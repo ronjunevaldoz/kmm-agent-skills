@@ -16,6 +16,11 @@ templates. Each skill fills a gap where LLMs consistently underperform without e
 | [`kotlin-multiplatform-feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) | Scaffold a full KMP multi-module project or add a new feature module group (`:api/:domain/:data/:ui`). AGP 9+, build-logic convention plugins, version catalog, CMP, Koin 4. |
 | [`kotlin-multiplatform-network-layer`](skills/kotlin-multiplatform-network-layer/) | Production-ready Ktor 3 network layer in `:core:network`. Bearer auth with automatic token refresh, `NetworkResult<T>`, `safeRequest {}`, platform engines for Android/iOS/Desktop/Web. |
 | [`kotlin-multiplatform-ci-github-actions`](skills/kotlin-multiplatform-ci-github-actions/) | GitHub Actions CI: lint, Android tests (Ubuntu), iOS tests (macOS), Desktop/Web tests, Gradle cache. Release workflow: XCFramework build + GitHub Release. |
+| [`kotlin-multiplatform-sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) | SQLDelight 2 setup in `:core:database`. Schema files, migrations, type adapters, platform drivers (Android/iOS/Desktop/Web), coroutines Flow queries, Koin wiring. |
+| [`kotlin-multiplatform-navigation`](skills/kotlin-multiplatform-navigation/) | Type-safe KMP navigation using Navigation Compose (JetBrains fork) with `@Serializable` routes, nested graphs, bottom navigation, and deep links. Decompose alternative covered. |
+| [`kotlin-multiplatform-shared-resources`](skills/kotlin-multiplatform-shared-resources/) | Compose Multiplatform Resources for shared strings, plurals, images, fonts, and raw files across Android/iOS/Desktop/Web. Localization and theme wiring included. |
+| [`kotlin-multiplatform-flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) | Multi-environment config (dev/staging/prod) via BuildKonfig. Android product flavors, secrets via `local.properties` or CI env vars, `AppConfig` facade in commonMain. |
+| [`kotlin-multiplatform-xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) | Build an XCFramework from `:shared` and publish it as a Swift Package Manager binary target. Local SPM for dev, GitHub Releases for distribution, automated via CI. |
 
 ---
 
@@ -77,11 +82,11 @@ Skills in this repo follow `kotlin-multiplatform-<functional-name>`.
 
 ## Roadmap
 
-- [ ] `kotlin-multiplatform-sqldelight-setup` — SQLDelight schema, migrations, type adapters
-- [ ] `kotlin-multiplatform-navigation` — KMP navigation (Navigation 3 / Decompose)
-- [ ] `kotlin-multiplatform-shared-resources` — Compose Resources (strings, fonts, images)
-- [ ] `kotlin-multiplatform-flavor-environment` — Multi-environment BuildKonfig + flavors
-- [ ] `kotlin-multiplatform-xcframework-spm` — XCFramework → Swift Package Manager
+- [ ] `kotlin-multiplatform-datastore` — Multiplatform DataStore (Preferences + Proto) for key-value and typed storage
+- [ ] `kotlin-multiplatform-biometric-auth` — Biometric / Face ID / Fingerprint authentication via expect/actual
+- [ ] `kotlin-multiplatform-push-notifications` — FCM (Android) + APNs (iOS) wiring with KMP shared handling
+- [ ] `kotlin-multiplatform-analytics` — Shared analytics abstraction with Firebase / Amplitude platform implementations
+- [ ] `kotlin-multiplatform-testing-robot` — UI testing robots pattern for Compose Multiplatform screens
 
 ---
 
