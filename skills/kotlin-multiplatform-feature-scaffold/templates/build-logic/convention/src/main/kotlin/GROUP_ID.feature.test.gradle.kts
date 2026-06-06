@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /**
@@ -5,6 +6,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  *
  * Provides: kotlin.test, Turbine (Flow testing), coroutines-test, and
  * a dependency on :core:testing for shared fakes and builders.
+ * Targets: Android, iOS, Desktop (JVM), Web (JS + WasmJs).
  *
  * Apply this plugin in any module's TEST source sets that need shared test infra.
  * It is NOT applied automatically — add it per-module where needed.
@@ -18,8 +20,17 @@ plugins {
 }
 
 kotlin {
+    // iOS
     iosArm64()
     iosSimulatorArm64()
+
+    // Desktop
+    jvm()
+
+    // Web
+    js { browser() }
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
 
     androidLibrary {
         compileSdk = libs.versions.android.compileSdk.get().toInt()

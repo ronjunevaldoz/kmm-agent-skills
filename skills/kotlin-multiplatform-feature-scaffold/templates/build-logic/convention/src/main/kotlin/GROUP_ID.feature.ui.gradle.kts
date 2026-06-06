@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /**
@@ -5,6 +6,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  *
  * Compose Multiplatform (CMP) screens and ViewModels.
  * Depends on :feature:*:api and :feature:*:domain (declared per-module).
+ * Targets: Android, iOS, Desktop (JVM), Web (JS + WasmJs).
  *
  * Each module must add its own namespace:
  *   kotlin { androidLibrary { namespace = "com.example.feature.auth.ui" } }
@@ -18,8 +20,17 @@ plugins {
 }
 
 kotlin {
+    // iOS
     iosArm64()
     iosSimulatorArm64()
+
+    // Desktop
+    jvm()
+
+    // Web
+    js { browser() }
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
 
     androidLibrary {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -50,6 +61,10 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.koin.android)
+        }
+        // Desktop: Swing dispatcher required for coroutines on JVM UI thread
+        jvmMain.dependencies {
+            implementation(libs.kotlinx.coroutines.swing)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

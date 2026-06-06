@@ -2,11 +2,11 @@
 name: kotlin-multiplatform-network-layer
 description: >
   Scaffolds a production-ready Ktor 3 network layer inside :core:network for a
-  Kotlin Multiplatform project. Covers: platform engines (OkHttp/Darwin),
-  ContentNegotiation, Bearer auth with automatic token refresh (race-condition-safe),
-  structured error mapping to a NetworkResult<T> sealed type, request/response
-  logging, and Koin wiring. Assumes the project was scaffolded with
-  kotlin-multiplatform-feature-scaffold.
+  Kotlin Multiplatform project. Covers: platform engines (OkHttp/Darwin/CIO/Js)
+  for Android, iOS, Desktop (JVM), and Web (JS + WasmJs), ContentNegotiation,
+  Bearer auth with automatic token refresh (race-condition-safe), structured error
+  mapping to a NetworkResult<T> sealed type, request/response logging, and Koin
+  wiring. Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
@@ -20,6 +20,11 @@ metadata:
     - Kotlin Multiplatform
     - OkHttp
     - Darwin
+    - CIO
+    - desktop
+    - web
+    - JS
+    - WasmJs
 ---
 
 ## Overview
@@ -39,6 +44,12 @@ This skill populates `:core:network` with a complete, production-grade HTTP clie
     HttpClientEngineFactory   → OkHttp
   iosMain
     HttpClientEngineFactory   → Darwin
+  jvmMain
+    HttpClientEngineFactory   → CIO  (Desktop)
+  jsMain
+    HttpClientEngineFactory   → Js   (Web browser)
+  wasmJsMain
+    HttpClientEngineFactory   → Js   (Web/Wasm browser)
 ```
 
 ---
@@ -59,6 +70,7 @@ ktor                 = "3.1.3"
 
 Verify these libraries exist in `libs.versions.toml`:
 - `ktor-client-core`, `ktor-client-android`, `ktor-client-darwin`
+- `ktor-client-cio` (Desktop/JVM), `ktor-client-js` (Web/JS + WasmJs)
 - `ktor-client-logging`, `ktor-client-contentNegotiation`
 - `ktor-serialization-json`, `ktor-client-mock`
 - Bundle: `ktor-common`
@@ -67,9 +79,11 @@ Verify these libraries exist in `libs.versions.toml`:
 
 ## Step 1: Update `:core:network/build.gradle.kts`
 
-The `GROUP_ID.core` convention plugin already includes the Ktor bundle. Confirm:
+The `GROUP_ID.core` convention plugin already adds all targets. Confirm the module build file:
 
 ```kotlin
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     id("GROUP_ID.core")
 }
@@ -85,6 +99,15 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)    // URLSession engine
+        }
+        jvmMain.dependencies {
+            implementation(libs.ktor.client.cio)       // CIO engine (Desktop)
+        }
+        jsMain.dependencies {
+            implementation(libs.ktor.client.js)        // Js engine (Web)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.ktor.client.js)        // Js engine (WasmJs)
         }
     }
 }
@@ -176,6 +199,39 @@ import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.darwin.Darwin
 
 internal actual fun platformEngine(): HttpClientEngineFactory<*> = Darwin
+```
+
+### `src/jvmMain/kotlin/GROUP_ID/core/network/HttpClientEngineFactory.kt`
+
+```kotlin
+package GROUP_ID.core.network
+
+import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.client.engine.cio.CIO
+
+internal actual fun platformEngine(): HttpClientEngineFactory<*> = CIO
+```
+
+### `src/jsMain/kotlin/GROUP_ID/core/network/HttpClientEngineFactory.kt`
+
+```kotlin
+package GROUP_ID.core.network
+
+import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.client.engine.js.Js
+
+internal actual fun platformEngine(): HttpClientEngineFactory<*> = Js
+```
+
+### `src/wasmJsMain/kotlin/GROUP_ID/core/network/HttpClientEngineFactory.kt`
+
+```kotlin
+package GROUP_ID.core.network
+
+import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.client.engine.js.Js
+
+internal actual fun platformEngine(): HttpClientEngineFactory<*> = Js
 ```
 
 ### `src/commonMain/kotlin/GROUP_ID/core/network/HttpClientEngineFactory.kt`
@@ -442,4 +498,7 @@ fun `login returns Success on 200`() = runTest {
 
 1. `./gradlew :core:network:compileKotlinMetadata` — common source compiles
 2. `./gradlew :core:network:compileDebugKotlinAndroid` — Android source compiles
-3. `./gradlew :core:network:commonTest` — mock engine tests pass
+3. `./gradlew :core:network:compileKotlinJvm` — Desktop (CIO) source compiles
+4. `./gradlew :core:network:compileKotlinJs` — Web JS source compiles
+5. `./gradlew :core:network:compileKotlinWasmJs` — WasmJs source compiles
+6. `./gradlew :core:network:commonTest` — mock engine tests pass

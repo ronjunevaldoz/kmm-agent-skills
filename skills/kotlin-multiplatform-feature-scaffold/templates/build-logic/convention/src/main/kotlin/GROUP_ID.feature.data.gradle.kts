@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /**
@@ -6,6 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  * KMP with platform-specific implementations.
  * Provides: Ktor (networking), SQLDelight (persistence), Koin wiring.
  * Does NOT depend on :domain — siblings only. Depends on :api (declared per-module).
+ * Targets: Android, iOS, Desktop (JVM), Web (JS + WasmJs).
  *
  * Each module must add:
  *   - namespace in androidLibrary {}
@@ -24,8 +26,17 @@ plugins {
 }
 
 kotlin {
+    // iOS
     iosArm64()
     iosSimulatorArm64()
+
+    // Desktop
+    jvm()
+
+    // Web
+    js { browser() }
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
 
     androidLibrary {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -53,6 +64,17 @@ kotlin {
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
             implementation(libs.sqldelight.native.driver)
+        }
+        // Desktop: CIO engine (JVM-based, no extra setup required)
+        jvmMain.dependencies {
+            implementation(libs.ktor.client.cio)
+        }
+        // Web: JS engine (works for both js and wasmJs targets)
+        jsMain.dependencies {
+            implementation(libs.ktor.client.js)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.ktor.client.js)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

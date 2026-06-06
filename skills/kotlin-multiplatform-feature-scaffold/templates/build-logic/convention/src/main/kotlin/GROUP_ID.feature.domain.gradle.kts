@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /**
@@ -6,6 +7,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  * Pure KMP — use cases and business logic.
  * No Compose, no network, no persistence.
  * Depends on :feature:*:api (declared per-module).
+ * Targets: Android, iOS, Desktop (JVM), Web (JS + WasmJs).
  *
  * Each module must add its own namespace:
  *   kotlin { androidLibrary { namespace = "com.example.feature.auth.domain" } }
@@ -17,8 +19,17 @@ plugins {
 }
 
 kotlin {
+    // iOS
     iosArm64()
     iosSimulatorArm64()
+
+    // Desktop
+    jvm()
+
+    // Web
+    js { browser() }
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs { browser() }
 
     androidLibrary {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
