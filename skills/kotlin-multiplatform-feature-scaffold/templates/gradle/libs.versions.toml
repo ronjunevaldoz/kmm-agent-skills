@@ -41,11 +41,13 @@ buildkonfig              = "0.21.2"
 
 # Testing
 junit                    = "4.13.2"
+turbine                  = "1.2.1"
 
 [libraries]
 # ── Kotlin stdlib & test ──────────────────────────────────────────────────────
 kotlin-test              = { module = "org.jetbrains.kotlin:kotlin-test",       version.ref = "kotlin" }
 kotlin-testJunit         = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+turbine                  = { module = "app.cash.turbine:turbine",               version.ref = "turbine" }
 
 # ── Kotlinx ──────────────────────────────────────────────────────────────────
 kotlinx-coroutines-core  = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core",    version.ref = "coroutines" }

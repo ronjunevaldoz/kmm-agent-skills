@@ -792,7 +792,81 @@ src/commonMain/kotlin/GROUP_ID/feature/FEATURE_NAME/ui/
 
 ---
 
-## Step 10: Verification
+## Step 10: Test Infrastructure
+
+### Convention plugin: `GROUP_ID.feature.test.gradle.kts`
+
+A lightweight plugin that equips any module's test source sets with shared test tooling.
+Apply it to modules that need Turbine, coroutines-test, or shared fakes.
+
+```kotlin
+// In any module's build.gradle.kts test configuration
+kotlin {
+    sourceSets {
+        commonTest.dependencies {
+            implementation(projects.core.testing)  // shared fakes + builders
+        }
+    }
+}
+```
+
+### `:core:testing` module
+
+Add to `settings.gradle.kts`:
+```kotlin
+include(":core:testing")
+```
+
+The module exposes (via `api()`):
+- `kotlin.test` — assertions
+- `kotlinx.coroutines.test` — `runTest`, `TestCoroutineScheduler`
+- `Turbine 1.2.1` — Flow testing
+
+### Turbine usage pattern
+
+```kotlin
+// commonTest — testing a ViewModel or use case that emits a Flow
+@Test
+fun `state emits Loading then Success`() = runTest {
+    val viewModel = AuthViewModel(FakeGetUserUseCase())
+    viewModel.uiState.test {
+        assertEquals(AuthUiState.Loading, awaitItem())
+        assertEquals(AuthUiState.Success(fakeUser), awaitItem())
+        cancelAndIgnoreRemainingEvents()
+    }
+}
+```
+
+### Shared fakes pattern in `:core:testing`
+
+```
+src/commonMain/kotlin/GROUP_ID/core/testing/
+    fakes/
+        FakeTokenStorage.kt
+        FakeNetworkClient.kt
+    builders/
+        UserBuilder.kt          ← test data builders with defaults
+    rules/
+        MainCoroutineRule.kt    ← TestCoroutineDispatcher setup
+```
+
+Example fake:
+```kotlin
+class FakeTokenStorage : TokenStorage {
+    var accessToken: String? = "test-access-token"
+    var refreshToken: String? = "test-refresh-token"
+    override suspend fun getAccessToken() = accessToken
+    override suspend fun getRefreshToken() = refreshToken
+    override suspend fun saveTokens(access: String, refresh: String) {
+        accessToken = access; refreshToken = refresh
+    }
+    override suspend fun clearTokens() { accessToken = null; refreshToken = null }
+}
+```
+
+---
+
+## Step 11: Verification
 
 After scaffolding, verify in order:
 
