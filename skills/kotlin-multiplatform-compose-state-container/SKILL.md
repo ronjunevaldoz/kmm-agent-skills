@@ -1,0 +1,385 @@
+---
+name: kotlin-multiplatform-compose-state-container
+description: >
+  Choosing the right state container in Compose Multiplatform: remember vs
+  rememberSaveable vs ViewModel vs rememberCoroutineScope. Covers: what survives
+  recomposition, config changes, and process death; when each container applies;
+  rememberSaveable with custom Saver for complex types; ViewModel scoping to
+  nav back-stack entries; and the most common wrong choices (ViewModel for dropdown
+  state, remember for form data that must survive rotation). Zero new dependencies.
+license: Apache-2.0
+metadata:
+  author: kmm-agent-skills
+  last-updated: '2026-06-06'
+  keywords:
+    - remember
+    - rememberSaveable
+    - ViewModel
+    - state container
+    - rememberCoroutineScope
+    - custom Saver
+    - state survival
+    - config change
+    - process death
+    - back stack scoped ViewModel
+    - nav-scoped ViewModel
+    - Compose state
+    - Kotlin Multiplatform
+    - CMP
+    - when to use ViewModel
+    - ephemeral state
+---
+
+## When to Use This Skill
+
+Use when you need to:
+- Decide whether state belongs in `remember`, `rememberSaveable`, or a `ViewModel`
+- Understand what "survives recomposition" vs "survives config change" actually means
+- Implement a custom `Saver` for `rememberSaveable` with a non-bundleable type
+- Scope a ViewModel to a nav back-stack entry vs the whole nav graph
+- Diagnose state being lost on screen rotation or back navigation
+
+**Trigger keywords:** remember vs ViewModel, rememberSaveable, state container, when to use
+ViewModel, ephemeral state, state survival, config change state, process death state,
+custom Saver, nav-scoped ViewModel, state lost on rotation.
+
+---
+
+## What Each Container Survives
+
+| Container | Recomposition | Config change (rotation) | Process death | Scope |
+|---|---|---|---|---|
+| `remember {}` | ✓ | ✗ | ✗ | Composition lifetime |
+| `rememberSaveable {}` | ✓ | ✓ | ✓ (Bundle types only) | Composition + SavedState |
+| `ViewModel` | ✓ | ✓ | ✗ (unless SavedStateHandle) | Nav back-stack entry or nav graph |
+| `ViewModel` + `SavedStateHandle` | ✓ | ✓ | ✓ | Nav back-stack entry or nav graph |
+
+**Recomposition** — Compose re-executes the composable body when state changes. `remember`
+keeps the value alive across re-executions of the same composable instance.
+
+**Config change** — Android destroys and recreates the Activity (screen rotation, locale
+change, font size change). `remember` is lost; `rememberSaveable` and `ViewModel` survive.
+
+**Process death** — Android kills the process entirely (low memory). Only `rememberSaveable`
+(via `Bundle`/`SavedState`) and `ViewModel` with `SavedStateHandle` survive.
+
+---
+
+## The Decision Tree
+
+```
+Does this state involve async operations, IO, or repository calls?
+├── YES → ViewModel
+└── NO
+    ├── Does this state need to survive screen rotation or config change?
+    │   ├── YES
+    │   │   ├── Is the type Bundle-safe (primitives, String, Parcelable, Serializable)?
+    │   │   │   ├── YES → rememberSaveable {}
+    │   │   │   └── NO  → rememberSaveable(stateSaver = customSaver) { }
+    │   │   │              or ViewModel (if logic justifies it)
+    │   │   └── Is this state shared with another screen/route?
+    │   │       ├── YES → ViewModel (scoped to nav graph)
+    │   │       └── NO  → rememberSaveable {}
+    │   └── NO → remember {}
+    └── Is this state shared between sibling composables?
+        ├── YES → hoist to parent (see kotlin-multiplatform-compose-state-hoisting)
+        └── NO  → remember {} in the composable that owns it
+```
+
+---
+
+## `remember {}` — In-Composition Memory
+
+`remember` keeps a value alive for the **lifetime of the composable** in the composition.
+When the composable leaves the tree and re-enters (back navigation, conditional rendering),
+`remember` starts fresh.
+
+```kotlin
+// ✓ Correct uses of remember
+@Composable
+fun DropdownMenu() {
+    var expanded by remember { mutableStateOf(false) }   // ephemeral UI toggle
+    // ...
+}
+
+@Composable
+fun AnimatedComponent() {
+    val animatable = remember { Animatable(0f) }         // animation object
+    // ...
+}
+
+@Composable
+fun SearchBar(onSearch: (String) -> Unit) {
+    var query by remember { mutableStateOf("") }         // local input before submit
+    // ...
+}
+```
+
+```kotlin
+// ❌ Wrong — remember loses this on rotation; user's half-typed form is gone
+@Composable
+fun RegistrationForm() {
+    var email by remember { mutableStateOf("") }         // lost on config change!
+    var name by remember { mutableStateOf("") }          // lost on config change!
+    // ...
+}
+```
+
+### `remember` with keys
+
+When a remembered value depends on inputs, use keys. The value is recomputed when any
+key changes:
+
+```kotlin
+// Recomputed when userId changes — stale cache is discarded
+val formatter = remember(userId) { UserFormatter(userId) }
+
+// Recomputed when both locale and theme change
+val painter = remember(locale, theme) { buildPainter(locale, theme) }
+```
+
+---
+
+## `rememberSaveable {}` — Rotation-Proof Local State
+
+`rememberSaveable` writes the value to a `Bundle` on config change and restores it.
+Works automatically for Bundle-safe types: `Boolean`, `Int`, `Long`, `Float`, `Double`,
+`String`, and anything `@Parcelize`/`Serializable`.
+
+```kotlin
+// ✓ Form that survives rotation
+@Composable
+fun SearchScreen() {
+    var query by rememberSaveable { mutableStateOf("") }   // survives rotation
+
+    Column {
+        AppTextField(value = query, onValueChange = { query = it })
+        AppButton(onClick = { performSearch(query) }) { AppText("Search") }
+    }
+}
+```
+
+### Custom Saver for non-Bundle types
+
+When the type isn't Bundle-safe, write a `Saver`:
+
+```kotlin
+data class FilterState(
+    val category: String?,
+    val priceRange: IntRange,
+    val sortOrder: SortOrder,
+)
+
+val FilterStateSaver = Saver<FilterState, Map<String, Any>>(
+    save = { state ->
+        mapOf(
+            "category"   to (state.category ?: ""),
+            "priceMin"   to state.priceRange.first,
+            "priceMax"   to state.priceRange.last,
+            "sortOrder"  to state.sortOrder.name,
+        )
+    },
+    restore = { map ->
+        FilterState(
+            category   = (map["category"] as String).ifEmpty { null },
+            priceRange = (map["priceMin"] as Int)..(map["priceMax"] as Int),
+            sortOrder  = SortOrder.valueOf(map["sortOrder"] as String),
+        )
+    },
+)
+
+// Usage
+var filterState by rememberSaveable(stateSaver = FilterStateSaver) {
+    mutableStateOf(FilterState(category = null, priceRange = 0..1000, sortOrder = SortOrder.Newest))
+}
+```
+
+**Limits of `rememberSaveable`:** Bundles have a size cap (~1 MB total). Don't store lists
+of items, images, or large collections — use a ViewModel with `SavedStateHandle` for those
+(store only the IDs, reload the data from repository).
+
+---
+
+## `ViewModel` — Config-Change-Proof Business State
+
+A ViewModel survives configuration changes because Android holds it separately from the
+Activity/Fragment. In KMP, `androidx.lifecycle.ViewModel` works across Android, Desktop,
+and iOS (with lifecycle support from JetBrains).
+
+```kotlin
+// ✓ Correct uses of ViewModel
+class ProductListViewModel(private val repo: ProductRepository) : ViewModel() {
+
+    // Async data load — needs viewModelScope
+    private val _products = MutableStateFlow<List<Product>>(emptyList())
+    val products = _products.asStateFlow()
+
+    init { loadProducts() }
+
+    private fun loadProducts() {
+        viewModelScope.launch {
+            _products.value = repo.getProducts()
+        }
+    }
+}
+
+// ✓ Shared across screens (scoped to nav graph)
+class CartViewModel : ViewModel() {
+    val items = mutableStateListOf<CartItem>()
+    fun addItem(item: CartItem) { items.add(item) }
+}
+```
+
+```kotlin
+// ❌ Wrong — ViewModel for pure ephemeral UI state
+class SearchViewModel : ViewModel() {
+    var isDropdownOpen by mutableStateOf(false)   // no business logic — belongs in remember
+    var tooltipVisible by mutableStateOf(false)   // no business logic — belongs in remember
+}
+```
+
+### ViewModel + SavedStateHandle (process-death survival)
+
+```kotlin
+class SearchViewModel(
+    private val savedStateHandle: SavedStateHandle,
+    private val repo: SearchRepository,
+) : ViewModel() {
+
+    // Automatically restored after process death
+    var query by savedStateHandle.saveable { mutableStateOf("") }
+
+    fun onQueryChanged(newQuery: String) {
+        query = newQuery
+        // launch search, etc.
+    }
+}
+```
+
+`savedStateHandle.saveable` is the ViewModel equivalent of `rememberSaveable`. Same size
+limits apply — store IDs, not full objects.
+
+---
+
+## ViewModel Scoping in Navigation Compose
+
+By default, `koinViewModel()` / `viewModel()` scopes the ViewModel to the **current
+back-stack entry**. When you navigate back, the ViewModel is cleared.
+
+```kotlin
+// Scoped to current back-stack entry — default, correct for most screens
+@Composable
+fun ProductDetailScreen(
+    viewModel: ProductDetailViewModel = koinViewModel(),  // cleared when you pop back
+) { ... }
+```
+
+To share a ViewModel across multiple destinations in a nested nav graph:
+
+```kotlin
+// Scoped to the nav graph — survives navigation between screens within the graph
+@Composable
+fun CheckoutScreen(navController: NavController) {
+    val backStackEntry = remember(navController) {
+        navController.getBackStackEntry("checkout_graph")   // graph-level entry
+    }
+    val viewModel: CheckoutViewModel = koinViewModel(viewModelStoreOwner = backStackEntry)
+    // ...
+}
+```
+
+This is the correct pattern for multi-step flows (checkout, onboarding) where all steps
+share state — the ViewModel lives as long as the user is anywhere in the graph.
+
+---
+
+## `rememberCoroutineScope` — Composable-Scoped Coroutines
+
+When you need to launch a coroutine from a composable (not from a ViewModel), use
+`rememberCoroutineScope()`. The scope is cancelled when the composable leaves the tree.
+
+```kotlin
+@Composable
+fun SaveButton(onSave: suspend () -> Unit) {
+    val scope = rememberCoroutineScope()
+    var isSaving by remember { mutableStateOf(false) }
+
+    AppButton(
+        onClick = {
+            scope.launch {
+                isSaving = true
+                onSave()
+                isSaving = false
+            }
+        },
+        enabled = !isSaving,
+    ) {
+        if (isSaving) AppSpinner() else AppText("Save")
+    }
+}
+```
+
+**Use `rememberCoroutineScope` when:**
+- The coroutine must be tied to the composable lifecycle, not the ViewModel
+- You need to launch a coroutine from a click handler (not from a `LaunchedEffect`)
+- The coroutine triggers UI-only side effects (scroll, show keyboard, haptic)
+
+**Do NOT use `rememberCoroutineScope` for:**
+- API calls or repository access — those belong in `viewModelScope`
+- State that needs to outlive the composable
+
+---
+
+## Quick Reference
+
+```kotlin
+// Ephemeral UI toggle — lost on rotation, that's fine
+var isDropdownOpen by remember { mutableStateOf(false) }
+
+// User input that must survive rotation — not worth a ViewModel
+var searchQuery by rememberSaveable { mutableStateOf("") }
+
+// Async data, business logic, or cross-screen state — ViewModel
+val state by viewModel.state.collectAsStateWithLifecycle()
+
+// Coroutine tied to composable lifecycle (scroll, animation, keyboard)
+val scope = rememberCoroutineScope()
+
+// Config-change AND process-death survival, with ID reference only
+var selectedId by savedStateHandle.saveable { mutableStateOf<String?>(null) }
+```
+
+---
+
+## Common Mistakes
+
+**1. `remember` for form data**
+A registration form with `remember` loses all user input on screen rotation.
+Use `rememberSaveable` for form fields, or a ViewModel if the form has validation logic.
+
+**2. ViewModel for every bit of UI state**
+`isDropdownOpen`, `isTooltipVisible`, `expandedCardIndex` — none of these belong in
+a ViewModel. They're ephemeral, local, and have no business logic. `remember` is correct.
+
+**3. `rememberSaveable` for large collections**
+Bundle has a size limit. Saving a list of 500 products in `rememberSaveable` will crash
+with a `TransactionTooLargeException` on Android. Save only IDs; reload data from cache/repo.
+
+**4. Creating a new ViewModel scope per recomposition**
+`viewModel()` / `koinViewModel()` must not be called inside a loop or conditional — it
+creates a new ViewModel per call. Call it once at the screen level.
+
+**5. Not understanding that Desktop/iOS don't have "config changes"**
+`rememberSaveable` and `ViewModel` config-change behavior only applies on Android.
+On Desktop and iOS, composable lifetime is tied to the window/view lifecycle. Plan your
+state survival strategy accordingly if cross-platform survival matters.
+
+---
+
+## Verification
+
+1. Rotate device (Android) — `rememberSaveable` values persist, `remember` values reset
+2. Navigate away and back — back-stack-scoped ViewModel is cleared, new one created on return
+3. Navigate between graph screens — graph-scoped ViewModel persists within the graph
+4. Kill app from recents and relaunch — `savedStateHandle.saveable` values restored
+5. `remember` state (dropdown open) resets when the composable re-enters the tree
