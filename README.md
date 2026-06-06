@@ -22,6 +22,7 @@ templates. Each skill fills a gap where LLMs consistently underperform without e
 | [`kotlin-multiplatform-flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) | Multi-environment config (dev/staging/prod) via BuildKonfig. Android product flavors, secrets via `local.properties` or CI env vars, `AppConfig` facade in commonMain. | dev/staging/prod, environment config, BuildKonfig, product flavors, API key secrets, build variants, AppConfig, env switching |
 | [`kotlin-multiplatform-xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) | Build an XCFramework from `:shared` and publish it as a Swift Package Manager binary target. Local SPM for dev, GitHub Releases for distribution, automated via CI. | XCFramework, Swift Package Manager, SPM, iOS binary, publish iOS framework, Xcode integration, local SPM, release framework |
 | [`kotlin-multiplatform-design-system`](skills/kotlin-multiplatform-design-system/) | Custom CMP design system in `:core:designsystem` using the Compose Styles API (`@ExperimentalStylesApi`). Shadcn-inspired sealed variants, design tokens (colors/typography/shapes/spacing), StyleScope extensions, dark mode, 6 core components — no Material dependency. | design system, custom theme, AppTheme, design tokens, shadcn KMP, no Material, custom components, ButtonVariant, dark mode tokens, Compose Styles API, ExperimentalStylesApi, AppColors, AppTypography |
+| [`kotlin-multiplatform-design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) | Extends the core design system with 27 production-ready components. Icon, IconButton, Label, Separator, Avatar, Spinner, Skeleton, Progress, TopAppBar, NavigationBar, Tabs (3 variants), Checkbox, RadioButton, Switch, Slider, Select, Alert, Toast/Snackbar (ToastHostState + AppScaffold), Dialog, AlertDialog, Sheet, Tooltip, Popover, Accordion. All on CMP primitives, no Material3. | dialog, bottom sheet, toast, snackbar, tabs, top app bar, bottom navigation, checkbox, radio button, switch, slider, select, dropdown, progress bar, skeleton, spinner, tooltip, popover, accordion, collapsible, avatar, separator, icon button, extended design system |
 
 ---
 
@@ -88,7 +89,7 @@ Skills in this repo follow `kotlin-multiplatform-<functional-name>`.
 - [ ] `kotlin-multiplatform-push-notifications` — FCM (Android) + APNs (iOS) wiring with KMP shared handling
 - [ ] `kotlin-multiplatform-analytics` — Shared analytics abstraction with Firebase / Amplitude platform implementations
 - [ ] `kotlin-multiplatform-testing-robot` — UI testing robots pattern for Compose Multiplatform screens
-- [ ] `kotlin-multiplatform-design-system-extended` — Extended component set for the design system skill (Dialog, BottomSheet, Snackbar, TopAppBar, Tabs, Progress, Skeleton)
+- [x] `kotlin-multiplatform-design-system-extended` — Extended component set for the design system skill (Dialog, BottomSheet, Snackbar, TopAppBar, Tabs, Progress, Skeleton)
 
 ---
 
