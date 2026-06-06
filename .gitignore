@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Gradle
+.gradle/
+build/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Local env
+local.properties
