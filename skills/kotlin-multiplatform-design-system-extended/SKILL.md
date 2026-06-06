@@ -612,7 +612,11 @@ fun AppSpinner(
 ```kotlin
 package GROUP_ID.core.designsystem.components
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -621,9 +625,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import GROUP_ID.core.designsystem.theme.appTheme
@@ -658,12 +666,16 @@ fun AppProgress(
             ),
             label = "progressOffset",
         )
+        // Capture the track's pixel width so graphicsLayer can translate across the full track,
+        // not just across the inner indicator box (which is only 40% wide).
+        var containerWidth by remember { mutableStateOf(0) }
         Box(
             modifier = modifier
                 .fillMaxWidth()
                 .height(height)
                 .clip(CircleShape)
-                .background(trackColor),
+                .background(trackColor)
+                .onSizeChanged { containerWidth = it.width },
         ) {
             Box(
                 modifier = Modifier
@@ -671,7 +683,7 @@ fun AppProgress(
                     .height(height)
                     .clip(CircleShape)
                     .background(color)
-                    .graphicsLayer { translationX = size.width * offsetFraction },
+                    .graphicsLayer { translationX = containerWidth * offsetFraction },
             )
         }
     } else {
@@ -1413,6 +1425,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -1465,6 +1478,7 @@ fun AppSlider(
         // Track
         Box(
             modifier = Modifier
+                .fillMaxWidth()
                 .onSizeChanged { trackWidth = it.width }
                 .height(4.dp)
                 .background(trackColor, RoundedCornerShape(2.dp))
@@ -2169,8 +2183,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.roundToPx
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import GROUP_ID.core.designsystem.theme.appTheme
 
 /**
@@ -2199,7 +2220,24 @@ fun AppTooltip(
     Box(modifier = modifier.hoverable(interactionSource)) {
         content()
         if (isHovered) {
-            Popup(alignment = Alignment.TopCenter) {
+            // PopupPositionProvider centres the tooltip horizontally above the anchor.
+            // Popup(alignment = ...) is wrong here — Alignment has no import and positions
+            // relative to the parent bounds rather than above it.
+            val density = LocalDensity.current
+            val positionProvider = remember(density) {
+                object : PopupPositionProvider {
+                    override fun calculatePosition(
+                        anchorBounds: IntRect,
+                        windowSize: IntSize,
+                        layoutDirection: LayoutDirection,
+                        popupContentSize: IntSize,
+                    ): IntOffset = IntOffset(
+                        x = anchorBounds.left + (anchorBounds.width - popupContentSize.width) / 2,
+                        y = anchorBounds.top - popupContentSize.height - with(density) { 4.dp.roundToPx() },
+                    )
+                }
+            }
+            Popup(popupPositionProvider = positionProvider) {
                 Box(
                     modifier = Modifier
                         .background(

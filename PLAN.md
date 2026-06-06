@@ -50,7 +50,7 @@ for future work. Update it as skills are added, revised, or completed.
 | Skill | Status | Notes |
 |---|---|---|
 | `kotlin-multiplatform-design-system` | ✅ | Tokens, AppTheme, dark mode, 6 core components, no Material |
-| `kotlin-multiplatform-design-system-extended` | 🔧 | 27 components shipped; 3 known compile issues (see below) |
+| `kotlin-multiplatform-design-system-extended` | ✅ | 27 components shipped |
 | `kotlin-multiplatform-compose-slot-api` | ✅ | Slot patterns, scoped slots, CompositionLocal |
 | `kotlin-multiplatform-compose-state-hoisting` | ✅ | Hoist-until-shared, controlled component, stateful wrapper |
 | `kotlin-multiplatform-compose-state-container` | ✅ | remember/rememberSaveable/ViewModel survival matrix, custom Saver |
@@ -66,11 +66,7 @@ for future work. Update it as skills are added, revised, or completed.
 
 ### `kotlin-multiplatform-design-system-extended`
 
-| # | Component | Issue |
-|---|---|---|
-| D-1 | `AppSlider` | `fillMaxWidth` called inside `pointerInput` lambda — outside `BoxScope`, compile error |
-| D-2 | `AppProgress` | `graphicsLayer` used as standalone call; must be `Modifier.graphicsLayer { }` |
-| D-3 | `AppTooltip` | `Popup(alignment = ...)` — `alignment` is not a direct `Popup` parameter in CMP |
+All known defects resolved. ✅
 
 ---
 
