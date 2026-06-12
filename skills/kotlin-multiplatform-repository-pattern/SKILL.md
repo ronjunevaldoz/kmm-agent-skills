@@ -191,6 +191,43 @@ class AuthRepositoryImpl(
 }
 ```
 
+### RPC client boundary pattern
+
+If the feature uses RPC or a dedicated HTTP client, keep the client wrapper in `:data`
+and make the call site a private `service()` function, not a cached property. That keeps
+auth headers fresh and the boundary explicit.
+
+```kotlin
+class BookingRpcClient(
+    private val httpClient: HttpClient,
+    private val serverUrl: String,
+    private val userSession: UserSession,
+) : BookingRequestRepository {
+
+    private fun service(): BookingRpcService =
+        httpClient.rpc("$serverUrl/rpc/booking") {
+            rpcConfig { serialization { json() } }
+            bearerAuth(userSession)
+        }.withService()
+}
+```
+
+### Mock-vs-real DI wiring
+
+Use one data module and branch there, instead of branching in the ViewModel or UI:
+
+```kotlin
+val bookingDataModule = module {
+    single<BookingRequestRepository> {
+        if (AuthConfig.USE_MOCK_AUTH) MockBookingRequestRepository(rideRepository = get())
+        else BookingRpcClient(httpClient = get(named("rpc")), serverUrl = AuthConfig.SERVER_URL, userSession = get())
+    }
+}
+```
+
+This keeps tests and previews simple: the feature code depends on the repository interface,
+and the module decides whether that interface is backed by a fake or a real remote source.
+
 ---
 
 ## Type Mapping: The Mapper Pattern

@@ -2,7 +2,9 @@
 name: kotlin-multiplatform-design-system
 description: >
   Scaffolds a custom Compose Multiplatform design system in :core:designsystem using
-  the new Compose Styles API (@ExperimentalStylesApi). Generates: color/typography/shape/spacing
+  the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles,
+  @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates:
+  color/typography/shape/spacing
   tokens, AppTheme with light/dark support, StyleScope extensions for token access,
   shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant,
   ChipVariant, TextFieldVariant), and 6 core components (AppButton, AppCard,
@@ -60,6 +62,16 @@ Design system layers (top-down):
   Screens (feature UIs consume AppTheme.provide { } at the top)
 ```
 
+## Style Rules
+
+- Use the Compose Styles API for visual styling, state styling, and animated transitions.
+- Do not confuse Styles with the Slot API: slots are for structure/content customization, not theming.
+- Keep text, borders, surfaces, and disabled states neutral-first.
+- Use palette colors for brand, emphasis, status, and primary actions only.
+- If the user does not specify a palette, suggest 2-3 options based on the project domain.
+- If typography is unspecified, suggest a font pair and type scale before generating components.
+- Use Atlassian and shadcn as references for neutral-first palettes, crisp hierarchy, and restrained component shapes.
+
 **Key API facts:**
 - `Style { ... }` — lambda-based style descriptor; runs in Layout/Draw phase (not Composition)
 - `style1 then style2` — merges styles; last-write-wins per property
@@ -110,6 +122,16 @@ include(":core:designsystem")
 ---
 
 ## Step 2: Design Tokens
+
+### Palette guidance
+
+- Prefer neutral tokens for most text, surfaces, borders, and disabled UI.
+- Reserve saturated palette colors for brand accents, primary actions, and semantic states.
+- If the project brief does not name a palette, propose one that fits the product:
+  - enterprise / admin: zinc, slate, neutral
+  - modern consumer: blue, indigo, violet
+  - creative / playful: violet, fuchsia, rose
+  - trust / finance: blue, teal, emerald
 
 ### `tokens/AppColors.kt`
 

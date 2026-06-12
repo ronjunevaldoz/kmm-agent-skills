@@ -151,6 +151,36 @@ object AuthContract {
 - State changes are NOT effects — if the screen needs to show a success banner persistently,
   put it in `State`, not `Effect`
 
+## Screen / Content Split
+
+Use the same split as the Carpool project:
+
+- `FooScreen(viewModel = ...)` owns DI, state collection, and effect collection.
+- `FooContent(state, onIntent)` is pure, previewable, and testable.
+- Navigation callbacks stay as lambdas (`onBack`, `onNavigateToX`) instead of being
+  pushed into `Intent` unless they are true in-screen actions.
+- If a screen has multiple nav callbacks, group them into a `FooNavActions` data class.
+
+```kotlin
+@Composable
+fun FooScreen(
+    onBack: () -> Unit,
+    onNavigateToDetails: (String) -> Unit,
+    viewModel: FooViewModel = koinViewModel(),
+) {
+    val state by viewModel.state.collectAsState()
+    LaunchedEffect(viewModel) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                FooContract.Effect.Close -> onBack()
+                is FooContract.Effect.OpenDetails -> onNavigateToDetails(effect.id)
+            }
+        }
+    }
+    FooContent(state = state, onIntent = viewModel::onIntent)
+}
+```
+
 ---
 
 ## MviViewModel Base Class

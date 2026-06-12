@@ -26,6 +26,21 @@ metadata:
     - Gradle cache
 ---
 
+## When to Use This Skill
+
+Use when you need to:
+- Set up GitHub Actions CI for a new or existing KMP project
+- Add automated Android, iOS, Desktop, or Web test jobs
+- Configure a release workflow that builds and publishes an XCFramework
+- Wire Gradle caching into CI for faster builds
+
+**Requires:** `kotlin-multiplatform-feature-scaffold` project structure (or equivalent AGP 9+ KMP layout).
+
+**Trigger keywords:** set up CI, GitHub Actions, CI pipeline, automated tests, build workflow,
+release workflow, KMP CI, XCFramework release, Gradle cache CI, PR checks.
+
+---
+
 ## Overview
 
 Two workflow files:

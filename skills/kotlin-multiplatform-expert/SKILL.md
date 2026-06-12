@@ -288,3 +288,19 @@ Run through these 5 questions for any KMP project audit:
 
 5. **Expect/actual ratio**: what fraction of platform files have identical implementations?
    High ratio → probable over-use of expect/actual; move shared logic to `commonMain`.
+
+## Docs-First Rule
+
+Before coding a feature, check the official docs and the project docs. The Carpool
+project showed the right shape:
+
+- verify official Android / Compose guidance first
+- prefer standard APIs over custom wrappers unless the docs force a custom path
+- record the decision in the project docs before implementation
+
+Use this when the user asks to audit or extend an existing project:
+
+1. Read the project architecture docs
+2. Confirm the module boundary
+3. Check whether the feature belongs in an existing pattern skill
+4. Only then write code or a new skill

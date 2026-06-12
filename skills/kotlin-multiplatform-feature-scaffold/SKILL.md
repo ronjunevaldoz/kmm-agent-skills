@@ -25,6 +25,22 @@ metadata:
     - version catalog
 ---
 
+## When to Use This Skill
+
+Use when you need to:
+- Create a new Kotlin Multiplatform project from scratch (Android + iOS + Desktop + Web)
+- Add a new feature module group (`:api/:domain/:data/:ui`) to an existing KMP project
+- Set up AGP 9+ build-logic convention plugins and a version catalog
+- Wire Koin 4 DI (annotated or manual) across KMP modules
+
+**This is the foundational skill** — most other KMP skills (`network-layer`, `sqldelight-setup`,
+`navigation`, `design-system`, etc.) require the project structure this skill creates.
+
+**Trigger keywords:** create KMP project, scaffold feature module, new module, set up KMP,
+add feature, multi-module, build-logic, convention plugin, AGP 9, Koin 4, KMP setup.
+
+---
+
 ## Overview
 
 This skill produces a KMP multi-feature module architecture with the following decisions

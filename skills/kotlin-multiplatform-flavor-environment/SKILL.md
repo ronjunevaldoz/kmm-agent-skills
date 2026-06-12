@@ -22,6 +22,21 @@ metadata:
     - AppConfig
 ---
 
+## When to Use This Skill
+
+Use when you need to:
+- Add dev / staging / prod environment configs to a KMP project
+- Wire Android product flavors to BuildKonfig values (`BASE_URL`, `API_KEY`, `DEBUG`)
+- Inject secrets at build time from `local.properties` or CI env vars
+- Access environment config from `commonMain` without platform-specific code
+
+**Requires:** `kotlin-multiplatform-feature-scaffold` project structure.
+
+**Trigger keywords:** dev/staging/prod, environment config, BuildKonfig, product flavors,
+API key secrets, build variants, AppConfig, env switching, multi-environment.
+
+---
+
 ## Overview
 
 BuildKonfig generates a `BuildKonfig` object in `commonMain` — the KMP equivalent
