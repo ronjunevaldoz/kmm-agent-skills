@@ -21,12 +21,7 @@ def iter_files(root: Path):
             yield path
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Run a lightweight KMP architecture audit.")
-    parser.add_argument("project_root", type=Path, help="Path to the KMP project root")
-    args = parser.parse_args()
-
-    root = args.project_root.resolve()
+def audit_project(root: Path) -> list[str]:
     findings: list[str] = []
 
     for path in iter_files(root):
@@ -42,6 +37,17 @@ def main() -> int:
                 continue
             if pattern.search(text):
                 findings.append(f"{label}: {path.relative_to(root)}")
+
+    return findings
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Run a lightweight KMP architecture audit.")
+    parser.add_argument("project_root", type=Path, help="Path to the KMP project root")
+    args = parser.parse_args()
+
+    root = args.project_root.resolve()
+    findings = audit_project(root)
 
     if findings:
         print("FINDINGS:")

@@ -9,15 +9,7 @@ from pathlib import Path
 EXPECTED_MODULES = ("api", "domain", "data", "ui")
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate a KMP feature module graph.")
-    parser.add_argument("project_root", type=Path, help="Path to the KMP project root")
-    parser.add_argument("feature_name", help="Feature name, e.g. auth")
-    args = parser.parse_args()
-
-    root = args.project_root.resolve()
-    feature = args.feature_name
-
+def validate_module_graph(root: Path, feature: str) -> list[str]:
     errors: list[str] = []
 
     settings = root / "settings.gradle.kts"
@@ -41,6 +33,19 @@ def main() -> int:
             errors.append(
                 f"androidApp/build.gradle.kts does not reference projects.feature.{feature}.ui"
             )
+
+    return errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Validate a KMP feature module graph.")
+    parser.add_argument("project_root", type=Path, help="Path to the KMP project root")
+    parser.add_argument("feature_name", help="Feature name, e.g. auth")
+    args = parser.parse_args()
+
+    root = args.project_root.resolve()
+    feature = args.feature_name
+    errors = validate_module_graph(root, feature)
 
     if errors:
         for error in errors:

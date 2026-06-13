@@ -13,9 +13,7 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def main() -> int:
-    script_path = Path(__file__).resolve()
-    repo_root = script_path.parents[3]
+def validate_skill_map(repo_root: Path) -> list[str]:
     skills_dir = repo_root / "skills"
     readme_path = repo_root / "README.md"
     expert_path = skills_dir / "kotlin-multiplatform-expert" / "SKILL.md"
@@ -51,12 +49,30 @@ def main() -> int:
     if missing_in_expert:
         errors.append("missing from expert: " + ", ".join(missing_in_expert))
 
+    return errors
+
+
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Validate the skill map against README and expert docs.")
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=Path(__file__).resolve().parents[3],
+        help="Path to the repo root (defaults to the current repo)",
+    )
+    args = parser.parse_args(argv)
+
+    errors = validate_skill_map(args.repo_root.resolve())
+
     if errors:
         for error in errors:
             print(f"ERROR: {error}", file=sys.stderr)
         return 1
 
-    print(f"OK: {len(skill_names)} skills indexed in README and expert map")
+    skill_count = len({p.parent for p in (args.repo_root / "skills").glob("*/SKILL.md") if p.is_file()})
+    print(f"OK: {skill_count} skills indexed in README and expert map")
     return 0
 
 
