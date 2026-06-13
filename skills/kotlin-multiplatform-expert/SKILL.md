@@ -340,6 +340,21 @@ When recommending an approach, always present it in this order:
 Use this format when the user asks what to build next, which pattern to use, or how a
 skill should be applied. Keep the snippet small and directly tied to the structure.
 
+## Naming Rule
+
+Use neutral names by default. Prefix only when the prefix adds clarity at the boundary.
+
+- Shared design-system primitives may use an `App` prefix: `AppButton`, `AppCard`,
+  `AppText`, `AppIcon`.
+- Feature-local UI should usually stay plain: `UsersScreen`, `UsersList`, `GraphSurface`.
+- Layout and state types should be descriptive, not branded: `ViewportState`,
+  `LayoutMode`, `Breakpoint`, `SelectionState`.
+- Avoid repeating the layer in the name: prefer `Toolbar` over `GraphUiToolbar`,
+  `Canvas` over `GraphUiCanvas`, unless a collision actually exists.
+
+If a name feels noisy, remove the prefix first. Add a prefix only when the codebase
+already has multiple same-named concepts or the component is part of a shared library.
+
 ## Bundled Script
 
 - `scripts/validate_skill_map.py` — checks that the README and expert map still list

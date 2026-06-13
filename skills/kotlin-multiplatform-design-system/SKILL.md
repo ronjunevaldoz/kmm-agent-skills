@@ -72,6 +72,13 @@ Design system layers (top-down):
 - If typography is unspecified, suggest a font pair and type scale before generating components.
 - Use Atlassian and shadcn as references for neutral-first palettes, crisp hierarchy, and restrained component shapes.
 
+## Naming Rule
+
+- Keep the `App` prefix for shared design-system primitives only.
+- Use plain names for feature-local or page-local components.
+- Do not over-prefix layouts, canvases, or state models.
+- Reserve the prefix for reusable primitives that live in `:core:designsystem`.
+
 **Key API facts:**
 - `Style { ... }` — lambda-based style descriptor; runs in Layout/Draw phase (not Composition)
 - `style1 then style2` — merges styles; last-write-wins per property
