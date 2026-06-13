@@ -34,6 +34,20 @@ Distribution options:
   B) Remote SPM (distribution) — zip + GitHub Release + checksum in Package.swift
 ```
 
+## When to Use This Skill
+
+Use this skill when you need to:
+- Export a KMP shared module as an XCFramework
+- Package the framework for Swift Package Manager
+- Set up local SPM for development or remote binary distribution
+- Recheck Xcode and SPM integration before release
+
+**Trigger keywords:** XCFramework, Swift Package Manager, SPM, binary target, Xcode,
+shared framework, iOS distribution, Package.swift.
+
+**Freshness rule:** recheck Xcode and Swift Package Manager docs before changing the
+binary target layout or the release workflow.
+
 ---
 
 ## Prerequisites

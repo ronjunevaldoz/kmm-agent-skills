@@ -29,6 +29,26 @@ audit_scripts = load_module(
     "audit_project",
     REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_project.py",
 )
+auth_service_scripts = load_module(
+    "scaffold_auth_service",
+    REPO_ROOT / "skills" / "kotlin-multiplatform-ktor-auth-service" / "scripts" / "scaffold_auth_service.py",
+)
+mongodb_scripts = load_module(
+    "scaffold_mongodb_database",
+    REPO_ROOT / "skills" / "kotlin-multiplatform-mongodb-database" / "scripts" / "scaffold_mongodb_database.py",
+)
+rpc_scripts = load_module(
+    "scaffold_kotlin_rpc",
+    REPO_ROOT / "skills" / "kotlin-multiplatform-kotlin-rpc" / "scripts" / "scaffold_kotlin_rpc.py",
+)
+audit_repo_scripts = load_module(
+    "audit_skills_repo",
+    REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_skills_repo.py",
+)
+draft_issue_scripts = load_module(
+    "draft_issue",
+    REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "draft_issue.py",
+)
 
 
 class ValidateSkillMapTests(unittest.TestCase):
@@ -131,6 +151,93 @@ class AuditProjectTests(unittest.TestCase):
             self.assertTrue(any("state copy race" in finding for finding in findings))
             self.assertTrue(any("sharedflow replay effect" in finding for finding in findings))
             self.assertTrue(any("data import in ui" in finding for finding in findings))
+
+
+class ScaffoldAuthServiceTests(unittest.TestCase):
+    def test_scaffold_auth_service_writes_expected_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            auth_service_scripts.scaffold_auth_service(root, "com.example.server")
+
+            expected = {
+                "routes/AuthRoutes.kt",
+                "service/AuthService.kt",
+                "service/TokenService.kt",
+                "model/AuthRequest.kt",
+                "model/AuthResponse.kt",
+                "model/AuthError.kt",
+                "di/AuthModule.kt",
+            }
+            self.assertTrue(expected.issubset({str(p.relative_to(root)) for p in root.rglob("*.kt")}))
+            self.assertIn("package com.example.server.auth.model", (root / "model" / "AuthRequest.kt").read_text(encoding="utf-8"))
+            self.assertIn("package com.example.server.auth.di", (root / "di" / "AuthModule.kt").read_text(encoding="utf-8"))
+
+
+class ScaffoldMongoDatabaseTests(unittest.TestCase):
+    def test_scaffold_mongodb_database_writes_expected_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            mongodb_scripts.scaffold_mongodb_database(root, "com.example.server")
+
+            expected = {
+                "MongoClientFactory.kt",
+                "di/DatabaseModule.kt",
+                "user/data/UserDocument.kt",
+                "user/repository/UserRepository.kt",
+                "user/repository/UserRepositoryImpl.kt",
+            }
+            self.assertTrue(expected.issubset({str(p.relative_to(root)) for p in root.rglob("*.kt")}))
+            self.assertIn("package com.example.server.database", (root / "MongoClientFactory.kt").read_text(encoding="utf-8"))
+            self.assertIn("package com.example.server.user.repository", (root / "user" / "repository" / "UserRepository.kt").read_text(encoding="utf-8"))
+
+
+class ScaffoldKotlinRpcTests(unittest.TestCase):
+    def test_scaffold_kotlin_rpc_writes_expected_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            rpc_scripts.scaffold_kotlin_rpc(root, "com.example.app")
+
+            expected = {
+                "shared/rpc/GreetingService.kt",
+                "shared/rpc/model/GreetingRequest.kt",
+                "shared/rpc/model/GreetingResponse.kt",
+                "server/rpc/GreetingRpcModule.kt",
+                "client/rpc/GreetingRpcClient.kt",
+            }
+            self.assertTrue(expected.issubset({str(p.relative_to(root)) for p in root.rglob("*.kt")}))
+            self.assertIn("package com.example.app.rpc", (root / "shared" / "rpc" / "GreetingService.kt").read_text(encoding="utf-8"))
+            self.assertIn("package com.example.app.server.rpc", (root / "server" / "rpc" / "GreetingRpcModule.kt").read_text(encoding="utf-8"))
+
+
+class AuditSkillsRepoTests(unittest.TestCase):
+    def test_audit_skills_repo_flags_missing_freshness_and_markers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            skill_dir = root / "skills" / "example-skill"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: example-skill\ndescription: Ktor example\n---\n\n## When to Use This Skill\n\nUses ktor client code.\n",
+                encoding="utf-8",
+            )
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("missing freshness guidance" in finding for finding in findings))
+
+
+class DraftIssueTests(unittest.TestCase):
+    def test_render_issue_includes_attribution_footer(self) -> None:
+        content = draft_issue_scripts.render_issue(
+            title="Missing freshness note",
+            evidence="skills/foo/SKILL.md lacks a freshness rule.",
+            recommendation="Add a freshness rule and re-run the audit.",
+            skill="kotlin-multiplatform-audit",
+            kind="issue",
+        )
+        self.assertIn("# Missing freshness note", content)
+        self.assertIn("Suggested by kotlin-multiplatform-audit", content)
 
 
 if __name__ == "__main__":

@@ -52,6 +52,20 @@ This skill populates `:core:database` with a complete SQLDelight 2 setup:
 > in-memory store or a different persistence strategy (e.g., `localStorage` via
 > `kotlin-wrappers`). Track upstream: https://github.com/cashapp/sqldelight/issues
 
+## When to Use This Skill
+
+Use this skill when you need to:
+- Add SQLDelight 2 to a KMP project
+- Define schema files, migrations, or type adapters
+- Wire platform drivers and Flow-based queries
+- Recheck driver support before targeting a new platform
+
+**Trigger keywords:** SQLDelight, database, SQLite, schema, migrations, type adapter,
+Flow query, Android driver, Native driver, Desktop driver, Web driver.
+
+**Freshness rule:** SQLDelight support changes across targets, so recheck the current
+driver matrix and WasmJs status before copying setup code.
+
 ---
 
 ## Prerequisites

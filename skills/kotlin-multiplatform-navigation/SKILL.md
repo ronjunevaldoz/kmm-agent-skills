@@ -34,6 +34,20 @@ Two options are available for KMP navigation. This skill covers both:
 
 **Recommendation**: Use Navigation Compose for KMP unless you need Decompose's fine-grained component lifecycle control.
 
+## When to Use This Skill
+
+Use this skill when you need to:
+- Add type-safe navigation to a KMP Compose app
+- Decide between Navigation Compose KMP and Decompose
+- Wire nested graphs, bottom navigation, or deep links
+- Recheck navigation API changes before upgrading the library
+
+**Trigger keywords:** navigation, nav graph, navhost, route, deep link, bottom nav,
+KMP navigation, type-safe routes, Decompose, Navigation Compose.
+
+**Freshness rule:** recheck the JetBrains Navigation Compose docs before upgrading or
+copying snippets into a new project.
+
 ---
 
 ## Prerequisites

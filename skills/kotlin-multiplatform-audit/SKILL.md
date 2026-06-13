@@ -4,9 +4,10 @@ description: >
   KMP project audit skill for reviewing an existing Kotlin Multiplatform codebase.
   Use this skill to inspect architecture, module boundaries, state handling, repository
   and network layering, Compose patterns, expect/actual usage, shared resources,
-  design system usage, test coverage, and platform readiness. Produces findings,
-  risk levels, and a fix sequence instead of implementation code. Pair with
-  kotlin-multiplatform-expert to route any follow-up work to the right domain skills.
+  design system usage, test coverage, platform readiness, and the skills repo itself.
+  Produces findings, risk levels, and a fix sequence instead of implementation code.
+  Pair with kotlin-multiplatform-expert to route any follow-up work to the right
+  domain skills.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
@@ -26,6 +27,12 @@ metadata:
     - KMP review
     - project health check
     - readiness review
+    - freshness audit
+    - deprecation audit
+    - script audit
+    - skills repo audit
+    - issue draft
+    - question draft
 ---
 
 ## When to Use This Skill
@@ -36,10 +43,14 @@ Use this skill when you need to:
 - Validate MVI, repository, Compose, and `expect/actual` choices
 - Produce a fix order before making code changes
 - Compare the project against this collection's recommended KMP patterns
+- Audit the skills repo for missing references, examples, scripts, rules, and freshness
+- Turn confirmed findings into GitHub issue drafts or question drafts when the user
+  wants work items instead of just findings
 
 **Trigger keywords:** audit repo, review architecture, project health, boundary check,
 module review, KMP audit, clean architecture review, readiness review, architecture drift,
-what is wrong with this project, inspect this repo.
+what is wrong with this project, inspect this repo, audit skills repo, script hygiene,
+freshness check, deprecation risk, references audit.
 
 ---
 
@@ -88,6 +99,14 @@ the user and the other skills what to do next.
 - Check whether components use the right pattern for the repo's chosen UI system
 - Flag hardcoded colors, sizes, and text styles
 
+### 6) Skills repo hygiene
+- Ensure every skill has `name`, `description`, and `metadata.last-updated`
+- Ensure trigger guidance is explicit enough to fire in practice
+- Prefer references for fast-moving topics and keep examples only when they clarify
+- Check that scripts are executable, deterministic, and covered by tests when practical
+- Flag skills that depend on fast-moving libraries without a freshness note or docs link
+- Flag scripts that encode assumptions about deprecated or unstable APIs
+
 ---
 
 ## Output Format
@@ -97,11 +116,31 @@ When auditing, return:
 - `Evidence` for each finding, with file paths when available
 - `Recommended fix order`
 - `Skills to use next`
+- `Optional issue drafts` when the user wants findings turned into GitHub-ready work items
 
 Keep implementation advice short and actionable. If a finding maps cleanly to an existing skill,
 name that skill so the follow-up path is obvious.
+
+## From Finding to Issue
+
+If the user wants repo work items, convert each confirmed finding into one of two things:
+- a **GitHub issue draft** when the problem is actionable and should be tracked
+- a **question draft** when the finding needs product or architecture confirmation first
+
+Ask before creating any issue draft. Do not auto-file issues from an audit without
+explicit confirmation from the user.
+
+Every draft should include:
+- a short title
+- the evidence that triggered it
+- the recommended fix or follow-up skill
+- an attribution footer such as `Suggested by kotlin-multiplatform-audit`
 
 ## Bundled Script
 
 - `scripts/audit_project.py` — runs a lightweight scan for a few common KMP architecture
   smells such as effect replay bugs, state copy races, and obvious UI/data boundary leaks.
+- `scripts/audit_skills_repo.py` — checks the skills repo for metadata, freshness, scripts,
+  and documentation gaps.
+- `scripts/draft_issue.py` — renders a GitHub-ready issue or question draft with an
+  attribution footer.

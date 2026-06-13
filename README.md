@@ -30,6 +30,9 @@ skill set and wording.
 
 | Skill | What it covers |
 |---|---|
+| [`kotlin-multiplatform-ktor-auth-service`](skills/kotlin-multiplatform-ktor-auth-service/) | Ktor auth service, bearer/JWT, sessions, Ktor RPC, login/refresh/logout flows, protected routes |
+| [`kotlin-multiplatform-mongodb-database`](skills/kotlin-multiplatform-mongodb-database/) | MongoDB coroutine driver, repository boundary, document mapping, reactive reads with Flow, change streams |
+| [`kotlin-multiplatform-kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) | Kotlin RPC boundaries, shared service contracts, client/server layout, Ktor auth integration, scaffolded RPC setup |
 | [`kotlin-multiplatform-network-layer`](skills/kotlin-multiplatform-network-layer/) | Ktor 3 client in `:core:network`, `NetworkResult<T>`, `safeRequest {}`, bearer auth with automatic token refresh, platform engines |
 | [`kotlin-multiplatform-sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) | SQLDelight 2 in `:core:database`, schema files, migrations, type adapters, platform drivers, coroutines Flow queries |
 | [`kotlin-multiplatform-xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) | XCFramework build from `:shared`, Swift Package Manager binary target, local SPM for dev, GitHub Releases for distribution |

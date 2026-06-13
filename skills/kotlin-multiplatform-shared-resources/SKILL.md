@@ -37,8 +37,22 @@ No platform-specific resource systems needed — one `composeResources/` directo
     font/             # .ttf / .otf fonts
     values/           # strings.xml, plurals.xml
     values-es/        # Localized strings (Spanish)
-    files/            # Raw files (JSON, certificates, etc.)
+  files/            # Raw files (JSON, certificates, etc.)
 ```
+
+## When to Use This Skill
+
+Use this skill when you need to:
+- Share strings, plurals, images, fonts, or raw files across KMP targets
+- Set up `Res` for a Compose Multiplatform UI module
+- Localize content or package shared fonts and icons
+- Recheck Compose Resources docs before changing the resource layout
+
+**Trigger keywords:** shared resources, compose resources, strings, plurals, fonts,
+images, localization, resource module, Res, resource packaging.
+
+**Freshness rule:** recheck the current Compose Multiplatform Resources docs before
+upgrading the plugin or moving resource directories.
 
 ---
 

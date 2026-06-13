@@ -46,11 +46,26 @@ This skill populates `:core:network` with a complete, production-grade HTTP clie
     HttpClientEngineFactory   → Darwin
   jvmMain
     HttpClientEngineFactory   → CIO  (Desktop)
-  jsMain
-    HttpClientEngineFactory   → Js   (Web browser)
-  wasmJsMain
-    HttpClientEngineFactory   → Js   (Web/Wasm browser)
+    jsMain
+      HttpClientEngineFactory   → Js   (Web browser)
+    wasmJsMain
+      HttpClientEngineFactory   → Js   (Web/Wasm browser)
 ```
+
+## When to Use This Skill
+
+Use this skill when you need to:
+- Add a shared Ktor HTTP client to a KMP project
+- Model transport results with `NetworkResult<T>`
+- Configure bearer auth with automatic token refresh
+- Split platform engines across Android, iOS, Desktop, Web, and WasmJs
+- Recheck Ktor docs before adopting a new plugin or engine
+
+**Trigger keywords:** network layer, Ktor client, HTTP client, bearer auth,
+token refresh, NetworkResult, safeRequest, OkHttp, Darwin, CIO, JS engine.
+
+**Freshness rule:** Ktor changes quickly, so recheck the current client engine,
+auth, and serialization docs before using or updating this skill.
 
 ---
 

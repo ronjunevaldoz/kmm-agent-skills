@@ -7,7 +7,8 @@ description: >
   skill dependency graph, layer-by-layer build order, feature-slice assembly sequence,
   decision trees for the most common "what do I use here?" questions, and when to hand
   off to the project audit skill. This is a meta-skill; it delegates to domain skills
-  for implementation and review.
+  for implementation and review, and it can turn confirmed audit findings into issue
+  drafts or question drafts when the repo needs tracking.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
@@ -28,6 +29,8 @@ metadata:
     - audit
     - project review
     - architecture review
+    - issue draft
+    - question draft
 ---
 
 ## When to Use This Skill
@@ -37,6 +40,8 @@ Use this skill when you need to:
 - Add a new full feature to an existing KMP project (network + DB + UI + navigation)
 - Decide which skill answers a specific question ("where do I put this?", "which pattern fits?")
 - Route an existing KMP project into the audit skill before making changes
+- Convert confirmed audit findings into GitHub issue drafts or question drafts before
+  fixing if the user wants repo tracking
 - Get a high-level roadmap before diving into implementation
 
 **Trigger keywords:** where do I start KMP, full KMP setup, new KMP feature, which skill,
@@ -54,7 +59,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 20 Skills and What They Own
+## The 23 Skills and What They Own
 
 ### Layer 0 — Project Foundation
 | Skill | Owns |
@@ -68,6 +73,9 @@ versions when the local repo can be checked directly.
 ### Layer 1 — Core Infrastructure
 | Skill | Owns |
 |---|---|
+| `kotlin-multiplatform-ktor-auth-service` | Ktor auth service, bearer/JWT, sessions, Ktor RPC, login/refresh/logout flows, protected routes |
+| `kotlin-multiplatform-mongodb-database` | MongoDB coroutine driver, repository boundary, document mapping, reactive reads with Flow, change streams |
+| `kotlin-multiplatform-kotlin-rpc` | Kotlin RPC boundaries, shared service contracts, client/server layout, Ktor auth integration |
 | `kotlin-multiplatform-network-layer` | Ktor 3 client, `NetworkResult<T>`, `safeRequest {}`, token refresh interceptor |
 | `kotlin-multiplatform-sqldelight-setup` | SQLDelight 2, platform drivers, schema files, migrations, Flow queries |
 | `kotlin-multiplatform-xcframework-spm` | XCFramework build, SPM binary target, Xcode integration |
@@ -105,6 +113,9 @@ kotlin-multiplatform-feature-scaffold       ← start here
 ├── kotlin-multiplatform-ci-github-actions  (Layer 0, no deps)
 ├── kotlin-multiplatform-dependency-injection (Layer 0, no deps)
 ├── kotlin-multiplatform-audit              (Layer 0, no deps for review work)
+├── kotlin-multiplatform-ktor-auth-service   (Layer 1, no deps)
+├── kotlin-multiplatform-mongodb-database    (Layer 1, no deps)
+├── kotlin-multiplatform-kotlin-rpc          (Layer 1, no deps)
 ├── kotlin-multiplatform-network-layer      (depends on: scaffold)
 ├── kotlin-multiplatform-sqldelight-setup   (depends on: scaffold)
 ├── kotlin-multiplatform-xcframework-spm    (depends on: scaffold, ci)
@@ -243,6 +254,18 @@ UiState                          → lives in :feature:x:ui/FooContract.kt
 The rule: data flows **inward** through mappers. Neither the DTO nor the entity ever
 crosses the `:data` module boundary. The domain model is the lingua franca.
 
+### "How do I handle audit findings?"
+
+```
+Finding confirmed?
+├── NO → keep it as a question and ask the user for clarification
+└── YES:
+    ├── Needs tracking in the repo? → draft a GitHub issue
+    └── Needs design/product input?  → draft a GitHub question
+```
+
+Include the skill name in every draft so attribution stays visible.
+
 ---
 
 ## Common Architecture Violations (Anti-Pattern Checklist)
@@ -273,6 +296,9 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "set up a new KMP project", "create feature module" | `kotlin-multiplatform-feature-scaffold` |
 | "Koin", "dependency injection", "manual modules", "annotated mode" | `kotlin-multiplatform-dependency-injection` |
 | "review my KMP project", "audit this repo", "what's wrong with this architecture" | `kotlin-multiplatform-audit` |
+| "auth", "authentication", "authorization", "JWT", "sessions", "Ktor RPC" | `kotlin-multiplatform-ktor-auth-service` |
+| "MongoDB", "database", "collection", "Flow", "change stream", "server-side Kotlin" | `kotlin-multiplatform-mongodb-database` |
+| "kotlin rpc", "kRPC", "kotlinx rpc", "RPC service", "shared RPC models" | `kotlin-multiplatform-kotlin-rpc` |
 | "add Ktor", "network layer", "API calls", "token refresh" | `kotlin-multiplatform-network-layer` |
 | "local database", "SQLite", "SQLDelight", "offline storage" | `kotlin-multiplatform-sqldelight-setup` |
 | "CI", "GitHub Actions", "run KMP tests" | `kotlin-multiplatform-ci-github-actions` |
