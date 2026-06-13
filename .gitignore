@@ -12,6 +12,8 @@ build/
 .idea/
 *.iml
 .vscode/
+__pycache__/
+*.pyc
 
 # Local env
 local.properties
