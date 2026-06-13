@@ -59,6 +59,7 @@ architecture decisions, and common pitfalls — not just dependency boilerplate.
 | Skill | What it covers |
 |---|---|
 | [`kotlin-multiplatform-expert`](skills/kotlin-multiplatform-expert/) | Skill dependency graph, phase-by-phase build order, feature-slice checklist, architecture decision trees, 12-point anti-pattern checklist, skill invocation map |
+| [`kotlin-multiplatform-audit`](skills/kotlin-multiplatform-audit/) | Existing project review, boundary checks, architecture drift, Compose/MVI/data-layer readiness, fix sequencing |
 
 ---
 

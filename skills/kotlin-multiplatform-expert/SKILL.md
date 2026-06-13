@@ -1,16 +1,17 @@
 ---
 name: kotlin-multiplatform-expert
 description: >
-  KMP Expert Orchestrator — maps all 17 skills in this collection, their dependency
+  KMP Expert Orchestrator — maps all skills in this collection, their dependency
   order, and how to sequence them for any Kotlin Multiplatform project. Use this skill
-  first to plan which other skills to invoke, in what order, for a given task. Covers:
+  first to decide which other skill to invoke, in what order, for a given task. Covers:
   skill dependency graph, layer-by-layer build order, feature-slice assembly sequence,
-  anti-pattern checklist, and decision trees for the most common "what do I use here?"
-  questions in KMP. This is a meta-skill; it delegates to domain skills for implementation.
+  decision trees for the most common "what do I use here?" questions, and when to hand
+  off to the project audit skill. This is a meta-skill; it delegates to domain skills
+  for implementation and review.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-06'
+  last-updated: '2026-06-13'
   keywords:
     - KMP expert
     - orchestrator
@@ -24,6 +25,9 @@ metadata:
     - meta-skill
     - feature assembly
     - KMP decision tree
+    - audit
+    - project review
+    - architecture review
 ---
 
 ## When to Use This Skill
@@ -32,7 +36,7 @@ Use this skill when you need to:
 - Start a new KMP project and don't know which skills to invoke or in what order
 - Add a new full feature to an existing KMP project (network + DB + UI + navigation)
 - Decide which skill answers a specific question ("where do I put this?", "which pattern fits?")
-- Audit an existing KMP project against the full expert checklist
+- Route an existing KMP project into the audit skill before making changes
 - Get a high-level roadmap before diving into implementation
 
 **Trigger keywords:** where do I start KMP, full KMP setup, new KMP feature, which skill,
@@ -41,7 +45,7 @@ KMP checklist, review my KMP project.
 
 ---
 
-## The 17 Skills and What They Own
+## The 18 Skills and What They Own
 
 ### Layer 0 — Project Foundation
 | Skill | Owns |
@@ -49,6 +53,7 @@ KMP checklist, review my KMP project.
 | `kotlin-multiplatform-feature-scaffold` | Project structure, module graph, AGP 9, build-logic, version catalog, Koin 4 |
 | `kotlin-multiplatform-flavor-environment` | Dev/staging/prod config, BuildKonfig, secrets, `AppConfig` facade |
 | `kotlin-multiplatform-ci-github-actions` | GitHub Actions, test matrix, XCFramework release workflow |
+| `kotlin-multiplatform-audit` | Existing project health checks, boundary review, architecture drift, readiness gaps |
 
 ### Layer 1 — Core Infrastructure
 | Skill | Owns |
@@ -87,6 +92,7 @@ KMP checklist, review my KMP project.
 kotlin-multiplatform-feature-scaffold       ← start here
 ├── kotlin-multiplatform-flavor-environment (Layer 0, no deps)
 ├── kotlin-multiplatform-ci-github-actions  (Layer 0, no deps)
+├── kotlin-multiplatform-audit              (Layer 0, no deps for review work)
 ├── kotlin-multiplatform-network-layer      (depends on: scaffold)
 ├── kotlin-multiplatform-sqldelight-setup   (depends on: scaffold)
 ├── kotlin-multiplatform-xcframework-spm    (depends on: scaffold, ci)
@@ -252,6 +258,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | User asks about | Invoke skill |
 |---|---|
 | "set up a new KMP project", "create feature module" | `kotlin-multiplatform-feature-scaffold` |
+| "review my KMP project", "audit this repo", "what's wrong with this architecture" | `kotlin-multiplatform-audit` |
 | "add Ktor", "network layer", "API calls", "token refresh" | `kotlin-multiplatform-network-layer` |
 | "local database", "SQLite", "SQLDelight", "offline storage" | `kotlin-multiplatform-sqldelight-setup` |
 | "CI", "GitHub Actions", "run KMP tests" | `kotlin-multiplatform-ci-github-actions` |
