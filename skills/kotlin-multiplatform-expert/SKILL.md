@@ -311,3 +311,16 @@ Use this when the user asks to audit or extend an existing project:
 2. Confirm the module boundary
 3. Check whether the feature belongs in an existing pattern skill
 4. Only then write code or a new skill
+
+## Recommendation Format
+
+When recommending an approach, always present it in this order:
+
+1. Recommend the default first.
+2. Show the relevant project structure.
+3. Show a small code snippet.
+4. Explain why that path is preferred.
+5. Mention the main alternative only after the default is clear.
+
+Use this format when the user asks what to build next, which pattern to use, or how a
+skill should be applied. Keep the snippet small and directly tied to the structure.
