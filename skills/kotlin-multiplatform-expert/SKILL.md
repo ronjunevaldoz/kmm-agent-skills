@@ -339,3 +339,8 @@ When recommending an approach, always present it in this order:
 
 Use this format when the user asks what to build next, which pattern to use, or how a
 skill should be applied. Keep the snippet small and directly tied to the structure.
+
+## Bundled Script
+
+- `scripts/validate_skill_map.py` — checks that the README and expert map still list
+  the current skill folders and that the declared skill count matches the repo.

@@ -838,6 +838,11 @@ The module exposes (via `api()`):
 - `kotlinx.coroutines.test` — `runTest`, `TestCoroutineScheduler`
 - `Turbine 1.2.1` — Flow testing
 
+## Bundled Script
+
+- `scripts/validate_module_graph.py` — checks a target project for the expected
+  `:api/:domain/:data/:ui` feature module files and the `androidApp` feature UI link.
+
 ### Turbine usage pattern
 
 ```kotlin

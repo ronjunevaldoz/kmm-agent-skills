@@ -101,3 +101,7 @@ When auditing, return:
 Keep implementation advice short and actionable. If a finding maps cleanly to an existing skill,
 name that skill so the follow-up path is obvious.
 
+## Bundled Script
+
+- `scripts/audit_project.py` — runs a lightweight scan for a few common KMP architecture
+  smells such as effect replay bugs, state copy races, and obvious UI/data boundary leaks.
