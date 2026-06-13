@@ -58,6 +58,7 @@ skill set and wording.
 | [`kotlin-multiplatform-compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) | `@Composable () -> Unit` slots, named/scoped slots (RowScope/ColumnScope), trailing lambda convention, CompositionLocal, when NOT to use slots |
 | [`kotlin-multiplatform-compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) | Hoist-until-shared rule, controlled component pattern (`value` + `onValueChange`), stateful vs stateless, when to stop hoisting |
 | [`kotlin-multiplatform-compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) | `remember` vs `rememberSaveable` vs `ViewModel` survival matrix, decision tree, custom `Saver`, graph-scoped ViewModels, `SavedStateHandle` |
+| [`kotlin-multiplatform-graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) | `graphicsLayer` vs Canvas, drawBehind, drawWithCache, workflow node shells, custom drawing performance |
 
 ### Meta
 

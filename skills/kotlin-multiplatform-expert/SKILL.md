@@ -54,7 +54,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 19 Skills and What They Own
+## The 20 Skills and What They Own
 
 ### Layer 0 — Project Foundation
 | Skill | Owns |
@@ -93,6 +93,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-compose-slot-api` | `@Composable () -> Unit` slots, scoped slots, CompositionLocal, component API shape |
 | `kotlin-multiplatform-compose-state-hoisting` | Hoist-until-shared rule, controlled components, stateless vs stateful composables |
 | `kotlin-multiplatform-compose-state-container` | `remember` vs `rememberSaveable` vs `ViewModel` survival matrix, custom Saver |
+| `kotlin-multiplatform-graphics-modifiers` | `graphicsLayer`, Canvas, drawBehind, drawWithCache, workflow node shells, custom drawing performance |
 
 ---
 
@@ -116,7 +117,8 @@ kotlin-multiplatform-feature-scaffold       ← start here
 ├── kotlin-multiplatform-design-system-extended (depends on: design-system)
 ├── kotlin-multiplatform-compose-slot-api   (depends on: design-system)
 ├── kotlin-multiplatform-compose-state-hoisting (depends on: mvi)
-└── kotlin-multiplatform-compose-state-container (depends on: mvi, navigation)
+├── kotlin-multiplatform-compose-state-container (depends on: mvi, navigation)
+└── kotlin-multiplatform-graphics-modifiers  (depends on: design-system, compose-state-container)
 ```
 
 ---
@@ -286,6 +288,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "slot API", "content lambda", "composable parameter", "scoped slot" | `kotlin-multiplatform-compose-slot-api` |
 | "state hoisting", "hoist state", "controlled component", "where does state go" | `kotlin-multiplatform-compose-state-hoisting` |
 | "remember vs ViewModel", "rememberSaveable", "state survival", "config change" | `kotlin-multiplatform-compose-state-container` |
+| "graphicsLayer", "Canvas", "drawWithCache", "workflow node", "custom drawing" | `kotlin-multiplatform-graphics-modifiers` |
 
 ---
 
