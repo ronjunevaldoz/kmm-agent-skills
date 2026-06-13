@@ -6,6 +6,10 @@ targeting Android, iOS, Desktop (JVM), and Web (JS/Wasm).
 Each skill is a self-contained `SKILL.md` grounding the agent with production patterns,
 architecture decisions, and common pitfalls — not just dependency boilerplate.
 
+The current repo files are the source of truth. Re-read `README.md` and the relevant
+`skills/*/SKILL.md` files before making recommendations so each session uses the latest
+skill set and wording.
+
 > **Start here:** use `kotlin-multiplatform-expert` first on any new project or feature.
 > It maps all skills, their build order, and answers "which skill do I need?" questions.
 

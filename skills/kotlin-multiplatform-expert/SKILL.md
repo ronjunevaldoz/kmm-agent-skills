@@ -45,6 +45,15 @@ KMP checklist, review my KMP project.
 
 ---
 
+## Freshness Rule
+
+At the start of every session, treat the repo files in front of you as the source of
+truth. Re-read the current `README.md` and the relevant `skills/*/SKILL.md` files before
+recommending an approach. Do not rely on a previous session's skill list or remembered
+versions when the local repo can be checked directly.
+
+---
+
 ## The 19 Skills and What They Own
 
 ### Layer 0 — Project Foundation
