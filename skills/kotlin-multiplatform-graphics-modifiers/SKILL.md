@@ -174,3 +174,8 @@ Modifier.drawWithCache {
 - using `drawWithCache` when the draw objects are trivial and do not need caching
 
 If the problem is geometry, use drawing. If the problem is presentation, use a layer.
+
+## Reference
+
+See `references/workflow-node-zoom.png` for the workflow editor mockup with the toolbar
+outside the zoomed graph surface and sample zoom levels.
