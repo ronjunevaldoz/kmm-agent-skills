@@ -18,6 +18,7 @@ architecture decisions, and common pitfalls — not just dependency boilerplate.
 | Skill | What it covers |
 |---|---|
 | [`kotlin-multiplatform-feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) | Project structure, module graph (`:api/:domain/:data/:ui`), AGP 9+, build-logic convention plugins, version catalog, Koin 4 |
+| [`kotlin-multiplatform-dependency-injection`](skills/kotlin-multiplatform-dependency-injection/) | Koin module organization, manual vs annotated wiring, constructor injection, app/feature/viewModel scopes, test overrides |
 | [`kotlin-multiplatform-flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) | Dev/staging/prod via BuildKonfig, Android product flavors, secrets via `local.properties` or CI env vars, `AppConfig` facade |
 | [`kotlin-multiplatform-ci-github-actions`](skills/kotlin-multiplatform-ci-github-actions/) | GitHub Actions matrix (Android/iOS/Desktop/Web), Gradle cache, XCFramework release workflow |
 

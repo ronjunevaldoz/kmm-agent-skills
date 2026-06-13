@@ -45,12 +45,13 @@ KMP checklist, review my KMP project.
 
 ---
 
-## The 18 Skills and What They Own
+## The 19 Skills and What They Own
 
 ### Layer 0 — Project Foundation
 | Skill | Owns |
 |---|---|
 | `kotlin-multiplatform-feature-scaffold` | Project structure, module graph, AGP 9, build-logic, version catalog, Koin 4 |
+| `kotlin-multiplatform-dependency-injection` | Koin module organization, manual vs annotated wiring, app/feature/ViewModel scopes, test overrides |
 | `kotlin-multiplatform-flavor-environment` | Dev/staging/prod config, BuildKonfig, secrets, `AppConfig` facade |
 | `kotlin-multiplatform-ci-github-actions` | GitHub Actions, test matrix, XCFramework release workflow |
 | `kotlin-multiplatform-audit` | Existing project health checks, boundary review, architecture drift, readiness gaps |
@@ -92,6 +93,7 @@ KMP checklist, review my KMP project.
 kotlin-multiplatform-feature-scaffold       ← start here
 ├── kotlin-multiplatform-flavor-environment (Layer 0, no deps)
 ├── kotlin-multiplatform-ci-github-actions  (Layer 0, no deps)
+├── kotlin-multiplatform-dependency-injection (Layer 0, no deps)
 ├── kotlin-multiplatform-audit              (Layer 0, no deps for review work)
 ├── kotlin-multiplatform-network-layer      (depends on: scaffold)
 ├── kotlin-multiplatform-sqldelight-setup   (depends on: scaffold)
@@ -258,6 +260,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | User asks about | Invoke skill |
 |---|---|
 | "set up a new KMP project", "create feature module" | `kotlin-multiplatform-feature-scaffold` |
+| "Koin", "dependency injection", "manual modules", "annotated mode" | `kotlin-multiplatform-dependency-injection` |
 | "review my KMP project", "audit this repo", "what's wrong with this architecture" | `kotlin-multiplatform-audit` |
 | "add Ktor", "network layer", "API calls", "token refresh" | `kotlin-multiplatform-network-layer` |
 | "local database", "SQLite", "SQLDelight", "offline storage" | `kotlin-multiplatform-sqldelight-setup` |
