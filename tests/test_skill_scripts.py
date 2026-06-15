@@ -239,6 +239,19 @@ class AuditSkillsRepoTests(unittest.TestCase):
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertTrue(any("missing all-targets branch guidance" in finding for finding in findings))
 
+    def test_audit_skills_repo_flags_missing_build_logic_toml_guidance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            scaffold_dir = root / "skills" / "kotlin-multiplatform-feature-scaffold"
+            scaffold_dir.mkdir(parents=True)
+            (scaffold_dir / "SKILL.md").write_text(
+                "---\nname: kotlin-multiplatform-feature-scaffold\ndescription: scaffold\n---\n\n## When to Use This Skill\n\nbuild-logic only\n",
+                encoding="utf-8",
+            )
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("missing build-logic and libs.versions.toml guidance" in finding for finding in findings))
+
 
 class DraftIssueTests(unittest.TestCase):
     def test_render_issue_includes_attribution_footer(self) -> None:

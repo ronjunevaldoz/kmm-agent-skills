@@ -49,6 +49,10 @@ Use this skill when you need to:
 **Branch recommendation:** use `Kotlin/kmp-wizard` `all-targets` by default for new
 full-stack KMP projects. Use `all-frontends-shared` only if you want to omit the server.
 
+**Build-logic rule:** route plugin and dependency versions through `build-logic/`
+convention plugins and `gradle/libs.versions.toml`; do not scatter version strings
+across module build files when creating or updating KMM projects.
+
 **Trigger keywords:** where do I start KMP, full KMP setup, new KMP feature, which skill,
 skill order, KMP architecture decision, KMM expert, KMP project plan, which pattern KMP,
 KMP checklist, review my KMP project.

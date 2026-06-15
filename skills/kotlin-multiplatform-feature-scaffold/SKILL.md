@@ -5,8 +5,8 @@ description: >
   architecture. Creates a full project by generating from the official Kotlin/kmp-wizard
   AGP 9 baseline, usually the `all-targets` branch for Android, iOS, Web, Desktop, and
   Server, or adds a new feature module group (:api/:domain/:data/:ui) to an existing
-  KMP project. Uses AGP 9+, build-logic convention plugins, version catalog groups,
-  Compose Multiplatform, and Koin 4 (annotated or manual DI).
+  KMP project. Uses AGP 9+, build-logic convention plugins, a TOML version catalog
+  (`gradle/libs.versions.toml`), Compose Multiplatform, and Koin 4 (annotated or manual DI).
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
@@ -33,6 +33,7 @@ Use when you need to:
   (usually the `all-targets` branch when you want Android + iOS + Web + Desktop + Server)
 - Add a new feature module group (`:api/:domain/:data/:ui`) to an existing KMP project
 - Set up AGP 9+ build-logic convention plugins and a version catalog
+- Set up AGP 9+ build-logic convention plugins backed by `gradle/libs.versions.toml`
 - Wire Koin 4 DI (annotated or manual) across KMP modules
 
 **This is the foundational skill** — most other KMP skills (`network-layer`, `sqldelight-setup`,
@@ -45,6 +46,10 @@ Kotlin/kmp-wizard, generate from template, baseline project.
 **Branch recommendation:** default to the `all-targets` branch for full-stack KMP apps.
 Use `all-frontends-shared` only when you want Android + iOS + Web + Desktop without a
 server module.
+
+**Build-logic rule:** always route module configuration through convention plugins in
+`build-logic/` and keep versions in `gradle/libs.versions.toml`; do not scatter plugin
+and dependency versions across module build files.
 
 ---
 

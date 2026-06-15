@@ -108,6 +108,9 @@ the user and the other skills what to do next.
 - Flag scripts that encode assumptions about deprecated or unstable APIs
 - Ensure new-project scaffold guidance names the `Kotlin/kmp-wizard` `all-targets`
   branch when the goal is Android, iOS, Web, Desktop, and Server
+- Ensure KMM projects route plugin and dependency versions through `build-logic/`
+  convention plugins and `gradle/libs.versions.toml` instead of scattering versions
+  across module build files
 
 ---
 

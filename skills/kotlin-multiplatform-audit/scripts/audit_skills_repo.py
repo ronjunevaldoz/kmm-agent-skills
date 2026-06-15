@@ -67,6 +67,13 @@ def audit_skills_repo(root: Path) -> list[str]:
                 "kotlin-multiplatform-feature-scaffold: missing all-targets branch guidance for full-stack KMP scaffolds"
             )
 
+        if skill_dir.name == "kotlin-multiplatform-feature-scaffold" and (
+            "build-logic" not in text or "libs.versions.toml" not in text
+        ):
+            findings.append(
+                "kotlin-multiplatform-feature-scaffold: missing build-logic and libs.versions.toml guidance"
+            )
+
     readme = root / "README.md"
     if readme.exists():
         readme_text = readme.read_text(encoding="utf-8")
