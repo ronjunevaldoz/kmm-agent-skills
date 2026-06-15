@@ -8,7 +8,8 @@ description: >
   decision trees for the most common "what do I use here?" questions, and when to hand
   off to the project audit skill. This is a meta-skill; it delegates to domain skills
   for implementation and review, and it can turn confirmed audit findings into issue
-  drafts or question drafts when the repo needs tracking.
+  drafts or question drafts when the repo needs tracking. The long-term goal is to keep
+  this skills collection aligned with the cleanest KMM architecture patterns possible.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills

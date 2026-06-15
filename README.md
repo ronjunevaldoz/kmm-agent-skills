@@ -1,85 +1,78 @@
 # kmm-agent-skills
 
-A collection of AI agent skills for **Kotlin Multiplatform (KMP)** development,
-targeting Android, iOS, Desktop (JVM), and Web (JS/Wasm).
+[![License](https://img.shields.io/github/license/ronjunevaldoz/kmm-agent-skills)](LICENSE)
+[![Repo size](https://img.shields.io/github/repo-size/ronjunevaldoz/kmm-agent-skills)](https://github.com/ronjunevaldoz/kmm-agent-skills)
+[![Last commit](https://img.shields.io/github/last-commit/ronjunevaldoz/kmm-agent-skills)](https://github.com/ronjunevaldoz/kmm-agent-skills)
 
-Each skill is a self-contained `SKILL.md` grounding the agent with production patterns,
-architecture decisions, and common pitfalls — not just dependency boilerplate.
+AI agent skills for **Kotlin Multiplatform (KMP)** development.
 
-The current repo files are the source of truth. Re-read `README.md` and the relevant
-`skills/*/SKILL.md` files before making recommendations so each session uses the latest
-skill set and wording.
+Goal: keep KMM architecture clean, repeatable, and easy to audit. The skills here
+favor clear module boundaries, version catalogs, build-logic convention plugins,
+and explicit review loops before code is generated.
 
-> **Start here:** use `kotlin-multiplatform-expert` first on any new project or feature.
-> It maps all skills, their build order, and answers "which skill do I need?" questions.
+The repo files are the source of truth. Re-read this README and the relevant
+`skills/*/SKILL.md` files before making recommendations so each session uses the
+latest skill set and wording.
+
+**Start here:** use `kotlin-multiplatform-expert` first on any new project or feature.
+It maps the skills, build order, and the best next step.
 
 ---
 
-## Skills
+## Quick Start
+
+1. Use `kotlin-multiplatform-expert` to choose the next skill.
+2. Use `kotlin-multiplatform-feature-scaffold` to start a new project from `Kotlin/kmp-wizard` `all-targets`.
+3. Use the domain skills below to fill in auth, data, UI, navigation, and audits.
+
+## Skill Map
 
 ### Foundation
 
-| Skill | What it covers |
-|---|---|
-| [`kotlin-multiplatform-feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) | Project structure, module graph (`:api/:domain/:data/:ui`), AGP 9+, build-logic convention plugins, version catalog, Koin 4 |
-| [`kotlin-multiplatform-dependency-injection`](skills/kotlin-multiplatform-dependency-injection/) | Koin module organization, manual vs annotated wiring, constructor injection, app/feature/viewModel scopes, test overrides |
-| [`kotlin-multiplatform-flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) | Dev/staging/prod via BuildKonfig, Android product flavors, secrets via `local.properties` or CI env vars, `AppConfig` facade |
-| [`kotlin-multiplatform-ci-github-actions`](skills/kotlin-multiplatform-ci-github-actions/) | GitHub Actions matrix (Android/iOS/Desktop/Web), Gradle cache, XCFramework release workflow |
+- [`kotlin-multiplatform-feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) - project structure, build-logic, TOML catalog, Koin
+- [`kotlin-multiplatform-dependency-injection`](skills/kotlin-multiplatform-dependency-injection/) - Koin wiring and scopes
+- [`kotlin-multiplatform-flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) - BuildKonfig, secrets, env setup
+- [`kotlin-multiplatform-ci-github-actions`](skills/kotlin-multiplatform-ci-github-actions/) - CI matrix and release workflow
 
 ### Infrastructure
 
-| Skill | What it covers |
-|---|---|
-| [`kotlin-multiplatform-ktor-auth-service`](skills/kotlin-multiplatform-ktor-auth-service/) | Ktor auth service, bearer/JWT, sessions, Ktor RPC, login/refresh/logout flows, protected routes |
-| [`kotlin-multiplatform-mongodb-database`](skills/kotlin-multiplatform-mongodb-database/) | MongoDB coroutine driver, repository boundary, document mapping, reactive reads with Flow, change streams |
-| [`kotlin-multiplatform-kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) | Kotlin RPC boundaries, shared service contracts, client/server layout, Ktor auth integration, scaffolded RPC setup |
-| [`kotlin-multiplatform-network-layer`](skills/kotlin-multiplatform-network-layer/) | Ktor 3 client in `:core:network`, `NetworkResult<T>`, `safeRequest {}`, bearer auth with automatic token refresh, platform engines |
-| [`kotlin-multiplatform-sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) | SQLDelight 2 in `:core:database`, schema files, migrations, type adapters, platform drivers, coroutines Flow queries |
-| [`kotlin-multiplatform-xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) | XCFramework build from `:shared`, Swift Package Manager binary target, local SPM for dev, GitHub Releases for distribution |
+- [`kotlin-multiplatform-ktor-auth-service`](skills/kotlin-multiplatform-ktor-auth-service/) - auth service, bearer/JWT, sessions, RPC
+- [`kotlin-multiplatform-mongodb-database`](skills/kotlin-multiplatform-mongodb-database/) - MongoDB coroutine driver and repositories
+- [`kotlin-multiplatform-kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) - Kotlin RPC boundaries and scaffolding
+- [`kotlin-multiplatform-network-layer`](skills/kotlin-multiplatform-network-layer/) - Ktor client, auth refresh, result mapping
+- [`kotlin-multiplatform-sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) - SQLDelight schema, drivers, migrations
+- [`kotlin-multiplatform-xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) - XCFramework and SPM export
 
-### Platform Patterns
+### Patterns
 
-| Skill | What it covers |
-|---|---|
-| [`kotlin-multiplatform-expect-actual`](skills/kotlin-multiplatform-expect-actual/) | When to use `expect/actual` vs interface injection, `typealias actual`, "actual everywhere" anti-pattern, `@ObjCName` for Swift API surface, `@Throws`, Kotlin/Native memory model |
-| [`kotlin-multiplatform-repository-pattern`](skills/kotlin-multiplatform-repository-pattern/) | Interface in `:api`, impl in `:data`, mapper pattern (DTO → Domain ← Entity), 3 fetch strategies (network-first / cache-first / offline-first), SQLDelight Flow as single source of truth, optimistic updates |
-
-### Feature Architecture
-
-| Skill | What it covers |
-|---|---|
-| [`kotlin-multiplatform-navigation`](skills/kotlin-multiplatform-navigation/) | Type-safe routes with `@Serializable`, nested graphs, bottom navigation, deep links (JetBrains Navigation Compose) |
-| [`kotlin-multiplatform-shared-resources`](skills/kotlin-multiplatform-shared-resources/) | Shared strings, plurals, images, fonts, raw files via CMP Resources; localization |
-| [`kotlin-multiplatform-mvi`](skills/kotlin-multiplatform-mvi/) | Contract pattern (State/Intent/Effect), `MviViewModel` with `StateFlow` + `Channel<Effect>`, atomic state updates, Screen/Content split, Turbine testing |
+- [`kotlin-multiplatform-expect-actual`](skills/kotlin-multiplatform-expect-actual/) - platform differences
+- [`kotlin-multiplatform-repository-pattern`](skills/kotlin-multiplatform-repository-pattern/) - repository boundary and fetch strategy
+- [`kotlin-multiplatform-navigation`](skills/kotlin-multiplatform-navigation/) - type-safe navigation
+- [`kotlin-multiplatform-shared-resources`](skills/kotlin-multiplatform-shared-resources/) - shared resources and localization
+- [`kotlin-multiplatform-mvi`](skills/kotlin-multiplatform-mvi/) - State / Intent / Effect flow
 
 ### UI System
 
-| Skill | What it covers |
-|---|---|
-| [`kotlin-multiplatform-design-system`](skills/kotlin-multiplatform-design-system/) | Tokens (colors / typography / shapes / spacing), `AppTheme`, dark mode, shadcn-inspired sealed variants, 6 core components — no Material dependency |
-| [`kotlin-multiplatform-design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) | 27 additional components: Icon, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton, Switch, Slider, Select, Progress, Skeleton, Spinner, Alert, Toast, Dialog, Sheet, Tooltip, Popover, Accordion |
-| [`kotlin-multiplatform-compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) | `@Composable () -> Unit` slots, named/scoped slots (RowScope/ColumnScope), trailing lambda convention, CompositionLocal, when NOT to use slots |
-| [`kotlin-multiplatform-compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) | Hoist-until-shared rule, controlled component pattern (`value` + `onValueChange`), stateful vs stateless, when to stop hoisting |
-| [`kotlin-multiplatform-compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) | `remember` vs `rememberSaveable` vs `ViewModel` survival matrix, decision tree, custom `Saver`, graph-scoped ViewModels, `SavedStateHandle` |
-| [`kotlin-multiplatform-graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) | `graphicsLayer` vs Canvas, drawBehind, drawWithCache, workflow node shells, custom drawing performance |
+- [`kotlin-multiplatform-design-system`](skills/kotlin-multiplatform-design-system/) - tokens and core components
+- [`kotlin-multiplatform-design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) - extended component set
+- [`kotlin-multiplatform-compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) - slot-based component APIs
+- [`kotlin-multiplatform-compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) - hoisting rules
+- [`kotlin-multiplatform-compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) - `remember` vs `ViewModel`
+- [`kotlin-multiplatform-graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) - canvas and graph surfaces
 
 ### Meta
 
-| Skill | What it covers |
-|---|---|
-| [`kotlin-multiplatform-expert`](skills/kotlin-multiplatform-expert/) | Skill dependency graph, phase-by-phase build order, feature-slice checklist, architecture decision trees, 12-point anti-pattern checklist, skill invocation map |
-| [`kotlin-multiplatform-audit`](skills/kotlin-multiplatform-audit/) | Existing project review, boundary checks, architecture drift, Compose/MVI/data-layer readiness, fix sequencing |
+- [`kotlin-multiplatform-expert`](skills/kotlin-multiplatform-expert/) - skill routing and build order
+- [`kotlin-multiplatform-audit`](skills/kotlin-multiplatform-audit/) - repo review and fix sequencing
 
 ---
 
 ## Targets
 
-| Platform | Target | Entry Point |
-|---|---|---|
-| Android | `androidTarget()` | `:androidApp` |
-| iOS | `iosArm64()`, `iosSimulatorArm64()` | `:iosApp` (Xcode) |
-| Desktop | `jvm()` | `:desktopApp` |
-| Web | `js { browser() }`, `wasmJs { browser() }` | `:webApp` |
+- Android - `androidTarget()` - `:androidApp`
+- iOS - `iosArm64()`, `iosSimulatorArm64()` - `:iosApp`
+- Desktop - `jvm()` - `:desktopApp`
+- Web - `js { browser() }`, `wasmJs { browser() }` - `:webApp`
 
 ---
 
@@ -97,26 +90,24 @@ cp -r skills/kotlin-multiplatform-feature-scaffold .claude/skills/
 
 ## Versions
 
-| Tool | Version |
-|---|---|
-| AGP | 9.0.1 |
-| Kotlin | 2.4.0 |
-| Compose Multiplatform | 1.11.1 |
-| Koin | 4.2.1 |
-| Ktor | 3.1.3 |
-| SQLDelight | 2.0.2 |
-| BuildKonfig | 0.21.2 |
-| Turbine | 1.2.1 |
+- AGP 9.0.1
+- Kotlin 2.4.0
+- Compose Multiplatform 1.11.1
+- Koin 4.2.1
+- Ktor 3.1.3
+- SQLDelight 2.0.2
+- BuildKonfig 0.21.2
+- Turbine 1.2.1
 
 ---
 
 ## Roadmap
 
-- [ ] `kotlin-multiplatform-datastore` — Multiplatform DataStore (Preferences + Proto)
-- [ ] `kotlin-multiplatform-biometric-auth` — Biometric / Face ID / Fingerprint via expect/actual
-- [ ] `kotlin-multiplatform-push-notifications` — FCM (Android) + APNs (iOS) with shared KMP handling
-- [ ] `kotlin-multiplatform-analytics` — Shared analytics abstraction (Firebase / Amplitude)
-- [ ] `kotlin-multiplatform-testing-robot` — UI testing robot pattern for CMP screens
+- `kotlin-multiplatform-datastore` - Multiplatform DataStore
+- `kotlin-multiplatform-biometric-auth` - Biometric auth via expect/actual
+- `kotlin-multiplatform-push-notifications` - FCM + APNs handling
+- `kotlin-multiplatform-analytics` - shared analytics abstraction
+- `kotlin-multiplatform-testing-robot` - CMP UI testing robot pattern
 
 ---
 
