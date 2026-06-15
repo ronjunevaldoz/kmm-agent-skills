@@ -106,6 +106,8 @@ the user and the other skills what to do next.
 - Check that scripts are executable, deterministic, and covered by tests when practical
 - Flag skills that depend on fast-moving libraries without a freshness note or docs link
 - Flag scripts that encode assumptions about deprecated or unstable APIs
+- Ensure new-project scaffold guidance names the `Kotlin/kmp-wizard` `all-targets`
+  branch when the goal is Android, iOS, Web, Desktop, and Server
 
 ---
 

@@ -62,6 +62,11 @@ def audit_skills_repo(root: Path) -> list[str]:
         ) is None:
             findings.append(f"{skill_dir.name}: missing freshness guidance for fast-moving dependencies")
 
+        if skill_dir.name == "kotlin-multiplatform-feature-scaffold" and "all-targets" not in text:
+            findings.append(
+                "kotlin-multiplatform-feature-scaffold: missing all-targets branch guidance for full-stack KMP scaffolds"
+            )
+
     readme = root / "README.md"
     if readme.exists():
         readme_text = readme.read_text(encoding="utf-8")
