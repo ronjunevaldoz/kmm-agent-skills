@@ -37,12 +37,17 @@ metadata:
 
 Use this skill when you need to:
 - Start a new KMP project and don't know which skills to invoke or in what order
+- Start a new KMP project from the Kotlin/kmp-wizard baseline and don't know which
+  skills to invoke or in what order
 - Add a new full feature to an existing KMP project (network + DB + UI + navigation)
 - Decide which skill answers a specific question ("where do I put this?", "which pattern fits?")
 - Route an existing KMP project into the audit skill before making changes
 - Convert confirmed audit findings into GitHub issue drafts or question drafts before
   fixing if the user wants repo tracking
 - Get a high-level roadmap before diving into implementation
+
+**Branch recommendation:** use `Kotlin/kmp-wizard` `all-targets` by default for new
+full-stack KMP projects. Use `all-frontends-shared` only if you want to omit the server.
 
 **Trigger keywords:** where do I start KMP, full KMP setup, new KMP feature, which skill,
 skill order, KMP architecture decision, KMM expert, KMP project plan, which pattern KMP,
@@ -137,7 +142,8 @@ kotlin-multiplatform-feature-scaffold       ← start here
 ## Build Order for a New Project
 
 ### Phase 1: Foundation (do once per project)
-1. **`feature-scaffold`** — create the project, establish module structure
+1. **`feature-scaffold`** — create the project from Kotlin/kmp-wizard, then establish
+   module structure
 2. **`flavor-environment`** — set up dev/staging/prod before writing any API code
 3. **`network-layer`** — Ktor client, `NetworkResult`, auth interceptor
 4. **`sqldelight-setup`** — local database, platform drivers, Koin wiring

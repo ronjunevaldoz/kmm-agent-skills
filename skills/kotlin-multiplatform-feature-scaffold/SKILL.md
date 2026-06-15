@@ -2,10 +2,11 @@
 name: kotlin-multiplatform-feature-scaffold
 description: >
   Scaffolds a production-ready Kotlin Multiplatform (KMP) multi-feature module
-  architecture. Creates a full project from the kmp-wizard AGP 9 baseline or adds
-  a new feature module group (:api/:domain/:data/:ui) to an existing KMP project.
-  Uses AGP 9+, build-logic convention plugins, version catalog groups, Compose
-  Multiplatform, and Koin 4 (annotated or manual DI).
+  architecture. Creates a full project by generating from the official Kotlin/kmp-wizard
+  AGP 9 baseline, usually the `all-targets` branch for Android, iOS, Web, Desktop, and
+  Server, or adds a new feature module group (:api/:domain/:data/:ui) to an existing
+  KMP project. Uses AGP 9+, build-logic convention plugins, version catalog groups,
+  Compose Multiplatform, and Koin 4 (annotated or manual DI).
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
@@ -28,7 +29,8 @@ metadata:
 ## When to Use This Skill
 
 Use when you need to:
-- Create a new Kotlin Multiplatform project from scratch (Android + iOS + Desktop + Web)
+- Create a new Kotlin Multiplatform project from scratch, starting from Kotlin/kmp-wizard
+  (usually the `all-targets` branch when you want Android + iOS + Web + Desktop + Server)
 - Add a new feature module group (`:api/:domain/:data/:ui`) to an existing KMP project
 - Set up AGP 9+ build-logic convention plugins and a version catalog
 - Wire Koin 4 DI (annotated or manual) across KMP modules
@@ -37,7 +39,12 @@ Use when you need to:
 `navigation`, `design-system`, etc.) require the project structure this skill creates.
 
 **Trigger keywords:** create KMP project, scaffold feature module, new module, set up KMP,
-add feature, multi-module, build-logic, convention plugin, AGP 9, Koin 4, KMP setup.
+add feature, multi-module, build-logic, convention plugin, AGP 9, Koin 4, KMP setup,
+Kotlin/kmp-wizard, generate from template, baseline project.
+
+**Branch recommendation:** default to the `all-targets` branch for full-stack KMP apps.
+Use `all-frontends-shared` only when you want Android + iOS + Web + Desktop without a
+server module.
 
 ---
 
@@ -77,7 +84,8 @@ baked in:
 Before doing anything, inspect the working directory:
 
 - **New Project mode**: no `settings.gradle.kts` or no `build-logic/` directory found.
-  Scaffold the full project from scratch.
+  Scaffold the full project by copying the Kotlin/kmp-wizard AGP 9 `all-targets`
+  baseline first, then layer the multi-feature module architecture on top.
 - **Add Feature mode**: existing KMP project detected (has `settings.gradle.kts` and
   `build-logic/`). Only scaffold the new feature module group.
 

@@ -124,7 +124,7 @@ cp -r skills/kotlin-multiplatform-feature-scaffold .claude/skills/
 
 - [Kotlin/kotlin-agent-skills](https://github.com/Kotlin/kotlin-agent-skills) — official Kotlin agent skills
 - [android/skills](https://github.com/android/skills) — official Android agent skills
-- [Kotlin/kmp-wizard](https://github.com/Kotlin/kmp-wizard) — AGP 9 KMP project templates
+- [Kotlin/kmp-wizard](https://github.com/Kotlin/kmp-wizard) — AGP 9 KMP project templates; use the `all-targets` branch for Android, iOS, Web, Desktop, and Server
 
 ---
 
