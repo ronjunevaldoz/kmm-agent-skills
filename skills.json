@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2",
+  "version": "1.1.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-audit",
@@ -264,6 +264,40 @@
         "single source of truth",
         "state sharing",
         "Compose state management"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-datastore",
+      "path": "skills/kotlin-multiplatform-datastore",
+      "description": "Sets up Multiplatform DataStore for KMP: Preferences (key-value) and Proto (typed, schema-driven) variants. Covers createDataStore {} expect/actual per platform, Flow-based reads, coroutine writes, migration from SharedPreferences, and Koin wiring so feature modules never construct DataStore directly.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-18",
+      "keywords": [
+        "DataStore",
+        "Preferences DataStore",
+        "Proto DataStore",
+        "KMP",
+        "Kotlin Multiplatform",
+        "SharedPreferences migration",
+        "Flow reads",
+        "persistent storage",
+        "key-value store",
+        "Koin",
+        "expect actual"
+      ],
+      "triggers": [
+        "DataStore",
+        "Preferences DataStore",
+        "Proto DataStore",
+        "SharedPreferences KMP",
+        "NSUserDefaults KMP",
+        "persist settings",
+        "key-value KMP",
+        "store user preferences",
+        "DataStore migration",
+        "DataStore Flow",
+        "DataStore Koin"
       ],
       "scripts": []
     },
