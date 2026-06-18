@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-13'
+  last-updated: '2026-06-18'
   keywords:
     - KMP expert
     - orchestrator

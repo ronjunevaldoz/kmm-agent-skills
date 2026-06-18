@@ -414,6 +414,15 @@ If back stack is broken or navigation effects replay, audit the above list first
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-feature-scaffold` — `NavHost` lives in the `:app:shared` module created by the scaffold
+- `kotlin-multiplatform-mvi` — navigation events should be sent as `Effect` from a ViewModel, not as state
+- `kotlin-multiplatform-presenter-module` — pure ViewModel that emits nav `Effect` without a Compose dependency
+- `kotlin-multiplatform-expect-actual` — platform-specific deep link and URI handling
+
+---
+
 ## Output Style
 
 When asked about navigation or routing, respond in this order:

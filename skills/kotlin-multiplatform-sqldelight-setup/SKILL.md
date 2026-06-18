@@ -555,6 +555,15 @@ If Flow queries are not updating after a write, check that the write and the Flo
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-feature-scaffold` — `:core:database` follows the same convention plugin pattern
+- `kotlin-multiplatform-repository-pattern` — SQLDelight drives the cache layer in offline-first repositories
+- `kotlin-multiplatform-network-layer` — Ktor + SQLDelight together form the complete data layer
+- `kotlin-multiplatform-dependency-injection` — Koin binding for `DatabaseDriverFactory` per platform
+
+---
+
 ## Output Style
 
 When asked about SQLDelight setup or database queries, respond in this order:

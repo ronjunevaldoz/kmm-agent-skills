@@ -336,6 +336,14 @@ If SPM resolution fails, verify the checksum in `Package.swift` matches the actu
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-feature-scaffold` — the KMP project structure being exported as an XCFramework
+- `kotlin-multiplatform-ci-github-actions` — CI job that assembles the XCFramework and publishes the binary target
+- `kotlin-multiplatform-expect-actual` — platform-specific iOS implementations bundled inside the XCFramework
+
+---
+
 ## Output Style
 
 When asked about XCFramework or SPM distribution, respond in this order:

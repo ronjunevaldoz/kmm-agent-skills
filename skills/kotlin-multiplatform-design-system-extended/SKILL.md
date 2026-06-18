@@ -2631,6 +2631,15 @@ Check the component list in this skill before building a custom alternative.
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-design-system` — the token and component foundation this skill extends
+- `kotlin-multiplatform-compose-slot-api` — slot APIs used by `AppDialog`, `AppBottomSheet`, and `AppScaffold`
+- `kotlin-multiplatform-preview-driven-development` — Desktop previews for each extended component variant
+- `kotlin-multiplatform-shared-resources` — icons and images loaded inside extended components via `Res`
+
+---
+
 ## Output Style
 
 When asked about extended design system components, respond in this order:

@@ -417,6 +417,15 @@ If state is disappearing on rotation, audit whether `rememberSaveable` or ViewMo
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-mvi` — ViewModel as the primary state container with `StateFlow` + `Channel<Effect>`
+- `kotlin-multiplatform-compose-state-hoisting` — when and where to hoist state vs keeping it in a container
+- `kotlin-multiplatform-presenter-module` — pure ViewModel pattern for containers with no Compose dependency
+- `kotlin-multiplatform-unit-testing` — testing ViewModel state transitions with Turbine
+
+---
+
 ## Output Style
 
 When asked about state containers or state survival, respond in this order:

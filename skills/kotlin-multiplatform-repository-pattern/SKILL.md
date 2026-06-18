@@ -487,6 +487,15 @@ If domain or UI code is importing `:data` types directly, the mapper boundary is
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-network-layer` — provides `HttpClient` and `safeRequest` that repository data sources call
+- `kotlin-multiplatform-sqldelight-setup` — the offline cache layer in cache-first and offline-first strategies
+- `kotlin-multiplatform-dependency-injection` — Koin binding for repository interfaces to their implementations
+- `kotlin-multiplatform-unit-testing` — fake repository pattern for testing ViewModels without real data sources
+
+---
+
 ## Output Style
 
 When asked about the repository pattern or data layer, respond in this order:

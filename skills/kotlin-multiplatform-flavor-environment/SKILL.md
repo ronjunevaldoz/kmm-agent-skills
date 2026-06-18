@@ -364,6 +364,15 @@ If CI builds fail on missing secrets, verify the GitHub Actions `env:` block inj
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-feature-scaffold` — `build-logic` convention plugins where `BuildKonfig` is applied
+- `kotlin-multiplatform-ci-github-actions` — CI secret injection via `env:` that feeds BuildKonfig values
+- `kotlin-multiplatform-network-layer` — consumes `BuildKonfig.BASE_URL` and `BuildKonfig.DEBUG`
+- `kotlin-multiplatform-logging` — consumes `BuildKonfig.DEBUG` to enable verbose log writers
+
+---
+
 ## Output Style
 
 When asked about environment config or BuildKonfig, respond in this order:

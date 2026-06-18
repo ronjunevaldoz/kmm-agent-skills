@@ -435,6 +435,15 @@ If a composable is hard to preview or test, check whether the state is in the ri
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-compose-state-container` — when hoisting reaches the ViewModel boundary
+- `kotlin-multiplatform-mvi` — MVI Contract as the top of the hoisting hierarchy for screen state
+- `kotlin-multiplatform-preview-driven-development` — stateless composables from hoisting enable fast Desktop previews
+- `kotlin-multiplatform-compose-slot-api` — slot APIs pair naturally with hoisted state callbacks
+
+---
+
 ## Output Style
 
 When asked about state hoisting or composable testability, respond in this order:

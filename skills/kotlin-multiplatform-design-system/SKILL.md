@@ -1373,6 +1373,15 @@ If the design system feels inconsistent, check whether tokens are being accessed
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-feature-scaffold` — `:core:designsystem` follows the same convention plugin pattern
+- `kotlin-multiplatform-design-system-extended` — additional components (`AppDialog`, `AppToast`, `AppTabs`, etc.) built on this foundation
+- `kotlin-multiplatform-shared-resources` — fonts and icons loaded via `Res` accessors inside the design system
+- `kotlin-multiplatform-preview-driven-development` — Desktop previews for each component variant using `PreviewParameterProvider`
+
+---
+
 ## Output Style
 
 When asked about design system setup or components, respond in this order:

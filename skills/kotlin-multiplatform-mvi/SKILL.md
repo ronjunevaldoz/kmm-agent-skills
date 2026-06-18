@@ -170,7 +170,7 @@ object AuthContract {
 
 ## Screen / Content Split
 
-Use the same split as the Carpool project:
+Split every screen into two composables:
 
 - `FooScreen(viewModel = ...)` owns DI, state collection, and effect collection.
 - `FooContent(state, onIntent)` is pure, previewable, and testable.
@@ -732,44 +732,6 @@ class UserProfileViewModel(
 
 ---
 
-## Common Pitfalls
-
-**1. Forgetting to reset `isLoading` on error**
-Always handle every result branch. A single code path that sets `isLoading = true` needs a
-matching reset in EVERY outcome branch (success, error, cancellation).
-
-**2. Triggering navigation from state observation**
-Don't navigate by observing a `navigateTo: Route?` field in `State` — the navigation fires
-on every recomposition that sees the non-null value. Use `Effect` instead.
-
-**3. Holding domain objects in State**
-Domain models (database entities, API DTOs) should be mapped to UI-specific types before
-entering State. Domain changes should not leak UI concerns.
-
-**4. Using `GlobalScope` or `CoroutineScope()` inside a ViewModel**
-Always use `viewModelScope`. It's cancelled when the ViewModel is cleared, preventing leaks.
-
-**5. Calling `onIntent` from inside the ViewModel**
-`onIntent` is a public API for the UI layer. The ViewModel should call private suspend
-functions directly, not route through `onIntent`.
-
-**6. `LaunchedEffect` on a mutable key that changes frequently**
-`LaunchedEffect(state.someField)` restarts the coroutine every time that field changes.
-For effect collection, use a stable key (`viewModel` or `Unit`).
-
----
-
-## Verification
-
-1. `./gradlew :core:common:compileCommonMainKotlinMetadata` — `MviViewModel` compiles in commonMain
-2. `./gradlew :feature:auth:ui:compileCommonMainKotlinMetadata` — Contract + ViewModel + Screen compile
-3. `./gradlew :feature:auth:ui:commonTest` (or `:jvmTest`) — all ViewModel tests pass
-4. Rotate the device / trigger Compose recomposition — effects fire exactly once
-5. Tap login button rapidly — only one network call fires (isLoading guard works)
-6. Test error path: ensure `isLoading` is `false` and error message is shown after failure
-
----
-
 ## Common Anti-Patterns
 
 - using `SharedFlow` for effects — events replay on new collectors and break "fire once" guarantees
@@ -778,8 +740,23 @@ For effect collection, use a stable key (`viewModel` or `Unit`).
 - using `copy {}` with a stale `state` reference instead of `update {}` — causes lost updates under concurrency
 - exposing mutable `StateFlow` from the ViewModel — UI should never mutate state directly
 - missing `isLoading` guard on submit actions — lets rapid taps fire multiple network calls
+- forgetting to reset `isLoading` on error — every branch that sets it `true` must reset it in success, error, and cancellation
+- navigating by observing a `navigateTo: Route?` field in `State` — fires on every recomposition; use `Effect` instead
+- holding domain objects (DTOs, entities) directly in `State` — map to UI-specific types at the ViewModel boundary
+- using `GlobalScope` or bare `CoroutineScope()` in a ViewModel — always use `viewModelScope`
+- calling `onIntent` from inside the ViewModel — `onIntent` is a UI-layer API; call private suspend functions directly
+- using `LaunchedEffect(state.someField)` for effect collection — restarts on every state change; use `LaunchedEffect(viewModel)` instead
 
 If effects are replaying or the state machine is hard to test, audit the above list first.
+
+---
+
+## Related Skills
+
+- `kotlin-multiplatform-presenter-module` — simpler ViewModel pattern without `Effect`; use for screens with no one-shot events
+- `kotlin-multiplatform-unit-testing` — `runTest` + Turbine for testing `StateFlow` transitions and `Channel` effects
+- `kotlin-multiplatform-compose-state-container` — when to use `remember` vs ViewModel as the state container
+- `kotlin-multiplatform-preview-driven-development` — `FooContent` stateless composables are the fast-preview target
 
 ---
 

@@ -546,6 +546,16 @@ If token refresh is unreliable, check that the auth plugin is installed on the `
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-feature-scaffold` — `:core:network` follows the same convention plugin pattern
+- `kotlin-multiplatform-repository-pattern` — repositories call `safeRequest` and map `NetworkResult` to domain types
+- `kotlin-multiplatform-datastore` — provides `TokenStorage` implementation via DataStore for token persistence
+- `kotlin-multiplatform-dependency-injection` — Koin wiring for the shared `HttpClient` singleton
+- `kotlin-multiplatform-unit-testing` — `MockEngine` for testing `safeRequest` contracts without a real server
+
+---
+
 ## Output Style
 
 When asked about the network layer or HTTP client setup, respond in this order:

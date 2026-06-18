@@ -393,6 +393,15 @@ If CI is slow, check the Gradle cache hit rate in the Actions summary before mak
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-feature-scaffold` — the project structure CI builds and tests
+- `kotlin-multiplatform-code-quality` — Ktlint and Detekt checks run as CI gates
+- `kotlin-multiplatform-xcframework-spm` — XCFramework release job assembled and published from CI
+- `kotlin-multiplatform-roborazzi` — screenshot diff CI job that runs on pull requests
+
+---
+
 ## Output Style
 
 When asked about CI setup or GitHub Actions for KMP, respond in this order:

@@ -387,6 +387,15 @@ If `Res.string.xxx` is unresolved, run `./gradlew generateCommonMainResourceAcce
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-feature-scaffold` — convention plugins that enable `composeResources/` in each module
+- `kotlin-multiplatform-design-system` — fonts and icons distributed via `Res` accessors inside the design system
+- `kotlin-multiplatform-preview-driven-development` — Desktop previews that consume `Res.string` and `Res.drawable`
+- `kotlin-multiplatform-expect-actual` — platform-specific resource loading when CMP `Res` is insufficient
+
+---
+
 ## Output Style
 
 When asked about shared resources or localization, respond in this order:
