@@ -44,6 +44,7 @@ It maps the skills, build order, and the best next step.
 - [`kotlin-multiplatform-kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) - Kotlin RPC boundaries and scaffolding
 - [`kotlin-multiplatform-network-layer`](skills/kotlin-multiplatform-network-layer/) - Ktor client, auth refresh, result mapping
 - [`kotlin-multiplatform-sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) - SQLDelight schema, drivers, migrations
+- [`kotlin-multiplatform-datastore`](skills/kotlin-multiplatform-datastore/) - Preferences DataStore + Proto DataStore, expect/actual factory, Koin wiring, SharedPreferences migration
 - [`kotlin-multiplatform-xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) - XCFramework and SPM export
 
 ### Patterns
@@ -116,7 +117,6 @@ npx skills add ronjunevaldoz/kmm-agent-skills
 
 ## Roadmap
 
-- `kotlin-multiplatform-datastore` - Multiplatform DataStore Preferences + Proto
 - `kotlin-multiplatform-biometric-auth` - BiometricPrompt (Android) + LocalAuthentication (iOS)
 - `kotlin-multiplatform-push-notifications` - FCM token (Android) + APNs token (iOS)
 - `kotlin-multiplatform-analytics` - shared Analytics interface, Firebase/Amplitude platform impls

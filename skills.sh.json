@@ -29,7 +29,8 @@
       "skills": [
         "kotlin-multiplatform-network-layer",
         "kotlin-multiplatform-sqldelight-setup",
-        "kotlin-multiplatform-repository-pattern"
+        "kotlin-multiplatform-repository-pattern",
+        "kotlin-multiplatform-datastore"
       ]
     },
     {
