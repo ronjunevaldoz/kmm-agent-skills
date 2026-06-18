@@ -2,7 +2,31 @@
 
 This guide covers how to install and use the KMM agent skills with every major AI coding assistant.
 
-Each assistant has its own mechanism for loading external context. The pattern is always the same:
+## Quickest install — `npx skills add`
+
+The [skills CLI](https://skills.sh) is the fastest way to install. It auto-detects your
+agent and copies the right files to the right place:
+
+```bash
+# Install all skills (auto-detects Claude Code, Cursor, Codex, Copilot, etc.)
+npx skills add ronjunevaldoz/kmm-agent-skills
+
+# Install specific skills only
+npx skills add ronjunevaldoz/kmm-agent-skills --skill kotlin-multiplatform-feature-scaffold
+
+# Install to a specific agent
+npx skills add ronjunevaldoz/kmm-agent-skills --agent claude-code
+
+# List available skills without installing
+npx skills add ronjunevaldoz/kmm-agent-skills --list
+```
+
+The CLI handles every agent's destination directory automatically. Use manual steps below
+only if you prefer full control or are not using the CLI.
+
+---
+
+Each assistant also has its own mechanism for loading external context. The pattern is always the same:
 **copy or reference the relevant `SKILL.md` file(s), then mention the skill by name or trigger keyword in your prompt.**
 
 ---

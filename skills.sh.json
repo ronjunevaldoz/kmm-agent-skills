@@ -1,0 +1,84 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "Architecture",
+      "description": "Layer contract, module structure, presenter isolation, and code quality gates for KMP projects.",
+      "skills": [
+        "kotlin-multiplatform-clean-architecture",
+        "kotlin-multiplatform-feature-scaffold",
+        "kotlin-multiplatform-presenter-module",
+        "kotlin-multiplatform-dependency-injection",
+        "kotlin-multiplatform-code-quality"
+      ]
+    },
+    {
+      "title": "Foundation",
+      "description": "Project setup, environment config, CI, and logging for a new KMP project.",
+      "skills": [
+        "kotlin-multiplatform-flavor-environment",
+        "kotlin-multiplatform-ci-github-actions",
+        "kotlin-multiplatform-logging",
+        "kotlin-multiplatform-xcframework-spm"
+      ]
+    },
+    {
+      "title": "Data & Networking",
+      "description": "Ktor client, SQLDelight, repository pattern, and offline-first data strategies.",
+      "skills": [
+        "kotlin-multiplatform-network-layer",
+        "kotlin-multiplatform-sqldelight-setup",
+        "kotlin-multiplatform-repository-pattern"
+      ]
+    },
+    {
+      "title": "Backend",
+      "description": "Ktor auth service, MongoDB repositories, and Kotlin RPC shared service contracts.",
+      "skills": [
+        "kotlin-multiplatform-ktor-auth-service",
+        "kotlin-multiplatform-mongodb-database",
+        "kotlin-multiplatform-kotlin-rpc"
+      ]
+    },
+    {
+      "title": "UI System",
+      "description": "No-Material design tokens, Compose components, state management, and preview-driven development.",
+      "skills": [
+        "kotlin-multiplatform-design-system",
+        "kotlin-multiplatform-design-system-extended",
+        "kotlin-multiplatform-mvi",
+        "kotlin-multiplatform-preview-driven-development",
+        "kotlin-multiplatform-compose-slot-api",
+        "kotlin-multiplatform-compose-state-hoisting",
+        "kotlin-multiplatform-compose-state-container",
+        "kotlin-multiplatform-graphics-modifiers"
+      ]
+    },
+    {
+      "title": "Testing",
+      "description": "Unit tests with runTest + Turbine, Roborazzi screenshot tests from @Preview, and shared fakes.",
+      "skills": [
+        "kotlin-multiplatform-unit-testing",
+        "kotlin-multiplatform-roborazzi"
+      ]
+    },
+    {
+      "title": "Platform",
+      "description": "expect/actual patterns, shared resources, navigation, and iOS XCFramework.",
+      "skills": [
+        "kotlin-multiplatform-expect-actual",
+        "kotlin-multiplatform-navigation",
+        "kotlin-multiplatform-shared-resources"
+      ]
+    },
+    {
+      "title": "Meta",
+      "description": "Expert routing skill and audit tooling for navigating and reviewing the full skill set.",
+      "skills": [
+        "kotlin-multiplatform-expert",
+        "kotlin-multiplatform-audit"
+      ]
+    }
+  ]
+}

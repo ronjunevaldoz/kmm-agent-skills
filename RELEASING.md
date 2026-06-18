@@ -226,5 +226,10 @@ to perform a release:
    entries. The script extracts them from `SKILL.md` frontmatter. Manual edits will be
    overwritten on the next release.
 
+7. **`skills.sh.json` must be kept in sync manually.** When adding a new skill, add its
+   name to the appropriate grouping in `skills.sh.json` before running the release script.
+   This file controls how skills.sh and the `npx skills add` CLI organize and display
+   the skills. The release script does not touch it.
+
 7. **All gates must pass before tagging.** If audit finds issues or tests fail, fix them
    and commit before re-running the release script. Do not skip or suppress failures.

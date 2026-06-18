@@ -1,5 +1,6 @@
 # kmm-agent-skills
 
+[![skills.sh](https://skills.sh/b/ronjunevaldoz/kmm-agent-skills)](https://skills.sh/ronjunevaldoz/kmm-agent-skills)
 [![License](https://img.shields.io/github/license/ronjunevaldoz/kmm-agent-skills)](LICENSE)
 [![Repo size](https://img.shields.io/github/repo-size/ronjunevaldoz/kmm-agent-skills)](https://github.com/ronjunevaldoz/kmm-agent-skills)
 [![Last commit](https://img.shields.io/github/last-commit/ronjunevaldoz/kmm-agent-skills)](https://github.com/ronjunevaldoz/kmm-agent-skills)
@@ -93,9 +94,9 @@ See **[RELEASING.md](RELEASING.md)** for the release process (used by both human
 See **[INSTALL.md](INSTALL.md)** for full setup instructions for every assistant:
 Claude Code, OpenAI Codex CLI, GitHub Copilot, Cursor, Windsurf, Gemini CLI, Aider, and Continue.
 
-Quick install for Claude Code:
+Quickest install (auto-detects your agent):
 ```bash
-cp -r kmm-agent-skills/skills/* your-kmp-project/.claude/skills/
+npx skills add ronjunevaldoz/kmm-agent-skills
 ```
 
 ---
