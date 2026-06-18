@@ -88,6 +88,8 @@ It maps the skills, build order, and the best next step.
 
 ## Installation
 
+See **[RELEASING.md](RELEASING.md)** for the release process (used by both humans and agents).
+
 See **[INSTALL.md](INSTALL.md)** for full setup instructions for every assistant:
 Claude Code, OpenAI Codex CLI, GitHub Copilot, Cursor, Windsurf, Gemini CLI, Aider, and Continue.
 

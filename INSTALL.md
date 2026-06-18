@@ -420,6 +420,19 @@ kotlin-multiplatform-shared-resources
 
 ---
 
+## Releasing a new version
+
+See **[RELEASING.md](RELEASING.md)** for the full process. The short version:
+
+```bash
+python3 scripts/release.py --dry-run minor   # validate first
+python3 scripts/release.py minor             # then execute
+# then confirm and push:
+# git push origin main && git push origin vX.Y.Z
+```
+
+---
+
 ## Keeping skills up to date
 
 Skills reference library versions (`AGP`, `Kotlin`, `CMP`, etc.) in their frontmatter and
