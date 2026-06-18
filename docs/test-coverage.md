@@ -6,7 +6,7 @@ All tests live in `tests/test_skill_scripts.py` and run with:
 python3 -m pytest tests/ -v
 ```
 
-Current status: **12 tests, 12 passing**.
+Current status: **16 tests, 16 passing**.
 
 ---
 
@@ -42,10 +42,11 @@ Detects four architecture smell patterns in `.kt`/`.kts`/`.md` files:
 |---|---|---|
 | `_state.value = _state.value.copy(` | `state copy race` | ✅ |
 | `MutableSharedFlow<.*replay = 1` | `sharedflow replay effect` | ✅ |
-| `NetworkResult<` in `/ui/` or `/presentation/` | `network result in ui` | ❌ |
+| `NetworkResult<` in `/ui/` or `/presentation/` | `network result in ui` | ✅ |
+| `NetworkResult<` outside `/ui/` — should NOT fire | `network result in ui` false-positive | ✅ |
 | `import *.data.*` in `/ui/` or `/presentation/` | `data import in ui` | ✅ |
 
-**Not covered:** `network result in ui` pattern; false-positive suppression (pattern outside `/ui/` path not reported); empty directory; non-Kotlin files ignored correctly.
+**Not covered:** empty directory; non-Kotlin files ignored correctly.
 
 ---
 
@@ -57,7 +58,7 @@ Detects four architecture smell patterns in `.kt`/`.kts`/`.md` files:
 | `test_audit_skills_repo_flags_missing_all_targets_branch_guidance` | Reports missing `all-targets` when `feature-scaffold` SKILL.md lacks it |
 | `test_audit_skills_repo_flags_missing_build_logic_toml_guidance` | Reports missing `build-logic` + `libs.versions.toml` when feature-scaffold SKILL.md lacks both |
 
-**Not covered:** `references/` directory without references guidance in SKILL.md; `scripts/` directory without script guidance; missing required markers (`## When to Use This Skill`, `Trigger keywords:`, `metadata:`, `last-updated:`); README missing "Start here" or "Roadmap"; missing `README.md`; skill directory with no SKILL.md.
+**Not covered:** `references/` directory without references guidance in SKILL.md; `scripts/` directory without script guidance; README missing "Start here" or "Roadmap"; missing `README.md`; skill directory with no SKILL.md.
 
 ---
 
@@ -127,12 +128,12 @@ These 18 skills have no scaffold or validation scripts, so there is nothing to t
 
 | Gap | Priority | Notes |
 |---|---|---|
-| `network result in ui` smell not tested | high | The pattern exists and fires in production; no test verifies it |
-| `audit_skills_repo` missing-marker tests | high | 4 required markers (`## When to Use`, `Trigger keywords:`, `metadata:`, `last-updated:`) have no test |
+| `network result in ui` smell not tested | ~~high~~ ✅ | Fixed — fires in `/ui/`, silent outside it |
+| `audit_skills_repo` missing-marker tests | ~~high~~ ✅ | Fixed — all 4 markers checked; false-positive guard added |
 | `audit_skills_repo` scripts/references directory checks | medium | No test covers the "has scripts/ but no script guidance" or "has references/ but no reference guidance" paths |
 | `draft_issue` kind="question" output | low | Different rendering path, no test |
 | Scaffold idempotency | low | All three scaffold scripts lack a second-run test |
-| `validate_module_graph` missing submodule | low | Only the missing androidApp reference is tested; missing api/domain/data/ui subfolders are not |
+| `validate_module_graph` missing submodule | low | Only the missing androidApp reference is tested; missing individual layer subfolders are not |
 
 ---
 

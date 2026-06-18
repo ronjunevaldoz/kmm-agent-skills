@@ -152,6 +152,34 @@ class AuditProjectTests(unittest.TestCase):
             self.assertTrue(any("sharedflow replay effect" in finding for finding in findings))
             self.assertTrue(any("data import in ui" in finding for finding in findings))
 
+    def test_audit_project_finds_network_result_in_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "auth" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "AuthScreen.kt").write_text(
+                "val result: NetworkResult<User> = viewModel.state",
+                encoding="utf-8",
+            )
+
+            findings = audit_scripts.audit_project(root)
+
+            self.assertTrue(any("network result in ui" in finding for finding in findings))
+
+    def test_audit_project_ignores_network_result_outside_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data_dir = root / "feature" / "auth" / "data"
+            data_dir.mkdir(parents=True)
+            (data_dir / "AuthRemoteDataSource.kt").write_text(
+                "suspend fun login(): NetworkResult<User>",
+                encoding="utf-8",
+            )
+
+            findings = audit_scripts.audit_project(root)
+
+            self.assertFalse(any("network result in ui" in finding for finding in findings))
+
 
 class ScaffoldAuthServiceTests(unittest.TestCase):
     def test_scaffold_auth_service_writes_expected_files(self) -> None:
@@ -251,6 +279,44 @@ class AuditSkillsRepoTests(unittest.TestCase):
             )
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertTrue(any("missing build-logic and libs.versions.toml guidance" in finding for finding in findings))
+
+
+    def test_audit_skills_repo_flags_all_missing_required_markers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            skill_dir = root / "skills" / "example-skill"
+            skill_dir.mkdir(parents=True)
+            # SKILL.md with none of the 4 required markers
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: example-skill\ndescription: example\n---\n\nSome content.\n",
+                encoding="utf-8",
+            )
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            marker_finding = next((f for f in findings if "missing markers" in f), None)
+
+            self.assertIsNotNone(marker_finding, "expected a 'missing markers' finding")
+            self.assertIn("## When to Use This Skill", marker_finding)
+            self.assertIn("Trigger keywords:", marker_finding)
+            self.assertIn("metadata:", marker_finding)
+            self.assertIn("last-updated:", marker_finding)
+
+    def test_audit_skills_repo_no_marker_finding_when_all_present(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            skill_dir = root / "skills" / "example-skill"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: example-skill\ndescription: example\nmetadata:\n  last-updated: '2026-06-18'\n---\n\n"
+                "## When to Use This Skill\n\n**Trigger keywords:** example.\n",
+                encoding="utf-8",
+            )
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+
+            self.assertFalse(any("missing markers" in f for f in findings))
 
 
 class DraftIssueTests(unittest.TestCase):
