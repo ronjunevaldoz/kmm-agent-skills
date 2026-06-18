@@ -106,7 +106,7 @@ class ValidateModuleGraphTests(unittest.TestCase):
                 "implementation(projects.feature.auth.ui)",
                 encoding="utf-8",
             )
-            for module in ("api", "domain", "data", "ui"):
+            for module in ("model", "api", "domain", "data", "presenter", "ui"):
                 module_dir = root / "feature" / "auth" / module
                 module_dir.mkdir(parents=True)
                 (module_dir / "build.gradle.kts").write_text("", encoding="utf-8")
@@ -120,7 +120,7 @@ class ValidateModuleGraphTests(unittest.TestCase):
             (root / "build-logic").mkdir()
             (root / "androidApp").mkdir()
             (root / "androidApp" / "build.gradle.kts").write_text("", encoding="utf-8")
-            for module in ("api", "domain", "data", "ui"):
+            for module in ("model", "api", "domain", "data", "presenter", "ui"):
                 module_dir = root / "feature" / "auth" / module
                 module_dir.mkdir(parents=True)
                 (module_dir / "build.gradle.kts").write_text("", encoding="utf-8")

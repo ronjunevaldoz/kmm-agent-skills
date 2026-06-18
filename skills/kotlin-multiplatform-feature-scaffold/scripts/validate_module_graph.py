@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-EXPECTED_MODULES = ("api", "domain", "data", "ui")
+EXPECTED_MODULES = ("model", "api", "domain", "data", "presenter", "ui")
 
 
 def validate_module_graph(root: Path, feature: str) -> list[str]:
@@ -52,7 +52,7 @@ def main() -> int:
             print(f"ERROR: {error}", file=sys.stderr)
         return 1
 
-    print(f"OK: feature '{feature}' has the expected {len(EXPECTED_MODULES)} module files")
+    print(f"OK: feature '{feature}' has the expected {len(EXPECTED_MODULES)} module files (6-layer: model/api/domain/data/presenter/ui)")
     return 0
 
 
