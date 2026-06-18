@@ -1,5 +1,5 @@
 {
-  "version": "1.1.1",
+  "version": "1.1.2",
   "skills": [
     {
       "name": "kotlin-multiplatform-audit",
@@ -928,7 +928,7 @@
         "PDD",
         "preview-driven development",
         "Desktop preview",
-        "@Preview",
+        "'@Preview'",
         "PreviewParameterProvider",
         "Compose preview",
         "KMP",
@@ -999,7 +999,7 @@
         "Roborazzi",
         "screenshot test",
         "golden image",
-        "@Preview",
+        "'@Preview'",
         "JVM screenshot",
         "visual regression",
         "CI diff",
