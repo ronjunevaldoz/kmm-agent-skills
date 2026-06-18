@@ -12,7 +12,7 @@ metadata:
     - Roborazzi
     - screenshot test
     - golden image
-    - @Preview
+    - '@Preview'
     - JVM screenshot
     - visual regression
     - CI diff

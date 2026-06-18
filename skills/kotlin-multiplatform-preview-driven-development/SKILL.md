@@ -12,7 +12,7 @@ metadata:
     - PDD
     - preview-driven development
     - Desktop preview
-    - @Preview
+    - '@Preview'
     - PreviewParameterProvider
     - Compose preview
     - KMP
