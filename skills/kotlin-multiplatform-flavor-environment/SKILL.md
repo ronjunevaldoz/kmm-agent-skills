@@ -35,6 +35,24 @@ Use when you need to:
 **Trigger keywords:** dev/staging/prod, environment config, BuildKonfig, product flavors,
 API key secrets, build variants, AppConfig, env switching, multi-environment.
 
+**Freshness rule:** BuildKonfig plugin versions and AGP product flavor APIs change — recheck
+the BuildKonfig repo and version catalog before upgrading.
+
+---
+
+## Recommendation First
+
+Default to **BuildKonfig + `AppConfig` sealed class + `local.properties` for secrets**.
+
+Why:
+- BuildKonfig generates a `BuildKonfig` object in `commonMain` — accessible from shared code
+  without expect/actual boilerplate
+- wrapping it in a typed `AppConfig` sealed class keeps route handlers and services decoupled
+  from raw string constants
+- secrets stay in `local.properties` (gitignored) and CI injects them via environment variables
+
+Use expect/actual environment injection only when BuildKonfig does not support a specific target.
+
 ---
 
 ## Overview
@@ -331,3 +349,27 @@ fi
 2. `./gradlew assembleProdRelease` — prod variant builds, `BuildKonfig.DEBUG` = false
 3. `./gradlew :androidApp:generateDevDebugBuildKonfig` — generated file contains expected values
 4. Check `build/generated/buildkonfig/commonMain/` for the generated `BuildKonfig.kt`
+
+---
+
+## Common Anti-Patterns
+
+- committing secrets to `gradle.properties` or `build.gradle.kts` — use `local.properties` and CI secrets
+- accessing `BuildKonfig` constants directly in feature code — wrap in `AppConfig` sealed class first
+- defining a fourth "test" flavor — use a build type override or test-specific `local.properties` instead
+- using BuildKonfig for feature flags — it is for environment config, not dynamic features
+- forgetting to add `local.properties` to `.gitignore` — leaks API keys if pushed
+
+If CI builds fail on missing secrets, verify the GitHub Actions `env:` block injects all required keys.
+
+---
+
+## Output Style
+
+When asked about environment config or BuildKonfig, respond in this order:
+1. recommendation (BuildKonfig default, with local.properties for secrets)
+2. code snippet (the `build.gradle.kts` block and the AppConfig wrapper)
+3. why that approach is preferred
+4. main alternative (manual expect/actual, environment-injected constants)
+
+Keep the snippet focused on one flavor. Map to the user's actual base URL and environment names when provided.

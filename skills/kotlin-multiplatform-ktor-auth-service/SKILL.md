@@ -41,6 +41,9 @@ stateful browser-style persistence, and Ktor RPC only when both sides are Kotlin
 **Trigger keywords:** auth, authentication, authorization, bearer token, JWT, sessions,
 Ktor auth, Ktor RPC, login, refresh token, logout, protected route, auth service.
 
+**Freshness rule:** Ktor auth plugin and JWT APIs change quickly — recheck the
+[Ktor auth docs](https://ktor.io/docs/server-auth.html) before using or updating this skill.
+
 ---
 
 ## Recommendation First
@@ -145,4 +148,38 @@ Not a good fit:
 
 - `scripts/scaffold_auth_service.py` — creates a starter auth-service folder with route,
   service, model, and DI files.
+
+---
+
+## Related Skills
+
+- `kotlin-multiplatform-kotlin-rpc` — auth guards the Ktor RPC route using bearer/JWT from this skill
+- `kotlin-multiplatform-mongodb-database` — `UserRepository` used by `AuthService` for credential lookup
+- `kotlin-multiplatform-network-layer` — client-side token injection is handled by the Ktor auth plugin
+- `kotlin-multiplatform-feature-scaffold` — server modules live alongside the shared and client modules from this skill
+
+---
+
+## Common Anti-Patterns
+
+- validating tokens inside route handlers instead of in the `authenticate {}` block — bypasses Ktor's auth pipeline
+- storing refresh tokens in memory — they must survive server restart; use a database or cache
+- returning 200 with an error body on auth failure — always use `401 Unauthorized` or `403 Forbidden`
+- mixing bearer and session auth on the same route without explicit guards — creates ambiguous behavior
+- putting business logic in `AuthService` — it should only handle token issuance, verification, and revocation
+
+If tokens are being rejected unexpectedly, check whether the `verifier` and `validate` blocks in the JWT install are consistent.
+
+---
+
+## Output Style
+
+When asked about Ktor auth, respond in this order:
+1. recommendation (bearer + JWT default; sessions or RPC only when explicitly needed)
+2. project structure (auth routes, service, token service, DI module)
+3. code snippet (install block + one route guard)
+4. why that auth approach is preferred
+5. main alternative
+
+Keep the snippet to one install block and one guarded route. Map to the user's actual route names when provided.
 

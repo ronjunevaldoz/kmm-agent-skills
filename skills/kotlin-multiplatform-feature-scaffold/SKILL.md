@@ -4,7 +4,7 @@ description: >
   Scaffolds a production-ready Kotlin Multiplatform (KMP) multi-feature module
   architecture. Creates a full project by generating from the official Kotlin/kmp-wizard
   AGP 9 baseline, usually the `all-targets` branch for Android, iOS, Web, Desktop, and
-  Server, or adds a new feature module group (:api/:domain/:data/:ui) to an existing
+  Server, or adds a new feature module group (:model/:api/:domain/:data/:presenter/:ui) to an existing
   KMP project. Uses AGP 9+, build-logic convention plugins, a TOML version catalog
   (`gradle/libs.versions.toml`), Compose Multiplatform, and Koin 4 (annotated or manual DI).
 license: Apache-2.0
@@ -31,7 +31,7 @@ metadata:
 Use when you need to:
 - Create a new Kotlin Multiplatform project from scratch, starting from Kotlin/kmp-wizard
   (usually the `all-targets` branch when you want Android + iOS + Web + Desktop + Server)
-- Add a new feature module group (`:api/:domain/:data/:ui`) to an existing KMP project
+- Add a new feature module group (`:model/:api/:domain/:data/:presenter/:ui`) to an existing KMP project
 - Set up AGP 9+ build-logic convention plugins and a version catalog
 - Set up AGP 9+ build-logic convention plugins backed by `gradle/libs.versions.toml`
 - Wire Koin 4 DI (annotated or manual) across KMP modules
@@ -51,6 +51,24 @@ server module.
 `build-logic/` and keep versions in `gradle/libs.versions.toml`; do not scatter plugin
 and dependency versions across module build files.
 
+**Freshness rule:** AGP, Kotlin, CMP, and Koin version targets change quickly — recheck the
+version table in `PLAN.md` and the kmp-wizard repo before scaffolding a new project.
+
+---
+
+## Recommendation First
+
+Default to **kmp-wizard `all-targets` branch + build-logic convention plugins + `gradle/libs.versions.toml`**.
+
+Why:
+- `all-targets` gives Android + iOS + Web + Desktop + Server in one baseline — easier to trim
+  than to add targets later
+- convention plugins enforce consistent AGP/Kotlin configuration across every module
+- a single version catalog eliminates version drift between modules
+
+Use a narrower branch (`all-frontends-shared`) only when the product explicitly excludes server.
+Never scaffold by hand — always start from kmp-wizard to avoid missing targets or misconfigured plugins.
+
 ---
 
 ## Overview
@@ -62,7 +80,7 @@ baked in:
   (replaces the old `kotlin("multiplatform")` + `com.android.library` pair for library modules)
 - **build-logic** as a Gradle included build providing precompiled convention plugins
 - **Version catalog** (`gradle/libs.versions.toml`) with proper group prefixes and bundles
-- **Feature split**: every feature is 4 modules — `:api` / `:domain` / `:data` / `:ui`
+- **Feature split**: every feature is 6 modules — `:model` / `:api` / `:domain` / `:data` / `:presenter` / `:ui`
 - **Core modules**: `:core:common`, `:core:network`, `:core:database`, `:core:ui`
 - **Compose Multiplatform (CMP)** as the default shared UI layer (CMP-first)
 - **Koin 4** DI — annotated (default, via Koin Compiler Plugin) or manual
@@ -70,17 +88,20 @@ baked in:
 ### Module dependency graph (per feature)
 
 ```
-:feature:<name>:api        pure KMP — interfaces, models, nav contracts
+:feature:<name>:model      pure KMP — data classes, sealed types, enums (no deps)
         ↑
-:feature:<name>:domain     pure KMP — use cases, business logic
-        ↑ (depends on :api)
-:feature:<name>:data       KMP + platform impls — Ktor, SQLDelight repositories
-        ↑ (depends on :api, NOT on :domain)
-:feature:<name>:ui         CMP — Compose screens, ViewModels
-        (depends on :domain + :api)
+:feature:<name>:api        pure KMP — interfaces, nav contracts (depends on :model)
+        ↑
+:feature:<name>:domain     pure KMP — use cases, business logic (depends on :api)
+        ↑
+:feature:<name>:data       KMP + platform impls — Ktor, SQLDelight (depends on :api, NOT :domain)
+:feature:<name>:presenter  pure KMP — ViewModels, MVI contracts (depends on :domain, NO Compose)
+        ↑
+:feature:<name>:ui         CMP — Compose screens + previews (depends on :presenter ONLY)
 ```
 
-`:data` and `:domain` are siblings. Neither depends on the other.
+`:data` and `:presenter` are siblings — neither depends on the other.
+`:presenter` has NO Compose dependency, so ViewModels are testable on plain JVM.
 
 ---
 
@@ -192,9 +213,11 @@ val isDebug = BuildKonfig.DEBUG
 │       └── src/main/kotlin/
 │           ├── GROUP_ID.android.app.gradle.kts
 │           ├── GROUP_ID.core.gradle.kts
+│           ├── GROUP_ID.feature.model.gradle.kts
 │           ├── GROUP_ID.feature.api.gradle.kts
 │           ├── GROUP_ID.feature.domain.gradle.kts
 │           ├── GROUP_ID.feature.data.gradle.kts
+│           ├── GROUP_ID.feature.presenter.gradle.kts
 │           └── GROUP_ID.feature.ui.gradle.kts
 ├── core/
 │   ├── common/build.gradle.kts          (applies GROUP_ID.core)
@@ -203,9 +226,11 @@ val isDebug = BuildKonfig.DEBUG
 │   └── ui/build.gradle.kts             (applies GROUP_ID.core + compose)
 ├── feature/
 │   └── <FEATURE_NAME>/
+│       ├── model/build.gradle.kts
 │       ├── api/build.gradle.kts
 │       ├── domain/build.gradle.kts
 │       ├── data/build.gradle.kts
+│       ├── presenter/build.gradle.kts
 │       └── ui/build.gradle.kts
 ├── androidApp/
 │   └── build.gradle.kts                (applies GROUP_ID.android.app)
@@ -366,10 +391,45 @@ gradlePlugin {
 > - etc.
 >
 > The template folder `templates/build-logic/convention/src/main/kotlin/` contains
-> all six files pre-named with the `GROUP_ID` placeholder for this purpose.
+> all eight files pre-named with the `GROUP_ID` placeholder for this purpose.
+
+### `GROUP_ID.feature.model.gradle.kts`
+Pure KMP — no framework deps. Data classes, sealed types, enums. Zero dependencies.
+
+```kotlin
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    id("org.jetbrains.kotlin.multiplatform")
+    id("com.android.kotlin.multiplatform.library")
+}
+
+kotlin {
+    jvm()
+    iosArm64()
+    iosSimulatorArm64()
+
+    androidLibrary {
+        compileSdk = 36
+        minSdk = 24
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            // intentionally empty — :model has no external deps
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+    }
+}
+```
 
 ### `GROUP_ID.feature.api.gradle.kts`
-Pure KMP — no Compose, no Koin. Exposes interfaces, sealed models, navigation contracts.
+Pure KMP — no Compose, no Koin. Exposes interfaces, navigation contracts. Depends on `:model`.
 
 ```kotlin
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -485,8 +545,47 @@ kotlin {
 }
 ```
 
+### `GROUP_ID.feature.presenter.gradle.kts`
+Pure KMP — ViewModels and MVI contracts. No Compose dependency. Testable on plain JVM.
+
+```kotlin
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    id("org.jetbrains.kotlin.multiplatform")
+    id("com.android.kotlin.multiplatform.library")
+}
+
+kotlin {
+    jvm()
+    iosArm64()
+    iosSimulatorArm64()
+
+    androidLibrary {
+        compileSdk = 36
+        minSdk = 24
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.androidx.lifecycle.viewmodel)   // no Compose flavour
+            implementation(libs.koin.core)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.turbine)
+        }
+    }
+}
+```
+
 ### `GROUP_ID.feature.ui.gradle.kts`
-CMP — Compose Multiplatform screens and ViewModels with Koin.
+CMP — Compose Multiplatform screens only. Depends on `:presenter`, not on `:domain` or `:data`.
 
 ```kotlin
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -517,18 +616,12 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.koin.core)
             implementation(libs.koin.compose)
-            implementation(libs.koin.composeViewModel)
         }
         androidMain.dependencies {
-            implementation(libs.koin.android)
             implementation(compose.uiTooling)
         }
         commonTest.dependencies {
@@ -618,8 +711,22 @@ dependencies {
 
 ## Step 6: Feature Module `build.gradle.kts` Templates
 
-For each new feature `FEATURE_NAME` with group `GROUP_ID`, create these four files.
+For each new feature `FEATURE_NAME` with group `GROUP_ID`, create these six files.
 Replace `FEATURE_NAME` and `GROUP_ID` with actual values.
+
+### `:feature:FEATURE_NAME:model/build.gradle.kts`
+
+```kotlin
+plugins {
+    id("GROUP_ID.feature.model")
+}
+
+kotlin {
+    androidLibrary {
+        namespace = "GROUP_ID.feature.FEATURE_NAME.model"
+    }
+}
+```
 
 ### `:feature:FEATURE_NAME:api/build.gradle.kts`
 
@@ -631,6 +738,12 @@ plugins {
 kotlin {
     androidLibrary {
         namespace = "GROUP_ID.feature.FEATURE_NAME.api"
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            api(projects.feature.FEATURE_NAME.model)
+        }
     }
 }
 ```
@@ -677,6 +790,26 @@ kotlin {
 }
 ```
 
+### `:feature:FEATURE_NAME:presenter/build.gradle.kts`
+
+```kotlin
+plugins {
+    id("GROUP_ID.feature.presenter")
+}
+
+kotlin {
+    androidLibrary {
+        namespace = "GROUP_ID.feature.FEATURE_NAME.presenter"
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.feature.FEATURE_NAME.domain)
+        }
+    }
+}
+```
+
 ### `:feature:FEATURE_NAME:ui/build.gradle.kts`
 
 ```kotlin
@@ -691,8 +824,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.feature.FEATURE_NAME.api)
-            implementation(projects.feature.FEATURE_NAME.domain)
+            implementation(projects.feature.FEATURE_NAME.presenter)
             implementation(projects.core.ui)
         }
     }
@@ -715,7 +847,7 @@ class GetUserUseCase(private val repo: UserRepository) {
     operator fun invoke(id: String): Flow<User> = repo.getUser(id)
 }
 
-// In :feature:auth:ui
+// In :feature:auth:presenter (no Compose dep — testable on JVM)
 @KoinViewModel
 class AuthViewModel(private val getUser: GetUserUseCase) : ViewModel() { ... }
 ```
@@ -740,8 +872,8 @@ val authDomainModule = module {
     factory { GetUserUseCase(get()) }
 }
 
-// :feature:auth:ui/src/commonMain/kotlin/.../AuthUiModule.kt
-val authUiModule = module {
+// :feature:auth:presenter/src/commonMain/kotlin/.../AuthPresenterModule.kt
+val authPresenterModule = module {
     viewModel { AuthViewModel(get()) }
 }
 ```
@@ -751,7 +883,7 @@ Declare all modules in `:androidApp`:
 ```kotlin
 startKoin {
     androidContext(this@App)
-    modules(authDomainModule, authUiModule, /* ... */)
+    modules(authDomainModule, authPresenterModule, /* ... */)
 }
 ```
 
@@ -761,19 +893,23 @@ startKoin {
 
 When adding a feature to an existing project:
 
-1. Create the four module directories:
+1. Create the six module directories:
    ```
+   feature/<FEATURE_NAME>/model/
    feature/<FEATURE_NAME>/api/
    feature/<FEATURE_NAME>/domain/
    feature/<FEATURE_NAME>/data/
+   feature/<FEATURE_NAME>/presenter/
    feature/<FEATURE_NAME>/ui/
    ```
 2. Write `build.gradle.kts` in each (see Step 6 templates above).
 3. Add to `settings.gradle.kts`:
    ```kotlin
+   include(":feature:FEATURE_NAME:model")
    include(":feature:FEATURE_NAME:api")
    include(":feature:FEATURE_NAME:domain")
    include(":feature:FEATURE_NAME:data")
+   include(":feature:FEATURE_NAME:presenter")
    include(":feature:FEATURE_NAME:ui")
    ```
 4. Wire into `:androidApp` dependencies:
@@ -787,11 +923,16 @@ When adding a feature to an existing project:
 
 After creating build files, generate stub source files so each module compiles:
 
+### `:feature:FEATURE_NAME:model`
+```
+src/commonMain/kotlin/GROUP_ID/feature/FEATURE_NAME/model/
+    FEATURE_NAMEModel.kt             ← data class(es), sealed types, enums
+```
+
 ### `:feature:FEATURE_NAME:api`
 ```
 src/commonMain/kotlin/GROUP_ID/feature/FEATURE_NAME/api/
-    FEATURE_NAMERepository.kt        ← interface
-    FEATURE_NAMEModel.kt             ← data class(es)
+    FEATURE_NAMERepository.kt        ← interface (uses types from :model)
     FEATURE_NAMENavigation.kt        ← nav route objects/sealed class
 ```
 
@@ -811,12 +952,20 @@ src/commonMain/kotlin/GROUP_ID/feature/FEATURE_NAME/data/
     di/FEATURE_NAME_DataModule.kt    ← only in manual mode
 ```
 
+### `:feature:FEATURE_NAME:presenter`
+```
+src/commonMain/kotlin/GROUP_ID/feature/FEATURE_NAME/presenter/
+    FEATURE_NAMEViewModel.kt         ← ViewModel, no Compose import
+    FEATURE_NAMEUiState.kt           ← MVI state sealed class
+    FEATURE_NAMEUiIntent.kt          ← MVI intent sealed class
+    di/FEATURE_NAME_PresenterModule.kt  ← only in manual mode
+```
+
 ### `:feature:FEATURE_NAME:ui`
 ```
 src/commonMain/kotlin/GROUP_ID/feature/FEATURE_NAME/ui/
-    FEATURE_NAMEScreen.kt
-    FEATURE_NAMEViewModel.kt
-    di/FEATURE_NAME_UiModule.kt      ← only in manual mode
+    FEATURE_NAMEScreen.kt            ← wires ViewModel from :presenter via koinViewModel()
+    FEATURE_NAMEContent.kt           ← stateless @Composable, accepts state parameter
 ```
 
 ---
@@ -854,7 +1003,7 @@ The module exposes (via `api()`):
 ## Bundled Script
 
 - `scripts/validate_module_graph.py` — checks a target project for the expected
-  `:api/:domain/:data/:ui` feature module files and the `androidApp` feature UI link.
+  `:model/:api/:domain/:data/:presenter/:ui` feature module files and the `androidApp` feature UI link.
 
 ### Turbine usage pattern
 
@@ -908,8 +1057,9 @@ After scaffolding, verify in order:
 2. `./gradlew :feature:FEATURE_NAME:api:compileKotlinMetadata` — KMP common compiles
 3. `./gradlew :androidApp:assembleDebug --dry-run` — Android wiring is correct
 4. Confirm all `include()` entries in `settings.gradle.kts` match actual directories
-5. Confirm no module references another module that it should not (enforce the layer rule:
-   `:ui` must not depend on `:data`; `:domain` must not depend on `:data`)
+5. Confirm no module references another module that it should not (enforce the layer rules:
+   `:ui` depends only on `:presenter`; `:presenter` has NO Compose dep; `:domain` must not depend on `:data`;
+   `:data` must not depend on `:domain` or `:presenter`)
 
 ---
 
@@ -922,3 +1072,41 @@ After scaffolding, verify in order:
 - Always use TYPESAFE_PROJECT_ACCESSORS (`projects.feature.auth.api`) — never string-based `:feature:auth:api`
 - Keep `:api` modules minimal — no DI framework dependencies, no platform deps
 - Namespace format: `GROUP_ID.module.path` (e.g. `com.example.app.feature.auth.api`)
+
+---
+
+## Related Skills
+
+- `kotlin-multiplatform-dependency-injection` — wire Koin after the module structure is in place
+- `kotlin-multiplatform-navigation` — add type-safe navigation after scaffold is complete
+- `kotlin-multiplatform-mvi` — screen architecture layer built on top of this scaffold
+- `kotlin-multiplatform-flavor-environment` — add dev/staging/prod environments after scaffolding
+- `kotlin-multiplatform-ci-github-actions` — CI workflow consumes the module structure this skill creates
+
+---
+
+## Common Anti-Patterns
+
+- scattering plugin versions across module `build.gradle.kts` files instead of `libs.versions.toml` — causes version drift
+- skipping `build-logic` convention plugins for "simple" modules — they accumulate inconsistency over time
+- adding `implementation` dependencies in `:api` modules — `:api` must stay dependency-free (only `:model`)
+- adding Compose deps to `:presenter` — breaks JVM testability; Compose belongs only in `:ui`
+- having `:ui` depend on `:domain` or `:data` directly — all state must flow through `:presenter`
+- putting domain types (data classes, sealed types) in `:api` instead of `:model` — `:api` should be interfaces only
+- using string project references (`:feature:auth:api`) instead of typesafe accessors — breaks refactoring
+- scaffolding by hand without kmp-wizard — often misses Wasm/Desktop/Server source sets
+
+If a module is failing to compile on one target, check whether the convention plugin was applied and the source sets declared correctly.
+
+---
+
+## Output Style
+
+When asked to scaffold a project or add a feature module, respond in this order:
+1. clarify the target (new project vs new feature module in existing project)
+2. version reference (confirm current AGP / Kotlin / CMP targets from PLAN.md)
+3. directory structure
+4. key file contents (build-logic convention plugin, module build file, settings)
+5. wire-up step (Koin module registration, nav graph entry)
+
+Ask for GROUP_ID and feature name before generating files. Map all paths to the actual values.

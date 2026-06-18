@@ -49,6 +49,23 @@ Turbine are already present.
 unidirectional data flow, ViewModel state, one-shot effects, side effects, screen architecture,
 StateFlow screen, channel effect, Contract pattern.
 
+**Freshness rule:** `lifecycle-viewmodel-compose` and CMP lifecycle integration change between
+releases — recheck the AndroidX lifecycle and JetBrains CMP docs before upgrading.
+
+---
+
+## Recommendation First
+
+Default to the **Contract pattern + MviViewModel + `Channel<Effect>`**.
+
+Why:
+- sealed `State`, `Intent`, and `Effect` types make the screen contract explicit and testable
+- `Channel<Effect>` prevents one-shot effects from replaying on recomposition
+- `MutableStateFlow.update {}` avoids state-copy races under concurrent updates
+
+Use a different state container only when the screen has no side effects and no ViewModel
+boundary — for example, a purely presentational component owned by a parent screen.
+
 ---
 
 ## Core Concepts
@@ -750,3 +767,29 @@ For effect collection, use a stable key (`viewModel` or `Unit`).
 4. Rotate the device / trigger Compose recomposition — effects fire exactly once
 5. Tap login button rapidly — only one network call fires (isLoading guard works)
 6. Test error path: ensure `isLoading` is `false` and error message is shown after failure
+
+---
+
+## Common Anti-Patterns
+
+- using `SharedFlow` for effects — events replay on new collectors and break "fire once" guarantees
+- emitting `Effect` from `init {}` — fires on every ViewModel recreation, not just on user action
+- putting navigation logic inside `State` — navigation is an effect, not persisted state
+- using `copy {}` with a stale `state` reference instead of `update {}` — causes lost updates under concurrency
+- exposing mutable `StateFlow` from the ViewModel — UI should never mutate state directly
+- missing `isLoading` guard on submit actions — lets rapid taps fire multiple network calls
+
+If effects are replaying or the state machine is hard to test, audit the above list first.
+
+---
+
+## Output Style
+
+When asked about MVI or screen architecture, respond in this order:
+1. recommendation (Contract pattern + MviViewModel)
+2. Contract snippet (State, Intent, Effect sealed types)
+3. ViewModel snippet (processIntent + emit pattern)
+4. Screen / Content split
+5. why Channel over SharedFlow for effects
+
+Keep each snippet to one block. Use the user's actual screen name and state fields when provided.

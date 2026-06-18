@@ -43,6 +43,9 @@ compiler-plugin workflow.
 constructor injection, startKoin, module scope, ViewModel injection, test override,
 single binding, factory binding, qualifier.
 
+**Freshness rule:** Koin 4 annotation processing and compiler-plugin conventions change —
+recheck the Koin docs and changelog when upgrading past a minor version.
+
 ---
 
 ## Recommendation First
@@ -229,6 +232,16 @@ Prefer replacing:
 - clocks
 - dispatchers
 - platform wrappers
+
+---
+
+## Related Skills
+
+- `kotlin-multiplatform-feature-scaffold` — module structure this skill populates with DI modules
+- `kotlin-multiplatform-mvi` — ViewModels are wired via Koin using `viewModel {}` bindings
+- `kotlin-multiplatform-repository-pattern` — repository and data source bindings live in feature DI modules
+- `kotlin-multiplatform-network-layer` — `HttpClient` and `NetworkDataSource` are app-scope singletons in Koin
+- `kotlin-multiplatform-sqldelight-setup` — database driver and DAO bindings live in `:core:database` DI module
 
 ---
 

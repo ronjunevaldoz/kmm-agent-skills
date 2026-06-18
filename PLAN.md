@@ -17,12 +17,14 @@ for future work. Update it as skills are added, revised, or completed.
 
 ---
 
-## Shipped Skills (17)
+## Shipped Skills (30)
 
 ### Foundation
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-feature-scaffold` | ✅ | AGP 9, build-logic, version catalog, Koin 4 |
+| `kotlin-multiplatform-feature-scaffold` | ✅ | AGP 9, build-logic, version catalog, Koin 4, 6-layer model |
+| `kotlin-multiplatform-clean-architecture` | ✅ | 6-layer contract, :model vs :api, internal visibility, Detekt rules |
+| `kotlin-multiplatform-presenter-module` | ✅ | Pure Kotlin ViewModel, MVI contracts, no Compose dep, Koin wiring |
 | `kotlin-multiplatform-flavor-environment` | ✅ | BuildKonfig, AppConfig, Android product flavors |
 | `kotlin-multiplatform-ci-github-actions` | ✅ | Android/iOS/Desktop/Web matrix, XCFramework release |
 
@@ -59,6 +61,20 @@ for future work. Update it as skills are added, revised, or completed.
 | Skill | Status | Notes |
 |---|---|---|
 | `kotlin-multiplatform-expert` | ✅ | Dependency graph, build order, decision trees, anti-pattern checklist |
+| `kotlin-multiplatform-audit` | ✅ | Architecture review, boundary check, skills repo hygiene, issue drafts |
+
+### Cross-Cutting Patterns
+| Skill | Status | Notes |
+|---|---|---|
+| `kotlin-multiplatform-dependency-injection` | ✅ | Koin manual + annotated modes, scope rules, test overrides |
+| `kotlin-multiplatform-graphics-modifiers` | ✅ | graphicsLayer, Canvas, drawWithCache, workflow node pattern |
+
+### Full-Stack / Backend
+| Skill | Status | Notes |
+|---|---|---|
+| `kotlin-multiplatform-kotlin-rpc` | ✅ | Kotlin RPC vs REST vs gRPC decision, shared contract, scaffold script |
+| `kotlin-multiplatform-ktor-auth-service` | ✅ | Bearer + JWT, sessions, Ktor RPC auth, scaffold script |
+| `kotlin-multiplatform-mongodb-database` | ✅ | Coroutine driver, repository boundary, typed errors, change streams |
 
 ---
 
@@ -87,10 +103,15 @@ All known defects resolved. ✅
 
 ### Batch 4 — Observability & Quality
 
-| Skill | Priority | Scope |
+| Skill | Status | Notes |
 |---|---|---|
+| `kotlin-multiplatform-unit-testing` | ✅ | runTest, Turbine, fake-over-mock, :core:testing fixtures, JVM ViewModel tests |
+| `kotlin-multiplatform-preview-driven-development` | ✅ | Desktop-first @Preview, PreviewParameterProvider, PDD cycle, Roborazzi link |
+| `kotlin-multiplatform-roborazzi` | ✅ | Screenshot tests from @Preview on JVM, golden images, CI diff job |
+| `kotlin-multiplatform-code-quality` | ✅ | Ktlint (formatting) + Detekt (architecture rules), CI gates |
+| `kotlin-multiplatform-logging` | ✅ | Kermit, log levels, pluggable writers, crash boundary, Koin wiring |
 | `kotlin-multiplatform-analytics` | 📋 Medium | Shared `Analytics` interface, Firebase/Amplitude platform impls, event schema via sealed classes, automatic screen tracking |
-| `kotlin-multiplatform-testing-robot` | 📋 Medium | UI test robot pattern for CMP screens. `ScreenRobot` base, `onNode`/`assertIsDisplayed` wrappers, Compose test rule setup, screenshot testing hooks |
+| `kotlin-multiplatform-testing-robot` | 🚫 Retired | Replaced by `kotlin-multiplatform-roborazzi` + `kotlin-multiplatform-unit-testing` |
 
 ### Ideas (not yet scoped)
 

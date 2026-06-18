@@ -38,6 +38,9 @@ or `drawWithCache` for the graph drawing itself.
 **Trigger keywords:** graphicsLayer, Canvas, drawBehind, drawWithCache, custom drawing,
 workflow node, node editor, graph editor, drag transform, layer effects, elevation.
 
+**Freshness rule:** Compose graphics and drawing APIs change with each CMP release — recheck
+the Compose developer docs before upgrading or copying snippets.
+
 ---
 
 ## Recommendation First
@@ -179,3 +182,23 @@ If the problem is geometry, use drawing. If the problem is presentation, use a l
 
 See `references/workflow-node-zoom.png` for the workflow editor mockup with the toolbar
 outside the zoomed graph surface and sample zoom levels.
+
+---
+
+## Related Skills
+
+- `kotlin-multiplatform-design-system` — design tokens and variants drive the visual style of workflow nodes
+- `kotlin-multiplatform-compose-slot-api` — node content areas are often implemented as composable slots
+- `kotlin-multiplatform-mvi` — draggable node state (position, selection) is managed through MVI state
+
+---
+
+## Output Style
+
+When asked about graphics modifiers or custom drawing, respond in this order:
+1. recommendation (graphicsLayer vs Canvas vs drawWithCache — pick the right tool)
+2. code snippet (the modifier or Canvas call for the stated use case)
+3. why that tool fits
+4. main alternative
+
+Lead with the decision table when the user is choosing between tools. Keep snippets to one modifier or one Canvas block.

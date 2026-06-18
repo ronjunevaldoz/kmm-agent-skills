@@ -52,6 +52,26 @@ module review, KMP audit, clean architecture review, readiness review, architect
 what is wrong with this project, inspect this repo, audit skills repo, script hygiene,
 freshness check, deprecation risk, references audit.
 
+**Freshness rule:** the audit checklist references Compose, MVI, network, and database patterns —
+recheck the `kotlin-multiplatform-expert` skill map and this collection's PLAN.md before auditing
+against a new version baseline.
+
+---
+
+## Recommendation First
+
+Default to **running the bundled scripts first, then reviewing findings manually against the
+checklist in this skill**.
+
+Why:
+- `audit_project.py` catches mechanical smells (effect replay, state-copy races, UI/data leaks)
+  faster than manual review
+- scripts produce evidence-backed findings that are easier to convert to issue drafts
+- the manual checklist catches architectural problems the scripts cannot detect
+
+Do not skip the scripts and go straight to manual review — you will miss mechanical issues
+that automation finds reliably.
+
 ---
 
 ## Audit Flow
@@ -141,6 +161,18 @@ Every draft should include:
 - the recommended fix or follow-up skill
 - an attribution footer such as `Suggested by kotlin-multiplatform-audit`
 
+## Common Anti-Patterns
+
+- reporting findings before reading `AGENTS.md` and `README.md` — misses project-specific constraints
+- producing implementation code during an audit instead of findings + fix order — audit and implement are separate steps
+- auto-filing issues without user confirmation — always ask before creating GitHub issue drafts
+- mapping every finding to the same skill — route each finding to the most specific applicable skill
+- flagging style preferences as architecture violations — only flag boundary or correctness problems
+
+An audit should produce findings that are actionable. If a finding doesn't map to a specific skill or fix, reclassify it as a question draft.
+
+---
+
 ## Bundled Script
 
 - `scripts/audit_project.py` — runs a lightweight scan for a few common KMP architecture
@@ -149,3 +181,17 @@ Every draft should include:
   and documentation gaps.
 - `scripts/draft_issue.py` — renders a GitHub-ready issue or question draft with an
   attribution footer.
+
+---
+
+## Output Style
+
+When asked to audit a project or the skills repo, respond in this order:
+1. run the bundled scripts and report any automated findings
+2. work through the manual checklist sections (module boundaries, state, data layer, etc.)
+3. findings ordered by severity (critical → high → medium → low)
+4. evidence for each finding (file paths, grep output, or line references)
+5. recommended fix order
+6. skills to use next
+
+Ask before converting findings to issue drafts. Keep implementation advice minimal — this skill routes work, it doesn't implement it.

@@ -68,6 +68,20 @@ driver matrix and WasmJs status before copying setup code.
 
 ---
 
+## Recommendation First
+
+Default to **SQLDelight 2 with platform-specific drivers injected via Koin + Flow queries**.
+
+Why:
+- Flow queries emit automatically when the underlying table changes — no manual cache invalidation
+- platform drivers (Android SqlDriver, JDBC, Web Worker) are injected, not hard-coded, so the
+  database module stays in `commonMain`
+- SQLDelight's compile-time SQL verification catches schema/query mismatches before runtime
+
+Use Room only if the team is Android-only and the shared-module investment is not worth it.
+
+---
+
 ## Prerequisites
 
 - Project scaffolded with `kotlin-multiplatform-feature-scaffold`
@@ -526,3 +540,28 @@ dependencies {
 4. `./gradlew :core:database:compileKotlinJs` — Web worker driver wires up
 5. `./gradlew :core:database:verifySqlDelightMigration` — migrations are valid (if any)
 6. `./gradlew :core:database:jvmTest` — run unit tests against JdbcSqliteDriver in-memory
+
+---
+
+## Common Anti-Patterns
+
+- running database queries on the main thread — always use `Dispatchers.IO` or the appropriate coroutine dispatcher
+- exposing raw `Query<T>` objects from the repository — always wrap in `Flow` and map to domain types
+- writing migration SQL inside `afterVersion` lambdas without test coverage — migration bugs cause data loss
+- sharing a `DatabaseDriverFactory` across tests without clearing state — tests contaminate each other
+- forgetting to call `.asFlow().mapToList()` — plain `executeAsList()` doesn't react to table changes
+
+If Flow queries are not updating after a write, check that the write and the Flow share the same database instance.
+
+---
+
+## Output Style
+
+When asked about SQLDelight setup or database queries, respond in this order:
+1. recommendation (SQLDelight 2, platform drivers, Flow queries)
+2. project structure (`:core:database` layout)
+3. code snippet (one `.sq` query and its generated Kotlin call)
+4. why SQLDelight is preferred over Room in KMP
+5. main alternative (Realm, raw SQLite driver)
+
+Keep the snippet to one table and one query. Map to the user's actual entity names when provided.

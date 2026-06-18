@@ -50,6 +50,20 @@ binary target layout or the release workflow.
 
 ---
 
+## Recommendation First
+
+Default to **`assembleXCFramework` Gradle task + SPM binary target published via GitHub Releases**.
+
+Why:
+- SPM binary targets consume a pre-built framework, so iOS team members don't need Kotlin or Gradle
+- GitHub Releases + a checksum URL is the simplest distribution mechanism that Xcode resolves natively
+- CI automates the release job on tag push — no manual XCFramework builds
+
+Use CocoaPods only if the iOS project already uses CocoaPods and migrating is not feasible.
+Avoid embedding the XCFramework manually — it breaks reproducible builds.
+
+---
+
 ## Prerequisites
 
 - KMP project with at least `iosArm64` and `iosSimulatorArm64` targets
@@ -307,3 +321,28 @@ jobs:
 3. Open local SPM package in Xcode — resolves without errors
 4. Build iOS app target — links against Shared framework successfully
 5. Call a Kotlin function from Swift — verify correct behavior
+
+---
+
+## Common Anti-Patterns
+
+- embedding the XCFramework directly in the iOS repo — breaks reproducibility and bloats the repo
+- publishing without a checksum in `Package.swift` — Xcode will reject the package or silently use a cached version
+- using `embedAndSign` without a CI build that produces a consistent binary — signature mismatch on device
+- forgetting to include the simulator slice (`iosSimulatorArm64`) — Apple Silicon Macs can't build the app
+- committing `Package.swift` with a hardcoded local path instead of a release URL — breaks for other developers
+
+If SPM resolution fails, verify the checksum in `Package.swift` matches the actual archive SHA256.
+
+---
+
+## Output Style
+
+When asked about XCFramework or SPM distribution, respond in this order:
+1. recommendation (assemble XCFramework, publish as SPM binary target)
+2. project structure (Gradle task, Package.swift, CI release job)
+3. code snippet (assembleXCFramework task config + Package.swift binaryTarget)
+4. why binary target SPM is preferred over source SPM for KMP
+5. main alternative (CocoaPods, manual xcframework embedding)
+
+Keep the snippet to the Gradle task and one Package.swift block. Map to the user's actual framework name and repo URL when provided.

@@ -60,6 +60,21 @@ KMP checklist, review my KMP project.
 
 ---
 
+## Recommendation First
+
+Default to **reading the current skill list and dependency graph before recommending anything**.
+
+Why:
+- the skill collection grows; a recommendation based on a stale skill list misroutes work
+- the dependency graph in this skill defines the correct build order — skipping foundation skills
+  causes downstream failures
+- routing to the wrong skill wastes a context window on the wrong patterns
+
+Use this skill as an entry point for open-ended KMP questions. Then hand off to the specific skill.
+Do not implement — route and explain.
+
+---
+
 ## Freshness Rule
 
 At the start of every session, treat the repo files in front of you as the source of
@@ -396,3 +411,15 @@ already has multiple same-named concepts or the component is part of a shared li
 
 - `scripts/validate_skill_map.py` — checks that the README and expert map still list
   the current skill folders and that the declared skill count matches the repo.
+
+---
+
+## Output Style
+
+When asked for a KMP recommendation, routing decision, or anti-pattern check, respond in this order:
+1. recommendation (name the skill and the default choice)
+2. the decision rule or dependency graph node that applies
+3. why that skill or pattern fits
+4. skills to use next (if the task spans multiple domains)
+
+Keep the response concise — this skill routes to other skills, not implements. Name the exact skill to invoke for follow-up work.

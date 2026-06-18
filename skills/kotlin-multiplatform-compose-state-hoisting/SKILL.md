@@ -42,6 +42,23 @@ Use when you need to:
 stateless composable, controlled input, value onValueChange, where does state go,
 single source of truth, state sharing, Compose state management.
 
+**Freshness rule:** Compose state management guidance tracks CMP releases — recheck the
+JetBrains CMP docs before upgrading or copying patterns into a new project.
+
+---
+
+## Recommendation First
+
+Default to **hoisting state to the lowest common ancestor of all consumers**.
+
+Why:
+- hoisted state makes a composable stateless and previewable with fixed input
+- a stateless composable is trivially unit-testable — no ViewModel or Compose rule needed
+- shared state belongs at the level where siblings can both read and write it, not duplicated
+
+Keep state internal (unhoisted) only when it is truly ephemeral and no other composable
+in the tree will ever need it (e.g., a tooltip open flag on a local button).
+
 ---
 
 ## The Core Rule
@@ -403,3 +420,27 @@ fun SearchBar(query: String, onQueryChanged: (String) -> Unit) {
 3. ViewModel state change triggers recomposition of `Content` composable
 4. Inline `remember` state (dropdown, tooltip) does NOT persist to ViewModel
 5. Unit test: instantiate `Content` with fixed state, assert rendered output without a ViewModel
+
+---
+
+## Common Anti-Patterns
+
+- keeping state internal to avoid "extra parameters" — hides testability problems behind convenience
+- hoisting state higher than the lowest common ancestor — forces unrelated composables to carry state they don't use
+- duplicating state in multiple composables instead of hoisting to a shared ancestor
+- using `MutableState` as a parameter type — callers should receive `value` + `onValueChange`, not the holder
+- lifting state all the way to the ViewModel when it is purely ephemeral UI state (tooltip, dropdown)
+
+If a composable is hard to preview or test, check whether the state is in the right place.
+
+---
+
+## Output Style
+
+When asked about state hoisting or composable testability, respond in this order:
+1. recommendation (hoist to the appropriate level)
+2. before/after code showing state lifted out of the component
+3. why hoisting makes the component testable
+4. main alternative (keep state internal, CompositionLocal)
+
+Keep snippets small. Use the user's actual composable names when provided.

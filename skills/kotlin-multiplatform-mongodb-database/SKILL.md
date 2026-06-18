@@ -39,6 +39,10 @@ map documents to domain models at the edge, and expose typed errors to the calle
 **Trigger keywords:** MongoDB, database, collection, repository, document mapping,
 Flow, change stream, server-side Kotlin, coroutine driver, typed errors, backend data.
 
+**Freshness rule:** the MongoDB Kotlin coroutine driver evolves independently of the JVM
+driver — recheck the [official docs](https://www.mongodb.com/docs/drivers/kotlin/coroutine/)
+before upgrading or scaffolding.
+
 ---
 
 ## Recommendation First
@@ -126,4 +130,38 @@ Do not overuse change streams for simple CRUD if a plain repository call is enou
 
 - `scripts/scaffold_mongodb_database.py` — creates a starter MongoDB data-layer folder
   with client, repository, document, and DI files.
+
+---
+
+## Related Skills
+
+- `kotlin-multiplatform-ktor-auth-service` — auth service depends on the `UserRepository` built here
+- `kotlin-multiplatform-kotlin-rpc` — RPC service implementations delegate to MongoDB repositories
+- `kotlin-multiplatform-repository-pattern` — the same repository interface/implementation pattern applied server-side
+- `kotlin-multiplatform-dependency-injection` — `MongoClient` and collection bindings are registered as Koin singletons
+
+---
+
+## Common Anti-Patterns
+
+- accessing collections directly from route handlers — always go through a repository
+- leaking `BsonDocument` or `MongoCollection` types out of the data layer — map to domain types at the boundary
+- using change streams for every collection by default — use them only when live updates are needed
+- constructing `MongoClient` in every call instead of sharing one instance via Koin — exhausts connection pools
+- catching `MongoException` globally and swallowing it — return a typed `DatabaseError` instead
+
+If the connection pool is exhausted or queries are slow, check that only one `MongoClient` is registered per DI scope.
+
+---
+
+## Output Style
+
+When asked about MongoDB setup or data access, respond in this order:
+1. recommendation (server-side only, repository boundary, typed errors)
+2. project structure (client factory, collection, repository, DI module)
+3. code snippet (repository impl with one findById and one Flow)
+4. why that approach is preferred
+5. main alternative (direct collection access, other drivers)
+
+Keep the snippet to one repository method. Map to the user's actual collection and document names when provided.
 

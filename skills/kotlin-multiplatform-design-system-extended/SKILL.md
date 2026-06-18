@@ -55,6 +55,24 @@ bottom navigation, checkbox, radio, switch, slider, select, dropdown, progress b
 loading, skeleton, spinner, tooltip, popover, accordion, collapsible, avatar,
 divider, separator, icon button, form label, extended design system.
 
+**Freshness rule:** `@ExperimentalStylesApi` and CMP primitive APIs change between releases —
+recheck the Compose docs and apply the same freshness check as `kotlin-multiplatform-design-system`.
+
+---
+
+## Recommendation First
+
+Default to **using a pre-built extended component before building a custom one**.
+
+Why:
+- all 27 components are built on CMP primitives with no Material dependency — they are safe to
+  use alongside the base design system
+- they follow the same sealed variant pattern as the core components, so the token layer stays consistent
+- building a custom component takes longer and may drift from the design system tokens
+
+Only build a custom component when none of the 27 extended components fit the design requirement,
+and apply the same `@ExperimentalStylesApi` token pattern as the core system.
+
 ---
 
 ## Prerequisites
@@ -2598,3 +2616,27 @@ fun SettingsPage() {
 8. `AppSelect` — dropdown opens/closes, selected value updates, keyboard accessible
 9. Desktop hover on `AppIconButton` inside `AppTooltip` — tooltip appears above
 10. `./gradlew :desktopApp:run` — all components render correctly on JVM target
+
+---
+
+## Common Anti-Patterns
+
+- using an extended component before applying `kotlin-multiplatform-design-system` — tokens are missing
+- overriding component internals via `Modifier` hacks instead of adding a variant — breaks the style contract
+- building a custom sheet or dialog without checking `AppBottomSheet` / `AppDialog` first
+- mixing Material3 components with extended design system components — creates token conflicts
+- importing `AppToastHostState` without adding it to the `AppScaffold` slot — toasts silently do nothing
+
+Check the component list in this skill before building a custom alternative.
+
+---
+
+## Output Style
+
+When asked about extended design system components, respond in this order:
+1. recommendation (which component to use and its variant)
+2. code snippet (component with its required props)
+3. why that component fits the use case
+4. main alternative (build from scratch, use Material3)
+
+Assume `kotlin-multiplatform-design-system` is already applied. Use the user's variant names and theme tokens when provided.

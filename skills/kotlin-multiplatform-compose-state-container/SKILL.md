@@ -43,6 +43,25 @@ Use when you need to:
 ViewModel, ephemeral state, state survival, config change state, process death state,
 custom Saver, nav-scoped ViewModel, state lost on rotation.
 
+**Freshness rule:** Compose state survival and nav-scoped ViewModel APIs change with lifecycle
+and navigation releases — recheck the Jetpack and CMP docs before upgrading.
+
+---
+
+## Recommendation First
+
+Default decision: **ephemeral UI state → `remember`; form/input state → `rememberSaveable`;
+business data or screen state → `ViewModel`**.
+
+Why:
+- `remember` is enough for transient state (dropdown open, tooltip visible) — no persistence needed
+- `rememberSaveable` survives config changes, preventing form input loss on rotation
+- `ViewModel` is the correct boundary for state that outlives a single screen instance and must
+  survive the back-stack navigation lifecycle
+
+Do not put business logic or domain objects inside `remember` or `rememberSaveable` — that belongs
+in the ViewModel, not the composition.
+
 ---
 
 ## What Each Container Survives
@@ -383,3 +402,28 @@ state survival strategy accordingly if cross-platform survival matters.
 3. Navigate between graph screens — graph-scoped ViewModel persists within the graph
 4. Kill app from recents and relaunch — `savedStateHandle.saveable` values restored
 5. `remember` state (dropdown open) resets when the composable re-enters the tree
+
+---
+
+## Common Anti-Patterns
+
+- storing domain objects in `remember` — they don't survive config change and belong in a ViewModel
+- using `rememberSaveable` for large or non-parcelable types without a custom `Saver` — crashes at runtime
+- scoping a ViewModel to the whole NavHost when it belongs to a nested graph — leaks state across features
+- hoisting a `ViewModel` to a parent composable that doesn't need it — breaks the boundary between features
+- using `remember` state to track loading/error — those are screen-state concerns and belong in the ViewModel
+
+If state is disappearing on rotation, audit whether `rememberSaveable` or ViewModel is the right container.
+
+---
+
+## Output Style
+
+When asked about state containers or state survival, respond in this order:
+1. recommendation (which container fits the survival requirement)
+2. survival matrix row for the case (remember / rememberSaveable / ViewModel)
+3. code snippet (smallest useful example)
+4. why that choice is preferred
+5. main alternative
+
+Keep the survival matrix reference tight. Map to actual state names when the user provides them.

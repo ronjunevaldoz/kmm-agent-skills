@@ -69,6 +69,20 @@ auth, and serialization docs before using or updating this skill.
 
 ---
 
+## Recommendation First
+
+Default to **Ktor CIO engine + `NetworkResult<T>` sealed type + `safeRequest` extension**.
+
+Why:
+- `NetworkResult` keeps error handling explicit at call sites — no uncaught exceptions leaking into UI
+- `safeRequest` centralizes serialization, timeout, and HTTP error handling in one place
+- CIO engine works on Android, Desktop, and Web; swap to Darwin engine for iOS if needed
+
+Use a different approach only when an existing REST abstraction is already in the codebase and
+migration cost outweighs the consistency benefit.
+
+---
+
 ## Prerequisites
 
 - Project scaffolded with `kotlin-multiplatform-feature-scaffold`
@@ -517,3 +531,28 @@ fun `login returns Success on 200`() = runTest {
 4. `./gradlew :core:network:compileKotlinJs` — Web JS source compiles
 5. `./gradlew :core:network:compileKotlinWasmJs` — WasmJs source compiles
 6. `./gradlew :core:network:commonTest` — mock engine tests pass
+
+---
+
+## Common Anti-Patterns
+
+- throwing exceptions from `safeRequest` instead of returning `NetworkResult.Error` — callers must handle errors explicitly
+- creating a new `HttpClient` per request — always inject a single shared instance via Koin
+- leaking `NetworkResult` into domain or UI state — map to domain types at the repository boundary
+- putting auth token logic in route-level call sites — token refresh belongs in the HttpClient plugin
+- skipping the mock engine in tests — test the `safeRequest` contract without a real server
+
+If token refresh is unreliable, check that the auth plugin is installed on the `HttpClient` and not duplicated per request.
+
+---
+
+## Output Style
+
+When asked about the network layer or HTTP client setup, respond in this order:
+1. recommendation (Ktor + NetworkResult<T> + safeRequest)
+2. project structure (`:core:network` layout)
+3. code snippet (one safeRequest call and its NetworkResult handler)
+4. why that approach is preferred
+5. main alternative (Retrofit, raw HttpClient)
+
+Keep the snippet to one endpoint. Map to the user's actual base URL and response type when provided.

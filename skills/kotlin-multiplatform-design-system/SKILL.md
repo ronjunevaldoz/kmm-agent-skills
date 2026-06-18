@@ -46,6 +46,25 @@ Use this skill when the user asks to:
 ButtonVariant, shadcn KMP, Compose Styles, ExperimentalStylesApi, custom components,
 unstyled components, dark mode tokens, color scheme, no Material.
 
+**Freshness rule:** `@ExperimentalStylesApi` is experimental and the Compose Styles API
+changes between CMP releases — recheck the Compose docs before upgrading.
+
+---
+
+## Recommendation First
+
+Default to **custom tokens + `AppTheme` + `@ExperimentalStylesApi` sealed variant systems —
+no Material dependency**.
+
+Why:
+- full ownership of the token layer means no Material opinion leaking into spacing, shape, or color
+- sealed variant classes (e.g., `ButtonVariant.Primary`) make component APIs explicit and auditable
+- `@ExperimentalStylesApi` is the sanctioned path for custom styling in CMP; Material3 is an overlay
+  on top of it, not a replacement
+
+Use Material3 only when the product targets Material Design explicitly and design token ownership
+is not a concern.
+
 ---
 
 ## Overview
@@ -1339,3 +1358,28 @@ All of these are already in `compose-multiplatform`. No new catalog entries requ
 5. Hover a button on Desktop — verify `hovered {}` style animation fires (JVM only)
 6. Set `enabled = false` on `AppButton` — verify `disabled { alpha(0.38f) }` applies
 7. Call `./gradlew :core:designsystem:jsTest` and `:wasmJsTest` — web targets compile clean
+
+---
+
+## Common Anti-Patterns
+
+- hardcoding colors, sizes, or text styles in feature composables — always use tokens
+- using Material3 `MaterialTheme.colorScheme` alongside `AppTheme` — the two token systems conflict
+- defining component variants as boolean parameters (`isOutlined`, `isDanger`) — use a sealed variant class
+- putting design system tokens in `:feature:*` modules — tokens belong in `:core:designsystem` only
+- skipping the `StyleScope` extension layer — leads to token access scattered across composables
+
+If the design system feels inconsistent, check whether tokens are being accessed directly or through the `StyleScope`.
+
+---
+
+## Output Style
+
+When asked about design system setup or components, respond in this order:
+1. recommendation (default token/component approach)
+2. project structure (`:core:designsystem` layout)
+3. code snippet (smallest useful token or component)
+4. why that approach is preferred (no Material, full ownership)
+5. main alternative (Material3 wrapper)
+
+Keep snippets small. Use the user's package name and token names when provided.

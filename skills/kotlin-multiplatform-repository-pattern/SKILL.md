@@ -45,6 +45,23 @@ Use when you need to:
 single source of truth, local cache, domain mapping, repository implementation, data source,
 optimistic update, sync strategy.
 
+**Freshness rule:** Ktor and SQLDelight APIs change — recheck both before using this skill
+with a version upgrade, and verify the fetch-strategy examples against the current driver APIs.
+
+---
+
+## Recommendation First
+
+Default to **cache-first with SQLDelight as the single source of truth**.
+
+Why:
+- the UI observes a SQLDelight `Flow` — it updates automatically when the DB changes
+- network failures don't affect the user if cached data is available
+- the repository owns the mapping boundary: DTOs and entities never leak into domain code
+
+Use network-first only when staleness is unacceptable (e.g., payment status, live inventory).
+Use network-only for write operations or when there is no local persistence.
+
 ---
 
 ## Where the Repository Lives
@@ -455,3 +472,28 @@ so the domain layer is decoupled from the database schema.
 4. No `UserDto`, `UserEntity`, or `NetworkResult` type appears in `:feature:auth:api` or `:domain`
 5. `AuthRepositoryImpl` can be replaced with a fake implementing `AuthRepository` in tests
 6. Unit test: fake remote returns error → cache-first Flow still emits cached data
+
+---
+
+## Common Anti-Patterns
+
+- calling the repository from a composable directly instead of through a ViewModel — bypasses the MVI state machine
+- leaking `NetworkResult`, `UserDto`, or `UserEntity` types into `:domain` or `:ui` — they belong in `:data` only
+- implementing fetch logic in a ViewModel instead of a repository — ViewModels coordinate, repositories fetch
+- returning `null` from a repository method when a typed error sealed class is clearer
+- skipping the mapper layer and mapping inside route handlers or composables
+
+If domain or UI code is importing `:data` types directly, the mapper boundary is missing.
+
+---
+
+## Output Style
+
+When asked about the repository pattern or data layer, respond in this order:
+1. recommendation (fetch strategy: cache-first, network-first, or network-only)
+2. project structure (`:data` layer with interface in `:api`)
+3. code snippet (one repository method showing the chosen strategy)
+4. why that strategy fits the use case
+5. main alternative (different fetch strategy, or direct data source)
+
+Keep the snippet to one repository method. Map to the user's actual entity and domain names when provided.

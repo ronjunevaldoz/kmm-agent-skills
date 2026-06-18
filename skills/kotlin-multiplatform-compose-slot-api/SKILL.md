@@ -41,6 +41,24 @@ Use when you need to:
 trailing lambda, flexible component, scaffold pattern, component design, RowScope slot,
 inversion of control Compose.
 
+**Freshness rule:** Compose Multiplatform slot conventions track CMP releases — recheck the
+JetBrains CMP docs before using or copying snippets into a new project.
+
+---
+
+## Recommendation First
+
+Default to **trailing lambda for a single slot, named `@Composable () -> Unit` parameters for
+multiple slots**.
+
+Why:
+- trailing lambdas are idiomatic Kotlin and require no extra parameter names for the common case
+- named slot parameters make multi-area components (header/body/footer) explicit and readable
+- scoped slots (`RowScope`, `ColumnScope`) should be used only when the caller needs layout scope
+
+Use `CompositionLocal` only when the slot content is needed at arbitrary depth and passing it
+down the tree would require drilling through many intermediate composables.
+
 ---
 
 ## What Is a Slot?
@@ -420,3 +438,36 @@ fun AppSomething(
 3. Scoped slot caller can use `Modifier.weight()` (confirms `RowScope`/`ColumnScope`)
 4. Slot content change triggers recomposition only of the slot subtree, not the parent
 5. Swapping slot content at runtime (e.g., text vs spinner) works without new component parameters
+
+---
+
+## Related Skills
+
+- `kotlin-multiplatform-design-system` — slot API is how design system components accept custom content
+- `kotlin-multiplatform-design-system-extended` — extended components use slots for dialog/sheet content areas
+- `kotlin-multiplatform-compose-state-hoisting` — pair with hoisting when the slot content owns state
+- `kotlin-multiplatform-mvi` — screen/content split uses slots to inject preview-friendly content composables
+
+---
+
+## Common Anti-Patterns
+
+- passing data into a slot that the slot itself could compute — slots should compose, not receive data
+- using `CompositionLocal` for content that is only one level deep — a slot parameter is clearer
+- defining more than 3–4 named slots on one component — signals the component needs to be split
+- using scoped slots (`RowScope`) when the caller does not need layout scope — adds noise without benefit
+- calling composable slot parameters from non-composable lambdas — always annotate slot parameters with `@Composable`
+
+If a component's API is hard to read or slot content is getting complex, split the component first.
+
+---
+
+## Output Style
+
+When asked about slots or component design, respond in this order:
+1. recommendation (lead with the default slot pattern)
+2. code snippet (smallest useful example)
+3. why that pattern is preferred
+4. main alternative (CompositionLocal, or props)
+
+Keep snippets small. If the user provides a component name, use it in the example.

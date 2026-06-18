@@ -134,3 +134,37 @@ Before changing this skill, re-read the current official docs:
 ## Scaffold Script
 
 - `scripts/scaffold_kotlin_rpc.py` - creates a starter shared/server/client RPC layout.
+
+---
+
+## Related Skills
+
+- `kotlin-multiplatform-ktor-auth-service` — auth guards for the RPC route live here
+- `kotlin-multiplatform-mongodb-database` — RPC service implementations often delegate to a MongoDB repository
+- `kotlin-multiplatform-feature-scaffold` — the shared contract module is a peer of the server and client modules
+- `kotlin-multiplatform-network-layer` — use this instead of RPC when the client is non-Kotlin or the API is public
+
+---
+
+## Common Anti-Patterns
+
+- using Kotlin RPC for a public API consumed by non-Kotlin clients — REST is clearer
+- putting auth logic inside the RPC service interface — auth belongs at the Ktor route boundary
+- keeping the RPC contract in the server module — it must live in shared code so the client can use it
+- using RPC for simple CRUD resources that REST already handles well — adds complexity without benefit
+- skipping the `authenticated {}` Ktor block before the RPC route — exposes the service unauthenticated
+
+If the contract needs to be consumed by a browser frontend or a non-Kotlin mobile client, use REST.
+
+---
+
+## Output Style
+
+When asked about Kotlin RPC, respond in this order:
+1. recommendation (use RPC only when both sides are Kotlin-first)
+2. project structure (shared contract, server module, client module)
+3. code snippet (service interface + server wiring sketch)
+4. why RPC fits (or doesn't fit) the stated use case
+5. main alternative (REST, gRPC)
+
+Lead with the fit/no-fit decision. Keep the code snippet to the interface and one route binding.

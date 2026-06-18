@@ -43,6 +43,24 @@ Use when you need to:
 expect fun, platform API, ObjCName, Swift interop, typealias actual, Kotlin Native memory,
 platform dispatcher, platform UUID, FileSystem KMP.
 
+**Freshness rule:** K2 and Kotlin Native change `expect/actual` rules with each Kotlin release —
+recheck the Kotlin Multiplatform docs before upgrading past a minor version.
+
+---
+
+## Recommendation First
+
+Default to **interface in `commonMain` + Koin injection of platform implementations**.
+
+Why:
+- interfaces are easier to mock in tests than `actual` declarations
+- Koin injection means platform code stays in platform source sets without compiler tricks
+- `expect/actual` adds K2 compiler surface area that breaks more often across Kotlin upgrades
+
+Use `expect/actual` only when the platform difference is about the **type** itself (typealias),
+a platform **annotation** (`@ObjCName`), or when injection is not available (e.g., top-level
+functions needed by Swift interop before Koin is initialized).
+
 ---
 
 ## The Core Question: expect/actual vs Interface Injection?
@@ -390,3 +408,24 @@ opening the file.
 4. `./gradlew :core:platform:compileKotlinJvm` — Desktop actuals resolve
 5. Swift caller: import the framework and verify `@ObjCName`-annotated types appear with correct names in Xcode autocompletion
 6. Run a coroutine that crosses the Kotlin/Native boundary and verify it cancels correctly on `deinit`
+
+---
+
+## Related Skills
+
+- `kotlin-multiplatform-dependency-injection` — preferred alternative to expect/actual for most platform abstractions
+- `kotlin-multiplatform-feature-scaffold` — module structure where `actual` declarations live in platform source sets
+- `kotlin-multiplatform-xcframework-spm` — `@ObjCName` annotations from this skill affect the Swift API surface
+- `kotlin-multiplatform-network-layer` — platform dispatcher and engine selection are common expect/actual use cases
+
+---
+
+## Output Style
+
+When asked about expect/actual or platform-specific code, respond in this order:
+1. recommendation (interface + injection vs expect/actual — pick the right tool)
+2. code snippet (the smallest valid expect/actual or interface pair)
+3. why that approach is preferred
+4. main alternative
+
+Lead with the decision rule. Keep snippets small — one `expect`/`actual` pair or one interface, not both.

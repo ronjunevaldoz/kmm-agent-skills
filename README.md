@@ -29,7 +29,9 @@ It maps the skills, build order, and the best next step.
 
 ### Foundation
 
-- [`kotlin-multiplatform-feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) - project structure, build-logic, TOML catalog, Koin
+- [`kotlin-multiplatform-feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) - 6-layer module structure, build-logic, TOML catalog, Koin
+- [`kotlin-multiplatform-clean-architecture`](skills/kotlin-multiplatform-clean-architecture/) - layer contract, `:model` vs `:api`, `internal` rules, Detekt enforcement
+- [`kotlin-multiplatform-presenter-module`](skills/kotlin-multiplatform-presenter-module/) - pure-Kotlin ViewModel, MVI contracts, no Compose dep, Koin wiring
 - [`kotlin-multiplatform-dependency-injection`](skills/kotlin-multiplatform-dependency-injection/) - Koin wiring and scopes
 - [`kotlin-multiplatform-flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) - BuildKonfig, secrets, env setup
 - [`kotlin-multiplatform-ci-github-actions`](skills/kotlin-multiplatform-ci-github-actions/) - CI matrix and release workflow
@@ -50,6 +52,7 @@ It maps the skills, build order, and the best next step.
 - [`kotlin-multiplatform-navigation`](skills/kotlin-multiplatform-navigation/) - type-safe navigation
 - [`kotlin-multiplatform-shared-resources`](skills/kotlin-multiplatform-shared-resources/) - shared resources and localization
 - [`kotlin-multiplatform-mvi`](skills/kotlin-multiplatform-mvi/) - State / Intent / Effect flow
+- [`kotlin-multiplatform-logging`](skills/kotlin-multiplatform-logging/) - Kermit, log levels, crash boundary, Koin wiring
 
 ### UI System
 
@@ -59,6 +62,13 @@ It maps the skills, build order, and the best next step.
 - [`kotlin-multiplatform-compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) - hoisting rules
 - [`kotlin-multiplatform-compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) - `remember` vs `ViewModel`
 - [`kotlin-multiplatform-graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) - canvas and graph surfaces
+- [`kotlin-multiplatform-preview-driven-development`](skills/kotlin-multiplatform-preview-driven-development/) - Desktop-first `@Preview` workflow, `PreviewParameterProvider`, PDD cycle
+
+### Testing & Quality
+
+- [`kotlin-multiplatform-unit-testing`](skills/kotlin-multiplatform-unit-testing/) - `runTest`, Turbine, fake-over-mock, `:core:testing` fixtures
+- [`kotlin-multiplatform-roborazzi`](skills/kotlin-multiplatform-roborazzi/) - screenshot tests from `@Preview` on JVM, golden images, CI diff
+- [`kotlin-multiplatform-code-quality`](skills/kotlin-multiplatform-code-quality/) - Ktlint (formatting) + Detekt (architecture rules), CI gates
 
 ### Meta
 
@@ -78,12 +88,12 @@ It maps the skills, build order, and the best next step.
 
 ## Installation
 
-```bash
-# All skills at once (Claude Code)
-cp -r skills/* .claude/skills/
+See **[INSTALL.md](INSTALL.md)** for full setup instructions for every assistant:
+Claude Code, OpenAI Codex CLI, GitHub Copilot, Cursor, Windsurf, Gemini CLI, Aider, and Continue.
 
-# Single skill
-cp -r skills/kotlin-multiplatform-feature-scaffold .claude/skills/
+Quick install for Claude Code:
+```bash
+cp -r kmm-agent-skills/skills/* your-kmp-project/.claude/skills/
 ```
 
 ---
@@ -103,11 +113,12 @@ cp -r skills/kotlin-multiplatform-feature-scaffold .claude/skills/
 
 ## Roadmap
 
-- `kotlin-multiplatform-datastore` - Multiplatform DataStore
-- `kotlin-multiplatform-biometric-auth` - Biometric auth via expect/actual
-- `kotlin-multiplatform-push-notifications` - FCM + APNs handling
-- `kotlin-multiplatform-analytics` - shared analytics abstraction
-- `kotlin-multiplatform-testing-robot` - CMP UI testing robot pattern
+- `kotlin-multiplatform-datastore` - Multiplatform DataStore Preferences + Proto
+- `kotlin-multiplatform-biometric-auth` - BiometricPrompt (Android) + LocalAuthentication (iOS)
+- `kotlin-multiplatform-push-notifications` - FCM token (Android) + APNs token (iOS)
+- `kotlin-multiplatform-analytics` - shared Analytics interface, Firebase/Amplitude platform impls
+
+See [PLAN.md](PLAN.md) for full scope and priority details.
 
 ---
 

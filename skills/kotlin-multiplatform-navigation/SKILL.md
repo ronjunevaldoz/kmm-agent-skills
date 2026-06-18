@@ -50,6 +50,20 @@ copying snippets into a new project.
 
 ---
 
+## Recommendation First
+
+Default to **JetBrains Navigation Compose with type-safe routes + one nested graph per feature**.
+
+Why:
+- type-safe routes catch destination mismatches at compile time
+- nested graphs keep feature navigation encapsulated and testable in isolation
+- the JetBrains fork supports all KMP targets (Android, iOS, Desktop, Web) from `commonMain`
+
+Use Decompose only when you need platform-specific lifecycle callbacks or deep back-stack control
+that Navigation Compose does not yet support on all targets.
+
+---
+
 ## Prerequisites
 
 - Project scaffolded with `kotlin-multiplatform-feature-scaffold`
@@ -384,3 +398,29 @@ class RootComponent(
 3. `./gradlew :shared:compileKotlinJvm` — Desktop navigation compiles
 4. Launch app and navigate to each destination — verify back stack behavior
 5. Test deep link: `adb shell am start -W -a android.intent.action.VIEW -d "https://example.com/article/123" GROUP_ID`
+
+---
+
+## Common Anti-Patterns
+
+- using string-based route names instead of type-safe sealed/data classes — breaks at runtime, not compile time
+- putting navigation logic inside the ViewModel — ViewModels should emit navigation `Effect`, not call `navController`
+- passing `navController` deep into composables — pass lambdas or use the effect pattern instead
+- defining all routes in one flat `NavHost` — leads to unnavigable spaghetti; use nested graphs per feature
+- sharing a `navController` between nested graphs — each graph should own its back stack
+- storing navigation state in `ViewModel` as a flag — `Effect` is the correct mechanism for navigation events
+
+If back stack is broken or navigation effects replay, audit the above list first.
+
+---
+
+## Output Style
+
+When asked about navigation or routing, respond in this order:
+1. recommendation (type-safe routes, nested graphs per feature)
+2. route definition snippet
+3. NavHost wiring snippet
+4. why type-safe routes over string routes
+5. main alternative (Decompose, manual back stack)
+
+Keep each snippet to one route and one composable destination. Map to the user's actual screen and feature names when provided.

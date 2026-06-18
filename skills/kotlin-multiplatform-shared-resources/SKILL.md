@@ -56,6 +56,20 @@ upgrading the plugin or moving resource directories.
 
 ---
 
+## Recommendation First
+
+Default to **CMP Resources (`composeResources/`) in `commonMain` for strings, images, and fonts**.
+
+Why:
+- a single `Res.string.xxx` accessor works on all targets — no platform-specific resource files
+- the Compose Resources plugin generates type-safe accessors at build time
+- localization is handled through standard `values-xx/strings.xml`-style directories
+
+Use platform resource bundles only when you need to share resources with non-Compose targets
+(e.g., a pure-Kotlin server module that also needs the same string definitions).
+
+---
+
 ## Prerequisites
 
 - Project scaffolded with `kotlin-multiplatform-feature-scaffold`
@@ -358,3 +372,28 @@ sourceSets {
 3. Launch Android — verify strings, images, and fonts render correctly
 4. Launch Desktop (`./gradlew :desktopApp:run`) — verify same resources render
 5. Change device language to a supported locale — verify localized strings appear
+
+---
+
+## Common Anti-Patterns
+
+- hardcoding string literals in composables instead of using `Res.string` — blocks localization
+- storing images outside `composeResources/` — they won't be picked up by the resource accessor generator
+- using platform-specific string files (`strings.xml` on Android only) for shared strings
+- importing `Res` from a non-Compose module — resource accessors require a Compose-enabled source set
+- forgetting to add new locales to `gradle/libs.versions.toml` locale list — localized strings are silently ignored
+
+If `Res.string.xxx` is unresolved, run `./gradlew generateCommonMainResourceAccessors` to regenerate accessors.
+
+---
+
+## Output Style
+
+When asked about shared resources or localization, respond in this order:
+1. recommendation (CMP Resources, strings/images/fonts in commonMain)
+2. project structure (`:core:ui/src/commonMain/composeResources/`)
+3. code snippet (one string or image accessor)
+4. why shared resources are preferred over platform-specific resource bundles
+5. main alternative (expect/actual resource loading, platform bundles)
+
+Keep the snippet to one resource type. Map to the user's actual resource names when provided.
