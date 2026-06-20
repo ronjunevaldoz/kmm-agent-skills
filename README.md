@@ -99,6 +99,7 @@ Use these in Claude Code to run the full pipeline with a single command.
 
 | Command | What it does |
 |---|---|
+| `/execute-ticket <id>` | Fetch a GitHub Issue (or paste any ticket), plan → branch → implement → validate → review → commit |
 | `/implement-feature <name>` | Plan → Implement → Validate → Review a new KMP feature end-to-end |
 | `/review-changes` | Review current git diff against 6-layer rules and skill anti-patterns |
 | `/run-audit [path]` | Run `audit_project.py` with per-finding remediation from the relevant skill |
