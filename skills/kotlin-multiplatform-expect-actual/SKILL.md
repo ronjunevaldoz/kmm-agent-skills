@@ -41,7 +41,9 @@ Use when you need to:
 
 **Trigger keywords:** expect actual, platform-specific code, iOS implementation, actual class,
 expect fun, platform API, ObjCName, Swift interop, typealias actual, Kotlin Native memory,
-platform dispatcher, platform UUID, FileSystem KMP.
+platform dispatcher, platform UUID, FileSystem KMP,
+platform-specific implementation, iOS only code, Android only code, platform bridge,
+native implementation, different per platform, platform abstraction.
 
 **Freshness rule:** K2 and Kotlin Native change `expect/actual` rules with each Kotlin release —
 recheck the Kotlin Multiplatform docs before upgrading past a minor version.

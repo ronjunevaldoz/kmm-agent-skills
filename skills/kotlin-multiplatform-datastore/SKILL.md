@@ -34,7 +34,9 @@ Use when you need to:
 
 **Trigger keywords:** DataStore, Preferences DataStore, Proto DataStore, SharedPreferences KMP,
 NSUserDefaults KMP, persist settings, key-value KMP, store user preferences, DataStore migration,
-DataStore Flow, DataStore Koin.
+DataStore Flow, DataStore Koin,
+local storage KMP, app settings KMP, save user settings, persist app state,
+user preferences KMP, settings persistence, save preferences, key value storage KMP.
 
 **Freshness rule:** `androidx.datastore` KMP artifact names and the `createDataStore {}`
 expect/actual API change between alpha versions — recheck the AndroidX releases page before

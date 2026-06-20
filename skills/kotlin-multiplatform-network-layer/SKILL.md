@@ -62,7 +62,9 @@ Use this skill when you need to:
 - Recheck Ktor docs before adopting a new plugin or engine
 
 **Trigger keywords:** network layer, Ktor client, HTTP client, bearer auth,
-token refresh, NetworkResult, safeRequest, OkHttp, Darwin, CIO, JS engine.
+token refresh, NetworkResult, safeRequest, OkHttp, Darwin, CIO, JS engine,
+API call, HTTP request, REST API, make a request, fetch data, network call,
+call API, REST client, HTTP interceptor, API client setup, network error handling.
 
 **Freshness rule:** Ktor changes quickly, so recheck the current client engine,
 auth, and serialization docs before using or updating this skill.

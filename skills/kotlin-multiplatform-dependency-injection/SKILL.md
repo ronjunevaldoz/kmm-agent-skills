@@ -41,7 +41,9 @@ compiler-plugin workflow.
 
 **Trigger keywords:** dependency injection, DI, Koin, manual modules, annotated mode,
 constructor injection, startKoin, module scope, ViewModel injection, test override,
-single binding, factory binding, qualifier.
+single binding, factory binding, qualifier,
+inject dependency, wire dependencies, Koin module, provide dependency,
+Koin setup, IoC, inversion of control, Hilt alternative, service locator.
 
 **Freshness rule:** Koin 4 annotation processing and compiler-plugin conventions change —
 recheck the Koin docs and changelog when upgrading past a minor version.

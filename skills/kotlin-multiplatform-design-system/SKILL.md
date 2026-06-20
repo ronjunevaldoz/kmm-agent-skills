@@ -44,7 +44,9 @@ Use this skill when the user asks to:
 
 **Trigger keywords:** design system, custom theme, AppTheme, design tokens,
 ButtonVariant, shadcn KMP, Compose Styles, ExperimentalStylesApi, custom components,
-unstyled components, dark mode tokens, color scheme, no Material.
+unstyled components, dark mode tokens, color scheme, no Material,
+typography system, spacing tokens, custom button style, Material3 alternative,
+app theme setup, brand colors, design token system, custom typography.
 
 **Freshness rule:** `@ExperimentalStylesApi` is experimental and the Compose Styles API
 changes between CMP releases — recheck the Compose docs before upgrading.

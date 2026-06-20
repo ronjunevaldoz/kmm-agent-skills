@@ -61,7 +61,9 @@ Use this skill when you need to:
 - Recheck driver support before targeting a new platform
 
 **Trigger keywords:** SQLDelight, database, SQLite, schema, migrations, type adapter,
-Flow query, Android driver, Native driver, Desktop driver, Web driver.
+Flow query, Android driver, Native driver, Desktop driver, Web driver,
+local database KMP, Room alternative, offline storage, local persistence,
+SQLite KMP, persist to database, store data locally, local data layer.
 
 **Freshness rule:** SQLDelight support changes across targets, so recheck the current
 driver matrix and WasmJs status before copying setup code.

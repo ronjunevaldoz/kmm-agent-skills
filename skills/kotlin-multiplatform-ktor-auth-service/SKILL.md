@@ -39,7 +39,9 @@ Use this skill when you need to:
 stateful browser-style persistence, and Ktor RPC only when both sides are Kotlin-first.
 
 **Trigger keywords:** auth, authentication, authorization, bearer token, JWT, sessions,
-Ktor auth, Ktor RPC, login, refresh token, logout, protected route, auth service.
+Ktor auth, Ktor RPC, login, refresh token, logout, protected route, auth service,
+sign in, sign up, user login, access token, OAuth, token management,
+secure endpoint, validate token, user session, authenticated request.
 
 **Freshness rule:** Ktor auth plugin and JWT APIs change quickly — recheck the
 [Ktor auth docs](https://ktor.io/docs/server-auth.html) before using or updating this skill.

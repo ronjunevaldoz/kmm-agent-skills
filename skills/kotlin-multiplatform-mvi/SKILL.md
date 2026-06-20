@@ -47,7 +47,9 @@ Turbine are already present.
 
 **Trigger keywords:** MVI, Model-View-Intent, screen state, UiState, UiIntent, UiEffect,
 unidirectional data flow, ViewModel state, one-shot effects, side effects, screen architecture,
-StateFlow screen, channel effect, Contract pattern.
+StateFlow screen, channel effect, Contract pattern,
+navigation effect, one-shot event, single event, show toast from ViewModel,
+trigger navigation, event driven UI, MVVM vs MVI, unidirectional event.
 
 **Freshness rule:** `lifecycle-viewmodel-compose` and CMP lifecycle integration change between
 releases — recheck the AndroidX lifecycle and JetBrains CMP docs before upgrading.

@@ -33,7 +33,9 @@ Use when you need to:
 **Requires:** `kotlin-multiplatform-feature-scaffold` project structure.
 
 **Trigger keywords:** dev/staging/prod, environment config, BuildKonfig, product flavors,
-API key secrets, build variants, AppConfig, env switching, multi-environment.
+API key secrets, build variants, AppConfig, env switching, multi-environment,
+staging URL, API endpoint config, debug config, production config, environment variable,
+build type config, switch API URL, hide API keys, config per environment.
 
 **Freshness rule:** BuildKonfig plugin versions and AGP product flavor APIs change — recheck
 the BuildKonfig repo and version catalog before upgrading.

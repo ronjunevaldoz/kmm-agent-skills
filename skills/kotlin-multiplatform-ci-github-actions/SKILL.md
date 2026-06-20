@@ -37,7 +37,9 @@ Use when you need to:
 **Requires:** `kotlin-multiplatform-feature-scaffold` project structure (or equivalent AGP 9+ KMP layout).
 
 **Trigger keywords:** set up CI, GitHub Actions, CI pipeline, automated tests, build workflow,
-release workflow, KMP CI, XCFramework release, Gradle cache CI, PR checks.
+release workflow, KMP CI, XCFramework release, Gradle cache CI, PR checks,
+continuous integration, continuous delivery, CD pipeline, GitHub workflow YAML,
+automate build, merge checks, branch protection, automated release, deploy workflow.
 
 **Freshness rule:** GitHub Actions runner images and `actions/setup-java` / `gradle/actions` versions
 change frequently — recheck pinned versions and `runs-on` labels before using this skill in a new project.

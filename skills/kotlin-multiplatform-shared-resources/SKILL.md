@@ -49,7 +49,9 @@ Use this skill when you need to:
 - Recheck Compose Resources docs before changing the resource layout
 
 **Trigger keywords:** shared resources, compose resources, strings, plurals, fonts,
-images, localization, resource module, Res, resource packaging.
+images, localization, resource module, Res, resource packaging,
+i18n, l10n, internationalization, translations, localize app, app strings KMP,
+string resources KMP, multiplatform images, drawable KMP, translate strings.
 
 **Freshness rule:** recheck the current Compose Multiplatform Resources docs before
 upgrading the plugin or moving resource directories.

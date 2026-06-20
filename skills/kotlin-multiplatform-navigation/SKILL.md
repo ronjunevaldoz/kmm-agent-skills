@@ -43,7 +43,9 @@ Use this skill when you need to:
 - Recheck navigation API changes before upgrading the library
 
 **Trigger keywords:** navigation, nav graph, navhost, route, deep link, bottom nav,
-KMP navigation, type-safe routes, Decompose, Navigation Compose.
+KMP navigation, type-safe routes, Decompose, Navigation Compose,
+navigate to screen, go to screen, back stack, push screen, pop back,
+navigate back, pass arguments, route arguments, nested navigation, screen transition.
 
 **Freshness rule:** recheck the JetBrains Navigation Compose docs before upgrading or
 copying snippets into a new project.

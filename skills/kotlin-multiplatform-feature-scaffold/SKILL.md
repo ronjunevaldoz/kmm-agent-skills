@@ -41,7 +41,9 @@ Use when you need to:
 
 **Trigger keywords:** create KMP project, scaffold feature module, new module, set up KMP,
 add feature, multi-module, build-logic, convention plugin, AGP 9, Koin 4, KMP setup,
-Kotlin/kmp-wizard, generate from template, baseline project.
+Kotlin/kmp-wizard, generate from template, baseline project,
+add a screen, new screen, new feature, new feature module, add feature layer,
+scaffold module, create module, add KMP screen, set up convention plugin.
 
 **Branch recommendation:** default to the `all-targets` branch for full-stack KMP apps.
 Use `all-frontends-shared` only when you want Android + iOS + Web + Desktop without a

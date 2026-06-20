@@ -33,7 +33,8 @@ Use when you need to:
 
 **Trigger keywords:** clean architecture, layer contract, dependency rule, model vs api,
 internal visibility, architecture violation, Detekt architecture, layer rule, feature layers,
-module boundaries.
+module boundaries, 6-layer architecture, domain isolation, which layer, domain model,
+api contract, dependency inversion, layer ownership, where does this code go.
 
 **Freshness rule:** Detekt rule set API changes between minor versions — recheck the
 `ArchitectureRule` DSL when upgrading Detekt.
