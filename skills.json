@@ -1,5 +1,5 @@
 {
-  "version": "1.1.5",
+  "version": "1.1.6",
   "skills": [
     {
       "name": "kotlin-multiplatform-audit",
@@ -84,7 +84,16 @@
         "KMP CI",
         "XCFramework release",
         "Gradle cache CI",
-        "PR checks"
+        "PR checks",
+        "continuous integration",
+        "continuous delivery",
+        "CD pipeline",
+        "GitHub workflow YAML",
+        "automate build",
+        "merge checks",
+        "branch protection",
+        "automated release",
+        "deploy workflow"
       ],
       "scripts": []
     },
@@ -116,7 +125,15 @@
         "Detekt architecture",
         "layer rule",
         "feature layers",
-        "module boundaries"
+        "module boundaries",
+        "6-layer architecture",
+        "domain isolation",
+        "which layer",
+        "domain model",
+        "api contract",
+        "dependency inversion",
+        "layer ownership",
+        "where does this code go"
       ],
       "scripts": []
     },
@@ -297,7 +314,15 @@
         "store user preferences",
         "DataStore migration",
         "DataStore Flow",
-        "DataStore Koin"
+        "DataStore Koin",
+        "local storage KMP",
+        "app settings KMP",
+        "save user settings",
+        "persist app state",
+        "user preferences KMP",
+        "settings persistence",
+        "save preferences",
+        "key value storage KMP"
       ],
       "scripts": []
     },
@@ -335,7 +360,16 @@
         "test override",
         "single binding",
         "factory binding",
-        "qualifier"
+        "qualifier",
+        "inject dependency",
+        "wire dependencies",
+        "Koin module",
+        "provide dependency",
+        "Koin setup",
+        "IoC",
+        "inversion of control",
+        "Hilt alternative",
+        "service locator"
       ],
       "scripts": []
     },
@@ -375,7 +409,15 @@
         "unstyled components",
         "dark mode tokens",
         "color scheme",
-        "no Material"
+        "no Material",
+        "typography system",
+        "spacing tokens",
+        "custom button style",
+        "Material3 alternative",
+        "app theme setup",
+        "brand colors",
+        "design token system",
+        "custom typography"
       ],
       "scripts": []
     },
@@ -480,7 +522,14 @@
         "Kotlin Native memory",
         "platform dispatcher",
         "platform UUID",
-        "FileSystem KMP"
+        "FileSystem KMP",
+        "platform-specific implementation",
+        "iOS only code",
+        "Android only code",
+        "platform bridge",
+        "native implementation",
+        "different per platform",
+        "platform abstraction"
       ],
       "scripts": []
     },
@@ -560,7 +609,16 @@
         "KMP setup",
         "Kotlin/kmp-wizard",
         "generate from template",
-        "baseline project"
+        "baseline project",
+        "add a screen",
+        "new screen",
+        "new feature",
+        "new feature module",
+        "add feature layer",
+        "scaffold module",
+        "create module",
+        "add KMP screen",
+        "set up convention plugin"
       ],
       "scripts": [
         "validate_module_graph.py"
@@ -591,7 +649,16 @@
         "build variants",
         "AppConfig",
         "env switching",
-        "multi-environment"
+        "multi-environment",
+        "staging URL",
+        "API endpoint config",
+        "debug config",
+        "production config",
+        "environment variable",
+        "build type config",
+        "switch API URL",
+        "hide API keys",
+        "config per environment"
       ],
       "scripts": []
     },
@@ -699,7 +766,17 @@
         "refresh token",
         "logout",
         "protected route",
-        "auth service"
+        "auth service",
+        "sign in",
+        "sign up",
+        "user login",
+        "access token",
+        "OAuth",
+        "token management",
+        "secure endpoint",
+        "validate token",
+        "user session",
+        "authenticated request"
       ],
       "scripts": [
         "scaffold_auth_service.py"
@@ -814,7 +891,15 @@
         "screen architecture",
         "StateFlow screen",
         "channel effect",
-        "Contract pattern"
+        "Contract pattern",
+        "navigation effect",
+        "one-shot event",
+        "single event",
+        "show toast from ViewModel",
+        "trigger navigation",
+        "event driven UI",
+        "MVVM vs MVI",
+        "unidirectional event"
       ],
       "scripts": []
     },
@@ -845,7 +930,17 @@
         "KMP navigation",
         "type-safe routes",
         "Decompose",
-        "Navigation Compose"
+        "Navigation Compose",
+        "navigate to screen",
+        "go to screen",
+        "back stack",
+        "push screen",
+        "pop back",
+        "navigate back",
+        "pass arguments",
+        "route arguments",
+        "nested navigation",
+        "screen transition"
       ],
       "scripts": []
     },
@@ -881,7 +976,18 @@
         "OkHttp",
         "Darwin",
         "CIO",
-        "JS engine"
+        "JS engine",
+        "API call",
+        "HTTP request",
+        "REST API",
+        "make a request",
+        "fetch data",
+        "network call",
+        "call API",
+        "REST client",
+        "HTTP interceptor",
+        "API client setup",
+        "network error handling"
       ],
       "scripts": []
     },
@@ -1078,7 +1184,17 @@
         "localization",
         "resource module",
         "Res",
-        "resource packaging"
+        "resource packaging",
+        "i18n",
+        "l10n",
+        "internationalization",
+        "translations",
+        "localize app",
+        "app strings KMP",
+        "string resources KMP",
+        "multiplatform images",
+        "drawable KMP",
+        "translate strings"
       ],
       "scripts": []
     },
@@ -1113,7 +1229,15 @@
         "Android driver",
         "Native driver",
         "Desktop driver",
-        "Web driver"
+        "Web driver",
+        "local database KMP",
+        "Room alternative",
+        "offline storage",
+        "local persistence",
+        "SQLite KMP",
+        "persist to database",
+        "store data locally",
+        "local data layer"
       ],
       "scripts": []
     },
