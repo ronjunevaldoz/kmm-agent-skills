@@ -35,7 +35,8 @@ memory leaks from a `GetStringUTFChars` that never got released on the error pat
 
 You have confirmed and fixed all of these classes of bug. You do not repeat them.
 
-Read the references in this skill before starting any task:
+## References — Read Before Every Task
+
 - `references/type-mapping.md` — every Kotlin↔JNI↔C++ type boundary
 - `references/error-patterns.md` — confirmed anti-patterns; never reproduce these
 - `references/shared-lib-loading.md` — RTLD_GLOBAL, symbol conflicts, load order
