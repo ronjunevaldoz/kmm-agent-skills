@@ -389,6 +389,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "@Preview", "desktop preview", "PDD", "fast UI iteration", "PreviewParameterProvider" | `kotlin-multiplatform-preview-driven-development` |
 | "unit test", "runTest", "Turbine", "Flow test", "fake repository", ":core:testing" | `kotlin-multiplatform-unit-testing` |
 | "screenshot test", "Roborazzi", "golden image", "visual regression", "CI diff" | `kotlin-multiplatform-roborazzi` |
+| "test canvas layout", "canvas screenshot", "layout regression test", "visual accuracy", "pixel-perfect test", "arrangement test", "test node placement", "UI layout verification", "100% accuracy test" | `kotlin-multiplatform-roborazzi` |
 | "Ktlint", "Detekt", "code quality", "formatting", "architecture rules", "CI gate" | `kotlin-multiplatform-code-quality` |
 
 ---

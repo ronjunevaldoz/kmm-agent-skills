@@ -28,6 +28,12 @@ metadata:
     - onNodeWithTag
     - interaction test
     - semantics
+    - visual accuracy
+    - layout test
+    - canvas test
+    - arrangement test
+    - pixel-perfect
+    - layout regression
 ---
 
 ## When to Use This Skill
@@ -41,7 +47,9 @@ Use when you need to:
 
 **Trigger keywords:** screenshot test, Roborazzi, golden image, visual regression, preview screenshot,
 UI test JVM, screenshot diff, CI visual test, testTag, test tag, compose test rule, onNodeWithTag,
-createComposeRule, interaction test, compose UI test, semantics node.
+createComposeRule, interaction test, compose UI test, semantics node, visual accuracy,
+pixel-perfect, layout test, canvas test, arrangement test, layout regression, 100% accuracy,
+UI layout verification, canvas layout test, visual confirmation, test layout.
 
 **Freshness rule:** Roborazzi is actively developed — the Gradle plugin API and the
 `captureRoboImage` API change between minor versions. Recheck the GitHub releases page before
