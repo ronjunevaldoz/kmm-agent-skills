@@ -79,6 +79,49 @@ It maps the skills, build order, and the best next step.
 
 ---
 
+## Agent Pipeline
+
+Five specialized agents orchestrate end-to-end feature work. Agents communicate via a structured plan contract and read `.claude/pipeline-context.json` to avoid repeating past mistakes.
+
+| Agent | Role |
+|---|---|
+| [`planner`](agents/planner.md) | Analyzes the task, loads only relevant skills, produces a layer-by-layer plan, gates on user approval |
+| [`implementer`](agents/implementer.md) | Executes the approved plan in 6-layer build order, generates complete runnable code |
+| [`reviewer`](agents/reviewer.md) | Checks layer boundaries, Koin wiring, MVI contracts, and test coverage; runs `audit_project.py` |
+| [`validator`](agents/validator.md) | Runs Gradle compilation and `jvmTest` in escalating levels; stops at first failure |
+| [`fixer`](agents/fixer.md) | Applies minimum targeted fixes for reviewer/validator blockers; rates confidence; asks user for LOW-confidence calls |
+
+---
+
+## Slash Commands
+
+Use these in Claude Code to run the full pipeline with a single command.
+
+| Command | What it does |
+|---|---|
+| `/implement-feature <name>` | Plan → Implement → Validate → Review a new KMP feature end-to-end |
+| `/review-changes` | Review current git diff against 6-layer rules and skill anti-patterns |
+| `/run-audit [path]` | Run `audit_project.py` with per-finding remediation from the relevant skill |
+
+---
+
+## Hooks
+
+Shell scripts for enforcing architecture hygiene locally and in CI.
+
+| Hook | Trigger | What it does |
+|---|---|---|
+| [`pre-commit-audit.sh`](hooks/pre-commit-audit.sh) | Before `git commit` | Blocks commit if staged `.kt` files have architecture findings |
+| [`validate-architecture.sh`](hooks/validate-architecture.sh) | Claude Code `PostToolUse` | Runs audit after any file edit |
+| [`check-skill-freshness.sh`](hooks/check-skill-freshness.sh) | Manual / CI schedule | Warns if any skill's `last-updated` is > 90 days old |
+
+**Install the pre-commit hook:**
+```bash
+ln -sf ../../hooks/pre-commit-audit.sh .git/hooks/pre-commit
+```
+
+---
+
 ## Trigger Keywords
 
 What to say to activate each skill. The agent matches these phrases automatically.
