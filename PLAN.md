@@ -17,7 +17,7 @@ for future work. Update it as skills are added, revised, or completed.
 
 ---
 
-## Shipped Skills (31)
+## Shipped Skills (32)
 
 ### Foundation
 | Skill | Status | Notes |
