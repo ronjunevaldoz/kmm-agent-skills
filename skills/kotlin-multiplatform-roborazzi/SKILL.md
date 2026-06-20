@@ -1,13 +1,15 @@
 ---
 name: kotlin-multiplatform-roborazzi
 description: >
-  Sets up Roborazzi screenshot tests for KMP: captures @Preview composables on JVM/Desktop,
-  commits golden images, and wires a CI diff job that fails the build on visual regressions.
-  Replaces kotlin-multiplatform-testing-robot for UI regression testing.
+  Complete UI layer testing for KMP: semantic test tags on composables, Compose UI
+  interaction tests (createComposeRule, onNodeWithTag, performClick, assertIsDisplayed),
+  and Roborazzi screenshot tests that capture @Preview composables on JVM/Desktop for
+  visual regression detection. Covers the full stack from testTag conventions to CI golden
+  image diffs. Replaces kotlin-multiplatform-testing-robot for UI regression testing.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-18'
+  last-updated: '2026-06-20'
   keywords:
     - Roborazzi
     - screenshot test
@@ -19,38 +21,48 @@ metadata:
     - KMP
     - Kotlin Multiplatform
     - Desktop JVM
+    - testTag
+    - test tag
+    - Compose UI test
+    - createComposeRule
+    - onNodeWithTag
+    - interaction test
+    - semantics
 ---
 
 ## When to Use This Skill
 
 Use when you need to:
+- Add semantic `testTag` identifiers to composables so tests can target specific nodes
+- Write Compose UI interaction tests (`onNodeWithTag`, `performClick`, `assertIsDisplayed`)
 - Capture screenshot golden images from `@Preview` composables on JVM
 - Detect visual regressions automatically in CI
-- Replace manual UI review with automated screenshot diffs
-- Wire Roborazzi into a KMP Desktop/JVM module
+- Wire the full UI testing stack: test tags → interaction tests → screenshot tests
 
 **Trigger keywords:** screenshot test, Roborazzi, golden image, visual regression, preview screenshot,
-UI test JVM, screenshot diff, CI visual test.
+UI test JVM, screenshot diff, CI visual test, testTag, test tag, compose test rule, onNodeWithTag,
+createComposeRule, interaction test, compose UI test, semantics node.
 
 **Freshness rule:** Roborazzi is actively developed — the Gradle plugin API and the
-`captureRoboImage` / `captureRoboGif` API change between minor versions. Recheck the
-GitHub releases page before pinning a version.
+`captureRoboImage` API change between minor versions. Recheck the GitHub releases page before
+pinning a version. The JetBrains Compose UI test dependency (`compose.uiTestJUnit4`) tracks
+the Compose Multiplatform version.
 
 ---
 
 ## Recommendation First
 
-Default to **Roborazzi on the JVM/Desktop target, driven by existing `@Preview` functions,
-with golden images committed to the repo**.
+Default to this three-layer UI testing stack:
+
+1. **Test tags** on every interactive or assertable node — `Modifier.testTag(FooTestTags.LOGIN_BUTTON)`
+2. **Interaction tests** with `createComposeRule` — verify behaviour (enabled/disabled, text shown, clicks fire)
+3. **Roborazzi screenshot tests** — verify visual output (layout, color, loading/error/empty states)
 
 Why:
-- `@Preview` composables are already stateless (Screen/Content split) — zero extra test code to write
-- JVM execution means no emulator, no AVD, no Xcode — fast and CI-friendly
-- committed goldens make diffs visible in PR reviews as image files
-- the same test task (`jvmTest`) that runs unit tests runs screenshot tests — one CI step
-
-Only use Roborazzi on Android (`roborazziAndroid`) when you need Android-specific resources
-that cannot render on JVM.
+- Test tags make tests stable — `onNodeWithTag` doesn't break when copy changes
+- Interaction tests run on JVM via `jvmTest`, no emulator needed
+- Roborazzi goldens catch unintentional visual regressions that logic tests miss
+- All three layers share the same `:ui` module and the same `jvmTest` task
 
 ---
 
@@ -63,23 +75,15 @@ that cannot render on JVM.
 roborazzi = "1.29.0"
 
 [libraries]
-roborazzi = { module = "io.github.takahirom.roborazzi:roborazzi", version.ref = "roborazzi" }
-roborazzi-compose = { module = "io.github.takahirom.roborazzi:roborazzi-compose", version.ref = "roborazzi" }
-roborazzi-junit-rule = { module = "io.github.takahirom.roborazzi:roborazzi-junit-rule", version.ref = "roborazzi" }
+roborazzi             = { module = "io.github.takahirom.roborazzi:roborazzi",             version.ref = "roborazzi" }
+roborazzi-compose     = { module = "io.github.takahirom.roborazzi:roborazzi-compose",     version.ref = "roborazzi" }
+roborazzi-junit-rule  = { module = "io.github.takahirom.roborazzi:roborazzi-junit-rule",  version.ref = "roborazzi" }
 
 [plugins]
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 ```
 
-### `build-logic/convention/build.gradle.kts`
-
-```kotlin
-dependencies {
-    implementation(libs.plugins.roborazzi.get().let { "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version}" })
-}
-```
-
-### Convention plugin: `GROUP_ID.feature.ui.gradle.kts` — add Roborazzi
+### Convention plugin: `GROUP_ID.feature.ui.gradle.kts`
 
 ```kotlin
 plugins {
@@ -89,8 +93,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("io.github.takahirom.roborazzi")
 }
-
-// ... existing kotlin {} block ...
 
 roborazzi {
     outputDir = project.file("src/jvmTest/snapshots")
@@ -111,6 +113,7 @@ kotlin {
 
     sourceSets {
         jvmTest.dependencies {
+            implementation(compose.uiTestJUnit4)       // Compose UI test rule
             implementation(libs.roborazzi)
             implementation(libs.roborazzi.compose)
             implementation(libs.roborazzi.junit.rule)
@@ -122,72 +125,265 @@ kotlin {
 
 ---
 
-## Writing a Screenshot Test
+## Step 1: Test Tags
+
+Create a `TestTags` object per feature. Place it in `commonMain` so both production code
+and tests can reference the constants without string literals.
 
 ```kotlin
-// :feature:auth:ui/src/jvmTest/kotlin/.../AuthContentScreenshotTest.kt
-class AuthContentScreenshotTest {
+// :feature:auth:ui/src/commonMain/kotlin/GROUP_ID/feature/auth/ui/AuthTestTags.kt
+package GROUP_ID.feature.auth.ui
+
+object AuthTestTags {
+    const val EMAIL_FIELD        = "auth:email_field"
+    const val PASSWORD_FIELD     = "auth:password_field"
+    const val LOGIN_BUTTON       = "auth:login_button"
+    const val LOADING_INDICATOR  = "auth:loading_indicator"
+    const val ERROR_MESSAGE      = "auth:error_message"
+}
+```
+
+**Naming convention**: `<feature>:<node>` — the feature prefix avoids collisions when
+multiple features are on screen simultaneously (e.g. in a navigation test).
+
+Apply tags in `AuthContent`:
+
+```kotlin
+AppTextField(
+    value = state.email,
+    onValueChange = { onIntent(AuthContract.Intent.EmailChanged(it)) },
+    modifier = Modifier.testTag(AuthTestTags.EMAIL_FIELD),
+)
+
+AppTextField(
+    value = state.password,
+    onValueChange = { onIntent(AuthContract.Intent.PasswordChanged(it)) },
+    modifier = Modifier.testTag(AuthTestTags.PASSWORD_FIELD),
+    isPassword = true,
+)
+
+AppButton(
+    onClick = { onIntent(AuthContract.Intent.LoginClicked) },
+    enabled = !state.isLoading,
+    modifier = Modifier
+        .fillMaxWidth()
+        .testTag(AuthTestTags.LOGIN_BUTTON),
+)
+
+if (state.isLoading) {
+    AppSpinner(modifier = Modifier.testTag(AuthTestTags.LOADING_INDICATOR))
+}
+
+if (state.error != null) {
+    AppText(
+        text = state.error,
+        modifier = Modifier.testTag(AuthTestTags.ERROR_MESSAGE),
+    )
+}
+```
+
+**Tag what matters** — tag interactive nodes (buttons, fields) and assertable output nodes
+(error banners, loading indicators). Don't tag decorative containers.
+
+---
+
+## Step 2: Compose UI Interaction Tests
+
+```kotlin
+// :feature:auth:ui/src/jvmTest/kotlin/GROUP_ID/feature/auth/ui/AuthContentInteractionTest.kt
+package GROUP_ID.feature.auth.ui
+
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createComposeRule
+import GROUP_ID.core.designsystem.theme.AppTheme
+import kotlin.test.Test
+import org.junit.Rule
+
+class AuthContentInteractionTest {
 
     @get:Rule
-    val roborazziRule = RoborazziRule(
-        captureRoot = captureRoboImage(),
-    )
+    val composeTestRule = createComposeRule()
 
     @Test
-    fun authContentLoading() {
+    fun loginButton_isDisabled_whenLoading() {
+        composeTestRule.setContent {
+            AppTheme {
+                AuthContent(
+                    state = AuthContract.State(isLoading = true),
+                    onIntent = {},
+                )
+            }
+        }
+        composeTestRule
+            .onNodeWithTag(AuthTestTags.LOGIN_BUTTON)
+            .assertIsNotEnabled()
+    }
+
+    @Test
+    fun errorMessage_isDisplayed_whenErrorInState() {
+        composeTestRule.setContent {
+            AppTheme {
+                AuthContent(
+                    state = AuthContract.State(error = "Invalid credentials"),
+                    onIntent = {},
+                )
+            }
+        }
+        composeTestRule
+            .onNodeWithTag(AuthTestTags.ERROR_MESSAGE)
+            .assertIsDisplayed()
+            .assertTextContains("Invalid credentials")
+    }
+
+    @Test
+    fun loadingIndicator_isDisplayed_whenLoading() {
+        composeTestRule.setContent {
+            AppTheme {
+                AuthContent(
+                    state = AuthContract.State(isLoading = true),
+                    onIntent = {},
+                )
+            }
+        }
+        composeTestRule
+            .onNodeWithTag(AuthTestTags.LOADING_INDICATOR)
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun loginButton_firesIntent_whenClicked() {
+        val intents = mutableListOf<AuthContract.Intent>()
+        composeTestRule.setContent {
+            AppTheme {
+                AuthContent(
+                    state = AuthContract.State(),
+                    onIntent = { intents.add(it) },
+                )
+            }
+        }
+        composeTestRule
+            .onNodeWithTag(AuthTestTags.LOGIN_BUTTON)
+            .performClick()
+
+        assert(intents.contains(AuthContract.Intent.LoginClicked))
+    }
+
+    @Test
+    fun emailField_updatesState_onTextInput() {
+        val intents = mutableListOf<AuthContract.Intent>()
+        composeTestRule.setContent {
+            AppTheme {
+                AuthContent(
+                    state = AuthContract.State(),
+                    onIntent = { intents.add(it) },
+                )
+            }
+        }
+        composeTestRule
+            .onNodeWithTag(AuthTestTags.EMAIL_FIELD)
+            .performTextInput("user@example.com")
+
+        assert(
+            intents.filterIsInstance<AuthContract.Intent.EmailChanged>()
+                .any { it.value == "user@example.com" }
+        )
+    }
+}
+```
+
+**Key APIs:**
+
+| API | Use |
+|---|---|
+| `onNodeWithTag(tag)` | Target a node by semantic tag |
+| `assertIsDisplayed()` | Node is visible on screen |
+| `assertIsNotEnabled()` | Node is disabled |
+| `assertTextContains(text)` | Node contains the given text |
+| `performClick()` | Simulate a tap |
+| `performTextInput(text)` | Type into a text field |
+| `assertDoesNotExist()` | Node is not in the composition |
+| `onNodeWithTag(tag, useUnmergedTree = true)` | Target inside a merged semantics tree |
+
+---
+
+## Step 3: Roborazzi Screenshot Tests
+
+```kotlin
+// :feature:auth:ui/src/jvmTest/kotlin/GROUP_ID/feature/auth/ui/AuthContentScreenshotTest.kt
+package GROUP_ID.feature.auth.ui
+
+import com.github.takahirom.roborazzi.captureRoboImage
+import GROUP_ID.core.designsystem.theme.AppTheme
+import kotlin.test.Test
+
+class AuthContentScreenshotTest {
+
+    @Test
+    fun authContent_default() {
+        captureRoboImage("auth_content_default.png") {
+            AppTheme {
+                AuthContent(state = AuthContract.State(), onIntent = {})
+            }
+        }
+    }
+
+    @Test
+    fun authContent_loading() {
         captureRoboImage("auth_content_loading.png") {
             AppTheme {
-                AuthContent(state = AuthUiState.Loading, onIntent = {})
+                AuthContent(state = AuthContract.State(isLoading = true), onIntent = {})
             }
         }
     }
 
     @Test
-    fun authContentSuccess() {
-        captureRoboImage("auth_content_success.png") {
-            AppTheme {
-                AuthContent(state = AuthUiState.Success(PreviewData.user), onIntent = {})
-            }
-        }
-    }
-
-    @Test
-    fun authContentError() {
+    fun authContent_error() {
         captureRoboImage("auth_content_error.png") {
             AppTheme {
-                AuthContent(state = AuthUiState.Error("Session expired"), onIntent = {})
+                AuthContent(state = AuthContract.State(error = "Session expired"), onIntent = {})
+            }
+        }
+    }
+
+    @Test
+    fun authContent_dark() {
+        captureRoboImage("auth_content_dark.png") {
+            AppTheme(darkTheme = true) {
+                AuthContent(state = AuthContract.State(), onIntent = {})
             }
         }
     }
 }
 ```
 
-Each `captureRoboImage` call writes a PNG to `src/jvmTest/snapshots/`.
+Each call writes a PNG to `src/jvmTest/snapshots/`. Capture one test per meaningful visual
+state: default, loading, error, empty, dark mode. Avoid redundant captures (e.g. don't
+capture every error message variant — capture the error state once).
 
 ---
 
-## Recording Golden Images
+## Recording and Verifying Goldens
 
 ```bash
-# Record (first run — write goldens)
+# Record (first run — writes golden PNGs to snapshots/)
 ./gradlew :feature:auth:ui:jvmTest -PrecordRoborazzi
 
-# Verify (subsequent runs — diff against goldens)
+# Verify (diff against committed goldens)
 ./gradlew :feature:auth:ui:jvmTest
 
-# Verify all feature UI modules at once
+# Verify all :ui modules at once
 ./gradlew jvmTest
 ```
 
-Commit the `snapshots/` directory to git. PRs that change UI will produce image diffs in the PR review.
+Commit the `snapshots/` directory to git. PRs that change UI produce image diffs in the
+PR review — reviewers see before/after without running tests locally.
 
 ---
 
 ## CI Integration
 
-Add a screenshot diff job to `.github/workflows/ci.yml`:
-
 ```yaml
+# .github/workflows/ci.yml
 test-screenshot:
   name: Screenshot Tests (JVM)
   runs-on: ubuntu-latest
@@ -206,7 +402,7 @@ test-screenshot:
       with:
         cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-    - name: Run screenshot tests
+    - name: Run UI + screenshot tests
       run: ./gradlew jvmTest
 
     - name: Upload screenshot diffs on failure
@@ -215,40 +411,43 @@ test-screenshot:
       with:
         name: screenshot-diffs
         path: '**/src/jvmTest/snapshots/**/*_compare.png'
+        retention-days: 7
 ```
 
-When a visual regression occurs, the CI job uploads diff images as artifacts — reviewers
-see the before/after side-by-side without running the tests locally.
+The same `jvmTest` task runs both interaction tests and screenshot tests — one CI step
+covers the entire UI layer.
 
 ---
 
 ## Related Skills
 
-- `kotlin-multiplatform-preview-driven-development` — the `@Preview` workflow that feeds into Roborazzi
-- `kotlin-multiplatform-presenter-module` — the Screen/Content split that makes `Content` injectable with fixed state
-- `kotlin-multiplatform-unit-testing` — Roborazzi covers `:ui`; unit tests cover `:presenter` and `:domain`
+- `kotlin-multiplatform-preview-driven-development` — the `@Preview` workflow that feeds directly into Roborazzi
+- `kotlin-multiplatform-presenter-module` — Screen/Content split that makes `Content` injectable with fixed state
+- `kotlin-multiplatform-unit-testing` — Roborazzi covers `:ui`; use `runTest` + Turbine for `:presenter` and `:domain`
 - `kotlin-multiplatform-ci-github-actions` — where the CI screenshot job is wired
 
 ---
 
 ## Common Anti-Patterns
 
-- testing `Screen` composables (with a real ViewModel) — inject fixed `UiState` into `Content` instead
+- using `onNodeWithText("Sign in")` instead of `onNodeWithTag` — breaks when copy changes; always use tags
+- tagging the `Screen` composable (with a real ViewModel) — inject fixed state into `Content` instead
 - not committing golden images — CI has nothing to diff against; diffs only work with committed goldens
-- running Roborazzi on Android instead of JVM — slower, needs emulator; use `jvmTest` unless you need Android-specific resources
-- one test class per state instead of one class per component — excessive boilerplate; group all states for a component in one test class
-- forgetting to record new goldens after a planned UI change — run with `-PrecordRoborazzi` and commit the updated images
+- running Roborazzi on Android instead of JVM — slower, needs emulator; use `jvmTest` unless Android-specific resources are required
+- one test class per state instead of one class per component — excessive boilerplate; group all states in one test class
+- forgetting to record new goldens after a planned UI change — run `-PrecordRoborazzi` and commit the updated images
+- putting test tag constants as bare string literals in the test — define them in `object FooTestTags` in `commonMain`
+- using `assertTextContains` for copy that will be localized — use `assertIsDisplayed()` on the tagged node instead
 
-If a screenshot test fails unexpectedly after a dependency upgrade, re-record goldens and commit —
-font rendering can shift between Compose versions.
+If a screenshot test fails after a Compose upgrade, re-record goldens — font rendering shifts between versions.
 
 ---
 
 ## Output Style
 
-When asked about screenshot testing or visual regression for KMP, respond in this order:
-1. Gradle plugin + dependency setup (toml + build.gradle.kts)
-2. test class with `captureRoboImage` calls
-3. record vs verify commands
-4. CI job snippet
-5. golden image commit strategy
+When asked about UI testing, test tags, or visual regression for KMP, respond in this order:
+1. `TestTag` object setup with naming convention
+2. `Modifier.testTag()` applied to the composable
+3. Interaction test with `createComposeRule` + `onNodeWithTag`
+4. Roborazzi screenshot test for the same component
+5. record/verify commands and CI job
