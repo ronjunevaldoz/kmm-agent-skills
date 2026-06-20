@@ -12,6 +12,10 @@ PATTERNS = [
     ("sharedflow replay effect", re.compile(r"MutableSharedFlow<.*replay\s*=\s*1")),
     ("network result in ui", re.compile(r"NetworkResult<")),
     ("data import in ui", re.compile(r"import .*\.data\.")),
+    ("manual screen capture", re.compile(
+        r"playwright|adb\s+screencap|xcrun\s+simctl\s+io|Robot\(\)\.createScreenCapture|ProcessBuilder.*screenshot",
+        re.IGNORECASE,
+    )),
 ]
 
 

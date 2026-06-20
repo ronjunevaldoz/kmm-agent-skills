@@ -180,6 +180,42 @@ class AuditProjectTests(unittest.TestCase):
 
             self.assertFalse(any("network result in ui" in finding for finding in findings))
 
+    def test_audit_project_finds_adb_screencap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "androidApp" / "src"
+            src_dir.mkdir(parents=True)
+            (src_dir / "ScreenshotHelper.kt").write_text(
+                'Runtime.getRuntime().exec("adb screencap /sdcard/screen.png")',
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("manual screen capture" in f for f in findings))
+
+    def test_audit_project_finds_playwright(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "androidApp" / "src"
+            src_dir.mkdir(parents=True)
+            (src_dir / "UITest.kt").write_text(
+                "import com.microsoft.playwright.Page",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("manual screen capture" in f for f in findings))
+
+    def test_audit_project_finds_xcrun_simctl(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "iosApp" / "src"
+            src_dir.mkdir(parents=True)
+            (src_dir / "CaptureHelper.kt").write_text(
+                'exec("xcrun simctl io booted screenshot screen.png")',
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("manual screen capture" in f for f in findings))
+
 
 class ScaffoldAuthServiceTests(unittest.TestCase):
     def test_scaffold_auth_service_writes_expected_files(self) -> None:

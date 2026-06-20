@@ -430,6 +430,7 @@ covers the entire UI layer.
 
 ## Common Anti-Patterns
 
+- using Playwright, `adb screencap`, `xcrun simctl io`, or `Robot.createScreenCapture` for UI screenshots — use `captureRoboImage` on JVM instead; system capture requires a running device/emulator, produces non-reproducible results, and is flagged by `audit_project.py`
 - using `onNodeWithText("Sign in")` instead of `onNodeWithTag` — breaks when copy changes; always use tags
 - tagging the `Screen` composable (with a real ViewModel) — inject fixed state into `Content` instead
 - not committing golden images — CI has nothing to diff against; diffs only work with committed goldens
