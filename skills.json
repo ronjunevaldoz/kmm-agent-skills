@@ -1,5 +1,5 @@
 {
-  "version": "1.1.2",
+  "version": "1.1.3",
   "skills": [
     {
       "name": "kotlin-multiplatform-audit",
@@ -992,9 +992,9 @@
     {
       "name": "kotlin-multiplatform-roborazzi",
       "path": "skills/kotlin-multiplatform-roborazzi",
-      "description": "Sets up Roborazzi screenshot tests for KMP: captures @Preview composables on JVM/Desktop, commits golden images, and wires a CI diff job that fails the build on visual regressions. Replaces kotlin-multiplatform-testing-robot for UI regression testing.",
+      "description": "Complete UI layer testing for KMP: semantic test tags on composables, Compose UI interaction tests (createComposeRule, onNodeWithTag, performClick, assertIsDisplayed), and Roborazzi screenshot tests that capture @Preview composables on JVM/Desktop for visual regression detection. Covers the full stack from testTag conventions to CI golden image diffs. Replaces kotlin-multiplatform-testing-robot for UI regression testing.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-18",
+      "last_updated": "2026-06-20",
       "keywords": [
         "Roborazzi",
         "screenshot test",
@@ -1005,7 +1005,14 @@
         "CI diff",
         "KMP",
         "Kotlin Multiplatform",
-        "Desktop JVM"
+        "Desktop JVM",
+        "testTag",
+        "test tag",
+        "Compose UI test",
+        "createComposeRule",
+        "onNodeWithTag",
+        "interaction test",
+        "semantics"
       ],
       "triggers": [
         "screenshot test",
@@ -1015,7 +1022,15 @@
         "preview screenshot",
         "UI test JVM",
         "screenshot diff",
-        "CI visual test"
+        "CI visual test",
+        "testTag",
+        "test tag",
+        "compose test rule",
+        "onNodeWithTag",
+        "createComposeRule",
+        "interaction test",
+        "compose UI test",
+        "semantics node"
       ],
       "scripts": []
     },
