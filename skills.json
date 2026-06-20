@@ -1303,6 +1303,29 @@
         "Package.swift"
       ],
       "scripts": []
+    },
+    {
+      "name": "jni-kotlin-pro",
+      "path": "skills/jni-kotlin-pro",
+      "description": "Expert in JNI bridge engineering between Kotlin/JVM and native C++ libraries. Specializes in memory safety across the JVM boundary, shared-library symbol isolation, type mapping, GPU-sync correctness, algorithm porting discipline, and stable-feature protection. Language and library agnostic \u2014 applies to any Kotlin \u2194 native pipeline (audio, image, ML inference, codec).",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-20",
+      "keywords": [
+        "JNI",
+        "Kotlin native",
+        "JVM native bridge",
+        "memory safety",
+        "RTLD_GLOBAL",
+        "shared library conflict",
+        "native handle",
+        "CMake JNI",
+        "audio pipeline",
+        "ISTFT",
+        "GPU sync",
+        "stable feature guard",
+        "llama.cpp",
+        "stable-diffusion.cpp"
+      ]
     }
   ]
 }
