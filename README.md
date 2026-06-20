@@ -79,6 +79,46 @@ It maps the skills, build order, and the best next step.
 
 ---
 
+## Trigger Keywords
+
+What to say to activate each skill. The agent matches these phrases automatically.
+
+| Skill | Say something like… |
+|---|---|
+| [`expert`](skills/kotlin-multiplatform-expert/) | "where do I start KMP", "which skill should I use", "KMP architecture decision" |
+| [`feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) | "new KMP feature", "add a screen", "scaffold feature module", "create module" |
+| [`clean-architecture`](skills/kotlin-multiplatform-clean-architecture/) | "6-layer architecture", "which layer does this go in", "layer contract", "domain isolation" |
+| [`presenter-module`](skills/kotlin-multiplatform-presenter-module/) | "KMP ViewModel", "presenter layer", "pure Kotlin ViewModel", "StateFlow ViewModel" |
+| [`dependency-injection`](skills/kotlin-multiplatform-dependency-injection/) | "Koin setup", "inject dependency", "wire dependencies", "Hilt alternative" |
+| [`flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) | "staging URL", "API endpoint config", "dev/staging/prod", "environment variable" |
+| [`ci-github-actions`](skills/kotlin-multiplatform-ci-github-actions/) | "set up CI", "GitHub Actions", "continuous integration", "automate build" |
+| [`ktor-auth-service`](skills/kotlin-multiplatform-ktor-auth-service/) | "sign in", "JWT auth", "bearer token", "refresh token", "OAuth" |
+| [`mongodb-database`](skills/kotlin-multiplatform-mongodb-database/) | "MongoDB", "server-side database", "document collection" |
+| [`kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) | "Kotlin RPC", "shared API contract", "client/server contract" |
+| [`network-layer`](skills/kotlin-multiplatform-network-layer/) | "API call", "HTTP request", "REST API", "Ktor client", "safeRequest" |
+| [`sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) | "local database KMP", "Room alternative", "SQLite KMP", "offline storage" |
+| [`datastore`](skills/kotlin-multiplatform-datastore/) | "save user settings", "local storage KMP", "Preferences DataStore", "app settings" |
+| [`xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) | "XCFramework", "Swift Package Manager", "iOS distribution", "Package.swift" |
+| [`expect-actual`](skills/kotlin-multiplatform-expect-actual/) | "iOS only code", "platform-specific implementation", "expect fun", "actual class" |
+| [`repository-pattern`](skills/kotlin-multiplatform-repository-pattern/) | "offline-first", "cache-first", "single source of truth", "data layer strategy" |
+| [`navigation`](skills/kotlin-multiplatform-navigation/) | "navigate to screen", "nav graph", "pass arguments", "back stack" |
+| [`shared-resources`](skills/kotlin-multiplatform-shared-resources/) | "i18n", "translations", "app strings KMP", "localize", "compose resources" |
+| [`mvi`](skills/kotlin-multiplatform-mvi/) | "MVI pattern", "navigation effect", "one-shot event", "UiState / UiIntent / UiEffect" |
+| [`logging`](skills/kotlin-multiplatform-logging/) | "Kermit", "KMP logging", "crash reporting", "log levels" |
+| [`design-system`](skills/kotlin-multiplatform-design-system/) | "AppTheme", "design tokens", "Material3 alternative", "custom typography" |
+| [`design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) | "bottom sheet", "dialog", "snackbar", "skeleton", "extended components" |
+| [`compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) | "slot API", "content lambda", "composable slot", "flexible component" |
+| [`compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) | "state hoisting", "lift state", "stateless composable", "where does state go" |
+| [`compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) | "remember vs ViewModel", "state survival", "config change", "process death" |
+| [`graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) | "custom drawing", "Canvas", "graphicsLayer", "workflow node", "node editor" |
+| [`preview-driven-development`](skills/kotlin-multiplatform-preview-driven-development/) | "PDD", "@Preview", "desktop preview", "PreviewParameterProvider", "fast UI iteration" |
+| [`unit-testing`](skills/kotlin-multiplatform-unit-testing/) | "unit test", "runTest", "Turbine", "test ViewModel", "fake repository" |
+| [`roborazzi`](skills/kotlin-multiplatform-roborazzi/) | "screenshot test", "visual regression", "test layout", "canvas test", "100% accuracy" |
+| [`code-quality`](skills/kotlin-multiplatform-code-quality/) | "Ktlint", "Detekt", "code style", "static analysis", "layer violation" |
+| [`audit`](skills/kotlin-multiplatform-audit/) | "audit repo", "project health", "what is wrong with this project", "architecture drift" |
+
+---
+
 ## Targets
 
 - Android - `androidTarget()` - `:androidApp`
