@@ -1,5 +1,5 @@
 {
-  "version": "1.1.4",
+  "version": "1.1.5",
   "skills": [
     {
       "name": "kotlin-multiplatform-audit",
@@ -1012,7 +1012,13 @@
         "createComposeRule",
         "onNodeWithTag",
         "interaction test",
-        "semantics"
+        "semantics",
+        "visual accuracy",
+        "layout test",
+        "canvas test",
+        "arrangement test",
+        "pixel-perfect",
+        "layout regression"
       ],
       "triggers": [
         "screenshot test",
@@ -1030,7 +1036,18 @@
         "createComposeRule",
         "interaction test",
         "compose UI test",
-        "semantics node"
+        "semantics node",
+        "visual accuracy",
+        "pixel-perfect",
+        "layout test",
+        "canvas test",
+        "arrangement test",
+        "layout regression",
+        "100% accuracy",
+        "UI layout verification",
+        "canvas layout test",
+        "visual confirmation",
+        "test layout"
       ],
       "scripts": []
     },
