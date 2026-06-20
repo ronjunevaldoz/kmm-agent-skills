@@ -1,85 +1,81 @@
 # /implement-feature $ARGUMENTS
 
-Implement a new KMP feature end-to-end using the 6-layer clean architecture.
+**KMM Agent Skills** — build a new KMP feature end-to-end, layer by layer, with the full
+Koin 4 / Ktor 3 / SQLDelight 2 / CMP 1.11 stack wired correctly from the start.
 
-The feature name is: **$ARGUMENTS**
-
----
-
-## Phase 1: PLAN
-
-Load `agents/planner.md` and execute it for feature `$ARGUMENTS`.
-
-The planner will:
-1. Identify which skills to load based on feature scope
-2. Inspect `build-logic/`, `gradle/libs.versions.toml`, and any existing modules
-3. Produce a layer-by-layer plan (`:model` → `:api` → `:domain` → `:data` → `:presenter` → `:ui`)
-
-**Gate: show the plan to the user and wait for approval before proceeding.**
+Feature name: **$ARGUMENTS**
 
 ---
 
-## Phase 2: IMPLEMENT
+## Phase 1 — Plan
 
-Load `agents/implementer.md` and execute the approved plan.
+Load `agents/planner.md`.
 
-The implementer will generate code for all 6 layers in build order, including:
-- Gradle module declarations and `build.gradle.kts` files
-- All Kotlin source files per layer
-- Koin module wiring
-- `:presenter` unit tests
-- `:ui` interaction tests and Roborazzi screenshot tests
+The layer planner will inspect `build-logic/`, `gradle/libs.versions.toml`, and any
+existing modules under `feature/$ARGUMENTS/`. It will identify which of the 31 skills
+apply and produce a build-order plan covering all 6 layers:
 
----
-
-## Phase 3: VALIDATE
-
-Load `agents/validator.md` and run:
-- Level 1: architecture audit (`audit_project.py`)
-- Level 2: metadata compilation
-- Level 3: JVM compile + tests
-
-If validation fails → load `agents/fixer.md`, apply fixes, re-validate.
-Maximum 2 fix cycles. If still failing after 2 cycles, stop and report to user.
-
----
-
-## Phase 4: REVIEW
-
-Load `agents/reviewer.md` and review all files created or modified during implementation.
-
-If verdict is `NEEDS_FIXES` → load `agents/fixer.md`, apply fixes, re-validate (one cycle only).
-
----
-
-## Phase 5: CONTEXT UPDATE
-
-Update `.claude/pipeline-context.json`:
-
-```json
-{
-  "last_feature": "<feature_name>",
-  "last_run": "<ISO date>",
-  "successful_validations": <incremented count>,
-  "recurring_issues": [ "<any blocker seen more than once>" ],
-  "proven_patterns": {
-    "<blocker_type>": "<fix strategy that worked>"
-  }
-}
+```
+:model → :api → :domain → :data → :presenter → :ui
 ```
 
-If the file does not exist, create it.
+The plan includes every Koin binding, every test class, and every `libs.versions.toml`
+addition needed before a line of code is written.
+
+**Show the plan. Wait for confirmation before continuing.**
 
 ---
 
-## Phase 6: SUMMARY
+## Phase 2 — Implement
+
+Load `agents/implementer.md`.
+
+Generates complete, runnable Kotlin for each layer in build order. Every file is fully
+written — no stubs, no `// TODO`. Includes:
+
+- `build.gradle.kts` for each new module
+- All Kotlin source files per layer
+- Koin module wiring (platform modules for `:data`, common module for `:presenter`)
+- `:presenter` unit tests with `runTest` + Turbine
+- `:ui` interaction tests with `createComposeRule` + `onNodeWithTag`
+- `:ui` Roborazzi screenshot tests for each meaningful visual state
+
+---
+
+## Phase 3 — Validate
+
+Load `agents/validator.md`.
+
+Runs in order — stops at the first failure:
+
+1. Architecture audit: `python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py .`
+2. `commonMain` metadata compilation
+3. `jvmTest` — presenter unit tests + UI tests in parallel
+
+On failure → load `agents/fixer.md`, apply targeted fixes, re-validate.
+Maximum 2 fix cycles. If still failing, stop and report to user.
+
+---
+
+## Phase 4 — Review
+
+Load `agents/reviewer.md`.
+
+Reviews layer boundaries, Koin wiring, MVI contracts, and testTag coverage on all files
+created during implementation. Any blocker → load `agents/fixer.md` for one fix cycle.
+
+---
+
+## Phase 5 — Wrap up
+
+Update `.claude/pipeline-context.json` with patterns learned during this feature.
 
 Report:
 ```
-Feature: <name>
-Layers created: <list>
-Files created: <count>
-Tests written: <count>
-Validation: PASS
-Review: APPROVE
+Feature:        $ARGUMENTS
+Layers built:   <list>
+Files created:  <N>
+Tests written:  <N> unit + <N> UI
+Validation:     PASS
+Review:         APPROVE
 ```

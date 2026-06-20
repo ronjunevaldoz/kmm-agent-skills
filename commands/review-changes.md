@@ -1,36 +1,38 @@
 # /review-changes
 
-Review all staged and unstaged changes in the current working tree against the KMP 6-layer architecture and skill anti-patterns.
+**KMM Agent Skills** — review everything in the current working tree against the
+6-layer contract, Koin wiring rules, MVI contracts, and testTag coverage.
 
 ---
 
-## Step 1: Identify changed files
+## Step 1 — Find changed files
 
 ```bash
 git diff --name-only HEAD
 git diff --name-only --cached
 ```
 
-Group the changed files by layer:
-- `*/model/**` → `:model`
-- `*/api/**` → `:api`
-- `*/domain/**` → `:domain`
-- `*/data/**` → `:data`
-- `*/presenter/**` → `:presenter`
-- `*/ui/**` → `:ui`
-- `build-logic/**` or `*.gradle.kts` → build
-- `*.yml` or `.github/**` → CI
+Bucket each file into its layer:
+
+| Path pattern | Layer |
+|---|---|
+| `*/model/**` | `:model` |
+| `*/api/**` | `:api` |
+| `*/domain/**` | `:domain` |
+| `*/data/**` | `:data` |
+| `*/presenter/**` | `:presenter` |
+| `*/ui/**` | `:ui` |
+| `build-logic/**`, `*.gradle.kts` | build |
+| `.github/**`, `*.yml` | CI |
 
 ---
 
-## Step 2: Load relevant skills
+## Step 2 — Load only the skills that apply
 
-Based on the changed layers, load only the skills that apply:
-
-| Changed layer | Skill to load |
+| Layers changed | Skills to load |
 |---|---|
 | `:model`, `:api`, `:domain` | `clean-architecture` |
-| `:data` | `repository-pattern`, `network-layer`, `sqldelight-setup`, or `datastore` (whichever applies) |
+| `:data` | `repository-pattern` + whichever of `network-layer`, `sqldelight-setup`, `datastore` applies |
 | `:presenter` | `presenter-module`, `mvi` |
 | `:ui` | `mvi`, `design-system`, `roborazzi` |
 | `build-logic/` | `feature-scaffold` |
@@ -38,7 +40,7 @@ Based on the changed layers, load only the skills that apply:
 
 ---
 
-## Step 3: Run the audit script
+## Step 3 — Run the architecture audit
 
 ```bash
 python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py .
@@ -48,29 +50,30 @@ Any finding is an automatic blocker.
 
 ---
 
-## Step 4: Load `agents/reviewer.md` and review all changed files
+## Step 4 — Review
 
-Focus on:
-- Layer boundary violations
-- Koin wiring gaps
-- MVI contract correctness
-- Test tag coverage on new composables
-- Missing or stale golden images (if `:ui` changed)
+Load `agents/reviewer.md` and check all changed files for:
+
+- Layer boundary violations (imports crossing the dependency rule)
+- Koin wiring gaps (unbound interfaces, unregistered ViewModels)
+- MVI contract violations (`_state.value.copy` race, `SharedFlow` for effects)
+- Missing `testTag` on interactive or assertable composables
+- Stale Roborazzi goldens (if `:ui` composables changed shape)
 
 ---
 
-## Step 5: Output
+## Step 5 — Output
 
 ```
-CHANGED FILES: <count> across <layers>
-SKILLS LOADED: <list>
-AUDIT: PASS | <N findings>
+CHANGED: <N> files across <layers>
+SKILLS:  <list loaded>
+AUDIT:   PASS | FAIL (<N> findings)
 
 BLOCKERS: <count>
 WARNINGS: <count>
-VERDICT: APPROVE | NEEDS_FIXES
+VERDICT:  APPROVE | NEEDS_FIXES
 
 <full reviewer output>
 ```
 
-If `NEEDS_FIXES`, list the exact changes required. Do not apply them automatically — let the user decide.
+If `NEEDS_FIXES`, list exact required changes. Do not apply automatically — present to user first.

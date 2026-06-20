@@ -1,66 +1,72 @@
 # /run-audit $ARGUMENTS
 
-Run the full KMP architecture audit on the project at `$ARGUMENTS` (defaults to current directory if empty).
+**KMM Agent Skills** — run the architecture audit on a KMP project and get
+per-finding remediation steps from the matching skill.
+
+Target project: `$ARGUMENTS` (defaults to `.` if empty)
 
 ---
 
-## Step 1: Resolve project root
-
-If `$ARGUMENTS` is empty, use `.` (current directory).
-If `$ARGUMENTS` is a relative path, resolve it.
+## Step 1 — Run the script
 
 ```bash
-PROJECT_ROOT="${ARGUMENTS:-.}"
+python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py "${ARGUMENTS:-.}"
 ```
+
+The script detects 5 architectural smells:
+
+| Pattern | What it catches |
+|---|---|
+| `state copy race` | `_state.value = _state.value.copy(...)` — race condition in ViewModel |
+| `sharedflow replay effect` | `MutableSharedFlow(replay=1)` used for one-shot UI effects |
+| `network result in ui` | `NetworkResult<T>` leaking into `:ui` or `:presentation` layer |
+| `data import in ui` | `*.data.*` imported from `:ui` — layer boundary violation |
+| `manual screen capture` | `playwright`, `adb screencap`, `xcrun simctl io` — replace with Roborazzi |
 
 ---
 
-## Step 2: Run the audit script
+## Step 2 — Explain each finding
 
-```bash
-python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py "$PROJECT_ROOT"
-```
+For every finding, load the relevant skill and give a concrete fix:
 
----
-
-## Step 3: Interpret findings
-
-For each finding, load the relevant skill and explain the remediation:
-
-| Finding label | Skill to load | What to fix |
+| Finding | Skill | Fix |
 |---|---|---|
-| `state copy race` | `presenter-module`, `mvi` | Replace `_state.value = _state.value.copy(...)` with `_state.update { it.copy(...) }` |
-| `sharedflow replay effect` | `mvi` | Replace `MutableSharedFlow(replay=1)` with `Channel(Channel.BUFFERED).receiveAsFlow()` |
-| `network result in ui` | `clean-architecture`, `network-layer` | Move `NetworkResult` unwrapping to `:presenter`; `:ui` receives only `UiState` |
-| `data import in ui` | `clean-architecture` | Remove `*.data.*` import from `:ui`; expose the type via `:api` or `:model` |
-| `manual screen capture` | `roborazzi` | Replace with `captureRoboImage(...)` in `jvmTest`; no device or emulator needed |
+| `state copy race` | `presenter-module`, `mvi` | `_state.update { it.copy(...) }` — atomic, race-free |
+| `sharedflow replay effect` | `mvi` | `Channel<Effect>(Channel.BUFFERED).receiveAsFlow()` |
+| `network result in ui` | `clean-architecture`, `network-layer` | Unwrap `NetworkResult` in `:presenter`; pass only `UiState` to `:ui` |
+| `data import in ui` | `clean-architecture` | Move the shared type to `:model` or `:api`; import from there |
+| `manual screen capture` | `roborazzi` | `captureRoboImage("name.png") { ... }` in `jvmTest` — no device needed |
 
 ---
 
-## Step 4: Output
+## Step 3 — Output
 
+On findings:
 ```
-PROJECT: <resolved path>
-AUDIT RESULT: PASS | <N findings>
+PROJECT: <path>
+RESULT:  <N> findings
 
 FINDINGS:
-- <label>: <file path>
-  → Fix: <what to change>
-  → Skill: <skill name for full guidance>
+  state copy race: feature/auth/presenter/AuthViewModel.kt
+  → Fix: replace _state.value = _state.value.copy(...) with _state.update { it.copy(...) }
+  → Full guidance: kotlin-multiplatform-mvi / kotlin-multiplatform-presenter-module
 
 SUMMARY:
-  Total findings: <N>
-  Blockers:       <N>
-  Estimated fix time: <rough estimate>
+  Total:    <N>
+  Blockers: <N>
 ```
 
-If `PASS`, output:
+On clean:
 ```
-✓ No architecture smells found. Project is clean.
+PROJECT: <path>
+RESULT:  CLEAN — no architecture smells found
 ```
 
 ---
 
-## Step 5: Optional — auto-fix
+## Step 4 — Optional auto-fix
 
-If the user says "fix it" after seeing the findings, load `agents/fixer.md` and apply fixes for HIGH confidence findings only. Leave LOW and MEDIUM for user review.
+If the user says "fix it", load `agents/fixer.md`.
+
+Apply only HIGH confidence fixes automatically. Present MEDIUM and LOW to the user
+for a decision before touching anything.
