@@ -364,9 +364,18 @@ class AuthContentScreenshotTest {
 }
 ```
 
-Each call writes a PNG to `src/jvmTest/snapshots/`. Capture one test per meaningful visual
-state: default, loading, error, empty, dark mode. Avoid redundant captures (e.g. don't
-capture every error message variant — capture the error state once).
+Each call writes a PNG to `src/jvmTest/snapshots/`.
+
+**Required minimum per screen:**
+- `_light` + `_dark` variant for the default state — always, no exceptions
+- `_light` + `_dark` variant for each meaningful variant (loading, error, empty)
+- If adaptive layout is in use: Compact + Expanded × light + dark = minimum 4 captures
+
+A test with only a light capture is a reviewer blocker (`[THEME]`). A color that
+passes visual review in light mode may be invisible or low-contrast in dark mode.
+
+Avoid redundant captures (don't capture every error message — capture the error state
+shape once, light and dark).
 
 ---
 

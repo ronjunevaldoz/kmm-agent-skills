@@ -130,6 +130,7 @@ versions when the local repo can be checked directly.
 |---|---|
 | `kotlin-multiplatform-design-system` | Tokens (colors, typography, shapes, spacing), dark mode, 6 core components, no Material dependency |
 | `kotlin-multiplatform-design-system-extended` | 27 additional components: Dialog, Sheet, Toast, Tabs, TopAppBar, Checkbox, etc. |
+| `kotlin-multiplatform-adaptive-layout` | WindowSizeClass, Compact/Medium/Expanded breakpoints, list-detail split, adaptive navigation, cross-session pattern consistency |
 | `kotlin-multiplatform-compose-slot-api` | `@Composable () -> Unit` slots, scoped slots, CompositionLocal, component API shape |
 | `kotlin-multiplatform-compose-state-hoisting` | Hoist-until-shared rule, controlled components, stateless vs stateful composables |
 | `kotlin-multiplatform-compose-state-container` | `remember` vs `rememberSaveable` vs `ViewModel` survival matrix, custom Saver |
@@ -381,6 +382,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "shared strings", "localization", "image assets", "fonts" | `kotlin-multiplatform-shared-resources` |
 | "MVI", "ViewModel state", "one-shot effects", "Screen/Content split" | `kotlin-multiplatform-mvi` |
 | "design system", "AppTheme", "design tokens", "dark mode" | `kotlin-multiplatform-design-system` |
+| "adaptive layout", "WindowSizeClass", "tablet layout", "desktop layout", "list detail", "split screen", "navigation rail", "Compact Medium Expanded", "responsive UI", "master detail" | `kotlin-multiplatform-adaptive-layout` |
 | "dialog", "bottom sheet", "toast", "tabs", "TopAppBar", "Checkbox" | `kotlin-multiplatform-design-system-extended` |
 | "slot API", "content lambda", "composable parameter", "scoped slot" | `kotlin-multiplatform-compose-slot-api` |
 | "state hoisting", "hoist state", "controlled component", "where does state go" | `kotlin-multiplatform-compose-state-hoisting` |

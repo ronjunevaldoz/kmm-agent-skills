@@ -17,6 +17,7 @@ PATTERNS = [
         re.IGNORECASE,
     )),
     ("magic color literal", re.compile(r"\bColor\(0x[0-9A-Fa-f]")),
+    ("system dark theme scatter", re.compile(r"\bisSystemInDarkTheme\(\)")),
 ]
 
 
@@ -45,6 +46,10 @@ def audit_project(root: Path) -> list[str]:
                     continue
                 if any(part in path.stem for part in ("Color", "Token", "Theme", "color", "token", "theme")):
                     continue
+            if label == "system dark theme scatter" and any(
+                part in path.stem for part in ("Theme", "theme", "App")
+            ):
+                continue
             if pattern.search(text):
                 findings.append(f"{label}: {path.relative_to(root)}")
 

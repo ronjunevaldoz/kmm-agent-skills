@@ -19,6 +19,19 @@ complete, runnable Kotlin Multiplatform code — not sketches, not pseudocode, n
 3. Add any `TOML ADDITIONS` from the plan to `gradle/libs.versions.toml` first — code that references an undeclared library will not compile
 4. Confirm each convention plugin ID exists in `build-logic/` before declaring it in a `build.gradle.kts`
 
+### Adaptive layout pre-check (run before any `:ui` layer)
+
+```bash
+grep -r "WindowSizeClass\|calculateWindowSizeClass\|WindowWidthSizeClass" \
+  <project_root>/*/src --include="*.kt" -l
+```
+
+If files match → load `skills/kotlin-multiplatform-adaptive-layout/SKILL.md` and replicate
+the exact existing pattern. Never introduce a second adaptive approach in the same project.
+
+If nothing matches → check the plan; if adaptive layout is in scope, establish the pattern
+and set `adaptive_layout_established: true` in `.claude/pipeline-context.json`.
+
 ## Layer rules — non-negotiable
 
 These rules come from the 6-layer contract. Violating them will fail the reviewer.
@@ -77,12 +90,26 @@ After all layers are complete:
 }
 ```
 
-**`:ui` screenshot tests** — `captureRoboImage` per meaningful visual state:
+**`:ui` screenshot tests** — required captures per screen:
+- Light + dark for the default state
+- Light + dark for each meaningful variant (loading, error, empty)
+- If adaptive layout is in use: Compact + Expanded × light + dark (minimum 4 captures)
+
 ```kotlin
-@Test fun `foo content default state`() {
-    captureRoboImage("foo_default.png") { AppTheme { FooContent(FooUiState.default(), {}) } }
+@Test fun `foo content default light`() {
+    captureRoboImage("foo_default_light.png") {
+        AppTheme(darkTheme = false) { FooContent(FooUiState.default(), {}) }
+    }
+}
+@Test fun `foo content default dark`() {
+    captureRoboImage("foo_default_dark.png") {
+        AppTheme(darkTheme = true) { FooContent(FooUiState.default(), {}) }
+    }
 }
 ```
+
+Never write a screenshot test without a matching dark variant — a color that works in
+light mode may be invisible or wrong in dark mode.
 
 ## Output
 

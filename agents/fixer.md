@@ -90,6 +90,55 @@ AppButton(
 
 Never use a bare string literal in `testTag(...)`. Always use the constants object.
 
+### `[THEME]` — magic color literal in composable
+
+```kotlin
+// Before (blocker):
+Box(modifier = Modifier.background(Color(0xFF6200EE)))
+
+// After (fix):
+Box(modifier = Modifier.background(AppTheme.colors.primary))
+```
+
+If the token does not exist yet, add it to `AppColors.kt` with both light and dark
+variants, then reference it through `AppTheme.colors`.
+
+### `[THEME]` — `isSystemInDarkTheme()` scattered in composable
+
+```kotlin
+// Before (blocker — inside FooContent.kt):
+val isDark = isSystemInDarkTheme()
+val textColor = if (isDark) Color.White else Color.Black
+
+// After (fix):
+val textColor = AppTheme.colors.onBackground  // token handles both modes
+```
+
+`isSystemInDarkTheme()` belongs only in the theme entry point (`App.kt` or `AppTheme.kt`).
+Everywhere else, consume theme tokens — never query the system dark state directly.
+
+### `[THEME]` — missing dark variant in screenshot test
+
+Add a paired dark capture for every existing light capture:
+
+```kotlin
+@Test fun `foo content default dark`() {
+    captureRoboImage("foo_default_dark.png") {
+        AppTheme(darkTheme = true) { FooContent(FooUiState.default(), {}) }
+    }
+}
+```
+
+### `[ADAPTIVE]` — screen missing `WindowSizeClass` parameter
+
+1. Load `skills/kotlin-multiplatform-adaptive-layout/SKILL.md`
+2. Grep for an existing screen that already accepts `WindowSizeClass` — copy its signature
+3. Add the parameter to the new screen's `FooScreen` and `FooContent`:
+   ```kotlin
+   fun FooContent(state: FooContract.State, windowSizeClass: WindowSizeClass, ...)
+   ```
+4. Update the nav host call site to pass `windowSizeClass` down
+
 ### `[TEST]` — manual screen capture detected
 
 Remove the offending tool (`playwright`, `adb screencap`, `xcrun simctl io`,

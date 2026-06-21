@@ -35,6 +35,8 @@ List every finding verbatim if any exist. Each finding maps to a blocker label:
 | `network result in ui` | `[LAYER BOUNDARY]` |
 | `data import in ui` | `[LAYER BOUNDARY]` |
 | `manual screen capture` | `[TEST]` |
+| `magic color literal` | `[THEME]` |
+| `system dark theme scatter` | `[THEME]` |
 
 ---
 
@@ -82,6 +84,38 @@ For each screen's contract file:
 
 ---
 
+## Check 6: Dark/light theme coverage
+
+For every Roborazzi screenshot test file:
+- Every visual state must have **both** a `_light` and `_dark` capture
+- `AppTheme(darkTheme = false)` and `AppTheme(darkTheme = true)` must both appear
+- A screenshot test that only captures light mode is a **`[THEME]`** blocker
+
+For every composable in the changed files:
+- No `Color(0xFF…)` literal — must use `AppTheme.colors.X` (caught by audit script as `magic color literal`)
+- No `isSystemInDarkTheme()` called inside a composable directly — it must only appear in
+  the theme entry point (`App.kt`, `AppTheme.kt`); direct calls scatter theme logic and
+  produce inconsistent results (caught by audit script as `system dark theme scatter`)
+
+---
+
+## Check 7: Adaptive layout consistency
+
+Run before reviewing any `:ui` file:
+
+```bash
+grep -r "WindowSizeClass\|calculateWindowSizeClass" <project_root>/*/src --include="*.kt" -l
+```
+
+- If **any** existing screen uses `WindowSizeClass` and the newly added screen does **not**,
+  that is a **`[ADAPTIVE]`** blocker
+- If `adaptive_layout_established: true` in `.claude/pipeline-context.json`, all new
+  screens must pass `WindowSizeClass` as a parameter
+- Roborazzi tests for adaptive screens must include Compact + Expanded × light + dark
+  (minimum 4 captures)
+
+---
+
 ## Output
 
 ```
@@ -92,6 +126,8 @@ BLOCKERS (<count>):
   [KOIN]           <module file> — <binding that is missing>
   [MVI]            <file> — <contract violation>
   [TEST]           <file> — <what is missing or forbidden>
+  [THEME]          <file> — <magic color literal | missing dark variant | isSystemInDarkTheme scattered>
+  [ADAPTIVE]       <file> — <screen missing WindowSizeClass parameter | missing breakpoint screenshot>
 
 WARNINGS (<count>):
   [MISSING TAG]  <composable>: <node description> has no testTag

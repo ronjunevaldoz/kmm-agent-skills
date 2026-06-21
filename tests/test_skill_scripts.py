@@ -252,6 +252,31 @@ class AuditProjectTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any("magic color literal" in f for f in findings))
 
+    def test_audit_project_finds_system_dark_theme_in_composable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "val isDark = isSystemInDarkTheme()\n"
+                "val bg = if (isDark) Color.Black else Color.White",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("system dark theme scatter" in f for f in findings))
+
+    def test_audit_project_ignores_system_dark_theme_in_app_theme(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "app" / "src"
+            src_dir.mkdir(parents=True)
+            (src_dir / "AppTheme.kt").write_text(
+                "AppTheme(darkTheme = isSystemInDarkTheme()) { content() }",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("system dark theme scatter" in f for f in findings))
+
 
 class ScaffoldAuthServiceTests(unittest.TestCase):
     def test_scaffold_auth_service_writes_expected_files(self) -> None:
