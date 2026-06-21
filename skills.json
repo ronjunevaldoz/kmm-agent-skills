@@ -1,5 +1,5 @@
 {
-  "version": "1.16.0",
+  "version": "1.16.1",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -1280,7 +1280,9 @@
         "play store legal",
         "privacy screen"
       ],
-      "scripts": []
+      "scripts": [
+        "detect_data_collection.py"
+      ]
     },
     {
       "name": "kotlin-multiplatform-logging",

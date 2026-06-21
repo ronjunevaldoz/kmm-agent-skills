@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.16.1] — 2026-06-21
+
+### Other
+
+- refine(legal-docs): auto-detect data collection + consent gate explanation + CI gate
+
+---
+
 ## [v1.16.0] — 2026-06-21
 
 ### Added
