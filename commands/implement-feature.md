@@ -7,12 +7,26 @@ Feature name: **$ARGUMENTS**
 
 ---
 
+## Phase 0 — Skills freshness check
+
+```bash
+python3 scripts/check_updates.py
+```
+
+| Exit | Action |
+|---|---|
+| `0` | Skills are current — proceed to Phase 1 |
+| `1` | Updates available — display the output, ask the user: **Pull now / Skip / View diff** (see `commands/check-updates.md`). Do not pull automatically. After the choice is made, proceed to Phase 1. |
+| `2` | Remote unreachable — print `⚠️ Running with local skills (offline)` and proceed to Phase 1. |
+
+---
+
 ## Phase 1 — Plan
 
 Load `agents/planner.md`.
 
 The layer planner will inspect `build-logic/`, `gradle/libs.versions.toml`, and any
-existing modules under `feature/$ARGUMENTS/`. It will identify which of the 31 skills
+existing modules under `feature/$ARGUMENTS/`. It will identify which of the 45 skills
 apply and produce a build-order plan covering all 6 layers:
 
 ```
