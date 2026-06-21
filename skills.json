@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
+  "version": "1.4.0",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -1084,6 +1084,51 @@
         "HTTP interceptor",
         "API client setup",
         "network error handling"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-paging",
+      "path": "skills/kotlin-multiplatform-paging",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "paging",
+        "Paging 3",
+        "PagingSource",
+        "Pager",
+        "PagingData",
+        "LazyPagingItems",
+        "collectAsLazyPagingItems",
+        "cursor pagination",
+        "offset pagination",
+        "infinite scroll",
+        "load more",
+        "RemoteMediator",
+        "LoadState",
+        "pagingSourceFactory",
+        "cachedIn"
+      ],
+      "triggers": [
+        "paging",
+        "Paging 3",
+        "PagingSource",
+        "Pager",
+        "PagingData",
+        "LazyPagingItems",
+        "collectAsLazyPagingItems",
+        "infinite scroll",
+        "load more",
+        "paginate",
+        "next page",
+        "cursor pagination",
+        "offset pagination",
+        "page token",
+        "RemoteMediator",
+        "load state",
+        "append loading",
+        "paged list KMP"
       ],
       "scripts": []
     },

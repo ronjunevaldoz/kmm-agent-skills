@@ -2,6 +2,19 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.4.0] — 2026-06-21
+
+### Added
+
+- feat(paging): add kotlin-multiplatform-paging skill
+
+### Fixed
+
+- fix(reviewer): add adaptive_layout_migration_mode to pipeline-context (KI-003)
+- fix(pipeline): commit pipeline-context.json at end of every pipeline run (KI-001) fix(hooks): add scripts/install-hooks.sh one-liner (KI-002)
+
+---
+
 ## [v1.3.0] — 2026-06-21
 
 ### Added
