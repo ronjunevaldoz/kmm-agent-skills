@@ -16,6 +16,7 @@ PATTERNS = [
         r"playwright|adb\s+screencap|xcrun\s+simctl\s+io|Robot\(\)\.createScreenCapture|ProcessBuilder.*screenshot",
         re.IGNORECASE,
     )),
+    ("magic color literal", re.compile(r"\bColor\(0x[0-9A-Fa-f]")),
 ]
 
 
@@ -39,6 +40,11 @@ def audit_project(root: Path) -> list[str]:
                 token in path.as_posix() for token in ("/ui/", "/presentation/")
             ):
                 continue
+            if label == "magic color literal":
+                if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+                    continue
+                if any(part in path.stem for part in ("Color", "Token", "Theme", "color", "token", "theme")):
+                    continue
             if pattern.search(text):
                 findings.append(f"{label}: {path.relative_to(root)}")
 

@@ -1365,7 +1365,7 @@ All of these are already in `compose-multiplatform`. No new catalog entries requ
 
 ## Common Anti-Patterns
 
-- hardcoding colors, sizes, or text styles in feature composables — always use tokens
+- magic color literals in composables — `Color(0xFF6200EE)` written directly inside a `@Composable` instead of `AppTheme.colors.primary`; the audit script (`audit_project.py`) flags `Color(0x…)` in any `/ui/` or `/presentation/` file that is not a token definition file
 - using Material3 `MaterialTheme.colorScheme` alongside `AppTheme` — the two token systems conflict
 - defining component variants as boolean parameters (`isOutlined`, `isDanger`) — use a sealed variant class
 - putting design system tokens in `:feature:*` modules — tokens belong in `:core:designsystem` only

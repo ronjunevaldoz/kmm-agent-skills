@@ -216,6 +216,42 @@ class AuditProjectTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertTrue(any("manual screen capture" in f for f in findings))
 
+    def test_audit_project_finds_magic_color_in_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "auth" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "AuthScreen.kt").write_text(
+                "Box(modifier = Modifier.background(Color(0xFF6200EE)))",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("magic color literal" in f for f in findings))
+
+    def test_audit_project_ignores_magic_color_in_token_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "core" / "designsystem" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "AppColors.kt").write_text(
+                "val primary = Color(0xFF6200EE)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("magic color literal" in f for f in findings))
+
+    def test_audit_project_ignores_magic_color_outside_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data_dir = root / "feature" / "auth" / "data"
+            data_dir.mkdir(parents=True)
+            (data_dir / "AuthMapper.kt").write_text(
+                "val highlight = Color(0xFFFF0000)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("magic color literal" in f for f in findings))
+
 
 class ScaffoldAuthServiceTests(unittest.TestCase):
     def test_scaffold_auth_service_writes_expected_files(self) -> None:

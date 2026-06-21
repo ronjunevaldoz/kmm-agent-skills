@@ -22,6 +22,7 @@ The script detects 5 architectural smells:
 | `network result in ui` | `NetworkResult<T>` leaking into `:ui` or `:presentation` layer |
 | `data import in ui` | `*.data.*` imported from `:ui` — layer boundary violation |
 | `manual screen capture` | `playwright`, `adb screencap`, `xcrun simctl io` — replace with Roborazzi |
+| `magic color literal` | `Color(0xFF…)` written directly in a composable instead of `AppTheme.colors.X` — design token bypass |
 
 ---
 
@@ -36,6 +37,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `network result in ui` | `clean-architecture`, `network-layer` | Unwrap `NetworkResult` in `:presenter`; pass only `UiState` to `:ui` |
 | `data import in ui` | `clean-architecture` | Move the shared type to `:model` or `:api`; import from there |
 | `manual screen capture` | `roborazzi` | `captureRoboImage("name.png") { ... }` in `jvmTest` — no device needed |
+| `magic color literal` | `design-system` | Replace `Color(0xFF…)` with `AppTheme.colors.X`; define the token in `AppColors.kt` |
 
 ---
 
