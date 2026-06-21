@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.16.3] — 2026-06-22
+
+### Fixed
+
+- fix(adaptive-layout): add missing trigger keywords for mobile/desktop/detail-split routing
+
+---
+
 ## [v1.16.2] — 2026-06-21
 
 ### Other

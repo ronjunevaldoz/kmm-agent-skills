@@ -1,5 +1,5 @@
 {
-  "version": "1.16.2",
+  "version": "1.16.3",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -126,7 +126,10 @@
         "ListDetailPane",
         "tablet layout",
         "desktop layout",
+        "mobile layout",
+        "phone layout",
         "split screen",
+        "detail split",
         "list detail",
         "side panel",
         "navigation rail",
@@ -136,9 +139,15 @@
         "adaptive navigation",
         "calculateWindowSizeClass",
         "different layout phone tablet",
+        "different layout phone desktop",
         "responsive composable",
         "multi-pane layout",
-        "master detail KMP"
+        "master detail KMP",
+        "pane layout",
+        "screen size breakpoint",
+        "layout per screen size",
+        "detect all screen layouts",
+        "all screen sizes"
       ],
       "scripts": []
     },
