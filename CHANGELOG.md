@@ -1,5 +1,17 @@
 # Changelog
 
+All notable changes to kmm-agent-skills are documented here.
+
+## [v1.16.0] — 2026-06-21
+
+### Added
+
+- feat(legal-docs): add kotlin-multiplatform-legal-docs lawyer agent skill
+
+---
+
+# Changelog
+
 All notable changes to **kmm-agent-skills** are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).

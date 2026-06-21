@@ -1,5 +1,5 @@
 {
-  "version": "1.15.0",
+  "version": "1.16.0",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -1242,6 +1242,45 @@
       "scripts": [
         "scaffold_auth_service.py"
       ]
+    },
+    {
+      "name": "kotlin-multiplatform-legal-docs",
+      "path": "skills/kotlin-multiplatform-legal-docs",
+      "description": "Lawyer agent for KMP apps: generates Privacy Policy and Terms & Conditions tailored to the data your app actually collects. Covers Google Play data safety section, App Store privacy nutrition labels, GDPR (EU), CCPA (California), and in-app display via a CMP composable. Produces web-ready markdown and a KMP WebView/ScrollView screen for showing the docs inside the app. Does NOT provide legal advice \u2014 output is a best-practice template that must be reviewed by a qualified lawyer before publishing.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "privacy policy",
+        "terms and conditions",
+        "terms of service",
+        "GDPR",
+        "CCPA",
+        "Google Play data safety",
+        "App Store privacy labels",
+        "legal docs",
+        "KMP legal",
+        "data collection disclosure",
+        "app store compliance",
+        "privacy screen",
+        "in-app terms",
+        "cookie policy"
+      ],
+      "triggers": [
+        "privacy policy",
+        "terms and conditions",
+        "terms of service",
+        "GDPR",
+        "CCPA",
+        "data safety",
+        "App Store privacy",
+        "legal docs",
+        "user data disclosure",
+        "consent screen",
+        "app compliance",
+        "play store legal",
+        "privacy screen"
+      ],
+      "scripts": []
     },
     {
       "name": "kotlin-multiplatform-logging",
