@@ -1,5 +1,5 @@
 {
-  "version": "1.5.1",
+  "version": "1.5.2",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -1245,7 +1245,7 @@
       "path": "skills/kotlin-multiplatform-mongodb-database",
       "description": "MongoDB Kotlin Coroutine Driver pattern for Kotlin Multiplatform full-stack apps. Covers: server-side MongoDB access, document mapping, repository boundaries, typed database errors, reactive reads with Flow, change streams, and a scaffold script for repeated database setup. Use this for the backend data layer, not shared client persistence.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-13",
+      "last_updated": "2026-06-21",
       "keywords": [
         "MongoDB",
         "Kotlin coroutine driver",

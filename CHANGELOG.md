@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.5.2] — 2026-06-21
+
+### Fixed
+
+- Fix: add comprehensive testing section to MongoDB skill — FakeRepository, Flapdoodle integration tests, change stream testing, and document mapping tests
+
+---
+
 ## [v1.5.1] — 2026-06-21
 
 ### Fixed
