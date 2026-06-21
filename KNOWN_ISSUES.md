@@ -33,7 +33,7 @@ Resolved issues stay here for reference — they explain *why* a rule exists.
 
 ### KI-005 — `krpc_established` flag round-trip has no automated test
 
-**Status:** Open
+**Status:** Resolved — see KI-R12 below
 
 **Symptom:** The implementer sets `krpc_established: true` in `pipeline-context.json`
 after confirming kRPC is active; the reviewer reads it to skip the grep. The wiring
@@ -49,7 +49,7 @@ in the reviewer would silently regress — every session would re-run the grep.
 
 ### KI-006 — Hook scripts lack unit tests
 
-**Status:** Open
+**Status:** Resolved — see KI-R13 below
 
 **Symptom:** `validate-architecture.sh` and `check-skill-freshness.sh` are shell scripts
 that wrap `audit_project.py` and `check_updates.py`. The Python scripts have 43 tests,
@@ -210,6 +210,32 @@ The pre-commit message names the changed scripts and explains the requirement.
 Reviewer Check 12, implementer Script test maintenance section, and `/modify-skill` Rule 8
 all mirror the same rule so the enforcement is layered — the hook is the hard gate,
 but agents enforce it before a commit is ever attempted.
+
+---
+
+### KI-R12 — `krpc_established` flag round-trip had no automated test
+
+**Resolved:** `v1.12.0` — `feat(tests): KI-005 + KI-006 — pipeline flag contract tests and hook script tests`  
+**Was:** The implementer and reviewer both referenced `krpc_established` in their markdown, but no test verified the contract. A refactor removing either reference would silently break the round-trip — sessions would re-run the kRPC grep every time instead of short-circuiting.  
+**Fix:** Added `PipelineContextFlagTests` class to `tests/test_skill_scripts.py` with four tests:
+- `pipeline-context.json` has the key and it is a bool
+- `agents/implementer.md` references `krpc_established` (set path)
+- `agents/reviewer.md` references `krpc_established` (read path)
+
+---
+
+### KI-R13 — Hook scripts had no unit tests
+
+**Resolved:** `v1.12.0` — `feat(tests): KI-005 + KI-006 — pipeline flag contract tests and hook script tests`  
+**Was:** `validate-architecture.sh` and `check-skill-freshness.sh` were shell scripts with no test coverage. Three bugs were also discovered and fixed in the process:
+- `validate-architecture.sh` had no way to point at a test project root (always used the skills repo itself, causing SKILL.md anti-pattern examples to trigger false positives)
+- `check-skill-freshness.sh` used `grep` without `|| true` — `set -e` caused exit 1 when a skill had no `last-updated` line
+- `check-skill-freshness.sh` had no `nullglob` — empty skills directories caused a spurious glob match  
+**Fix:**
+- Added `$2` project root override to `validate-architecture.sh`
+- Added `|| true` to `grep` in `check-skill-freshness.sh`
+- Added `shopt -s nullglob` to `check-skill-freshness.sh`
+- Added `HookScriptTests` class (8 tests covering skip logic, clean-project pass, stale/fresh detection, missing-date warning, empty directory)
 
 ---
 

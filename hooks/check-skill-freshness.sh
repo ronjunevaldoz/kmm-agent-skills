@@ -1,21 +1,26 @@
 #!/usr/bin/env bash
 # Warns when a skill's last-updated date is more than 90 days old.
 # Run manually or as a scheduled CI check — not a blocking hook.
-# Usage: ./hooks/check-skill-freshness.sh
+# Usage: ./hooks/check-skill-freshness.sh [skills-dir]
+#   skills-dir  Optional override for the skills directory (default: <repo-root>/skills).
+#               Used by tests to point at a temp directory without touching the real repo.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SKILLS_DIR="$REPO_ROOT/skills"
+SKILLS_DIR="${1:-$REPO_ROOT/skills}"
 
 THRESHOLD_DAYS=90
 TODAY=$(date +%s)
 STALE_COUNT=0
 
+# nullglob: if no SKILL.md files exist the loop body is never entered
+shopt -s nullglob
+
 for skill_md in "$SKILLS_DIR"/*/SKILL.md; do
   skill_name=$(basename "$(dirname "$skill_md")")
-  last_updated=$(grep "last-updated:" "$skill_md" | sed "s/.*last-updated: *'//" | sed "s/'.*//")
+  last_updated=$(grep "last-updated:" "$skill_md" | sed "s/.*last-updated: *'//" | sed "s/'.*//") || true
 
   if [[ -z "$last_updated" ]]; then
     echo "WARN: $skill_name — no last-updated date found"

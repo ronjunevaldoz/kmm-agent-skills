@@ -112,8 +112,6 @@ Targeted improvements that don't require new skills.
 
 | Item | Priority | Description |
 |---|---|---|
-| `krpc_established` round-trip test | MEDIUM | Add a unit test verifying the implementer sets the flag and the reviewer reads it. Currently the wiring is correct but untested — a refactor could silently break it. |
-| Unit tests for hook scripts | LOW | `validate-architecture.sh` and `check-skill-freshness.sh` are shell scripts with no test coverage. The audit scripts they wrap are tested, but the hook plumbing itself is not. |
 | CI gate: block PR without Testing section | LOW | `scan_skill_issues.py` runs at release time, but a skill directory could be merged without a Testing section if the author doesn't cut a release. Add a GitHub Actions step to run the scanner on every PR. |
 
 ---
