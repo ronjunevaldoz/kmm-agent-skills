@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.6.0] — 2026-06-21
+
+### Other
+
+- Add skills freshness check — auto-detect when local skills are behind origin/main at pipeline start
+
+---
+
 ## [v1.5.2] — 2026-06-21
 
 ### Fixed
