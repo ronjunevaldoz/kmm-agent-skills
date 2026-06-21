@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.9.0] — 2026-06-21
+
+### Added
+
+- feat(pipeline): add ktlint enforcement + proactive issue tracking
+
+---
+
 ## [v1.8.0] — 2026-06-21
 
 ### Added
