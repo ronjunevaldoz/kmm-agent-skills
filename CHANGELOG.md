@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.11.1] — 2026-06-21
+
+### Added
+
+- feat(commands): add /verify command for KMP validation pipeline
+
+### Docs
+
+- docs: update PLAN.md, KNOWN_ISSUES.md for v1.11.0 state
+
+---
+
 ## [v1.11.0] — 2026-06-21
 
 ### Added
