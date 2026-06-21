@@ -10,12 +10,17 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 - `CONTRIBUTING.md` — contribution guide covering skill authoring, commit format, PR checklist, and release process
+- `agents/changelog.md` — changelog agent: categorizes git + skill diff into Breaking/New/Improved/Fixed and generates consumer-facing release notes
+- `commands/release-notes.md` — `/release-notes` command: generates per-skill or collection release notes from git history and `## Changelog` tables
+- `scripts/generate_release_notes.py` — reads git log, maps commits to skills, parses per-skill `## Changelog` tables; outputs structured JSON for the changelog agent
+- `## Changelog` section added to all 47 skills — consumer-facing release note table travels with each skill when installed
 
 ### Changed
 - `feature-scaffold` skill Step 3 rewritten: mandatory `Kotlin/kmp-wizard` clone replaces manual file creation
 - `feature-scaffold` skill Step 4 rewritten: extend kmp-wizard's build-logic rather than recreate it
 - `feature-scaffold` anti-patterns: hand-scaffolding and precompiled `.gradle.kts` script plugins now listed as explicit blockers
 - `/new-project` command F-01 step updated to clone-first mandate with `./gradlew help` gate
+- `audit_skills_repo.py`: `## Changelog` added to `REQUIRED_MARKERS` — skills without it now fail the audit
 
 ### Fixed
 - `kotlin-multiplatform-expert` skill: removed private Carpool project reference from docs-first rule
