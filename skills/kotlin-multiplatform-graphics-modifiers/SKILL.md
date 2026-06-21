@@ -168,6 +168,60 @@ Modifier.drawWithCache {
 
 ---
 
+## Testing
+
+```kotlin
+// Graphics modifiers are visual — test with Roborazzi screenshot regression.
+// Interaction tests are not applicable here; focus on visual contracts.
+
+@Test fun `graphicslayer_rotation_45deg screenshot`() {
+    captureRoboImage("graphics_rotation_45deg.png") {
+        AppTheme {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .graphicsLayer { rotationZ = 45f }
+                    .background(AppTheme.colors.primary),
+            )
+        }
+    }
+}
+
+@Test fun `drawbehind_rounded_border screenshot`() {
+    captureRoboImage("graphics_drawbehind_border.png") {
+        AppTheme {
+            val color = AppTheme.colors.primary
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .drawBehind {
+                        drawRoundRect(
+                            color = color,
+                            cornerRadius = CornerRadius(8.dp.toPx()),
+                            style = Stroke(width = 2.dp.toPx()),
+                        )
+                    },
+            )
+        }
+    }
+}
+
+@Test fun `graphicslayer_alpha_50_percent screenshot`() {
+    captureRoboImage("graphics_alpha_50.png") {
+        AppTheme {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .graphicsLayer { alpha = 0.5f }
+                    .background(AppTheme.colors.primary),
+            )
+        }
+    }
+}
+```
+
+---
+
 ## Common Anti-Patterns
 
 - using `graphicsLayer` to fake the whole graph rendering

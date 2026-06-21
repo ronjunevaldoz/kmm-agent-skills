@@ -1425,6 +1425,61 @@ All of these are already in `compose-multiplatform`. No new catalog entries requ
 
 ---
 
+## Testing
+
+```kotlin
+// Design system testing is primarily visual — Roborazzi screenshot pairs (light + dark)
+// for every token category and component, plus interaction tests for interactive tokens.
+
+@Test fun `color_tokens_light screenshot`() {
+    captureRoboImage("ds_color_tokens_light.png") {
+        AppTheme(darkTheme = false) {
+            Column(modifier = Modifier.padding(AppTheme.spacing.lg)) {
+                Box(Modifier.size(48.dp).background(AppTheme.colors.primary))
+                Box(Modifier.size(48.dp).background(AppTheme.colors.secondary))
+                Box(Modifier.size(48.dp).background(AppTheme.colors.surface))
+                Box(Modifier.size(48.dp).background(AppTheme.colors.error))
+            }
+        }
+    }
+}
+
+@Test fun `color_tokens_dark screenshot`() {
+    captureRoboImage("ds_color_tokens_dark.png") {
+        AppTheme(darkTheme = true) {
+            Column(modifier = Modifier.padding(AppTheme.spacing.lg)) {
+                Box(Modifier.size(48.dp).background(AppTheme.colors.primary))
+                Box(Modifier.size(48.dp).background(AppTheme.colors.secondary))
+                Box(Modifier.size(48.dp).background(AppTheme.colors.surface))
+                Box(Modifier.size(48.dp).background(AppTheme.colors.error))
+            }
+        }
+    }
+}
+
+@Test fun `typography_scale screenshot`() {
+    captureRoboImage("ds_typography_scale.png") {
+        AppTheme {
+            Column(modifier = Modifier.padding(AppTheme.spacing.lg)) {
+                Text("Display Large", style = AppTheme.typography.displayLarge)
+                Text("Headline Medium", style = AppTheme.typography.headlineMedium)
+                Text("Body Large", style = AppTheme.typography.bodyLarge)
+                Text("Label Small", style = AppTheme.typography.labelSmall)
+            }
+        }
+    }
+}
+
+@Test fun `spacing tokens match expected dp values`() {
+    // Assert the compile-time constants — catches accidental token renames
+    assertEquals(16.dp, AppTheme.spacing.lg)
+    assertEquals(8.dp, AppTheme.spacing.sm)
+    assertEquals(4.dp, AppTheme.spacing.xs)
+}
+```
+
+---
+
 ## Common Anti-Patterns
 
 - magic color literals in composables — `Color(0xFF6200EE)` written directly inside a `@Composable` instead of `AppTheme.colors.primary`; the audit script flags `Color(0x…)` in any `/ui/` or `/presentation/` file that is not a token definition file

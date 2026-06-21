@@ -2619,6 +2619,65 @@ fun SettingsPage() {
 
 ---
 
+## Testing
+
+```kotlin
+// Every component in the extended system needs: light + dark screenshots + 1 interaction test
+@get:Rule val composeRule = createComposeRule()
+
+// --- AppButton ---
+@Test fun `app_button_primary_light screenshot`() {
+    captureRoboImage("dsx_button_primary_light.png") {
+        AppTheme(darkTheme = false) { AppButton(text = "Continue", onClick = {}) }
+    }
+}
+
+@Test fun `app_button_primary_dark screenshot`() {
+    captureRoboImage("dsx_button_primary_dark.png") {
+        AppTheme(darkTheme = true) { AppButton(text = "Continue", onClick = {}) }
+    }
+}
+
+@Test fun `app_button_fires_onclick`() {
+    var clicked = false
+    composeRule.setContent { AppTheme { AppButton(text = "Go", onClick = { clicked = true }) } }
+    composeRule.onNodeWithText("Go").performClick()
+    assertTrue(clicked)
+}
+
+// --- AppTextField ---
+@Test fun `app_text_field_default screenshot`() {
+    captureRoboImage("dsx_text_field_default.png") {
+        AppTheme { var t by remember { mutableStateOf("") }; AppTextField(value = t, onValueChange = {}, label = "Email") }
+    }
+}
+
+@Test fun `app_text_field_onValueChange fires on input`() {
+    var value = ""
+    composeRule.setContent {
+        AppTheme { AppTextField(value = value, onValueChange = { value = it }, label = "Name") }
+    }
+    composeRule.onNodeWithText("Name").performTextInput("Alice")
+    assertEquals("Alice", value)
+}
+
+// --- AppIcon / AppIconButton ---
+@Test fun `app_icon_button_fires_onclick`() {
+    var clicked = false
+    composeRule.setContent {
+        AppTheme {
+            AppIconButton(onClick = { clicked = true }, contentDescription = "Close") {
+                AppIcon(Icons.Default.Close, contentDescription = null)
+            }
+        }
+    }
+    composeRule.onNodeWithContentDescription("Close").performClick()
+    assertTrue(clicked)
+}
+```
+
+---
+
 ## Common Anti-Patterns
 
 - using an extended component before applying `kotlin-multiplatform-design-system` — tokens are missing

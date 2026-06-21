@@ -184,6 +184,16 @@ An audit should produce findings that are actionable. If a finding doesn't map t
 
 ---
 
+## Related Skills
+
+- `kotlin-multiplatform-expert` — use before running the audit; the expert skill identifies which domain skills apply and what build order to follow
+- `kotlin-multiplatform-clean-architecture` — defines the 6-layer boundary rules the audit script enforces
+- `kotlin-multiplatform-mvi` — most `state copy race` and `sharedflow replay effect` findings require this skill to fix correctly
+- `kotlin-multiplatform-roborazzi` — replacement for `manual screen capture` findings
+- `kotlin-multiplatform-design-system` — replacement for `magic color literal` and `hardcoded spacing` findings
+
+---
+
 ## Output Style
 
 When asked to audit a project or the skills repo, respond in this order:

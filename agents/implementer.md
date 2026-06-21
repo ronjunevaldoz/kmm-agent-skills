@@ -35,6 +35,12 @@ If nothing matches → kRPC is not in use. For a Kotlin-to-Kotlin backend, ask w
 is the right choice before defaulting to HTTP. For third-party or non-Kotlin backends,
 proceed with the network-layer skill.
 
+After confirming kRPC is in use, set `krpc_established: true` in `.claude/pipeline-context.json`
+so subsequent sessions skip the grep and know to enforce the transport constraint immediately:
+```json
+"krpc_established": true
+```
+
 ### Adaptive layout pre-check (run before any `:ui` layer)
 
 ```bash

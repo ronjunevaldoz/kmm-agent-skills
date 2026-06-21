@@ -293,6 +293,53 @@ fun AnimatedVisibilityOrInstant(
 
 ---
 
+## Testing
+
+```kotlin
+@get:Rule val composeRule = createComposeRule()
+
+@Test fun `animated visibility shows content when visible`() {
+    var visible by mutableStateOf(false)
+    composeRule.setContent {
+        AnimatedVisibility(visible = visible) {
+            Text("Hello", modifier = Modifier.testTag("content"))
+        }
+    }
+    composeRule.onNodeWithTag("content").assertDoesNotExist()
+    visible = true
+    composeRule.waitForIdle()
+    composeRule.onNodeWithTag("content").assertExists()
+}
+
+@Test fun `crossfade renders target state after transition`() {
+    var state by mutableStateOf("A")
+    composeRule.setContent {
+        Crossfade(targetState = state) { s ->
+            Text(s, modifier = Modifier.testTag("text"))
+        }
+    }
+    composeRule.onNodeWithTag("text").assertTextEquals("A")
+    state = "B"
+    composeRule.mainClock.advanceTimeByFrame()
+    composeRule.waitForIdle()
+    composeRule.onNodeWithTag("text").assertTextEquals("B")
+}
+
+// Roborazzi — capture final (animated-in) visual state
+@Test fun `animated_content_visible_screenshot`() {
+    captureRoboImage("animation_visible_state.png") {
+        AppTheme {
+            var visible by remember { mutableStateOf(true) }
+            AnimatedVisibility(visible = visible) {
+                Box(Modifier.size(80.dp).background(AppTheme.colors.primary))
+            }
+        }
+    }
+}
+```
+
+---
+
 ## Common Anti-Patterns
 
 - **Animating inside a `LazyColumn` item without a `key`** — without stable keys Compose

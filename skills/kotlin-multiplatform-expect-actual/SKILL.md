@@ -413,6 +413,54 @@ opening the file.
 
 ---
 
+## Common Anti-Patterns
+
+- **`expect` class with state** — if an `expect class` has mutable state, it cannot be tested in `commonTest` without a real platform target. Extract the state to a shared type and keep the `actual` stateless.
+- **Wrapping a single function** — `expect fun getPlatformName()` is fine; `expect class PlatformNameProvider` to wrap it is overcomplicated. Use `expect fun` directly.
+- **`expect`/`actual` for dependency injection** — inject the platform dependency through Koin instead; reserve `expect`/`actual` for platform capabilities that are not injectable objects.
+- **`actual` in a shared module** — `actual` declarations must live in platform source sets (`androidMain`, `iosMain`); putting them in `commonMain` defeats the purpose.
+- **Not annotating with `@ObjCName`** — every `expect` declaration that surfaces to Swift should carry `@ObjCName` to control the generated Swift name. Load `kotlin-multiplatform-xcframework-spm` for guidance.
+
+---
+
+## Testing
+
+```kotlin
+// commonTest — test pure logic that wraps platform capabilities via an interface
+interface PlatformClock {
+    fun nowMillis(): Long
+}
+
+class FakePlatformClock(private val now: Long = 1_000L) : PlatformClock {
+    override fun nowMillis() = now
+}
+
+@Test fun `elapsed time calculation uses injected clock`() {
+    val clock = FakePlatformClock(now = 5_000L)
+    val elapsed = clock.nowMillis() - 1_000L
+    assertEquals(4_000L, elapsed)
+}
+
+// For expect/actual functions with no side effects, test the actual directly:
+@Test fun `platform name is non-empty`() {
+    assertTrue(getPlatformName().isNotBlank())
+}
+
+// androidUnitTest — verify the Android actual behaves correctly
+@Test fun `android platform name contains Android`() {
+    assertTrue(getPlatformName().contains("Android", ignoreCase = true))
+}
+
+// If the actual wraps a platform API, extract logic behind an interface so it can
+// be faked in commonTest — this is the preferred pattern over testing the actual directly.
+```
+
+> Platform-specific actuals that wrap impure APIs (camera, location, keychain) should be
+> exercised via instrumented tests or XCTest on their respective platforms. Use
+> `FakeXxx` in `commonTest` for all ViewModel and domain-layer coverage.
+
+---
+
 ## Related Skills
 
 - `kotlin-multiplatform-dependency-injection` — preferred alternative to expect/actual for most platform abstractions

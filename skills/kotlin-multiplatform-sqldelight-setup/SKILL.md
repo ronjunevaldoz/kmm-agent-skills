@@ -545,6 +545,45 @@ dependencies {
 
 ---
 
+## Testing
+
+```kotlin
+// Use JdbcSqliteDriver with in-memory database — no device or emulator needed
+fun testDriver(): SqlDriver {
+    val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+    AppDatabase.Schema.create(driver)
+    return driver
+}
+
+@Test fun `insert and query round-trip`() = runTest {
+    val db = AppDatabase(testDriver())
+    db.userQueries.insert(id = "1", name = "Alice", email = "a@example.com")
+    val result = db.userQueries.selectById("1").executeAsOne()
+    assertEquals("Alice", result.name)
+}
+
+@Test fun `delete removes row`() = runTest {
+    val db = AppDatabase(testDriver())
+    db.userQueries.insert(id = "1", name = "Alice", email = "a@example.com")
+    db.userQueries.deleteById("1")
+    assertNull(db.userQueries.selectById("1").executeAsOneOrNull())
+}
+
+@Test fun `query emits updates via flow`() = runTest {
+    val db = AppDatabase(testDriver())
+    db.userQueries.selectAll().asFlow().mapToList(coroutineContext).test {
+        assertEquals(emptyList(), awaitItem())
+        db.userQueries.insert(id = "1", name = "Alice", email = "a@example.com")
+        assertEquals(1, awaitItem().size)
+        cancelAndIgnoreRemainingEvents()
+    }
+}
+```
+
+> Add `testImplementation("app.cash.sqldelight:sqlite-driver:<version>")` to the `jvmTest` source set only — the JDBC driver is JVM-only and must not appear in `commonMain`.
+
+---
+
 ## Common Anti-Patterns
 
 - running database queries on the main thread — always use `Dispatchers.IO` or the appropriate coroutine dispatcher

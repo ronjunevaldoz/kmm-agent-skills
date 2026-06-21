@@ -403,6 +403,47 @@ class RootComponent(
 
 ---
 
+## Testing
+
+```kotlin
+// Use TestNavHostController from the Navigation testing artifact
+// testImplementation("org.jetbrains.androidx.navigation:navigation-testing:<version>")
+@get:Rule val composeRule = createComposeRule()
+
+@Test fun `start destination renders home screen`() {
+    composeRule.setContent {
+        val navController = rememberTestNavController()
+        AppNavHost(navController = navController)
+    }
+    composeRule.onNodeWithTag(HomeTestTags.ROOT).assertExists()
+}
+
+@Test fun `navigate to detail shows detail screen`() {
+    composeRule.setContent {
+        val navController = rememberTestNavController()
+        AppNavHost(navController = navController)
+        LaunchedEffect(Unit) { navController.navigate(Screen.Detail(id = "42")) }
+    }
+    composeRule.waitForIdle()
+    composeRule.onNodeWithTag(DetailTestTags.ROOT).assertExists()
+}
+
+@Test fun `back stack pops on up navigation`() {
+    composeRule.setContent {
+        val navController = rememberTestNavController()
+        AppNavHost(navController = navController)
+        LaunchedEffect(Unit) {
+            navController.navigate(Screen.Detail(id = "1"))
+            navController.popBackStack()
+        }
+    }
+    composeRule.waitForIdle()
+    composeRule.onNodeWithTag(HomeTestTags.ROOT).assertExists()
+}
+```
+
+---
+
 ## Common Anti-Patterns
 
 - using string-based route names instead of type-safe sealed/data classes — breaks at runtime, not compile time

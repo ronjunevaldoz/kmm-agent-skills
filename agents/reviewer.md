@@ -124,12 +124,19 @@ Spacing token check:
 
 ## Check 9: Transport consistency (kRPC vs HTTP)
 
-Run before reviewing any `:data` file:
+Read `.claude/pipeline-context.json` and check `krpc_established`:
+
+- **`krpc_established: true`** → skip the grep; kRPC is confirmed active. Proceed directly to
+  the transport consistency checks below.
+- **`krpc_established: false` or missing** → run the grep to confirm:
 
 ```bash
 grep -r "RemoteService\|@Rpc\|withRpc\|KtorRPCClient\|rpcClient\|\.rpc(" \
   <project_root>/*/src --include="*.kt" -l
 ```
+
+If the grep finds files, set `krpc_established: true` in `.claude/pipeline-context.json`
+before continuing.
 
 **If kRPC is present in the project:**
 

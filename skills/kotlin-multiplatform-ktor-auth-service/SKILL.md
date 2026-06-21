@@ -162,6 +162,54 @@ Not a good fit:
 
 ---
 
+## Testing
+
+```kotlin
+// Use Ktor MockEngine — never spin up a real server in unit tests
+fun buildTestClient(handler: MockRequestHandler): HttpClient =
+    HttpClient(MockEngine) {
+        engine { addHandler(handler) }
+        install(ContentNegotiation) { json() }
+    }
+
+class FakeTokenStorage : TokenStorage {
+    var stored: TokenPair? = null
+    override suspend fun save(tokens: TokenPair) { stored = tokens }
+    override suspend fun load(): TokenPair? = stored
+    override suspend fun clear() { stored = null }
+}
+
+@Test fun `login returns token on 200`() = runTest {
+    val client = buildTestClient {
+        respond(
+            content = """{"accessToken":"tok","refreshToken":"ref","expiresIn":3600}""",
+            status = HttpStatusCode.OK,
+            headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
+        )
+    }
+    val storage = FakeTokenStorage()
+    val result = AuthServiceImpl(client, storage).login("user", "pass")
+    assertTrue(result is NetworkResult.Success)
+    assertEquals("tok", storage.stored?.accessToken)
+}
+
+@Test fun `login returns Error on 401`() = runTest {
+    val client = buildTestClient { respond("Unauthorized", HttpStatusCode.Unauthorized) }
+    val result = AuthServiceImpl(client, FakeTokenStorage()).login("u", "wrong")
+    assertTrue(result is NetworkResult.Error)
+    assertEquals(401, (result as NetworkResult.Error).code)
+}
+
+@Test fun `refresh clears storage on 401`() = runTest {
+    val storage = FakeTokenStorage().apply { stored = TokenPair("old", "refresh") }
+    val client = buildTestClient { respond("Unauthorized", HttpStatusCode.Unauthorized) }
+    AuthServiceImpl(client, storage).refresh()
+    assertNull(storage.stored)
+}
+```
+
+---
+
 ## Common Anti-Patterns
 
 - validating tokens inside route handlers instead of in the `authenticate {}` block — bypasses Ktor's auth pipeline

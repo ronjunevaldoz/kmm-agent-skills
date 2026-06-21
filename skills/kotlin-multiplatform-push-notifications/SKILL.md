@@ -277,6 +277,51 @@ viewModelScope.launch {
 
 ---
 
+## Testing
+
+```kotlin
+class FakeNotificationHandler : NotificationHandler {
+    val tokens = mutableListOf<PushToken>()
+    val received = mutableListOf<NotificationPayload>()
+
+    override fun onTokenRefresh(token: PushToken) { tokens += token }
+    override fun onNotificationReceived(payload: NotificationPayload) { received += payload }
+}
+
+@Test fun `token refresh stores new token`() = runTest {
+    val handler = FakeNotificationHandler()
+    handler.onTokenRefresh(PushToken("device-token-abc"))
+    assertEquals(1, handler.tokens.size)
+    assertEquals("device-token-abc", handler.tokens.first().value)
+}
+
+@Test fun `received notification forwarded correctly`() = runTest {
+    val handler = FakeNotificationHandler()
+    val payload = NotificationPayload(
+        title = "New message",
+        body = "You have a reply",
+        data = mapOf("thread_id" to "42"),
+    )
+    handler.onNotificationReceived(payload)
+    assertEquals(1, handler.received.size)
+    assertEquals("New message", handler.received.first().title)
+    assertEquals("42", handler.received.first().data["thread_id"])
+}
+
+@Test fun `multiple tokens only the latest is relevant`() = runTest {
+    val handler = FakeNotificationHandler()
+    handler.onTokenRefresh(PushToken("old-token"))
+    handler.onTokenRefresh(PushToken("new-token"))
+    assertEquals("new-token", handler.tokens.last().value)
+}
+```
+
+> Platform registration (FCM `onNewToken`, APNs `didRegisterForRemoteNotificationsWithDeviceToken`)
+> is tested via instrumented tests on Android and XCTest on iOS. The shared `NotificationHandler`
+> interface covers the cross-platform logic testable in `commonTest`.
+
+---
+
 ## Common Anti-Patterns
 
 - **Sending the push token directly from `onNewToken` over the network** — `onNewToken`

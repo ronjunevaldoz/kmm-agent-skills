@@ -218,6 +218,59 @@ sealed class ImageSource {
 
 ---
 
+## Testing
+
+```kotlin
+// Coil 3 exposes ImageLoader as an interface — create a fake for unit/UI tests
+class FakeImageLoader : ImageLoader {
+    var requestCount = 0
+
+    override suspend fun execute(request: ImageRequest): ImageResult {
+        requestCount++
+        return SuccessResult(
+            drawable = ColorDrawable(android.graphics.Color.GRAY),
+            request = request,
+            dataSource = DataSource.MEMORY_CACHE,
+        )
+    }
+
+    override fun enqueue(request: ImageRequest): Disposable {
+        requestCount++
+        return object : Disposable {
+            override val job get() = CompletableDeferred(Unit as Any?)
+            override val isDisposed = false
+            override fun dispose() = Unit
+        }
+    }
+
+    override fun newBuilder() = error("not needed in tests")
+    override fun shutdown() = Unit
+    override val components: ComponentRegistry get() = ComponentRegistry()
+    override val defaults: DefaultRequestOptions get() = DefaultRequestOptions()
+    override val diskCache: DiskCache? = null
+    override val memoryCache: MemoryCache? = null
+}
+
+@get:Rule val composeRule = createComposeRule()
+
+@Test fun `async image triggers a load request`() {
+    val loader = FakeImageLoader()
+    composeRule.setContent {
+        CompositionLocalProvider(LocalImageLoader provides loader) {
+            AsyncImage(
+                model = "https://example.com/photo.jpg",
+                contentDescription = null,
+                modifier = Modifier.testTag("image"),
+            )
+        }
+    }
+    composeRule.onNodeWithTag("image").assertExists()
+    assertTrue(loader.requestCount > 0)
+}
+```
+
+---
+
 ## Common Anti-Patterns
 
 - **Creating `ImageLoader` per composable** — each loader creates its own memory/disk cache;

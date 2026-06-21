@@ -224,6 +224,44 @@ fun setup() {
 
 ---
 
+## Testing
+
+```kotlin
+class FakeLogWriter : LogWriter() {
+    data class Entry(val severity: Severity, val message: String, val tag: String)
+    val entries = mutableListOf<Entry>()
+
+    override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+        entries += Entry(severity, message, tag)
+    }
+}
+
+@Test fun `error log is recorded with correct severity`() = runTest {
+    val writer = FakeLogWriter()
+    val kermit = Kermit(writer)
+    kermit.e("Auth") { "token expired" }
+    assertEquals(1, writer.entries.size)
+    assertEquals(Severity.Error, writer.entries.first().severity)
+    assertTrue(writer.entries.first().message.contains("token expired"))
+}
+
+@Test fun `verbose log below min severity is suppressed`() = runTest {
+    val writer = FakeLogWriter()
+    val kermit = Kermit(StaticConfig(minSeverity = Severity.Warn, logWriterList = listOf(writer)))
+    kermit.v("Tag") { "verbose noise" }
+    assertTrue(writer.entries.isEmpty())
+}
+
+@Test fun `tag is forwarded to writer`() = runTest {
+    val writer = FakeLogWriter()
+    val kermit = Kermit(writer)
+    kermit.i("UserRepo") { "loaded" }
+    assertEquals("UserRepo", writer.entries.first().tag)
+}
+```
+
+---
+
 ## Common Anti-Patterns
 
 - importing `Logger` directly in feature modules — inject it via Koin; direct imports scatter the logging config

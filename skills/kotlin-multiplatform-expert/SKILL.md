@@ -58,6 +58,11 @@ across module build files when creating or updating KMM projects.
 skill order, KMP architecture decision, KMM expert, KMP project plan, which pattern KMP,
 KMP checklist, review my KMP project.
 
+**Freshness rule:** recheck the Skill Invocation Map and dependency graph entries whenever
+a new skill is added or removed — the routing table and skill count must stay in sync with
+the actual `skills/` directories. Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py .`
+after any skill addition.
+
 ---
 
 ## Recommendation First
@@ -381,7 +386,7 @@ Include the skill name in every draft so attribution stays visible.
 
 ---
 
-## Common Architecture Violations (Anti-Pattern Checklist)
+## Common Anti-Patterns
 
 Review each of these before shipping a feature:
 
@@ -522,6 +527,15 @@ already has multiple same-named concepts or the component is part of a shared li
 
 - `scripts/validate_skill_map.py` — checks that the README and expert map still list
   the current skill folders and that the declared skill count matches the repo.
+
+---
+
+## Related Skills
+
+- `kotlin-multiplatform-audit` — run this after every feature to verify no architecture smells were introduced
+- `kotlin-multiplatform-clean-architecture` — the 6-layer contract that all skill routing assumes
+- `kotlin-multiplatform-feature-scaffold` — establishes the module structure before any feature skills are loaded
+- `kotlin-multiplatform-dependency-injection` — every feature plan must include Koin wiring; load this if the plan references bindings
 
 ---
 

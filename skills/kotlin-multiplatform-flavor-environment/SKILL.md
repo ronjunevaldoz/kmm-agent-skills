@@ -354,6 +354,44 @@ fi
 
 ---
 
+## Testing
+
+```kotlin
+// BuildKonfig generates AppConfig at compile time — wrap it behind an interface so tests
+// can inject a fake without depending on a specific build variant
+interface AppEnvironment {
+    val baseUrl: String
+    val isDebug: Boolean
+    val environment: String
+}
+
+class FakeAppEnvironment(
+    override val baseUrl: String = "https://dev.example.com",
+    override val isDebug: Boolean = true,
+    override val environment: String = "dev",
+) : AppEnvironment
+
+@Test fun `dev url is used when environment is dev`() = runTest {
+    val env = FakeAppEnvironment(baseUrl = "https://dev.example.com", environment = "dev")
+    val repo = UserRepositoryImpl(buildClient(env.baseUrl), FakeUserDao())
+    assertTrue(env.baseUrl.contains("dev"))
+}
+
+@Test fun `debug flag is false in prod environment`() {
+    val env = FakeAppEnvironment(baseUrl = "https://api.example.com", isDebug = false, environment = "prod")
+    assertFalse(env.isDebug)
+    assertEquals("prod", env.environment)
+}
+
+@Test fun `staging and prod base urls are different`() {
+    val staging = FakeAppEnvironment(baseUrl = "https://staging.example.com", environment = "staging")
+    val prod    = FakeAppEnvironment(baseUrl = "https://api.example.com", environment = "prod")
+    assertNotEquals(staging.baseUrl, prod.baseUrl)
+}
+```
+
+---
+
 ## Common Anti-Patterns
 
 - committing secrets to `gradle.properties` or `build.gradle.kts` — use `local.properties` and CI secrets

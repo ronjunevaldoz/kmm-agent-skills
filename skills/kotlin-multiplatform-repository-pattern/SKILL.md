@@ -475,6 +475,47 @@ so the domain layer is decoupled from the database schema.
 
 ---
 
+## Testing
+
+```kotlin
+class FakeUserRepository : UserRepository {
+    val stored = mutableListOf<User>()
+    var getResult: NetworkResult<User> = NetworkResult.Success(User.default())
+    private val _flow = MutableStateFlow(stored.toList())
+
+    override suspend fun getById(id: UserId): NetworkResult<User> = getResult
+    override suspend fun save(user: User) { stored += user; _flow.value = stored.toList() }
+    override fun observeAll(): Flow<List<User>> = _flow.asStateFlow()
+}
+
+@Test fun `getById returns success result`() = runTest {
+    val repo = FakeUserRepository()
+    val result = repo.getById(UserId("1"))
+    assertTrue(result is NetworkResult.Success)
+}
+
+@Test fun `getById propagates error`() = runTest {
+    val repo = FakeUserRepository().apply {
+        getResult = NetworkResult.Error(404, "not found")
+    }
+    val result = repo.getById(UserId("x"))
+    assertTrue(result is NetworkResult.Error)
+    assertEquals(404, (result as NetworkResult.Error).code)
+}
+
+@Test fun `save emits updated list via flow`() = runTest {
+    val repo = FakeUserRepository()
+    repo.observeAll().test {
+        assertEquals(emptyList(), awaitItem())
+        repo.save(User(id = UserId("1"), name = "Alice"))
+        assertEquals(1, awaitItem().size)
+        cancelAndIgnoreRemainingEvents()
+    }
+}
+```
+
+---
+
 ## Common Anti-Patterns
 
 - calling the repository from a composable directly instead of through a ViewModel — bypasses the MVI state machine
