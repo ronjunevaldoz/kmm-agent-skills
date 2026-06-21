@@ -209,6 +209,24 @@ Confidence for `[STYLE]` fixes: always **HIGH** — run `./gradlew ktlintFormat`
 
 ---
 
+## Check 11: Code smells (detekt)
+
+If the project has detekt configured, check whether any modified file triggers a rule at `error` severity:
+
+```bash
+./gradlew tasks --all | grep -q "^detekt " && ./gradlew detekt 2>&1 | grep -E "^.*\.kt:[0-9]+" || true
+```
+
+Flag as `[DETEKT]` blocker for:
+- **`TooManyFunctions`** — ViewModel or Repository with >11 public functions; suggest splitting into focused classes
+- **`LongMethod`** — function body >60 lines; suggest extracting helpers
+- **`MagicNumber`** — literal numbers in logic (except 0, 1, -1, 2); require a named constant
+- **`ComplexCondition`** — boolean with >4 conditions; require a named predicate function
+
+`[DETEKT]` is informational if detekt is not configured — print the file and rule, note that setup is needed, but do not block APPROVE.
+
+---
+
 ## Output
 
 ```
@@ -224,6 +242,7 @@ BLOCKERS (<count>):
   [ADAPTIVE]       <file> — <screen missing WindowSizeClass parameter | missing breakpoint screenshot>
   [TRANSPORT]      <file> — <safeRequest bypasses existing kRPC transport for service/method>
   [STYLE]          <file>:<line> — <line exceeds 120 chars | wildcard import>
+  [DETEKT]         <file>:<line> — <rule: TooManyFunctions | LongMethod | MagicNumber | ComplexCondition>
 
 WARNINGS (<count>):
   [MISSING TAG]  <composable>: <node description> has no testTag

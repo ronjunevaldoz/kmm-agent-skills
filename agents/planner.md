@@ -26,13 +26,39 @@ wastes context. Match the feature to these work types:
 | New screen or feature end-to-end | `feature-scaffold`, `clean-architecture`, `presenter-module`, `mvi` |
 | Data access (network, cache, persistence) | `repository-pattern`, `network-layer`, `sqldelight-setup`, `datastore` |
 | UI only (composables, states, theming) | `mvi`, `design-system`, `compose-state-hoisting`, `preview-driven-development`, `roborazzi` |
-| Screen navigation or deep links | `navigation`, `mvi` |
+| Screen navigation or deep links | `navigation`, `mvi`, `deep-linking` |
+| Deep links (App Links / Universal Links) | `deep-linking`, `navigation` |
 | Authentication or token handling | `ktor-auth-service`, `network-layer`, `dependency-injection` |
+| Biometric authentication | `biometric-auth`, `expect-actual` |
 | iOS/Android platform differences | `expect-actual` |
 | Koin wiring only | `dependency-injection` |
 | Tests only | `unit-testing`, `roborazzi` |
 | CI or build changes | `ci-github-actions`, `code-quality` |
 | Strings, fonts, or localization | `shared-resources` |
+| Multi-environment config (dev/staging/prod) | `flavor-environment` |
+| Image loading (Coil, AsyncImage, cache) | `image-loading` |
+| Push notifications (FCM, APNs) | `push-notifications`, `expect-actual` |
+| Background jobs / scheduling | `workmanager`, `expect-actual` |
+| Permissions (camera, location, storage) | `permissions`, `expect-actual` |
+| Analytics / event tracking | `analytics`, `expect-actual` |
+| Form validation | `form-validation`, `mvi` |
+| Feature flags / remote config | `feature-flags` |
+| Accessibility (a11y, screen reader, WCAG) | `accessibility`, `roborazzi` |
+| Compose animations | `compose-animation` |
+| Slot-based UI components | `compose-slot-api`, `design-system-extended` |
+| State container choice (remember vs ViewModel) | `compose-state-container`, `compose-state-hoisting` |
+| Custom graphics, canvas, visual effects | `graphics-modifiers` |
+| Adaptive / responsive layouts | `adaptive-layout`, `roborazzi` |
+| Design system setup or token changes | `design-system` |
+| Design system component library | `design-system-extended`, `design-system` |
+| Paging / paginated lists | `paging`, `repository-pattern` |
+| Kotlin RPC (full-stack Kotlin backend) | `kotlin-rpc`, `network-layer` |
+| MongoDB backend / Ktor server data layer | `mongodb-database`, `kotlin-rpc` |
+| Logging / crash reporting | `logging` |
+| JNI / Kotlin Native bridge | `jni-kotlin-pro`, `expect-actual` |
+| SPM / XCFramework distribution | `xcframework-spm`, `expect-actual` |
+| Offline-first / sync / optimistic updates | `offline-first`, `repository-pattern`, `sqldelight-setup` |
+| Crash reporting (Crashlytics, Sentry) | `crash-reporting`, `logging` |
 
 Read each loaded skill's `SKILL.md` before planning — the `## Recommendation First` section
 states the default approach, and `## Common Anti-Patterns` lists what not to suggest.

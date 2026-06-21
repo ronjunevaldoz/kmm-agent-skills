@@ -263,6 +263,62 @@ Replace with a Roborazzi screenshot test in `jvmTest`:
 
 ---
 
+### `[DETEKT]` — code smell flagged by detekt
+
+Each detekt rule has a specific mechanical fix:
+
+**`TooManyFunctions`** — split the class into focused collaborators:
+```kotlin
+// Before (blocker — UserViewModel has 15 functions):
+class UserViewModel : ViewModel() {
+    fun loadProfile() { ... }
+    fun updateName() { ... }
+    fun updateEmail() { ... }
+    fun uploadAvatar() { ... }
+    // ... 11 more functions
+}
+
+// After (fix — split by concern):
+class UserProfileViewModel : ViewModel() { fun loadProfile() { ... }; fun updateName() { ... } }
+class UserAvatarViewModel  : ViewModel() { fun uploadAvatar() { ... } }
+```
+
+**`LongMethod`** — extract private helpers:
+```kotlin
+// Before (blocker — handleIntent is 80 lines):
+fun handleIntent(intent: Intent) { /* 80 lines */ }
+
+// After (fix — extract cohesive sub-steps):
+fun handleIntent(intent: Intent) {
+    when (intent) {
+        is Intent.Load   -> loadUser(intent.id)
+        is Intent.Update -> updateUser(intent.fields)
+    }
+}
+private fun loadUser(id: UserId) { /* focused, ≤20 lines */ }
+private fun updateUser(fields: UpdateFields) { /* focused, ≤20 lines */ }
+```
+
+**`MagicNumber`** — replace with named constant:
+```kotlin
+// Before:  if (retryCount > 3) { ... }
+// After:   private const val MAX_RETRIES = 3
+//          if (retryCount > MAX_RETRIES) { ... }
+```
+
+**`ComplexCondition`** — extract to a named predicate:
+```kotlin
+// Before:  if (user != null && user.isActive && !user.isBanned && token.isValid) { ... }
+// After:   val canProceed = user != null && user.isActive && !user.isBanned && token.isValid
+//          if (canProceed) { ... }
+```
+
+Confidence: **HIGH** for MagicNumber and ComplexCondition (mechanical).
+Confidence: **MEDIUM** for LongMethod (requires understanding the method's cohesion).
+Confidence: **LOW** for TooManyFunctions (splitting a ViewModel requires understanding the domain) — stop and ask the user where the boundary should be.
+
+---
+
 ### `[STYLE]` — line too long or wildcard import
 
 **Never hand-edit formatting.** Run ktlint's auto-formatter:

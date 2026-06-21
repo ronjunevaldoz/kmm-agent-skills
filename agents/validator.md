@@ -50,6 +50,31 @@ Key rules enforced by ktlint + `.editorconfig`:
 
 ---
 
+## Level 1.6 — Code smells (detekt)
+
+Run only if `detekt` task exists:
+
+```bash
+./gradlew tasks --all | grep -q "^detekt " && ./gradlew detekt 2>&1 || echo "DETEKT_NOT_CONFIGURED"
+```
+
+**If detekt is configured:**
+- Any finding at severity `error` = Level 1.6 FAIL. List the file, rule, and line.
+- Findings at severity `warning` = printed but not blocking (unless `allRules = true` in `detekt.yml`)
+- Do not auto-fix — detekt findings require a code change. Hand to fixer with `[DETEKT]` label.
+
+**If detekt is not configured:**
+- Print `⚠️ detekt not found — load kotlin-multiplatform-code-quality to set it up`
+- Continue to Level 2 (non-blocking)
+
+Common detekt rules that fire in KMP code:
+- `MagicNumber` — literal numbers in logic (use named constants)
+- `TooManyFunctions` — ViewModel or Repository with >11 functions (split the class)
+- `LongMethod` — function body >60 lines (extract helpers)
+- `ComplexCondition` — boolean expression with >4 conditions (extract named predicates)
+
+---
+
 ## Level 2 — commonMain metadata compilation
 
 Compiles `commonMain` without resolving all platform targets. Fast (typically 10–30s).
@@ -97,6 +122,7 @@ iteration; run it once before opening the PR.
 ```
 LEVEL 1   — AUDIT:          PASS | FAIL (<N> findings)
 LEVEL 1.5 — KTLINT:        PASS | FAIL (<N> files) | NOT CONFIGURED
+LEVEL 1.6 — DETEKT:        PASS | FAIL (<N> errors) | NOT CONFIGURED
 LEVEL 2   — METADATA:      PASS | FAIL | SKIPPED
 LEVEL 3   — JVM + TESTS:   PASS | FAIL | SKIPPED  (<N> passed, <N> failed)
 LEVEL 4   — FULL BUILD:    PASS | FAIL | SKIPPED | NOT RUN

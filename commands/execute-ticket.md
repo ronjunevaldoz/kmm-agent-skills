@@ -201,7 +201,34 @@ REVIEW:     APPROVE
 CRITERIA:   <N>/<N> met
 COMMIT:     <short sha>
 
-Next: gh pr create --title "<title>" --body "Closes #<number>"
+Next:
+```bash
+gh pr create \
+  --title "<ticket title (≤70 chars)>" \
+  --body "$(cat <<'EOF'
+## Summary
+
+- <one bullet per acceptance criterion met>
+- <layer or file that satisfies it>
+
+## Changes
+
+- **Layers built**: <:model, :api, :domain, :data, :presenter, :ui>
+- **Files created**: <N>  |  **Tests written**: <N> unit + <N> UI
+- **Validation**: PASS (ktlint: PASS, detekt: PASS | NOT CONFIGURED)
+
+## Test plan
+
+- [ ] `./gradlew jvmTest` passes
+- [ ] Roborazzi golden images committed
+- [ ] No new architecture smells (`audit_project.py`)
+
+Closes #<number>
+
+🤖 Implemented with [KMM Agent Skills](https://github.com/ronjunevaldoz/kmm-agent-skills)
+EOF
+)"
+```
 ```
 
 ---

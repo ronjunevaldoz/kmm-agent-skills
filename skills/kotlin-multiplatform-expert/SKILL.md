@@ -139,6 +139,8 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-push-notifications` | FCM + APNs, `PushToken`, `FirebaseMessagingService`, `NotificationHandler` expect/actual, deep-link routing |
 | `kotlin-multiplatform-workmanager` | `CoroutineWorker`, `BGTaskScheduler`, `expect/actual BackgroundScheduler`, one-time + periodic, retry |
 | `kotlin-multiplatform-feature-flags` | `FeatureFlag` enum, `FeatureFlagProvider`, Firebase Remote Config, A/B variants, kill switch, fake provider |
+| `kotlin-multiplatform-offline-first` | `SyncState` sealed class, `SyncManager` interface, optimistic updates with rollback, conflict resolution, local-first read pattern |
+| `kotlin-multiplatform-crash-reporting` | `CrashReporter` interface, Firebase Crashlytics + Sentry actuals, Kermit `CrashReporterLogWriter`, dSYM symbolication |
 
 ### Layer 5 — UI System
 | Skill | Owns |
@@ -206,7 +208,9 @@ kotlin-multiplatform-feature-scaffold       ← scaffold second (implements the 
 ├── kotlin-multiplatform-workmanager        (depends on: dependency-injection)
 ├── kotlin-multiplatform-feature-flags      (depends on: dependency-injection, analytics)
 ├── kotlin-multiplatform-accessibility      (depends on: design-system, roborazzi, compose-animation)
-└── kotlin-multiplatform-compose-animation  (depends on: design-system)
+├── kotlin-multiplatform-compose-animation  (depends on: design-system)
+├── kotlin-multiplatform-offline-first      (depends on: repository-pattern, sqldelight-setup, workmanager)
+└── kotlin-multiplatform-crash-reporting    (depends on: logging, dependency-injection)
 ```
 
 ---
@@ -454,6 +458,8 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "feature flags", "feature toggle", "remote config", "Firebase Remote Config", "A/B test", "experiment", "kill switch", "flag evaluation", "FeatureFlagProvider" | `kotlin-multiplatform-feature-flags` |
 | "accessibility", "a11y", "TalkBack", "VoiceOver", "contentDescription", "semantic role", "screen reader", "touch target", "WCAG", "traversal order", "mergeDescendants" | `kotlin-multiplatform-accessibility` |
 | "animation", "AnimatedVisibility", "animateContentSize", "Crossfade", "AnimatedContent", "animateFloatAsState", "shared element", "enter transition", "exit transition", "reduced motion", "spring animation" | `kotlin-multiplatform-compose-animation` |
+| "offline first", "offline-first", "local first", "sync", "optimistic update", "conflict resolution", "background sync", "SyncManager", "single source of truth", "cache then network" | `kotlin-multiplatform-offline-first` |
+| "crash reporting", "crashlytics", "firebase crashes", "sentry", "non-fatal", "symbolication", "dSYM", "kermit crash", "crash handler", "breadcrumb crash" | `kotlin-multiplatform-crash-reporting` |
 
 ---
 
