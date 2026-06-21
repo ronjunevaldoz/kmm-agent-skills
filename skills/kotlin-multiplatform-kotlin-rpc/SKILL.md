@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-13'
+  last-updated: '2026-06-21'
   keywords:
     - kotlin rpc
     - kRPC
@@ -23,6 +23,27 @@ metadata:
     - typed contract
     - service stub
     - shared contract
+---
+
+## Pre-implementation check (run before writing any `:data` layer code)
+
+```bash
+grep -r "RemoteService\|@Rpc\|withRpc\|KtorRPCClient\|rpcClient\|\.rpc(" \
+  <project_root>/*/src --include="*.kt" -l
+```
+
+**If files match** → kRPC is already wired in this project. Before adding any `safeRequest`
+or `HttpClient` call to the Kotlin backend:
+1. Identify which service interface owns the operation (check `shared/rpc/` or equivalent)
+2. If the operation is already exposed on an RPC service → call it through the existing RPC
+   client; **do not add a parallel HTTP call**
+3. If the operation is not yet on any service interface → extend the existing service
+   interface with a new method; do not create a second transport
+
+**If nothing matches** → kRPC is not in use. Decide: is this a Kotlin-to-Kotlin boundary?
+If yes and both sides are controlled, consider kRPC before defaulting to REST. If the backend
+is third-party or non-Kotlin, use `kotlin-multiplatform-network-layer`.
+
 ---
 
 ## When to Use This Skill
@@ -148,6 +169,14 @@ Before changing this skill, re-read the current official docs:
 
 ## Common Anti-Patterns
 
+- **Adding `safeRequest` for an endpoint already on an RPC service** — if `UserService.getUser(id)`
+  exists as an RPC method, calling `client.safeRequest { get("/users/$id") }` in parallel creates
+  two code paths that can diverge; extend the service method if behaviour needs to change
+- **Creating a second `HttpClient` for the Kotlin backend when kRPC already handles it** — two
+  transports to the same server doubles token refresh logic, error handling, and serialisation
+  config; route through the existing RPC client
+- **Not checking for kRPC before writing `:data` layer code** — run the pre-implementation grep
+  above before every new repository implementation; never assume the project is HTTP-only
 - using Kotlin RPC for a public API consumed by non-Kotlin clients — REST is clearer
 - putting auth logic inside the RPC service interface — auth belongs at the Ktor route boundary
 - keeping the RPC contract in the server module — it must live in shared code so the client can use it

@@ -122,6 +122,35 @@ Spacing token check:
 
 ---
 
+## Check 9: Transport consistency (kRPC vs HTTP)
+
+Run before reviewing any `:data` file:
+
+```bash
+grep -r "RemoteService\|@Rpc\|withRpc\|KtorRPCClient\|rpcClient\|\.rpc(" \
+  <project_root>/*/src --include="*.kt" -l
+```
+
+**If kRPC is present in the project:**
+
+For every new or modified file in `:data`:
+- If the file calls `safeRequest`, `client.get`, `client.post`, `client.put`, `client.delete`
+  against the same Kotlin backend URL that kRPC already owns → **`[TRANSPORT]`** blocker
+- The check: does an RPC service interface already expose this operation? If yes, the data
+  layer must call the RPC client, not the HTTP client
+- A new operation not yet on any service → reviewer must flag it as requiring a service
+  extension (`[TRANSPORT]` warning), not a new HTTP call
+
+**If kRPC is NOT present:**
+- No `[TRANSPORT]` check needed; proceed with other checks
+
+Add `[TRANSPORT]` to the blocker output format:
+```
+[TRANSPORT] <file> — safeRequest bypasses existing kRPC transport for <service>/<method>
+```
+
+---
+
 ## Check 7: Adaptive layout consistency
 
 Run before reviewing any `:ui` file:
@@ -169,6 +198,7 @@ BLOCKERS (<count>):
   [THEME]          <file> — <magic color literal | missing dark variant | isSystemInDarkTheme scattered>
   [LAYOUT]         <file> — <missing AppScaffold | title in content | action outside TopAppBar | hardcoded dp padding>
   [ADAPTIVE]       <file> — <screen missing WindowSizeClass parameter | missing breakpoint screenshot>
+  [TRANSPORT]      <file> — <safeRequest bypasses existing kRPC transport for service/method>
 
 WARNINGS (<count>):
   [MISSING TAG]  <composable>: <node description> has no testTag

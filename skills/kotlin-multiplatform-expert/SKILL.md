@@ -315,6 +315,26 @@ Does the state involve async, IO, or repository calls?
 
 Full survival matrix: see `kotlin-multiplatform-compose-state-container`.
 
+### "Which transport for a backend call?"
+
+```
+grep -r "RemoteService\|@Rpc\|withRpc\|KtorRPCClient\|rpcClient\|\.rpc(" */src --include="*.kt" -l
+
+Results found?
+├── YES (kRPC is in the project):
+│   ├── Does an existing RPC service interface expose this operation?
+│   │   ├── YES → call through the RPC client; do NOT add safeRequest
+│   │   └── NO  → extend the service interface with a new method; do NOT add a parallel HTTP call
+│   └── Is the call to a DIFFERENT backend (external REST API, third-party service)?
+│       └── YES → safeRequest is correct; this is a separate network boundary
+└── NO (kRPC not present):
+    ├── Is the backend a Kotlin-first Ktor server you control?
+    │   ├── YES → consider kRPC (kotlin-multiplatform-kotlin-rpc skill) before adding HTTP
+    │   └── NO  → use safeRequest (kotlin-multiplatform-network-layer skill)
+    └── Is the backend a third-party REST API?
+        └── YES → safeRequest is correct
+```
+
 ### "expect/actual or interface?"
 
 ```

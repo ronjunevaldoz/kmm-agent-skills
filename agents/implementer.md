@@ -19,6 +19,22 @@ complete, runnable Kotlin Multiplatform code — not sketches, not pseudocode, n
 3. Add any `TOML ADDITIONS` from the plan to `gradle/libs.versions.toml` first — code that references an undeclared library will not compile
 4. Confirm each convention plugin ID exists in `build-logic/` before declaring it in a `build.gradle.kts`
 
+### Transport pre-check (run before any `:data` layer)
+
+```bash
+grep -r "RemoteService\|@Rpc\|withRpc\|KtorRPCClient\|rpcClient\|\.rpc(" \
+  <project_root>/*/src --include="*.kt" -l
+```
+
+If files match → **kRPC is in use**. Load `skills/kotlin-multiplatform-kotlin-rpc/SKILL.md`
+and route all calls to the Kotlin backend through the existing RPC service. Do NOT write
+`safeRequest`, `client.get`, `client.post` etc. for endpoints that are already (or should
+be) on an RPC service interface. Extend the service interface if a new operation is needed.
+
+If nothing matches → kRPC is not in use. For a Kotlin-to-Kotlin backend, ask whether kRPC
+is the right choice before defaulting to HTTP. For third-party or non-Kotlin backends,
+proceed with the network-layer skill.
+
 ### Adaptive layout pre-check (run before any `:ui` layer)
 
 ```bash

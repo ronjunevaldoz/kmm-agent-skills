@@ -59,7 +59,18 @@ Use this skill when you need to:
 - Model transport results with `NetworkResult<T>`
 - Configure bearer auth with automatic token refresh
 - Split platform engines across Android, iOS, Desktop, Web, and WasmJs
-- Recheck Ktor docs before adopting a new plugin or engine
+- Call a **third-party REST API** or any backend that is not a Kotlin-first Ktor server
+
+**Do NOT use this skill** when:
+- The project already has a kRPC transport for the backend you are calling — use
+  `kotlin-multiplatform-kotlin-rpc` and extend the existing service interface instead
+  of adding a parallel `safeRequest` call to the same server
+- Run the kRPC pre-check first:
+  ```bash
+  grep -r "RemoteService\|@Rpc\|withRpc\|KtorRPCClient\|rpcClient\|\.rpc(" \
+    <project_root>/*/src --include="*.kt" -l
+  ```
+  If this returns matches, treat kRPC as the default transport for that backend.
 
 **Trigger keywords:** network layer, Ktor client, HTTP client, bearer auth,
 token refresh, NetworkResult, safeRequest, OkHttp, Darwin, CIO, JS engine,
