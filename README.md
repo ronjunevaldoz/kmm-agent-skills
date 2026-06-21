@@ -230,6 +230,12 @@ See [PLAN.md](PLAN.md) for full scope and priority details.
 
 ---
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for skill authoring, commit format, PR checklist, and release process.
+
+---
+
 ## References
 
 - [Kotlin/kotlin-agent-skills](https://github.com/Kotlin/kotlin-agent-skills) — official Kotlin agent skills

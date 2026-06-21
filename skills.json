@@ -1,5 +1,5 @@
 {
-  "version": "1.12.0",
+  "version": "1.15.0",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -912,6 +912,7 @@
         "review my KMP project"
       ],
       "scripts": [
+        "validate_keyword_routing.py",
         "validate_skill_map.py"
       ]
     },
@@ -961,7 +962,7 @@
       "path": "skills/kotlin-multiplatform-feature-scaffold",
       "description": "Scaffolds a production-ready Kotlin Multiplatform (KMP) multi-feature module architecture. Creates a full project by generating from the official Kotlin/kmp-wizard AGP 9 baseline, usually the `all-targets` branch for Android, iOS, Web, Desktop, and Server, or adds a new feature module group (:model/:api/:domain/:data/:presenter/:ui) to an existing KMP project. Uses AGP 9+, build-logic convention plugins, a TOML version catalog (`gradle/libs.versions.toml`), Compose Multiplatform, and Koin 4 (annotated or manual DI).",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-18",
+      "last_updated": "2026-06-21",
       "keywords": [
         "Kotlin Multiplatform",
         "KMP",
@@ -1010,7 +1011,7 @@
       "path": "skills/kotlin-multiplatform-flavor-environment",
       "description": "Sets up multi-environment configuration (dev/staging/prod) in a Kotlin Multiplatform project using BuildKonfig. Covers: environment-specific BuildKonfig values, Android product flavors wired to BuildKonfig, a shared AppConfig object in commonMain, secret management, and switching environments at build time. Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-06-21",
       "keywords": [
         "BuildKonfig",
         "multi-environment",

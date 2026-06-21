@@ -8,6 +8,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [v1.15.0] — 2026-06-21
+
 ### Added
 - `CONTRIBUTING.md` — contribution guide covering skill authoring, commit format, PR checklist, and release process
 - `agents/changelog.md` — changelog agent: categorizes git + skill diff into Breaking/New/Improved/Fixed and generates consumer-facing release notes
@@ -16,6 +20,8 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `## Changelog` section added to all 47 skills — consumer-facing release note table travels with each skill when installed
 
 ### Changed
+- `feature-scaffold` skill: app versioning pattern defined — `VERSION_NAME`/`VERSION_CODE` in `gradle.properties` as single source of truth; `androidApp` reads from properties; `BuildKonfig` exposes `APP_VERSION` to `commonMain`; `libs.versions.toml` is for dependency versions only
+- `flavor-environment` skill: `APP_VERSION` added to `BuildKonfig defaultConfigs`; `AppConfig.versionName` added to public facade
 - `feature-scaffold` skill Step 3 rewritten: mandatory `Kotlin/kmp-wizard` clone replaces manual file creation
 - `feature-scaffold` skill Step 4 rewritten: extend kmp-wizard's build-logic rather than recreate it
 - `feature-scaffold` anti-patterns: hand-scaffolding and precompiled `.gradle.kts` script plugins now listed as explicit blockers

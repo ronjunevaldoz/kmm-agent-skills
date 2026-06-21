@@ -106,7 +106,20 @@ None. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for tracked open items.
 
 ---
 
-## Upcoming — v1.14.0 (E2E Testing & Project Bootstrap)
+## Shipped — v1.15.0 (Consumer Changelogs, Release Notes & App Versioning)
+
+| Item | Status | Description |
+|---|---|---|
+| `## Changelog` in all 47 skills | ✅ Shipped | Consumer-facing release note table in every SKILL.md; travels with the skill on install |
+| `agents/changelog.md` | ✅ Shipped | Changelog agent: categorizes git + skill diff into Breaking/New/Improved/Fixed, writes consumer release notes |
+| `commands/release-notes.md` | ✅ Shipped | `/release-notes` command: per-skill or collection release notes from git history |
+| `scripts/generate_release_notes.py` | ✅ Shipped | Reads git log + per-skill `## Changelog` tables, outputs structured JSON for the changelog agent |
+| App versioning pattern | ✅ Shipped | `gradle.properties` as single source of truth for `VERSION_NAME`/`VERSION_CODE`; `BuildKonfig` exposes `APP_VERSION` to `commonMain` |
+| `CONTRIBUTING.md` | ✅ Shipped | Full contribution guide: skill authoring, commit format, PR checklist, release process |
+
+---
+
+## Shipped — v1.14.0 (E2E Testing & Project Bootstrap)
 
 | Item | Status | Description |
 |---|---|---|
