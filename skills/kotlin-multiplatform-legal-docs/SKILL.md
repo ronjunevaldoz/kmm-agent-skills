@@ -63,12 +63,82 @@ pages before filling in store listings.
 ## Recommendation First
 
 Default to this sequence:
-1. **Gather** — ask the developer what data the app collects (Step 1)
-2. **Generate** — produce Privacy Policy + Terms in markdown (Steps 2–3)
-3. **Map to stores** — fill in the Google Play Data Safety answers and App Store privacy label rows (Step 4)
-4. **Add to app** — wire a `LegalDocsScreen` composable that loads the docs from a URL or embedded string (Step 5)
+1. **Auto-scan** — run `detect_data_collection.py` against the project first (Step 1a). This replaces most of the manual questionnaire.
+2. **Fill gaps** — ask only the questions the scanner cannot answer (Step 1b)
+3. **Generate** — produce Privacy Policy + Terms in markdown (Steps 2–3)
+4. **Map to stores** — fill in the Google Play Data Safety answers and App Store privacy label rows (Step 4)
+5. **Add to app** — wire a `LegalDocsScreen` composable that loads the docs from a URL or embedded string (Step 5)
+6. **Wire into CI** — run `detect_data_collection.py --policy` in `./gradlew check` so new SDK additions are caught automatically (Step 6)
 
 Generate both documents in one pass. Do not generate Privacy Policy without Terms (or vice versa) — stores require both.
+
+---
+
+## Step 1a: Auto-Detect from the Project
+
+Run the bundled scanner first. It inspects `*.kt`, `*.swift`, `*.xml`, `libs.versions.toml`,
+and `AndroidManifest.xml` for known SDK imports, permission declarations, and class usages.
+
+```bash
+# Scan only — show what data types the code collects:
+python3 skills/kotlin-multiplatform-legal-docs/scripts/detect_data_collection.py <project_root>
+
+# Compare against an existing policy and show gaps + conflicts:
+python3 skills/kotlin-multiplatform-legal-docs/scripts/detect_data_collection.py <project_root> \
+  --policy docs/privacy_policy.md
+
+# JSON output for agent consumption:
+python3 skills/kotlin-multiplatform-legal-docs/scripts/detect_data_collection.py <project_root> --json
+```
+
+**What the scanner detects automatically:**
+
+| Data type | Evidence it looks for |
+|---|---|
+| Analytics | `FirebaseAnalytics`, `Amplitude`, `Mixpanel`, `logEvent`, `AnalyticsEvent` |
+| Crash reporting | `Crashlytics`, `Sentry`, `recordException` |
+| Push notifications | `FirebaseMessaging`, `fcmToken`, `UNUserNotificationCenter` |
+| Precise location | `ACCESS_FINE_LOCATION`, `FusedLocationProviderClient` |
+| Approximate location | `ACCESS_COARSE_LOCATION` |
+| Camera | `CAMERA` permission, `CameraX`, `AVCaptureSession` |
+| Microphone | `RECORD_AUDIO`, `AudioRecord`, `AVAudioSession` |
+| Biometric | `BiometricPrompt`, `LAContext`, `BiometricAuthenticator` |
+| Advertising ID | `AdvertisingIdClient`, `IDFA`, `ASIdentifierManager` |
+| Google Sign-In | `GoogleSignIn`, `BeginSignInRequest` |
+| Apple Sign-In | `ASAuthorizationAppleIDProvider` |
+| In-app purchases | `BillingClient`, `SKProductsRequest`, `StoreKit` |
+| Stripe payments | `PaymentSheet`, `stripe` dependency |
+| Photo library | `READ_MEDIA_IMAGES`, `PHPhotoLibrary` |
+| Health data | `HealthConnect`, `HKHealthStore` |
+| Contacts | `READ_CONTACTS`, `CNContactStore` |
+| Account / email | `FirebaseAuth`, `signInWithEmailAndPassword` |
+
+**Output sections:**
+
+- `DETECTED` — data types found in the codebase, with file:line evidence
+- `⚠️ GAPS` — detected in code but **not disclosed** in the existing policy → add disclosures
+- `ℹ️ CONFLICTS` — disclosed in the policy but **not detected** in code → remove or verify these sections
+- Exit code `0` = no gaps; `1` = gaps found (CI can fail on this)
+
+**What the scanner cannot detect** (still needs the manual questionnaire from Step 1b):
+- Third-party SDKs that use obfuscated or indirect data collection
+- Data collected server-side (your backend, not the app)
+- Whether data is "linked to the user" or anonymous (Google Play / App Store distinction)
+- Jurisdiction: which markets the app targets (EU → GDPR, California → CCPA)
+- Data retention periods and deletion policy
+
+---
+
+## Step 1b: Manual Questionnaire (gaps only)
+
+After running the scanner, ask only the questions it cannot answer:
+
+- **Jurisdiction**: EU/EEA? California USA? Both? Other?
+- **Server-side data**: does your backend store anything the app sends that the scanner wouldn't see?
+- **Third-party sharing**: is any data shared with parties beyond the detected SDKs? (ad networks, data brokers)
+- **Retention & deletion**: how long is data kept? Can users request deletion?
+- **Linked to user**: for analytics/crash data — is it linked to a user identity or anonymous?
+- **Children**: is the app directed at children under 13?
 
 ---
 
@@ -489,16 +559,46 @@ defaultConfigs {
 }
 ```
 
-### First-launch consent gate (optional)
+### First-launch consent gate
 
-If the app requires explicit consent before use, add a `ConsentScreen` before the main
-flow. Show it once; persist the accepted version in DataStore so it re-appears only when
-the policy version changes.
+**What it is:** a "Before you continue" screen shown to the user before they can use the app. It displays links to both legal documents and has a single "I agree — Continue" button.
+
+**Why version-pin it:** The naïve approach stores a `true/false` flag — shown once, never again. The problem: when you update your Privacy Policy (e.g. you add analytics), existing users who already accepted the old policy need to see and accept the new one. If you store only `true`, you have no way to re-show the screen.
+
+The solution: store the *version string of the policy they accepted* (e.g. `"1.2"`). At launch, compare it against the current policy version from `BuildKonfig`. If they match → skip. If they differ → show the gate again. Users only see it when the policy actually changes, not on every launch.
+
+```
+First launch:          stored = ""       current = "1.0"  → show gate
+After accept:          stored = "1.0"    current = "1.0"  → skip
+After policy update:   stored = "1.0"    current = "1.1"  → show gate again
+After re-accept:       stored = "1.1"    current = "1.1"  → skip
+```
+
+**`gradle.properties`** — add the policy version alongside the URLs:
+```properties
+PRIVACY_POLICY_URL=https://example.com/privacy
+TERMS_URL=https://example.com/terms
+POLICY_VERSION=1.0
+```
+
+**`buildkonfig {}`** additions:
+```kotlin
+buildConfigField(STRING, "POLICY_VERSION", project.property("POLICY_VERSION") as String)
+```
+
+**`AppConfig`** additions:
+```kotlin
+val privacyPolicyVersion: String get() = BuildKonfig.POLICY_VERSION
+```
+
+**`ConsentScreen.kt`:**
 
 ```kotlin
 @Composable
 fun ConsentScreen(
     onAccept: () -> Unit,
+    onViewTerms: () -> Unit,
+    onViewPrivacy: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -514,11 +614,10 @@ fun ConsentScreen(
                 style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(Modifier.height(12.dp))
-            // Inline links to open LegalDocsScreen
             Row {
-                TextButton(onClick = { /* navigate to Terms */ }) { Text("Terms & Conditions") }
+                TextButton(onClick = onViewTerms)   { Text("Terms & Conditions") }
                 Text("  and  ", modifier = Modifier.align(Alignment.CenterVertically))
-                TextButton(onClick = { /* navigate to Privacy Policy */ }) { Text("Privacy Policy") }
+                TextButton(onClick = onViewPrivacy) { Text("Privacy Policy") }
             }
         }
 
@@ -532,18 +631,31 @@ fun ConsentScreen(
 }
 ```
 
-Persist acceptance with DataStore (see `kotlin-multiplatform-datastore`):
-```kotlin
-// In a ConsentViewModel or use-case:
-suspend fun hasAcceptedCurrentPolicy(): Boolean {
-    val accepted = dataStore.data.first()[POLICY_VERSION_KEY] ?: ""
-    return accepted == AppConfig.privacyPolicyVersion
-}
+**`ConsentViewModel.kt`** — checks whether the gate should show, and records acceptance:
 
-suspend fun acceptPolicy() {
-    dataStore.edit { it[POLICY_VERSION_KEY] = AppConfig.privacyPolicyVersion }
+```kotlin
+class ConsentViewModel(
+    private val dataStore: DataStore<Preferences>,
+) : ViewModel() {
+
+    private val POLICY_VERSION_KEY = stringPreferencesKey("accepted_policy_version")
+
+    val shouldShowConsent: StateFlow<Boolean> = dataStore.data
+        .map { prefs ->
+            val accepted = prefs[POLICY_VERSION_KEY] ?: ""
+            accepted != AppConfig.privacyPolicyVersion
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    fun acceptPolicy() {
+        viewModelScope.launch {
+            dataStore.edit { it[POLICY_VERSION_KEY] = AppConfig.privacyPolicyVersion }
+        }
+    }
 }
 ```
+
+**When to bump `POLICY_VERSION`:** any time the policy changes in a way that is material to the user (new data collected, new third-party shared with, new jurisdiction section). Typo fixes do not need a bump.
 
 ---
 
@@ -557,6 +669,40 @@ Quick options:
 - **Firebase Hosting** — `firebase deploy --only hosting`
 
 The URL must be publicly accessible (no login) for both stores to accept it.
+
+---
+
+## Step 6: CI Gate — Keep Policy in Sync with Code
+
+Add `detect_data_collection.py` to your CI pipeline so that adding a new SDK (analytics,
+location, biometric) that is not yet disclosed in the policy causes the build to fail.
+
+### GitHub Actions step (add to `.github/workflows/ci.yml`):
+
+```yaml
+- name: Check privacy policy coverage
+  run: |
+    python3 skills/kotlin-multiplatform-legal-docs/scripts/detect_data_collection.py . \
+      --policy docs/privacy_policy.md
+  # Exit code 1 = gaps found → build fails
+```
+
+### What triggers a CI failure:
+
+| Scenario | What happens |
+|---|---|
+| New analytics SDK added, policy not updated | `GAPS: analytics` → exit 1 → CI fails |
+| Firebase removed, policy still mentions it | `CONFLICTS: analytics` → warning only (exit 0) |
+| Policy and code in sync | No gaps, no conflicts → exit 0 |
+
+**Workflow when CI fails on gaps:**
+
+1. CI reports `⚠️ GAPS — detected in code but NOT disclosed in policy`
+2. Developer runs `/release-notes` to draft the policy update
+3. Developer updates `docs/privacy_policy.md` and bumps `POLICY_VERSION` in `gradle.properties`
+4. CI passes on next push
+
+This closes the loop between feature development and legal compliance — no more shipping analytics without disclosing it.
 
 ---
 
@@ -645,4 +791,6 @@ that does not match what the app actually collects is worse than no policy.
 
 | Date | Change |
 |---|---|
+| 2026-06-21 | **Improved** — `detect_data_collection.py` scanner added: auto-detects 17 data types from project source; gap/conflict analysis against existing policy; CI gate via exit code; Step 6 CI integration guide added. |
+| 2026-06-21 | **Improved** — Consent gate explained with version-pinning pattern; `ConsentViewModel` with `StateFlow` added; `POLICY_VERSION` in `gradle.properties` → `BuildKonfig`. |
 | 2026-06-21 | Initial release — Privacy Policy + T&C templates, Google Play Data Safety, App Store privacy labels, GDPR/CCPA sections, in-app `LegalDocsScreen`, consent gate, web deployment guide. |
