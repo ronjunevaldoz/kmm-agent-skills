@@ -1,5 +1,5 @@
 {
-  "version": "1.9.0",
+  "version": "1.10.0",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -545,6 +545,40 @@
         "single source of truth",
         "state sharing",
         "Compose state management"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-crash-reporting",
+      "path": "skills/kotlin-multiplatform-crash-reporting",
+      "description": "Crash reporting for Kotlin Multiplatform apps \u2014 Firebase Crashlytics on Android/iOS, Sentry as a cross-platform alternative, custom non-fatal event recording, and breadcrumb logging. Covers: Kermit crash integration (via kermit-crashlytics / kermit-sentry), symbolication setup for Kotlin/Native dSYMs, and a CrashReporter expect/actual interface that keeps commonMain free of platform SDKs. Does NOT cover general structured logging (see logging skill) or app analytics/events (see analytics skill).",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "crash reporting",
+        "crashlytics",
+        "firebase crashlytics",
+        "sentry",
+        "non-fatal",
+        "symbolication",
+        "dsym",
+        "kermit crash",
+        "crash handler",
+        "breadcrumb",
+        "crash analytics"
+      ],
+      "triggers": [
+        "crash reporting",
+        "crashlytics",
+        "firebase crashes",
+        "sentry",
+        "non-fatal error",
+        "symbolication",
+        "dSYM",
+        "kermit crash",
+        "crash handler",
+        "crash analytics",
+        "crash tracking"
       ],
       "scripts": []
     },
@@ -1414,6 +1448,37 @@
         "HTTP interceptor",
         "API client setup",
         "network error handling"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-offline-first",
+      "path": "skills/kotlin-multiplatform-offline-first",
+      "description": "Offline-first architecture for Kotlin Multiplatform apps \u2014 local-first reads, background sync, optimistic updates, conflict resolution, and sync state tracking. Covers: single-source-of-truth via SQLDelight, a SyncManager pattern using WorkManager/BGTaskScheduler, optimistic mutation with rollback, and a SyncState sealed class surfaced to the UI via MVI. Does NOT cover FCM-triggered sync (see push-notifications) or RPC streaming (see kotlin-rpc).",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "offline first",
+        "offline-first",
+        "local first",
+        "sync",
+        "optimistic update",
+        "conflict resolution",
+        "background sync",
+        "single source of truth",
+        "cache",
+        "network-cache-flow"
+      ],
+      "triggers": [
+        "offline first",
+        "offline-first",
+        "local first",
+        "sync",
+        "optimistic update",
+        "conflict resolution",
+        "background sync",
+        "single source of truth",
+        "cache-then-network"
       ],
       "scripts": []
     },

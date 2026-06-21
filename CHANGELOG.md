@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.10.0] — 2026-06-21
+
+### Added
+
+- feat(pipeline+skills): 7 gap fixes — planner routing, new-skill cmd, detekt, PR template, hooks guide, tests, 2 new skills
+
+---
+
 ## [v1.9.0] — 2026-06-21
 
 ### Added
