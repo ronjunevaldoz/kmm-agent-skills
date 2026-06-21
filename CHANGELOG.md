@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.7.1] — 2026-06-21
+
+### Fixed
+
+- fix(pipeline): close 5 gaps — [TRANSPORT] fixer rule, stale counts, krpc context flag, tests, run-audit quality scan
+
+---
+
 ## [v1.7.0] — 2026-06-21
 
 ### Other
