@@ -18,7 +18,7 @@ PATTERNS = [
     )),
     ("magic color literal", re.compile(r"\bColor\(0x[0-9A-Fa-f]")),
     ("system dark theme scatter", re.compile(r"\bisSystemInDarkTheme\(\)")),
-    ("hardcoded spacing", re.compile(r"\bpadding\([^)]*\d+\.dp")),
+    ("hardcoded spacing", re.compile(r"\bpadding\([^)]*[1-9]\d*\.dp")),
 ]
 
 

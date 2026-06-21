@@ -65,17 +65,7 @@ pre-existing screens.
 
 ### KI-004 — `hardcoded spacing` audit pattern can false-positive on `padding(0.dp)`
 
-**Status:** Open  
-**Affects:** `audit_project.py`, `hardcoded spacing` pattern  
-**Symptom:** `Modifier.padding(0.dp)` (used to explicitly zero out inherited padding)
-is flagged as a hardcoded spacing violation even though there is no `AppTheme.spacing.zero`
-token and the intent is intentional zeroing.  
-**Root cause:** The regex `\bpadding\([^)]*\d+\.dp` matches any digit including `0`.  
-**Workaround:** Use `Modifier.padding(AppTheme.spacing.xxs)` (2dp) or suppress inline:
-add a comment `// audit:ignore` — the pattern does not currently check for this but
-can be extended.  
-**Fix needed:** Exclude `0.dp` from the pattern: change regex to
-`\bpadding\([^)]*[1-9]\d*\.dp`.
+**Status:** Resolved — see KI-R06 below
 
 ---
 
@@ -146,6 +136,17 @@ routed to `kotlin-multiplatform-graphics-modifiers` instead of
 that caused misrouting on natural-language queries.  
 **Fix:** Added 14 skills with expanded trigger keyword lines. Added a new routing row
 to the expert skill for canvas/layout testing vocabulary.
+
+---
+
+### KI-R06 — `hardcoded spacing` false-positive on `padding(0.dp)`
+
+**Resolved:** `fix(audit): exclude 0.dp from hardcoded spacing pattern`  
+**Was:** The regex `\bpadding\([^)]*\d+\.dp` matched `0.dp`, flagging intentional
+zero-padding as a spacing token violation even though no `AppTheme.spacing.zero` token
+exists.  
+**Fix:** Changed regex to `\bpadding\([^)]*[1-9]\d*\.dp` — requires at least one
+non-zero leading digit, so `0.dp` is silently ignored.
 
 ---
 
