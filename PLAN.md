@@ -90,9 +90,9 @@ All known defects resolved. ✅
 
 ### Batch 2 — Data & Storage
 
-| Skill | Priority | Scope |
+| Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-datastore` | 📋 High | Multiplatform DataStore Preferences + Proto. `createDataStore {}` expect/actual, coroutines Flow reads, migration from SharedPreferences, Koin wiring |
+| `kotlin-multiplatform-datastore` | ✅ | Multiplatform DataStore Preferences + Proto. `createDataStore {}` expect/actual, coroutines Flow reads, migration from SharedPreferences, Koin wiring |
 
 ### Batch 3 — Native Features
 
@@ -118,9 +118,15 @@ All known defects resolved. ✅
 | Idea | Notes |
 |---|---|
 | `kotlin-multiplatform-paging` | Paging 3 in KMP — `PagingSource`, `Pager`, Compose `collectAsLazyPagingItems`, cursor vs offset strategies |
+| `kotlin-multiplatform-analytics` | Already in Batch 4 above — move here once scoped |
 | `kotlin-multiplatform-workmanager` | Background sync — WorkManager (Android) + BGTaskScheduler (iOS) via expect/actual, retry policies, sync queue pattern |
 | `kotlin-multiplatform-deep-linking` | Universal Links (iOS) + App Links (Android) setup, route parsing in KMP shared code, navigation integration |
 | `kotlin-multiplatform-compose-animation` | CMP animation patterns — `AnimatedVisibility`, `animateContentSize`, shared element transitions, motion specs |
+| `kotlin-multiplatform-form-validation` | Declarative form validation, async validators, field-level error display, submit gating — no library currently covers KMP end-to-end |
+| `kotlin-multiplatform-image-loading` | Coil 3 (KMP-ready) setup, cache policy, placeholder/error state, Modifier.clip integration |
+| `kotlin-multiplatform-permissions` | Android `rememberLauncherForActivityResult` + iOS `Info.plist` request flow, shared `PermissionState` sealed type via expect/actual |
+| `kotlin-multiplatform-feature-flags` | Remote config (Firebase/LaunchDarkly/custom), flag evaluation in `:domain`, A/B variant sealed types, offline fallbacks |
+| `kotlin-multiplatform-accessibility` | Semantic roles, `contentDescription`, screen reader traversal order, Roborazzi accessibility snapshot validation |
 
 ---
 
