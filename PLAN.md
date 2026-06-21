@@ -106,6 +106,16 @@ None. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for tracked open items.
 
 ---
 
+## Upcoming — v1.14.0 (E2E Testing & Project Bootstrap)
+
+| Item | Status | Description |
+|---|---|---|
+| `/new-project` command | ✅ Shipped | Natural language → full KMP project scaffold. Drives full pipeline: feature-scaffold → clean-arch → infrastructure → design system → features → verify |
+| `samples/todo-app.md` | ✅ Shipped | E2E test spec: 12 skills, local persistence, form validation, MVI, Roborazzi. Pass/fail is objective (audit + jvmTest + screenshot audit) |
+| More sample specs | 📋 Planned | `samples/social-feed.md` (paging, image loading, kRPC), `samples/settings-app.md` (DataStore, biometric auth) |
+
+---
+
 ## Upcoming — v1.x (Quality & Hardening)
 
 Targeted improvements that don't require new skills.
@@ -154,3 +164,5 @@ Require coordination across multiple files or introduce breaking changes to exis
 - Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py` after adding a skill to confirm README, expert, and planner are all updated
 - Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py` after adding invocation map rows to confirm every skill has keyword routing coverage
 - Run `/audit-screenshots` after recording Roborazzi goldens to verify design-system compliance visually
+- Use `/new-project <description or samples/*.md>` to bootstrap a full KMP project from scratch
+- To run E2E tests against a sample spec: clone a clean sandbox repo, then run `/new-project samples/todo-app.md`
