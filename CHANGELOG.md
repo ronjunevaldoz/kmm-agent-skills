@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.12.0] — 2026-06-21
+
+### Added
+
+- feat(tests): resolve KI-005 and KI-006 — pipeline flag contract and hook script tests
+
+---
+
 ## [v1.11.1] — 2026-06-21
 
 ### Added
