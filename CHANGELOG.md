@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.7.0] — 2026-06-21
+
+### Other
+
+- Add /summarize-issues command and scan_skill_issues.py — automated quality gap detection with copy-paste fix prompts
+
+---
+
 ## [v1.6.0] — 2026-06-21
 
 ### Other
