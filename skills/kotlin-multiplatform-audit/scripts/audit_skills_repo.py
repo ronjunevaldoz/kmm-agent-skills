@@ -32,6 +32,36 @@ FAST_MOVING_HINTS = (
 )
 
 
+# Subdirectories where all .md files must be kebab-case
+KEBAB_DIRS = ("agents", "commands", "docs", "samples")
+
+# Root-level .md files must be SCREAMING_CASE (all uppercase stem + optional underscores/hyphens)
+_SCREAMING_RE = re.compile(r"^[A-Z][A-Z0-9_-]*$")
+_KEBAB_RE = re.compile(r"^[a-z][a-z0-9-]*$")
+
+
+def _check_naming_conventions(root: Path, findings: list[str]) -> None:
+    # Root-level .md files must be SCREAMING_CASE
+    for f in root.glob("*.md"):
+        if not _SCREAMING_RE.match(f.stem):
+            findings.append(
+                f"naming: root-level {f.name} should be SCREAMING_CASE "
+                f"(e.g. {f.stem.upper()}.md)"
+            )
+
+    # Subdirectory .md files must be kebab-case
+    for subdir_name in KEBAB_DIRS:
+        subdir = root / subdir_name
+        if not subdir.exists():
+            continue
+        for f in subdir.rglob("*.md"):
+            if not _KEBAB_RE.match(f.stem):
+                findings.append(
+                    f"naming: {f.relative_to(root)} should be kebab-case "
+                    f"(e.g. {f.stem.lower().replace('_', '-')}.md)"
+                )
+
+
 def audit_skills_repo(root: Path) -> list[str]:
     findings: list[str] = []
     skills_dir = root / "skills"
@@ -74,6 +104,8 @@ def audit_skills_repo(root: Path) -> list[str]:
             findings.append(
                 "kotlin-multiplatform-feature-scaffold: missing build-logic and libs.versions.toml guidance"
             )
+
+    _check_naming_conventions(root, findings)
 
     readme = root / "README.md"
     if readme.exists():

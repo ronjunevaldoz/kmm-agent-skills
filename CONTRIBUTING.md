@@ -59,6 +59,24 @@ kmm-agent-skills/
 
 ---
 
+## File naming conventions
+
+| Location | Convention | Examples |
+|---|---|---|
+| Root-level docs | `SCREAMING_CASE.md` | `README.md`, `CHANGELOG.md`, `PLAN.md` |
+| `agents/` | `kebab-case.md` | `planner.md`, `changelog.md` |
+| `commands/` | `kebab-case.md` | `new-project.md`, `run-audit.md` |
+| `docs/` | `kebab-case.md` | `goal-gap-analysis.md` |
+| `samples/` | `kebab-case.md` | `todo-app.md` |
+| `skills/<name>/` | `SKILL.md` (fixed) | Same reasoning as `README.md` — primary entry file |
+| `scripts/` | `snake_case.py` | `release.py`, `generate_release_notes.py` |
+
+**Rule:** root-level files are `SCREAMING_CASE` because GitHub renders them prominently.
+Everything inside a subdirectory uses `kebab-case` (or `snake_case` for Python scripts).
+`SKILL.md` is the one intentional SCREAMING exception — it is the skill's `README.md` equivalent.
+
+---
+
 ## Adding a new skill
 
 ### 1. Create the skill directory

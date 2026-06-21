@@ -496,6 +496,42 @@ class AuditSkillsRepoTests(unittest.TestCase):
             self.assertFalse(any("missing markers" in f for f in findings))
 
 
+    def test_naming_flags_uppercase_file_in_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            cmd_dir = root / "commands"
+            cmd_dir.mkdir()
+            (cmd_dir / "NewFeature.md").write_text("# cmd\n", encoding="utf-8")
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("naming" in f and "NewFeature.md" in f for f in findings))
+
+    def test_naming_flags_lowercase_root_doc(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            (root / "changelog.md").write_text("# log\n", encoding="utf-8")
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("naming" in f and "changelog.md" in f for f in findings))
+
+    def test_naming_clean_on_correct_conventions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            (root / "PLAN.md").write_text("# plan\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            cmd_dir = root / "commands"
+            cmd_dir.mkdir()
+            (cmd_dir / "new-feature.md").write_text("# cmd\n", encoding="utf-8")
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertFalse(any("naming" in f for f in findings))
+
+
 class DraftIssueTests(unittest.TestCase):
     def test_render_issue_includes_attribution_footer(self) -> None:
         content = draft_issue_scripts.render_issue(
