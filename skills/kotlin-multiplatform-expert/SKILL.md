@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-18'
+  last-updated: '2026-06-21'
   keywords:
     - KMP expert
     - orchestrator
@@ -84,7 +84,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 30 Skills and What They Own
+## The 45 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -125,6 +125,15 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-shared-resources` | Strings, images, fonts, plurals, localization |
 | `kotlin-multiplatform-mvi` | MVI architecture, Contract pattern, `MviViewModel`, State/Intent/Effect, one-shot effects |
 | `kotlin-multiplatform-paging` | Paging 3 — `PagingSource`, `Pager`, `PagingData`, cursor vs offset, `RemoteMediator`, load-state handling |
+| `kotlin-multiplatform-analytics` | Sealed `AnalyticsEvent`, `Analytics` interface, Firebase/Amplitude impls, screen tracking, `FakeAnalytics` |
+| `kotlin-multiplatform-form-validation` | `ValidationResult`, `FieldState`, synchronous + async validators, submit gating, `ValidatedTextField` |
+| `kotlin-multiplatform-image-loading` | Coil 3 — `AsyncImage`, `AvatarImage`, `HeroImage`, single `ImageLoader`, memory/disk cache |
+| `kotlin-multiplatform-permissions` | `PermissionState` sealed type, `expect/actual PermissionController`, Android launcher, iOS Info.plist |
+| `kotlin-multiplatform-deep-linking` | App Links + Universal Links, `DeepLinkParser`, NavHost `navDeepLink`, intent handling, AASA |
+| `kotlin-multiplatform-biometric-auth` | `BiometricResult`, `expect/actual BiometricAuthenticator`, `BiometricPrompt`, `LAContext` |
+| `kotlin-multiplatform-push-notifications` | FCM + APNs, `PushToken`, `FirebaseMessagingService`, `NotificationHandler` expect/actual, deep-link routing |
+| `kotlin-multiplatform-workmanager` | `CoroutineWorker`, `BGTaskScheduler`, `expect/actual BackgroundScheduler`, one-time + periodic, retry |
+| `kotlin-multiplatform-feature-flags` | `FeatureFlag` enum, `FeatureFlagProvider`, Firebase Remote Config, A/B variants, kill switch, fake provider |
 
 ### Layer 5 — UI System
 | Skill | Owns |
@@ -144,6 +153,8 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-unit-testing` | `runTest`, Turbine, fake-over-mock, `:core:testing` fixtures module, JVM ViewModel tests |
 | `kotlin-multiplatform-roborazzi` | Screenshot tests from `@Preview` on JVM/Desktop, golden images, CI diff job |
 | `kotlin-multiplatform-code-quality` | Ktlint (formatting) + Detekt (architecture rules), CI gates |
+| `kotlin-multiplatform-accessibility` | Semantic roles, `contentDescription`, `mergeDescendants`, touch targets, traversal order, Roborazzi a11y snapshots |
+| `kotlin-multiplatform-compose-animation` | `AnimatedVisibility`, `animateContentSize`, `Crossfade`, `AnimatedContent`, `animateXAsState`, shared elements, reduced motion |
 
 ---
 
@@ -178,7 +189,19 @@ kotlin-multiplatform-feature-scaffold       ← scaffold second (implements the 
 ├── kotlin-multiplatform-preview-driven-development (depends on: presenter-module, design-system)
 ├── kotlin-multiplatform-unit-testing       (depends on: presenter-module)
 ├── kotlin-multiplatform-roborazzi          (depends on: preview-driven-development)
-└── kotlin-multiplatform-code-quality       (depends on: scaffold, clean-architecture)
+├── kotlin-multiplatform-code-quality       (depends on: scaffold, clean-architecture)
+├── kotlin-multiplatform-paging             (depends on: mvi, network-layer, repository-pattern)
+├── kotlin-multiplatform-analytics          (depends on: mvi, dependency-injection)
+├── kotlin-multiplatform-form-validation    (depends on: mvi, design-system)
+├── kotlin-multiplatform-image-loading      (depends on: design-system, network-layer)
+├── kotlin-multiplatform-permissions        (depends on: mvi, dependency-injection)
+├── kotlin-multiplatform-deep-linking       (depends on: navigation)
+├── kotlin-multiplatform-biometric-auth     (depends on: mvi, dependency-injection)
+├── kotlin-multiplatform-push-notifications (depends on: permissions, deep-linking, workmanager)
+├── kotlin-multiplatform-workmanager        (depends on: dependency-injection)
+├── kotlin-multiplatform-feature-flags      (depends on: dependency-injection, analytics)
+├── kotlin-multiplatform-accessibility      (depends on: design-system, roborazzi, compose-animation)
+└── kotlin-multiplatform-compose-animation  (depends on: design-system)
 ```
 
 ---
@@ -395,6 +418,17 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "screenshot test", "Roborazzi", "golden image", "visual regression", "CI diff" | `kotlin-multiplatform-roborazzi` |
 | "test canvas layout", "canvas screenshot", "layout regression test", "visual accuracy", "pixel-perfect test", "arrangement test", "test node placement", "UI layout verification", "100% accuracy test" | `kotlin-multiplatform-roborazzi` |
 | "Ktlint", "Detekt", "code quality", "formatting", "architecture rules", "CI gate" | `kotlin-multiplatform-code-quality` |
+| "analytics", "event tracking", "track event", "Firebase Analytics", "screen tracking", "AnalyticsTracker", "event schema", "amplitude KMP", "mixpanel KMP" | `kotlin-multiplatform-analytics` |
+| "form validation", "field validation", "required field", "email validation", "inline error", "submit disabled", "async validation", "FieldState", "ValidationResult" | `kotlin-multiplatform-form-validation` |
+| "image loading", "Coil", "Coil 3", "AsyncImage", "network image", "image placeholder", "circular image", "avatar image", "image cache", "disk cache" | `kotlin-multiplatform-image-loading` |
+| "permissions", "runtime permission", "camera permission", "location permission", "permission denied", "PermissionState", "permission rationale", "iOS permission" | `kotlin-multiplatform-permissions` |
+| "deep linking", "App Links", "Universal Links", "deep link", "AASA", "Digital Asset Links", "intent filter", "route parsing", "notification deep link" | `kotlin-multiplatform-deep-linking` |
+| "biometric", "fingerprint", "Face ID", "Touch ID", "BiometricPrompt", "LocalAuthentication", "biometric result", "device credential" | `kotlin-multiplatform-biometric-auth` |
+| "push notifications", "FCM", "APNs", "Firebase Messaging", "push token", "FirebaseMessagingService", "remote notification", "notification tap" | `kotlin-multiplatform-push-notifications` |
+| "WorkManager", "background work", "background task", "BGTaskScheduler", "BGProcessingTask", "one-time work", "periodic work", "CoroutineWorker", "background sync" | `kotlin-multiplatform-workmanager` |
+| "feature flags", "feature toggle", "remote config", "Firebase Remote Config", "A/B test", "experiment", "kill switch", "flag evaluation", "FeatureFlagProvider" | `kotlin-multiplatform-feature-flags` |
+| "accessibility", "a11y", "TalkBack", "VoiceOver", "contentDescription", "semantic role", "screen reader", "touch target", "WCAG", "traversal order", "mergeDescendants" | `kotlin-multiplatform-accessibility` |
+| "animation", "AnimatedVisibility", "animateContentSize", "Crossfade", "AnimatedContent", "animateFloatAsState", "shared element", "enter transition", "exit transition", "reduced motion", "spring animation" | `kotlin-multiplatform-compose-animation` |
 
 ---
 

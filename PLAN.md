@@ -17,7 +17,7 @@ for future work. Update it as skills are added, revised, or completed.
 
 ---
 
-## Shipped Skills (34)
+## Shipped Skills (45)
 
 ### Foundation
 | Skill | Status | Notes |
@@ -98,8 +98,8 @@ All known defects resolved. ✅
 
 | Skill | Priority | Scope |
 |---|---|---|
-| `kotlin-multiplatform-biometric-auth` | 📋 Medium | BiometricPrompt (Android) + LocalAuthentication (iOS) via expect/actual. Shared `BiometricAuth` interface, result sealed type, Keychain/EncryptedSharedPrefs integration |
-| `kotlin-multiplatform-push-notifications` | 📋 Medium | FCM token (Android) + APNs token (iOS). Shared `PushToken` domain type, `NotificationHandler` interface, deep-link routing from notification tap |
+| `kotlin-multiplatform-biometric-auth` | ✅ | `BiometricResult` sealed type, `expect/actual BiometricAuthenticator`, Android `BiometricPrompt`, iOS `LAContext.evaluatePolicy`, Koin wiring |
+| `kotlin-multiplatform-push-notifications` | ✅ | FCM + APNs, `PushToken`, `FirebaseMessagingService`, `expect/actual NotificationHandler`, deep-link routing from notification tap |
 
 ### Batch 4 — Observability & Quality
 
@@ -110,23 +110,22 @@ All known defects resolved. ✅
 | `kotlin-multiplatform-roborazzi` | ✅ | Screenshot tests from @Preview on JVM, golden images, CI diff job |
 | `kotlin-multiplatform-code-quality` | ✅ | Ktlint (formatting) + Detekt (architecture rules), CI gates |
 | `kotlin-multiplatform-logging` | ✅ | Kermit, log levels, pluggable writers, crash boundary, Koin wiring |
-| `kotlin-multiplatform-analytics` | 📋 Medium | Shared `Analytics` interface, Firebase/Amplitude platform impls, event schema via sealed classes, automatic screen tracking |
+| `kotlin-multiplatform-analytics` | ✅ | Sealed `AnalyticsEvent` hierarchy, `Analytics` interface, Firebase/no-op impls, screen tracking via `DisposableEffect`, `FakeAnalytics` |
 | `kotlin-multiplatform-testing-robot` | 🚫 Retired | Replaced by `kotlin-multiplatform-roborazzi` + `kotlin-multiplatform-unit-testing` |
 
 ### Ideas (not yet scoped)
 
-| Idea | Notes |
+| Idea | Status |
 |---|---|
-| `kotlin-multiplatform-paging` | ✅ | Paging 3 — `PagingSource`, `Pager`, cursor vs offset, `RemoteMediator`, load-state handling, `collectAsLazyPagingItems` |
-| `kotlin-multiplatform-analytics` | Already in Batch 4 above — move here once scoped |
-| `kotlin-multiplatform-workmanager` | Background sync — WorkManager (Android) + BGTaskScheduler (iOS) via expect/actual, retry policies, sync queue pattern |
-| `kotlin-multiplatform-deep-linking` | Universal Links (iOS) + App Links (Android) setup, route parsing in KMP shared code, navigation integration |
-| `kotlin-multiplatform-compose-animation` | CMP animation patterns — `AnimatedVisibility`, `animateContentSize`, shared element transitions, motion specs |
-| `kotlin-multiplatform-form-validation` | Declarative form validation, async validators, field-level error display, submit gating — no library currently covers KMP end-to-end |
-| `kotlin-multiplatform-image-loading` | Coil 3 (KMP-ready) setup, cache policy, placeholder/error state, Modifier.clip integration |
-| `kotlin-multiplatform-permissions` | Android `rememberLauncherForActivityResult` + iOS `Info.plist` request flow, shared `PermissionState` sealed type via expect/actual |
-| `kotlin-multiplatform-feature-flags` | Remote config (Firebase/LaunchDarkly/custom), flag evaluation in `:domain`, A/B variant sealed types, offline fallbacks |
-| `kotlin-multiplatform-accessibility` | Semantic roles, `contentDescription`, screen reader traversal order, Roborazzi accessibility snapshot validation |
+| `kotlin-multiplatform-paging` | ✅ Shipped (v1.4.0) — Paging 3, cursor/offset, RemoteMediator, load-state handling |
+| `kotlin-multiplatform-workmanager` | ✅ Shipped — `CoroutineWorker` + `BGTaskScheduler`, `expect/actual BackgroundScheduler`, retry with backoff |
+| `kotlin-multiplatform-deep-linking` | ✅ Shipped — App Links + Universal Links, `DeepLinkParser` in commonMain, NavHost `navDeepLink` |
+| `kotlin-multiplatform-compose-animation` | ✅ Shipped — `AnimatedVisibility`, `Crossfade`, `AnimatedContent`, `animateXAsState`, shared elements, reduced motion |
+| `kotlin-multiplatform-form-validation` | ✅ Shipped — `Validators`, `FieldState`, async debounce, `ValidatedTextField`, submit gating |
+| `kotlin-multiplatform-image-loading` | ✅ Shipped — Coil 3, single `ImageLoader`, `AsyncImage`, `AvatarImage`, `HeroImage`, memory/disk cache |
+| `kotlin-multiplatform-permissions` | ✅ Shipped — `PermissionState`, `expect/actual PermissionController`, Android launcher, iOS Info.plist |
+| `kotlin-multiplatform-feature-flags` | ✅ Shipped — `FeatureFlag` enum, `FeatureFlagProvider`, Firebase Remote Config, A/B variants, kill switch |
+| `kotlin-multiplatform-accessibility` | ✅ Shipped — semantic roles, `contentDescription`, touch targets, Roborazzi a11y snapshots, WCAG checklist |
 
 ---
 
