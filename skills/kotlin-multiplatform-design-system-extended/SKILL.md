@@ -11,7 +11,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-06'
+  last-updated: '2026-06-22'
   keywords:
     - design system extended
     - Dialog
@@ -411,14 +411,14 @@ fun AppLabel(
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         AppText(
             text = text,
-            style = TextStyle.LabelLarge,
+            style = AppTextStyle.LabelLarge,
             muted = !enabled,
         )
         if (required) {
             Spacer(Modifier.width(2.dp))
             AppText(
                 text = "*",
-                style = TextStyle.LabelLarge,
+                style = AppTextStyle.LabelLarge,
                 color = AppTheme.LocalAppTheme.current.colors.destructive,
             )
         }
@@ -535,7 +535,7 @@ fun AppAvatar(
         } else if (initials != null) {
             AppText(
                 text = initials.take(2).uppercase(),
-                style = if (size.dp >= 56.dp) TextStyle.TitleSmall else TextStyle.LabelLarge,
+                style = if (size.dp >= 56.dp) AppTextStyle.TitleSmall else AppTextStyle.LabelLarge,
                 color = theme.colors.onSecondary,
             )
         }
@@ -851,7 +851,7 @@ fun AppTopAppBar(
         }
         AppText(
             text = title,
-            style = TextStyle.TitleSmall,
+            style = AppTextStyle.TitleSmall,
             color = contentColor,
             modifier = Modifier
                 .weight(1f)
@@ -956,7 +956,7 @@ fun AppNavigationBar(
                     Spacer(Modifier.height(2.dp))
                     AppText(
                         text = item.label,
-                        style = TextStyle.LabelSmall,
+                        style = AppTextStyle.LabelSmall,
                         color = if (selected) theme.colors.primary else theme.colors.onSurfaceVariant,
                     )
                 }
@@ -1052,7 +1052,7 @@ fun AppTabs(
                             ) {
                                 AppText(
                                     text = title,
-                                    style = TextStyle.LabelLarge,
+                                    style = AppTextStyle.LabelLarge,
                                     color = if (selected) colors.selected else colors.unselected,
                                     modifier = Modifier.padding(vertical = 10.dp),
                                 )
@@ -1096,7 +1096,7 @@ fun AppTabs(
                         ) {
                             AppText(
                                 text = title,
-                                style = TextStyle.LabelLarge,
+                                style = AppTextStyle.LabelLarge,
                                 color = if (selected) colors.selected else colors.unselected,
                             )
                         }
@@ -1127,7 +1127,7 @@ fun AppTabs(
                         ) {
                             AppText(
                                 text = title,
-                                style = TextStyle.LabelLarge,
+                                style = AppTextStyle.LabelLarge,
                                 color = if (selected) colors.selected else colors.unselected,
                             )
                         }
@@ -1261,7 +1261,7 @@ fun AppCheckbox(
             }
         }
         if (label != null) {
-            AppText(text = label, style = TextStyle.BodyMedium, muted = !enabled)
+            AppText(text = label, style = AppTextStyle.BodyMedium, muted = !enabled)
         }
     }
 }
@@ -1344,7 +1344,7 @@ fun AppRadioButton(
             }
         }
         if (label != null) {
-            AppText(text = label, style = TextStyle.BodyMedium, muted = !enabled)
+            AppText(text = label, style = AppTextStyle.BodyMedium, muted = !enabled)
         }
     }
 }
@@ -1428,7 +1428,7 @@ fun AppSwitch(
             )
         }
         if (label != null) {
-            AppText(text = label, style = TextStyle.BodyMedium, muted = !enabled)
+            AppText(text = label, style = AppTextStyle.BodyMedium, muted = !enabled)
         }
     }
 }
@@ -1633,12 +1633,12 @@ fun AppSelect(
         ) {
             AppText(
                 text = selected ?: placeholder,
-                style = TextStyle.BodyMedium,
+                style = AppTextStyle.BodyMedium,
                 color = if (selected != null) theme.colors.onSurface else theme.colors.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
             // Chevron
-            AppText(text = if (expanded) "▲" else "▼", style = TextStyle.LabelSmall, muted = true)
+            AppText(text = if (expanded) "▲" else "▼", style = AppTextStyle.LabelSmall, muted = true)
         }
 
         // Dropdown
@@ -1676,11 +1676,11 @@ fun AppSelect(
                     ) {
                         AppText(
                             text = option,
-                            style = TextStyle.BodyMedium,
+                            style = AppTextStyle.BodyMedium,
                             modifier = Modifier.weight(1f),
                         )
                         if (option == selected) {
-                            AppText(text = "✓", style = TextStyle.LabelSmall, color = theme.colors.primary)
+                            AppText(text = "✓", style = AppTextStyle.LabelSmall, color = theme.colors.primary)
                         }
                     }
                 }
@@ -1752,10 +1752,10 @@ fun AppAlert(
             Spacer(Modifier.width(12.dp))
         }
         Column {
-            AppText(text = title, style = TextStyle.TitleSmall)
+            AppText(text = title, style = AppTextStyle.TitleSmall)
             if (description != null) {
                 Spacer(Modifier.height(4.dp))
-                AppText(text = description, style = TextStyle.BodySmall)
+                AppText(text = description, style = AppTextStyle.BodySmall)
             }
         }
     }
@@ -1877,14 +1877,14 @@ fun ToastHost(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            AppText(text = toast.title, style = TextStyle.LabelLarge, color = content)
+                            AppText(text = toast.title, style = AppTextStyle.LabelLarge, color = content)
                             if (toast.description != null) {
-                                AppText(text = toast.description, style = TextStyle.BodySmall, color = content.copy(alpha = 0.8f))
+                                AppText(text = toast.description, style = AppTextStyle.BodySmall, color = content.copy(alpha = 0.8f))
                             }
                         }
                         Spacer(Modifier.width(8.dp))
                         AppIconButton(onClick = { toastHostState.dismiss(toast.id) }) {
-                            AppText(text = "✕", style = TextStyle.LabelSmall, color = content)
+                            AppText(text = "✕", style = AppTextStyle.LabelSmall, color = content)
                         }
                     }
                 }
@@ -2025,11 +2025,11 @@ fun AppDialog(
                 .padding(24.dp),
         ) {
             if (title != null) {
-                AppText(text = title, style = TextStyle.TitleMedium)
+                AppText(text = title, style = AppTextStyle.TitleMedium)
             }
             if (description != null) {
                 Spacer(Modifier.height(8.dp))
-                AppText(text = description, style = TextStyle.BodyMedium, muted = true)
+                AppText(text = description, style = AppTextStyle.BodyMedium, muted = true)
             }
             if (content != null) {
                 Spacer(Modifier.height(16.dp))
@@ -2171,7 +2171,7 @@ fun AppSheet(
                 if (title != null) {
                     AppText(
                         text = title,
-                        style = TextStyle.TitleSmall,
+                        style = AppTextStyle.TitleSmall,
                         modifier = Modifier.padding(horizontal = 24.dp),
                     )
                     Spacer(Modifier.height(16.dp))
@@ -2266,7 +2266,7 @@ fun AppTooltip(
                 ) {
                     AppText(
                         text = tooltip,
-                        style = TextStyle.BodySmall,
+                        style = AppTextStyle.BodySmall,
                         color = theme.colors.background,
                     )
                 }
@@ -2441,13 +2441,13 @@ fun AppAccordion(
                 ) {
                     AppText(
                         text = item.title,
-                        style = TextStyle.LabelLarge,
+                        style = AppTextStyle.LabelLarge,
                         modifier = Modifier.weight(1f),
                     )
                     Spacer(Modifier.width(8.dp))
                     AppText(
                         text = "▼",
-                        style = TextStyle.LabelSmall,
+                        style = AppTextStyle.LabelSmall,
                         muted = true,
                         modifier = Modifier.graphicsLayer { rotationZ = rotation },
                     )
@@ -2576,7 +2576,7 @@ fun SettingsPage() {
             },
             AccordionItem("Appearance") {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    AppText("Theme", style = TextStyle.LabelLarge)
+                    AppText("Theme", style = AppTextStyle.LabelLarge)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf("System", "Light", "Dark").forEach { opt ->
                             AppChip(label = opt, selected = opt == "System", onClick = {})
@@ -2715,4 +2715,5 @@ Assume `kotlin-multiplatform-design-system` is already applied. Use the user's v
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Renamed all `TextStyle.` references → `AppTextStyle.` to align with base skill rename. |
 | 2026-06-06 | Initial release. |

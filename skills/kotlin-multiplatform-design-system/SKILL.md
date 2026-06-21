@@ -7,13 +7,14 @@ description: >
   color/typography/shape/spacing
   tokens, AppTheme with light/dark support, StyleScope extensions for token access,
   shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant,
-  ChipVariant, TextFieldVariant), and 6 core components (AppButton, AppCard,
-  AppTextField, AppChip, AppBadge, AppText) built on BasicXxx CMP primitives.
+  ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision),
+  and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText)
+  built on BasicXxx CMP primitives.
   No Material dependency — fully custom, fully owned.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-06'
+  last-updated: '2026-06-22'
   keywords:
     - design system
     - Compose Styles API
@@ -71,6 +72,10 @@ is not a concern.
 
 ## Screen Layout Contract
 
+> **Requires extended skill:** `AppScaffold` and `AppTopAppBar` are defined in
+> `kotlin-multiplatform-design-system-extended`. Apply that skill before using the
+> screen layout contract below.
+
 Every screen must follow this structure — no exceptions. Consistency across all pages
 depends on every feature using the same scaffold shell.
 
@@ -102,7 +107,7 @@ fun FooContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)            // ← prevents clipping under TopAppBar
-                .padding(horizontal = AppTheme.spacing.lg)  // ← token, never 16.dp
+                .padding(horizontal = appTheme.spacing.lg)  // ← token, never 16.dp
         ) {
             // functional content only — no title text, no duplicate action buttons
         }
@@ -118,7 +123,7 @@ fun FooContent(
 | Back / close | `AppTopAppBar(navigationIcon = { … })` | Custom button in content |
 | Primary action (save, filter, search) | `AppTopAppBar(actions = { … })` | Floating button duplicating the TopAppBar action |
 | Overflow menu | `AppTopAppBar(actions = { AppIconButton(MoreVert) { … } })` | Separate menu row inside content |
-| Horizontal content padding | `spacing.lg` (`16.dp` token) | Hardcoded `.dp` literals |
+| Horizontal content padding | `appTheme.spacing.lg` (`16.dp` token) | Hardcoded `.dp` literals |
 
 ### Why redundant UI in content hurts
 
@@ -541,6 +546,10 @@ val StyleScope.spacing: AppSpacing
 
 ## Step 5: Variant Systems
 
+> **Required in every style and component file:** add `@file:OptIn(ExperimentalStylesApi::class)`
+> before the `package` line and `import androidx.compose.foundation.style.ExperimentalStylesApi`
+> in the imports. The snippets below omit these for brevity — they are required for compilation.
+
 ### `styles/ButtonStyles.kt`
 
 Mirrors shadcn Button: `default | outline | secondary | ghost | destructive | link`
@@ -551,7 +560,9 @@ package GROUP_ID.core.designsystem.styles
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.style.Style
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import GROUP_ID.core.designsystem.theme.colors
 import GROUP_ID.core.designsystem.theme.shapes
 import GROUP_ID.core.designsystem.theme.spacing
@@ -681,7 +692,9 @@ package GROUP_ID.core.designsystem.styles
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.style.Style
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import GROUP_ID.core.designsystem.theme.colors
 import GROUP_ID.core.designsystem.theme.shapes
 import GROUP_ID.core.designsystem.theme.spacing
@@ -757,6 +770,7 @@ import androidx.compose.ui.unit.dp
 import GROUP_ID.core.designsystem.theme.colors
 import GROUP_ID.core.designsystem.theme.shapes
 import GROUP_ID.core.designsystem.theme.spacing
+import GROUP_ID.core.designsystem.tokens.AppSpacing
 
 sealed interface CardVariant {
     val style: Style
@@ -797,12 +811,12 @@ sealed interface CardSize {
     val headerSpacing: androidx.compose.ui.unit.Dp
 
     data object Default : CardSize {
-        override val contentPadding = 24.dp
-        override val headerSpacing  = 6.dp
+        override val contentPadding = AppSpacing().xxl  // 24.dp
+        override val headerSpacing  = AppSpacing().sm   // 8.dp
     }
     data object Sm : CardSize {
-        override val contentPadding = 16.dp
-        override val headerSpacing  = 4.dp
+        override val contentPadding = AppSpacing().lg   // 16.dp
+        override val headerSpacing  = AppSpacing().xs   // 4.dp
     }
 }
 ```
@@ -815,6 +829,7 @@ package GROUP_ID.core.designsystem.styles
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.style.Style
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import GROUP_ID.core.designsystem.theme.colors
 import GROUP_ID.core.designsystem.theme.shapes
 import GROUP_ID.core.designsystem.theme.spacing
@@ -868,6 +883,7 @@ package GROUP_ID.core.designsystem.styles
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.style.Style
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import GROUP_ID.core.designsystem.theme.colors
 import GROUP_ID.core.designsystem.theme.shapes
 import GROUP_ID.core.designsystem.theme.spacing
@@ -1105,10 +1121,10 @@ fun CardHeader(
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
         Column {
-            AppText(text = title, style = TextStyle.TitleSmall)
+            AppText(text = title, style = AppTextStyle.TitleSmall)
             if (description != null) {
                 Spacer(Modifier.height(4.dp))
-                AppText(text = description, style = TextStyle.BodySmall, muted = true)
+                AppText(text = description, style = AppTextStyle.BodySmall, muted = true)
             }
         }
         if (action != null) {
@@ -1182,6 +1198,120 @@ fun AppChip(
 }
 ```
 
+### `components/AppTextField.kt`
+
+```kotlin
+package GROUP_ID.core.designsystem.components
+
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.style.ExperimentalStylesApi
+import androidx.compose.foundation.style.MutableStyleState
+import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.styleable
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.VisualTransformation
+import GROUP_ID.core.designsystem.styles.TextFieldVariant
+import GROUP_ID.core.designsystem.theme.appTheme
+import GROUP_ID.core.designsystem.theme.colors
+
+/**
+ * Usage:
+ * ```
+ * AppTextField(value = email, onValueChange = { email = it }, label = "Email", placeholder = "you@example.com")
+ * AppTextField(value = pwd, onValueChange = { pwd = it }, label = "Password", visualTransformation = PasswordVisualTransformation())
+ * AppTextField(value = q, onValueChange = { q = it }, variant = TextFieldVariant.Ghost, placeholder = "Search…")
+ * AppTextField(value = bio, onValueChange = { bio = it }, singleLine = false, label = "Bio")
+ * ```
+ */
+@OptIn(ExperimentalStylesApi::class)
+@Composable
+fun AppTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    label: String? = null,
+    placeholder: String? = null,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
+    isError: Boolean = false,
+    supportingText: String? = null,
+    variant: TextFieldVariant = TextFieldVariant.Default,
+    style: Style = Style,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    singleLine: Boolean = true,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val styleState = remember(interactionSource) { MutableStyleState(interactionSource) }
+    styleState.enabled = enabled
+
+    val errorStyle = if (isError) Style { borderColor(colors.error) } else Style
+
+    Column(modifier = modifier) {
+        if (label != null) {
+            AppText(text = label, style = AppTextStyle.LabelLarge)
+            Spacer(Modifier.height(appTheme.spacing.xxs))
+        }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            enabled = enabled,
+            modifier = Modifier
+                .fillMaxWidth()
+                .styleable(styleState, variant.style then errorStyle, style),
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            visualTransformation = visualTransformation,
+            singleLine = singleLine,
+            interactionSource = interactionSource,
+            decorationBox = { innerTextField ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (leadingIcon != null) {
+                        leadingIcon()
+                        Spacer(Modifier.width(appTheme.spacing.xs))
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (value.isEmpty() && placeholder != null) {
+                            AppText(placeholder, style = AppTextStyle.BodyMedium, muted = true)
+                        }
+                        innerTextField()
+                    }
+                    if (trailingIcon != null) {
+                        Spacer(Modifier.width(appTheme.spacing.xs))
+                        trailingIcon()
+                    }
+                }
+            },
+        )
+        if (supportingText != null) {
+            Spacer(Modifier.height(appTheme.spacing.xxs))
+            AppText(
+                text = supportingText,
+                style = AppTextStyle.BodySmall,
+                color = if (isError) appTheme.colors.error else appTheme.colors.onSurfaceVariant,
+            )
+        }
+    }
+}
+```
+
+---
+
 ### `components/AppText.kt`
 
 ```kotlin
@@ -1191,11 +1321,11 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle as ComposeTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import GROUP_ID.core.designsystem.theme.appTheme
 
-enum class TextStyle {
+enum class AppTextStyle {
     DisplayLarge, DisplayMedium,
     TitleLarge, TitleMedium, TitleSmall,
     BodyLarge, BodyMedium, BodySmall,
@@ -1206,15 +1336,15 @@ enum class TextStyle {
  * Usage:
  * ```
  * AppText("Hello world")
- * AppText("Title", style = TextStyle.TitleLarge)
- * AppText("Subtitle", style = TextStyle.BodySmall, muted = true)
+ * AppText("Title", style = AppTextStyle.TitleLarge)
+ * AppText("Subtitle", style = AppTextStyle.BodySmall, muted = true)
  * ```
  */
 @Composable
 fun AppText(
     text: String,
     modifier: Modifier = Modifier,
-    style: TextStyle = TextStyle.BodyMedium,
+    style: AppTextStyle = AppTextStyle.BodyMedium,
     muted: Boolean = false,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
@@ -1222,16 +1352,16 @@ fun AppText(
 ) {
     val theme = appTheme
     val resolvedStyle = when (style) {
-        TextStyle.DisplayLarge  -> theme.typography.displayLarge
-        TextStyle.DisplayMedium -> theme.typography.displayMedium
-        TextStyle.TitleLarge    -> theme.typography.titleLarge
-        TextStyle.TitleMedium   -> theme.typography.titleMedium
-        TextStyle.TitleSmall    -> theme.typography.titleSmall
-        TextStyle.BodyLarge     -> theme.typography.bodyLarge
-        TextStyle.BodyMedium    -> theme.typography.bodyMedium
-        TextStyle.BodySmall     -> theme.typography.bodySmall
-        TextStyle.LabelLarge    -> theme.typography.labelLarge
-        TextStyle.LabelSmall    -> theme.typography.labelSmall
+        AppTextStyle.DisplayLarge  -> theme.typography.displayLarge
+        AppTextStyle.DisplayMedium -> theme.typography.displayMedium
+        AppTextStyle.TitleLarge    -> theme.typography.titleLarge
+        AppTextStyle.TitleMedium   -> theme.typography.titleMedium
+        AppTextStyle.TitleSmall    -> theme.typography.titleSmall
+        AppTextStyle.BodyLarge     -> theme.typography.bodyLarge
+        AppTextStyle.BodyMedium    -> theme.typography.bodyMedium
+        AppTextStyle.BodySmall     -> theme.typography.bodySmall
+        AppTextStyle.LabelLarge    -> theme.typography.labelLarge
+        AppTextStyle.LabelSmall    -> theme.typography.labelSmall
     }
 
     val textColor = when {
@@ -1434,11 +1564,12 @@ All of these are already in `compose-multiplatform`. No new catalog entries requ
 @Test fun `color_tokens_light screenshot`() {
     captureRoboImage("ds_color_tokens_light.png") {
         AppTheme(darkTheme = false) {
-            Column(modifier = Modifier.padding(AppTheme.spacing.lg)) {
-                Box(Modifier.size(48.dp).background(AppTheme.colors.primary))
-                Box(Modifier.size(48.dp).background(AppTheme.colors.secondary))
-                Box(Modifier.size(48.dp).background(AppTheme.colors.surface))
-                Box(Modifier.size(48.dp).background(AppTheme.colors.error))
+            val t = appTheme
+            Column(modifier = Modifier.padding(t.spacing.lg)) {
+                Box(Modifier.size(48.dp).background(t.colors.primary))
+                Box(Modifier.size(48.dp).background(t.colors.secondary))
+                Box(Modifier.size(48.dp).background(t.colors.surface))
+                Box(Modifier.size(48.dp).background(t.colors.error))
             }
         }
     }
@@ -1447,11 +1578,12 @@ All of these are already in `compose-multiplatform`. No new catalog entries requ
 @Test fun `color_tokens_dark screenshot`() {
     captureRoboImage("ds_color_tokens_dark.png") {
         AppTheme(darkTheme = true) {
-            Column(modifier = Modifier.padding(AppTheme.spacing.lg)) {
-                Box(Modifier.size(48.dp).background(AppTheme.colors.primary))
-                Box(Modifier.size(48.dp).background(AppTheme.colors.secondary))
-                Box(Modifier.size(48.dp).background(AppTheme.colors.surface))
-                Box(Modifier.size(48.dp).background(AppTheme.colors.error))
+            val t = appTheme
+            Column(modifier = Modifier.padding(t.spacing.lg)) {
+                Box(Modifier.size(48.dp).background(t.colors.primary))
+                Box(Modifier.size(48.dp).background(t.colors.secondary))
+                Box(Modifier.size(48.dp).background(t.colors.surface))
+                Box(Modifier.size(48.dp).background(t.colors.error))
             }
         }
     }
@@ -1460,11 +1592,11 @@ All of these are already in `compose-multiplatform`. No new catalog entries requ
 @Test fun `typography_scale screenshot`() {
     captureRoboImage("ds_typography_scale.png") {
         AppTheme {
-            Column(modifier = Modifier.padding(AppTheme.spacing.lg)) {
-                Text("Display Large", style = AppTheme.typography.displayLarge)
-                Text("Headline Medium", style = AppTheme.typography.headlineMedium)
-                Text("Body Large", style = AppTheme.typography.bodyLarge)
-                Text("Label Small", style = AppTheme.typography.labelSmall)
+            Column(modifier = Modifier.padding(appTheme.spacing.lg)) {
+                AppText("Display Large",  style = AppTextStyle.DisplayLarge)
+                AppText("Display Medium", style = AppTextStyle.DisplayMedium)
+                AppText("Body Large",     style = AppTextStyle.BodyLarge)
+                AppText("Label Small",    style = AppTextStyle.LabelSmall)
             }
         }
     }
@@ -1472,9 +1604,9 @@ All of these are already in `compose-multiplatform`. No new catalog entries requ
 
 @Test fun `spacing tokens match expected dp values`() {
     // Assert the compile-time constants — catches accidental token renames
-    assertEquals(16.dp, AppTheme.spacing.lg)
-    assertEquals(8.dp, AppTheme.spacing.sm)
-    assertEquals(4.dp, AppTheme.spacing.xs)
+    assertEquals(16.dp, AppSpacing().lg)
+    assertEquals(8.dp,  AppSpacing().sm)
+    assertEquals(4.dp,  AppSpacing().xs)
 }
 ```
 
@@ -1482,8 +1614,9 @@ All of these are already in `compose-multiplatform`. No new catalog entries requ
 
 ## Common Anti-Patterns
 
-- magic color literals in composables — `Color(0xFF6200EE)` written directly inside a `@Composable` instead of `AppTheme.colors.primary`; the audit script flags `Color(0x…)` in any `/ui/` or `/presentation/` file that is not a token definition file
-- hardcoded spacing in composables — `padding(16.dp)` or `padding(horizontal = 8.dp)` written directly instead of `padding(horizontal = AppTheme.spacing.lg)`; the audit script flags `.dp` literals inside `padding(…)` calls in UI files
+- magic color literals in composables — `Color(0xFF6200EE)` written directly inside a `@Composable` instead of `appTheme.colors.primary`; the audit script flags `Color(0x…)` in any `/ui/` or `/presentation/` file that is not a token definition file
+- hardcoded spacing in composables — `padding(16.dp)` or `padding(horizontal = 8.dp)` written directly instead of `padding(horizontal = appTheme.spacing.lg)`; the audit script flags `.dp` literals inside `padding(…)` calls in UI files
+- accessing `AppTheme.colors`, `AppTheme.spacing`, or `AppTheme.typography` as static properties — these are instance properties; use the `appTheme` `@Composable` accessor or `AppTheme.LocalAppTheme.current` inside a composable
 - title text in content body — a `Text("Screen Title")` composable inside the content column when it should be `AppTopAppBar(title = "Screen Title")`; makes the title scroll away and duplicates chrome
 - action buttons outside the TopAppBar — a "Save" `AppButton` at the bottom of a form when it belongs in `AppTopAppBar(actions = { … })`; creates two interaction points for the same operation
 - not consuming `PaddingValues` from `AppScaffold` — `AppScaffold { MyContent() }` without `Modifier.padding(paddingValues)` clips the content under the TopAppBar on status-bar devices
@@ -1522,4 +1655,5 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Added `AppTextField` component (was missing from Step 6). Renamed `TextStyle` enum → `AppTextStyle` to avoid Compose collision. Fixed test code: `AppTheme.spacing.*` → `appTheme.*`, `Text()` → `AppText()`. Added `@OptIn` note to Steps 5–6. Fixed missing `sp`/`FontWeight` imports in Button/Badge/Chip/TextField style snippets. Fixed `CardSize` hardcoded dp → `AppSpacing()` tokens. Added cross-skill note for `AppScaffold`/`AppTopAppBar`. |
 | 2026-06-06 | Initial release. |
