@@ -68,7 +68,15 @@ created during implementation. Any blocker → load `agents/fixer.md` for one fi
 
 ## Phase 5 — Wrap up
 
-Update `.claude/pipeline-context.json` with patterns learned during this feature.
+Update `.claude/pipeline-context.json` with patterns learned during this feature,
+then commit it so the next session inherits the context:
+
+```bash
+git add .claude/pipeline-context.json
+git commit -m "chore(pipeline): update context after $ARGUMENTS"
+```
+
+Only commit if the file actually changed. Skip if all values are unchanged.
 
 Report:
 ```
@@ -78,4 +86,5 @@ Files created:  <N>
 Tests written:  <N> unit + <N> UI
 Validation:     PASS
 Review:         APPROVE
+Pipeline ctx:   committed | unchanged
 ```

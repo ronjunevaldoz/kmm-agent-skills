@@ -146,7 +146,9 @@ Prefixes: `feat` / `fix` / `refactor` / `test` / `chore` per Conventional Commit
 
 ---
 
-## Phase 8 — Update pipeline context
+## Phase 8 — Update and commit pipeline context
+
+Write the updated values to `.claude/pipeline-context.json`:
 
 ```json
 {
@@ -160,6 +162,15 @@ Prefixes: `feat` / `fix` / `refactor` / `test` / `chore` per Conventional Commit
   }
 }
 ```
+
+Then commit it so the next session inherits the learned patterns:
+
+```bash
+git add .claude/pipeline-context.json
+git commit -m "chore(pipeline): update context after <feature-name>"
+```
+
+Only commit if the file actually changed. Skip if all values are unchanged.
 
 ---
 

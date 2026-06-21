@@ -9,39 +9,13 @@ Resolved issues stay here for reference — they explain *why* a rule exists.
 
 ### KI-001 — `pipeline-context.json` is never auto-populated
 
-**Status:** Open  
-**Affects:** All pipeline commands (`/execute-ticket`, `/implement-feature`)  
-**Symptom:** `.claude/pipeline-context.json` always shows null values. `recurring_issues`
-and `proven_patterns` are never written back, so the pipeline cannot learn from previous
-runs across sessions.  
-**Root cause:** Claude Code does not persist file writes made during one session into the
-next session's context. The agents write the JSON, but a fresh session starts from the
-repo's committed state — which still has nulls unless the user committed the JSON.  
-**Workaround:** After any `/execute-ticket` or `/implement-feature` run, commit the
-updated `.claude/pipeline-context.json` before starting the next session. The agents
-will then read the patterns correctly.  
-**Fix needed:** Either auto-commit the context file at the end of each pipeline run
-(add a step to Phase 8 of `execute-ticket.md`), or move pattern storage to a committed
-`docs/pipeline-patterns.md` that agents read explicitly.
+**Status:** Resolved — see KI-R07 below
 
 ---
 
 ### KI-002 — Hooks require manual installation; not enforced
 
-**Status:** Open  
-**Affects:** `hooks/pre-commit-audit.sh`, `hooks/validate-architecture.sh`,
-`hooks/check-skill-freshness.sh`  
-**Symptom:** Hooks are documented in `README.md` and present in `hooks/` but not
-installed in consumer projects by default. Architecture audit and freshness checks
-silently do nothing until manually linked.  
-**Root cause:** Git hooks cannot be committed as active — they must be symlinked into
-`.git/hooks/` per-machine.  
-**Workaround:** Run the install commands from README after cloning:
-```bash
-ln -sf ../../hooks/pre-commit-audit.sh .git/hooks/pre-commit
-```
-**Fix needed:** Add a `scripts/install-hooks.sh` one-liner that installs all three hooks,
-and mention it in the onboarding section of README.
+**Status:** Resolved — see KI-R08 below
 
 ---
 
@@ -147,6 +121,30 @@ zero-padding as a spacing token violation even though no `AppTheme.spacing.zero`
 exists.  
 **Fix:** Changed regex to `\bpadding\([^)]*[1-9]\d*\.dp` — requires at least one
 non-zero leading digit, so `0.dp` is silently ignored.
+
+---
+
+### KI-R07 — `pipeline-context.json` never committed between sessions
+
+**Resolved:** `fix(pipeline): commit pipeline-context.json at end of every pipeline run`  
+**Was:** Agents updated `.claude/pipeline-context.json` during a session but never
+committed it. The next session always started with null values — `recurring_issues` and
+`proven_patterns` were lost on every session boundary.  
+**Fix:** Phase 8 of `execute-ticket.md` and Phase 5 of `implement-feature.md` now
+include a `git add .claude/pipeline-context.json && git commit` step. The file is only
+committed if its values actually changed. Pipeline context now persists across sessions.
+
+---
+
+### KI-R08 — Hooks required manual `ln -sf` per machine
+
+**Resolved:** `fix(hooks): add scripts/install-hooks.sh one-liner`  
+**Was:** `pre-commit-audit.sh` and `validate-architecture.sh` were present in `hooks/`
+but README only showed a manual `ln -sf` command. Most users skipped it, silently
+disabling the architecture audit gate.  
+**Fix:** `scripts/install-hooks.sh` symlinks both hooks in one command and makes them
+executable. README updated to show `bash scripts/install-hooks.sh` as the primary
+install path.
 
 ---
 

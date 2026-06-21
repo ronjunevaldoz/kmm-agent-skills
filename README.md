@@ -116,7 +116,12 @@ Shell scripts for enforcing architecture hygiene locally and in CI.
 | [`validate-architecture.sh`](hooks/validate-architecture.sh) | Claude Code `PostToolUse` | Runs audit after any file edit |
 | [`check-skill-freshness.sh`](hooks/check-skill-freshness.sh) | Manual / CI schedule | Warns if any skill's `last-updated` is > 90 days old |
 
-**Install the pre-commit hook:**
+**Install all hooks (one command):**
+```bash
+bash scripts/install-hooks.sh
+```
+
+Or manually:
 ```bash
 ln -sf ../../hooks/pre-commit-audit.sh .git/hooks/pre-commit
 ```
