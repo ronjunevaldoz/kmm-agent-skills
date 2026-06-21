@@ -71,14 +71,21 @@ Starting implementation...
 Run these two before any feature work. They establish the module graph and layer contract
 everything else depends on.
 
-**F-01: Project scaffold**
-Load `kotlin-multiplatform-feature-scaffold`. Generate:
-- `settings.gradle.kts` with version catalog
-- `build-logic/` convention plugins
-- Root `build.gradle.kts`
-- `androidApp/` shell
-- `shared/` KMP module with Android + Desktop targets
-- `gradle/libs.versions.toml` with all inferred dependency versions
+**F-01: Project scaffold — clone kmp-wizard first**
+Load `kotlin-multiplatform-feature-scaffold`. The first action is always:
+
+```bash
+git clone --depth 1 --branch all-targets \
+  https://github.com/Kotlin/kmp-wizard <PROJECT_NAME>
+cd <PROJECT_NAME> && rm -rf .git && git init
+```
+
+Then configure the clone (rename project, update group ID, update version catalog).
+Then add the 6-layer convention plugins on top of what kmp-wizard already ships.
+Run `./gradlew help` — must be `BUILD SUCCESSFUL` before any feature work begins.
+
+Never write `build-logic/`, `settings.gradle.kts`, or `gradle.properties` from scratch —
+kmp-wizard is the only valid starting point for a new project.
 
 **F-02: Clean architecture**
 Load `kotlin-multiplatform-clean-architecture`. Generate the 6-layer module structure

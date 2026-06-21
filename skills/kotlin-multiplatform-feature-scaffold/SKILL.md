@@ -202,182 +202,150 @@ val isDebug = BuildKonfig.DEBUG
 
 ---
 
-## Step 3: New Project Scaffold
+## Step 3: New Project — Clone kmp-wizard (MANDATORY)
 
-### 3a. Full directory structure to create
+> **Never create build infrastructure by hand.** Always start from the official
+> `Kotlin/kmp-wizard` repository. Hand-writing `build-logic`, convention plugins, or
+> `settings.gradle.kts` from scratch leads to misconfigured Gradle included builds,
+> broken precompiled script plugin accessor generation, and missing platform targets.
+> The wizard gives you a known-good baseline; your job is to configure and extend it.
 
-```
-<root>/
-├── build-logic/
-│   ├── settings.gradle.kts
-│   └── convention/
-│       ├── build.gradle.kts
-│       └── src/main/kotlin/
-│           ├── GROUP_ID.android.app.gradle.kts
-│           ├── GROUP_ID.core.gradle.kts
-│           ├── GROUP_ID.feature.model.gradle.kts
-│           ├── GROUP_ID.feature.api.gradle.kts
-│           ├── GROUP_ID.feature.domain.gradle.kts
-│           ├── GROUP_ID.feature.data.gradle.kts
-│           ├── GROUP_ID.feature.presenter.gradle.kts
-│           └── GROUP_ID.feature.ui.gradle.kts
-├── core/
-│   ├── common/build.gradle.kts          (applies GROUP_ID.core)
-│   ├── network/build.gradle.kts         (applies GROUP_ID.core)
-│   ├── database/build.gradle.kts        (applies GROUP_ID.core)
-│   └── ui/build.gradle.kts             (applies GROUP_ID.core + compose)
-├── feature/
-│   └── <FEATURE_NAME>/
-│       ├── model/build.gradle.kts
-│       ├── api/build.gradle.kts
-│       ├── domain/build.gradle.kts
-│       ├── data/build.gradle.kts
-│       ├── presenter/build.gradle.kts
-│       └── ui/build.gradle.kts
-├── androidApp/
-│   └── build.gradle.kts                (applies GROUP_ID.android.app)
-├── iosApp/                              (Xcode project — copy from kmp-wizard)
-├── gradle/
-│   └── libs.versions.toml
-├── settings.gradle.kts
-├── build.gradle.kts
-├── gradle.properties
-├── gradlew
-└── gradlew.bat
+### 3a. Clone the baseline
+
+```bash
+# Default: all platforms (Android + iOS + Desktop + Web + Server)
+git clone --depth 1 --branch all-targets \
+  https://github.com/Kotlin/kmp-wizard <PROJECT_NAME>
+
+# Frontend-only (no server module):
+git clone --depth 1 --branch all-frontends-shared \
+  https://github.com/Kotlin/kmp-wizard <PROJECT_NAME>
+
+cd <PROJECT_NAME>
+rm -rf .git          # detach from kmp-wizard history
+git init             # start fresh project history
 ```
 
-### 3b. Root `settings.gradle.kts`
+Choose `all-targets` by default. Use `all-frontends-shared` only when the project
+explicitly excludes a server module.
 
-Replace `PROJECT_NAME` and include all modules:
+### 3b. Configure the clone
 
+After cloning, make these targeted edits — do not rewrite the files:
+
+**`settings.gradle.kts`** — update the root project name:
 ```kotlin
 rootProject.name = "PROJECT_NAME"
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
-pluginManagement {
-    includeBuild("build-logic")
-    repositories {
-        google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
-            }
-        }
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
-
-dependencyResolutionManagement {
-    repositories {
-        google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
-            }
-        }
-        mavenCentral()
-    }
-}
-
-include(":androidApp")
-include(":core:common")
-include(":core:network")
-include(":core:database")
-include(":core:ui")
-include(":feature:FEATURE_NAME:api")
-include(":feature:FEATURE_NAME:domain")
-include(":feature:FEATURE_NAME:data")
-include(":feature:FEATURE_NAME:ui")
 ```
 
-### 3c. Root `build.gradle.kts`
-
-```kotlin
-// Top-level build file. Convention plugins handle all module configuration.
-plugins {
-    alias(libs.plugins.androidApplication) apply false
-    alias(libs.plugins.androidKmpLibrary) apply false
-    alias(libs.plugins.kotlinMultiplatform) apply false
-    alias(libs.plugins.composeMultiplatform) apply false
-    alias(libs.plugins.composeCompiler) apply false
-    alias(libs.plugins.ksp) apply false
-    alias(libs.plugins.sqldelight) apply false
-    alias(libs.plugins.koin) apply false
-}
+**`gradle/libs.versions.toml`** — update to the target versions from Step 2:
+```toml
+agp                   = "9.0.1"
+kotlin                = "2.4.0"
+compose-multiplatform = "1.11.1"
+# … update all version entries to match Step 2 table
 ```
 
-### 3d. `gradle.properties`
-
-```properties
-org.gradle.jvmargs=-Xmx4g -XX:+UseParallelGC
-org.gradle.configuration-cache=true
-org.gradle.parallel=true
-kotlin.code.style=official
+**`build-logic/convention/src/main/kotlin/`** — rename every convention plugin file
+by substituting the wizard's placeholder group ID with `GROUP_ID`:
+```bash
+# Example: if kmp-wizard uses "org.example" as placeholder
+for f in build-logic/convention/src/main/kotlin/*.kt; do
+  mv "$f" "${f/org.example/GROUP_ID}"
+done
+# Then update the group ID string inside each file
+find build-logic/convention/src/main/kotlin -name "*.kt" \
+  -exec sed -i '' 's/org\.example/GROUP_ID/g' {} +
 ```
+
+**`androidApp/build.gradle.kts`** and any `applicationId` occurrences — replace
+the wizard placeholder with `GROUP_ID`.
+
+### 3c. Verify the base builds
+
+Run this before adding any modules:
+
+```bash
+./gradlew help
+```
+
+`BUILD SUCCESSFUL` means the base is sound. Fix any version resolution errors
+before proceeding. Do not add feature modules to a broken base.
 
 ---
 
-## Step 4: build-logic Setup
+## Step 4: Extend build-logic with KMM Convention Plugins
 
-### 4a. `build-logic/settings.gradle.kts`
+kmp-wizard ships with its own convention plugins. You need to **add** the 6-layer
+KMM-specific plugins on top — do not replace the wizard's existing plugins.
+
+### 4a. Add plugin dependencies to `build-logic/convention/build.gradle.kts`
+
+Add any missing plugin dependencies the wizard doesn't include (e.g. SQLDelight,
+Roborazzi). Do not remove what the wizard already declares:
 
 ```kotlin
-dependencyResolutionManagement {
-    repositories {
-        google {
-            mavenContent {
-                includeGroupAndSubgroups("androidx")
-                includeGroupAndSubgroups("com.android")
-                includeGroupAndSubgroups("com.google")
-            }
-        }
-        mavenCentral()
-        gradlePluginPortal()
-    }
-    versionCatalogs {
-        create("libs") {
-            from(files("../gradle/libs.versions.toml"))
-        }
-    }
+dependencies {
+    // Keep whatever kmp-wizard already has, then add:
+    compileOnly(libs.sqldelight.gradlePlugin)
+    compileOnly("io.github.takahirom.roborazzi:io.github.takahirom.roborazzi.gradle.plugin:${libs.versions.roborazzi.get()}")
 }
-
-rootProject.name = "build-logic"
-include(":convention")
 ```
 
-### 4b. `build-logic/convention/build.gradle.kts`
+Add the new plugin registrations to the existing `gradlePlugin { plugins { … } }` block:
 
 ```kotlin
-plugins {
-    `kotlin-dsl`
-}
-
-dependencies {
-    compileOnly(libs.android.gradlePlugin)
-    compileOnly(libs.kotlin.gradlePlugin)
-    compileOnly(libs.compose.gradlePlugin)
-    compileOnly(libs.ksp.gradlePlugin)
-    compileOnly(libs.sqldelight.gradlePlugin)
-}
-
-// Register precompiled script plugins
 gradlePlugin {
     plugins {
-        register("kmmAndroidApp") {
-            // Replace GROUP_ID with your actual group ID (e.g. com.example.myapp)
-            id = "GROUP_ID.android.app"
-            implementationClass = "KmmAndroidAppPlugin"
-        }
+        // Keep whatever kmp-wizard registers, then add:
+        register("featureModel")    { id = "GROUP_ID.feature.model";    implementationClass = "FeatureModelConventionPlugin" }
+        register("featureApi")      { id = "GROUP_ID.feature.api";      implementationClass = "FeatureApiConventionPlugin" }
+        register("featureDomain")   { id = "GROUP_ID.feature.domain";   implementationClass = "FeatureDomainConventionPlugin" }
+        register("featureData")     { id = "GROUP_ID.feature.data";     implementationClass = "FeatureDataConventionPlugin" }
+        register("featurePresenter"){ id = "GROUP_ID.feature.presenter";implementationClass = "FeaturePresenterConventionPlugin" }
+        register("featureUi")       { id = "GROUP_ID.feature.ui";       implementationClass = "FeatureUiConventionPlugin" }
+        register("core")            { id = "GROUP_ID.core";             implementationClass = "CoreConventionPlugin" }
     }
 }
 ```
 
-> **Note**: The precompiled `.gradle.kts` files in `src/main/kotlin/` are automatically
-> registered by `kotlin-dsl`. The `gradlePlugin` block above is only needed for any
-> class-based plugins. Prefer precompiled script plugins for all convention plugins.
+> **Class-based plugins only.** Do NOT use precompiled `.gradle.kts` script plugins
+> for convention plugins in included builds — Gradle 9's `generatePrecompiledScriptPluginAccessors`
+> does not generate version catalog type-safe accessors for included builds, causing every
+> `libs.*` reference to fail with "Unresolved reference". Always write convention plugins
+> as classes implementing `Plugin<Project>` and access the catalog via
+> `extensions.getByType<VersionCatalogsExtension>().named("libs")`.
+
+### 4b. Add missing catalog entries to `gradle/libs.versions.toml`
+
+Only add what the wizard doesn't already have (check before adding):
+
+```toml
+[versions]
+sqldelight            = "2.0.2"
+roborazzi             = "1.29.0"
+turbine               = "1.2.1"
+datetime              = "0.8.0"
+koin                  = "4.2.1"
+
+[libraries]
+sqldelight-runtime         = { module = "app.cash.sqldelight:runtime",               version.ref = "sqldelight" }
+sqldelight-coroutines      = { module = "app.cash.sqldelight:coroutines-extensions",  version.ref = "sqldelight" }
+sqldelight-android-driver  = { module = "app.cash.sqldelight:android-driver",         version.ref = "sqldelight" }
+sqldelight-sqlite-driver   = { module = "app.cash.sqldelight:sqlite-driver",          version.ref = "sqldelight" }
+sqldelight-gradlePlugin    = { module = "app.cash.sqldelight:gradle-plugin",          version.ref = "sqldelight" }
+roborazzi                  = { module = "io.github.takahirom.roborazzi:roborazzi",            version.ref = "roborazzi" }
+roborazzi-compose          = { module = "io.github.takahirom.roborazzi:roborazzi-compose",    version.ref = "roborazzi" }
+roborazzi-junit-rule       = { module = "io.github.takahirom.roborazzi:roborazzi-junit-rule", version.ref = "roborazzi" }
+turbine                    = { module = "app.cash.turbine:turbine",                   version.ref = "turbine" }
+kotlinx-datetime           = { module = "org.jetbrains.kotlinx:kotlinx-datetime",    version.ref = "datetime" }
+koin-core                  = { module = "io.insert-koin:koin-core",                  version.ref = "koin" }
+koin-core-viewmodel        = { module = "io.insert-koin:koin-core-viewmodel",        version.ref = "koin" }
+koin-compose               = { module = "io.insert-koin:koin-compose",               version.ref = "koin" }
+koin-compose-viewmodel     = { module = "io.insert-koin:koin-compose-viewmodel",     version.ref = "koin" }
+koin-android               = { module = "io.insert-koin:koin-android",               version.ref = "koin" }
+koin-androidx-compose      = { module = "io.insert-koin:koin-androidx-compose",      version.ref = "koin" }
+```
 
 ---
 
@@ -1096,7 +1064,8 @@ After scaffolding, verify in order:
 - having `:ui` depend on `:domain` or `:data` directly — all state must flow through `:presenter`
 - putting domain types (data classes, sealed types) in `:api` instead of `:model` — `:api` should be interfaces only
 - using string project references (`:feature:auth:api`) instead of typesafe accessors — breaks refactoring
-- scaffolding by hand without kmp-wizard — often misses Wasm/Desktop/Server source sets
+- **scaffolding by hand instead of cloning kmp-wizard** — always use `git clone Kotlin/kmp-wizard` as the base; writing build-logic, convention plugins, or settings.gradle.kts from scratch causes broken Gradle included builds, missing platform targets, and cascading precompiled script plugin failures that are very hard to debug
+- using precompiled `.gradle.kts` script plugins for convention plugins in included builds — Gradle 9 does not generate version catalog type-safe accessors for included builds; always use class-based `Plugin<Project>` instead
 
 If a module is failing to compile on one target, check whether the convention plugin was applied and the source sets declared correctly.
 
