@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
+  "version": "1.5.0",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -52,6 +52,51 @@
       "scripts": []
     },
     {
+      "name": "kotlin-multiplatform-accessibility",
+      "path": "skills/kotlin-multiplatform-accessibility",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "accessibility",
+        "a11y",
+        "contentDescription",
+        "semantics",
+        "screen reader",
+        "TalkBack",
+        "VoiceOver",
+        "semantic role",
+        "mergeDescendants",
+        "touch target",
+        "accessibility test",
+        "Roborazzi a11y",
+        "reduced motion",
+        "WCAG",
+        "compose accessibility"
+      ],
+      "triggers": [
+        "accessibility",
+        "a11y",
+        "TalkBack",
+        "VoiceOver",
+        "contentDescription",
+        "semantics",
+        "screen reader",
+        "semantic role",
+        "mergeDescendants",
+        "touch target",
+        "WCAG",
+        "accessibility test",
+        "Roborazzi a11y",
+        "traversal order",
+        "live region",
+        "role = button",
+        "accessibility label",
+        "semantic tree"
+      ],
+      "scripts": []
+    },
+    {
       "name": "kotlin-multiplatform-adaptive-layout",
       "path": "skills/kotlin-multiplatform-adaptive-layout",
       "description": ">-",
@@ -94,6 +139,42 @@
         "responsive composable",
         "multi-pane layout",
         "master detail KMP"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-analytics",
+      "path": "skills/kotlin-multiplatform-analytics",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "analytics",
+        "Firebase Analytics",
+        "event tracking",
+        "screen tracking",
+        "sealed events",
+        "AnalyticsTracker",
+        "KMP analytics",
+        "platform analytics",
+        "event schema",
+        "A/B analytics"
+      ],
+      "triggers": [
+        "analytics",
+        "event tracking",
+        "Firebase Analytics",
+        "screen tracking",
+        "track event",
+        "log event",
+        "user properties",
+        "AnalyticsTracker",
+        "event schema",
+        "KMP analytics",
+        "analytics interface",
+        "analytics facade",
+        "mixpanel KMP",
+        "amplitude KMP"
       ],
       "scripts": []
     },
@@ -148,6 +229,46 @@
         "audit_skills_repo.py",
         "draft_issue.py"
       ]
+    },
+    {
+      "name": "kotlin-multiplatform-biometric-auth",
+      "path": "skills/kotlin-multiplatform-biometric-auth",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "biometric",
+        "biometric auth",
+        "fingerprint",
+        "face ID",
+        "BiometricPrompt",
+        "LocalAuthentication",
+        "LAContext",
+        "biometric result",
+        "expect actual",
+        "CryptoObject",
+        "biometric fallback",
+        "KMP biometric",
+        "device credential"
+      ],
+      "triggers": [
+        "biometric",
+        "biometric auth",
+        "fingerprint",
+        "Face ID",
+        "Touch ID",
+        "BiometricPrompt",
+        "LocalAuthentication",
+        "LAContext",
+        "biometric result",
+        "device credential",
+        "biometric unlock",
+        "secure auth KMP",
+        "expect actual biometric",
+        "CryptoObject",
+        "biometric fallback"
+      ],
+      "scripts": []
     },
     {
       "name": "kotlin-multiplatform-ci-github-actions",
@@ -263,6 +384,53 @@
         "import check",
         "layer violation",
         "code style"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-compose-animation",
+      "path": "skills/kotlin-multiplatform-compose-animation",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "animation",
+        "AnimatedVisibility",
+        "animateContentSize",
+        "Crossfade",
+        "AnimatedContent",
+        "animateFloatAsState",
+        "animateDpAsState",
+        "shared element transition",
+        "enter transition",
+        "exit transition",
+        "spring animation",
+        "tween animation",
+        "compose animation",
+        "reduced motion",
+        "accessibility animation"
+      ],
+      "triggers": [
+        "animation",
+        "AnimatedVisibility",
+        "animateContentSize",
+        "Crossfade",
+        "AnimatedContent",
+        "animateFloatAsState",
+        "animateDpAsState",
+        "transition",
+        "enter transition",
+        "exit transition",
+        "shared element",
+        "spring animation",
+        "tween animation",
+        "compose animation",
+        "fade in",
+        "slide in",
+        "bounce",
+        "ease",
+        "reduced motion",
+        "motion accessibility"
       ],
       "scripts": []
     },
@@ -419,6 +587,48 @@
         "settings persistence",
         "save preferences",
         "key value storage KMP"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-deep-linking",
+      "path": "skills/kotlin-multiplatform-deep-linking",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "deep linking",
+        "App Links",
+        "Universal Links",
+        "deep link",
+        "NavHost deep link",
+        "AASA",
+        "Digital Asset Links",
+        "intent filter",
+        "route parsing",
+        "deep link handling",
+        "openURL",
+        "NSUserActivity",
+        "KMP deep link",
+        "URL scheme",
+        "custom scheme"
+      ],
+      "triggers": [
+        "deep linking",
+        "App Links",
+        "Universal Links",
+        "deep link",
+        "AASA",
+        "Digital Asset Links",
+        "intent filter",
+        "route parsing",
+        "NavHost deep link",
+        "openURL",
+        "NSUserActivity",
+        "deep link handling",
+        "custom URL scheme",
+        "in-app linking",
+        "KMP deep link"
       ],
       "scripts": []
     },
@@ -634,7 +844,7 @@
       "path": "skills/kotlin-multiplatform-expert",
       "description": "KMP Expert Orchestrator \u2014 maps all skills in this collection, their dependency order, and how to sequence them for any Kotlin Multiplatform project. Use this skill first to decide which other skill to invoke, in what order, for a given task. Covers: skill dependency graph, layer-by-layer build order, feature-slice assembly sequence, decision trees for the most common \"what do I use here?\" questions, and when to hand off to the project audit skill. This is a meta-skill; it delegates to domain skills for implementation and review, and it can turn confirmed audit findings into issue drafts or question drafts when the repo needs tracking. The long-term goal is to keep this skills collection aligned with the cleanest KMM architecture patterns possible.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-18",
+      "last_updated": "2026-06-21",
       "keywords": [
         "KMP expert",
         "orchestrator",
@@ -670,6 +880,47 @@
       "scripts": [
         "validate_skill_map.py"
       ]
+    },
+    {
+      "name": "kotlin-multiplatform-feature-flags",
+      "path": "skills/kotlin-multiplatform-feature-flags",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "feature flags",
+        "remote config",
+        "Firebase Remote Config",
+        "feature toggle",
+        "A/B testing",
+        "kill switch",
+        "flag evaluation",
+        "FeatureFlagProvider",
+        "FeatureFlag",
+        "offline fallback",
+        "experiment",
+        "variant",
+        "KMP feature flags",
+        "LaunchDarkly KMP"
+      ],
+      "triggers": [
+        "feature flags",
+        "feature toggle",
+        "remote config",
+        "Firebase Remote Config",
+        "A/B test",
+        "experiment",
+        "kill switch",
+        "flag evaluation",
+        "FeatureFlagProvider",
+        "variant",
+        "rollout",
+        "LaunchDarkly KMP",
+        "feature flag KMP",
+        "flag provider",
+        "remote feature flag"
+      ],
+      "scripts": []
     },
     {
       "name": "kotlin-multiplatform-feature-scaffold",
@@ -759,6 +1010,43 @@
       "scripts": []
     },
     {
+      "name": "kotlin-multiplatform-form-validation",
+      "path": "skills/kotlin-multiplatform-form-validation",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "form validation",
+        "field validation",
+        "validation rules",
+        "async validation",
+        "submit gating",
+        "inline errors",
+        "form state",
+        "ValidationResult",
+        "FieldState",
+        "KMP form"
+      ],
+      "triggers": [
+        "form validation",
+        "field validation",
+        "required field",
+        "email validation",
+        "inline error",
+        "validation rule",
+        "form error",
+        "submit disabled",
+        "async validation",
+        "validate form",
+        "ValidationResult",
+        "FieldState",
+        "form state KMP",
+        "input validation",
+        "field error message"
+      ],
+      "scripts": []
+    },
+    {
       "name": "kotlin-multiplatform-graphics-modifiers",
       "path": "skills/kotlin-multiplatform-graphics-modifiers",
       "description": "Jetpack Compose graphics modifiers for KMP and CMP \u2014 use graphicsLayer for transforms, clipping, alpha, elevation, and layer effects; use Canvas, drawBehind, and drawWithCache for actual custom drawing. Recommended for workflow editors, node-based UIs, and other surfaces where a composable needs a transformable shell around a custom-drawn interior.",
@@ -789,6 +1077,48 @@
         "drag transform",
         "layer effects",
         "elevation"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-image-loading",
+      "path": "skills/kotlin-multiplatform-image-loading",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "image loading",
+        "Coil 3",
+        "AsyncImage",
+        "coil-compose",
+        "image cache",
+        "placeholder",
+        "error image",
+        "network image",
+        "KMP image",
+        "SubcomposeAsyncImage",
+        "ImageLoader",
+        "disk cache",
+        "memory cache"
+      ],
+      "triggers": [
+        "image loading",
+        "Coil",
+        "Coil 3",
+        "AsyncImage",
+        "coil-compose",
+        "network image",
+        "load image from URL",
+        "image placeholder",
+        "image error state",
+        "circular image",
+        "avatar image",
+        "image cache",
+        "disk cache",
+        "SubcomposeAsyncImage",
+        "ImageLoader KMP",
+        "Kamel",
+        "image loading KMP"
       ],
       "scripts": []
     },
@@ -1133,6 +1463,44 @@
       "scripts": []
     },
     {
+      "name": "kotlin-multiplatform-permissions",
+      "path": "skills/kotlin-multiplatform-permissions",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "permissions",
+        "runtime permission",
+        "PermissionState",
+        "expect actual",
+        "Android permission",
+        "iOS permission",
+        "camera permission",
+        "location permission",
+        "permission controller",
+        "permission rationale",
+        "Accompanist permissions",
+        "KMP permissions"
+      ],
+      "triggers": [
+        "permissions",
+        "runtime permission",
+        "PermissionState",
+        "camera permission",
+        "location permission",
+        "microphone permission",
+        "permission denied",
+        "permission rationale",
+        "request permission",
+        "permission controller",
+        "Accompanist permissions KMP",
+        "expect actual permission",
+        "iOS Info.plist permission",
+        "permission flow"
+      ],
+      "scripts": []
+    },
+    {
       "name": "kotlin-multiplatform-presenter-module",
       "path": "skills/kotlin-multiplatform-presenter-module",
       "description": "Sets up the :presenter module in a KMP feature \u2014 pure Kotlin ViewModels, MVI UiState/UiIntent contracts, Koin wiring, and convention plugin. No Compose dependency so ViewModels are testable on plain JVM without an Android device or emulator.",
@@ -1194,6 +1562,46 @@
         "desktop app run",
         "JVM preview",
         "preview workflow"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-push-notifications",
+      "path": "skills/kotlin-multiplatform-push-notifications",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "push notifications",
+        "FCM",
+        "APNs",
+        "Firebase Messaging",
+        "push token",
+        "NotificationHandler",
+        "FirebaseMessagingService",
+        "foreground notification",
+        "notification tap",
+        "deep link from notification",
+        "remote notification",
+        "KMP push notifications",
+        "notification payload",
+        "NotificationPayload"
+      ],
+      "triggers": [
+        "push notifications",
+        "FCM",
+        "APNs",
+        "Firebase Messaging",
+        "push token",
+        "notification handler",
+        "FirebaseMessagingService",
+        "foreground notification",
+        "notification tap",
+        "deep link from notification",
+        "remote notification",
+        "KMP push",
+        "NotificationPayload",
+        "token refresh"
       ],
       "scripts": []
     },
@@ -1414,6 +1822,49 @@
         "fake over mock",
         "test fixtures",
         "test builders"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-workmanager",
+      "path": "skills/kotlin-multiplatform-workmanager",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "WorkManager",
+        "background work",
+        "BackgroundScheduler",
+        "BGTaskScheduler",
+        "BGProcessingTask",
+        "BGAppRefreshTask",
+        "one-time work",
+        "periodic work",
+        "retry backoff",
+        "background task",
+        "WorkRequest",
+        "CoroutineWorker",
+        "expect actual background",
+        "KMP background tasks",
+        "background sync"
+      ],
+      "triggers": [
+        "WorkManager",
+        "background work",
+        "background task",
+        "BackgroundScheduler",
+        "BGTaskScheduler",
+        "BGProcessingTask",
+        "BGAppRefreshTask",
+        "one-time work",
+        "periodic work",
+        "retry backoff",
+        "CoroutineWorker",
+        "background sync",
+        "deferred work",
+        "background job",
+        "WorkRequest",
+        "KMP background"
       ],
       "scripts": []
     },

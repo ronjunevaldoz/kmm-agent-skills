@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.5.0] — 2026-06-21
+
+### Other
+
+- Add 11 new skills: analytics, form-validation, image-loading, permissions, deep-linking, compose-animation, biometric-auth, push-notifications, workmanager, feature-flags, accessibility
+
+---
+
 ## [v1.4.0] — 2026-06-21
 
 ### Added
