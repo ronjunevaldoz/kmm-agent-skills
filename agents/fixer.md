@@ -263,6 +263,38 @@ Replace with a Roborazzi screenshot test in `jvmTest`:
 
 ---
 
+### `[STYLE]` — line too long or wildcard import
+
+**Never hand-edit formatting.** Run ktlint's auto-formatter:
+
+```bash
+./gradlew ktlintFormat
+```
+
+Then re-run `ktlintCheck` to confirm all violations are gone:
+
+```bash
+./gradlew ktlintCheck
+```
+
+If `ktlintFormat` cannot fix a violation automatically (rare), the cause is usually a string
+literal or function call that genuinely exceeds 120 characters. Break it across lines manually:
+
+```kotlin
+// Before (blocker — 128 chars):
+val message = "This is a very long string that exceeds the 120 character limit set in the editorconfig file"
+
+// After (fix — extract to a val or break the call):
+val message = "This is a very long string that exceeds " +
+    "the 120 character limit set in the editorconfig file"
+```
+
+For wildcard imports — replace with specific imports. Your IDE (or ktlintFormat) does this automatically.
+
+Confidence: always **HIGH** — formatting is mechanical with a single correct output.
+
+---
+
 ## Confidence ratings
 
 Rate each fix before applying it:

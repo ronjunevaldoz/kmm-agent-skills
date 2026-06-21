@@ -203,3 +203,26 @@ COMMIT:     <short sha>
 
 Next: gh pr create --title "<title>" --body "Closes #<number>"
 ```
+
+---
+
+## Phase 10 — Proactive issue tracking
+
+After the summary, scan this session for patterns worth tracking:
+
+1. **Recurring blockers** — any `[BLOCKER_TYPE]` that appeared in 2+ files
+2. **LOW-confidence fixes** — anything the fixer marked LOW and the user resolved manually
+3. **Skill gaps discovered** — any case where a skill was missing guidance that the implementer had to invent
+
+For each item found, prompt:
+```
+Found <N> item(s) worth tracking as GitHub issues:
+  · [<TYPE>] seen in <N> files — may indicate a skill gap in <skill-name>
+  · LOW fix for <blocker> — no clear guidance in fixer.md
+
+Create GitHub issues for these? /submit-issue is ready to pre-fill each one.
+  [y] Yes — open /submit-issue for each item in turn
+  [n] No  — end session
+```
+
+Skip this phase if the session had zero blockers and no LOW fixes.

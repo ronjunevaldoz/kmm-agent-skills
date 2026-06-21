@@ -98,7 +98,29 @@ Feature:        $ARGUMENTS
 Layers built:   <list>
 Files created:  <N>
 Tests written:  <N> unit + <N> UI
-Validation:     PASS
+Validation:     PASS (ktlint: PASS | NOT CONFIGURED)
 Review:         APPROVE
 Pipeline ctx:   committed | unchanged
 ```
+
+---
+
+## Phase 6 — Proactive issue tracking
+
+After the report, scan this session for patterns worth tracking:
+
+1. **Recurring blockers** — any `[BLOCKER_TYPE]` that appeared in 2+ files
+2. **LOW-confidence fixes** — anything the fixer marked LOW and the user resolved manually
+3. **Skill gaps discovered** — any guidance the implementer had to invent because no skill covered it
+
+For each item found, prompt:
+```
+Found <N> item(s) worth tracking as GitHub issues:
+  · [<TYPE>] seen in <N> files — may indicate a skill gap in <skill-name>
+
+Create GitHub issues for these? /submit-issue is ready to pre-fill each one.
+  [y] Yes — open /submit-issue for each item in turn
+  [n] No  — end session
+```
+
+Skip this phase if the session had zero blockers and no LOW fixes.

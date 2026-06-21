@@ -192,6 +192,23 @@ Disable it again once the retrofit is complete.
 
 ---
 
+## Check 10: Code style (ktlint)
+
+For every new or modified `.kt` file, check:
+
+1. **Line length** — any line exceeding 120 characters → `[STYLE]` blocker
+   ```bash
+   awk 'length > 120 {print FILENAME ":" NR ": " length " chars"}' <file>.kt
+   ```
+
+2. **Wildcard imports** — `import foo.bar.*` in any source file → `[STYLE]` blocker
+
+3. **ktlintCheck reminder** — if the project has ktlint configured (check via `./gradlew tasks --all | grep ktlintCheck`), flag that the validator must pass Level 1.5 before this review counts as APPROVE.
+
+Confidence for `[STYLE]` fixes: always **HIGH** — run `./gradlew ktlintFormat` to auto-fix; never hand-edit formatting.
+
+---
+
 ## Output
 
 ```
@@ -206,6 +223,7 @@ BLOCKERS (<count>):
   [LAYOUT]         <file> — <missing AppScaffold | title in content | action outside TopAppBar | hardcoded dp padding>
   [ADAPTIVE]       <file> — <screen missing WindowSizeClass parameter | missing breakpoint screenshot>
   [TRANSPORT]      <file> — <safeRequest bypasses existing kRPC transport for service/method>
+  [STYLE]          <file>:<line> — <line exceeds 120 chars | wildcard import>
 
 WARNINGS (<count>):
   [MISSING TAG]  <composable>: <node description> has no testTag
@@ -222,3 +240,22 @@ REQUIRED CHANGES:
 
 On `APPROVE`: update `.claude/pipeline-context.json` — add any reusable patterns under `proven_patterns`.
 On `NEEDS_FIXES`: hand `REQUIRED CHANGES` to the fixer.
+
+---
+
+## Proactive issue tracking
+
+After printing the verdict, check: **were any blocker types seen more than once across files in this session?**
+
+If yes, prompt:
+```
+Recurring findings detected: [<BLOCKER_TYPE>] appeared in <N> files.
+This pattern may indicate a systemic gap in the skill or project conventions.
+
+Track as GitHub issue?
+  [y] Yes — run /submit-issue with the finding summary pre-filled
+  [n] No  — continue
+```
+
+If the user chooses yes, load `commands/submit-issue.md` with the blocker type, affected files,
+and the relevant skill as pre-filled context. Do not file automatically — always confirm first.

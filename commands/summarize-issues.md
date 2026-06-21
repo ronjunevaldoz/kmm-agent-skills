@@ -108,16 +108,17 @@ After clearing all HIGH items, re-run /summarize-issues to confirm zero 🔴 fin
 
 ---
 
-## Step 5 — Offer a filtered view
+## Step 5 — Offer actions
 
 After printing the full report, ask:
 
 ```
-Run a filtered view?
+What next?
   [a] Show only HIGH issues (ready to fix now)
   [b] Show by skill (all issues for one skill grouped)
   [c] Export as KNOWN_ISSUES.md additions
-  [d] Done
+  [d] Create GitHub issues for all HIGH gaps
+  [e] Done
 ```
 
 ### Option c — Export to KNOWN_ISSUES.md
@@ -126,6 +127,37 @@ For each issue not already in KNOWN_ISSUES.md:
 - Assign the next `KI-NNN` ID
 - Add it under `## Open Issues` in the standard format
 - Commit: `docs: add <N> quality gaps from /summarize-issues scan`
+
+### Option d — Create GitHub issues for HIGH gaps
+
+For each HIGH issue not already tracked on GitHub:
+
+1. Check for an existing open issue:
+   ```bash
+   gh issue list --search "<skill-name> testing gap" --state open
+   ```
+
+2. If no duplicate found, draft the issue using the `/submit-issue` template:
+   - **Title**: `skill-gap: <skill-name> — missing Testing section`
+   - **Labels**: `skill-gap`, `testing`, `priority: high`
+   - **Body**: pre-fill the evidence from the scanner output and the `prompt_hint` field
+
+3. Show the draft and confirm before creating:
+   ```
+   Issue <N>/<total>: <skill-name>
+   Title: skill-gap: <skill-name> — missing Testing section
+   Labels: skill-gap, testing, priority: high
+
+   Create? [y/n/skip all]
+   ```
+
+4. After creating all confirmed issues, report:
+   ```
+   GitHub issues created: <N>
+   Skipped (already tracked or declined): <N>
+   ```
+
+Do not create issues in bulk without per-item confirmation. Never file duplicate issues.
 
 ---
 

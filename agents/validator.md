@@ -26,6 +26,30 @@ Any finding = Level 1 FAIL. List every finding with its file path. Do not run Le
 
 ---
 
+## Level 1.5 — Code style (ktlint)
+
+Run only if `ktlintCheck` task exists in the project:
+
+```bash
+./gradlew tasks --all | grep -q ktlintCheck && ./gradlew ktlintCheck 2>&1 || echo "KTLINT_NOT_CONFIGURED"
+```
+
+**If ktlint is configured:**
+- Any formatting violation = Level 1.5 FAIL
+- Auto-fix before reporting: `./gradlew ktlintFormat` then re-run `ktlintCheck`
+- If violations remain after format, list the files — do not proceed to Level 2
+
+**If ktlint is not configured:**
+- Print `⚠️ ktlint not found — load kotlin-multiplatform-code-quality to set it up`
+- Continue to Level 2 (non-blocking)
+
+Key rules enforced by ktlint + `.editorconfig`:
+- `max_line_length = 120` — no line may exceed 120 characters
+- No wildcard imports (`import foo.*`)
+- Consistent indentation (4 spaces, no tabs)
+
+---
+
 ## Level 2 — commonMain metadata compilation
 
 Compiles `commonMain` without resolving all platform targets. Fast (typically 10–30s).
@@ -71,10 +95,11 @@ iteration; run it once before opening the PR.
 ## Output
 
 ```
-LEVEL 1 — AUDIT:          PASS | FAIL (<N> findings)
-LEVEL 2 — METADATA:       PASS | FAIL | SKIPPED
-LEVEL 3 — JVM + TESTS:    PASS | FAIL | SKIPPED  (<N> passed, <N> failed)
-LEVEL 4 — FULL BUILD:     PASS | FAIL | SKIPPED | NOT RUN
+LEVEL 1   — AUDIT:          PASS | FAIL (<N> findings)
+LEVEL 1.5 — KTLINT:        PASS | FAIL (<N> files) | NOT CONFIGURED
+LEVEL 2   — METADATA:      PASS | FAIL | SKIPPED
+LEVEL 3   — JVM + TESTS:   PASS | FAIL | SKIPPED  (<N> passed, <N> failed)
+LEVEL 4   — FULL BUILD:    PASS | FAIL | SKIPPED | NOT RUN
 
 OVERALL: PASS | FAIL
 NEXT:    <proceed to PR | hand to fixer — Level <N> failed: <summary>>
