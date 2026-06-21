@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.16.4] — 2026-06-22
+
+### Fixed
+
+- fix(design-system): resolve all 7 audit findings
+
+---
+
 ## [v1.16.3] — 2026-06-22
 
 ### Fixed

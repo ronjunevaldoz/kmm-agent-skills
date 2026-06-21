@@ -1,5 +1,5 @@
 {
-  "version": "1.16.3",
+  "version": "1.16.4",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -725,9 +725,9 @@
     {
       "name": "kotlin-multiplatform-design-system",
       "path": "skills/kotlin-multiplatform-design-system",
-      "description": "Scaffolds a custom Compose Multiplatform design system in :core:designsystem using the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles, @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates: color/typography/shape/spacing tokens, AppTheme with light/dark support, StyleScope extensions for token access, shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant, ChipVariant, TextFieldVariant), and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText) built on BasicXxx CMP primitives. No Material dependency \u2014 fully custom, fully owned.",
+      "description": "Scaffolds a custom Compose Multiplatform design system in :core:designsystem using the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles, @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates: color/typography/shape/spacing tokens, AppTheme with light/dark support, StyleScope extensions for token access, shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant, ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision), and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText) built on BasicXxx CMP primitives. No Material dependency \u2014 fully custom, fully owned.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-06-22",
       "keywords": [
         "design system",
         "Compose Styles API",
@@ -775,7 +775,7 @@
       "path": "skills/kotlin-multiplatform-design-system-extended",
       "description": "Extends :core:designsystem (from kotlin-multiplatform-design-system) with 27 production-ready components using the Compose Styles API. Covers: Icon, IconButton, Label, Separator, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton, Switch, Slider, Select/Dropdown, Progress (linear + circular), Skeleton, Spinner, Alert, Toast/Snackbar system (ToastHostState + Scaffold slot), Dialog, AlertDialog, Sheet (BottomSheet), Tooltip, Popover, Accordion/Collapsible. All components built on CMP primitives (no Material3). Requires kotlin-multiplatform-design-system skill.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-06-22",
       "keywords": [
         "design system extended",
         "Dialog",
