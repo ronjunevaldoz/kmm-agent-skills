@@ -23,6 +23,10 @@ expert_scripts = load_module(
     "validate_skill_map",
     REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_skill_map.py",
 )
+keyword_routing_scripts = load_module(
+    "validate_keyword_routing",
+    REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_keyword_routing.py",
+)
 scaffold_scripts = load_module(
     "validate_module_graph",
     REPO_ROOT / "skills" / "kotlin-multiplatform-feature-scaffold" / "scripts" / "validate_module_graph.py",
@@ -861,6 +865,69 @@ class HookScriptTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, (
             "check-skill-freshness.sh should exit 0 when the skills directory is empty."
         ))
+
+
+class ValidateKeywordRoutingTests(unittest.TestCase):
+    EXPERT_HEADER = "## Skill Invocation Map\n"
+    EXPERT_FOOTER = "\n---\n"
+
+    def _make_repo(self, tmp: str, skill_names: list[str], map_rows: str) -> Path:
+        root = Path(tmp)
+        skills_dir = root / "skills"
+        for name in skill_names:
+            (skills_dir / name).mkdir(parents=True)
+            (skills_dir / name / "SKILL.md").write_text("", encoding="utf-8")
+        # expert SKILL.md with a Skill Invocation Map section
+        expert_dir = skills_dir / "kotlin-multiplatform-expert"
+        expert_dir.mkdir(parents=True, exist_ok=True)
+        (expert_dir / "SKILL.md").write_text(
+            self.EXPERT_HEADER + map_rows + self.EXPERT_FOOTER,
+            encoding="utf-8",
+        )
+        return root
+
+    def test_all_skills_present_returns_empty(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._make_repo(
+                tmp,
+                ["kotlin-multiplatform-a", "kotlin-multiplatform-b", "kotlin-multiplatform-expert"],
+                "| keyword-a | `kotlin-multiplatform-a` |\n"
+                "| keyword-b | `kotlin-multiplatform-b` |\n",
+            )
+            self.assertEqual(keyword_routing_scripts.validate_keyword_routing(root), [])
+
+    def test_missing_skill_returns_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._make_repo(
+                tmp,
+                ["kotlin-multiplatform-a", "kotlin-multiplatform-b", "kotlin-multiplatform-expert"],
+                "| keyword-a | `kotlin-multiplatform-a` |\n",
+            )
+            errors = keyword_routing_scripts.validate_keyword_routing(root)
+            self.assertTrue(any("kotlin-multiplatform-b" in e for e in errors))
+
+    def test_meta_skills_are_skipped(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._make_repo(
+                tmp,
+                ["kotlin-multiplatform-audit", "kotlin-multiplatform-expert"],
+                "",
+            )
+            # audit and expert are in SKIP_INVOCATION — no map rows needed
+            self.assertEqual(keyword_routing_scripts.validate_keyword_routing(root), [])
+
+    def test_missing_map_section_returns_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            expert_dir = root / "skills" / "kotlin-multiplatform-expert"
+            expert_dir.mkdir(parents=True)
+            (expert_dir / "SKILL.md").write_text("no section here", encoding="utf-8")
+            errors = keyword_routing_scripts.validate_keyword_routing(root)
+            self.assertTrue(any("not found" in e for e in errors))
+
+    def test_main_exits_0_on_clean_repo(self) -> None:
+        result = keyword_routing_scripts.main(["--repo-root", str(REPO_ROOT)])
+        self.assertEqual(result, 0)
 
 
 if __name__ == "__main__":

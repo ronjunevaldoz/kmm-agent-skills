@@ -17,7 +17,7 @@ Update when skills are added, revised, or completed.
 
 ---
 
-## Shipped Skills (47) — v1.11.0
+## Shipped Skills (47) — v1.13.0
 
 ### Layer 0 — Architecture Contract
 | Skill | Status | Notes |
@@ -113,6 +113,7 @@ Targeted improvements that don't require new skills.
 | Item | Priority | Description |
 |---|---|---|
 | CI gate: block PR without Testing section | LOW | `scan_skill_issues.py` runs at release time, but a skill directory could be merged without a Testing section if the author doesn't cut a release. Add a GitHub Actions step to run the scanner on every PR. |
+| Wire `validate_keyword_routing.py` into release script | LOW | `release.py` calls `validate_skill_map.py` but not `validate_keyword_routing.py`. Run both so a release is blocked if a new skill has no invocation map row. |
 
 ---
 
@@ -151,3 +152,5 @@ Require coordination across multiple files or introduce breaking changes to exis
 - Use `/modify-skill` to edit — it prevents accidental removal of required sections
 - Run `python3 scripts/scan_skill_issues.py` after any SKILL.md change to verify zero HIGH findings
 - Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py` after adding a skill to confirm README, expert, and planner are all updated
+- Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py` after adding invocation map rows to confirm every skill has keyword routing coverage
+- Run `/audit-screenshots` after recording Roborazzi goldens to verify design-system compliance visually

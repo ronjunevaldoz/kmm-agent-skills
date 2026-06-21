@@ -445,6 +445,34 @@ covers the entire UI layer.
 
 ---
 
+## Visual Design Audit
+
+After recording new golden images, run `/audit-screenshots` to verify the goldens themselves
+are design-system-compliant — not just pixel-stable. The audit uses Claude vision and checks:
+
+| Category | What is checked |
+|---|---|
+| Color tokens | No raw `Color(0xFF…)` visible; backgrounds use semantic surface colors |
+| Dark mode parity | Dark variant has dark background; text is light-on-dark, not invisible |
+| AppScaffold structure | TopAppBar present; title not duplicated in content body; back button in nav slot |
+| Spacing | Content has outer padding; list items have consistent internal padding |
+| Typography | Body readable; headings distinct; text truncates with ellipsis |
+| Contrast | Text on colored backgrounds is readable; disabled states are visually distinct |
+
+Running the audit:
+```bash
+# After recording new goldens
+./gradlew recordRoborazziJvm
+/audit-screenshots src/jvmTest/snapshots/
+```
+
+The audit is also wired into `/verify` (Step 5) — it runs automatically after `jvmTest`
+if new or modified PNGs are present in the snapshots directory.
+
+Findings map to reviewer blockers: FAIL-level → `[THEME]` or `[LAYOUT]`; WARNING-level → non-blocking.
+
+---
+
 ## Common Anti-Patterns
 
 - using Playwright, `adb screencap`, `xcrun simctl io`, or `Robot.createScreenCapture` for UI screenshots — use `captureRoboImage` on JVM instead; system capture requires a running device/emulator, produces non-reproducible results, and is flagged by `audit_project.py`

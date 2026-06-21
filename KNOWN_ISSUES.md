@@ -239,4 +239,27 @@ but agents enforce it before a commit is ever attempted.
 
 ---
 
+### KI-R14 — Keyword routing gaps for `datastore` and `jni-kotlin-pro`
+
+**Resolved:** `v1.13.0` — `feat(expert+tests): keyword routing coverage, validate_keyword_routing.py, visual design audit`  
+**Was:** Both skills were fully registered (README, expert table, planner routing) but had no rows in the Skill Invocation Map in `kotlin-multiplatform-expert/SKILL.md`. The invocation map is the table the expert uses for real-time keyword routing — without rows, queries like "DataStore", "save settings", or "JNI bridge" would not activate the correct skill.  
+**Fix:**
+- Added two invocation map rows to the expert SKILL.md
+- Created `validate_keyword_routing.py` — validates every skill (excluding meta-skills) has at least one invocation map row; returns `OK: N skills` or errors per missing skill
+- Added `ValidateKeywordRoutingTests` (5 tests) to `tests/test_skill_scripts.py`
+
+---
+
+### KI-R15 — No tooling to catch visual design regressions in Roborazzi goldens
+
+**Resolved:** `v1.13.0` — `feat(expert+tests): keyword routing coverage, validate_keyword_routing.py, visual design audit`  
+**Was:** Roborazzi golden diffs catch pixel-level regressions but could not detect whether a committed golden was design-system-compliant. A developer could record a new golden with a missing TopAppBar, broken dark mode, or hardcoded colors — the screenshot tests would pass, but the screen would violate the design contract.  
+**Fix:**
+- Created `commands/audit-screenshots.md` — a `/audit-screenshots` command that uses Claude vision to analyze light/dark PNG pairs against design-system rules (color tokens, AppScaffold structure, dark mode parity, spacing, typography, contrast)
+- Wired as Step 5 of `commands/verify.md` — runs automatically after `jvmTest` if new/modified PNGs are present
+- Wired as Check 13 of `agents/reviewer.md` — reviewer invokes the audit on screenshot goldens modified in the session
+- Added Visual Design Audit section to `skills/kotlin-multiplatform-roborazzi/SKILL.md`
+
+---
+
 *Add new entries as issues are discovered. Format: `KI-NNN` (open) or `KI-RNNN` (resolved).*

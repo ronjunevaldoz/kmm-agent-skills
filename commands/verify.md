@@ -78,7 +78,25 @@ Then re-run `jvmTest` to confirm the recorded images now pass.
 
 ---
 
-## Step 5 — Summary
+## Step 5 — Visual design audit (optional)
+
+Only run this step if:
+- PNG files exist under `**/src/jvmTest/snapshots/`, AND
+- At least one PNG was modified or recorded during Step 4 (new or updated goldens)
+
+If both conditions are true:
+```bash
+/audit-screenshots <snapshots path>
+```
+
+This runs a vision-based design consistency audit — color tokens, TopAppBar structure,
+dark/light parity, spacing, contrast. Reports PASS / WARNING / FAIL per screenshot pair.
+
+Skip silently if no PNGs exist or the user chose "Skip Roborazzi" in Step 4.
+
+---
+
+## Step 6 — Summary
 
 ```
 VERIFY: <project path>
@@ -88,6 +106,7 @@ VERIFY: <project path>
   Step 3 — detekt:              PASS | FAIL | SKIPPED
   Step 4 — jvmTest:             PASS | FAIL (<N> tests failed)
             Roborazzi:          PASS | FAIL (<N> diffs) | SKIPPED
+  Step 5 — Visual audit:        PASS | NEEDS ATTENTION (<N> findings) | SKIPPED
 
 RESULT: PASS | FAIL
 ```

@@ -462,6 +462,8 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "animation", "AnimatedVisibility", "animateContentSize", "Crossfade", "AnimatedContent", "animateFloatAsState", "shared element", "enter transition", "exit transition", "reduced motion", "spring animation" | `kotlin-multiplatform-compose-animation` |
 | "offline first", "offline-first", "local first", "sync", "optimistic update", "conflict resolution", "background sync", "SyncManager", "single source of truth", "cache then network" | `kotlin-multiplatform-offline-first` |
 | "crash reporting", "crashlytics", "firebase crashes", "sentry", "non-fatal", "symbolication", "dSYM", "kermit crash", "crash handler", "breadcrumb crash" | `kotlin-multiplatform-crash-reporting` |
+| "DataStore", "Preferences DataStore", "Proto DataStore", "save settings", "persist user prefs", "SharedPreferences migration", "createDataStore", "local key-value store" | `kotlin-multiplatform-datastore` |
+| "JNI", "native bridge", "C library", "C++ interop", "JNI bridge", "CPointer", "JvmStatic native", "kotlin native interop", "call C from Kotlin" | `jni-kotlin-pro` |
 
 ---
 

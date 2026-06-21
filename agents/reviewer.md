@@ -249,6 +249,27 @@ This check mirrors the pre-commit hook in `hooks/pre-commit-audit.sh`. If the ho
 
 ---
 
+## Check 13: Visual design audit (Roborazzi screenshots)
+
+If the session added or changed UI composables that have Roborazzi tests, check whether committed golden images are visually consistent with the design system.
+
+1. List PNG files in `src/jvmTest/snapshots/` (or wherever goldens are committed)
+2. If any PNGs exist and were modified or newly added in this session, run `/audit-screenshots <snapshots path>`
+3. Skip silently if no PNG files exist or no screenshots were modified
+
+Flag as **`[THEME]`** blocker for FAIL-level findings (broken dark mode, invisible text).
+Flag as **`[LAYOUT]`** blocker for missing TopAppBar or title outside AppScaffold.
+Emit `[WARNING]` (non-blocking) for contrast, spacing, and typography issues.
+
+```
+[THEME]   FooContent_dark.png — dark mode appears identical to light variant
+[LAYOUT]  FooContent_light.png — TopAppBar missing; title is plain Text in content body
+```
+
+Skip this check if the user has explicitly chosen "Skip Roborazzi" in the verify step.
+
+---
+
 ## Output
 
 ```
