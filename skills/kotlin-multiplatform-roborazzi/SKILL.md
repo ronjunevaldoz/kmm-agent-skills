@@ -461,13 +461,18 @@ are design-system-compliant — not just pixel-stable. The audit uses Claude vis
 
 Running the audit:
 ```bash
-# After recording new goldens
+# After recording new goldens — pass the project root, not the snapshots path
 ./gradlew recordRoborazziJvm
-/audit-screenshots src/jvmTest/snapshots/
+/audit-screenshots .
 ```
 
+`/audit-screenshots` resolves the output directory dynamically by reading
+`roborazzi { outputDir = ... }` from `build.gradle.kts`. If `outputDir` is not set,
+it falls back to `src/jvmTest/snapshots/` (jvmTest target) or `src/test/snapshots/`
+(Android target). Never hardcode the path — it varies by project configuration.
+
 The audit is also wired into `/verify` (Step 5) — it runs automatically after `jvmTest`
-if new or modified PNGs are present in the snapshots directory.
+if new or modified PNGs are present.
 
 Findings map to reviewer blockers: FAIL-level → `[THEME]` or `[LAYOUT]`; WARNING-level → non-blocking.
 

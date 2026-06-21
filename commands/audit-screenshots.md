@@ -5,20 +5,80 @@ Uses Claude's vision capability to inspect committed PNG files against the desig
 system rules: color tokens, spacing, typography, TopAppBar structure, dark/light
 mode parity, and accessibility contrast.
 
-Screenshot path: `$ARGUMENTS` (defaults to `**/src/jvmTest/snapshots/` if empty)
+Search root: `$ARGUMENTS` (defaults to `.` — the current project root)
 
 This is a visual audit — it catches design regressions that logic tests miss:
 wrong colors, broken dark mode, inconsistent spacing, or missing TopAppBar chrome.
 
 ---
 
-## Step 1 — Find screenshots
+## Step 1 — Resolve the Roborazzi output directory
+
+The screenshots location is project-configured, not fixed. Resolve it in this order:
+
+**1a. Read the `build.gradle.kts` that applies the Roborazzi plugin.**
+
+Search for the file that contains both `io.github.takahirom.roborazzi` and a `roborazzi {` block:
 
 ```bash
-find "${ARGUMENTS:-.}" -name "*.png" \
+grep -rl "io.github.takahirom.roborazzi" "${ARGUMENTS:-.}" \
+  --include="build.gradle.kts" \
+  --include="build.gradle" \
+  | head -5
+```
+
+For each candidate file, look for an explicit `outputDir`:
+
+```bash
+grep -A 5 "roborazzi {" <candidate file>
+```
+
+Example patterns to match:
+```
+roborazzi {
+    outputDir = project.file("src/jvmTest/snapshots")   # most common
+    outputDir = File(projectDir, "screenshots/golden")  # custom path
+    outputDir = layout.projectDirectory.dir("goldens").asFile
+}
+```
+
+Extract the path string. Resolve it relative to the directory containing the
+`build.gradle.kts` file (not the project root) — `project.file(...)` anchors to the module.
+
+**1b. No explicit `outputDir` found — use Roborazzi's default.**
+
+Roborazzi writes goldens to `src/test/snapshots/` (Android JUnit4) or `src/jvmTest/snapshots/`
+(CMP JVM). Detect which applies:
+
+```bash
+# Check for jvmTest (CMP / Desktop / JVM target)
+find "${ARGUMENTS:-.}" -type d -name "jvmTest" | head -3
+
+# Check for standard test (Android)
+find "${ARGUMENTS:-.}" -type d -name "test" -path "*/src/test" | head -3
+```
+
+Use `src/jvmTest/snapshots/` if a `jvmTest` source set exists, else `src/test/snapshots/`.
+Resolve relative to the module root (same directory as the `build.gradle.kts`).
+
+**1c. Print the resolved path before proceeding:**
+
+```
+Roborazzi output dir: <module-root>/src/jvmTest/snapshots/  [from build.gradle.kts]
+  or
+Roborazzi output dir: <module-root>/src/jvmTest/snapshots/  [default — outputDir not set]
+```
+
+If multiple modules use Roborazzi (monorepo), resolve each independently and audit each.
+
+---
+
+## Step 2 — Find screenshots
+
+```bash
+find "<resolved-output-dir>" -name "*.png" \
   -not -name "*_compare.png" \
   -not -name "*_actual.png" \
-  -path "*/snapshots/*" \
   | sort
 ```
 
@@ -26,11 +86,11 @@ Group files into pairs where possible:
 - `FooContent_light.png` + `FooContent_dark.png` → one audit unit
 - Unpaired files → audit individually
 
-If no PNG files are found: print `No screenshots found at <path>` and stop.
+If no PNG files are found: print `No screenshots found at <resolved path>` and stop.
 
 ---
 
-## Step 2 — For each screenshot (or pair), run a visual design audit
+## Step 3 — For each screenshot (or pair), run a visual design audit
 
 Read each image using vision and check all of the following. Flag each issue
 with the screenshot filename and a short description.
@@ -70,7 +130,7 @@ with the screenshot filename and a short description.
 
 ---
 
-## Step 3 — Output
+## Step 4 — Output
 
 For each screenshot audited:
 
@@ -99,7 +159,7 @@ RESULT: PASS | NEEDS ATTENTION
 
 ---
 
-## Step 4 — Recommended fixes
+## Step 5 — Recommended fixes
 
 For each WARNING or FAIL, give a concrete fix tied to the design-system skill:
 
@@ -122,3 +182,4 @@ For each WARNING or FAIL, give a concrete fix tied to the design-system skill:
 - If the screenshots directory contains `_compare.png` or `_actual.png` files (diff artifacts),
   those indicate a failing `jvmTest` run — resolve the test failure before running this audit.
 - Run this after `./gradlew recordRoborazziJvm` on a new screen, or after a design-system token update.
+- The output directory is always resolved from `build.gradle.kts` first (Step 1) — never assume `src/jvmTest/snapshots/` is correct without checking. Projects with a custom `outputDir` will be missed if the path is hardcoded.

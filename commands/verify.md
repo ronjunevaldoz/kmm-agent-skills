@@ -80,14 +80,16 @@ Then re-run `jvmTest` to confirm the recorded images now pass.
 
 ## Step 5 — Visual design audit (optional)
 
-Only run this step if:
-- PNG files exist under `**/src/jvmTest/snapshots/`, AND
-- At least one PNG was modified or recorded during Step 4 (new or updated goldens)
+Only run this step if at least one PNG was modified or recorded during Step 4 (new or updated goldens).
 
-If both conditions are true:
+First, let `/audit-screenshots` resolve the Roborazzi output directory from `build.gradle.kts`
+(it reads `roborazzi { outputDir = ... }` and falls back to the jvmTest/test default if not set).
+
 ```bash
-/audit-screenshots <snapshots path>
+/audit-screenshots "${ARGUMENTS:-.}"
 ```
+
+Pass the project root — the command handles directory resolution internally.
 
 This runs a vision-based design consistency audit — color tokens, TopAppBar structure,
 dark/light parity, spacing, contrast. Reports PASS / WARNING / FAIL per screenshot pair.
