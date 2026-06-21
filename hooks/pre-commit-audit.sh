@@ -8,22 +8,37 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 AUDIT_SCRIPT="$REPO_ROOT/skills/kotlin-multiplatform-audit/scripts/audit_project.py"
+TEST_FILE="tests/test_skill_scripts.py"
 
-# Only run if Kotlin files are staged
-STAGED_KT=$(git diff --cached --name-only | grep -E '\.(kt|kts)$' || true)
-if [[ -z "$STAGED_KT" ]]; then
-  exit 0
+STAGED=$(git diff --cached --name-only)
+
+# --- Check 1: architecture audit on Kotlin files ---
+STAGED_KT=$(echo "$STAGED" | grep -E '\.(kt|kts)$' || true)
+if [[ -n "$STAGED_KT" ]]; then
+  echo "Running architecture audit on staged Kotlin files..."
+  python3 "$AUDIT_SCRIPT" "$REPO_ROOT"
+  STATUS=$?
+  if [[ $STATUS -ne 0 ]]; then
+    echo ""
+    echo "Commit blocked: architecture audit found issues."
+    echo "Run: python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py ."
+    echo "Or: /run-audit to see findings with remediation steps."
+    exit 1
+  fi
 fi
 
-echo "Running architecture audit on staged Kotlin files..."
-python3 "$AUDIT_SCRIPT" "$REPO_ROOT"
-STATUS=$?
-
-if [[ $STATUS -ne 0 ]]; then
+# --- Check 2: Python script changes must include test updates ---
+STAGED_PY=$(echo "$STAGED" | grep -E '^(scripts/|skills/.*/scripts/).*\.py$' || true)
+STAGED_TEST=$(echo "$STAGED" | grep -F "$TEST_FILE" || true)
+if [[ -n "$STAGED_PY" ]] && [[ -z "$STAGED_TEST" ]]; then
   echo ""
-  echo "Commit blocked: architecture audit found issues."
-  echo "Run: python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py ."
-  echo "Or: /run-audit to see findings with remediation steps."
+  echo "Commit blocked: Python scripts changed without updating $TEST_FILE"
+  echo ""
+  echo "Changed scripts:"
+  echo "$STAGED_PY" | sed 's/^/  /'
+  echo ""
+  echo "Add or update tests in $TEST_FILE then re-stage it before committing."
+  echo "Pattern: see existing test classes in $TEST_FILE for examples."
   exit 1
 fi
 

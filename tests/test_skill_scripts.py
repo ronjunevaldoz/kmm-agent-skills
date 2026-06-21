@@ -71,6 +71,12 @@ class ValidateSkillMapTests(unittest.TestCase):
                 """.strip(),
                 encoding="utf-8",
             )
+            # planner.md must reference all non-meta skills (short names)
+            (root / "agents").mkdir()
+            (root / "agents" / "planner.md").write_text(
+                "| feature a | `a`, `b` |\n",
+                encoding="utf-8",
+            )
             skills_dir = root / "skills"
             for name in ("kotlin-multiplatform-a", "kotlin-multiplatform-b", "kotlin-multiplatform-expert"):
                 (skills_dir / name).mkdir(parents=True)

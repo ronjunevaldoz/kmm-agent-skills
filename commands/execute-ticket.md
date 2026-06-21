@@ -145,6 +145,14 @@ Any blocker → load `agents/fixer.md` (one cycle).
 
 ## Phase 7 — Commit
 
+Before staging, check: did this session add or modify any `.py` file under `scripts/` or `skills/*/scripts/`?
+
+```bash
+git diff --name-only HEAD | grep -E '^(scripts/|skills/.*/scripts/).*\.py$' || true
+```
+
+If any scripts changed → add `tests/test_skill_scripts.py` to the staged files. The pre-commit hook will block if it is missing.
+
 ```bash
 git add <all implementation files>
 git commit -m "feat(<area>): <ticket title>

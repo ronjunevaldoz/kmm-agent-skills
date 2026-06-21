@@ -46,20 +46,35 @@ It maps the skills, build order, and the best next step.
 - [`kotlin-multiplatform-sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) - SQLDelight schema, drivers, migrations
 - [`kotlin-multiplatform-datastore`](skills/kotlin-multiplatform-datastore/) - Preferences DataStore + Proto DataStore, expect/actual factory, Koin wiring, SharedPreferences migration
 - [`kotlin-multiplatform-xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) - XCFramework and SPM export
+- [`jni-kotlin-pro`](skills/jni-kotlin-pro/) - JNI bridge from Kotlin to native C/C++ libraries, CPointer, memory-safe interop
 
 ### Patterns
 
 - [`kotlin-multiplatform-expect-actual`](skills/kotlin-multiplatform-expect-actual/) - platform differences
 - [`kotlin-multiplatform-repository-pattern`](skills/kotlin-multiplatform-repository-pattern/) - repository boundary and fetch strategy
 - [`kotlin-multiplatform-navigation`](skills/kotlin-multiplatform-navigation/) - type-safe navigation
+- [`kotlin-multiplatform-deep-linking`](skills/kotlin-multiplatform-deep-linking/) - App Links, Universal Links, NavHost deep-link routing
 - [`kotlin-multiplatform-shared-resources`](skills/kotlin-multiplatform-shared-resources/) - shared resources and localization
 - [`kotlin-multiplatform-mvi`](skills/kotlin-multiplatform-mvi/) - State / Intent / Effect flow
 - [`kotlin-multiplatform-logging`](skills/kotlin-multiplatform-logging/) - Kermit, log levels, crash boundary, Koin wiring
+- [`kotlin-multiplatform-crash-reporting`](skills/kotlin-multiplatform-crash-reporting/) - Firebase Crashlytics + Sentry, CrashReporter interface, dSYM symbolication
+- [`kotlin-multiplatform-offline-first`](skills/kotlin-multiplatform-offline-first/) - SyncState, SyncManager, optimistic updates, conflict resolution
+- [`kotlin-multiplatform-paging`](skills/kotlin-multiplatform-paging/) - Paging 3, PagingSource, RemoteMediator, load-state handling
+- [`kotlin-multiplatform-image-loading`](skills/kotlin-multiplatform-image-loading/) - Coil 3, AsyncImage, single ImageLoader, cache
+- [`kotlin-multiplatform-permissions`](skills/kotlin-multiplatform-permissions/) - PermissionState, expect/actual PermissionController, Android + iOS
+- [`kotlin-multiplatform-push-notifications`](skills/kotlin-multiplatform-push-notifications/) - FCM + APNs, PushToken, NotificationHandler expect/actual
+- [`kotlin-multiplatform-workmanager`](skills/kotlin-multiplatform-workmanager/) - CoroutineWorker, BGTaskScheduler, expect/actual BackgroundScheduler
+- [`kotlin-multiplatform-analytics`](skills/kotlin-multiplatform-analytics/) - sealed AnalyticsEvent, Firebase/Amplitude, screen tracking, FakeAnalytics
+- [`kotlin-multiplatform-feature-flags`](skills/kotlin-multiplatform-feature-flags/) - FeatureFlag enum, Firebase Remote Config, A/B variants, kill switch
+- [`kotlin-multiplatform-form-validation`](skills/kotlin-multiplatform-form-validation/) - ValidationResult, FieldState, synchronous + async validators, submit gating
+- [`kotlin-multiplatform-biometric-auth`](skills/kotlin-multiplatform-biometric-auth/) - BiometricResult, expect/actual BiometricAuthenticator, BiometricPrompt
 
 ### UI System
 
 - [`kotlin-multiplatform-design-system`](skills/kotlin-multiplatform-design-system/) - tokens and core components
 - [`kotlin-multiplatform-design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) - extended component set
+- [`kotlin-multiplatform-adaptive-layout`](skills/kotlin-multiplatform-adaptive-layout/) - WindowSizeClass, Compact/Medium/Expanded breakpoints, list-detail split
+- [`kotlin-multiplatform-compose-animation`](skills/kotlin-multiplatform-compose-animation/) - AnimatedVisibility, Crossfade, AnimatedContent, shared elements
 - [`kotlin-multiplatform-compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) - slot-based component APIs
 - [`kotlin-multiplatform-compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) - hoisting rules
 - [`kotlin-multiplatform-compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) - `remember` vs `ViewModel`
@@ -71,6 +86,7 @@ It maps the skills, build order, and the best next step.
 - [`kotlin-multiplatform-unit-testing`](skills/kotlin-multiplatform-unit-testing/) - `runTest`, Turbine, fake-over-mock, `:core:testing` fixtures
 - [`kotlin-multiplatform-roborazzi`](skills/kotlin-multiplatform-roborazzi/) - screenshot tests from `@Preview` on JVM, golden images, CI diff
 - [`kotlin-multiplatform-code-quality`](skills/kotlin-multiplatform-code-quality/) - Ktlint (formatting) + Detekt (architecture rules), CI gates
+- [`kotlin-multiplatform-accessibility`](skills/kotlin-multiplatform-accessibility/) - semantic roles, contentDescription, touch targets, Roborazzi a11y snapshots
 
 ### Meta
 

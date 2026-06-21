@@ -89,7 +89,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 45 Skills and What They Own
+## The 47 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -114,6 +114,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-kotlin-rpc` | Kotlin RPC boundaries, shared service contracts, client/server layout, Ktor auth integration |
 | `kotlin-multiplatform-network-layer` | Ktor 3 client, `NetworkResult<T>`, `safeRequest {}`, token refresh interceptor |
 | `kotlin-multiplatform-sqldelight-setup` | SQLDelight 2, platform drivers, schema files, migrations, Flow queries |
+| `kotlin-multiplatform-datastore` | Preferences DataStore + Proto DataStore, expect/actual factory, Koin wiring, SharedPreferences migration |
 | `kotlin-multiplatform-xcframework-spm` | XCFramework build, SPM binary target, Xcode integration |
 | `kotlin-multiplatform-logging` | Kermit, log levels, pluggable writers, crash boundary, Koin-injected logger |
 
@@ -122,6 +123,7 @@ versions when the local repo can be checked directly.
 |---|---|
 | `kotlin-multiplatform-expect-actual` | `expect/actual` mechanism, interface-injection alternative, `@ObjCName`, Kotlin/Native memory |
 | `kotlin-multiplatform-repository-pattern` | Data layer, single source of truth, fetch strategies, domain mapping, optimistic updates |
+| `jni-kotlin-pro` | JNI bridge from Kotlin to native C/C++ libraries, `@JvmStatic` entry points, `CPointer`, memory-safe interop patterns |
 
 ### Layer 4 — Feature Building Blocks
 | Skill | Owns |

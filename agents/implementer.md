@@ -133,6 +133,19 @@ After all layers are complete:
 Never write a screenshot test without a matching dark variant — a color that works in
 light mode may be invisible or wrong in dark mode.
 
+## Script test maintenance
+
+When any `.py` file under `scripts/` or `skills/*/scripts/` is added or modified as part of the implementation:
+
+1. Open `tests/test_skill_scripts.py`
+2. Add or update a test class for the changed script (mirror existing class structure)
+3. Cover every new public function and every new `main()` exit code path
+4. Stage `tests/test_skill_scripts.py` alongside the script in the same commit
+
+This is not optional. The pre-commit hook (`hooks/pre-commit-audit.sh`) blocks the commit if script files change without a matching test update.
+
+---
+
 ## Output
 
 For every file, show full path and complete content. No stubs, no `// TODO`, no `...`.

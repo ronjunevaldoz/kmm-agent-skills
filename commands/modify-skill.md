@@ -67,6 +67,17 @@ A Testing section must include:
 The `name:` field in frontmatter and the directory name under `skills/` must match
 the entry in `skills.json`. Renaming without updating `skills.json` breaks routing.
 
+### 8. Update tests when modifying a bundled script
+
+If the modification touches any `.py` file under `skills/kotlin-multiplatform-$ARGUMENTS/scripts/`
+or any file under the top-level `scripts/`, update `tests/test_skill_scripts.py` in the
+same commit. The pre-commit hook (`hooks/pre-commit-audit.sh`) will block the commit otherwise.
+
+The test update must:
+- Add a test for every new function introduced
+- Update or remove tests for any function signature that changed
+- Verify all new `main()` exit code paths are covered
+
 ### 7. Do not merge two skills
 
 Each SKILL.md covers one concern. If a skill feels too broad, add a `## Related Skills`

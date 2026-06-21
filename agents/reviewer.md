@@ -227,6 +227,28 @@ Flag as `[DETEKT]` blocker for:
 
 ---
 
+## Check 12: Script test coverage
+
+For any session that adds or modifies a `.py` file under `scripts/` or `skills/*/scripts/`:
+
+1. Confirm `tests/test_skill_scripts.py` was also modified in this session
+2. For every new function or `main()` entry point in the changed script, verify at least one `@unittest` test covers the new code path
+3. For modified functions, verify the existing tests still reflect the updated behaviour
+
+Flag as **`[TEST]`** blocker if:
+- A script file changed and `tests/test_skill_scripts.py` was not touched
+- A new script function has zero test coverage
+- A renamed or removed function leaves orphan test methods that will silently pass vacuously
+
+```
+[TEST] scripts/my_new_tool.py — no tests added to tests/test_skill_scripts.py
+[TEST] skills/kotlin-multiplatform-foo/scripts/foo.py — new main() function has no test coverage
+```
+
+This check mirrors the pre-commit hook in `hooks/pre-commit-audit.sh`. If the hook blocked the commit, the reviewer will see the same finding.
+
+---
+
 ## Output
 
 ```
@@ -243,6 +265,7 @@ BLOCKERS (<count>):
   [TRANSPORT]      <file> — <safeRequest bypasses existing kRPC transport for service/method>
   [STYLE]          <file>:<line> — <line exceeds 120 chars | wildcard import>
   [DETEKT]         <file>:<line> — <rule: TooManyFunctions | LongMethod | MagicNumber | ComplexCondition>
+  [TEST]           scripts/<file>.py — no tests added or updated in tests/test_skill_scripts.py
 
 WARNINGS (<count>):
   [MISSING TAG]  <composable>: <node description> has no testTag
