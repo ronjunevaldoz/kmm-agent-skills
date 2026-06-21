@@ -3,22 +3,32 @@
 Release script for kmm-agent-skills.
 
 Usage:
-    python3 scripts/release.py patch   # bug fixes, freshness updates
-    python3 scripts/release.py minor   # new skills added
-    python3 scripts/release.py major   # breaking structure changes
+    python3 scripts/release.py patch   # bug fixes, audit pattern fixes, freshness updates
+    python3 scripts/release.py minor   # new skills, new agents/commands, new reviewer checks
+    python3 scripts/release.py major   # breaking structure changes (skill section renames, etc.)
     python3 scripts/release.py --dry-run minor
 
+Versioning policy:
+    patch — fixes only: audit false-positive corrections, typos, freshness date bumps,
+            KNOWN_ISSUES updates, PLAN.md housekeeping
+    minor — additive work: new skill, new audit pattern, new reviewer check, new command,
+            new fixer rule, new agent, layout/theme enforcement additions
+    major — breaking: skill section headers renamed (breaks external tooling that parses
+            SKILL.md), skills.json schema changed, skill directories removed or renamed
+
 What it does (in order):
-    1. Verify git working tree is clean
-    2. Run audit_skills_repo.py — must be zero findings
-    3. Run pytest — must be 100% passing
-    4. Bump version in skills.json (semver)
-    5. Regenerate all skill entries in skills.json from SKILL.md frontmatter
-    6. Update shipped skill count in PLAN.md
-    7. Stage skills.json and PLAN.md
-    8. Create a signed commit: "Release vX.Y.Z"
-    9. Create an annotated git tag vX.Y.Z
-   10. Print push instructions — does NOT push automatically
+    1.  Verify git working tree is clean
+    2.  Run audit_skills_repo.py — must be zero findings
+    3.  Run pytest — must be 100% passing
+    4.  Bump version in skills.json (semver)
+    5.  Regenerate all skill entries in skills.json from SKILL.md frontmatter
+    6.  Update shipped skill count in PLAN.md
+    7.  Prepend new section to CHANGELOG.md (auto-generated from git log)
+    8.  Stage skills.json, PLAN.md, CHANGELOG.md
+    9.  Create a release commit: "Release vX.Y.Z"
+    10. Create an annotated git tag vX.Y.Z
+    11. Create a GitHub Release via gh CLI (release notes from CHANGELOG section)
+    12. Print push instructions — does NOT push automatically
 
 Agents: run this script exactly as shown above. Do not push to remote
 without explicit user confirmation.
@@ -36,6 +46,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).parent.parent
 SKILLS_JSON = REPO_ROOT / "skills.json"
 PLAN_MD = REPO_ROOT / "PLAN.md"
+CHANGELOG_MD = REPO_ROOT / "CHANGELOG.md"
 SKILLS_DIR = REPO_ROOT / "skills"
 AUDIT_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_skills_repo.py"
 TESTS_DIR = REPO_ROOT / "tests"
@@ -188,20 +199,101 @@ def update_plan_md(skill_count: int) -> None:
 
 # ── step 7–9: git commit + tag ────────────────────────────────────────────────
 
-def git_commit_and_tag(new_version: str, skill_count: int, dry_run: bool) -> None:
+def get_previous_tag() -> str:
+    result = run(["git", "describe", "--tags", "--abbrev=0", "HEAD"], check=False)
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
+def generate_changelog_section(new_version: str, prev_tag: str) -> str:
+    """Build a CHANGELOG section from git log since prev_tag."""
+    import datetime
+    date = datetime.date.today().isoformat()
     tag = f"v{new_version}"
-    msg = f"Release {tag}\n\n{skill_count} skills shipped. See PLAN.md for details."
+
+    if prev_tag:
+        result = run(["git", "log", "--oneline", f"{prev_tag}..HEAD"])
+    else:
+        result = run(["git", "log", "--oneline"])
+
+    lines = [l.strip() for l in result.stdout.strip().splitlines() if l.strip()]
+
+    # Bucket by conventional commit prefix
+    buckets: dict[str, list[str]] = {
+        "feat": [], "fix": [], "docs": [], "chore": [], "other": []
+    }
+    for line in lines:
+        sha, _, rest = line.partition(" ")
+        prefix = rest.split("(")[0].split(":")[0].strip().lower()
+        if prefix in buckets:
+            buckets[prefix].append(f"- {rest}")
+        else:
+            buckets["other"].append(f"- {rest}")
+
+    section = [f"## [{tag}] — {date}\n"]
+    labels = [("feat", "Added"), ("fix", "Fixed"), ("docs", "Docs"), ("chore", "Chore"), ("other", "Other")]
+    for key, heading in labels:
+        if buckets[key]:
+            section.append(f"### {heading}\n")
+            section.extend(buckets[key])
+            section.append("")
+
+    return "\n".join(section)
+
+
+def update_changelog(new_version: str, prev_tag: str, dry_run: bool) -> str:
+    section = generate_changelog_section(new_version, prev_tag)
 
     if dry_run:
-        info(f"[dry-run] would stage: skills.json PLAN.md")
+        info(f"[dry-run] CHANGELOG section preview:\n{section[:300]}…")
+        return section
+
+    header = "# Changelog\n\nAll notable changes to kmm-agent-skills are documented here.\n\n"
+    existing = CHANGELOG_MD.read_text(encoding="utf-8") if CHANGELOG_MD.exists() else header
+    # Strip the header so we can prepend the new section after it
+    body = existing[len(header):] if existing.startswith(header) else existing
+    CHANGELOG_MD.write_text(header + section + "\n---\n\n" + body, encoding="utf-8")
+    ok(f"CHANGELOG.md updated — {new_version} section prepended")
+    return section
+
+
+def create_github_release(tag: str, changelog_section: str, dry_run: bool) -> None:
+    # Check gh CLI is available
+    result = run(["gh", "--version"], check=False)
+    if result.returncode != 0:
+        info("gh CLI not found — skipping GitHub Release creation")
+        return
+
+    if dry_run:
+        info(f"[dry-run] would create GitHub Release {tag}")
+        return
+
+    result = run(
+        ["gh", "release", "create", tag,
+         "--title", tag,
+         "--notes", changelog_section],
+        check=False,
+    )
+    if result.returncode == 0:
+        ok(f"GitHub Release {tag} created")
+    else:
+        info(f"GitHub Release creation failed (non-fatal): {result.stderr.strip()}")
+
+
+def git_commit_and_tag(new_version: str, skill_count: int, changelog_section: str, dry_run: bool) -> None:
+    tag = f"v{new_version}"
+    msg = f"Release {tag}\n\n{skill_count} skills shipped. See CHANGELOG.md for details."
+
+    if dry_run:
+        info(f"[dry-run] would stage: skills.json PLAN.md CHANGELOG.md")
         info(f"[dry-run] would commit: {msg.splitlines()[0]}")
         info(f"[dry-run] would tag:    {tag}")
         return
 
-    run(["git", "add", "skills.json", "PLAN.md"])
+    run(["git", "add", "skills.json", "PLAN.md", "CHANGELOG.md"])
     run(["git", "commit", "-m", msg])
     run(["git", "tag", "-a", tag, "-m", f"Release {tag} — {skill_count} skills"])
     ok(f"Committed and tagged {tag}")
+    create_github_release(tag, changelog_section, dry_run=False)
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
@@ -231,13 +323,21 @@ def main() -> int:
     if args.dry_run:
         skills = extract_skills()
         info(f"Skills count: {len(skills)}")
+        prev_tag = get_previous_tag()
+        info(f"Previous tag: {prev_tag or '(none)'}")
+        update_changelog(new_version, prev_tag, dry_run=True)
+        git_commit_and_tag(new_version, len(skills), "", dry_run=True)
         info("Dry run complete — nothing written")
         return 0
+
+    prev_tag = get_previous_tag()
+    info(f"Previous tag: {prev_tag or '(none)'}")
 
     update_skills_json(new_version)
     skill_count = len(json.loads(SKILLS_JSON.read_text())["skills"])
     update_plan_md(skill_count)
-    git_commit_and_tag(new_version, skill_count, dry_run=False)
+    changelog_section = update_changelog(new_version, prev_tag, dry_run=False)
+    git_commit_and_tag(new_version, skill_count, changelog_section, dry_run=False)
 
     tag = f"v{new_version}"
     print(f"""
