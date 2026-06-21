@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.11.0] — 2026-06-21
+
+### Added
+
+- feat(quality): enforce test maintenance and planner routing validation
+
+---
+
 ## [v1.10.0] — 2026-06-21
 
 ### Added
