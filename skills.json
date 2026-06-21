@@ -1,5 +1,5 @@
 {
-  "version": "1.5.0",
+  "version": "1.5.1",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -1127,7 +1127,7 @@
       "path": "skills/kotlin-multiplatform-kotlin-rpc",
       "description": "Kotlin RPC for Kotlin Multiplatform full-stack apps. Covers when to use Kotlin RPC instead of REST or gRPC, shared request/response contracts, client/server module layout, auth boundaries, service interface design, and a scaffold script for initial RPC project setup. Use this for Kotlin-to-Kotlin service boundaries, especially when the client and server both live in the same KMP ecosystem.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-13",
+      "last_updated": "2026-06-21",
       "keywords": [
         "kotlin rpc",
         "kRPC",

@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.5.1] — 2026-06-21
+
+### Fixed
+
+- Fix: add kRPC transport pre-check to prevent HTTP bypass when RPC already owns the boundary
+
+---
+
 ## [v1.5.0] — 2026-06-21
 
 ### Other
