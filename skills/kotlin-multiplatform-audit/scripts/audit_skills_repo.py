@@ -11,6 +11,7 @@ REQUIRED_MARKERS = (
     "Trigger keywords:",
     "metadata:",
     "last-updated:",
+    "## Changelog",
 )
 
 FAST_MOVING_HINTS = (

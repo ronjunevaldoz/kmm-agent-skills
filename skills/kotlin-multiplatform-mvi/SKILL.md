@@ -772,3 +772,11 @@ When asked about MVI or screen architecture, respond in this order:
 5. why Channel over SharedFlow for effects
 
 Keep each snippet to one block. Use the user's actual screen name and state fields when provided.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-06 | Initial release. |

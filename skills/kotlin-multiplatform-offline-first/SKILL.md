@@ -307,3 +307,11 @@ When asked about offline-first or sync patterns, respond in this order:
 
 Lead with the data flow direction: DB → UI (read), UI → DB → network (write).
 Never suggest reading from the network in the observe path.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-21 | Initial release. |

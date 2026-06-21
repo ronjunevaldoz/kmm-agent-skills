@@ -248,3 +248,11 @@ When asked about UI iteration, previews, or fast Compose development, respond in
 3. Desktop run command for live iteration
 4. how previews promote to Roborazzi
 5. PreviewData object placement
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-18 | Initial release. |

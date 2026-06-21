@@ -557,3 +557,12 @@ When asked for a KMP recommendation, routing decision, or anti-pattern check, re
 4. skills to use next (if the task spans multiple domains)
 
 Keep the response concise — this skill routes to other skills, not implements. Name the exact skill to invoke for follow-up work.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-21 | Removed private project reference from docs-first rule; rule is now generic. |
+| 2026-06-18 | Initial release — 30-skill routing map, dependency graph, build order, decision trees, anti-pattern checklist. |

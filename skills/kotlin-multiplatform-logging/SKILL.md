@@ -283,3 +283,11 @@ When asked about logging in KMP, respond in this order:
 3. log level guidelines
 4. Koin injection pattern (factory with tag)
 5. crash boundary writer (CrashlyticsLogWriter or SentryLogWriter)
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-18 | Initial release. |

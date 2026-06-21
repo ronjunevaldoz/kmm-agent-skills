@@ -522,3 +522,11 @@ When asked about slots or component design, respond in this order:
 4. main alternative (CompositionLocal, or props)
 
 Keep snippets small. If the user provides a component name, use it in the example.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-06 | Initial release. |

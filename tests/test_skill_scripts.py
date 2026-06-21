@@ -487,7 +487,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
             skill_dir.mkdir(parents=True)
             (skill_dir / "SKILL.md").write_text(
                 "---\nname: example-skill\ndescription: example\nmetadata:\n  last-updated: '2026-06-18'\n---\n\n"
-                "## When to Use This Skill\n\n**Trigger keywords:** example.\n",
+                "## When to Use This Skill\n\n**Trigger keywords:** example.\n\n## Changelog\n\n| Date | Change |\n|---|---|\n| 2026-06-18 | Initial release. |\n",
                 encoding="utf-8",
             )
 

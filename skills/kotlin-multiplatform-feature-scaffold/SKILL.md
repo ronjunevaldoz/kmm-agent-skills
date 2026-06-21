@@ -1081,3 +1081,13 @@ When asked to scaffold a project or add a feature module, respond in this order:
 5. wire-up step (Koin module registration, nav graph entry)
 
 Ask for GROUP_ID and feature name before generating files. Map all paths to the actual values.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-21 | **Breaking** — Step 3 rewritten: `git clone Kotlin/kmp-wizard` is now mandatory. Hand-scaffolding `build-logic`, convention plugins, or `settings.gradle.kts` from scratch is no longer supported. |
+| 2026-06-21 | **Breaking** — Step 4 rewritten: convention plugins must be class-based `Plugin<Project>`. Precompiled `.gradle.kts` script plugins in included builds do not generate version catalog accessors in Gradle 9. |
+| 2026-06-18 | 6-layer module structure enforced; `jvm()` target added to all convention plugin templates; Step 9 source stubs expanded. |

@@ -344,3 +344,11 @@ When implementing adaptive layout, respond in this order:
 4. **Navigation** — whether `AdaptiveNavScaffold` needs updating for the new screen
 5. **Roborazzi tests** — compact+dark, compact+light, expanded+dark, expanded+light
 6. **Pipeline-context update** — set `adaptive_layout_established: true` if this is the first
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-21 | Initial release. |

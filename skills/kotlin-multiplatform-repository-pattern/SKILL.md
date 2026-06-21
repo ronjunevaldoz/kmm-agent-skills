@@ -547,3 +547,11 @@ When asked about the repository pattern or data layer, respond in this order:
 5. main alternative (different fetch strategy, or direct data source)
 
 Keep the snippet to one repository method. Map to the user's actual entity and domain names when provided.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-06 | Initial release. |

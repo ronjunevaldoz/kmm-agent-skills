@@ -257,3 +257,11 @@ When asked about testing KMP code, respond in this order:
 3. where the test file lives (`commonTest` in `:presenter` or `:domain`)
 4. how to run it (`./gradlew jvmTest`)
 5. `:core:testing` module setup if shared fakes are needed
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-18 | Initial release. |

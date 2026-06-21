@@ -615,3 +615,11 @@ When asked about SQLDelight setup or database queries, respond in this order:
 5. main alternative (Realm, raw SQLite driver)
 
 Keep the snippet to one table and one query. Map to the user's actual entity names when provided.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-06 | Initial release. |

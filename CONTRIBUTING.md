@@ -97,6 +97,7 @@ keywords:
 | One or more `## Step N:` sections | Concrete implementation steps |
 | `## Testing` | How to verify the output (unit tests, audit commands) |
 | `## Common Anti-Patterns` | What to avoid and why |
+| `## Changelog` | Consumer-facing release notes — date + change table, travels with the skill |
 
 Skills that lack any of these sections will fail the audit script.
 

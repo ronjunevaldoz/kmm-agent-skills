@@ -2708,3 +2708,11 @@ When asked about extended design system components, respond in this order:
 4. main alternative (build from scratch, use Material3)
 
 Assume `kotlin-multiplatform-design-system` is already applied. Use the user's variant names and theme tokens when provided.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-06 | Initial release. |

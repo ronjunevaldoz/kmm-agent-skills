@@ -377,3 +377,11 @@ When implementing animations, respond in this order:
 2. **Implementation** — composable with the animation applied
 3. **Reduced-motion** — `respectsReducedMotion()` check for non-trivial transitions
 4. **Anti-pattern note** — call out if the chosen API has a common pitfall in this context
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-21 | Initial release. |

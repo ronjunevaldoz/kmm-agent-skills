@@ -307,3 +307,11 @@ When asked to set up a presenter module or ViewModel, respond in this order:
 3. convention plugin or `build.gradle.kts` snippet
 4. Koin wiring (annotated or manual)
 5. Screen/Content split in `:ui` that consumes the ViewModel
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-18 | Initial release. |

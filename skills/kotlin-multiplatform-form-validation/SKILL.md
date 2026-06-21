@@ -346,3 +346,11 @@ When implementing form validation, respond in this order:
 4. **Async validators** — if any field needs a network check, add debounce pattern
 5. **ValidatedTextField** — reusable composable with inline error display
 6. **Tests** — validator unit tests and a ViewModel submit test
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-21 | Initial release. |

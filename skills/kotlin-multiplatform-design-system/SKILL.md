@@ -1515,3 +1515,11 @@ When asked about design system setup or components, respond in this order:
 5. main alternative (Material3 wrapper)
 
 Keep snippets small. Use the user's package name and token names when provided.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-06 | Initial release. |

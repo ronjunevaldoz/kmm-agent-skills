@@ -208,3 +208,11 @@ When asked about architecture layers or module boundaries, respond in this order
 3. concrete file/class placement
 4. how to enforce it (Gradle dep or Detekt rule)
 5. the anti-pattern it avoids
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-18 | Initial release. |

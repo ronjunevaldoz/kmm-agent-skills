@@ -231,3 +231,12 @@ When asked to audit a project or the skills repo, respond in this order:
 6. skills to use next
 
 Ask before converting findings to issue drafts. Keep implementation advice minimal — this skill routes work, it doesn't implement it.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-21 | GitHub issue title format defined: `[category] short description`. Category table added with 8 categories (`[arch]`, `[mvi]`, `[presenter]`, `[data]`, `[ui]`, `[di]`, `[build]`, `[test]`). |
+| 2026-06-18 | Initial release — architecture audit checklist, `audit_project.py`, `audit_skills_repo.py`, `draft_issue.py`. |

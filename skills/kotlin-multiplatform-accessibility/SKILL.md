@@ -319,3 +319,11 @@ When implementing accessibility, respond in this order:
 5. **mergeDescendants** — group related row/card children
 6. **Roborazzi a11y snapshot** — one test per screen
 7. **Checklist** — confirm each row is satisfied
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-21 | Initial release. |

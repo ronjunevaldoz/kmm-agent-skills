@@ -476,3 +476,11 @@ When asked about navigation or routing, respond in this order:
 5. main alternative (Decompose, manual back stack)
 
 Keep each snippet to one route and one composable destination. Map to the user's actual screen and feature names when provided.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-06 | Initial release. |

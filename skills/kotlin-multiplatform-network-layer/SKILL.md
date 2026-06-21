@@ -579,3 +579,11 @@ When asked about the network layer or HTTP client setup, respond in this order:
 5. main alternative (Retrofit, raw HttpClient)
 
 Keep the snippet to one endpoint. Map to the user's actual base URL and response type when provided.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-06 | Initial release. |

@@ -502,3 +502,11 @@ When asked about UI testing, test tags, or visual regression for KMP, respond in
 3. Interaction test with `createComposeRule` + `onNodeWithTag`
 4. Roborazzi screenshot test for the same component
 5. record/verify commands and CI job
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-20 | Initial release. |

@@ -422,3 +422,11 @@ When asked about environment config or BuildKonfig, respond in this order:
 4. main alternative (manual expect/actual, environment-injected constants)
 
 Keep the snippet focused on one flavor. Map to the user's actual base URL and environment names when provided.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-06 | Initial release. |

@@ -222,3 +222,11 @@ When responding to JNI work, always structure the response in this order:
 5. **Audit comment** — if the target has `// STABLE:`, include the required change comment
 
 Never output a partial JNI function. A bridge function with a missing release on one exit path is worse than no change — it ships a memory leak.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-20 | Initial release. |

@@ -340,3 +340,11 @@ When asked about crash reporting, respond in this order:
 5. dSYM symbolication reminder
 
 Lead with the interface — never put SDK imports in commonMain code.
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-21 | Initial release. |
