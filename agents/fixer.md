@@ -213,6 +213,39 @@ Add a paired dark capture for every existing light capture:
    ```
 4. Update the nav host call site to pass `windowSizeClass` down
 
+### `[TRANSPORT]` — plain HTTP client used when kRPC is already wired
+
+Run the pre-check grep first to confirm kRPC is active:
+```bash
+grep -r "RemoteService\|@Rpc\|withRpc\|KtorRPCClient\|rpcClient\|\.rpc(" \
+  <project_root>/*/src --include="*.kt" -l
+```
+
+If files are found, kRPC is established. Replace the `safeRequest` / `HttpClient` call with
+the existing kRPC service:
+
+```kotlin
+// Before (blocker — adds a second HttpClient transport):
+val result = safeRequest { client.get("api/foo") }
+
+// After (fix — use the already-wired kRPC service):
+val result = fooService.getFoo()   // fooService: FooService injected via Koin
+```
+
+Steps:
+1. Identify which `@Rpc`-annotated interface covers the endpoint.
+2. If no interface covers it yet, add the method to the existing `RemoteService` — do NOT
+   create a new `HttpClient` instance.
+3. Remove the `safeRequest` call and any `HttpClient` binding added for this call.
+4. Update the Koin module: inject the existing `RpcClient` / `KtorRPCClient`, not a new one.
+
+Confidence: **HIGH** when an existing `@Rpc` interface covers the endpoint.
+Confidence: **MEDIUM** when the endpoint is new and the interface must be extended.
+Confidence: **LOW** when you cannot determine whether the backend contract is shared — stop
+and ask the user before touching the transport.
+
+---
+
 ### `[TEST]` — manual screen capture detected
 
 Remove the offending tool (`playwright`, `adb screencap`, `xcrun simctl io`,

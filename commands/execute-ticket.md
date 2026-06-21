@@ -73,7 +73,7 @@ Load `agents/planner.md` with the ticket content as input.
 
 The layer planner:
 1. Reads `.claude/pipeline-context.json` for `recurring_issues` and `proven_patterns`
-2. Identifies which of the 31 skills apply based on what the ticket requires
+2. Identifies which of the 45 skills apply based on what the ticket requires
 3. Maps the acceptance criteria to specific layers and Koin bindings
 4. Produces a full `BUILD ORDER` plan
 

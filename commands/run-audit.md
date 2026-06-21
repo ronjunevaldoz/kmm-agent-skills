@@ -28,7 +28,34 @@ The script detects 5 architectural smells:
 
 ---
 
-## Step 2 — Explain each finding
+## Step 2 — Quality scan
+
+```bash
+python3 scripts/scan_skill_issues.py
+```
+
+Parse the JSON output (`total_issues`, `by_severity`, `issues[]`).
+
+Print a brief summary before the architecture findings:
+
+```
+SKILLS QUALITY SCAN:
+  Total issues:   <N>
+  🔴 HIGH:        <N>   (testing gaps)
+  🟡 MEDIUM:      <N>   (missing sections, stale skills)
+  🔵 LOW:         <N>   (minor gaps)
+```
+
+If `total_issues > 0`, append:
+```
+  Run /summarize-issues for the full report with paste-ready fix prompts.
+```
+
+This step is non-blocking — continue to Step 4 regardless of the scan result.
+
+---
+
+## Step 4 — Explain each finding
 
 For every finding, load the relevant skill and give a concrete fix:
 
@@ -45,7 +72,7 @@ For every finding, load the relevant skill and give a concrete fix:
 
 ---
 
-## Step 3 — Output
+## Step 5 — Output
 
 On findings:
 ```
@@ -70,7 +97,7 @@ RESULT:  CLEAN — no architecture smells found
 
 ---
 
-## Step 4 — Optional auto-fix
+## Step 6 — Optional auto-fix
 
 If the user says "fix it", load `agents/fixer.md`.
 
