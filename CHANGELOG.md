@@ -1,159 +1,191 @@
 # Changelog
 
-All notable changes to kmm-agent-skills are documented here.
+All notable changes to **kmm-agent-skills** are documented here.
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [Unreleased]
+
+### Added
+- `CONTRIBUTING.md` — contribution guide covering skill authoring, commit format, PR checklist, and release process
+
+### Changed
+- `feature-scaffold` skill Step 3 rewritten: mandatory `Kotlin/kmp-wizard` clone replaces manual file creation
+- `feature-scaffold` skill Step 4 rewritten: extend kmp-wizard's build-logic rather than recreate it
+- `feature-scaffold` anti-patterns: hand-scaffolding and precompiled `.gradle.kts` script plugins now listed as explicit blockers
+- `/new-project` command F-01 step updated to clone-first mandate with `./gradlew help` gate
+
+### Fixed
+- `kotlin-multiplatform-expert` skill: removed private Carpool project reference from docs-first rule
+
+### Docs
+- `kotlin-multiplatform-audit` skill: defined `[category] short description` issue title format with category table and examples
+
+---
+
+## [v1.14.0] — 2026-06-21
+
+### Added
+- `/new-project` command — natural language to full KMP scaffold, 8-step pipeline, no user gates; infers platforms, features, data, backend from a single prompt
+- `samples/todo-app.md` — E2E test spec for the todo app: 4 features, SQLDelight persistence, 12 skills, objective pass/fail quality bar (audit + jvmTest + Roborazzi + visual audit)
+
+### Changed
+- `/verify` command: added Step 5 visual design audit (runs `/audit-screenshots` when PNGs modified)
+- `agents/reviewer.md`: added Check 13 visual design audit on Roborazzi screenshots
+- `kotlin-multiplatform-roborazzi` skill: documented visual design audit and dynamic path resolution
+
+---
+
+## [v1.13.0] — 2026-06-18
+
+### Added
+- `validate_keyword_routing.py` script — ensures every skill has at least one trigger keyword registered; now part of CI gate
+- Visual design audit step integrated into `/verify` and `agents/reviewer.md`
+
+### Fixed
+- `/audit-screenshots` command: Roborazzi output directory resolved dynamically from `build.gradle.kts` instead of hardcoded path; falls back to `src/jvmTest/snapshots/` or `src/test/snapshots/`
+
+---
 
 ## [v1.12.0] — 2026-06-21
 
 ### Added
-
-- feat(tests): resolve KI-005 and KI-006 — pipeline flag contract and hook script tests
+- Tests for pipeline flag contract (KI-005) and hook script behaviour (KI-006)
 
 ---
 
 ## [v1.11.1] — 2026-06-21
 
 ### Added
-
-- feat(commands): add /verify command for KMP validation pipeline
+- `/verify` command — KMP validation pipeline: module graph, unit tests, screenshot tests, architecture audit, summary
 
 ### Docs
-
-- docs: update PLAN.md, KNOWN_ISSUES.md for v1.11.0 state
+- Updated `PLAN.md` and `KNOWN_ISSUES.md` to reflect v1.11.0 state
 
 ---
 
 ## [v1.11.0] — 2026-06-21
 
 ### Added
-
-- feat(quality): enforce test maintenance and planner routing validation
+- Test maintenance enforcement: planner routing validation and skill freshness gates added to pipeline
 
 ---
 
 ## [v1.10.0] — 2026-06-21
 
 ### Added
-
-- feat(pipeline+skills): 7 gap fixes — planner routing, new-skill cmd, detekt, PR template, hooks guide, tests, 2 new skills
+- 7 pipeline gap fixes: planner routing, `/new-skill` command, Detekt rule reference, PR template, hooks guide, test additions, 2 new skills
 
 ---
 
 ## [v1.9.0] — 2026-06-21
 
 ### Added
-
-- feat(pipeline): add ktlint enforcement + proactive issue tracking
+- ktlint enforcement gate in CI and reviewer pipeline
+- Proactive issue tracking: reviewer now creates `[build]` issues for lint failures
 
 ---
 
 ## [v1.8.0] — 2026-06-21
 
 ### Added
+- `## Testing` sections added to 18 skills that were missing them
+- Contribution rules added to `AGENTS.md`
 
-- feat(skills): close all quality gaps — 18 Testing sections, MEDIUM fixes, contribution rules
+### Fixed
+- Medium-priority audit findings resolved across 6 skills
 
 ---
 
 ## [v1.7.1] — 2026-06-21
 
 ### Fixed
-
-- fix(pipeline): close 5 gaps — [TRANSPORT] fixer rule, stale counts, krpc context flag, tests, run-audit quality scan
+- `[TRANSPORT]` fixer rule for kRPC boundary enforcement
+- Stale shipped-skill count in `PLAN.md`
+- kRPC context flag added to `pipeline-context.json`
+- Run-audit quality scan added to release gate
 
 ---
 
 ## [v1.7.0] — 2026-06-21
 
-### Other
-
-- Add /summarize-issues command and scan_skill_issues.py — automated quality gap detection with copy-paste fix prompts
+### Added
+- `/summarize-issues` command — scans all skills for quality gaps and outputs copy-paste fix prompts
+- `scan_skill_issues.py` script — automated gap detection across the skills repo
 
 ---
 
 ## [v1.6.0] — 2026-06-21
 
-### Other
-
-- Add skills freshness check — auto-detect when local skills are behind origin/main at pipeline start
+### Added
+- Skills freshness check at pipeline start — auto-detects when local skills are behind `origin/main` and prompts the user to pull before proceeding
 
 ---
 
 ## [v1.5.2] — 2026-06-21
 
 ### Fixed
-
-- Fix: add comprehensive testing section to MongoDB skill — FakeRepository, Flapdoodle integration tests, change stream testing, and document mapping tests
+- `kotlin-multiplatform-mongodb-database`: added `## Testing` section covering `FakeRepository`, Flapdoodle integration tests, change stream testing, and document mapping
 
 ---
 
 ## [v1.5.1] — 2026-06-21
 
 ### Fixed
-
-- Fix: add kRPC transport pre-check to prevent HTTP bypass when RPC already owns the boundary
+- `kotlin-multiplatform-kotlin-rpc`: added kRPC transport pre-check to prevent HTTP bypass when RPC already owns the boundary
 
 ---
 
 ## [v1.5.0] — 2026-06-21
 
-### Other
-
-- Add 11 new skills: analytics, form-validation, image-loading, permissions, deep-linking, compose-animation, biometric-auth, push-notifications, workmanager, feature-flags, accessibility
+### Added
+- 11 new skills: `analytics`, `form-validation`, `image-loading`, `permissions`, `deep-linking`, `compose-animation`, `biometric-auth`, `push-notifications`, `workmanager`, `feature-flags`, `accessibility`
 
 ---
 
 ## [v1.4.0] — 2026-06-21
 
 ### Added
-
-- feat(paging): add kotlin-multiplatform-paging skill
+- `kotlin-multiplatform-paging` skill — Paging 3 for KMP: `PagingSource`, `Pager`, `PagingData`, cursor vs offset, `RemoteMediator`, load-state handling
 
 ### Fixed
-
-- fix(reviewer): add adaptive_layout_migration_mode to pipeline-context (KI-003)
-- fix(pipeline): commit pipeline-context.json at end of every pipeline run (KI-001) fix(hooks): add scripts/install-hooks.sh one-liner (KI-002)
+- `adaptive_layout_migration_mode` flag added to `pipeline-context.json` (KI-003)
+- Pipeline context committed at end of every pipeline run (KI-001)
+- `scripts/install-hooks.sh` one-liner added (KI-002)
 
 ---
 
 ## [v1.3.0] — 2026-06-21
 
 ### Added
-
-- feat(layout): enforce screen layout contract and scaffold consistency
-- feat(adaptive+theme): add adaptive-layout skill and dark/light mode enforcement
-- feat(audit): detect magic color literals in UI composables
+- Screen layout contract and scaffold consistency enforcement in reviewer
+- `kotlin-multiplatform-adaptive-layout` skill — WindowSizeClass breakpoints, list-detail, adaptive navigation
+- Magic color literal detection in `audit_project.py`
 
 ### Fixed
-
-- fix(audit): exclude 0.dp from hardcoded spacing pattern (KI-004)
+- `audit_project.py`: excluded `0.dp` from hardcoded spacing pattern (KI-004)
 
 ### Docs
-
-- docs: add KNOWN_ISSUES.md with 4 open and 5 resolved issues
-
-### Chore
-
-- chore(release): add CHANGELOG.md generation and GitHub Release to release script
-- chore(plan): mark datastore shipped, document 6 undiscovered gaps
-
----
+- `KNOWN_ISSUES.md` created with 4 open and 5 resolved issues
 
 ---
 
 ## [v1.2.3] — 2026-06-20
 
 ### Added
-- `jni-kotlin-pro` skill — JNI bridge engineering between Kotlin/JVM and native C++; 4-layer stack, memory safety, symbol isolation, GPU sync
+- `jni-kotlin-pro` skill — JNI bridge from Kotlin/JVM to native C/C++; 4-layer stack, memory safety, symbol isolation, GPU sync
 
 ### Fixed
-- Added `## References` section header to satisfy `audit_skills_repo` check for skills with a `references/` directory
+- Added `## References` section to skills that have a `references/` directory
 
 ---
 
 ## [v1.2.2] — 2026-06-18
 
-### Chore
-- Rebranded all pipeline agent/command/hook files with KMM Agent Skills identity; removed structural similarity to external repos
+### Changed
+- Rebranded all pipeline agent, command, and hook files with `kmm-agent-skills` identity
 
 ---
 
@@ -169,19 +201,19 @@ All notable changes to kmm-agent-skills are documented here.
 ### Added
 - `agents/planner.md` — Layer Planner with work-type skill loading matrix and 6-layer build order
 - `agents/implementer.md` — Layer Implementer with stack declaration, layer rules, Koin wiring, test generation
-- `agents/reviewer.md` — Architecture Reviewer with 5 checks and APPROVE/NEEDS_FIXES verdict
-- `agents/validator.md` — Build Validator with 4 graduated levels
+- `agents/reviewer.md` — Architecture Reviewer with 5 checks and APPROVE / NEEDS_FIXES verdict
+- `agents/validator.md` — Build Validator with 4 graduated validation levels
 - `agents/fixer.md` — Targeted Fixer with per-blocker fix rules and confidence ratings
 - `commands/implement-feature.md`, `commands/review-changes.md`, `commands/run-audit.md`
 - `hooks/pre-commit-audit.sh`, `hooks/validate-architecture.sh`, `hooks/check-skill-freshness.sh`
-- `.claude/pipeline-context.json` — pipeline state store
+- `.claude/pipeline-context.json` — pipeline state store shared across agents
 
 ---
 
 ## [v1.1.7] — 2026-06-17
 
-### Added
-- `## Trigger Keywords` table in README (31 rows, 3–4 phrases per skill)
+### Docs
+- `## Trigger Keywords` table added to README — 31 rows, 3–4 phrases per skill
 
 ---
 
@@ -195,62 +227,67 @@ All notable changes to kmm-agent-skills are documented here.
 ## [v1.1.5] — 2026-06-17
 
 ### Fixed
-- Roborazzi skill routing for canvas/layout testing queries (`visual accuracy`, `pixel-perfect`, `canvas test`, etc.)
+- `kotlin-multiplatform-roborazzi` trigger keywords expanded to cover canvas/layout testing queries
 
 ---
 
 ## [v1.1.4] — 2026-06-17
 
 ### Added
-- `manual screen capture` audit pattern in `audit_project.py` — flags `playwright`, `adb screencap`, `xcrun simctl io`
+- `manual screen capture` audit pattern in `audit_project.py` — flags Playwright, `adb screencap`, `xcrun simctl io`
 
 ---
 
 ## [v1.1.3] — 2026-06-17
 
-### Added
-- Expanded `kotlin-multiplatform-roborazzi` to cover full UI testing stack
+### Changed
+- `kotlin-multiplatform-roborazzi` expanded to cover the full UI testing stack including `@Preview` screenshot workflow
 
 ---
 
 ## [v1.1.2] — 2026-06-17
 
 ### Fixed
-- YAML parse error in roborazzi and preview-driven-development skills (`@Preview` unquoted)
-- Added `.claude-plugin/plugin.json` for marketplace submission
+- YAML parse error in `roborazzi` and `preview-driven-development` skills (`@Preview` value unquoted)
+
+### Added
+- `.claude-plugin/plugin.json` for marketplace submission
 
 ---
 
 ## [v1.1.1] — 2026-06-17
 
 ### Fixed
-- Full audit and cleanup pass across all 31 skills — missing sections, stale frontmatter
+- Full audit pass across all 31 skills — missing sections, stale `last-updated` frontmatter
 
 ---
 
 ## [v1.1.0] — 2026-06-17
 
 ### Added
-- `kotlin-multiplatform-datastore` skill — Preferences DataStore, `createDataStore {}` expect/actual, Flow reads, Koin wiring
+- `kotlin-multiplatform-datastore` skill — Preferences DataStore, `createDataStore {}` expect/actual factory, Flow reads, Koin wiring, SharedPreferences migration
 
 ---
 
 ## [v1.0.2] — 2026-06-17
 
 ### Fixed
-- Test coverage expanded: 12 → 16 tests covering two high-priority gaps
+- Test coverage expanded from 12 to 16 tests covering two high-priority gaps
 
 ---
 
 ## [v1.0.1] — 2026-06-17
 
 ### Added
-- `skills.sh.json` and `npx skills add` install path
-- `scripts/release.py` and `RELEASING.md`
+- `skills.sh.json` manifest and `npx skills add` install path
+- `scripts/release.py` release automation
+- `RELEASING.md` release guide
 
 ---
 
 ## [v1.0.0] — 2026-06-17
 
 ### Added
-- Initial release — 6-layer clean architecture, 31 skills, `skills.json` manifest, `audit_project.py`, `audit_skills_repo.py`
+- Initial release — 6-layer clean architecture, 31 skills, `skills.json` manifest
+- `audit_project.py` — KMP architecture smell detector
+- `audit_skills_repo.py` — skills repo metadata and freshness checker
