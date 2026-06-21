@@ -37,6 +37,7 @@ List every finding verbatim if any exist. Each finding maps to a blocker label:
 | `manual screen capture` | `[TEST]` |
 | `magic color literal` | `[THEME]` |
 | `system dark theme scatter` | `[THEME]` |
+| `hardcoded spacing` | `[LAYOUT]` |
 
 ---
 
@@ -99,6 +100,28 @@ For every composable in the changed files:
 
 ---
 
+## Check 8: Scaffold structure and layout consistency
+
+For every `*Screen.kt` and `*Content.kt` in the changed files:
+
+- Must use `AppScaffold` — not raw `Scaffold` or no scaffold at all → **`[LAYOUT]`** blocker
+- `AppTopAppBar` must be passed to the `topBar` slot → **`[LAYOUT]`** blocker if absent
+- Screen title must appear in `AppTopAppBar(title = "…")` only — a `Text` composable
+  at the top of the content body that duplicates the title is a **`[LAYOUT]`** blocker
+- Back/close navigation must be in `AppTopAppBar(navigationIcon = { … })` — a custom
+  back `Button` or `AppIconButton` in the content body is a **`[LAYOUT]`** blocker
+- Primary action buttons (save, confirm, filter, search) must be in
+  `AppTopAppBar(actions = { … })` unless they require a large tap target in the content
+  (e.g. a form's primary submit); duplicating them in both places is always a blocker
+- Content lambda must consume `PaddingValues` → `Modifier.padding(paddingValues)`
+  must appear in the content root; missing it clips content under the TopAppBar
+
+Spacing token check:
+- `padding(N.dp)` or `padding(horizontal = N.dp)` with a literal number → **`[LAYOUT]`**
+  blocker (caught by audit script as `hardcoded spacing`); must use `AppTheme.spacing.X`
+
+---
+
 ## Check 7: Adaptive layout consistency
 
 Run before reviewing any `:ui` file:
@@ -127,6 +150,7 @@ BLOCKERS (<count>):
   [MVI]            <file> — <contract violation>
   [TEST]           <file> — <what is missing or forbidden>
   [THEME]          <file> — <magic color literal | missing dark variant | isSystemInDarkTheme scattered>
+  [LAYOUT]         <file> — <missing AppScaffold | title in content | action outside TopAppBar | hardcoded dp padding>
   [ADAPTIVE]       <file> — <screen missing WindowSizeClass parameter | missing breakpoint screenshot>
 
 WARNINGS (<count>):

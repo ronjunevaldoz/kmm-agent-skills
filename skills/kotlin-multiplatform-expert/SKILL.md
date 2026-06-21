@@ -381,7 +381,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "navigation", "screen routing", "NavHost", "deep links" | `kotlin-multiplatform-navigation` |
 | "shared strings", "localization", "image assets", "fonts" | `kotlin-multiplatform-shared-resources` |
 | "MVI", "ViewModel state", "one-shot effects", "Screen/Content split" | `kotlin-multiplatform-mvi` |
-| "design system", "AppTheme", "design tokens", "dark mode" | `kotlin-multiplatform-design-system` |
+| "design system", "AppTheme", "design tokens", "dark mode", "spacing tokens", "screen layout", "layout consistency", "AppScaffold", "AppTopAppBar", "page title", "top bar", "action button placement" | `kotlin-multiplatform-design-system` |
 | "adaptive layout", "WindowSizeClass", "tablet layout", "desktop layout", "list detail", "split screen", "navigation rail", "Compact Medium Expanded", "responsive UI", "master detail" | `kotlin-multiplatform-adaptive-layout` |
 | "dialog", "bottom sheet", "toast", "tabs", "TopAppBar", "Checkbox" | `kotlin-multiplatform-design-system-extended` |
 | "slot API", "content lambda", "composable parameter", "scoped slot" | `kotlin-multiplatform-compose-slot-api` |

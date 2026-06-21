@@ -90,6 +90,80 @@ AppButton(
 
 Never use a bare string literal in `testTag(...)`. Always use the constants object.
 
+### `[LAYOUT]` — missing `AppScaffold` or `AppTopAppBar`
+
+Wrap the content in `AppScaffold` and add an `AppTopAppBar` to the `topBar` slot:
+
+```kotlin
+// Before (blocker):
+@Composable
+fun FooContent(state: FooContract.State, onIntent: (FooContract.Intent) -> Unit) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        // content
+    }
+}
+
+// After (fix):
+@Composable
+fun FooContent(state: FooContract.State, onIntent: (FooContract.Intent) -> Unit) {
+    AppScaffold(
+        topBar = { AppTopAppBar(title = "Foo") }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = AppTheme.spacing.lg)
+        ) {
+            // content
+        }
+    }
+}
+```
+
+### `[LAYOUT]` — title or action duplicated in content body
+
+Move to the TopAppBar and remove from the content:
+
+```kotlin
+// Before (blocker):
+Column {
+    Text("Foo Title", style = AppTheme.typography.titleLarge)  // remove this
+    AppButton("Save") { ... }                                  // remove if it mirrors TopAppBar action
+    // …
+}
+
+// After (fix) — title and action live only in AppTopAppBar:
+AppScaffold(
+    topBar = {
+        AppTopAppBar(
+            title = "Foo Title",
+            actions = {
+                AppIconButton(onClick = { onIntent(FooContract.Intent.Save) }) {
+                    AppIcon(Icons.Default.Check, contentDescription = "Save")
+                }
+            }
+        )
+    }
+) { paddingValues ->
+    Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) { /* content */ }
+}
+```
+
+### `[LAYOUT]` — hardcoded spacing literal
+
+```kotlin
+// Before (blocker):
+Column(modifier = Modifier.padding(16.dp)) { ... }
+Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) { ... }
+
+// After (fix):
+Column(modifier = Modifier.padding(horizontal = AppTheme.spacing.lg)) { ... }
+Row(modifier = Modifier.padding(horizontal = AppTheme.spacing.sm, vertical = AppTheme.spacing.xs)) { ... }
+```
+
+Spacing token reference: `xxs=2dp`, `xs=4dp`, `sm=8dp`, `md=12dp`, `lg=16dp`, `xl=20dp`, `xxl=24dp`, `xxxl=32dp`.
+
 ### `[THEME]` — magic color literal in composable
 
 ```kotlin

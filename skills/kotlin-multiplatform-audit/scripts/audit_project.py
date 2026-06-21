@@ -18,6 +18,7 @@ PATTERNS = [
     )),
     ("magic color literal", re.compile(r"\bColor\(0x[0-9A-Fa-f]")),
     ("system dark theme scatter", re.compile(r"\bisSystemInDarkTheme\(\)")),
+    ("hardcoded spacing", re.compile(r"\bpadding\([^)]*\d+\.dp")),
 ]
 
 
@@ -50,6 +51,11 @@ def audit_project(root: Path) -> list[str]:
                 part in path.stem for part in ("Theme", "theme", "App")
             ):
                 continue
+            if label == "hardcoded spacing":
+                if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+                    continue
+                if any(part in path.stem for part in ("Spacing", "spacing", "Token", "token", "Theme", "theme")):
+                    continue
             if pattern.search(text):
                 findings.append(f"{label}: {path.relative_to(root)}")
 

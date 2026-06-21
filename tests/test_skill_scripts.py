@@ -265,6 +265,54 @@ class AuditProjectTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertTrue(any("system dark theme scatter" in f for f in findings))
 
+    def test_audit_project_finds_hardcoded_spacing_in_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeContent.kt").write_text(
+                "Column(modifier = Modifier.padding(16.dp)) { }",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded spacing" in f for f in findings))
+
+    def test_audit_project_finds_hardcoded_spacing_horizontal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeContent.kt").write_text(
+                "Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) { }",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded spacing" in f for f in findings))
+
+    def test_audit_project_ignores_spacing_token_usage(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeContent.kt").write_text(
+                "Column(modifier = Modifier.padding(horizontal = AppTheme.spacing.lg)) { }",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded spacing" in f for f in findings))
+
+    def test_audit_project_ignores_hardcoded_spacing_outside_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            comp_dir = root / "core" / "designsystem" / "components"
+            comp_dir.mkdir(parents=True)
+            (comp_dir / "AppTopAppBar.kt").write_text(
+                ".padding(horizontal = 4.dp)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded spacing" in f for f in findings))
+
     def test_audit_project_ignores_system_dark_theme_in_app_theme(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

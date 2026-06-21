@@ -69,6 +69,68 @@ is not a concern.
 
 ---
 
+## Screen Layout Contract
+
+Every screen must follow this structure — no exceptions. Consistency across all pages
+depends on every feature using the same scaffold shell.
+
+```kotlin
+@Composable
+fun FooContent(
+    state: FooContract.State,
+    onIntent: (FooContract.Intent) -> Unit,
+    // windowSizeClass: WindowSizeClass  // add if adaptive layout is in scope
+) {
+    AppScaffold(                                    // always AppScaffold, never raw Scaffold
+        topBar = {
+            AppTopAppBar(
+                title = "Page Title",              // ← title lives HERE, nowhere else
+                navigationIcon = {                 // back button lives HERE
+                    AppIconButton(onClick = { onIntent(FooContract.Intent.NavigateBack) }) {
+                        AppIcon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {                        // action buttons live HERE
+                    AppIconButton(onClick = { onIntent(FooContract.Intent.OpenMenu) }) {
+                        AppIcon(Icons.Default.MoreVert, contentDescription = "Menu")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->                           // always consume PaddingValues
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)            // ← prevents clipping under TopAppBar
+                .padding(horizontal = AppTheme.spacing.lg)  // ← token, never 16.dp
+        ) {
+            // functional content only — no title text, no duplicate action buttons
+        }
+    }
+}
+```
+
+### Rules
+
+| What | Where it lives | Never |
+|---|---|---|
+| Screen title | `AppTopAppBar(title = "…")` | `Text("…")` in content body |
+| Back / close | `AppTopAppBar(navigationIcon = { … })` | Custom button in content |
+| Primary action (save, filter, search) | `AppTopAppBar(actions = { … })` | Floating button duplicating the TopAppBar action |
+| Overflow menu | `AppTopAppBar(actions = { AppIconButton(MoreVert) { … } })` | Separate menu row inside content |
+| Horizontal content padding | `spacing.lg` (`16.dp` token) | Hardcoded `.dp` literals |
+
+### Why redundant UI in content hurts
+
+- A title in the content AND in the TopAppBar means the title scrolls away — the
+  TopAppBar title remains anchored; use it
+- Duplicate action buttons create two sources of truth for the same action; one will
+  inevitably be wired differently or go stale
+- Not consuming `PaddingValues` clips content under the TopAppBar on devices with
+  status bars
+
+---
+
 ## Overview
 
 ```
@@ -1365,13 +1427,17 @@ All of these are already in `compose-multiplatform`. No new catalog entries requ
 
 ## Common Anti-Patterns
 
-- magic color literals in composables — `Color(0xFF6200EE)` written directly inside a `@Composable` instead of `AppTheme.colors.primary`; the audit script (`audit_project.py`) flags `Color(0x…)` in any `/ui/` or `/presentation/` file that is not a token definition file
+- magic color literals in composables — `Color(0xFF6200EE)` written directly inside a `@Composable` instead of `AppTheme.colors.primary`; the audit script flags `Color(0x…)` in any `/ui/` or `/presentation/` file that is not a token definition file
+- hardcoded spacing in composables — `padding(16.dp)` or `padding(horizontal = 8.dp)` written directly instead of `padding(horizontal = AppTheme.spacing.lg)`; the audit script flags `.dp` literals inside `padding(…)` calls in UI files
+- title text in content body — a `Text("Screen Title")` composable inside the content column when it should be `AppTopAppBar(title = "Screen Title")`; makes the title scroll away and duplicates chrome
+- action buttons outside the TopAppBar — a "Save" `AppButton` at the bottom of a form when it belongs in `AppTopAppBar(actions = { … })`; creates two interaction points for the same operation
+- not consuming `PaddingValues` from `AppScaffold` — `AppScaffold { MyContent() }` without `Modifier.padding(paddingValues)` clips the content under the TopAppBar on status-bar devices
 - using Material3 `MaterialTheme.colorScheme` alongside `AppTheme` — the two token systems conflict
 - defining component variants as boolean parameters (`isOutlined`, `isDanger`) — use a sealed variant class
 - putting design system tokens in `:feature:*` modules — tokens belong in `:core:designsystem` only
 - skipping the `StyleScope` extension layer — leads to token access scattered across composables
 
-If the design system feels inconsistent, check whether tokens are being accessed directly or through the `StyleScope`.
+If the design system feels inconsistent, check: (1) are all pages using `AppScaffold` + `AppTopAppBar`? (2) are spacing and colors coming from tokens or from hardcoded literals? (3) is there duplicated chrome (title, actions) in the content body?
 
 ---
 
