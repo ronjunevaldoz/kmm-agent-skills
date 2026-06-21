@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.16.2] — 2026-06-21
+
+### Other
+
+- enforce(naming): document and audit file naming conventions
+
+---
+
 ## [v1.16.1] — 2026-06-21
 
 ### Other
