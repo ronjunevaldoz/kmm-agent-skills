@@ -1,7 +1,7 @@
 # Development Plan
 
-This file tracks the build status of every skill in this collection and the roadmap
-for future work. Update it as skills are added, revised, or completed.
+Tracks every skill's status and the roadmap for future work.
+Update when skills are added, revised, or completed.
 
 ---
 
@@ -10,131 +10,125 @@ for future work. Update it as skills are added, revised, or completed.
 | Symbol | Meaning |
 |---|---|
 | ✅ | Shipped — skill is in `main`, production-ready |
-| 🔧 | Known issues — skill exists but has open defects (see notes) |
+| 🔧 | Known issues — skill exists but has open defects (see KNOWN_ISSUES.md) |
 | 🚧 | In progress — actively being written |
 | 📋 | Planned — scoped and ready to start |
 | 💡 | Idea — not yet scoped |
 
 ---
 
-## Shipped Skills (47)
+## Shipped Skills (47) — v1.11.0
 
-### Foundation
+### Layer 0 — Architecture Contract
 | Skill | Status | Notes |
 |---|---|---|
 | `kotlin-multiplatform-feature-scaffold` | ✅ | AGP 9, build-logic, version catalog, Koin 4, 6-layer model |
 | `kotlin-multiplatform-clean-architecture` | ✅ | 6-layer contract, :model vs :api, internal visibility, Detekt rules |
 | `kotlin-multiplatform-presenter-module` | ✅ | Pure Kotlin ViewModel, MVI contracts, no Compose dep, Koin wiring |
+
+### Layer 1 — Project Foundation
+| Skill | Status | Notes |
+|---|---|---|
+| `kotlin-multiplatform-dependency-injection` | ✅ | Koin manual + annotated modes, scope rules, test overrides |
 | `kotlin-multiplatform-flavor-environment` | ✅ | BuildKonfig, AppConfig, Android product flavors |
 | `kotlin-multiplatform-ci-github-actions` | ✅ | Android/iOS/Desktop/Web matrix, XCFramework release |
+| `kotlin-multiplatform-audit` | ✅ | Architecture review, boundary check, skills repo hygiene, issue drafts |
 
-### Infrastructure
+### Layer 2 — Core Infrastructure
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-network-layer` | ✅ | Ktor 3, NetworkResult<T>, safeRequest, token refresh |
-| `kotlin-multiplatform-sqldelight-setup` | ✅ | SQLDelight 2, platform drivers, Flow queries |
-| `kotlin-multiplatform-xcframework-spm` | ✅ | XCFramework, SPM binary target, CI release |
+| `kotlin-multiplatform-ktor-auth-service` | ✅ | Bearer + JWT, sessions, Ktor RPC auth, login/refresh/logout |
+| `kotlin-multiplatform-mongodb-database` | ✅ | Coroutine driver, repository boundary, typed errors, change streams |
+| `kotlin-multiplatform-kotlin-rpc` | ✅ | Kotlin RPC vs REST decision, shared contract, Ktor auth integration |
+| `kotlin-multiplatform-network-layer` | ✅ | Ktor 3, NetworkResult<T>, safeRequest, token refresh interceptor |
+| `kotlin-multiplatform-sqldelight-setup` | ✅ | SQLDelight 2, platform drivers, schema, migrations, Flow queries |
+| `kotlin-multiplatform-datastore` | ✅ | Preferences + Proto DataStore, expect/actual factory, Koin wiring |
+| `kotlin-multiplatform-xcframework-spm` | ✅ | XCFramework build, SPM binary target, CI release |
+| `kotlin-multiplatform-logging` | ✅ | Kermit, log levels, pluggable writers, crash boundary, Koin wiring |
 
-### Platform Patterns
+### Layer 3 — Platform Patterns
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-expect-actual` | ✅ | 4 categories, typealias actual, @ObjCName, KN memory |
+| `kotlin-multiplatform-expect-actual` | ✅ | 4 categories, typealias actual, @ObjCName, Kotlin/Native memory |
 | `kotlin-multiplatform-repository-pattern` | ✅ | Interface/:data impl, mapper pattern, 3 fetch strategies, optimistic updates |
+| `jni-kotlin-pro` | ✅ | JNI bridge, @JvmStatic entry points, CPointer, memory-safe interop |
 
-### Feature Architecture
+### Layer 4 — Feature Building Blocks
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-navigation` | ✅ | JetBrains Nav Compose, type-safe routes, nested graphs |
-| `kotlin-multiplatform-shared-resources` | ✅ | CMP Resources, strings/images/fonts, localization |
+| `kotlin-multiplatform-navigation` | ✅ | JetBrains Nav Compose, type-safe routes, nested graphs, bottom nav |
+| `kotlin-multiplatform-shared-resources` | ✅ | CMP Resources, strings/images/fonts, plurals, localization |
 | `kotlin-multiplatform-mvi` | ✅ | Contract pattern, MviViewModel, Channel<Effect>, Turbine testing |
+| `kotlin-multiplatform-paging` | ✅ | Paging 3, PagingSource, RemoteMediator, cursor/offset, load-state |
+| `kotlin-multiplatform-analytics` | ✅ | Sealed AnalyticsEvent, Firebase/Amplitude impls, screen tracking, FakeAnalytics |
+| `kotlin-multiplatform-form-validation` | ✅ | ValidationResult, FieldState, async debounce, ValidatedTextField, submit gate |
+| `kotlin-multiplatform-image-loading` | ✅ | Coil 3, single ImageLoader, AsyncImage, AvatarImage, HeroImage |
+| `kotlin-multiplatform-permissions` | ✅ | PermissionState, expect/actual PermissionController, Android + iOS |
+| `kotlin-multiplatform-deep-linking` | ✅ | App Links + Universal Links, DeepLinkParser, NavHost navDeepLink, AASA |
+| `kotlin-multiplatform-biometric-auth` | ✅ | BiometricResult, expect/actual BiometricAuthenticator, BiometricPrompt, LAContext |
+| `kotlin-multiplatform-push-notifications` | ✅ | FCM + APNs, PushToken, FirebaseMessagingService, NotificationHandler expect/actual |
+| `kotlin-multiplatform-workmanager` | ✅ | CoroutineWorker, BGTaskScheduler, expect/actual BackgroundScheduler, retry |
+| `kotlin-multiplatform-feature-flags` | ✅ | FeatureFlag enum, Firebase Remote Config, A/B variants, kill switch |
+| `kotlin-multiplatform-offline-first` | ✅ | SyncState, SyncManager, optimistic updates with rollback, conflict resolution |
+| `kotlin-multiplatform-crash-reporting` | ✅ | CrashReporter interface, Firebase Crashlytics + Sentry, dSYM symbolication |
 
-### UI System
+### Layer 5 — UI System
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-design-system` | ✅ | Tokens, AppTheme, dark mode, 6 core components, no Material |
-| `kotlin-multiplatform-design-system-extended` | ✅ | 27 components shipped |
-| `kotlin-multiplatform-compose-slot-api` | ✅ | Slot patterns, scoped slots, CompositionLocal |
-| `kotlin-multiplatform-compose-state-hoisting` | ✅ | Hoist-until-shared, controlled component, stateful wrapper |
+| `kotlin-multiplatform-design-system` | ✅ | Tokens, AppTheme, dark mode, 6 core components, no Material dependency |
+| `kotlin-multiplatform-design-system-extended` | ✅ | 27 additional components: Dialog, Sheet, Toast, Tabs, TopAppBar, etc. |
+| `kotlin-multiplatform-adaptive-layout` | ✅ | WindowSizeClass, Compact/Medium/Expanded, list-detail split, migration mode |
+| `kotlin-multiplatform-compose-animation` | ✅ | AnimatedVisibility, Crossfade, AnimatedContent, animateXAsState, shared elements |
+| `kotlin-multiplatform-compose-slot-api` | ✅ | Slot patterns, scoped slots, CompositionLocal, component API shape |
+| `kotlin-multiplatform-compose-state-hoisting` | ✅ | Hoist-until-shared rule, controlled components, stateless vs stateful |
 | `kotlin-multiplatform-compose-state-container` | ✅ | remember/rememberSaveable/ViewModel survival matrix, custom Saver |
+| `kotlin-multiplatform-graphics-modifiers` | ✅ | graphicsLayer, Canvas, drawBehind, drawWithCache, workflow node shells |
+| `kotlin-multiplatform-preview-driven-development` | ✅ | Desktop-first @Preview, PreviewParameterProvider, PDD cycle |
+
+### Layer 6 — Testing & Quality
+| Skill | Status | Notes |
+|---|---|---|
+| `kotlin-multiplatform-unit-testing` | ✅ | runTest, Turbine, fake-over-mock, :core:testing fixtures, JVM ViewModel tests |
+| `kotlin-multiplatform-roborazzi` | ✅ | Screenshot tests from @Preview on JVM, golden images, CI diff |
+| `kotlin-multiplatform-code-quality` | ✅ | Ktlint + Detekt, CI gates, pre-commit hook |
+| `kotlin-multiplatform-accessibility` | ✅ | Semantic roles, contentDescription, touch targets, Roborazzi a11y snapshots |
 
 ### Meta
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-expert` | ✅ | Dependency graph, build order, decision trees, anti-pattern checklist |
-| `kotlin-multiplatform-audit` | ✅ | Architecture review, boundary check, skills repo hygiene, issue drafts |
-
-### Cross-Cutting Patterns
-| Skill | Status | Notes |
-|---|---|---|
-| `kotlin-multiplatform-dependency-injection` | ✅ | Koin manual + annotated modes, scope rules, test overrides |
-| `kotlin-multiplatform-graphics-modifiers` | ✅ | graphicsLayer, Canvas, drawWithCache, workflow node pattern |
-
-### Full-Stack / Backend
-| Skill | Status | Notes |
-|---|---|---|
-| `kotlin-multiplatform-kotlin-rpc` | ✅ | Kotlin RPC vs REST vs gRPC decision, shared contract, scaffold script |
-| `kotlin-multiplatform-ktor-auth-service` | ✅ | Bearer + JWT, sessions, Ktor RPC auth, scaffold script |
-| `kotlin-multiplatform-mongodb-database` | ✅ | Coroutine driver, repository boundary, typed errors, change streams |
+| `kotlin-multiplatform-expert` | ✅ | 47-skill routing map, dependency graph, invocation map, build order |
 
 ---
 
 ## Open Defects
 
-### `kotlin-multiplatform-design-system-extended`
-
-All known defects resolved. ✅
+None. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for tracked open items.
 
 ---
 
-## Roadmap
+## Upcoming — v1.x (Quality & Hardening)
 
-### Batch 2 — Data & Storage
+Targeted improvements that don't require new skills.
 
-| Skill | Status | Notes |
+| Item | Priority | Description |
 |---|---|---|
-| `kotlin-multiplatform-datastore` | ✅ | Multiplatform DataStore Preferences + Proto. `createDataStore {}` expect/actual, coroutines Flow reads, migration from SharedPreferences, Koin wiring |
-
-### Batch 3 — Native Features
-
-| Skill | Priority | Scope |
-|---|---|---|
-| `kotlin-multiplatform-biometric-auth` | ✅ | `BiometricResult` sealed type, `expect/actual BiometricAuthenticator`, Android `BiometricPrompt`, iOS `LAContext.evaluatePolicy`, Koin wiring |
-| `kotlin-multiplatform-push-notifications` | ✅ | FCM + APNs, `PushToken`, `FirebaseMessagingService`, `expect/actual NotificationHandler`, deep-link routing from notification tap |
-
-### Batch 4 — Observability & Quality
-
-| Skill | Status | Notes |
-|---|---|---|
-| `kotlin-multiplatform-unit-testing` | ✅ | runTest, Turbine, fake-over-mock, :core:testing fixtures, JVM ViewModel tests |
-| `kotlin-multiplatform-preview-driven-development` | ✅ | Desktop-first @Preview, PreviewParameterProvider, PDD cycle, Roborazzi link |
-| `kotlin-multiplatform-roborazzi` | ✅ | Screenshot tests from @Preview on JVM, golden images, CI diff job |
-| `kotlin-multiplatform-code-quality` | ✅ | Ktlint (formatting) + Detekt (architecture rules), CI gates |
-| `kotlin-multiplatform-logging` | ✅ | Kermit, log levels, pluggable writers, crash boundary, Koin wiring |
-| `kotlin-multiplatform-analytics` | ✅ | Sealed `AnalyticsEvent` hierarchy, `Analytics` interface, Firebase/no-op impls, screen tracking via `DisposableEffect`, `FakeAnalytics` |
-| `kotlin-multiplatform-testing-robot` | 🚫 Retired | Replaced by `kotlin-multiplatform-roborazzi` + `kotlin-multiplatform-unit-testing` |
-
-### Ideas (not yet scoped)
-
-| Idea | Status |
-|---|---|
-| `kotlin-multiplatform-paging` | ✅ Shipped (v1.4.0) — Paging 3, cursor/offset, RemoteMediator, load-state handling |
-| `kotlin-multiplatform-workmanager` | ✅ Shipped — `CoroutineWorker` + `BGTaskScheduler`, `expect/actual BackgroundScheduler`, retry with backoff |
-| `kotlin-multiplatform-deep-linking` | ✅ Shipped — App Links + Universal Links, `DeepLinkParser` in commonMain, NavHost `navDeepLink` |
-| `kotlin-multiplatform-compose-animation` | ✅ Shipped — `AnimatedVisibility`, `Crossfade`, `AnimatedContent`, `animateXAsState`, shared elements, reduced motion |
-| `kotlin-multiplatform-form-validation` | ✅ Shipped — `Validators`, `FieldState`, async debounce, `ValidatedTextField`, submit gating |
-| `kotlin-multiplatform-image-loading` | ✅ Shipped — Coil 3, single `ImageLoader`, `AsyncImage`, `AvatarImage`, `HeroImage`, memory/disk cache |
-| `kotlin-multiplatform-permissions` | ✅ Shipped — `PermissionState`, `expect/actual PermissionController`, Android launcher, iOS Info.plist |
-| `kotlin-multiplatform-feature-flags` | ✅ Shipped — `FeatureFlag` enum, `FeatureFlagProvider`, Firebase Remote Config, A/B variants, kill switch |
-| `kotlin-multiplatform-accessibility` | ✅ Shipped — semantic roles, `contentDescription`, touch targets, Roborazzi a11y snapshots, WCAG checklist |
+| `krpc_established` round-trip test | MEDIUM | Add a unit test verifying the implementer sets the flag and the reviewer reads it. Currently the wiring is correct but untested — a refactor could silently break it. |
+| Unit tests for hook scripts | LOW | `validate-architecture.sh` and `check-skill-freshness.sh` are shell scripts with no test coverage. The audit scripts they wrap are tested, but the hook plumbing itself is not. |
+| CI gate: block PR without Testing section | LOW | `scan_skill_issues.py` runs at release time, but a skill directory could be merged without a Testing section if the author doesn't cut a release. Add a GitHub Actions step to run the scanner on every PR. |
 
 ---
 
-## Contribution Notes
+## Upcoming — v2.0 (Platform Milestone)
 
-- Every skill must follow the "real skill" principle: 80% patterns/decisions/pitfalls, ≤20% dependency setup
-- Skill descriptions must be specific enough to trigger correctly — test against the keyword list before shipping
-- Add cross-skill dependency references in "When to Use" sections where relevant
-- Run `./gradlew :core:xxx:compileCommonMainKotlinMetadata` on any code snippet before committing
+Require coordination across multiple files or introduce breaking changes to existing skill guidance.
+
+| Item | Priority | Description |
+|---|---|---|
+| Kotlin 2.x / K2 verification pass | HIGH | Audit every skill's code snippets against K2 — some `expect/actual` and annotation patterns changed. Update minimum Kotlin version across all TOML snippets. |
+| AGP 10 migration | MEDIUM | AGP 10 changes module graph declaration API. Update `feature-scaffold` and `clean-architecture` skills when AGP 10 stable ships. |
+| Compose Multiplatform 2.x readiness | MEDIUM | CMP 2.x expected to stabilize shared navigation and resources API. `navigation`, `shared-resources`, and `adaptive-layout` skills will need version bumps and pattern updates. |
+| Skill freshness CI gate | LOW | `/setup-hooks Option C` describes a weekly cron. Post-v2.0 add it to the repo's own `.github/workflows/` so freshness warnings surface without a local install. |
+| `kotlin-multiplatform-testing-robot` | 💡 Deferred | UI test robot pattern (Page Object Model for Compose). Deferred until Roborazzi + compose-test-rule coverage feels insufficient in practice. |
 
 ---
 
@@ -142,9 +136,20 @@ All known defects resolved. ✅
 
 | Tool | Current | Next target |
 |---|---|---|
-| AGP | 9.0.1 | Track AGP stable |
+| AGP | 9.0.1 | AGP 10 stable |
 | Kotlin | 2.4.0 | Track K2 stable |
-| Compose Multiplatform | 1.11.1 | Track CMP stable |
+| Compose Multiplatform | 1.11.1 | CMP 2.x stable |
 | Koin | 4.2.1 | — |
 | Ktor | 3.1.3 | — |
 | SQLDelight | 2.0.2 | — |
+
+---
+
+## Contribution Notes
+
+- Every skill must follow the "real skill" principle: 80% patterns/decisions/pitfalls, ≤20% dependency setup
+- Skill descriptions must be specific enough to trigger correctly — test against the keyword list before shipping
+- Use `/new-skill` to scaffold — it enforces all required sections at creation time
+- Use `/modify-skill` to edit — it prevents accidental removal of required sections
+- Run `python3 scripts/scan_skill_issues.py` after any SKILL.md change to verify zero HIGH findings
+- Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py` after adding a skill to confirm README, expert, and planner are all updated

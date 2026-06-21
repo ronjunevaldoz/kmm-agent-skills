@@ -31,6 +31,38 @@ Resolved issues stay here for reference — they explain *why* a rule exists.
 
 ---
 
+### KI-005 — `krpc_established` flag round-trip has no automated test
+
+**Status:** Open
+
+**Symptom:** The implementer sets `krpc_established: true` in `pipeline-context.json`
+after confirming kRPC is active; the reviewer reads it to skip the grep. The wiring
+is correct, but no unit test verifies the round-trip. A refactor dropping the read
+in the reviewer would silently regress — every session would re-run the grep.
+
+**Workaround:** Manually verify `.claude/pipeline-context.json` contains
+`"krpc_established": true` after an implementer session on a kRPC project.
+
+**Fix:** Add a `PipelineContextFlagTests` class to `tests/test_skill_scripts.py`.
+
+---
+
+### KI-006 — Hook scripts lack unit tests
+
+**Status:** Open
+
+**Symptom:** `validate-architecture.sh` and `check-skill-freshness.sh` are shell scripts
+that wrap `audit_project.py` and `check_updates.py`. The Python scripts have 43 tests,
+but the shell plumbing — exit code forwarding, argument passing, `STAGED_KT` filter — is
+untested. A shell syntax error would go undetected until a developer runs a commit.
+
+**Workaround:** Manually run each hook after any change to confirm it executes.
+
+**Fix:** Add a `HookScriptTests` class using `subprocess.run` to test each hook's
+exit code against known inputs (clean dir, dirty dir, no `.kt` files staged).
+
+---
+
 ## Resolved
 
 ### KI-R01 — Agent not detecting magic color/variable violations in design system
@@ -146,6 +178,38 @@ existing screens — all changes were blocked until every screen was retrofitted
 When `true`, Check 7 downgrades pre-existing screens to `[WARNING]` and only enforces
 the full `[ADAPTIVE]` blocker on screens created or modified in the current session.
 Documented in the adaptive-layout skill with a 4-step retrofit workflow.
+
+---
+
+### KI-R10 — Planner routing table silently went stale for 25 skills
+
+**Resolved:** `v1.11.0` — `feat(quality): enforce test maintenance and planner routing validation`  
+**Was:** `validate_skill_map.py` checked README and the expert SKILL.md but never
+checked `agents/planner.md`. When 25 skills were added across multiple sessions, their
+routing rows were never added to the planner. The planner routed correctly for the first
+~10 skills but silently failed to load the correct skills for any of the 25 newer ones.
+No script caught the drift because validation only covered two of the three indexes.  
+**Fix:** `validate_skill_map.py` now validates all three indexes — README, expert
+SKILL.md, and `agents/planner.md` — using a short-name lookup (strips the
+`kotlin-multiplatform-` prefix) with a `SKIP_PLANNER` set for meta-skills that
+intentionally have no routing rows. The check runs on every `release.py` call, blocking
+a release if any skill directory is missing from the planner.
+
+---
+
+### KI-R11 — Python script changes could skip unit tests with no enforcement
+
+**Resolved:** `v1.11.0` — `feat(quality): enforce test maintenance and planner routing validation`  
+**Was:** When `scripts/` or `skills/*/scripts/` Python files were modified, there was
+no gate requiring `tests/test_skill_scripts.py` to be updated in the same commit.
+Several test gaps were found during audits (e.g. `check_updates.py main()` had no
+test coverage for exit codes 0/1/2 until manually identified and fixed).  
+**Fix:** `hooks/pre-commit-audit.sh` now blocks any commit that stages a `.py` file
+under `scripts/` or `skills/*/scripts/` without also staging `tests/test_skill_scripts.py`.
+The pre-commit message names the changed scripts and explains the requirement.
+Reviewer Check 12, implementer Script test maintenance section, and `/modify-skill` Rule 8
+all mirror the same rule so the enforcement is layered — the hook is the hard gate,
+but agents enforce it before a commit is ever attempted.
 
 ---
 
