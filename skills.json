@@ -1,5 +1,5 @@
 {
-  "version": "1.2.3",
+  "version": "1.3.0",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -48,6 +48,52 @@
         "JNI memory safety",
         "native C++ bridge",
         "shared library Kotlin"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-adaptive-layout",
+      "path": "skills/kotlin-multiplatform-adaptive-layout",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-21",
+      "keywords": [
+        "adaptive layout",
+        "WindowSizeClass",
+        "WindowWidthSizeClass",
+        "responsive UI",
+        "Compact Medium Expanded",
+        "ListDetailPane",
+        "adaptive navigation",
+        "navigation rail",
+        "navigation drawer",
+        "tablet layout",
+        "desktop layout",
+        "split screen",
+        "list detail",
+        "side panel",
+        "calculateWindowSizeClass"
+      ],
+      "triggers": [
+        "adaptive layout",
+        "responsive layout",
+        "WindowSizeClass",
+        "ListDetailPane",
+        "tablet layout",
+        "desktop layout",
+        "split screen",
+        "list detail",
+        "side panel",
+        "navigation rail",
+        "navigation drawer",
+        "window size",
+        "Compact Medium Expanded",
+        "adaptive navigation",
+        "calculateWindowSizeClass",
+        "different layout phone tablet",
+        "responsive composable",
+        "multi-pane layout",
+        "master detail KMP"
       ],
       "scripts": []
     },

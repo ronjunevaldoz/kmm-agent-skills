@@ -2,6 +2,29 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.3.0] — 2026-06-21
+
+### Added
+
+- feat(layout): enforce screen layout contract and scaffold consistency
+- feat(adaptive+theme): add adaptive-layout skill and dark/light mode enforcement
+- feat(audit): detect magic color literals in UI composables
+
+### Fixed
+
+- fix(audit): exclude 0.dp from hardcoded spacing pattern (KI-004)
+
+### Docs
+
+- docs: add KNOWN_ISSUES.md with 4 open and 5 resolved issues
+
+### Chore
+
+- chore(release): add CHANGELOG.md generation and GitHub Release to release script
+- chore(plan): mark datastore shipped, document 6 undiscovered gaps
+
+---
+
 ---
 
 ## [v1.2.3] — 2026-06-20
