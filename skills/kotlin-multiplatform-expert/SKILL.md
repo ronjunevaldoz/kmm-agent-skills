@@ -89,7 +89,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 47 Skills and What They Own
+## The 48 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -105,6 +105,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-flavor-environment` | Dev/staging/prod config, BuildKonfig, secrets, `AppConfig` facade |
 | `kotlin-multiplatform-ci-github-actions` | GitHub Actions, test matrix, XCFramework release workflow |
 | `kotlin-multiplatform-audit` | Existing project health checks, boundary review, architecture drift, readiness gaps |
+| `kotlin-multiplatform-legal-docs` | Privacy Policy, Terms & Conditions, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, in-app `LegalDocsScreen`, consent gate |
 
 ### Layer 2 — Core Infrastructure
 | Skill | Owns |
@@ -464,6 +465,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "crash reporting", "crashlytics", "firebase crashes", "sentry", "non-fatal", "symbolication", "dSYM", "kermit crash", "crash handler", "breadcrumb crash" | `kotlin-multiplatform-crash-reporting` |
 | "DataStore", "Preferences DataStore", "Proto DataStore", "save settings", "persist user prefs", "SharedPreferences migration", "createDataStore", "local key-value store" | `kotlin-multiplatform-datastore` |
 | "JNI", "native bridge", "C library", "C++ interop", "JNI bridge", "CPointer", "JvmStatic native", "kotlin native interop", "call C from Kotlin" | `jni-kotlin-pro` |
+| "privacy policy", "terms and conditions", "terms of service", "GDPR", "CCPA", "data safety", "App Store privacy", "legal docs", "user data disclosure", "consent screen", "privacy screen", "play store legal", "app store compliance" | `kotlin-multiplatform-legal-docs` |
 
 ---
 

@@ -34,6 +34,7 @@ wastes context. Match the feature to these work types:
 | Koin wiring only | `dependency-injection` |
 | Tests only | `unit-testing`, `roborazzi` |
 | CI or build changes | `ci-github-actions`, `code-quality` |
+| Legal docs (privacy policy, terms, GDPR, data safety) | `legal-docs`, `flavor-environment`, `datastore` |
 | Strings, fonts, or localization | `shared-resources` |
 | Multi-environment config (dev/staging/prod) | `flavor-environment` |
 | Image loading (Coil, AsyncImage, cache) | `image-loading` |
