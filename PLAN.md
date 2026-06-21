@@ -117,7 +117,7 @@ All known defects resolved. ✅
 
 | Idea | Notes |
 |---|---|
-| `kotlin-multiplatform-paging` | Paging 3 in KMP — `PagingSource`, `Pager`, Compose `collectAsLazyPagingItems`, cursor vs offset strategies |
+| `kotlin-multiplatform-paging` | ✅ | Paging 3 — `PagingSource`, `Pager`, cursor vs offset, `RemoteMediator`, load-state handling, `collectAsLazyPagingItems` |
 | `kotlin-multiplatform-analytics` | Already in Batch 4 above — move here once scoped |
 | `kotlin-multiplatform-workmanager` | Background sync — WorkManager (Android) + BGTaskScheduler (iOS) via expect/actual, retry policies, sync queue pattern |
 | `kotlin-multiplatform-deep-linking` | Universal Links (iOS) + App Links (Android) setup, route parsing in KMP shared code, navigation integration |

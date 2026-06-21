@@ -124,6 +124,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-navigation` | Type-safe routes, nested graphs, bottom nav, deep links |
 | `kotlin-multiplatform-shared-resources` | Strings, images, fonts, plurals, localization |
 | `kotlin-multiplatform-mvi` | MVI architecture, Contract pattern, `MviViewModel`, State/Intent/Effect, one-shot effects |
+| `kotlin-multiplatform-paging` | Paging 3 — `PagingSource`, `Pager`, `PagingData`, cursor vs offset, `RemoteMediator`, load-state handling |
 
 ### Layer 5 — UI System
 | Skill | Owns |
@@ -379,6 +380,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "expect actual", "platform-specific", "@ObjCName", "iOS interop" | `kotlin-multiplatform-expect-actual` |
 | "repository", "data layer", "offline-first", "cache", "single source of truth" | `kotlin-multiplatform-repository-pattern` |
 | "navigation", "screen routing", "NavHost", "deep links" | `kotlin-multiplatform-navigation` |
+| "paging", "Paging 3", "PagingSource", "infinite scroll", "load more", "next page", "cursor pagination", "offset pagination", "LazyPagingItems", "paginate" | `kotlin-multiplatform-paging` |
 | "shared strings", "localization", "image assets", "fonts" | `kotlin-multiplatform-shared-resources` |
 | "MVI", "ViewModel state", "one-shot effects", "Screen/Content split" | `kotlin-multiplatform-mvi` |
 | "design system", "AppTheme", "design tokens", "dark mode", "spacing tokens", "screen layout", "layout consistency", "AppScaffold", "AppTopAppBar", "page title", "top bar", "action button placement" | `kotlin-multiplatform-design-system` |
