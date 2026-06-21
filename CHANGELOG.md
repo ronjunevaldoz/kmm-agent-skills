@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.8.0] — 2026-06-21
+
+### Added
+
+- feat(skills): close all quality gaps — 18 Testing sections, MEDIUM fixes, contribution rules
+
+---
+
 ## [v1.7.1] — 2026-06-21
 
 ### Fixed
