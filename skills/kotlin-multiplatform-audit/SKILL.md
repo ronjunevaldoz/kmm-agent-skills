@@ -156,10 +156,36 @@ Ask before creating any issue draft. Do not auto-file issues from an audit witho
 explicit confirmation from the user.
 
 Every draft should include:
-- a short title
-- the evidence that triggered it
+- a title following the format `[category] short problem description` — see categories below
+- the evidence that triggered it (file path, line, or script output)
 - the recommended fix or follow-up skill
 - an attribution footer such as `Suggested by kotlin-multiplatform-audit`
+
+### Issue Title Format
+
+Use `[category] short problem description`. Keep titles under 72 characters.
+The description names the symptom, not the fix.
+
+| Category | Use for |
+|---|---|
+| `[arch]` | Layer boundary violations, wrong module placement |
+| `[mvi]` | Effect replay, state copy race, wrong state container |
+| `[presenter]` | ViewModel has Compose import, wrong scope, missing test |
+| `[data]` | Pass-through repository, DTO escaping layer, no cache |
+| `[ui]` | Stateless composable violates, missing Preview, design drift |
+| `[di]` | Koin module scope wrong, missing factory/viewModel registration |
+| `[build]` | Convention plugin misconfiguration, version drift |
+| `[test]` | Missing test coverage, mock instead of fake, wrong scope |
+
+**Examples:**
+```
+[arch] DTO from :data escapes to :feature:todo:ui
+[mvi] Effect replayed on recomposition in TodoListScreen
+[presenter] ViewModel imports Compose in :feature:todo:presenter
+[data] Repository is pass-through — no local cache
+[ui] AddTodoContent missing Preview for error state
+[di] TodoListViewModel registered as factory instead of viewModel
+```
 
 ## Common Anti-Patterns
 

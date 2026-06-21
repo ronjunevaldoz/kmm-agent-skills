@@ -491,8 +491,7 @@ Run through these 6 questions for any KMP project audit:
 
 ## Docs-First Rule
 
-Before coding a feature, check the official docs and the project docs. The Carpool
-project showed the right shape:
+Before coding a feature, check the official docs and the project docs:
 
 - verify official Android / Compose guidance first
 - prefer standard APIs over custom wrappers unless the docs force a custom path
