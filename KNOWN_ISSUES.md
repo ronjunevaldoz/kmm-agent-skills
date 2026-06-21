@@ -21,19 +21,7 @@ Resolved issues stay here for reference — they explain *why* a rule exists.
 
 ### KI-003 — Adaptive layout not adopted retroactively in existing projects
 
-**Status:** Open  
-**Affects:** `kotlin-multiplatform-adaptive-layout` skill, Check 7 in `agents/reviewer.md`  
-**Symptom:** When adaptive layout skill is loaded in a project that has 10+ existing
-screens with no `WindowSizeClass`, the reviewer correctly flags every screen as
-`[ADAPTIVE]` — but fixing all of them in one session is impractical.  
-**Root cause:** The reviewer applies the consistency rule uniformly; there is no
-"migration mode" that only enforces the rule on *new* screens.  
-**Workaround:** When retrofitting an existing project, explicitly tell the agent:
-*"Only enforce adaptive layout on new screens in this session; track retrofitting as a
-separate ticket."* The agent will honour that scope limit.  
-**Fix needed:** Add a `adaptive_layout_migration_mode: true` flag to
-`pipeline-context.json` that changes the reviewer from blocking to warning-only on
-pre-existing screens.
+**Status:** Resolved — see KI-R09 below
 
 ---
 
@@ -145,6 +133,19 @@ disabling the architecture audit gate.
 **Fix:** `scripts/install-hooks.sh` symlinks both hooks in one command and makes them
 executable. README updated to show `bash scripts/install-hooks.sh` as the primary
 install path.
+
+---
+
+### KI-R09 — Adaptive layout reviewer blocked entire existing codebase
+
+**Resolved:** `fix(reviewer): add adaptive_layout_migration_mode to pipeline-context`  
+**Was:** Reviewer Check 7 uniformly blocked every screen lacking `WindowSizeClass`,
+making it impossible to incrementally adopt adaptive layout in a project with many
+existing screens — all changes were blocked until every screen was retrofitted.  
+**Fix:** Added `adaptive_layout_migration_mode: true/false` to `pipeline-context.json`.
+When `true`, Check 7 downgrades pre-existing screens to `[WARNING]` and only enforces
+the full `[ADAPTIVE]` blocker on screens created or modified in the current session.
+Documented in the adaptive-layout skill with a 4-step retrofit workflow.
 
 ---
 

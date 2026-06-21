@@ -3,5 +3,7 @@
   "last_run": null,
   "successful_validations": 0,
   "recurring_issues": [],
-  "proven_patterns": {}
+  "proven_patterns": {},
+  "adaptive_layout_established": false,
+  "adaptive_layout_migration_mode": false
 }

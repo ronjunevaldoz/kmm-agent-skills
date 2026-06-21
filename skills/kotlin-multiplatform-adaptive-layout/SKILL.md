@@ -95,6 +95,17 @@ If nothing matches, establish the pattern using the template below and update
 "adaptive_layout_root_file": "<path to the first screen that established the pattern>"
 ```
 
+### Retrofitting an existing project
+
+If the project already has many screens **without** `WindowSizeClass`, retrofitting all
+of them in one session is impractical. Use migration mode to avoid being blocked:
+
+1. Set `adaptive_layout_migration_mode: true` in `.claude/pipeline-context.json` and commit it
+2. The reviewer will warn (not block) on pre-existing screens and only enforce the full
+   rule on screens created or modified in the current session
+3. Track the remaining screens as a follow-up ticket
+4. Once all screens are migrated, set `adaptive_layout_migration_mode: false` and commit
+
 ---
 
 ## Core pattern — screen structure

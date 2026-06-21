@@ -130,10 +130,27 @@ Run before reviewing any `:ui` file:
 grep -r "WindowSizeClass\|calculateWindowSizeClass" <project_root>/*/src --include="*.kt" -l
 ```
 
+Read `.claude/pipeline-context.json` and check `adaptive_layout_migration_mode`:
+
+**Normal mode** (`adaptive_layout_migration_mode: false`, default):
 - If **any** existing screen uses `WindowSizeClass` and the newly added screen does **not**,
   that is a **`[ADAPTIVE]`** blocker
-- If `adaptive_layout_established: true` in `.claude/pipeline-context.json`, all new
-  screens must pass `WindowSizeClass` as a parameter
+- If `adaptive_layout_established: true`, all new screens must pass `WindowSizeClass`
+  as a parameter
+
+**Migration mode** (`adaptive_layout_migration_mode: true`):
+- Pre-existing screens without `WindowSizeClass` produce **`[WARNING]`** only, not a blocker
+- Only screens **created or modified in this session** are held to the full adaptive standard
+- Add a migration note to the review output listing which pre-existing screens still need retrofitting
+
+To enable migration mode, set the flag before starting:
+```bash
+# In pipeline-context.json:
+"adaptive_layout_migration_mode": true
+```
+Disable it again once the retrofit is complete.
+
+**Both modes:**
 - Roborazzi tests for adaptive screens must include Compact + Expanded × light + dark
   (minimum 4 captures)
 
