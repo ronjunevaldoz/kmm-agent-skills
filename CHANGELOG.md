@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.21.9] — 2026-06-22
+
+### Docs
+
+- docs(known-issues): add KI-007 — external skill trigger isolation unverifiable
+
+---
+
 ## [v1.21.8] — 2026-06-22
 
 ### Other
