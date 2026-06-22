@@ -9,6 +9,7 @@ Detects:
   material_theme       MaterialTheme.colors/typography/shapes — use appTheme.*
   direct_textstyle     TextStyle(...) construction — use AppTextStyle enum
   nested_container     Card { Card { or Surface { Surface { — redundant nesting
+  layout_inconsistency Mixed flat/card/tabbed patterns across *Content.kt files in the same feature ui/ dir
 
 Usage:
   python3 scan_design_violations.py <project_root>
@@ -26,6 +27,7 @@ import argparse
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 
@@ -72,6 +74,12 @@ _PATTERNS: list[tuple[str, str, str, re.Pattern]] = [
 # Containers where nesting is a structural smell.
 # Matches both `Card(` and `Card {` (Kotlin trailing-lambda form).
 _CONTAINER_OPEN_RE = re.compile(r"\b(Card|Surface)\b\s*[\({]")
+
+# ── Layout classification ─────────────────────────────────────────────────────
+
+_TABBED_RE = re.compile(r"\bTabRow\b")
+# AppCard( or Card( — excludes Card used as a type annotation (Card:)
+_CARD_LAYOUT_RE = re.compile(r"\b(?:App)?Card\s*\(")
 
 # Files / directories that are design-system source — allowed to use primitives directly
 _SKIP_NAME_SUFFIXES = (
@@ -160,6 +168,60 @@ def scan_file(path: Path) -> list[dict]:
     return _scan_patterns(path, lines) + _scan_nested_containers(path, lines)
 
 
+def _classify_layout(content: str) -> str:
+    """Return the dominant layout pattern for a *Content.kt file."""
+    if _TABBED_RE.search(content):
+        return "tabbed"
+    if _CARD_LAYOUT_RE.search(content):
+        return "card"
+    return "flat"
+
+
+def scan_layout_consistency(project_root: Path) -> list[dict]:
+    """Cross-screen check: all *Content.kt files in the same ui/ dir must use the same layout pattern."""
+    findings: list[dict] = []
+
+    dir_files: dict[Path, list[Path]] = {}
+    for kt_file in sorted(project_root.rglob("*Content.kt")):
+        if _should_skip(kt_file):
+            continue
+        dir_files.setdefault(kt_file.parent, []).append(kt_file)
+
+    for ui_dir, files in dir_files.items():
+        if len(files) < 2:
+            continue
+
+        classifications: dict[Path, str] = {}
+        for f in files:
+            try:
+                content = f.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            classifications[f] = _classify_layout(content)
+
+        if len(set(classifications.values())) < 2:
+            continue  # all consistent
+
+        majority, _ = Counter(classifications.values()).most_common(1)[0]
+        for f, layout in classifications.items():
+            if layout != majority:
+                findings.append({
+                    "type": "layout_inconsistency",
+                    "severity": "warning",
+                    "file": str(f),
+                    "line": 1,
+                    "code": f"# detected layout: {layout}",
+                    "message": (
+                        f"Layout pattern '{layout}' differs from the rest of "
+                        f"{ui_dir.name}/ (majority: '{majority}'). "
+                        "All *Content.kt files in the same feature ui/ dir should use "
+                        "the same top-level pattern (flat / card / tabbed)."
+                    ),
+                })
+
+    return findings
+
+
 def scan(project_root: Path, single_file: Path | None = None) -> list[dict]:
     if single_file:
         return [] if _should_skip(single_file) else scan_file(single_file)
@@ -169,6 +231,7 @@ def scan(project_root: Path, single_file: Path | None = None) -> list[dict]:
         if _should_skip(kt_file):
             continue
         all_findings.extend(scan_file(kt_file))
+    all_findings.extend(scan_layout_consistency(project_root))
     return all_findings
 
 

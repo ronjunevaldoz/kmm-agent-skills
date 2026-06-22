@@ -1837,5 +1837,78 @@ class ScanDesignViolationsTests(unittest.TestCase):
         self.assertIn("file", parsed[0])
 
 
+class LayoutConsistencyTests(unittest.TestCase):
+    """Tests for scan_layout_consistency() in scan_design_violations.py."""
+
+    def _make_ui_dir(self, tmp: str, feature: str = "auth") -> Path:
+        ui_dir = Path(tmp) / "feature" / feature / "ui"
+        ui_dir.mkdir(parents=True, exist_ok=True)
+        return ui_dir
+
+    def _write_content(self, ui_dir: Path, name: str, body: str) -> Path:
+        path = ui_dir / name
+        path.write_text(body, encoding="utf-8")
+        return path
+
+    def test_flat_screens_are_consistent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            ui = self._make_ui_dir(tmp)
+            self._write_content(ui, "ListContent.kt", "fun ListContent() { Column { } }")
+            self._write_content(ui, "DetailContent.kt", "fun DetailContent() { Column { } }")
+            findings = scan_design_violations_scripts.scan_layout_consistency(Path(tmp))
+        self.assertEqual(findings, [])
+
+    def test_card_screens_are_consistent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            ui = self._make_ui_dir(tmp)
+            self._write_content(ui, "ProfileContent.kt", "fun ProfileContent() { AppCard() { } }")
+            self._write_content(ui, "SettingsContent.kt", "fun SettingsContent() { AppCard() { } }")
+            findings = scan_design_violations_scripts.scan_layout_consistency(Path(tmp))
+        self.assertEqual(findings, [])
+
+    def test_mixed_card_and_flat_flags_minority(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            ui = self._make_ui_dir(tmp)
+            self._write_content(ui, "ListContent.kt", "fun ListContent() { Column { } }")
+            self._write_content(ui, "DetailContent.kt", "fun DetailContent() { Column { } }")
+            self._write_content(ui, "ProfileContent.kt", "fun ProfileContent() { AppCard() { } }")
+            findings = scan_design_violations_scripts.scan_layout_consistency(Path(tmp))
+        types = [f["type"] for f in findings]
+        self.assertIn("layout_inconsistency", types)
+        # Only the minority (card) is flagged, not the majority (flat x2)
+        flagged = [f["file"] for f in findings if f["type"] == "layout_inconsistency"]
+        self.assertTrue(any("ProfileContent" in p for p in flagged))
+        self.assertFalse(any("ListContent" in p for p in flagged))
+
+    def test_tabbed_screen_detected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            ui = self._make_ui_dir(tmp)
+            self._write_content(ui, "OverviewContent.kt", "fun OverviewContent() { Column { TabRow() } }")
+            self._write_content(ui, "ListContent.kt", "fun ListContent() { Column { } }")
+            findings = scan_design_violations_scripts.scan_layout_consistency(Path(tmp))
+        types = [f["type"] for f in findings]
+        self.assertIn("layout_inconsistency", types)
+
+    def test_single_content_file_not_flagged(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            ui = self._make_ui_dir(tmp)
+            self._write_content(ui, "AuthContent.kt", "fun AuthContent() { AppCard() { } }")
+            findings = scan_design_violations_scripts.scan_layout_consistency(Path(tmp))
+        self.assertEqual(findings, [])
+
+    def test_different_features_checked_independently(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            auth_ui = self._make_ui_dir(tmp, "auth")
+            home_ui = self._make_ui_dir(tmp, "home")
+            # auth uses flat — consistent within itself
+            self._write_content(auth_ui, "LoginContent.kt", "fun LoginContent() { Column { } }")
+            self._write_content(auth_ui, "RegisterContent.kt", "fun RegisterContent() { Column { } }")
+            # home uses card — consistent within itself
+            self._write_content(home_ui, "FeedContent.kt", "fun FeedContent() { AppCard() { } }")
+            self._write_content(home_ui, "ProfileContent.kt", "fun ProfileContent() { AppCard() { } }")
+            findings = scan_design_violations_scripts.scan_layout_consistency(Path(tmp))
+        self.assertEqual(findings, [])
+
+
 if __name__ == "__main__":
     unittest.main()

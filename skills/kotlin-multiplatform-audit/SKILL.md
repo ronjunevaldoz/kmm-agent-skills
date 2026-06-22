@@ -118,6 +118,7 @@ the user and the other skills what to do next.
 - Verify tokens, palette rules, and typography are consistent
 - Check whether components use the right pattern for the repo's chosen UI system
 - Flag hardcoded colors, sizes, and text styles
+- **Layout pattern consistency** — every `*Content.kt` in the same feature `ui/` dir must use the same top-level layout pattern (flat `Column`/`LazyColumn`, card-sectioned `AppCard`, or tabbed `TabRow`+`HorizontalPager`); mixed patterns are a `layout_inconsistency` violation. Run `scan_design_violations.py <project_root>` — it detects this cross-screen.
 
 ### 6) Native / JNI boundary (only if `*-jni.cpp`, `*-wrapper.cpp`, or `CMakeLists.txt` exist)
 - 3rd-party C++ (`vendor/`, `third_party/`, submodules, `FetchContent`) is **read-only** —

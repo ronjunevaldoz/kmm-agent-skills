@@ -134,6 +134,24 @@ fun FooContent(
 - Not consuming `PaddingValues` clips content under the TopAppBar on devices with
   status bars
 
+### Content Layout Patterns
+
+Choose **one pattern** for a feature and apply it consistently across **all screens in that feature**.
+Mixing patterns inside the same flow is a `layout_inconsistency` violation caught by `scan_design_violations.py`.
+
+| Pattern | When to use | What goes inside `AppScaffold { paddingValues -> … }` |
+|---|---|---|
+| **Flat** | Default. Lists, feeds, forms, step-by-step flows | `Column` or `LazyColumn` directly |
+| **Card-sectioned** | Profile, settings, detail pages with distinct sections | `Column { AppCard { … }; AppCard { … } }` |
+| **Tabbed** | Genuinely multi-categorical content (Active / Completed / Archived) | `Column { TabRow(…); HorizontalPager { … } }` |
+
+Rules:
+- Do not place `AppCard` as the first-level child in a flat-pattern screen — it creates an inconsistent elevation bump vs. sibling screens
+- Tabbed screens define the chrome; **each tab page must use the same inner pattern** (all tabs flat, or all tabs card-sectioned — never mixed)
+- If two screens genuinely need different patterns, they belong in different features or flows
+
+`scan_design_violations.py --layout` flags any feature `ui/` directory where `*Content.kt` files use different patterns.
+
 ---
 
 ## Overview
