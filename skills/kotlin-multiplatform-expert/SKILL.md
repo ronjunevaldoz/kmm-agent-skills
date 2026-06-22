@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-21'
+  last-updated: '2026-06-22'
   keywords:
     - KMP expert
     - orchestrator
@@ -439,6 +439,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "shared strings", "localization", "image assets", "fonts" | `kotlin-multiplatform-shared-resources` |
 | "MVI", "ViewModel state", "one-shot effects", "Screen/Content split" | `kotlin-multiplatform-mvi` |
 | "design system", "AppTheme", "design tokens", "dark mode", "spacing tokens", "layout consistency", "AppScaffold", "AppTopAppBar", "page title", "top bar", "action button placement" | `kotlin-multiplatform-design-system` |
+| "update design system", "sync design system", "update components", "sync components", "update AppButton", "design system out of date", "new version of design system", "design system changed", "refresh design system" | `/update-design-system` |
 | "adaptive layout", "WindowSizeClass", "tablet layout", "desktop layout", "mobile layout", "phone layout", "list detail", "detail split", "split screen", "navigation rail", "Compact Medium Expanded", "responsive UI", "master detail", "multi-pane", "different layout phone tablet", "different layout phone desktop", "screen size breakpoint", "pane layout", "layout per screen size", "layout phone desktop" | `kotlin-multiplatform-adaptive-layout` |
 | "dialog", "bottom sheet", "toast", "tabs", "TopAppBar", "Checkbox" | `kotlin-multiplatform-design-system-extended` |
 | "slot API", "content lambda", "composable parameter", "scoped slot" | `kotlin-multiplatform-compose-slot-api` |

@@ -150,6 +150,30 @@ Design system layers (top-down):
   Screens (feature UIs consume AppTheme.provide { } at the top)
 ```
 
+---
+
+## Ownership Model
+
+The design system follows the shadcn model — you own the generated code, not a dependency.
+This gives full brand control without forking a library.
+
+| Layer | Ownership | Update path |
+|---|---|---|
+| `tokens/` — `AppColors`, `AppTypography`, `AppShapes`, `AppSpacing` | **Project-owned** | Customize freely — never touched by `/update-design-system` |
+| `theme/` — `AppTheme`, `StyleScopeExtensions` | **Project-owned** | Customize freely |
+| `components/` — `App*.kt` | **Skill-owned** | Run `/update-design-system` to pull in bug fixes and new variants without touching tokens |
+
+**Why not a published library?** The Compose Styles API (`@ExperimentalStylesApi`) changes
+between CMP releases. A published library would break every downstream project on CMP upgrades.
+The scaffold approach keeps each project on its own upgrade schedule.
+
+Use `/update-design-system` to compare your project's components against the latest skill
+version and selectively apply fixes. The comparison is powered by
+`scripts/update_design_system.py`, which MD5-hashes each component block from this SKILL.md
+against the project file and reports CURRENT / MODIFIED / MISSING status.
+
+---
+
 ## Style Rules
 
 - Use the Compose Styles API for visual styling, state styling, and animated transitions.
@@ -217,6 +241,9 @@ include(":core:designsystem")
 ---
 
 ## Step 2: Design Tokens
+
+> **Project-owned.** Customize `tokens/` and `theme/` freely — `/update-design-system`
+> will never modify these files. This is your brand layer.
 
 ### Palette guidance
 
@@ -930,6 +957,19 @@ sealed interface TextFieldVariant {
 ---
 
 ## Step 6: Core Components
+
+> **Skill-owned.** Components are updateable via `/update-design-system`. Avoid deep
+> customisations here — put brand-specific variants in project-level composables that
+> wrap these primitives instead.
+
+| Component | Stability | Notes |
+|---|---|---|
+| `AppButton` | **Stable** | 6 variants, 5 sizes |
+| `AppBadge` | **Stable** | 5 variants |
+| `AppCard` | **Stable** | 3 variants, 2 sizes |
+| `AppChip` | **Stable** | 3 variants, selected state |
+| `AppTextField` | **Stable** | label, placeholder, leading/trailing icon, error state |
+| `AppText` | **Stable** | `AppTextStyle` enum, muted mode |
 
 ### `components/AppButton.kt`
 
@@ -1655,5 +1695,6 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Added ownership model section (project-owned tokens vs skill-owned components). Added stability tiers to component overview. Added `scripts/update_design_system.py` reference. |
 | 2026-06-22 | Added `AppTextField` component (was missing from Step 6). Renamed `TextStyle` enum → `AppTextStyle` to avoid Compose collision. Fixed test code: `AppTheme.spacing.*` → `appTheme.*`, `Text()` → `AppText()`. Added `@OptIn` note to Steps 5–6. Fixed missing `sp`/`FontWeight` imports in Button/Badge/Chip/TextField style snippets. Fixed `CardSize` hardcoded dp → `AppSpacing()` tokens. Added cross-skill note for `AppScaffold`/`AppTopAppBar`. |
 | 2026-06-06 | Initial release. |

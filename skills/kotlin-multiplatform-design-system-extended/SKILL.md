@@ -82,17 +82,29 @@ and apply the same `@ExperimentalStylesApi` token pattern as the core system.
 
 ---
 
+## Ownership Model
+
+> **Skill-owned.** All extended components are updateable via `/update-design-system`.
+> Project-owned files (`tokens/`, `theme/`) are never touched.
+
 ## Component Overview
 
-| Group | Components |
-|---|---|
-| Primitives | `AppIcon`, `AppIconButton`, `AppLabel`, `AppSeparator` |
-| Display | `AppAvatar`, `AppSpinner`, `AppSkeleton`, `AppProgress` |
-| Navigation | `AppTopAppBar`, `AppNavigationBar`, `AppTabs` |
-| Form Controls | `AppCheckbox`, `AppRadioButton`, `AppSwitch`, `AppSlider`, `AppSelect` |
-| Feedback | `AppAlert`, `AppToast` (with `ToastHostState` + `AppScaffold`) |
-| Overlays | `AppDialog`, `AppAlertDialog`, `AppSheet`, `AppTooltip`, `AppPopover` |
-| Expandable | `AppAccordion` |
+| Group | Components | Stability |
+|---|---|---|
+| Primitives | `AppIcon`, `AppIconButton`, `AppLabel`, `AppSeparator` | **Stable** |
+| Display | `AppAvatar`, `AppSpinner`, `AppSkeleton`, `AppProgress` | **Stable** |
+| Navigation | `AppTopAppBar`, `AppNavigationBar`, `AppScaffold` | **Stable** |
+| Tabs | `AppTabs` | **Stable** |
+| Form Controls | `AppCheckbox`, `AppRadioButton`, `AppSwitch`, `AppSlider` | **Stable** |
+| Form Controls | `AppSelect` | **Experimental** — API may change |
+| Feedback | `AppAlert`, `AppToast` (with `ToastHostState` + `AppScaffold`) | **Stable** |
+| Overlays | `AppDialog`, `AppAlertDialog`, `AppSheet` | **Stable** |
+| Overlays | `AppTooltip`, `AppPopover` | **Experimental** — positioning varies by platform |
+| Expandable | `AppAccordion` | **Experimental** — animation API in flux |
+
+**Stability tiers:**
+- **Stable** — API locked; breaking changes come with a migration note in the Changelog.
+- **Experimental** — API may change between skill versions; review diffs before accepting updates.
 
 ---
 

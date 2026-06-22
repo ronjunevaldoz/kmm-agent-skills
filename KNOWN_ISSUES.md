@@ -262,4 +262,20 @@ but agents enforce it before a commit is ever attempted.
 
 ---
 
+---
+
+### KI-R16 — Design system had no update path once code was copied to a project
+
+**Resolved:** `v1.17.0` — `feat(design-system): ownership model, stability tiers, /update-design-system command`  
+**Was:** The design-system skill generated code by copying snippets from SKILL.md into the project. Once copied, there was no way for the agent to know whether a project's component had drifted from the skill reference, so bug fixes and improvements in the skill were silently ignored by all existing projects.  
+**Fix:**
+- Added `## Ownership Model` section to base and extended SKILL.md — splits files into project-owned (tokens, theme) and skill-owned (components)
+- Created `scripts/update_design_system.py` — parses `### components/AppXxx.kt` blocks from SKILL.md, MD5-compares against project files, reports CURRENT / MODIFIED / MISSING; `--diff AppButton` shows unified diff
+- Created `commands/update-design-system.md` — 5-step command: run script, present report, diff modified files one at a time, apply approved changes, compile
+- Added stability tiers (Stable / Experimental) to all 33 components across base and extended skills
+- Added routing keywords to expert Skill Invocation Map ("update design system", "sync components", etc.)
+- Added 13 tests for `update_design_system.py` (total test suite: 98 tests)
+
+---
+
 *Add new entries as issues are discovered. Format: `KI-NNN` (open) or `KI-RNNN` (resolved).*

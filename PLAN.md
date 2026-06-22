@@ -75,8 +75,8 @@ Update when skills are added, revised, or completed.
 ### Layer 5 — UI System
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-design-system` | ✅ | Tokens, AppTheme, dark mode, 6 core components, no Material dependency |
-| `kotlin-multiplatform-design-system-extended` | ✅ | 27 additional components: Dialog, Sheet, Toast, Tabs, TopAppBar, etc. |
+| `kotlin-multiplatform-design-system` | ✅ | Tokens, AppTheme, dark mode, 6 core components (Stable tier), ownership model, `scripts/update_design_system.py` |
+| `kotlin-multiplatform-design-system-extended` | ✅ | 27 additional components with stability tiers (Stable / Experimental) |
 | `kotlin-multiplatform-adaptive-layout` | ✅ | WindowSizeClass, Compact/Medium/Expanded, list-detail split, migration mode |
 | `kotlin-multiplatform-compose-animation` | ✅ | AnimatedVisibility, Crossfade, AnimatedContent, animateXAsState, shared elements |
 | `kotlin-multiplatform-compose-slot-api` | ✅ | Slot patterns, scoped slots, CompositionLocal, component API shape |
