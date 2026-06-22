@@ -496,6 +496,88 @@ class AuditSkillsRepoTests(unittest.TestCase):
             self.assertFalse(any("missing markers" in f for f in findings))
 
 
+    # ── Design-system content checks ────────────────────────────────────────────
+
+    def _make_ds_skill(self, root: Path, name: str, content: str) -> None:
+        skill_dir = root / "skills" / name
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text(content, encoding="utf-8")
+
+    _DS_GOOD_CONTENT = (
+        "## When to Use This Skill\n\n**Trigger keywords:** design system.\n\nmetadata:\n"
+        "  last-updated: '2026-06-22'\n\n"
+        "OptIn(ExperimentalStylesApi\n"
+        "fun AppButton(\nfun AppBadge(\nfun AppCard(\nfun AppChip(\nfun AppTextField(\nfun AppText(\n"
+        "## Changelog\n\n| Date | Change |\n|---|---|\n| 2026-06-22 | v1. |\n"
+    )
+
+    def test_ds_flags_missing_component(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            # AppTextField omitted
+            content = self._DS_GOOD_CONTENT.replace("fun AppTextField(\n", "")
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("fun AppTextField" in f for f in findings))
+
+    def test_ds_flags_textstyle_collision(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            content = self._DS_GOOD_CONTENT + "enum class TextStyle {\n  BodyMedium\n}\n"
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("enum class TextStyle" in f for f in findings))
+
+    def test_ds_flags_missing_optins(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            content = self._DS_GOOD_CONTENT.replace("OptIn(ExperimentalStylesApi\n", "ExperimentalStylesApi\n")
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("ExperimentalStylesApi" in f and "@OptIn" in f for f in findings))
+
+    def test_ds_flags_static_apptheme_access(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            content = self._DS_GOOD_CONTENT + "padding(AppTheme.spacing.lg)\n"
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("AppTheme" in f and "static" in f for f in findings))
+
+    def test_ds_flags_hardcoded_dp_in_override(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            content = self._DS_GOOD_CONTENT + "override val contentPadding = 24.dp\n"
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("override val" in f and "N.dp" in f for f in findings))
+
+    def test_ds_exempts_component_dimension_dp(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            # `override val dp = 24.dp` is an IconSize/AvatarSize enum — exempt
+            content = self._DS_GOOD_CONTENT + "override val dp = 24.dp\n"
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertFalse(any("override val" in f and "N.dp" in f for f in findings))
+
+    def test_ds_clean_passes_all_checks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", self._DS_GOOD_CONTENT)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            ds_findings = [f for f in findings if "design-system" in f]
+            self.assertEqual([], ds_findings)
+
+    # ── Naming conventions ───────────────────────────────────────────────────────
+
     def test_naming_flags_uppercase_file_in_commands(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
