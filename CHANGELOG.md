@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.21.1] — 2026-06-22
+
+### Added
+
+- feat(design-system): add references/design-system-template.md
+
+### Docs
+
+- docs(design-system): add References section for references/ directory
+
+---
+
 ## [v1.21.0] — 2026-06-22
 
 ### Added
