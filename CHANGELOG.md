@@ -6,18 +6,6 @@ All notable changes to kmm-agent-skills are documented here.
 
 ### Added
 
-- feat(design-system): per-component preview files with light/dark + key states
-
-### Chore
-
-- chore: deduplicate v1.18.0 changelog entry
-
----
-
-## [v1.19.0] — 2026-06-22
-
-### Added
-
 - feat(design-system): add per-component preview files — `previews/AppThemePreviewWrapper.kt` + one preview file per base component (AppButton, AppBadge, AppCard, AppChip, AppTextField, AppText) with light/dark and key-state variants
 - feat(design-system): extend `update_design_system.py` to sync `previews/` blocks alongside `components/` blocks; `find_component_dir` now returns parent dir so both subdirectories are covered
 - feat(fix-design): add component-level Roborazzi step — run `:core:designsystem:jvmTest` first to verify components in isolation before feature tests
