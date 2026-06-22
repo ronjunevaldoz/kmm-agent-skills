@@ -10,6 +10,28 @@ Issue description: **$ARGUMENTS** (or nothing — will collect interactively)
 
 ---
 
+## Step 0 — Triage: skill issue or project issue?
+
+**Ask this before doing anything else.**
+
+| Question | Answer → action |
+|---|---|
+| Did a skill give you wrong guidance, miss a case, or produce broken code? | **Skill issue** — continue with this command |
+| Did you apply correct skill guidance and something still broke in your project? | **Project issue** — file in your own repo, not here |
+| Does the skill work but your project has an architecture violation? | **Project issue** — run `/run-audit` first |
+| Are you unsure whether the skill or your code is at fault? | Ask Claude: "Is this a skill problem or a project problem?" before filing |
+
+**Hard stop — do NOT continue if:**
+- The bug is in your project code and the skill guidance was correctly applied
+- The issue is about a 3rd-party library the skill references (file upstream, not here)
+- The problem only happens in your specific project environment (not reproducible from the skill guidance alone)
+
+If the user is unsure, ask: *"Did following the skill's guidance cause this, or did something else in your project go wrong?"*
+
+Only continue past Step 0 if the answer is clearly: **the skill itself is wrong or incomplete**.
+
+---
+
 ## Step 1 — Classify
 
 Determine the type before writing anything:
