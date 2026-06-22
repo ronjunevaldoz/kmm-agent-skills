@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.21.0] — 2026-06-22
+
+### Added
+
+- feat(design-system): RedundantScreenTitleRule + HardcodedGridColumnsRule + MultiDevicePreview
+
+---
+
 ## [v1.20.1] — 2026-06-22
 
 ### Fixed
