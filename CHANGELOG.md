@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.23.1] — 2026-06-23
+
+### Fixed
+
+- fix(report-skill-issue): add Step 0 triage gate — skill vs project issue
+
+---
+
 ## [v1.23.0] — 2026-06-23
 
 ### Added
