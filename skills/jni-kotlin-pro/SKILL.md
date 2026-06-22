@@ -9,7 +9,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-20'
+  last-updated: '2026-06-22'
   keywords:
     - JNI
     - Kotlin native
@@ -69,40 +69,28 @@ recheck their headers before writing any bridge code against a new version.
 
 ---
 
-## Recommendation First
+## Stack contract
 
-Default to the strict 4-layer stack. The JNI bridge (`*-jni.cpp`) is **type conversion only** —
-no native logic, no library state, no business rules. One bridge function does exactly one wrapper call.
-
-Why:
-- Logic in the JNI layer is untestable from Kotlin and undebuggable from C++
-- State in the JNI layer causes crashes on GC-driven object moves
-- Putting a `get_error()` accessor on the C wrapper is what makes errors surfaceable from Kotlin
-- RAII in the wrapper is what prevents leaks on any exit path — the JNI layer cannot own cleanup
-
----
-
-## Core identity
-
-You work in a strict four-layer stack. Never skip a layer. Never add logic to the
-wrong layer.
+Four layers. Never skip. The JNI bridge (`*-jni.cpp`) is **type conversion only** — one function, one wrapper call.
 
 ```
-Kotlin engine class   (business logic, coroutines, Result<T>)
+Kotlin engine (*-engine.kt)      (business logic, coroutines, Result<T>)
        ↓
-JNI bridge (*-jni.cpp)   (type conversion ONLY — no native logic)
+JNI bridge (*-jni.cpp)           (type conversion ONLY — no native logic)
        ↓
-C wrapper (*-wrapper.cpp) (owns native object lifecycle, RAII)
+C wrapper (*-wrapper.cpp)        (native lifecycle, RAII, error string)
        ↓
-Native library (<your-lib>.so)  — never modify, only call or port
+Native library                   (READ-ONLY — call it, never modify it)
 ```
 
-| Layer | What it does | What it must NOT do |
+| Layer | DO | NEVER |
 |---|---|---|
-| Kotlin engine | Coroutine dispatch, error wrapping, result mapping | JNI calls on main thread, raw pointer arithmetic |
-| JNI bridge | `jstring`→`std::string`, `jbyteArray`→`float*`, throw on error | Own native state, library logic, global mutable state |
-| C wrapper | Create/free native context, RAII, error string | Parse JNI types, business logic |
-| Native lib | Computation, codec, processing | Be modified — read it, don't rewrite it |
+| Kotlin engine | Dispatch coroutines; wrap errors; map results | JNI on main thread; raw pointer arithmetic |
+| JNI bridge | Convert `jstring`/arrays; call one wrapper fn; throw on null/error | Own native state; native logic; global mutable state |
+| C wrapper | create/free lifecycle; RAII; `get_error()` accessor | Parse JNI types; business logic |
+| Native lib | Computation, codec | Be modified |
+
+Why: logic in `*-jni.cpp` is untestable from Kotlin and undebuggable from C++. State in the JNI layer crashes on GC-driven object moves. RAII in the wrapper prevents leaks on every exit path — the JNI layer cannot own cleanup.
 
 ---
 
@@ -374,28 +362,34 @@ stated goal and nothing else.
 
 ## Common Anti-Patterns
 
-- **Missing release on error path** — `GetStringUTFChars` acquired, then `return error` before `ReleaseStringUTFChars`. The JNI layer leaks on every error. Every acquired resource must be released on ALL exit paths, including throws.
-- **Wrong array release mode** — using `0` (copy-back) instead of `JNI_ABORT` on a read-only array. Triggers unnecessary write-back and masks the intent.
-- **Native logic in the JNI bridge** — putting computation or processing steps in `*-jni.cpp` instead of the native library or C wrapper. Makes the bridge untestable.
-- **Algorithm reimplementation** — rewriting a function that already exists in the native library. Produces a diverged copy that drifts silently with library updates. The correct path: run Phase 0 discovery, find the library function, call it from `*-wrapper.cpp`. If the library function has a different signature than you need, write an adapter in the wrapper — never a reimplementation.
+See `references/error-patterns.md` for full evidence and context.
 
-  ```cpp
-  // WRONG — reimplements what the library already does:
-  float* engine_wrapper_decode(float* input, int len) {
-      // ... manual ISTFT implementation ...  ← EP-1 error pattern
-  }
+| Anti-pattern | Rule |
+|---|---|
+| Missing release on error path | Every `GetStringUTFChars`/`Get*ArrayElements` released on ALL paths, including throws (EP-2) |
+| Wrong array release mode | `JNI_ABORT` for read-only arrays — `0` triggers an unnecessary write-back (EP-3) |
+| Native logic in JNI bridge | `*-jni.cpp` calls one wrapper fn only — computation in wrapper or library (EP-4) |
+| Algorithm reimplementation | Phase 0 first; if the library has it, call it — never rewrite (EP-1) |
+| RTLD_GLOBAL symbol conflict | Use `RTLD_LOCAL`; verify with `nm -D`; see `references/shared-lib-loading.md` (EP-5) |
+| GPU output read without sync | `synchronize()` before reading native output (EP-6) |
+| Hardcoded constants | Read from library header or `get_*` accessor — never guess (EP-7) |
+| Early return before cleanup | RAII or `goto cleanup`; never bare `return error` before `delete ctx` (EP-8) |
+| Null handle not checked | Zero-check the `jlong` before casting to a pointer |
+| JNI types in C wrapper | `jstring`/`jbyteArray` stay in `*-jni.cpp`; wrapper is pure C++ |
 
-  // RIGHT — calls the library function:
-  float* engine_wrapper_decode(EngineContext* ctx, float* input, int len) {
-      return your_lib_decode(ctx->handle, input, len);  // ← library owns the algorithm
-  }
-  ```
-- **RTLD_GLOBAL symbol conflict** — two `.so` files both export the same symbol (e.g. `lib_init`). The second load silently uses the first library's symbol. Always use `RTLD_LOCAL` and verify with `nm -D`.
-- **GPU output read without sync** — reading native output before `synchronize()` returns stale or partially-written data.
-- **Hardcoded constants** — guessing dimensions, sizes, or thread counts instead of reading them from the library header or a `get_*` accessor. Silent wrong results, not crashes.
-- **Early return before cleanup in C wrapper** — `return -1` before `delete ctx` or `free(buf)`. Use RAII or a `goto cleanup` pattern; never a bare early return.
-- **Null handle not checked** — casting a `jlong` native handle to a pointer without checking for zero. Produces a null-pointer dereference with no useful stack trace from Kotlin.
-- **JNI types inside C wrapper** — `jstring` or `jbyteArray` parameters in `*-wrapper.cpp`. The wrapper must be a pure C++ layer; JNI types belong only in `*-jni.cpp`.
+**Algorithm reimplementation (EP-1) — most common mistake:**
+
+```cpp
+// WRONG — reimplements what the library already does:
+float* engine_wrapper_decode(float* input, int len) {
+    // ... manual ISTFT implementation ...  ← EP-1 error pattern
+}
+
+// RIGHT — calls the library function:
+float* engine_wrapper_decode(EngineContext* ctx, float* input, int len) {
+    return your_lib_decode(ctx->handle, input, len);  // ← library owns the algorithm
+}
+```
 
 ---
 
@@ -424,20 +418,19 @@ stated goal and nothing else.
 
 ## Output Style
 
-When responding to JNI work, always structure the response in this order:
+Structure every JNI response in this order:
 
-1. **Discovery result** — report what Phase 0 found: which library header contains the relevant function, its exact signature, and the reference example that shows correct call usage. If no library function was found, state that explicitly.
-2. **Compatibility matrix** — emit the Phase 0.5 matrix (`header-compatibility-matrix.md`) for every type/paradigm crossing the boundary. If any row is Unsupported, stop and emit an Architectural Feedback Report instead of code.
-3. **Layer** — identify which of the 4 layers the change lives in (Kotlin engine / JNI bridge / C wrapper / native lib)
-4. **3rd party file check** — confirm that no 3rd party file will be modified. If one would need to be, stop here.
-5. **Risk assessment** — answer the 5 questions from Phase 2 (memory, algorithm, symbol conflict, GPU sync, defaults) before writing code
-6. **Implementation** — complete code following the wrapper-call pattern; zero algorithm code in the JNI bridge; zero reimplementations of library functions; all exit paths with matching acquire/release pairs; no stubs
-7. **Quality gate checklist** — confirm each gate from the relevant layer (bridge, wrapper, or shared library) is satisfied
-8. **Audit comment** — if the target has `// STABLE:`, include the required change comment
+1. **Discovery result** — Phase 0: header, exact signature, reference example (or "not found")
+2. **Compatibility matrix** — Phase 0.5: Supported/Conditional/Unsupported for each type/paradigm; halt + Architectural Feedback Report if any Unsupported
+3. **Layer** — which of the 4 layers the change is in
+4. **3rd party check** — confirm no vendored file will be modified; stop if one would be
+5. **Risk** — Phase 2: memory / algorithm / symbol conflict / GPU sync / defaults
+6. **Implementation** — complete code; wrapper-call pattern; all acquire/release pairs; no stubs
+7. **Quality gates** — checklist per layer (bridge / wrapper / shared lib)
+8. **Audit comment** — `// STABLE:` target → include the required change comment
 
-Never output a partial JNI function. A bridge function with a missing release on one exit path is worse than no change — it ships a memory leak.
-
-Never output wrapper code that reimplements a function found in step 1. Cite the library function by name.
+Never output a partial JNI function — a missing release on any exit path ships a memory leak.
+Never reimplement a library function found in step 1 — cite it by name.
 
 ---
 
@@ -445,6 +438,7 @@ Never output wrapper code that reimplements a function found in step 1. Cite the
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | B1/B2 bloat compression: merged "Recommendation First" + "Core identity" into single "Stack contract" section with DO/NEVER table; compressed "Common Anti-Patterns" from prose to reference table + EP-1 code example; trimmed "Output Style" to concise 8-step list. No information removed. |
 | 2026-06-22 | Added references/header-compatibility-matrix.md (deterministic `.h` audit: Supported/Conditional/Unsupported tiers for 22 C++ constructs, decision gate) and references/architectural-feedback-schema.md (halt-and-report format + 9 C-shim strategies for Unsupported constructs). Added Phase 0.5 (header audit) to the workflow, pre-task checklist, output style (matrix as required artifact #2), References and Integration sections. |
 | 2026-06-22 | Added references/cmake-jni-setup.md (3 inclusion options, compile-definition config, Dockerfile checklist, CMake boundary guard) and references/wrapper-patterns.md (4 concrete patterns: lifecycle, streaming, callback/trampoline, multi-library pipeline; anti-patterns table). Wired both into References and Integration sections. |
 | 2026-06-22 | Added Phase 0 (library-first discovery gate): grep commands, decision table, and wrapper-call pattern with concrete header/wrapper/JNI code template. Updated pre-task checklist to require Phase 0. Updated anti-patterns with reinvention wrong-vs-right example. Updated output style to require discovery result and 3rd party check as first two response items. |

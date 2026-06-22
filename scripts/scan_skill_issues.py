@@ -53,7 +53,7 @@ REQUIRED_SECTIONS = {
     "anti_patterns":     (r"## Common Anti-Patterns", "MEDIUM"),
     "related_skills":    (r"## Related Skills", "LOW"),
     "output_style":      (r"## Output Style", "LOW"),
-    "recommendation":    (r"## Recommendation First", "MEDIUM"),
+    "recommendation":    (r"## (?:Recommendation First|Stack contract)", "MEDIUM"),
 }
 
 
