@@ -138,3 +138,27 @@ as an existing one, check for symbol overlap: `nm -D lib_a.so | grep 'T symbol'`
 `nm -D lib_b.so | grep 'U symbol'`. Resolve conflicts by: (1) building both against the
 same CMake targets, (2) statically linking the dependency into the JNI `.so`, or
 (3) running in separate processes.
+
+---
+
+## EP-9 — Editing 3rd party library `.cpp` or `.h` files directly
+
+**What happened**: An agent editing a JNI wrapper also modified a header or source file
+inside `third_party/` (e.g. added a field to a library struct, changed a `#define` in the
+library's public header, or patched a function body in `vendor/lib.cpp`). The modification
+was lost the next time the submodule was updated or the external project was re-fetched,
+and the build broke silently on a fresh clone. In some cases the modification changed the
+ABI of a struct shared between the JNI wrapper and the native library, producing crashes
+that were extremely difficult to trace.
+
+**Why hard to detect**: The change compiles and works locally. It only fails when:
+(a) another developer clones and builds without the modification,
+(b) the submodule is bumped,
+(c) the CMake FetchContent re-downloads the source.
+The connection between "submodule update" and "new crash" is non-obvious.
+
+**Rule**: 3rd party files — any file under `vendor/`, `third_party/`, `external/`, or
+managed by a git submodule / `ExternalProject_Add` — are **read-only**. All adaptations
+go into project-owned `*-wrapper.cpp` / `*-wrapper.h`. If a `#define` or constant is
+needed, define it in your own header before including the library header. If the library
+has a genuine bug, document the workaround in the wrapper and file an upstream issue.

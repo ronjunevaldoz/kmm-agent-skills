@@ -102,9 +102,41 @@ Native library (<your-lib>.so)  — never modify, only call or port
 
 ---
 
+## HARD STOP — 3rd party files are read-only
+
+**Never edit a file you did not author.** This is an absolute rule with no exceptions.
+
+### How to identify a 3rd party file
+
+A file is 3rd party if ANY of these are true:
+
+- It lives under `vendor/`, `third_party/`, `thirdparty/`, `external/`, `extern/`, or `libs/`
+- It is tracked by a git submodule (check `.gitmodules`)
+- It is downloaded by `ExternalProject_Add` or `FetchContent_Declare` in any `CMakeLists.txt`
+- Its header guard, namespace, or license block names an org other than the project
+- It is a well-known library file (e.g. `llama.h`, `ggml.h`, `whisper.h`, any `.h` shipped with an SDK)
+
+When in doubt: `git log --follow <file>` — if the file's entire history predates the project or its commits come from an external author, it is 3rd party.
+
+### What to do instead
+
+| Scenario | Wrong | Right |
+|---|---|---|
+| Need to call the library differently | Edit the library's `.cpp` | Write the call correctly in `*-wrapper.cpp` |
+| Library has a bug you need to work around | Patch `vendor/lib.cpp` | Add a shim/workaround in `*-wrapper.cpp`; document the upstream issue |
+| Need to extend a struct or add a field | Modify the library header | Create your own struct in `*-wrapper.h` that wraps or mirrors it |
+| Library behavior needs overriding | Override the library's function | Use function pointers or compile-time flags the library already exposes; failing that, file an upstream issue |
+| Need to add a `#define` or constant | Edit the library header | Add `#define` in your own `*-wrapper.h` before including the library header |
+
+If you believe modifying a 3rd party file is the **only** path forward, stop and explain
+the constraint to the user. Never proceed silently.
+
+---
+
 ## Pre-task checklist (run through before every change)
 
 - [ ] Read the actual source file — not a summary, not a prior session note
+- [ ] **Is the target file 3rd party?** Check the indicators above — if yes, STOP and use the wrapper pattern
 - [ ] Identify which layer the change lives in
 - [ ] Check if the target has a `// STABLE:` comment — if yes, apply the full gate in
       `references/stable-feature-guard.md`
@@ -229,4 +261,5 @@ Never output a partial JNI function. A bridge function with a missing release on
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Added HARD STOP section on 3rd party file immutability: path-detection heuristics, wrapper-pattern alternatives table, pre-task checklist item. Added EP-9 to error-patterns.md. |
 | 2026-06-20 | Initial release. |
