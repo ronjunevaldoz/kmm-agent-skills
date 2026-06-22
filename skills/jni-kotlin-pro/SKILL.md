@@ -43,6 +43,8 @@ You have confirmed and fixed all of these classes of bug. You do not repeat them
 - `references/native-algorithm-pitfalls.md` — audio/DSP pitfalls (Hann window, IRFFT, vocoder embeddings)
 - `references/cmake-jni-setup.md` — how to include 3rd party libraries via CMake without modifying them; FetchContent, add_subdirectory, compile definitions, Dockerfile checklist
 - `references/wrapper-patterns.md` — concrete C wrapper templates: lifecycle, streaming, callback/trampoline, multi-library pipeline
+- `references/header-compatibility-matrix.md` — deterministic `.h` audit; classify every type/paradigm as Supported / Conditional / Unsupported before any code
+- `references/architectural-feedback-schema.md` — structured halt-and-report format when a header has Unsupported constructs; C-shim design strategies
 
 ---
 
@@ -138,6 +140,7 @@ the constraint to the user. Never proceed silently.
 ## Pre-task checklist (run through before every change)
 
 - [ ] **Run Phase 0 (library-first discovery)** — grep the library headers for what you need; read the reference example; confirm whether the library already provides it
+- [ ] **Run Phase 0.5 (header compatibility audit)** — emit the matrix from `references/header-compatibility-matrix.md`; if any row is Unsupported, HALT and emit an Architectural Feedback Report
 - [ ] **Is the target file 3rd party?** Check the indicators in "HARD STOP" — if yes, STOP and use the wrapper-call pattern
 - [ ] Read the actual project source file — not a summary, not a prior session note
 - [ ] Identify which layer the change lives in
@@ -197,6 +200,30 @@ After discovery, answer:
 | Does the library do something close but not exact? | Yes | Call the closest function; adapt input/output in the wrapper layer only |
 | Does the library not have this at all? | Yes | Implement ONLY in `*-wrapper.cpp`; never in the JNI bridge layer |
 | Can this require editing a library file? | **Never** | STOP — use the wrapper-call pattern or report a blocker |
+
+---
+
+### Phase 0.5 — Header compatibility audit (MANDATORY before any code)
+
+Once you've located the header you'll bind to, classify everything it exposes **before
+writing JNI or wrapper code**. Follow `references/header-compatibility-matrix.md` and emit
+the matrix as the first artifact of the task:
+
+1. Scan the public surface of the target `.h` line by line.
+2. Classify each type / function / paradigm: **Supported** (direct map), **Conditional**
+   (wrapper adapter), or **Unsupported** (no stable ABI).
+3. Decision gate:
+   - All rows Supported or Conditional → proceed to Phase 0e (wrapper).
+   - Any row Unsupported → **HALT**. Emit an Architectural Feedback Report per
+     `references/architectural-feedback-schema.md` proposing a C-shim, and wait for
+     confirmation. Never attempt a direct JNI map of an Unsupported construct.
+
+The C-shim, when needed, adds one tier to the stack and is project-owned — the library is
+still never edited:
+
+```
+Kotlin engine → JNI bridge → C wrapper → C-shim (extern "C") → 3rd party library (read-only)
+```
 
 ---
 
@@ -384,6 +411,8 @@ stated goal and nothing else.
 ## Integration
 
 - `references/stable-feature-guard.md` — full gate for stable feature changes (bundled)
+- `references/header-compatibility-matrix.md` — run the deterministic `.h` audit before any code; emit the Supported/Conditional/Unsupported matrix as the first artifact
+- `references/architectural-feedback-schema.md` — halt-and-report format + C-shim strategy catalogue for Unsupported header constructs
 - `references/cmake-jni-setup.md` — CMake patterns for including 3rd party libraries safely; read before touching CMakeLists.txt or Dockerfiles
 - `references/wrapper-patterns.md` — lifecycle / streaming / callback / pipeline wrapper templates; use as the starting point for any new `*-wrapper.cpp`
 - `references/engine-rules-template.md` — copy to `docs/engine_rules.md` in your project to register stable engines
@@ -398,12 +427,13 @@ stated goal and nothing else.
 When responding to JNI work, always structure the response in this order:
 
 1. **Discovery result** — report what Phase 0 found: which library header contains the relevant function, its exact signature, and the reference example that shows correct call usage. If no library function was found, state that explicitly.
-2. **Layer** — identify which of the 4 layers the change lives in (Kotlin engine / JNI bridge / C wrapper / native lib)
-3. **3rd party file check** — confirm that no 3rd party file will be modified. If one would need to be, stop here.
-4. **Risk assessment** — answer the 5 questions from Phase 2 (memory, algorithm, symbol conflict, GPU sync, defaults) before writing code
-5. **Implementation** — complete code following the wrapper-call pattern; zero algorithm code in the JNI bridge; zero reimplementations of library functions; all exit paths with matching acquire/release pairs; no stubs
-6. **Quality gate checklist** — confirm each gate from the relevant layer (bridge, wrapper, or shared library) is satisfied
-7. **Audit comment** — if the target has `// STABLE:`, include the required change comment
+2. **Compatibility matrix** — emit the Phase 0.5 matrix (`header-compatibility-matrix.md`) for every type/paradigm crossing the boundary. If any row is Unsupported, stop and emit an Architectural Feedback Report instead of code.
+3. **Layer** — identify which of the 4 layers the change lives in (Kotlin engine / JNI bridge / C wrapper / native lib)
+4. **3rd party file check** — confirm that no 3rd party file will be modified. If one would need to be, stop here.
+5. **Risk assessment** — answer the 5 questions from Phase 2 (memory, algorithm, symbol conflict, GPU sync, defaults) before writing code
+6. **Implementation** — complete code following the wrapper-call pattern; zero algorithm code in the JNI bridge; zero reimplementations of library functions; all exit paths with matching acquire/release pairs; no stubs
+7. **Quality gate checklist** — confirm each gate from the relevant layer (bridge, wrapper, or shared library) is satisfied
+8. **Audit comment** — if the target has `// STABLE:`, include the required change comment
 
 Never output a partial JNI function. A bridge function with a missing release on one exit path is worse than no change — it ships a memory leak.
 
@@ -415,6 +445,7 @@ Never output wrapper code that reimplements a function found in step 1. Cite the
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Added references/header-compatibility-matrix.md (deterministic `.h` audit: Supported/Conditional/Unsupported tiers for 22 C++ constructs, decision gate) and references/architectural-feedback-schema.md (halt-and-report format + 9 C-shim strategies for Unsupported constructs). Added Phase 0.5 (header audit) to the workflow, pre-task checklist, output style (matrix as required artifact #2), References and Integration sections. |
 | 2026-06-22 | Added references/cmake-jni-setup.md (3 inclusion options, compile-definition config, Dockerfile checklist, CMake boundary guard) and references/wrapper-patterns.md (4 concrete patterns: lifecycle, streaming, callback/trampoline, multi-library pipeline; anti-patterns table). Wired both into References and Integration sections. |
 | 2026-06-22 | Added Phase 0 (library-first discovery gate): grep commands, decision table, and wrapper-call pattern with concrete header/wrapper/JNI code template. Updated pre-task checklist to require Phase 0. Updated anti-patterns with reinvention wrong-vs-right example. Updated output style to require discovery result and 3rd party check as first two response items. |
 | 2026-06-22 | Added HARD STOP section on 3rd party file immutability: path-detection heuristics, wrapper-pattern alternatives table, pre-task checklist item. Added EP-9 to error-patterns.md. |
