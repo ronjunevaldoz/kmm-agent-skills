@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.16.5] — 2026-06-22
+
+### Other
+
+- enforce(audit): add design-system content checks to audit_skills_repo
+
+---
+
 ## [v1.16.4] — 2026-06-22
 
 ### Fixed
