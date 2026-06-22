@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.24.1] — 2026-06-23
+
+### Added
+
+- feat(release): add development versioning guidance
+
+---
+
 ## [v1.24.0] — 2026-06-23
 
 ### Added

@@ -1,5 +1,5 @@
 {
-  "version": "1.24.0",
+  "version": "1.24.1",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -1767,7 +1767,16 @@
         "release pipeline",
         "publish KMP library",
         "release workflow",
-        "secrets management publish"
+        "secrets management publish",
+        "alpha release",
+        "beta release",
+        "release candidate",
+        "pre-release",
+        "snapshot",
+        "development version",
+        "GitHub Packages",
+        "promote to stable",
+        "version suffix"
       ],
       "scripts": []
     },
