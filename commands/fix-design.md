@@ -129,6 +129,22 @@ After writing each file, determine the composable name(s) in that file (look for
 
 ### 4a. Regenerate screenshots
 
+**Component-level (always run first):**
+If any tokens, styles, or design system components were changed, regenerate
+the design system component screenshots before the feature screenshots:
+
+```bash
+./gradlew :core:designsystem:jvmTest
+```
+
+This runs all `previews/AppXxxPreview.kt` tests and produces one PNG per
+`@Preview` function in `core/designsystem/build/...`. Read these PNGs first —
+they verify the component itself is correct in isolation, independent of any
+feature-specific layout.
+
+**Feature-level:**
+After the design system tests pass, regenerate the feature screen screenshots:
+
 ```bash
 ./gradlew :<module>:jvmTest \
   --tests "*<ComposableName>*" \

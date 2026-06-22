@@ -23,9 +23,13 @@ import sys
 from pathlib import Path
 
 
-# Matches ### `components/AppXxx.kt` followed by a ```kotlin … ``` block in SKILL.md.
+# Matches ### `components/AppXxx.kt` or ### `previews/AppXxxPreview.kt`
+# followed by a ```kotlin … ``` block in SKILL.md.
+# Group 1 = relative path (e.g. "components/AppButton.kt")
+# Group 2 = filename only (e.g. "AppButton.kt")
+# Group 3 = code body
 _COMPONENT_BLOCK_RE = re.compile(
-    r"###\s+`components/(\w+\.kt)`\s*\n+```kotlin\n(.*?)```",
+    r"###\s+`((?:components|previews)/(\w+\.kt))`\s*\n+```kotlin\n(.*?)```",
     re.DOTALL,
 )
 
@@ -34,21 +38,39 @@ _OWNED_DIRS = ("tokens", "theme")
 
 
 def extract_reference_components(skill_md: Path) -> dict[str, str]:
-    """Return {filename: code_body} for every `components/AppXxx.kt` block in SKILL.md."""
+    """Return {rel_path: code_body} for every components/ and previews/ block in SKILL.md.
+
+    Keys are relative paths, e.g. "components/AppButton.kt" or "previews/AppButtonPreview.kt".
+    """
     text = skill_md.read_text(encoding="utf-8")
-    return {m.group(1): m.group(2) for m in _COMPONENT_BLOCK_RE.finditer(text)}
+    return {m.group(1): m.group(3) for m in _COMPONENT_BLOCK_RE.finditer(text)}
 
 
 def find_component_dir(project_root: Path) -> Path | None:
-    """Locate the components directory inside the project's :core:designsystem."""
-    candidates = [
-        project_root / "core" / "designsystem" / "src" / "commonMain" / "kotlin",
-        project_root / "core" / "designsystem" / "components",
-        project_root / "core" / "designsystem",
-    ]
-    for path in candidates:
-        if path.exists():
-            return path
+    """Locate the base directory under which components/ and previews/ both live.
+
+    Returns the highest-level directory that contains the design system files so
+    that rglob() can find files in both components/ and previews/ subdirectories.
+    """
+    # Preferred: commonMain/kotlin contains both components/ and previews/
+    commonmain_kotlin = (
+        project_root / "core" / "designsystem" / "src" / "commonMain" / "kotlin"
+    )
+    if commonmain_kotlin.exists():
+        return commonmain_kotlin
+
+    # If components/ or previews/ exists, return the parent (core/designsystem/)
+    # so rglob finds files in both subdirectories.
+    for subdir in ("components", "previews"):
+        candidate = project_root / "core" / "designsystem" / subdir
+        if candidate.exists():
+            return candidate.parent  # core/designsystem/
+
+    # Fallback: the designsystem directory itself
+    ds = project_root / "core" / "designsystem"
+    if ds.exists():
+        return ds
+
     return None
 
 
@@ -57,12 +79,13 @@ def _md5(text: str) -> str:
 
 
 def compare(project_root: Path, skill_md: Path) -> list[dict]:
-    """Return a list of comparison results, one per reference component."""
+    """Return a list of comparison results, one per reference component or preview."""
     reference = extract_reference_components(skill_md)
     comp_dir = find_component_dir(project_root)
 
     results = []
-    for filename, ref_code in sorted(reference.items()):
+    for rel_path, ref_code in sorted(reference.items()):
+        filename = rel_path.split("/")[-1]
         project_file: Path | None = None
         if comp_dir:
             matches = list(comp_dir.rglob(filename))
@@ -70,7 +93,7 @@ def compare(project_root: Path, skill_md: Path) -> list[dict]:
 
         if project_file is None:
             results.append({
-                "file": filename,
+                "file": rel_path,
                 "status": "MISSING",
                 "ref": ref_code,
                 "project": None,
@@ -80,7 +103,7 @@ def compare(project_root: Path, skill_md: Path) -> list[dict]:
             project_code = project_file.read_text(encoding="utf-8")
             status = "CURRENT" if _md5(ref_code) == _md5(project_code) else "MODIFIED"
             results.append({
-                "file": filename,
+                "file": rel_path,
                 "status": status,
                 "ref": ref_code,
                 "project": project_code,
@@ -91,11 +114,22 @@ def compare(project_root: Path, skill_md: Path) -> list[dict]:
 
 
 def _resolve_filename(name: str) -> str:
-    """Normalise 'AppButton' / 'AppButton.kt' → 'AppButton.kt'."""
+    """Normalise a component/preview name to its reference key.
+
+    'AppButton'         → 'components/AppButton.kt'
+    'AppButtonPreview'  → 'previews/AppButtonPreview.kt'
+    'components/AppButton.kt' → unchanged
+    'previews/AppButtonPreview.kt' → unchanged
+    """
+    if "/" in name:
+        return name  # already a relative path
     if not name.endswith(".kt"):
-        name = name if name.startswith("App") else f"App{name}"
+        if not name.startswith("App"):
+            name = f"App{name}"
         name = f"{name}.kt"
-    return name
+    if "Preview" in name:
+        return f"previews/{name}"
+    return f"components/{name}"
 
 
 def main() -> int:
@@ -153,7 +187,14 @@ def main() -> int:
     modified = [r for r in results if r["status"] == "MODIFIED"]
     missing  = [r for r in results if r["status"] == "MISSING"]
 
-    print(f"Design system components — {len(results)} reference component(s)\n")
+    components = [r for r in results if r["file"].startswith("components/")]
+    previews   = [r for r in results if r["file"].startswith("previews/")]
+
+    print(
+        f"Design system files — {len(results)} reference files  "
+        f"({len(components)} component{'s' if len(components) != 1 else ''}, "
+        f"{len(previews)} preview{'s' if len(previews) != 1 else ''})\n"
+    )
     print(f"  ✅  CURRENT   {len(current):>2}  (matches skill reference)")
     print(f"  ⚠️   MODIFIED  {len(modified):>2}  (project has customisations — review before updating)")
     print(f"  ❌  MISSING   {len(missing):>2}  (not yet generated in project)")
