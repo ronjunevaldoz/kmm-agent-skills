@@ -713,6 +713,19 @@ class AuditSkillsRepoTests(unittest.TestCase):
 
     # ── New commands exist ────────────────────────────────────────────────────────
 
+    def test_design_system_template_exists(self) -> None:
+        template = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "references" / "design-system-template.md"
+        )
+        self.assertTrue(template.exists(), "design-system-template.md missing from references/")
+        content = template.read_text()
+        for section in ("PROJECT_NAME", "GROUP_ID", "COMPONENT_PREFIX",
+                        "Color palette", "Typography", "Spacing scale",
+                        "Component Inventory", "Ownership Model",
+                        "Detekt Rules", "Multi-Device Preview", "Design Audit Log"):
+            self.assertIn(section, content, f"Template missing section: {section}")
+
     def test_record_design_baselines_command_exists(self) -> None:
         cmd = REPO_ROOT / "commands" / "record-design-baselines.md"
         self.assertTrue(cmd.exists())

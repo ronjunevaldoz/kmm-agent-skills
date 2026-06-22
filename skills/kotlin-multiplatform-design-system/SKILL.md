@@ -181,6 +181,25 @@ Use `/record-design-baselines` after fixing to record new Roborazzi golden PNGs.
 Use `/audit-design-visual` to run a vision pass over the goldens and catch spacing,
 contrast, and cross-screen consistency issues that have no code-level signal.
 
+### Project documentation template
+
+Copy `references/design-system-template.md` to `docs/design-system.md` in your project
+and fill it in. This living document records your token values, component inventory,
+detekt rule overrides, multi-device preview coverage, and audit log.
+
+The skill reads `docs/design-system.md` when it exists and uses it to:
+- Infer your component prefix (e.g. `Acme` instead of `App`)
+- Confirm your token names before generating code
+- Detect deviations you've documented as intentional
+
+```bash
+cp skills/kotlin-multiplatform-design-system/references/design-system-template.md \
+   your-project/docs/design-system.md
+```
+
+Then replace `PROJECT_NAME`, `GROUP_ID`, and `COMPONENT_PREFIX` globally and fill in
+the token values for your brand.
+
 ---
 
 ## Style Rules
@@ -2270,6 +2289,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Added `references/design-system-template.md` — project-facing living document covering tokens, component inventory, detekt overrides, multi-device preview coverage, and audit log. Wired copy instructions into Ownership Model section. |
 | 2026-06-22 | Added `RedundantScreenTitleRule` (flags `Text`/`AppText` with string literals inside `*Content`/`*Screen` composables) and `HardcodedGridColumnsRule` (flags `GridCells.Fixed(N≥2)`). Added `@MultiDevicePreview` annotation (phone 360dp / tablet 673dp / desktop 1280dp) to `AppThemePreviewWrapper.kt`; applied to base light/dark variants of all 6 core component previews. Updated `/audit-design-visual` with duplicate title check and multi-device layout table. Updated `/record-design-baselines` with multi-device PNG naming. |
 | 2026-06-22 | Added `detekt-rules/` PSI-based scanner module with 7 rules (HardcodedColor, HardcodedDp, MaterialThemeUsage, DirectTextStyle, NestedContainer, ComponentRegistryViolation, DesignTokenImportBoundary). Added `/record-design-baselines` and `/audit-design-visual` commands. Updated `/fix-design` to use detekt as primary scanner. |
 | 2026-06-22 | Added `scripts/scan_design_violations.py` and `/fix-design` command: scans Compose files for hardcoded colors/dp/MaterialTheme/nested containers, fixes file-by-file, verifies with Roborazzi vision. |
