@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.21.5] — 2026-06-22
+
+### Added
+
+- feat(jni-kotlin-pro): header compatibility matrix + architectural feedback schema
+
+---
+
 ## [v1.21.4] — 2026-06-22
 
 ### Added
