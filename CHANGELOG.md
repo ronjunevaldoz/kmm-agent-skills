@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.21.3] — 2026-06-22
+
+### Added
+
+- feat(jni-kotlin-pro): Phase 0 discovery gate + wrapper-call pattern
+
+---
+
 ## [v1.21.2] — 2026-06-22
 
 ### Fixed
