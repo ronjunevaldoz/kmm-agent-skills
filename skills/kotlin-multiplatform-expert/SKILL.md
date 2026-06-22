@@ -103,7 +103,8 @@ versions when the local repo can be checked directly.
 |---|---|
 | `kotlin-multiplatform-dependency-injection` | Koin module organization, manual vs annotated wiring, app/feature/ViewModel scopes, test overrides |
 | `kotlin-multiplatform-flavor-environment` | Dev/staging/prod config, BuildKonfig, secrets, `AppConfig` facade |
-| `kotlin-multiplatform-ci-github-actions` | GitHub Actions, test matrix, XCFramework release workflow |
+| `kotlin-multiplatform-ci-github-actions` | GitHub Actions, test matrix, XCFramework release workflow YAML |
+| `kotlin-multiplatform-release` | Versioning (`gradle.properties`), Maven Central (vanniktech), GPG signing, git-cliff changelog, GitHub Release, secrets management, local publish script |
 | `kotlin-multiplatform-audit` | Existing project health checks, boundary review, architecture drift, readiness gaps |
 | `kotlin-multiplatform-legal-docs` | Privacy Policy, Terms & Conditions, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, in-app `LegalDocsScreen`, consent gate |
 
@@ -176,6 +177,7 @@ kotlin-multiplatform-feature-scaffold       ← scaffold second (implements the 
 ├── kotlin-multiplatform-presenter-module   (depends on: scaffold, clean-architecture)
 ├── kotlin-multiplatform-flavor-environment (no deps)
 ├── kotlin-multiplatform-ci-github-actions  (no deps)
+├── kotlin-multiplatform-release            (depends on: ci-github-actions, xcframework-spm)
 ├── kotlin-multiplatform-dependency-injection (no deps)
 ├── kotlin-multiplatform-audit              (no deps for review work)
 ├── kotlin-multiplatform-logging            (depends on: scaffold)
@@ -430,6 +432,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "add Ktor", "network layer", "API calls", "token refresh" | `kotlin-multiplatform-network-layer` |
 | "local database", "SQLite", "SQLDelight", "offline storage" | `kotlin-multiplatform-sqldelight-setup` |
 | "CI", "GitHub Actions", "run KMP tests" | `kotlin-multiplatform-ci-github-actions` |
+| "publish to Maven Central", "Maven publish", "release library", "versioning", "semantic versioning", "bump version", "vanniktech", "Sonatype", "git-cliff", "changelog", "GitHub Release", "release pipeline", "GPG signing" | `kotlin-multiplatform-release` |
 | "dev/staging/prod", "BuildKonfig", "environment config" | `kotlin-multiplatform-flavor-environment` |
 | "XCFramework", "Swift Package Manager", "SPM", "iOS binary" | `kotlin-multiplatform-xcframework-spm` |
 | "expect actual", "platform-specific", "@ObjCName", "iOS interop" | `kotlin-multiplatform-expect-actual` |
