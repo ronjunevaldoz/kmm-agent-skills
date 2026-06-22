@@ -124,7 +124,7 @@ versions when the local repo can be checked directly.
 |---|---|
 | `kotlin-multiplatform-expect-actual` | `expect/actual` mechanism, interface-injection alternative, `@ObjCName`, Kotlin/Native memory |
 | `kotlin-multiplatform-repository-pattern` | Data layer, single source of truth, fetch strategies, domain mapping, optimistic updates |
-| `jni-kotlin-pro` | JNI bridge from Kotlin to native C/C++ libraries, `@JvmStatic` entry points, `CPointer`, memory-safe interop patterns |
+| `jni-kotlin-pro` | JVM↔C++ JNI bridges (`JNIEnv`, `Java_*`, `GetStringUTFChars`, `*-jni.cpp`/`*-wrapper.cpp`), memory safety across the JVM boundary, 3rd-party C++ as read-only black box + C-shim wrapping, symbol-conflict isolation. **NOT** Kotlin/Native cinterop (`CPointer`/`.def`) |
 
 ### Layer 4 — Feature Building Blocks
 | Skill | Owns |
@@ -468,7 +468,8 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "offline first", "offline-first", "local first", "sync", "optimistic update", "conflict resolution", "background sync", "SyncManager", "single source of truth", "cache then network" | `kotlin-multiplatform-offline-first` |
 | "crash reporting", "crashlytics", "firebase crashes", "sentry", "non-fatal", "symbolication", "dSYM", "kermit crash", "crash handler", "breadcrumb crash" | `kotlin-multiplatform-crash-reporting` |
 | "DataStore", "Preferences DataStore", "Proto DataStore", "save settings", "persist user prefs", "SharedPreferences migration", "createDataStore", "local key-value store" | `kotlin-multiplatform-datastore` |
-| "JNI", "native bridge", "C library", "C++ interop", "JNI bridge", "CPointer", "JvmStatic native", "kotlin native interop", "call C from Kotlin" | `jni-kotlin-pro` |
+| "JNI", "JNI bridge", "native bridge", "JNIEnv", "Java_*", "GetStringUTFChars", "jbyteArray", "wrapper.cpp", "vendor C++", "3rd-party C++", "CMake JNI", "NDK", "call C++ from Kotlin/JVM", "native memory leak", "symbol conflict", "C-shim", "header compatibility" | `jni-kotlin-pro` |
+| Disambiguation — "platform-specific code", "iOS implementation", "CPointer", "cinterop", ".def file", "Kotlin/Native" → `kotlin-multiplatform-expect-actual` (NOT `jni-kotlin-pro`; JNI is JVM-only) | — |
 | "privacy policy", "terms and conditions", "terms of service", "GDPR", "CCPA", "data safety", "App Store privacy", "legal docs", "user data disclosure", "consent screen", "privacy screen", "play store legal", "app store compliance" | `kotlin-multiplatform-legal-docs` |
 
 ---
@@ -570,5 +571,6 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Fixed jni-kotlin-pro routing: was tagged with Kotlin/Native cinterop vocabulary (`CPointer`, `kotlin native interop`) but the skill is strictly JVM JNI. Corrected description + trigger map to JNI terms (`JNIEnv`, `Java_*`, `wrapper.cpp`, `vendor C++`, `C-shim`); added expect-actual disambiguation row for cinterop. |
 | 2026-06-21 | Removed private project reference from docs-first rule; rule is now generic. |
 | 2026-06-18 | Initial release — 30-skill routing map, dependency graph, build order, decision trees, anti-pattern checklist. |
