@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.22.0] — 2026-06-22
+
+### Added
+
+- feat(design-system): detect cross-screen layout inconsistency
+
+---
+
 ## [v1.21.9] — 2026-06-22
 
 ### Docs
