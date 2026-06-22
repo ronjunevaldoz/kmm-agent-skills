@@ -6,14 +6,6 @@ All notable changes to kmm-agent-skills are documented here.
 
 ### Added
 
-- feat(design-system): ownership model, stability tiers, /update-design-system command
-
----
-
-## [v1.17.0] — 2026-06-22
-
-### Added
-
 - feat(design-system): add ownership model (project-owned tokens vs skill-owned components), stability tiers for all components, and `scripts/update_design_system.py`
 - feat(design-system): add `/update-design-system` command with diff-and-confirm workflow
 - feat(expert): add `/update-design-system` routing keywords to Skill Invocation Map
