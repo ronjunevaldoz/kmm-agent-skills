@@ -135,18 +135,152 @@ the constraint to the user. Never proceed silently.
 
 ## Pre-task checklist (run through before every change)
 
-- [ ] Read the actual source file — not a summary, not a prior session note
-- [ ] **Is the target file 3rd party?** Check the indicators above — if yes, STOP and use the wrapper pattern
+- [ ] **Run Phase 0 (library-first discovery)** — grep the library headers for what you need; read the reference example; confirm whether the library already provides it
+- [ ] **Is the target file 3rd party?** Check the indicators in "HARD STOP" — if yes, STOP and use the wrapper-call pattern
+- [ ] Read the actual project source file — not a summary, not a prior session note
 - [ ] Identify which layer the change lives in
 - [ ] Check if the target has a `// STABLE:` comment — if yes, apply the full gate in
       `references/stable-feature-guard.md`
 - [ ] Check `references/error-patterns.md` — does this change risk repeating a known bug?
-- [ ] If the change touches a native algorithm: `grep -r "function_name" <lib_source>/`
-      before writing a single line
 
 ---
 
 ## Development workflow
+
+### Phase 0 — Library-first discovery (MANDATORY — cannot skip)
+
+**Do this before opening any project file. Do this before writing any code.**
+
+The library already does most of what you need. Your job is to find it and call it,
+not rewrite it.
+
+#### Step 0a — Locate the library headers
+
+```bash
+# Find the public API surface — headers you can include
+find vendor/ third_party/ external/ libs/ \
+  -name "*.h" -o -name "*.hpp" | sort
+
+# Or if the library is a submodule:
+git submodule status
+ls <submodule-path>/include/
+```
+
+#### Step 0b — Search for the function you need
+
+```bash
+# Search by what you're trying to do (e.g. "decode", "encode", "init", "free")
+grep -r "your_keyword" vendor/<lib>/include/ --include="*.h" -l
+
+# Read the matching header
+# Look for: function signature, parameter names, return values, error conventions
+```
+
+#### Step 0c — Find the reference usage
+
+```bash
+# The library always ships examples or a CLI that shows correct usage
+find vendor/<lib>/ -name "*.cpp" -o -name "main.cpp" | xargs grep -l "your_function"
+
+# Read the example. Copy its call pattern verbatim.
+```
+
+#### Step 0d — Decision gate
+
+After discovery, answer:
+
+| Question | Answer | Action |
+|---|---|---|
+| Does the library already do this? | Yes | Call it through the wrapper — write zero algorithm code |
+| Does the library do something close but not exact? | Yes | Call the closest function; adapt input/output in the wrapper layer only |
+| Does the library not have this at all? | Yes | Implement ONLY in `*-wrapper.cpp`; never in the JNI bridge layer |
+| Can this require editing a library file? | **Never** | STOP — use the wrapper-call pattern or report a blocker |
+
+---
+
+### Phase 0e — Wrapper call pattern
+
+This is the only legitimate way to use a 3rd party library through JNI.
+Never deviate from this structure.
+
+```
+vendor/<lib>/include/lib.h          ← READ ONLY — include it, never edit it
+        ↓ included by
+project/src/engine-wrapper.h        ← YOUR file — declares your wrapper API
+project/src/engine-wrapper.cpp      ← YOUR file — calls the library, owns RAII
+        ↓ called by
+project/src/engine-jni.cpp          ← YOUR file — JNI type conversion only
+```
+
+**`engine-wrapper.h`** — your API, library-agnostic types only:
+```cpp
+#pragma once
+// Include the library header here, not in the JNI file
+#include "vendor/your-lib/include/your-lib.h"
+
+struct EngineContext {
+    your_lib_handle_t* handle;   // opaque — never exposed to Kotlin
+    std::string last_error;
+};
+
+EngineContext* engine_create(const char* model_path);
+int            engine_run(EngineContext* ctx, const float* input, int len, float* output);
+const char*    engine_get_error(const EngineContext* ctx);
+void           engine_free(EngineContext* ctx);
+```
+
+**`engine-wrapper.cpp`** — call the library exactly as its header says:
+```cpp
+#include "engine-wrapper.h"
+
+EngineContext* engine_create(const char* model_path) {
+    auto* ctx = new EngineContext{};
+    // Call the library function — copy the call from the library's own example
+    ctx->handle = your_lib_init(model_path);          // ← library function, not reimplemented
+    if (!ctx->handle) {
+        ctx->last_error = "your_lib_init failed for: " + std::string(model_path);
+        return ctx;   // caller checks handle == nullptr
+    }
+    return ctx;
+}
+
+int engine_run(EngineContext* ctx, const float* input, int len, float* output) {
+    if (!ctx->handle) { ctx->last_error = "not initialised"; return -1; }
+    // Call the library — do not reimplement what it already does
+    int result = your_lib_process(ctx->handle, input, len, output); // ← library function
+    if (result != YOUR_LIB_OK) {
+        ctx->last_error = your_lib_get_error(ctx->handle);          // ← library function
+    }
+    return result;
+}
+
+void engine_free(EngineContext* ctx) {
+    if (!ctx) return;
+    if (ctx->handle) your_lib_free(ctx->handle);    // ← library function
+    delete ctx;
+}
+```
+
+**`engine-jni.cpp`** — type conversion only, zero algorithm code:
+```cpp
+#include "engine-wrapper.h"
+#include <jni.h>
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_com_example_Engine_nativeCreate(JNIEnv* env, jobject, jstring modelPath) {
+    const char* path = env->GetStringUTFChars(modelPath, nullptr);
+    EngineContext* ctx = engine_create(path);          // ← wrapper call
+    env->ReleaseStringUTFChars(modelPath, path);
+    if (!ctx->handle) {
+        env->ThrowNew(env->FindClass("java/lang/RuntimeException"), ctx->last_error.c_str());
+        engine_free(ctx);
+        return 0L;
+    }
+    return reinterpret_cast<jlong>(ctx);
+}
+```
+
+---
 
 ### Phase 1 — Understand the boundary
 
@@ -214,7 +348,19 @@ stated goal and nothing else.
 - **Missing release on error path** — `GetStringUTFChars` acquired, then `return error` before `ReleaseStringUTFChars`. The JNI layer leaks on every error. Every acquired resource must be released on ALL exit paths, including throws.
 - **Wrong array release mode** — using `0` (copy-back) instead of `JNI_ABORT` on a read-only array. Triggers unnecessary write-back and masks the intent.
 - **Native logic in the JNI bridge** — putting computation or processing steps in `*-jni.cpp` instead of the native library or C wrapper. Makes the bridge untestable.
-- **Algorithm reimplementation** — rewriting a function that already exists in the native library. Produces a diverged copy that drifts silently with library updates.
+- **Algorithm reimplementation** — rewriting a function that already exists in the native library. Produces a diverged copy that drifts silently with library updates. The correct path: run Phase 0 discovery, find the library function, call it from `*-wrapper.cpp`. If the library function has a different signature than you need, write an adapter in the wrapper — never a reimplementation.
+
+  ```cpp
+  // WRONG — reimplements what the library already does:
+  float* engine_wrapper_decode(float* input, int len) {
+      // ... manual ISTFT implementation ...  ← EP-1 error pattern
+  }
+
+  // RIGHT — calls the library function:
+  float* engine_wrapper_decode(EngineContext* ctx, float* input, int len) {
+      return your_lib_decode(ctx->handle, input, len);  // ← library owns the algorithm
+  }
+  ```
 - **RTLD_GLOBAL symbol conflict** — two `.so` files both export the same symbol (e.g. `lib_init`). The second load silently uses the first library's symbol. Always use `RTLD_LOCAL` and verify with `nm -D`.
 - **GPU output read without sync** — reading native output before `synchronize()` returns stale or partially-written data.
 - **Hardcoded constants** — guessing dimensions, sizes, or thread counts instead of reading them from the library header or a `get_*` accessor. Silent wrong results, not crashes.
@@ -247,13 +393,17 @@ stated goal and nothing else.
 
 When responding to JNI work, always structure the response in this order:
 
-1. **Layer** — identify which of the 4 layers the change lives in (Kotlin engine / JNI bridge / C wrapper / native lib)
-2. **Risk assessment** — answer the 5 questions from Phase 2 (memory, algorithm, symbol conflict, GPU sync, defaults) before writing code
-3. **Implementation** — complete code showing all exit paths with matching acquire/release pairs; no stubs
-4. **Quality gate checklist** — confirm each gate from the relevant layer (bridge, wrapper, or shared library) is satisfied
-5. **Audit comment** — if the target has `// STABLE:`, include the required change comment
+1. **Discovery result** — report what Phase 0 found: which library header contains the relevant function, its exact signature, and the reference example that shows correct call usage. If no library function was found, state that explicitly.
+2. **Layer** — identify which of the 4 layers the change lives in (Kotlin engine / JNI bridge / C wrapper / native lib)
+3. **3rd party file check** — confirm that no 3rd party file will be modified. If one would need to be, stop here.
+4. **Risk assessment** — answer the 5 questions from Phase 2 (memory, algorithm, symbol conflict, GPU sync, defaults) before writing code
+5. **Implementation** — complete code following the wrapper-call pattern; zero algorithm code in the JNI bridge; zero reimplementations of library functions; all exit paths with matching acquire/release pairs; no stubs
+6. **Quality gate checklist** — confirm each gate from the relevant layer (bridge, wrapper, or shared library) is satisfied
+7. **Audit comment** — if the target has `// STABLE:`, include the required change comment
 
 Never output a partial JNI function. A bridge function with a missing release on one exit path is worse than no change — it ships a memory leak.
+
+Never output wrapper code that reimplements a function found in step 1. Cite the library function by name.
 
 ---
 
@@ -261,5 +411,6 @@ Never output a partial JNI function. A bridge function with a missing release on
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Added Phase 0 (library-first discovery gate): grep commands, decision table, and wrapper-call pattern with concrete header/wrapper/JNI code template. Updated pre-task checklist to require Phase 0. Updated anti-patterns with reinvention wrong-vs-right example. Updated output style to require discovery result and 3rd party check as first two response items. |
 | 2026-06-22 | Added HARD STOP section on 3rd party file immutability: path-detection heuristics, wrapper-pattern alternatives table, pre-task checklist item. Added EP-9 to error-patterns.md. |
 | 2026-06-20 | Initial release. |
