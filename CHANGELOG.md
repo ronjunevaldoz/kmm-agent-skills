@@ -2,6 +2,16 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.20.0] — 2026-06-22
+
+### Fixed
+
+- fix(release): release script no longer prepends a duplicate CHANGELOG entry when a detailed one was already written manually; version guard now runs before git log so no subprocess call is made
+- fix(audit): `_check_design_system()` now flags missing `## Component Previews` section and `### previews/` blocks in the base design-system skill
+- test: update `_DS_GOOD_CONTENT` fixture to include previews section; add `test_ds_flags_missing_component_previews` (total: 126 tests)
+
+---
+
 ## [v1.19.0] — 2026-06-22
 
 ### Added

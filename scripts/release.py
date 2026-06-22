@@ -241,14 +241,20 @@ def generate_changelog_section(new_version: str, prev_tag: str) -> str:
 
 
 def update_changelog(new_version: str, prev_tag: str, dry_run: bool) -> str:
+    header = "# Changelog\n\nAll notable changes to kmm-agent-skills are documented here.\n\n"
+    existing = CHANGELOG_MD.read_text(encoding="utf-8") if CHANGELOG_MD.exists() else header
+
+    # Skip git log + prepend if a detailed entry was already written manually.
+    if not dry_run and f"## [{new_version}]" in existing:
+        ok(f"CHANGELOG.md already contains {new_version} entry — skipping prepend")
+        return ""
+
     section = generate_changelog_section(new_version, prev_tag)
 
     if dry_run:
         info(f"[dry-run] CHANGELOG section preview:\n{section[:300]}…")
         return section
 
-    header = "# Changelog\n\nAll notable changes to kmm-agent-skills are documented here.\n\n"
-    existing = CHANGELOG_MD.read_text(encoding="utf-8") if CHANGELOG_MD.exists() else header
     # Strip the header so we can prepend the new section after it
     body = existing[len(header):] if existing.startswith(header) else existing
     CHANGELOG_MD.write_text(header + section + "\n---\n\n" + body, encoding="utf-8")

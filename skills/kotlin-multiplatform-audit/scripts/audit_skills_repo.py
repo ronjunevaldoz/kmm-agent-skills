@@ -54,6 +54,13 @@ def _check_design_system(skill_dir: Path, text: str, findings: list[str]) -> Non
                 + ", ".join(missing)
             )
 
+        # Must have a Component Previews section with at least one previews/ block.
+        if "## Component Previews" not in text or "### `previews/" not in text:
+            findings.append(
+                f"{name}: missing Component Previews section — "
+                "add '## Component Previews' with previews/AppXxxPreview.kt blocks"
+            )
+
         # `enum class TextStyle` collides with Compose's own TextStyle — rename to AppTextStyle.
         if re.search(r"\benum class TextStyle\b", text):
             findings.append(

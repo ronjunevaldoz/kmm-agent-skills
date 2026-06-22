@@ -508,6 +508,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
         "  last-updated: '2026-06-22'\n\n"
         "OptIn(ExperimentalStylesApi\n"
         "fun AppButton(\nfun AppBadge(\nfun AppCard(\nfun AppChip(\nfun AppTextField(\nfun AppText(\n"
+        "## Component Previews\n\n### `previews/AppButtonPreview.kt`\n```kotlin\n// preview\n```\n\n"
         "## Changelog\n\n| Date | Change |\n|---|---|\n| 2026-06-22 | v1. |\n"
     )
 
@@ -575,6 +576,18 @@ class AuditSkillsRepoTests(unittest.TestCase):
             findings = audit_repo_scripts.audit_skills_repo(root)
             ds_findings = [f for f in findings if "design-system" in f]
             self.assertEqual([], ds_findings)
+
+    def test_ds_flags_missing_component_previews(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            content = self._DS_GOOD_CONTENT.replace(
+                "## Component Previews\n\n### `previews/AppButtonPreview.kt`\n```kotlin\n// preview\n```\n\n",
+                "",
+            )
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("Component Previews" in f for f in findings))
 
     # ── Naming conventions ───────────────────────────────────────────────────────
 
