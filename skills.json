@@ -1,5 +1,5 @@
 {
-  "version": "1.17.0",
+  "version": "1.18.0",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -769,6 +769,7 @@
         "custom typography"
       ],
       "scripts": [
+        "scan_design_violations.py",
         "update_design_system.py"
       ]
     },
