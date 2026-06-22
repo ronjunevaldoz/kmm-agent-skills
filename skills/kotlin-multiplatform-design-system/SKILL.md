@@ -2263,6 +2263,20 @@ If the design system feels inconsistent, check: (1) are all pages using `AppScaf
 
 ---
 
+## References
+
+The `references/` directory contains project-facing documents the skill uses at generation time:
+
+| File | Purpose | Usage |
+|---|---|---|
+| `references/design-system-template.md` | Living design system doc — tokens, component inventory, detekt overrides, audit log | Copy to `docs/design-system.md` in your project; fill in token values and prefix |
+
+The skill reads `docs/design-system.md` when it exists in the target project to infer
+the component prefix and token names before generating code. If the file is absent,
+defaults (`App` prefix, token names as shown in the steps) are used.
+
+---
+
 ## Related Skills
 
 - `kotlin-multiplatform-feature-scaffold` — `:core:designsystem` follows the same convention plugin pattern
