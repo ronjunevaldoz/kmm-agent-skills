@@ -17,6 +17,8 @@ class DesignSystemRuleSetProvider : RuleSetProvider {
             NestedContainerRule(config),
             ComponentRegistryRule(config),
             ImportBoundaryRule(config),
+            RedundantScreenTitleRule(config),
+            HardcodedGridColumnsRule(config),
         )
     )
 }

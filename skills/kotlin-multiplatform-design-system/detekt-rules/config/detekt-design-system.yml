@@ -16,3 +16,11 @@ design-system:
     componentPrefix: 'App'
   ImportBoundaryRule:
     active: true
+  RedundantScreenTitleRule:
+    active: true
+    # Severity is Warning — legitimate section headers exist inside content.
+    # Review each finding before removing the Text() call.
+  HardcodedGridColumnsRule:
+    active: true
+    # GridCells.Fixed(1) is exempt. Fixed(2+) triggers this rule.
+    # Fix: GridCells.Adaptive(minSize = Xdp) or WindowSizeClass guard.

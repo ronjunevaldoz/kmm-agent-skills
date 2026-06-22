@@ -1462,7 +1462,18 @@ import androidx.compose.foundation.style.ExperimentalStylesApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import GROUP_ID.core.designsystem.theme.AppTheme
+
+/**
+ * Shared annotation for cross-device preview coverage.
+ * Generates one screenshot per size class: phone, tablet, desktop.
+ * Use on light/dark base variants. State variants (disabled, error) use plain @Preview.
+ */
+@Preview(name = "Phone",   widthDp = 360,  heightDp = 640)
+@Preview(name = "Tablet",  widthDp = 673,  heightDp = 841)
+@Preview(name = "Desktop", widthDp = 1280, heightDp = 800)
+annotation class MultiDevicePreview
 
 @Composable
 fun AppThemePreviewWrapper(
@@ -1492,7 +1503,7 @@ import GROUP_ID.core.designsystem.components.AppButton
 import GROUP_ID.core.designsystem.components.AppText
 import GROUP_ID.core.designsystem.styles.ButtonVariant
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppButtonDefaultLightPreview() {
     AppThemePreviewWrapper(darkTheme = false) {
@@ -1500,7 +1511,7 @@ fun AppButtonDefaultLightPreview() {
     }
 }
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppButtonDefaultDarkPreview() {
     AppThemePreviewWrapper(darkTheme = true) {
@@ -1559,7 +1570,7 @@ import GROUP_ID.core.designsystem.components.AppBadge
 import GROUP_ID.core.designsystem.components.AppText
 import GROUP_ID.core.designsystem.styles.BadgeVariant
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppBadgeAllVariantsPreview() {
     AppThemePreviewWrapper {
@@ -1573,7 +1584,7 @@ fun AppBadgeAllVariantsPreview() {
     }
 }
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppBadgeDarkPreview() {
     AppThemePreviewWrapper(darkTheme = true) {
@@ -1603,7 +1614,7 @@ import GROUP_ID.core.designsystem.components.AppCard
 import GROUP_ID.core.designsystem.components.AppText
 import GROUP_ID.core.designsystem.styles.CardVariant
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppCardDefaultPreview() {
     AppThemePreviewWrapper {
@@ -1637,7 +1648,7 @@ fun AppCardElevatedPreview() {
     }
 }
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppCardDarkPreview() {
     AppThemePreviewWrapper(darkTheme = true) {
@@ -1665,7 +1676,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import GROUP_ID.core.designsystem.components.AppChip
 import GROUP_ID.core.designsystem.styles.ChipVariant
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppChipStatesPreview() {
     AppThemePreviewWrapper {
@@ -1678,7 +1689,7 @@ fun AppChipStatesPreview() {
     }
 }
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppChipDarkPreview() {
     AppThemePreviewWrapper(darkTheme = true) {
@@ -1722,7 +1733,7 @@ fun AppTextFieldEmptyPreview() {
     }
 }
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppTextFieldWithLabelAndValuePreview() {
     AppThemePreviewWrapper {
@@ -1779,7 +1790,7 @@ fun AppTextFieldGhostPreview() {
     }
 }
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppTextFieldDarkPreview() {
     AppThemePreviewWrapper(darkTheme = true) {
@@ -1821,7 +1832,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import GROUP_ID.core.designsystem.components.AppText
 import GROUP_ID.core.designsystem.components.AppTextStyle
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppTextTypescalePreview() {
     AppThemePreviewWrapper {
@@ -1853,7 +1864,7 @@ fun AppTextMutedPreview() {
     }
 }
 
-@Preview
+@MultiDevicePreview
 @Composable
 fun AppTextDarkPreview() {
     AppThemePreviewWrapper(darkTheme = true) {
@@ -2124,11 +2135,15 @@ core/designsystem/
 │       │   ├── DirectTextStyleRule.kt
 │       │   ├── NestedContainerRule.kt
 │       │   ├── ComponentRegistryRule.kt
-│       │   └── ImportBoundaryRule.kt
+│       │   ├── ImportBoundaryRule.kt
+│       │   ├── RedundantScreenTitleRule.kt
+│       │   └── HardcodedGridColumnsRule.kt
 │       └── test/kotlin/GROUP_ID/designsystem/detekt/
 │           ├── HardcodedColorRuleTest.kt
 │           ├── ComponentRegistryRuleTest.kt
-│           └── ImportBoundaryRuleTest.kt
+│           ├── ImportBoundaryRuleTest.kt
+│           ├── RedundantScreenTitleRuleTest.kt
+│           └── HardcodedGridColumnsRuleTest.kt
 ```
 
 Replace `GROUP_ID` with your actual group ID (e.g. `com.example.myapp`) — same as your convention plugin names in `build-logic/`.
@@ -2179,6 +2194,8 @@ include(":core:designsystem:detekt-rules")
 | `NestedContainer` | Warning | `Card { Card {` and `Surface { Surface {` | Trailing-lambda form `Card { }` |
 | `ComponentRegistryViolation` | Warning | `@Composable fun MyButton` outside `core/designsystem/` | Entire class — regex can't see function definitions |
 | `DesignTokenImportBoundary` | Error | `import …tokens.AppColors` in `feature/*/ui/` | Entire class — regex can't check import context |
+| `RedundantScreenTitle` | Warning | `Text("…")` / `AppText("…")` with a string literal inside `*Content` / `*Screen` composables | Cannot infer that the composable is a screen or that a TopAppBar already shows the same string |
+| `HardcodedGridColumns` | Warning | `GridCells.Fixed(N≥2)` — fixed column count ignores screen width | Cannot count GridCells arguments or distinguish `Fixed` from `Adaptive` |
 
 ### Configuration
 
@@ -2253,6 +2270,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Added `RedundantScreenTitleRule` (flags `Text`/`AppText` with string literals inside `*Content`/`*Screen` composables) and `HardcodedGridColumnsRule` (flags `GridCells.Fixed(N≥2)`). Added `@MultiDevicePreview` annotation (phone 360dp / tablet 673dp / desktop 1280dp) to `AppThemePreviewWrapper.kt`; applied to base light/dark variants of all 6 core component previews. Updated `/audit-design-visual` with duplicate title check and multi-device layout table. Updated `/record-design-baselines` with multi-device PNG naming. |
 | 2026-06-22 | Added `detekt-rules/` PSI-based scanner module with 7 rules (HardcodedColor, HardcodedDp, MaterialThemeUsage, DirectTextStyle, NestedContainer, ComponentRegistryViolation, DesignTokenImportBoundary). Added `/record-design-baselines` and `/audit-design-visual` commands. Updated `/fix-design` to use detekt as primary scanner. |
 | 2026-06-22 | Added `scripts/scan_design_violations.py` and `/fix-design` command: scans Compose files for hardcoded colors/dp/MaterialTheme/nested containers, fixes file-by-file, verifies with Roborazzi vision. |
 | 2026-06-22 | Added ownership model section (project-owned tokens vs skill-owned components). Added stability tiers to component overview. Added `scripts/update_design_system.py` reference. |

@@ -613,6 +613,8 @@ class AuditSkillsRepoTests(unittest.TestCase):
             "NestedContainerRule.kt",
             "ComponentRegistryRule.kt",
             "ImportBoundaryRule.kt",
+            "RedundantScreenTitleRule.kt",
+            "HardcodedGridColumnsRule.kt",
         ]
         for fname in expected:
             self.assertTrue((rules_dir / fname).exists(), f"Missing rule file: {fname}")
@@ -635,7 +637,8 @@ class AuditSkillsRepoTests(unittest.TestCase):
         content = config_file.read_text()
         for rule in ("HardcodedColor", "HardcodedDp", "MaterialThemeUsage",
                      "DirectTextStyle", "NestedContainer",
-                     "ComponentRegistryRule", "ImportBoundaryRule"):
+                     "ComponentRegistryRule", "ImportBoundaryRule",
+                     "RedundantScreenTitleRule", "HardcodedGridColumnsRule"):
             self.assertIn(rule, content, f"Config missing rule: {rule}")
 
     def test_detekt_rules_service_loader_file_exists(self) -> None:
@@ -648,7 +651,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
         self.assertTrue(svc_file.exists())
         self.assertIn("DesignSystemRuleSetProvider", svc_file.read_text())
 
-    def test_detekt_rule_set_provider_has_all_7_rules(self) -> None:
+    def test_detekt_rule_set_provider_has_all_9_rules(self) -> None:
         provider_kt = (
             REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
             / "detekt-rules" / "src" / "main" / "kotlin"
@@ -658,8 +661,33 @@ class AuditSkillsRepoTests(unittest.TestCase):
         content = provider_kt.read_text()
         for rule in ("HardcodedColorRule", "HardcodedDpRule", "MaterialThemeUsageRule",
                      "DirectTextStyleRule", "NestedContainerRule",
-                     "ComponentRegistryRule", "ImportBoundaryRule"):
+                     "ComponentRegistryRule", "ImportBoundaryRule",
+                     "RedundantScreenTitleRule", "HardcodedGridColumnsRule"):
             self.assertIn(rule, content, f"RuleSetProvider missing: {rule}")
+
+    def test_redundant_screen_title_rule_exists(self) -> None:
+        rule_kt = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "GROUP_ID" / "designsystem" / "detekt"
+            / "RedundantScreenTitleRule.kt"
+        )
+        content = rule_kt.read_text()
+        self.assertIn("RedundantScreenTitle", content)
+        self.assertIn("KtTreeVisitorVoid", content)
+        self.assertIn("AppTopAppBar", content)
+
+    def test_hardcoded_grid_columns_rule_exists(self) -> None:
+        rule_kt = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "GROUP_ID" / "designsystem" / "detekt"
+            / "HardcodedGridColumnsRule.kt"
+        )
+        content = rule_kt.read_text()
+        self.assertIn("HardcodedGridColumns", content)
+        self.assertIn("GridCells", content)
+        self.assertIn("Adaptive", content)
 
     def test_component_registry_rule_uses_configurable_prefix(self) -> None:
         rule_kt = (

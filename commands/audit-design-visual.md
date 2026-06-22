@@ -47,6 +47,10 @@ For each PNG, read it with the Read tool and evaluate against these criteria:
 
 ### Screen-level checks (feature PNGs)
 
+These checks require **full-screen device PNGs** — screenshots that include both the
+`AppTopAppBar` and the content body in one frame. Component-level PNGs cannot catch
+these because they isolate each composable.
+
 | Check | Pass | Fail signal |
 |---|---|---|
 | Consistent button size across screens | ✅ | Buttons different heights in different screens |
@@ -55,6 +59,39 @@ For each PNG, read it with the Read tool and evaluate against these criteria:
 | No orphaned hardcoded color vs system color | ✅ | Brand color in one screen, plain grey in another |
 | Error states use the same error color token | ✅ | Red in one screen, orange in another |
 | Navigation bar / TopAppBar consistent across screens | ✅ | Height or icon size varies |
+| **No duplicate screen title** | ✅ | Title text appears both in TopAppBar AND in content body |
+| Grid layout fills available width on phone | ✅ | Single item in 2-column grid leaves half the screen empty |
+| Phone (360dp) — single-column list readable | ✅ | Content clipped or overflows |
+| Tablet (673dp) — layout uses extra width | ✅ | Identical to phone layout, wasted horizontal space |
+| Desktop (1280dp) — multi-column or max-width container | ✅ | Full-width single column of giant cards |
+
+#### Duplicate title check — what to look for
+
+The `RedundantScreenTitleRule` detekt rule catches this in code, but the visual check
+confirms the actual rendered output. A duplicate title looks like:
+
+```
+┌─────────────────────────────┐
+│  ← Community          ⋮    │  ← AppTopAppBar renders "Community" here
+├─────────────────────────────┤
+│                             │
+│  Community                  │  ← Text("Community") in CommunityContent — DUPLICATE
+│                             │
+│  [guild card]               │
+└─────────────────────────────┘
+```
+
+Flag as ❌ if the same string appears in both the TopAppBar title area and as a
+standalone `Text` composable in the content body directly below it.
+
+#### Multi-device layout check
+
+Each screen-level baseline set should contain three PNGs (phone / tablet / desktop)
+generated via `@MultiDevicePreview`. Compare across device widths:
+
+- **Phone (360dp)**: list/stack layout expected — no multi-column grids unless `Fixed(1)`
+- **Tablet (673dp)**: medium layout — some components may switch to 2-column
+- **Desktop (1280dp)**: wide layout — content should have max-width constraint, not stretch end-to-end
 
 ---
 

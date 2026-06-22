@@ -30,11 +30,20 @@ function to:
 
 ```
 core/designsystem/build/outputs/roborazzi/
-  AppButton_DefaultLight.png
-  AppButton_DefaultDark.png
-  AppButton_OutlineLight.png
+  AppButton_DefaultLight_Phone.png
+  AppButton_DefaultLight_Tablet.png
+  AppButton_DefaultLight_Desktop.png
+  AppButton_DefaultDark_Phone.png
+  AppButton_DefaultDark_Tablet.png
+  AppButton_DefaultDark_Desktop.png
+  AppButton_OutlineLight.png        ← state variants keep plain @Preview (one PNG each)
   ...
 ```
+
+> **Why three device PNGs per base variant?** The `@MultiDevicePreview` annotation
+> (defined in `AppThemePreviewWrapper.kt`) is a composite of three `@Preview`s at
+> 360dp / 673dp / 1280dp widths. Each produces a separate PNG so the visual audit
+> can compare phone, tablet, and desktop in one baseline record step.
 
 Copy the generated PNGs to the golden directory:
 
