@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.20.0] — 2026-06-22
+
+### Added
+
+- feat(design-system): PSI-based detekt scanner + Roborazzi baselines + visual audit
+
+### Chore
+
+- chore: consolidate v1.19.1 CHANGELOG into single detailed entry
+
+---
+
 ## [v1.19.1] — 2026-06-22
 
 ### Fixed
