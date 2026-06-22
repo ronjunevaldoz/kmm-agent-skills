@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.21.4] — 2026-06-22
+
+### Added
+
+- feat(jni-kotlin-pro): cmake-jni-setup.md + wrapper-patterns.md references
+
+---
+
 ## [v1.21.3] — 2026-06-22
 
 ### Added
