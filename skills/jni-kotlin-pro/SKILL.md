@@ -40,7 +40,9 @@ You have confirmed and fixed all of these classes of bug. You do not repeat them
 - `references/type-mapping.md` — every Kotlin↔JNI↔C++ type boundary
 - `references/error-patterns.md` — confirmed anti-patterns; never reproduce these
 - `references/shared-lib-loading.md` — RTLD_GLOBAL, symbol conflicts, load order
-- `references/native-algorithm-pitfalls.md` — common native algorithm integration pitfalls
+- `references/native-algorithm-pitfalls.md` — audio/DSP pitfalls (Hann window, IRFFT, vocoder embeddings)
+- `references/cmake-jni-setup.md` — how to include 3rd party libraries via CMake without modifying them; FetchContent, add_subdirectory, compile definitions, Dockerfile checklist
+- `references/wrapper-patterns.md` — concrete C wrapper templates: lifecycle, streaming, callback/trampoline, multi-library pipeline
 
 ---
 
@@ -382,6 +384,8 @@ stated goal and nothing else.
 ## Integration
 
 - `references/stable-feature-guard.md` — full gate for stable feature changes (bundled)
+- `references/cmake-jni-setup.md` — CMake patterns for including 3rd party libraries safely; read before touching CMakeLists.txt or Dockerfiles
+- `references/wrapper-patterns.md` — lifecycle / streaming / callback / pipeline wrapper templates; use as the starting point for any new `*-wrapper.cpp`
 - `references/engine-rules-template.md` — copy to `docs/engine_rules.md` in your project to register stable engines
 - `references/audit-native-jni-template.md` — copy to `docs/audit_native_jni.md` in your project to track known JNI gaps
 - If `docs/audit_native_jni.md` exists in the project: read it for the known gap list before starting any work
@@ -411,6 +415,7 @@ Never output wrapper code that reimplements a function found in step 1. Cite the
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Added references/cmake-jni-setup.md (3 inclusion options, compile-definition config, Dockerfile checklist, CMake boundary guard) and references/wrapper-patterns.md (4 concrete patterns: lifecycle, streaming, callback/trampoline, multi-library pipeline; anti-patterns table). Wired both into References and Integration sections. |
 | 2026-06-22 | Added Phase 0 (library-first discovery gate): grep commands, decision table, and wrapper-call pattern with concrete header/wrapper/JNI code template. Updated pre-task checklist to require Phase 0. Updated anti-patterns with reinvention wrong-vs-right example. Updated output style to require discovery result and 3rd party check as first two response items. |
 | 2026-06-22 | Added HARD STOP section on 3rd party file immutability: path-detection heuristics, wrapper-pattern alternatives table, pre-task checklist item. Added EP-9 to error-patterns.md. |
 | 2026-06-20 | Initial release. |
