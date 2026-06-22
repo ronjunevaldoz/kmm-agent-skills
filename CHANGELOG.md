@@ -2,6 +2,23 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.23.2] — 2026-06-23
+
+### Added
+
+- feat(ci): add Maven Central publish, Doppler, git-cliff changelog, versioning
+
+### Fixed
+
+- fix(report-skill-issue): add Step 0 triage gate — skill vs project issue
+
+### Other
+
+- Revert "feat(ci): add Maven Central publish, Doppler, git-cliff changelog, versioning"
+- Release v1.23.1
+
+---
+
 ## [v1.23.1] — 2026-06-23
 
 ### Fixed
