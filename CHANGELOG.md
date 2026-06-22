@@ -2,6 +2,17 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.18.0] — 2026-06-22
+
+### Added
+
+- feat(design-system): add `scripts/scan_design_violations.py` — scans Compose files for hardcoded colors, dp literals, MaterialTheme usage, TextStyle construction, and nested containers; exit 0/1/2, `--json` and `--file` modes
+- feat(design-system): add `commands/fix-design.md` — fix violations file-by-file with per-file diff confirmation, regenerate Roborazzi screenshots, and verify fixes with Claude vision
+- feat(expert): add `/fix-design` routing keywords to Skill Invocation Map
+- test: add 22 tests for `scan_design_violations.py` (total: 120 tests passing)
+
+---
+
 ## [v1.17.0] — 2026-06-22
 
 ### Added

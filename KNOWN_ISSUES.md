@@ -278,4 +278,19 @@ but agents enforce it before a commit is ever attempted.
 
 ---
 
+---
+
+### KI-R17 — No automated way to find design violations in existing project code
+
+**Resolved:** `v1.18.0` — `feat(design-system): add /fix-design command with Roborazzi vision verification`  
+**Was:** The agent had no systematic way to find hardcoded colors, literal dp values, `MaterialTheme.*` access, `TextStyle()` construction, or nested Card/Surface containers in an existing project. When asked to "fix the design," it improvised — reading a few files and guessing, with no ordered priority and no safety guard.  
+**Fix:**
+- Created `scripts/scan_design_violations.py` — scans `*.kt` files for 5 violation categories, skips design-system source files, outputs JSON with file/line/severity; exit 0=clean, 1=violations, 2=not found
+- Created `commands/fix-design.md` — 5-step command: scan → summarize → fix each file with per-file diff+confirmation → regenerate Roborazzi screenshots → vision verify
+- Vision verification step reads light+dark PNGs with Claude vision and checks: brand color on primary actions, spacing consistency, no nested-card double-shadow, dark mode background, typography hierarchy
+- Added routing keywords to expert Skill Invocation Map
+- Added 22 tests for `scan_design_violations.py` (total: 120 tests passing)
+
+---
+
 *Add new entries as issues are discovered. Format: `KI-NNN` (open) or `KI-RNNN` (resolved).*

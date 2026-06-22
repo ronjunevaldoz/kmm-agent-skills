@@ -172,6 +172,10 @@ version and selectively apply fixes. The comparison is powered by
 `scripts/update_design_system.py`, which MD5-hashes each component block from this SKILL.md
 against the project file and reports CURRENT / MODIFIED / MISSING status.
 
+Use `/fix-design` to scan an existing project for violations (hardcoded colors, dp literals,
+`MaterialTheme.*` usage, `TextStyle()` construction, nested containers) and fix them
+file-by-file with per-file confirmation. Powered by `scripts/scan_design_violations.py`.
+
 ---
 
 ## Style Rules
@@ -1695,6 +1699,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Added `scripts/scan_design_violations.py` and `/fix-design` command: scans Compose files for hardcoded colors/dp/MaterialTheme/nested containers, fixes file-by-file, verifies with Roborazzi vision. |
 | 2026-06-22 | Added ownership model section (project-owned tokens vs skill-owned components). Added stability tiers to component overview. Added `scripts/update_design_system.py` reference. |
 | 2026-06-22 | Added `AppTextField` component (was missing from Step 6). Renamed `TextStyle` enum → `AppTextStyle` to avoid Compose collision. Fixed test code: `AppTheme.spacing.*` → `appTheme.*`, `Text()` → `AppText()`. Added `@OptIn` note to Steps 5–6. Fixed missing `sp`/`FontWeight` imports in Button/Badge/Chip/TextField style snippets. Fixed `CardSize` hardcoded dp → `AppSpacing()` tokens. Added cross-skill note for `AppScaffold`/`AppTopAppBar`. |
 | 2026-06-06 | Initial release. |
