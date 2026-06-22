@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.19.1] — 2026-06-22
+
+### Fixed
+
+- fix(release+audit): eliminate duplicate CHANGELOG entries and add preview check
+
+### Chore
+
+- chore: deduplicate v1.19.0 changelog entry
+
+---
+
 ## [v1.20.0] — 2026-06-22
 
 ### Fixed
