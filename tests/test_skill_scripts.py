@@ -589,6 +589,122 @@ class AuditSkillsRepoTests(unittest.TestCase):
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertTrue(any("Component Previews" in f for f in findings))
 
+    # ── Detekt rules module structure ────────────────────────────────────────────
+
+    def test_detekt_rules_directory_exists(self) -> None:
+        """detekt-rules/ directory must exist in the design-system skill."""
+        detekt_dir = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "detekt-rules"
+        )
+        self.assertTrue(detekt_dir.is_dir(), "detekt-rules/ directory missing")
+
+    def test_detekt_rules_contains_all_rule_files(self) -> None:
+        rules_dir = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "com" / "yourapp" / "designsystem" / "detekt"
+        )
+        expected = [
+            "DesignSystemRuleSetProvider.kt",
+            "HardcodedColorRule.kt",
+            "HardcodedDpRule.kt",
+            "MaterialThemeUsageRule.kt",
+            "DirectTextStyleRule.kt",
+            "NestedContainerRule.kt",
+            "ComponentRegistryRule.kt",
+            "ImportBoundaryRule.kt",
+        ]
+        for fname in expected:
+            self.assertTrue((rules_dir / fname).exists(), f"Missing rule file: {fname}")
+
+    def test_detekt_rules_build_gradle_exists(self) -> None:
+        build_file = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "build.gradle.kts"
+        )
+        self.assertTrue(build_file.exists())
+        content = build_file.read_text()
+        self.assertIn("detekt-api", content)
+
+    def test_detekt_rules_config_exists(self) -> None:
+        config_file = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "config" / "detekt-design-system.yml"
+        )
+        self.assertTrue(config_file.exists())
+        content = config_file.read_text()
+        for rule in ("HardcodedColor", "HardcodedDp", "MaterialThemeUsage",
+                     "DirectTextStyle", "NestedContainer",
+                     "ComponentRegistryRule", "ImportBoundaryRule"):
+            self.assertIn(rule, content, f"Config missing rule: {rule}")
+
+    def test_detekt_rules_service_loader_file_exists(self) -> None:
+        svc_file = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "resources"
+            / "META-INF" / "services"
+            / "io.gitlab.arturbosch.detekt.api.RuleSetProvider"
+        )
+        self.assertTrue(svc_file.exists())
+        self.assertIn("DesignSystemRuleSetProvider", svc_file.read_text())
+
+    def test_detekt_rule_set_provider_has_all_7_rules(self) -> None:
+        provider_kt = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "com" / "yourapp" / "designsystem" / "detekt"
+            / "DesignSystemRuleSetProvider.kt"
+        )
+        content = provider_kt.read_text()
+        for rule in ("HardcodedColorRule", "HardcodedDpRule", "MaterialThemeUsageRule",
+                     "DirectTextStyleRule", "NestedContainerRule",
+                     "ComponentRegistryRule", "ImportBoundaryRule"):
+            self.assertIn(rule, content, f"RuleSetProvider missing: {rule}")
+
+    def test_component_registry_rule_uses_configurable_prefix(self) -> None:
+        rule_kt = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "com" / "yourapp" / "designsystem" / "detekt"
+            / "ComponentRegistryRule.kt"
+        )
+        content = rule_kt.read_text()
+        self.assertIn("componentPrefix", content)
+        self.assertIn("valueOrDefault", content)
+
+    def test_import_boundary_rule_scoped_to_feature_ui(self) -> None:
+        rule_kt = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "com" / "yourapp" / "designsystem" / "detekt"
+            / "ImportBoundaryRule.kt"
+        )
+        content = rule_kt.read_text()
+        self.assertIn("/feature/", content)
+        self.assertIn("/ui/", content)
+
+    # ── New commands exist ────────────────────────────────────────────────────────
+
+    def test_record_design_baselines_command_exists(self) -> None:
+        cmd = REPO_ROOT / "commands" / "record-design-baselines.md"
+        self.assertTrue(cmd.exists())
+        content = cmd.read_text()
+        self.assertIn("roborazzi.record=true", content)
+        self.assertIn("roborazzi.verify=true", content)
+
+    def test_audit_design_visual_command_exists(self) -> None:
+        cmd = REPO_ROOT / "commands" / "audit-design-visual.md"
+        self.assertTrue(cmd.exists())
+        content = cmd.read_text()
+        self.assertIn("snapshots", content)
+        self.assertIn("vision", content.lower())
+
+    def test_fix_design_references_detekt_as_primary(self) -> None:
+        cmd = REPO_ROOT / "commands" / "fix-design.md"
+        content = cmd.read_text()
+        self.assertIn("detekt", content)
+        self.assertIn("detekt-design-system.yml", content)
+
     # ── Naming conventions ───────────────────────────────────────────────────────
 
     def test_naming_flags_uppercase_file_in_commands(self) -> None:

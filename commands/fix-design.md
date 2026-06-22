@@ -34,12 +34,27 @@ this skills collection (parent of `commands/`).
 
 ## Step 2 — Run the scanner
 
+**Primary (PSI-based — recommended when detekt is wired into the project):**
+```bash
+./gradlew detekt --rerun-tasks \
+  --config "$SKILLS_ROOT/skills/kotlin-multiplatform-design-system/detekt-rules/config/detekt-design-system.yml"
+```
+
+Parse the detekt XML/SARIF output. Violations map to rule IDs:
+`HardcodedColor`, `HardcodedDp`, `MaterialThemeUsage`, `DirectTextStyle`,
+`NestedContainer`, `ComponentRegistryViolation`, `DesignTokenImportBoundary`.
+
+**Fallback (quick CLI, no JVM warm-up, no Gradle required):**
 ```bash
 python3 "$SKILLS_ROOT/skills/kotlin-multiplatform-design-system/scripts/scan_design_violations.py" \
   "$PROJECT_ROOT" --json
 ```
 
-Parse the JSON output into a findings list. If the list is empty:
+Use the fallback when detekt is not yet set up in the project's Gradle build.
+The fallback catches violations 1–5 (color, dp, MaterialTheme, TextStyle, nested
+containers) but not the PSI-only rules (ComponentRegistry, ImportBoundary).
+
+If the scanner finds no violations:
 ```
 ✅ No design violations found. Nothing to fix.
 ```
@@ -232,6 +247,8 @@ Next steps:
   2. Run ./gradlew jvmTest                    (re-run all screenshot tests)
   3. Review any ⚠️ REVIEW NEEDED screenshots above
   4. Commit: git add -p  (stage only the design fixes)
+  5. Run /record-design-baselines             (update golden PNGs to match fixed state)
+  6. Run /audit-design-visual                 (visual pass — catches what code analysis misses)
 ```
 
 ---

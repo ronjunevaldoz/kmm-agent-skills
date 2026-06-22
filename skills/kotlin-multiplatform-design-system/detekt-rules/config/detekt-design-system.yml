@@ -1,0 +1,18 @@
+design-system:
+  HardcodedColor:
+    active: true
+  HardcodedDp:
+    active: true
+  MaterialThemeUsage:
+    active: true
+  DirectTextStyle:
+    active: true
+  NestedContainer:
+    active: true
+  ComponentRegistryRule:
+    active: true
+    # Set this to the prefix used in your project's design system.
+    # If your components are named AcmeButton, AcmeCard etc., set this to "Acme".
+    componentPrefix: 'App'
+  ImportBoundaryRule:
+    active: true

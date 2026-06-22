@@ -173,8 +173,13 @@ version and selectively apply fixes. The comparison is powered by
 against the project file and reports CURRENT / MODIFIED / MISSING status.
 
 Use `/fix-design` to scan an existing project for violations (hardcoded colors, dp literals,
-`MaterialTheme.*` usage, `TextStyle()` construction, nested containers) and fix them
-file-by-file with per-file confirmation. Powered by `scripts/scan_design_violations.py`.
+`MaterialTheme.*` usage, `TextStyle()` construction, nested containers, component
+reimplementations, direct token imports) and fix them file-by-file with per-file
+confirmation. Primary scanner: `detekt-rules/` (PSI-based); fallback: `scripts/scan_design_violations.py`.
+
+Use `/record-design-baselines` after fixing to record new Roborazzi golden PNGs.
+Use `/audit-design-visual` to run a vision pass over the goldens and catch spacing,
+contrast, and cross-screen consistency issues that have no code-level signal.
 
 ---
 
@@ -2093,6 +2098,118 @@ All of these are already in `compose-multiplatform`. No new catalog entries requ
 
 ---
 
+## Detekt Rules (PSI-based scanner)
+
+The design system ships a custom detekt rule set that replaces regex-based violation
+detection with full Kotlin PSI analysis. PSI traversal resolves variable aliases,
+handles trailing-lambda syntax correctly, and enables two rules that regex cannot
+express: component reimplementation detection and import boundary enforcement.
+
+### Module location
+
+Copy `detekt-rules/` from this skill into your project's `:core:designsystem` module:
+
+```
+core/designsystem/
+├── detekt-rules/
+│   ├── build.gradle.kts
+│   ├── config/
+│   │   └── detekt-design-system.yml
+│   └── src/
+│       ├── main/kotlin/com/yourapp/designsystem/detekt/
+│       │   ├── DesignSystemRuleSetProvider.kt
+│       │   ├── HardcodedColorRule.kt
+│       │   ├── HardcodedDpRule.kt
+│       │   ├── MaterialThemeUsageRule.kt
+│       │   ├── DirectTextStyleRule.kt
+│       │   ├── NestedContainerRule.kt
+│       │   ├── ComponentRegistryRule.kt
+│       │   └── ImportBoundaryRule.kt
+│       └── test/kotlin/com/yourapp/designsystem/detekt/
+│           ├── HardcodedColorRuleTest.kt
+│           ├── ComponentRegistryRuleTest.kt
+│           └── ImportBoundaryRuleTest.kt
+```
+
+Replace `com.yourapp` with your actual package name across all files.
+
+### Wire into the Gradle build
+
+In `core/designsystem/build.gradle.kts`:
+
+```kotlin
+plugins {
+    id("io.gitlab.arturbosch.detekt")
+}
+
+detekt {
+    config.setFrom("detekt-rules/config/detekt-design-system.yml")
+    buildUponDefaultConfig = true
+}
+
+dependencies {
+    detektPlugins(project(":core:designsystem:detekt-rules"))
+}
+```
+
+Add to `settings.gradle.kts`:
+
+```kotlin
+include(":core:designsystem:detekt-rules")
+```
+
+### Run
+
+```bash
+# Check violations (CI mode)
+./gradlew detekt
+
+# Fix session (re-scan after each edit)
+./gradlew detekt --rerun-tasks --continue
+```
+
+### Rules summary
+
+| Rule ID | Severity | What it catches | What regex missed |
+|---|---|---|---|
+| `HardcodedColor` | Error | `Color(0xFF…)`, `Color(r,g,b)` | Variable aliases in local scope |
+| `HardcodedDp` | Warning | `.dp` literals in layout modifiers | Modifier chains deeper than 1 level |
+| `MaterialThemeUsage` | Error | `MaterialTheme.colors.*`, `MaterialTheme.colorScheme.*` | — |
+| `DirectTextStyle` | Error | `TextStyle(…)` construction | — |
+| `NestedContainer` | Warning | `Card { Card {` and `Surface { Surface {` | Trailing-lambda form `Card { }` |
+| `ComponentRegistryViolation` | Warning | `@Composable fun MyButton` outside `core/designsystem/` | Entire class — regex can't see function definitions |
+| `DesignTokenImportBoundary` | Error | `import …tokens.AppColors` in `feature/*/ui/` | Entire class — regex can't check import context |
+
+### Configuration
+
+Customize `config/detekt-design-system.yml`:
+
+```yaml
+design-system:
+  ComponentRegistryRule:
+    active: true
+    # Match your project's design system prefix (default: App)
+    componentPrefix: 'App'
+  HardcodedDp:
+    active: true
+    # To disable dp warnings while keeping color/MaterialTheme errors:
+    # active: false
+```
+
+### Quick CLI fallback
+
+When detekt is not yet wired into the project, use the Python scanner for a fast check:
+
+```bash
+python3 skills/kotlin-multiplatform-design-system/scripts/scan_design_violations.py \
+  /path/to/project --json
+```
+
+The Python scanner covers rules 1–5 (`HardcodedColor` through `NestedContainer`) but
+not `ComponentRegistryViolation` or `DesignTokenImportBoundary`.
+
+---
+
 ## Common Anti-Patterns
 
 - magic color literals in composables — `Color(0xFF6200EE)` written directly inside a `@Composable` instead of `appTheme.colors.primary`; the audit script flags `Color(0x…)` in any `/ui/` or `/presentation/` file that is not a token definition file
@@ -2136,6 +2253,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-06-22 | Added `detekt-rules/` PSI-based scanner module with 7 rules (HardcodedColor, HardcodedDp, MaterialThemeUsage, DirectTextStyle, NestedContainer, ComponentRegistryViolation, DesignTokenImportBoundary). Added `/record-design-baselines` and `/audit-design-visual` commands. Updated `/fix-design` to use detekt as primary scanner. |
 | 2026-06-22 | Added `scripts/scan_design_violations.py` and `/fix-design` command: scans Compose files for hardcoded colors/dp/MaterialTheme/nested containers, fixes file-by-file, verifies with Roborazzi vision. |
 | 2026-06-22 | Added ownership model section (project-owned tokens vs skill-owned components). Added stability tiers to component overview. Added `scripts/update_design_system.py` reference. |
 | 2026-06-22 | Added `AppTextField` component (was missing from Step 6). Renamed `TextStyle` enum → `AppTextStyle` to avoid Compose collision. Fixed test code: `AppTheme.spacing.*` → `appTheme.*`, `Text()` → `AppText()`. Added `@OptIn` note to Steps 5–6. Fixed missing `sp`/`FontWeight` imports in Button/Badge/Chip/TextField style snippets. Fixed `CardSize` hardcoded dp → `AppSpacing()` tokens. Added cross-skill note for `AppScaffold`/`AppTopAppBar`. |
