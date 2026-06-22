@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.20.1] — 2026-06-22
+
+### Fixed
+
+- fix(design-system): use GROUP_ID placeholder in detekt-rules module
+
+---
+
 ## [v1.20.0] — 2026-06-22
 
 ### Added
