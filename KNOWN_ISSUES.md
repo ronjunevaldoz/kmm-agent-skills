@@ -293,4 +293,24 @@ but agents enforce it before a commit is ever attempted.
 
 ---
 
+### KI-007 — External skill trigger isolation is unverifiable from this repo
+
+**Status:** Open
+
+**Symptom:** The cross-skill audit (v1.21.6) identified four external skills referenced
+in `skills/jni-kotlin-pro/SKILL.md` — `cpp-pro`, `kotlin-specialist`, `compose-expert`,
+and `android-cli` — that have no local `skills/<name>/` directory. Their trigger
+vocabularies cannot be inspected to verify they don't overlap with `jni-kotlin-pro`
+triggers (`JNI`, `NDK`, `native bridge`, `wrapper.cpp`). A collision would cause the
+wrong skill to activate silently.
+
+**Workaround:** `routing_rules.json` `hard_boundaries` and `intent_routes` define the
+authoritative JNI trigger set for this repo. When integrating any of the four external
+skills, manually compare their trigger keywords against `routing_rules.json` before use.
+
+**Fix:** Requires access to the four external skill repos to audit their trigger
+vocabularies and add disambiguation rows if overlaps are found.
+
+---
+
 *Add new entries as issues are discovered. Format: `KI-NNN` (open) or `KI-RNNN` (resolved).*
