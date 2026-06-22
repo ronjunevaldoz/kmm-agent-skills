@@ -1,0 +1,40 @@
+name: "Feature / New Skill Request"
+description: "Request a new skill or a significant new capability in an existing one."
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: request-type
+    attributes:
+      label: Request type
+      options:
+        - New skill (topic not covered by any existing skill)
+        - Major addition to an existing skill
+        - New slash command
+        - New reference file
+    validations:
+      required: true
+  - type: input
+    id: skill-or-topic
+    attributes:
+      label: Skill or topic name
+      description: Existing skill name, or a proposed name for a new one.
+      placeholder: "kotlin-multiplatform-..."
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem it solves
+      description: What KMP / JNI concern is not covered? What were you trying to do when you found the gap?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-guidance
+    attributes:
+      label: Proposed guidance (optional)
+      description: If you have a starting point — a snippet, pattern, or outline — paste it here.
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Skill dependencies (optional)
+      description: Which existing skills would this build on?

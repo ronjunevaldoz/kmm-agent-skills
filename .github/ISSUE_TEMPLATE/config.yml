@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Browse the skill collection
+    url: https://github.com/ronjunevaldoz/kmm-agent-skills/blob/main/README.md
+    about: Check existing skills and commands before filing
+  - name: Changelog
+    url: https://github.com/ronjunevaldoz/kmm-agent-skills/blob/main/CHANGELOG.md
+    about: See what changed recently — your issue may already be fixed

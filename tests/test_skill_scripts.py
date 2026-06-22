@@ -796,6 +796,58 @@ class DraftIssueTests(unittest.TestCase):
         self.assertIn("# Missing freshness note", content)
         self.assertIn("Suggested by kotlin-multiplatform-audit", content)
 
+    def test_render_question_uses_question_heading(self) -> None:
+        content = draft_issue_scripts.render_issue(
+            title="Should X live in :model or :api?",
+            evidence="Ambiguous placement.",
+            recommendation="Confirm with the team.",
+            skill="kotlin-multiplatform-clean-architecture",
+            kind="question",
+        )
+        self.assertIn("## Type\nQuestion", content)
+
+    def test_build_gh_command_includes_repo_and_labels(self) -> None:
+        cmd = draft_issue_scripts.build_gh_command(
+            title="Test issue",
+            body="body text",
+            repo="owner/repo",
+            labels=["skill-bug", "priority: high"],
+        )
+        self.assertIn("--repo", cmd)
+        self.assertIn("owner/repo", cmd)
+        self.assertEqual(cmd.count("--label"), 2)
+        self.assertIn("skill-bug", cmd)
+        self.assertIn("priority: high", cmd)
+
+    def test_build_gh_command_no_labels(self) -> None:
+        cmd = draft_issue_scripts.build_gh_command(
+            title="T", body="B", repo="r/r", labels=[]
+        )
+        self.assertNotIn("--label", cmd)
+
+    def test_submit_dry_run_prints_command_does_not_execute(self) -> None:
+        import io
+        from contextlib import redirect_stdout
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = draft_issue_scripts.submit_issue(
+                title="T", body="B",
+                repo="ronjunevaldoz/kmm-agent-skills",
+                labels=["skill-bug"],
+                dry_run=True,
+            )
+        output = buf.getvalue()
+        self.assertEqual(rc, 0)
+        self.assertIn("DRY RUN", output)
+        self.assertIn("gh issue create", output)
+        self.assertIn("ronjunevaldoz/kmm-agent-skills", output)
+
+    def test_default_repo_constant(self) -> None:
+        self.assertEqual(
+            draft_issue_scripts.DEFAULT_REPO,
+            "ronjunevaldoz/kmm-agent-skills",
+        )
+
 
 class ScanSkillIssuesTests(unittest.TestCase):
     def _make_skill(self, root: Path, name: str, content: str) -> Path:

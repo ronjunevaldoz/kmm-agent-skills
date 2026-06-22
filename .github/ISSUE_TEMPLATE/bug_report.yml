@@ -1,0 +1,61 @@
+name: "Skill Bug"
+description: "A code snippet, guidance, or example in a skill is wrong, outdated, or won't compile."
+labels: ["skill-bug"]
+body:
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Affected skill
+      description: Which skill contains the bug?
+      options:
+        - jni-kotlin-pro
+        - kotlin-multiplatform-mvi
+        - kotlin-multiplatform-design-system
+        - kotlin-multiplatform-design-system-extended
+        - kotlin-multiplatform-feature-scaffold
+        - kotlin-multiplatform-clean-architecture
+        - kotlin-multiplatform-presenter-module
+        - kotlin-multiplatform-network-layer
+        - kotlin-multiplatform-repository-pattern
+        - kotlin-multiplatform-navigation
+        - kotlin-multiplatform-sqldelight-setup
+        - kotlin-multiplatform-expect-actual
+        - kotlin-multiplatform-unit-testing
+        - kotlin-multiplatform-roborazzi
+        - kotlin-multiplatform-code-quality
+        - kotlin-multiplatform-audit
+        - Other (specify below)
+    validations:
+      required: true
+  - type: input
+    id: other-skill
+    attributes:
+      label: Other skill name
+      placeholder: "kotlin-multiplatform-..."
+  - type: textarea
+    id: what-is-wrong
+    attributes:
+      label: What is wrong
+      description: Paste the exact snippet or guidance that is incorrect.
+      placeholder: "The skill says X but..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What should the skill say or produce instead?
+    validations:
+      required: true
+  - type: input
+    id: trigger
+    attributes:
+      label: Trigger phrase used
+      description: What did you type to activate this skill?
+      placeholder: "e.g. 'create JNI bridge for my C++ library'"
+  - type: input
+    id: version
+    attributes:
+      label: Skills version
+      description: Check CHANGELOG.md or skills.json in the repo.
+      placeholder: "e.g. v1.22.0"

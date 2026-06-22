@@ -1,0 +1,52 @@
+name: "Skill Improvement"
+description: "A skill covers the topic but the guidance could be clearer, more complete, or better structured."
+labels: ["improvement"]
+body:
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Affected skill
+      options:
+        - jni-kotlin-pro
+        - kotlin-multiplatform-mvi
+        - kotlin-multiplatform-design-system
+        - kotlin-multiplatform-design-system-extended
+        - kotlin-multiplatform-feature-scaffold
+        - kotlin-multiplatform-clean-architecture
+        - kotlin-multiplatform-presenter-module
+        - kotlin-multiplatform-network-layer
+        - kotlin-multiplatform-repository-pattern
+        - kotlin-multiplatform-navigation
+        - kotlin-multiplatform-sqldelight-setup
+        - kotlin-multiplatform-expect-actual
+        - kotlin-multiplatform-unit-testing
+        - kotlin-multiplatform-roborazzi
+        - kotlin-multiplatform-code-quality
+        - kotlin-multiplatform-audit
+        - Other (specify below)
+    validations:
+      required: true
+  - type: input
+    id: other-skill
+    attributes:
+      label: Other skill name
+      placeholder: "kotlin-multiplatform-..."
+  - type: textarea
+    id: current-guidance
+    attributes:
+      label: Current guidance
+      description: Quote or describe what the skill currently says.
+    validations:
+      required: true
+  - type: textarea
+    id: improvement
+    attributes:
+      label: Suggested improvement
+      description: What would be clearer, more complete, or better structured? Why?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context (optional)
+      description: Were you working on a specific project type or use-case that exposed the gap?
