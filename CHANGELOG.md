@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.21.2] — 2026-06-22
+
+### Fixed
+
+- fix(jni-kotlin-pro): hard stop rule for 3rd party file modification
+
+---
+
 ## [v1.21.1] — 2026-06-22
 
 ### Added
