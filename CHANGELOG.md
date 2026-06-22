@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.21.6] — 2026-06-22
+
+### Fixed
+
+- fix(routing): correct JNI skill vocabulary, cross-ref immutability rule, add routing matrix
+
+### Chore
+
+- chore: workspace agent config (AGENTS.md persona + CLAUDE.md CLI profile)
+
+---
+
 ## [v1.21.5] — 2026-06-22
 
 ### Added
