@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.21.8] — 2026-06-22
+
+### Other
+
+- refactor(AGENTS.md): pointer model — remove embedded rule copies
+
+---
+
 ## [v1.21.7] — 2026-06-22
 
 ### Other
