@@ -1,5 +1,5 @@
 {
-  "version": "1.23.2",
+  "version": "1.24.0",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -1721,6 +1721,53 @@
         "KMP push",
         "NotificationPayload",
         "token refresh"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-release",
+      "path": "skills/kotlin-multiplatform-release",
+      "description": "End-to-end KMP library and app release pipeline. Covers versioning strategy (gradle.properties as source of truth), Maven Central publishing via the vanniktech plugin, GPG signing, Sonatype Central Portal, changelog generation with git-cliff and Conventional Commits, GitHub Release creation, and secrets management patterns. Distinct from the CI skill (which owns workflow YAML) and the xcframework-spm skill (which owns SPM binary distribution).",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-23",
+      "keywords": [
+        "Maven Central",
+        "publish",
+        "release",
+        "versioning",
+        "semantic versioning",
+        "gradle.properties",
+        "vanniktech",
+        "Sonatype",
+        "GPG signing",
+        "git-cliff",
+        "changelog",
+        "Conventional Commits",
+        "GitHub Release",
+        "Doppler",
+        "secrets",
+        "version bump"
+      ],
+      "triggers": [
+        "publish to Maven Central",
+        "Maven publish",
+        "release library",
+        "versioning",
+        "semantic versioning",
+        "bump version",
+        "gradle.properties version",
+        "vanniktech",
+        "Sonatype",
+        "Central Portal",
+        "GPG signing",
+        "git-cliff",
+        "changelog",
+        "conventional commits",
+        "GitHub Release",
+        "release pipeline",
+        "publish KMP library",
+        "release workflow",
+        "secrets management publish"
       ],
       "scripts": []
     },
