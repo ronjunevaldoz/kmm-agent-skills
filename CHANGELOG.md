@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.21.7] — 2026-06-22
+
+### Other
+
+- refactor(jni-kotlin-pro): compress B1/B2 bloat — merge stack sections, table-ify anti-patterns
+
+---
+
 ## [v1.21.6] — 2026-06-22
 
 ### Fixed

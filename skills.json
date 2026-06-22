@@ -1,12 +1,12 @@
 {
-  "version": "1.21.6",
+  "version": "1.21.7",
   "skills": [
     {
       "name": "jni-kotlin-pro",
       "path": "skills/jni-kotlin-pro",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-20",
+      "last_updated": "2026-06-22",
       "keywords": [
         "JNI",
         "Kotlin native",
