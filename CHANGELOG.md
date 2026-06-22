@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.23.0] — 2026-06-23
+
+### Added
+
+- feat(consumer): GitHub issue templates, /report-skill-issue command, draft_issue --submit
+
+---
+
 ## [v1.22.0] — 2026-06-22
 
 ### Added
