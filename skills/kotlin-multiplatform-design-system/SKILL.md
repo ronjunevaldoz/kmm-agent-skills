@@ -2116,7 +2116,7 @@ core/designsystem/
 │   ├── config/
 │   │   └── detekt-design-system.yml
 │   └── src/
-│       ├── main/kotlin/com/yourapp/designsystem/detekt/
+│       ├── main/kotlin/GROUP_ID/designsystem/detekt/
 │       │   ├── DesignSystemRuleSetProvider.kt
 │       │   ├── HardcodedColorRule.kt
 │       │   ├── HardcodedDpRule.kt
@@ -2125,13 +2125,13 @@ core/designsystem/
 │       │   ├── NestedContainerRule.kt
 │       │   ├── ComponentRegistryRule.kt
 │       │   └── ImportBoundaryRule.kt
-│       └── test/kotlin/com/yourapp/designsystem/detekt/
+│       └── test/kotlin/GROUP_ID/designsystem/detekt/
 │           ├── HardcodedColorRuleTest.kt
 │           ├── ComponentRegistryRuleTest.kt
 │           └── ImportBoundaryRuleTest.kt
 ```
 
-Replace `com.yourapp` with your actual package name across all files.
+Replace `GROUP_ID` with your actual group ID (e.g. `com.example.myapp`) — same as your convention plugin names in `build-logic/`.
 
 ### Wire into the Gradle build
 

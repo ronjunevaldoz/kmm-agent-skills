@@ -1,4 +1,4 @@
-package com.yourapp.designsystem.detekt
+package GROUP_ID.designsystem.detekt
 
 import io.gitlab.arturbosch.detekt.api.*
 import org.jetbrains.kotlin.psi.*

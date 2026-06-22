@@ -602,7 +602,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
         rules_dir = (
             REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
             / "detekt-rules" / "src" / "main" / "kotlin"
-            / "com" / "yourapp" / "designsystem" / "detekt"
+            / "GROUP_ID" / "designsystem" / "detekt"
         )
         expected = [
             "DesignSystemRuleSetProvider.kt",
@@ -652,7 +652,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
         provider_kt = (
             REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
             / "detekt-rules" / "src" / "main" / "kotlin"
-            / "com" / "yourapp" / "designsystem" / "detekt"
+            / "GROUP_ID" / "designsystem" / "detekt"
             / "DesignSystemRuleSetProvider.kt"
         )
         content = provider_kt.read_text()
@@ -665,7 +665,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
         rule_kt = (
             REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
             / "detekt-rules" / "src" / "main" / "kotlin"
-            / "com" / "yourapp" / "designsystem" / "detekt"
+            / "GROUP_ID" / "designsystem" / "detekt"
             / "ComponentRegistryRule.kt"
         )
         content = rule_kt.read_text()
@@ -676,7 +676,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
         rule_kt = (
             REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
             / "detekt-rules" / "src" / "main" / "kotlin"
-            / "com" / "yourapp" / "designsystem" / "detekt"
+            / "GROUP_ID" / "designsystem" / "detekt"
             / "ImportBoundaryRule.kt"
         )
         content = rule_kt.read_text()

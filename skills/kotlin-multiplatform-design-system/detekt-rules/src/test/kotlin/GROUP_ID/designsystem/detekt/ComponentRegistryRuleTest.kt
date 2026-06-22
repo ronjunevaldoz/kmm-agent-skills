@@ -1,4 +1,4 @@
-package com.yourapp.designsystem.detekt
+package GROUP_ID.designsystem.detekt
 
 import io.gitlab.arturbosch.detekt.test.lint
 import org.junit.jupiter.api.Test

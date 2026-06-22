@@ -1,4 +1,4 @@
-package com.yourapp.designsystem.detekt
+package GROUP_ID.designsystem.detekt
 
 import io.gitlab.arturbosch.detekt.api.*
 import org.jetbrains.kotlin.psi.*
@@ -11,13 +11,13 @@ import org.jetbrains.kotlin.psi.*
  * and may return un-themed default values (the wrong light-mode values in dark mode).
  *
  * Allowed — these import the component API, not the raw tokens:
- *   import com.yourapp.core.designsystem.components.AppButton
- *   import com.yourapp.core.designsystem.theme.AppTheme
+ *   import GROUP_ID.core.designsystem.components.AppButton
+ *   import GROUP_ID.core.designsystem.theme.AppTheme
  *
  * Flagged — these import the token data classes directly:
- *   import com.yourapp.core.designsystem.tokens.AppColors
- *   import com.yourapp.core.designsystem.tokens.AppSpacing
- *   import com.yourapp.core.designsystem.typography.AppTypography
+ *   import GROUP_ID.core.designsystem.tokens.AppColors
+ *   import GROUP_ID.core.designsystem.tokens.AppSpacing
+ *   import GROUP_ID.core.designsystem.typography.AppTypography
  *
  * Only applied to files under feature/*/ui/ to avoid false positives in test
  * helpers and design system documentation.
