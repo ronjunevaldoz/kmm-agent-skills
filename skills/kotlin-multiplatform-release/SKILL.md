@@ -43,7 +43,9 @@ Use when you need to:
 **Trigger keywords:** publish to Maven Central, Maven publish, release library, versioning,
 semantic versioning, bump version, gradle.properties version, vanniktech, Sonatype,
 Central Portal, GPG signing, git-cliff, changelog, conventional commits, GitHub Release,
-release pipeline, publish KMP library, release workflow, secrets management publish.
+release pipeline, publish KMP library, release workflow, secrets management publish,
+alpha release, beta release, release candidate, pre-release, snapshot, development version,
+GitHub Packages, promote to stable, version suffix.
 
 **Freshness rule:** Sonatype Central Portal API and the vanniktech plugin change frequently —
 recheck the [vanniktech plugin releases](https://github.com/vanniktech/gradle-maven-publish-plugin/releases)
@@ -106,6 +108,72 @@ Use `error()` instead of a fallback string — a missing `VERSION` should fail l
 | Major (breaking) | Edit `VERSION=X+1.0.0`, commit, tag, publish |
 
 Keep version bumps as a standalone commit: `chore(release): bump version to 1.2.0`. This gives git-cliff a clean anchor.
+
+### Development versions
+
+Use suffixes in `gradle.properties` to signal pre-release intent. Never publish a suffixed version to Maven Central — use GitHub Packages or `mavenLocal` instead.
+
+| Stage | Suffix convention | Example | Publish target |
+|---|---|---|---|
+| Local dev build | `-LOCAL` | `1.2.0-LOCAL` | `mavenLocal` only — never pushed |
+| First alpha | `-alpha01` | `1.2.0-alpha01` | GitHub Packages |
+| Subsequent alphas | `-alpha02`, `-alpha03` | `1.2.0-alpha02` | GitHub Packages |
+| Beta | `-beta01` | `1.2.0-beta01` | GitHub Packages |
+| Release candidate | `-rc01` | `1.2.0-rc01` | GitHub Packages |
+| Stable | _(no suffix)_ | `1.2.0` | Maven Central |
+| SNAPSHOT | `-SNAPSHOT` | `1.2.0-SNAPSHOT` | `mavenLocal` only — Central rejects it |
+
+Follow AndroidX/JetBrains zero-padded suffix convention (`alpha01` not `alpha1`) — it sorts correctly as a string.
+
+#### Local dev builds
+
+```bash
+# Publish to ~/.m2 for local consumer testing
+./gradlew publishToMavenLocal
+```
+
+Consumer adds `mavenLocal()` first in their `repositories {}` block and uses `VERSION=1.2.0-LOCAL`. Remove `mavenLocal()` before shipping.
+
+#### GitHub Packages for pre-release distribution
+
+Add a second publish target alongside the Central configuration:
+
+```kotlin
+// build.gradle.kts
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)  // stable only
+    signAllPublications()
+    // GitHub Packages — used for alpha/beta/rc
+    repositories.maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/yourhandle/your-repo")
+        credentials {
+            username = System.getenv("GITHUB_ACTOR")
+            password = System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+```
+
+Publish pre-release to GitHub Packages:
+
+```bash
+./gradlew publishAllPublicationsToGitHubPackagesRepository --no-configuration-cache
+```
+
+#### Promotion path
+
+```
+gradle.properties: VERSION=1.2.0-alpha01
+    ↓ feedback / fixes
+VERSION=1.2.0-beta01   (no new features)
+    ↓ stability testing
+VERSION=1.2.0-rc01     (no changes unless critical bug)
+    ↓ confirmed stable
+VERSION=1.2.0          → publish to Maven Central
+```
+
+Each stage is its own commit + tag (`v1.2.0-alpha01`, `v1.2.0-beta01`, etc.) so git-cliff produces a pre-release CHANGELOG section automatically.
 
 ---
 
@@ -348,7 +416,7 @@ After tagging:
 | Anti-pattern | Rule |
 |---|---|
 | Fallback version string in `build.gradle.kts` (`?: "0.1.0"`) | Use `error()` — a missing VERSION should fail loudly |
-| Publishing `-SNAPSHOT` to Maven Central | Sonatype Central Portal rejects snapshots; use GitHub Packages or JitPack for pre-release |
+| Publishing `-SNAPSHOT` or any pre-release suffix to Maven Central | Central rejects snapshots and pre-release suffixes; use GitHub Packages for alpha/beta/rc distribution |
 | Credentials as `-P` flags (`-PmavenCentralUsername=...`) | Use `ORG_GRADLE_PROJECT_*` env vars — Gradle maps them automatically, no flags needed |
 | Version bump in CI | Version is a publisher decision; bump in `gradle.properties` before the CI publish job |
 | Committing credentials to `gradle.properties` or `.env` | Always gitignore `.env`; store credentials in GitHub Secrets or a secrets manager |
