@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.1] — 2026-06-23
+
+### Docs
+
+- docs(readme): add release skill, governance section, clean up roadmap
+
+---
+
 ## [v1.25.0] — 2026-06-23
 
 ### Added
