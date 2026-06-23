@@ -60,7 +60,7 @@ KMP checklist, review my KMP project.
 
 **Freshness rule:** recheck the Skill Invocation Map and dependency graph entries whenever
 a new skill is added or removed — the routing table and skill count must stay in sync with
-the actual `skills/` directories. Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py .`
+the actual `skills/` directories. Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .`
 after any skill addition.
 
 ---

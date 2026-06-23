@@ -19,16 +19,19 @@ Versioning policy:
 What it does (in order):
     1.  Verify git working tree is clean
     2.  Run audit_skills_repo.py — must be zero findings
-    3.  Run pytest — must be 100% passing
-    4.  Bump version in skills.json (semver)
-    5.  Regenerate all skill entries in skills.json from SKILL.md frontmatter
-    6.  Update shipped skill count in PLAN.md
-    7.  Prepend new section to CHANGELOG.md (auto-generated from git log)
-    8.  Stage skills.json, PLAN.md, CHANGELOG.md
-    9.  Create a release commit: "Release vX.Y.Z"
-    10. Create an annotated git tag vX.Y.Z
-    11. Create a GitHub Release via gh CLI (release notes from CHANGELOG section)
-    12. Print push instructions — does NOT push automatically
+    3.  Run scan_skill_issues.py — must report zero issues
+    4.  Run validate_skill_map.py — README, expert map, and planner must match
+    5.  Run validate_keyword_routing.py — every skill must have routing coverage
+    6.  Run pytest — must be 100% passing
+    7.  Bump version in skills.json (semver)
+    8.  Regenerate all skill entries in skills.json from SKILL.md frontmatter
+    9.  Update shipped skill count in PLAN.md
+    10. Prepend new section to CHANGELOG.md (auto-generated from git log)
+    11. Stage skills.json, PLAN.md, CHANGELOG.md
+    12. Create a release commit: "Release vX.Y.Z"
+    13. Create an annotated git tag vX.Y.Z
+    14. Create a GitHub Release via gh CLI (release notes from CHANGELOG section)
+    15. Print push instructions — does NOT push automatically
 
 Agents: run this script exactly as shown above. Do not push to remote
 without explicit user confirmation.
@@ -49,6 +52,9 @@ PLAN_MD = REPO_ROOT / "PLAN.md"
 CHANGELOG_MD = REPO_ROOT / "CHANGELOG.md"
 SKILLS_DIR = REPO_ROOT / "skills"
 AUDIT_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_skills_repo.py"
+SCAN_ISSUES_SCRIPT = REPO_ROOT / "scripts" / "scan_skill_issues.py"
+VALIDATE_SKILL_MAP_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_skill_map.py"
+VALIDATE_KEYWORD_ROUTING_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_keyword_routing.py"
 TESTS_DIR = REPO_ROOT / "tests"
 
 
@@ -96,6 +102,45 @@ def run_audit() -> None:
     ok("Audit clean — zero findings")
 
 
+def run_scan_skill_issues() -> None:
+    result = run(["python3", str(SCAN_ISSUES_SCRIPT)], check=False)
+    if result.returncode != 0:
+        fail(
+            "scan_skill_issues.py found issues. Fix them before releasing.\n"
+            + result.stdout
+            + result.stderr
+        )
+    ok("Skill issue scan clean — zero issues")
+
+
+def run_skill_map_validation() -> None:
+    result = run(
+        ["python3", str(VALIDATE_SKILL_MAP_SCRIPT), "--repo-root", str(REPO_ROOT)],
+        check=False,
+    )
+    if result.returncode != 0:
+        fail(
+            "validate_skill_map.py failed. Fix README/expert/planner routing before releasing.\n"
+            + result.stdout
+            + result.stderr
+        )
+    ok("Skill map validation passed")
+
+
+def run_keyword_routing_validation() -> None:
+    result = run(
+        ["python3", str(VALIDATE_KEYWORD_ROUTING_SCRIPT), "--repo-root", str(REPO_ROOT)],
+        check=False,
+    )
+    if result.returncode != 0:
+        fail(
+            "validate_keyword_routing.py failed. Fix invocation map coverage before releasing.\n"
+            + result.stdout
+            + result.stderr
+        )
+    ok("Keyword routing validation passed")
+
+
 # ── step 3: tests ─────────────────────────────────────────────────────────────
 
 def run_tests() -> None:
@@ -106,6 +151,14 @@ def run_tests() -> None:
     match = re.search(r"(\d+) passed", result.stdout)
     count = match.group(1) if match else "?"
     ok(f"All tests pass ({count} passed)")
+
+
+def run_release_validation() -> None:
+    run_audit()
+    run_scan_skill_issues()
+    run_skill_map_validation()
+    run_keyword_routing_validation()
+    run_tests()
 
 
 # ── step 4+5: bump version & regenerate skills.json ──────────────────────────
@@ -317,8 +370,7 @@ def main() -> int:
     if not args.dry_run:
         check_clean_tree()
 
-    run_audit()
-    run_tests()
+    run_release_validation()
 
     # Determine new version
     manifest = json.loads(SKILLS_JSON.read_text())

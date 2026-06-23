@@ -107,6 +107,16 @@ None. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for tracked open items.
 
 ---
 
+## Shipped — v1.17.0 (Repo Validation Hardening)
+
+| Item | Status | Description |
+|---|---|---|
+| Repo validation workflow | ✅ Shipped | Added a repo-owned PR/push workflow that runs skill issue scan, repo audit, skill map validation, keyword routing validation, and pytest. |
+| Release validation gates | ✅ Shipped | `scripts/release.py` now runs scan, audit, skill map validation, keyword routing validation, and pytest before any version mutation. |
+| Validator command cleanup | ✅ Shipped | Updated stale validator command docs to use the expert skill script paths and `--repo-root .` where required. |
+
+---
+
 ## Shipped — v1.15.0 (Consumer Changelogs, Release Notes & App Versioning)
 
 | Item | Status | Description |
@@ -132,15 +142,7 @@ None. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for tracked open items.
 
 ## Upcoming — v1.x (Quality & Hardening)
 
-Targeted improvements that don't require new skills.
-
-| Item | Priority | Description |
-|---|---|---|
-| Smarter routing consistency gate | HIGH | Keep README, expert map, planner routing, and `routing_rules.json` synchronized after every skill addition or rename. Current validator coverage now catches stale counts, missing README entries, and missing planner rows. |
-| JNI/cinterop terminology cleanup | HIGH | Keep JVM JNI guidance (`JNIEnv`, `Java_*`, `*-jni.cpp`, C-shim) separate from Kotlin/Native cinterop guidance (`CPointer`, `.def`). Audit top-level docs whenever either skill changes. |
-| Planner task taxonomy cleanup | MEDIUM | Update `agents/planner.md` whenever a shipped skill becomes feature-plannable; use explicit rows for release, legal docs, JNI, and Kotlin/Native interop instead of overloaded umbrella labels. |
-| CI gate: block PR without Testing section | LOW | `scan_skill_issues.py` runs at release time, but a skill directory could be merged without a Testing section if the author doesn't cut a release. Add a GitHub Actions step to run the scanner on every PR. |
-| Wire `validate_keyword_routing.py` into release script | LOW | `release.py` calls `validate_skill_map.py` but not `validate_keyword_routing.py`. Run both so a release is blocked if a new skill has no invocation map row. |
+No open quality-hardening items after the repo validation gate pass.
 
 ---
 
@@ -178,7 +180,7 @@ Require coordination across multiple files or introduce breaking changes to exis
 - Use `/new-skill` to scaffold — it enforces all required sections at creation time
 - Use `/modify-skill` to edit — it prevents accidental removal of required sections
 - Run `python3 scripts/scan_skill_issues.py` after any SKILL.md change to verify zero HIGH findings
-- Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py` after adding a skill to confirm README, expert, and planner are all updated
+- Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .` after adding a skill to confirm README, expert, and planner are all updated
 - Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py` after adding invocation map rows to confirm every skill has keyword routing coverage
 - Run `/audit-screenshots` after recording Roborazzi goldens to verify design-system compliance visually
 - Use `/new-project <description or samples/*.md>` to bootstrap a full KMP project from scratch

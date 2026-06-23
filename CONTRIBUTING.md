@@ -127,17 +127,20 @@ update this file — you must add it manually before releasing.
 
 ### 4. Add a keyword routing entry
 
-Open `scripts/validate_keyword_routing.py` and add at least one trigger keyword
-for the new skill. This is tested in CI.
+Open `skills/kotlin-multiplatform-expert/SKILL.md` and add at least one invocation
+map row for the new skill. This is tested in CI.
 
 ### 5. Run validation
 
 ```bash
 python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .
+python3 scripts/scan_skill_issues.py
+python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .
+python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py --repo-root .
 python3 -m pytest tests/ -v
 ```
 
-Both must pass with zero findings before opening a PR.
+All validation commands must pass with zero findings before opening a PR.
 
 ---
 
@@ -159,17 +162,23 @@ Both must pass with zero findings before opening a PR.
 # Architecture audit — checks all skills for required sections and cross-references
 python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .
 
-# Full test suite
-python3 -m pytest tests/ -v
+# Skill issue scan — checks Testing sections, freshness, and required guidance
+python3 scripts/scan_skill_issues.py
+
+# Skill map coverage — keeps README, expert map, and planner routing synchronized
+python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .
 
 # Keyword routing coverage — ensures every skill has at least one trigger
-python3 scripts/validate_keyword_routing.py
+python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py --repo-root .
+
+# Full test suite
+python3 -m pytest tests/ -v
 
 # Module graph validator (for KMP project validation, not skills repo)
 python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py <project-path>
 ```
 
-All three must be clean before a PR is opened or a release is cut.
+All skills-repo validation commands must be clean before a PR is opened or a release is cut.
 
 ---
 
@@ -205,8 +214,10 @@ docs: add CONTRIBUTING.md
 Before opening a PR, confirm:
 
 - [ ] `audit_skills_repo.py` returns zero findings
-- [ ] `pytest tests/` passes with 0 failures
+- [ ] `scan_skill_issues.py` returns zero issues
+- [ ] `validate_skill_map.py` passes
 - [ ] `validate_keyword_routing.py` passes
+- [ ] `pytest tests/` passes with 0 failures
 - [ ] `SKILL.md` frontmatter `last-updated` is set to today's date
 - [ ] Any new skill is added to `skills.sh.json`
 - [ ] `CHANGELOG.md` has an entry under `[Unreleased]`
@@ -223,7 +234,7 @@ See [`RELEASING.md`](RELEASING.md) for the full release guide.
 Quick summary:
 
 ```bash
-# Dry run first — validates audit, tests, and version bump
+# Dry run first — validates repo gates, tests, and version bump
 python3 scripts/release.py --dry-run minor   # or patch / major
 
 # Execute the release

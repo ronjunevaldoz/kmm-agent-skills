@@ -66,14 +66,18 @@ The script does the following automatically:
 
 1. **Verify git working tree is clean** — uncommitted changes abort the release
 2. **Run `audit_skills_repo.py`** — must return zero findings
-3. **Run pytest** — must be 100% passing
-4. **Bump the version** in `skills.json` (semver, based on the argument)
-5. **Regenerate all skill entries** in `skills.json` from `SKILL.md` frontmatter
-6. **Update shipped skill count** in `PLAN.md`
-7. **Stage `skills.json` and `PLAN.md`**
-8. **Create a commit**: `Release vX.Y.Z`
-9. **Create an annotated git tag**: `vX.Y.Z`
-10. **Print push instructions** — does **not** push automatically
+3. **Run `scan_skill_issues.py`** — must report zero issues
+4. **Run `validate_skill_map.py`** — README, expert map, and planner must match
+5. **Run `validate_keyword_routing.py`** — every skill must have routing coverage
+6. **Run pytest** — must be 100% passing
+7. **Bump the version** in `skills.json` (semver, based on the argument)
+8. **Regenerate all skill entries** in `skills.json` from `SKILL.md` frontmatter
+9. **Update shipped skill count** in `PLAN.md`
+10. **Stage `skills.json`, `PLAN.md`, and `CHANGELOG.md`**
+11. **Create a commit**: `Release vX.Y.Z`
+12. **Create an annotated git tag**: `vX.Y.Z`
+13. **Create a GitHub Release** via `gh` if available
+14. **Print push instructions** — does **not** push automatically
 
 ### Script output
 
@@ -112,10 +116,19 @@ git status   # must show nothing to commit
 # 2. Audit — must print nothing (zero findings)
 python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .
 
-# 3. Tests — must show N passed, 0 failed
+# 3. Skill issue scan — must report zero issues
+python3 scripts/scan_skill_issues.py
+
+# 4. Skill map validation — must pass
+python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .
+
+# 5. Keyword routing validation — must pass
+python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py --repo-root .
+
+# 6. Tests — must show N passed, 0 failed
 python3 -m pytest tests/ -v
 
-# 4. Bump version and regenerate skills.json manually
+# 7. Bump version and regenerate skills.json manually
 #    Edit skills.json "version" field, then re-run the extraction:
 python3 - << 'PYEOF'
 import json, re
