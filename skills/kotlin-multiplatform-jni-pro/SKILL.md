@@ -1,5 +1,5 @@
 ---
-name: jni-kotlin-pro
+name: kotlin-multiplatform-jni-pro
 description: >-
   Expert in JNI bridge engineering between Kotlin/JVM and native C++ libraries.
   Specializes in memory safety across the JVM boundary, shared-library symbol

@@ -67,7 +67,7 @@ Ask the user for anything not already provided in `$ARGUMENTS`:
 
 | Field | Question |
 |---|---|
-| **Skill name** | Which skill triggered this? (e.g. `jni-kotlin-pro`) |
+| **Skill name** | Which skill triggered this? (e.g. `kotlin-multiplatform-jni-pro`) |
 | **Trigger phrase** | What did you type that activated it? |
 | **What happened** | What did the skill produce or say? |
 | **Expected** | What should it have said or done instead? |

@@ -239,7 +239,7 @@ but agents enforce it before a commit is ever attempted.
 
 ---
 
-### KI-R14 — Keyword routing gaps for `datastore` and `jni-kotlin-pro`
+### KI-R14 — Keyword routing gaps for `datastore` and `kotlin-multiplatform-jni-pro`
 
 **Resolved:** `v1.13.0` — `feat(expert+tests): keyword routing coverage, validate_keyword_routing.py, visual design audit`  
 **Was:** Both skills were fully registered (README, expert table, planner routing) but had no rows in the Skill Invocation Map in `kotlin-multiplatform-expert/SKILL.md`. The invocation map is the table the expert uses for real-time keyword routing — without rows, queries like "DataStore", "save settings", or "JNI bridge" would not activate the correct skill.  
@@ -298,9 +298,9 @@ but agents enforce it before a commit is ever attempted.
 **Status:** Open
 
 **Symptom:** The cross-skill audit (v1.21.6) identified four external skills referenced
-in `skills/jni-kotlin-pro/SKILL.md` — `cpp-pro`, `kotlin-specialist`, `compose-expert`,
+in `skills/kotlin-multiplatform-jni-pro/SKILL.md` — `cpp-pro`, `kotlin-specialist`, `compose-expert`,
 and `android-cli` — that have no local `skills/<name>/` directory. Their trigger
-vocabularies cannot be inspected to verify they don't overlap with `jni-kotlin-pro`
+vocabularies cannot be inspected to verify they don't overlap with `kotlin-multiplatform-jni-pro`
 triggers (`JNI`, `NDK`, `native bridge`, `wrapper.cpp`). A collision would cause the
 wrong skill to activate silently.
 

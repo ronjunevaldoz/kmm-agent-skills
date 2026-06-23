@@ -56,7 +56,7 @@ wastes context. Match the feature to these work types:
 | Kotlin RPC (full-stack Kotlin backend) | `kotlin-rpc`, `network-layer` |
 | MongoDB backend / Ktor server data layer | `mongodb-database`, `kotlin-rpc` |
 | Logging / crash reporting | `logging` |
-| JNI / Kotlin Native bridge | `jni-kotlin-pro`, `expect-actual` |
+| JNI / Kotlin Native bridge | `kotlin-multiplatform-jni-pro`, `expect-actual` |
 | SPM / XCFramework distribution | `xcframework-spm`, `expect-actual` |
 | Offline-first / sync / optimistic updates | `offline-first`, `repository-pattern`, `sqldelight-setup` |
 | Crash reporting (Crashlytics, Sentry) | `crash-reporting`, `logging` |

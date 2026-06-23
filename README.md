@@ -46,7 +46,7 @@ It maps the skills, build order, and the best next step.
 - [`kotlin-multiplatform-sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) - SQLDelight schema, drivers, migrations
 - [`kotlin-multiplatform-datastore`](skills/kotlin-multiplatform-datastore/) - Preferences DataStore + Proto DataStore, expect/actual factory, Koin wiring, SharedPreferences migration
 - [`kotlin-multiplatform-xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) - XCFramework and SPM export
-- [`jni-kotlin-pro`](skills/jni-kotlin-pro/) - JNI bridge from Kotlin to native C/C++ libraries, CPointer, memory-safe interop
+- [`kotlin-multiplatform-jni-pro`](skills/kotlin-multiplatform-jni-pro/) - JNI bridge from Kotlin to native C/C++ libraries, CPointer, memory-safe interop
 
 ### Patterns
 

@@ -51,7 +51,7 @@ Update when skills are added, revised, or completed.
 |---|---|---|
 | `kotlin-multiplatform-expect-actual` | ✅ | 4 categories, typealias actual, @ObjCName, Kotlin/Native memory |
 | `kotlin-multiplatform-repository-pattern` | ✅ | Interface/:data impl, mapper pattern, 3 fetch strategies, optimistic updates |
-| `jni-kotlin-pro` | ✅ | JNI bridge, @JvmStatic entry points, CPointer, memory-safe interop |
+| `kotlin-multiplatform-jni-pro` | ✅ | JNI bridge, @JvmStatic entry points, CPointer, memory-safe interop |
 
 ### Layer 4 — Feature Building Blocks
 | Skill | Status | Notes |

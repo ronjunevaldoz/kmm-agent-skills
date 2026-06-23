@@ -11,19 +11,19 @@
     {
       "ext": [".cpp", ".cc", ".cxx", ".h", ".hpp", ".hxx"],
       "condition": "file is project-owned JNI/wrapper code (e.g. *-jni.cpp, *-wrapper.cpp, src/main/cpp/**)",
-      "skill": "jni-kotlin-pro",
+      "skill": "kotlin-multiplatform-jni-pro",
       "enter_phase": "Phase 0.5 header compatibility audit before any edit"
     },
     {
       "ext": [".h", ".hpp"],
       "condition": "file is under vendor/, third_party/, external/, extern/, or a git submodule",
-      "skill": "jni-kotlin-pro",
+      "skill": "kotlin-multiplatform-jni-pro",
       "directive": "READ-ONLY. Run header-compatibility-matrix audit. NEVER edit. Wrap via C-shim if Unsupported."
     },
     {
       "ext": ["CMakeLists.txt", ".cmake"],
       "condition": "native build configuration",
-      "skill": "jni-kotlin-pro",
+      "skill": "kotlin-multiplatform-jni-pro",
       "reference": "references/cmake-jni-setup.md",
       "directive": "Configure 3rd-party libs via cache vars / target_compile_definitions. NEVER edit vendor CMake or headers."
     },
@@ -46,18 +46,18 @@
     { "path_glob": "**/feature/*/model/**.kt",     "skill": "kotlin-multiplatform-clean-architecture",  "note": "Pure domain types only" },
     { "path_glob": "**/feature/*/api/**.kt",       "skill": "kotlin-multiplatform-clean-architecture",  "note": "Interfaces, nav contracts" },
     { "path_glob": "**/core/designsystem/**.kt",   "skill": "kotlin-multiplatform-design-system",       "note": "Tokens + components" },
-    { "path_glob": "**/*androidMain*/**.kt",       "skill": "kotlin-multiplatform-expect-actual",       "note": "Platform actual; if it loads a .so via System.loadLibrary, also jni-kotlin-pro" },
-    { "path_glob": "**/*iosMain*/**.kt",           "skill": "kotlin-multiplatform-expect-actual",       "note": "iOS actual / cinterop — NOT jni-kotlin-pro (JNI is JVM-only)" }
+    { "path_glob": "**/*androidMain*/**.kt",       "skill": "kotlin-multiplatform-expect-actual",       "note": "Platform actual; if it loads a .so via System.loadLibrary, also kotlin-multiplatform-jni-pro" },
+    { "path_glob": "**/*iosMain*/**.kt",           "skill": "kotlin-multiplatform-expect-actual",       "note": "iOS actual / cinterop — NOT kotlin-multiplatform-jni-pro (JNI is JVM-only)" }
   ],
   "intent_routes": {
     "$comment": "Condensed. Full trigger lists live in each skill's SKILL.md. Listed here only where intent disambiguates a shared extension.",
-    "jni-kotlin-pro": ["JNI", "JNIEnv", "Java_*", "GetStringUTFChars", "wrapper.cpp", "vendor C++", "3rd-party C++ immutable", "C-shim", "symbol conflict", "native memory leak", "NDK", "call C++ from Kotlin/JVM"],
+    "kotlin-multiplatform-jni-pro": ["JNI", "JNIEnv", "Java_*", "GetStringUTFChars", "wrapper.cpp", "vendor C++", "3rd-party C++ immutable", "C-shim", "symbol conflict", "native memory leak", "NDK", "call C++ from Kotlin/JVM"],
     "kotlin-multiplatform-expect-actual": ["expect/actual", "platform-specific code", "iOS implementation", "CPointer", "cinterop", ".def file", "Kotlin/Native memory"],
     "kotlin-multiplatform-expert": ["where do I start KMP", "which skill", "skill order", "KMP architecture decision", "review my KMP project"],
     "kotlin-multiplatform-audit": ["audit repo", "review architecture", "project health", "what is wrong with this project"]
   },
   "hard_boundaries": [
-    "JNI (JVM, JNIEnv, Java_*) is jni-kotlin-pro. Kotlin/Native cinterop (CPointer, .def) is expect-actual. They are different mechanisms — never conflate.",
+    "JNI (JVM, JNIEnv, Java_*) is kotlin-multiplatform-jni-pro. Kotlin/Native cinterop (CPointer, .def) is expect-actual. They are different mechanisms — never conflate.",
     "Any .cpp/.h under vendor/ or a submodule is read-only. Edits are a violation (EP-9). Adapt in *-wrapper.cpp or a C-shim.",
     "Opaque native pointer held as Kotlin Long MUST have a matching dispose()/close() → JNI _free."
   ]

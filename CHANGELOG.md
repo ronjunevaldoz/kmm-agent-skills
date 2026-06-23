@@ -95,7 +95,7 @@ All notable changes to kmm-agent-skills are documented here.
 
 ### Other
 
-- refactor(jni-kotlin-pro): compress B1/B2 bloat — merge stack sections, table-ify anti-patterns
+- refactor(kotlin-multiplatform-jni-pro): compress B1/B2 bloat — merge stack sections, table-ify anti-patterns
 
 ---
 
@@ -115,7 +115,7 @@ All notable changes to kmm-agent-skills are documented here.
 
 ### Added
 
-- feat(jni-kotlin-pro): header compatibility matrix + architectural feedback schema
+- feat(kotlin-multiplatform-jni-pro): header compatibility matrix + architectural feedback schema
 
 ---
 
@@ -123,7 +123,7 @@ All notable changes to kmm-agent-skills are documented here.
 
 ### Added
 
-- feat(jni-kotlin-pro): cmake-jni-setup.md + wrapper-patterns.md references
+- feat(kotlin-multiplatform-jni-pro): cmake-jni-setup.md + wrapper-patterns.md references
 
 ---
 
@@ -131,7 +131,7 @@ All notable changes to kmm-agent-skills are documented here.
 
 ### Added
 
-- feat(jni-kotlin-pro): Phase 0 discovery gate + wrapper-call pattern
+- feat(kotlin-multiplatform-jni-pro): Phase 0 discovery gate + wrapper-call pattern
 
 ---
 
@@ -139,7 +139,7 @@ All notable changes to kmm-agent-skills are documented here.
 
 ### Fixed
 
-- fix(jni-kotlin-pro): hard stop rule for 3rd party file modification
+- fix(kotlin-multiplatform-jni-pro): hard stop rule for 3rd party file modification
 
 ---
 
@@ -462,7 +462,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [v1.2.3] — 2026-06-20
 
 ### Added
-- `jni-kotlin-pro` skill — JNI bridge from Kotlin/JVM to native C/C++; 4-layer stack, memory safety, symbol isolation, GPU sync
+- `kotlin-multiplatform-jni-pro` skill — JNI bridge from Kotlin/JVM to native C/C++; 4-layer stack, memory safety, symbol isolation, GPU sync
 
 ### Fixed
 - Added `## References` section to skills that have a `references/` directory

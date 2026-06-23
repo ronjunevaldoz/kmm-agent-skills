@@ -2,8 +2,8 @@
   "version": "1.25.1",
   "skills": [
     {
-      "name": "jni-kotlin-pro",
-      "path": "skills/jni-kotlin-pro",
+      "name": "kotlin-multiplatform-jni-pro",
+      "path": "skills/kotlin-multiplatform-jni-pro",
       "description": ">-",
       "license": "Apache-2.0",
       "last_updated": "2026-06-22",

@@ -123,14 +123,14 @@ the user and the other skills what to do next.
 
 ### 6) Native / JNI boundary (only if `*-jni.cpp`, `*-wrapper.cpp`, or `CMakeLists.txt` exist)
 - 3rd-party C++ (`vendor/`, `third_party/`, submodules, `FetchContent`) is **read-only** —
-  flag ANY edit to a vendored `.cpp`/`.h`. Hand off to `jni-kotlin-pro`.
+  flag ANY edit to a vendored `.cpp`/`.h`. Hand off to `kotlin-multiplatform-jni-pro`.
 - Every opaque native handle stored as a Kotlin `Long` has a matching `dispose()`/`close()`
   → JNI `_free`. Flag any `_create` with no `_free` (memory leak).
 - Every `GetStringUTFChars`/`Get*ArrayElements` has a release on all exit paths.
 - JNI bridge contains type-conversion only — flag native logic or reimplemented library
-  algorithms (route to `jni-kotlin-pro` Phase 0 discovery).
+  algorithms (route to `kotlin-multiplatform-jni-pro` Phase 0 discovery).
 - Complex headers (templates, `std::function`, overloads, exceptions) are wrapped via a
-  flat `extern "C"` C-shim, not mapped directly. Full gate: `jni-kotlin-pro`.
+  flat `extern "C"` C-shim, not mapped directly. Full gate: `kotlin-multiplatform-jni-pro`.
 
 ### 7) Skills repo hygiene
 - Ensure every skill has `name`, `description`, and `metadata.last-updated`
@@ -300,7 +300,7 @@ python3 ../kmm-agent-skills/skills/kotlin-multiplatform-audit/scripts/governance
 - `kotlin-multiplatform-mvi` — most `state copy race` and `sharedflow replay effect` findings require this skill to fix correctly
 - `kotlin-multiplatform-roborazzi` — replacement for `manual screen capture` findings
 - `kotlin-multiplatform-design-system` — replacement for `magic color literal` and `hardcoded spacing` findings
-- `jni-kotlin-pro` — owns every native/JNI finding (3rd-party C++ immutability, opaque-handle cleanup, C-shim wrapping); hand off section 6 findings here
+- `kotlin-multiplatform-jni-pro` — owns every native/JNI finding (3rd-party C++ immutability, opaque-handle cleanup, C-shim wrapping); hand off section 6 findings here
 
 ---
 
@@ -323,6 +323,6 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 | Date | Change |
 |---|---|
 | 2026-06-23 | Added "Governance & CI Enforcement" section: governance_check.py, reusable workflow, .kmm-skills version file, threshold guide. |
-| 2026-06-22 | Added "Native / JNI boundary" inspection section (#6): 3rd-party C++ immutability, opaque-handle cleanup, acquire/release pairing, C-shim wrapping — closes the cross-skill enforcement gap for the immutability rule. Hands off to jni-kotlin-pro. |
+| 2026-06-22 | Added "Native / JNI boundary" inspection section (#6): 3rd-party C++ immutability, opaque-handle cleanup, acquire/release pairing, C-shim wrapping — closes the cross-skill enforcement gap for the immutability rule. Hands off to kotlin-multiplatform-jni-pro. |
 | 2026-06-21 | GitHub issue title format defined: `[category] short description`. Category table added with 8 categories (`[arch]`, `[mvi]`, `[presenter]`, `[data]`, `[ui]`, `[di]`, `[build]`, `[test]`). |
 | 2026-06-18 | Initial release — architecture audit checklist, `audit_project.py`, `audit_skills_repo.py`, `draft_issue.py`. |
