@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.5] — 2026-06-23
+
+### Chore
+
+- chore(funding): update PayPal link
+
+---
+
 ## [v1.25.4] — 2026-06-23
 
 ### Chore
