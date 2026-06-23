@@ -1962,5 +1962,101 @@ class LayoutConsistencyTests(unittest.TestCase):
         self.assertEqual(findings, [])
 
 
+governance_scripts = load_module(
+    "governance_check",
+    REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "governance_check.py",
+)
+
+
+class GovernanceCheckTests(unittest.TestCase):
+    def _project(self, tmp: str) -> Path:
+        root = Path(tmp)
+        (root / "feature" / "auth" / "ui").mkdir(parents=True)
+        (root / "feature" / "auth" / "ui" / "LoginContent.kt").write_text(
+            "fun LoginContent() { Column { } }", encoding="utf-8"
+        )
+        return root
+
+    def test_clean_project_returns_no_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._project(tmp)
+            findings = (
+                governance_scripts.run_scan_violations(root)
+                + governance_scripts.run_audit_project(root)
+            )
+        self.assertEqual(findings, [])
+
+    def test_hardcoded_color_is_high_severity(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._project(tmp)
+            (root / "feature" / "auth" / "ui" / "LoginContent.kt").write_text(
+                "fun Foo() { Box(Modifier.background(Color(0xFFFF0000))) {} }",
+                encoding="utf-8",
+            )
+            findings = governance_scripts.run_scan_violations(root)
+        high = [f for f in findings if f["severity"] == "HIGH"]
+        self.assertTrue(len(high) >= 1)
+
+    def test_medium_finding_does_not_fail_on_high_threshold(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._project(tmp)
+            ui = root / "feature" / "auth" / "ui"
+            # layout inconsistency → warning → MEDIUM (audit_project does not flag this)
+            (ui / "LoginContent.kt").write_text("fun LoginContent() { Column { } }", encoding="utf-8")
+            (ui / "ProfileContent.kt").write_text("fun ProfileContent() { AppCard() { } }", encoding="utf-8")
+            findings = (
+                governance_scripts.run_scan_violations(root)
+                + governance_scripts.run_audit_project(root)
+            )
+        threshold = governance_scripts.SEVERITY_RANK["HIGH"]
+        failing = [f for f in findings if governance_scripts.SEVERITY_RANK.get(f["severity"], 0) >= threshold]
+        self.assertEqual(failing, [])
+
+    def test_reads_kmm_skills_version(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / ".kmm-skills").write_text(
+                '{"skills_repo": "ronjunevaldoz/kmm-agent-skills", "version": "1.24.1"}',
+                encoding="utf-8",
+            )
+            version = governance_scripts.read_skills_version(root)
+        self.assertEqual(version, "1.24.1")
+
+    def test_missing_kmm_skills_file_returns_none(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            version = governance_scripts.read_skills_version(Path(tmp))
+        self.assertIsNone(version)
+
+    def test_cli_exit_0_on_clean_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._project(tmp)
+            script = REPO_ROOT / "skills/kotlin-multiplatform-audit/scripts/governance_check.py"
+            result = subprocess.run(
+                ["python3", str(script), str(root)],
+                capture_output=True, text=True,
+            )
+        self.assertEqual(result.returncode, 0)
+
+    def test_cli_exit_2_on_missing_root(self) -> None:
+        script = REPO_ROOT / "skills/kotlin-multiplatform-audit/scripts/governance_check.py"
+        result = subprocess.run(
+            ["python3", str(script), "/nonexistent/path/xyz"],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 2)
+
+    def test_cli_json_output_is_valid(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._project(tmp)
+            script = REPO_ROOT / "skills/kotlin-multiplatform-audit/scripts/governance_check.py"
+            result = subprocess.run(
+                ["python3", str(script), str(root), "--json"],
+                capture_output=True, text=True,
+            )
+        self.assertEqual(result.returncode, 0)
+        parsed = json.loads(result.stdout)
+        self.assertIsInstance(parsed, list)
+
+
 if __name__ == "__main__":
     unittest.main()
