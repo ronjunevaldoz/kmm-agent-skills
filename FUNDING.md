@@ -17,7 +17,6 @@ KMM Agent Skills is free, open source, and maintained by volunteers. If these sk
 ## Traditional Payment
 
 - [GitHub Sponsors](https://github.com/sponsors/ronjunevaldoz) — recurring monthly support
-- [Buy Me a Coffee](https://buymeacoffee.com/ronjunevaldoz) — one-time or recurring
 - [PayPal](https://www.paypal.com/ncp/payment/KJ9GZWLA6EVYS) — one-time or recurring support
 
 ## Other Ways to Help
