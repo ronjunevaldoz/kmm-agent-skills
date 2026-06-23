@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.2] — 2026-06-23
+
+### Other
+
+- refactor: rename jni-kotlin-pro to kotlin-multiplatform-jni-pro
+
+---
+
 ## [v1.25.1] — 2026-06-23
 
 ### Docs
