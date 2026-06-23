@@ -6,17 +6,12 @@ KMM Agent Skills is free, open source, and maintained by volunteers. If these sk
 
 **Kaia USDT** (recommended for speed and no fees)
 ```
-0x742d35Cc6634C0532925a3b844Bc9e7595f42bE
+0xe2be42863fb40eebd2695a68f1d9d73b2a3b054f
 ```
 
-**Ethereum / Polygon / Arbitrum (ETH, USDC, USDT)**
+**Bitcoin (BTC) on BSC**
 ```
-0x742d35Cc6634C0532925a3b844Bc9e7595f42bE
-```
-
-**Bitcoin (BTC)**
-```
-bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+0xe2be42863fb40eebd2695a68f1d9d73b2a3b054f
 ```
 
 ## Traditional Payment
