@@ -91,7 +91,8 @@ It maps the skills, build order, and the best next step.
 ### Meta
 
 - [`kotlin-multiplatform-expert`](skills/kotlin-multiplatform-expert/) - skill routing and build order
-- [`kotlin-multiplatform-audit`](skills/kotlin-multiplatform-audit/) - repo review and fix sequencing
+- [`kotlin-multiplatform-audit`](skills/kotlin-multiplatform-audit/) - repo review, fix sequencing, and CI governance gate
+- [`kotlin-multiplatform-release`](skills/kotlin-multiplatform-release/) - versioning, Maven Central publishing, pre-release suffixes, git-cliff changelog, GitHub Release
 
 ---
 
@@ -144,6 +145,49 @@ ln -sf ../../hooks/pre-commit-audit.sh .git/hooks/pre-commit
 
 ---
 
+## Governance (for skill consumers)
+
+Enforce skill compliance automatically in your CI — violations block the build, no manual audit needed.
+
+**1. Add `.kmm-skills` to your project root:**
+
+```json
+{
+  "skills_repo": "ronjunevaldoz/kmm-agent-skills",
+  "version": "1.25.0"
+}
+```
+
+**2. Add a governance workflow:**
+
+```yaml
+# .github/workflows/governance.yml
+name: KMM Governance
+on: [pull_request, push]
+
+jobs:
+  kmm-governance:
+    uses: ronjunevaldoz/kmm-agent-skills/.github/workflows/kmm-audit.yml@main
+    with:
+      project_root: .
+      fail_on: HIGH          # or MEDIUM for stricter enforcement
+      skills_ref: v1.25.0   # pin to a tag for reproducibility
+```
+
+That is the complete setup. The reusable workflow checks out this repo and runs `governance_check.py` — no scripts to copy, no dependencies to install.
+
+| `fail_on` | What it catches |
+|---|---|
+| `HIGH` (default) | Architecture boundary violations, hardcoded colors, Material theme usage |
+| `MEDIUM` | Also catches hardcoded dp literals and layout pattern inconsistency |
+| `LOW` | Full enforcement — any finding fails the build |
+
+<a name="when-to-file-here"></a>
+**When to file an issue here vs. in your own project:**
+File here only if the skill guidance itself is wrong or incomplete. If you applied the guidance correctly and your project still broke, file the issue in your own repo. Use `/report-skill-issue` from any Claude session to file skill issues with the correct template.
+
+---
+
 ## Trigger Keywords
 
 What to say to activate each skill. The agent matches these phrases automatically.
@@ -180,7 +224,8 @@ What to say to activate each skill. The agent matches these phrases automaticall
 | [`unit-testing`](skills/kotlin-multiplatform-unit-testing/) | "unit test", "runTest", "Turbine", "test ViewModel", "fake repository" |
 | [`roborazzi`](skills/kotlin-multiplatform-roborazzi/) | "screenshot test", "visual regression", "test layout", "canvas test", "100% accuracy" |
 | [`code-quality`](skills/kotlin-multiplatform-code-quality/) | "Ktlint", "Detekt", "code style", "static analysis", "layer violation" |
-| [`audit`](skills/kotlin-multiplatform-audit/) | "audit repo", "project health", "what is wrong with this project", "architecture drift" |
+| [`audit`](skills/kotlin-multiplatform-audit/) | "audit repo", "project health", "what is wrong with this project", "architecture drift", "governance check", "CI enforcement" |
+| [`release`](skills/kotlin-multiplatform-release/) | "publish to Maven Central", "release library", "bump version", "git-cliff", "alpha release", "GitHub Release" |
 
 ---
 
@@ -221,10 +266,6 @@ npx skills add ronjunevaldoz/kmm-agent-skills
 ---
 
 ## Roadmap
-
-- `kotlin-multiplatform-biometric-auth` - BiometricPrompt (Android) + LocalAuthentication (iOS)
-- `kotlin-multiplatform-push-notifications` - FCM token (Android) + APNs token (iOS)
-- `kotlin-multiplatform-analytics` - shared Analytics interface, Firebase/Amplitude platform impls
 
 See [PLAN.md](PLAN.md) for full scope and priority details.
 
