@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.0] — 2026-06-23
+
+### Added
+
+- feat(governance): add CI enforcement gate for skill consumers
+
+---
+
 ## [v1.24.1] — 2026-06-23
 
 ### Added

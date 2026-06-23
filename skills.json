@@ -1,5 +1,5 @@
 {
-  "version": "1.24.1",
+  "version": "1.25.0",
   "skills": [
     {
       "name": "jni-kotlin-pro",
@@ -231,12 +231,20 @@
         "script hygiene",
         "freshness check",
         "deprecation risk",
-        "references audit"
+        "references audit",
+        "governance",
+        "CI enforcement",
+        "governance check",
+        "enforce skills",
+        "compliance",
+        "fail on violation",
+        "kmm-skills"
       ],
       "scripts": [
         "audit_project.py",
         "audit_skills_repo.py",
-        "draft_issue.py"
+        "draft_issue.py",
+        "governance_check.py"
       ]
     },
     {
