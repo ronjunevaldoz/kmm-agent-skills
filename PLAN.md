@@ -51,7 +51,7 @@ Update when skills are added, revised, or completed.
 |---|---|---|
 | `kotlin-multiplatform-expect-actual` | ✅ | 4 categories, typealias actual, @ObjCName, Kotlin/Native memory |
 | `kotlin-multiplatform-repository-pattern` | ✅ | Interface/:data impl, mapper pattern, 3 fetch strategies, optimistic updates |
-| `kotlin-multiplatform-jni-pro` | ✅ | JNI bridge, @JvmStatic entry points, CPointer, memory-safe interop |
+| `kotlin-multiplatform-jni-pro` | ✅ | JVM JNI bridge, @JvmStatic entry points, wrapper/C-shim discipline, memory-safe interop |
 
 ### Layer 4 — Feature Building Blocks
 | Skill | Status | Notes |
@@ -97,7 +97,7 @@ Update when skills are added, revised, or completed.
 | Skill | Status | Notes |
 |---|---|---|
 | `kotlin-multiplatform-legal-docs` | ✅ | Privacy Policy + T&C templates, auto-detect scanner, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, consent gate, CI gate |
-| `kotlin-multiplatform-expert` | ✅ | 48-skill routing map, dependency graph, invocation map, build order |
+| `kotlin-multiplatform-expert` | ✅ | 49-skill routing map, dependency graph, invocation map, build order |
 
 ---
 
@@ -136,6 +136,9 @@ Targeted improvements that don't require new skills.
 
 | Item | Priority | Description |
 |---|---|---|
+| Smarter routing consistency gate | HIGH | Keep README, expert map, planner routing, and `routing_rules.json` synchronized after every skill addition or rename. Current validator coverage now catches stale counts, missing README entries, and missing planner rows. |
+| JNI/cinterop terminology cleanup | HIGH | Keep JVM JNI guidance (`JNIEnv`, `Java_*`, `*-jni.cpp`, C-shim) separate from Kotlin/Native cinterop guidance (`CPointer`, `.def`). Audit top-level docs whenever either skill changes. |
+| Planner task taxonomy cleanup | MEDIUM | Update `agents/planner.md` whenever a shipped skill becomes feature-plannable; use explicit rows for release, legal docs, JNI, and Kotlin/Native interop instead of overloaded umbrella labels. |
 | CI gate: block PR without Testing section | LOW | `scan_skill_issues.py` runs at release time, but a skill directory could be merged without a Testing section if the author doesn't cut a release. Add a GitHub Actions step to run the scanner on every PR. |
 | Wire `validate_keyword_routing.py` into release script | LOW | `release.py` calls `validate_skill_map.py` but not `validate_keyword_routing.py`. Run both so a release is blocked if a new skill has no invocation map row. |
 

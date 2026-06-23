@@ -46,7 +46,7 @@ It maps the skills, build order, and the best next step.
 - [`kotlin-multiplatform-sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) - SQLDelight schema, drivers, migrations
 - [`kotlin-multiplatform-datastore`](skills/kotlin-multiplatform-datastore/) - Preferences DataStore + Proto DataStore, expect/actual factory, Koin wiring, SharedPreferences migration
 - [`kotlin-multiplatform-xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) - XCFramework and SPM export
-- [`kotlin-multiplatform-jni-pro`](skills/kotlin-multiplatform-jni-pro/) - JNI bridge from Kotlin to native C/C++ libraries, CPointer, memory-safe interop
+- [`kotlin-multiplatform-jni-pro`](skills/kotlin-multiplatform-jni-pro/) - JVM JNI bridge to native C/C++ libraries, wrapper/C-shim discipline, memory-safe interop
 
 ### Patterns
 
@@ -93,6 +93,7 @@ It maps the skills, build order, and the best next step.
 - [`kotlin-multiplatform-expert`](skills/kotlin-multiplatform-expert/) - skill routing and build order
 - [`kotlin-multiplatform-audit`](skills/kotlin-multiplatform-audit/) - repo review, fix sequencing, and CI governance gate
 - [`kotlin-multiplatform-release`](skills/kotlin-multiplatform-release/) - versioning, Maven Central publishing, pre-release suffixes, git-cliff changelog, GitHub Release
+- [`kotlin-multiplatform-legal-docs`](skills/kotlin-multiplatform-legal-docs/) - privacy policy, terms, data-safety labels, consent gates, and legal compliance screens
 
 ---
 

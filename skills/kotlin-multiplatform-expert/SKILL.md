@@ -89,7 +89,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 48 Skills and What They Own
+## The 49 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
