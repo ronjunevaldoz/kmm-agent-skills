@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.6] — 2026-06-23
+
+### Chore
+
+- chore(funding): remove Buy Me a Coffee (unsupported in Philippines)
+
+---
+
 ## [v1.25.5] — 2026-06-23
 
 ### Chore
