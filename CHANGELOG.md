@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.4] — 2026-06-23
+
+### Chore
+
+- chore(funding): update donation addresses to Binance wallet
+
+---
+
 ## [v1.25.3] — 2026-06-23
 
 ### Docs
