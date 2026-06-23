@@ -15,7 +15,7 @@ The repo files are the source of truth. Re-read this README and the relevant
 `skills/*/SKILL.md` files before making recommendations so each session uses the
 latest skill set and wording.
 
-**Start here:** use `kotlin-multiplatform-expert` first on any new project or feature.
+**Start here:** Read [GETTING_STARTED.md](GETTING_STARTED.md) for the 5-minute overview, then use `kotlin-multiplatform-expert` first on any new project or feature.
 It maps the skills, build order, and the best next step.
 
 ---
@@ -285,6 +285,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for skill authoring, commit format, PR ch
 
 ---
 
+## Support
+
+Help keep these skills free and maintained:
+- ⭐ Star this repo
+- 💬 Share feedback via issues
+- 💰 [Support via donation](FUNDING.md) — Kaia USDT, Ethereum, Bitcoin, or traditional payment
+
 ## License
 
-Apache-2.0
+Apache-2.0 — see [LICENSE](LICENSE)
