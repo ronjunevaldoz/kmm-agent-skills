@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.3] — 2026-06-23
+
+### Docs
+
+- docs: add consumer getting started guide, license file, and funding options
+
+---
+
 ## [v1.25.2] — 2026-06-23
 
 ### Other
