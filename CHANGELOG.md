@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.7] — 2026-06-23
+
+### Docs
+
+- docs: align skill routing indexes
+
+### Chore
+
+- chore: harden skill repo validation
+
+---
+
 ## [v1.25.6] — 2026-06-23
 
 ### Chore
