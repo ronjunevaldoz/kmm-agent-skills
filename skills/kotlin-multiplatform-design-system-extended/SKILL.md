@@ -53,7 +53,9 @@ Use **after** `kotlin-multiplatform-design-system` has been applied. Use when th
 **Trigger keywords:** dialog, bottom sheet, toast, snackbar, tabs, top app bar,
 bottom navigation, checkbox, radio, switch, slider, select, dropdown, progress bar,
 loading, skeleton, spinner, tooltip, popover, accordion, collapsible, avatar,
-divider, separator, icon button, form label, extended design system.
+divider, separator, icon button, form label, extended design system,
+redesign, visual consistency, UI components, component library, page components,
+add components, component set, UI kit, component design, redesign page.
 
 **Freshness rule:** `@ExperimentalStylesApi` and CMP primitive APIs change between releases —
 recheck the Compose docs and apply the same freshness check as `kotlin-multiplatform-design-system`.

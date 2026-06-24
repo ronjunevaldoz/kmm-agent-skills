@@ -46,7 +46,9 @@ list detail, side panel, navigation rail, navigation drawer, window size,
 Compact Medium Expanded, adaptive navigation, calculateWindowSizeClass,
 different layout phone tablet, different layout phone desktop, responsive composable,
 multi-pane layout, master detail KMP, pane layout, screen size breakpoint,
-layout per screen size, detect all screen layouts, all screen sizes.
+layout per screen size, detect all screen layouts, all screen sizes,
+page layout, layout consistency, consistent layout, screen consistency,
+redesign page, layout redesign, page consistency, uniform layout, layout patterns.
 
 **Freshness rule:** `material3-adaptive` is still evolving — recheck the API when upgrading
 `androidx.compose.material3.adaptive`. `calculateWindowSizeClass()` moved packages between

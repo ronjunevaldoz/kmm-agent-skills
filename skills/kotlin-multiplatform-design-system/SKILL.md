@@ -47,7 +47,10 @@ Use this skill when the user asks to:
 ButtonVariant, shadcn KMP, Compose Styles, ExperimentalStylesApi, custom components,
 unstyled components, dark mode tokens, color scheme, no Material,
 typography system, spacing tokens, custom button style, Material3 alternative,
-app theme setup, brand colors, design token system, custom typography.
+app theme setup, brand colors, design token system, custom typography,
+redesign, visual consistency, UI consistency, design consistency, page design,
+screen design, UI look and feel, consistent styling, style guide, branding,
+component library, theming, color palette, visual identity.
 
 **Freshness rule:** `@ExperimentalStylesApi` is experimental and the Compose Styles API
 changes between CMP releases — recheck the Compose docs before upgrading.
