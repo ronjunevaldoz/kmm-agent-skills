@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.13] — 2026-06-24
+
+### Docs
+
+- docs: support kotlin-logging and Kermit
+
+---
+
 ## [v1.25.12] — 2026-06-24
 
 ### Docs

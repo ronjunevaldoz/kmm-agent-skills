@@ -1,5 +1,5 @@
 {
-  "version": "1.25.12",
+  "version": "1.25.13",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -518,9 +518,9 @@
     {
       "name": "kotlin-multiplatform-crash-reporting",
       "path": "skills/kotlin-multiplatform-crash-reporting",
-      "description": "Crash reporting for Kotlin Multiplatform apps \u2014 Firebase Crashlytics on Android/iOS, Sentry as a cross-platform alternative, custom non-fatal event recording, and breadcrumb logging. Covers: Kermit crash integration (via kermit-crashlytics / kermit-sentry), symbolication setup for Kotlin/Native dSYMs, and a CrashReporter expect/actual interface that keeps commonMain free of platform SDKs. Does NOT cover general structured logging (see logging skill) or app analytics/events (see analytics skill).",
+      "description": "Crash reporting for Kotlin Multiplatform apps \u2014 Firebase Crashlytics on Android/iOS, Sentry as a cross-platform alternative, custom non-fatal event recording, and breadcrumb logging. Covers: logger breadcrumb bridges, symbolication setup for Kotlin/Native dSYMs, and a CrashReporter expect/actual interface that keeps commonMain free of platform SDKs. Does NOT cover general structured logging (see logging skill) or app analytics/events (see analytics skill).",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-21",
+      "last_updated": "2026-06-24",
       "keywords": [
         "crash reporting",
         "crashlytics",
@@ -529,7 +529,7 @@
         "non-fatal",
         "symbolication",
         "dsym",
-        "kermit crash",
+        "breadcrumb bridge",
         "crash handler",
         "breadcrumb",
         "crash analytics"
@@ -542,7 +542,7 @@
         "non-fatal error",
         "symbolication",
         "dSYM",
-        "kermit crash",
+        "breadcrumb bridge",
         "crash handler",
         "crash analytics",
         "crash tracking"
@@ -1307,25 +1307,28 @@
     {
       "name": "kotlin-multiplatform-logging",
       "path": "skills/kotlin-multiplatform-logging",
-      "description": "Sets up Kermit KMP-native logging: log levels, pluggable writers per platform, crash boundary integration (Firebase Crashlytics, Sentry), and Koin wiring so every layer gets a logger without importing Kermit directly.",
+      "description": "Sets up kotlin-logging or Kermit for KMP projects: log levels, logger factories per target, crash boundary integration (Firebase Crashlytics, Sentry), and Koin wiring so every layer gets a logger without constructing it directly.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-18",
+      "last_updated": "2026-06-24",
       "keywords": [
         "Kermit",
+        "kotlin-logging",
+        "KotlinLogging",
         "logging",
         "KMP",
         "Kotlin Multiplatform",
         "log levels",
         "crash reporting",
         "Koin",
-        "pluggable writers",
+        "logger factories",
+        "crash bridges",
         "Crashlytics",
         "Sentry"
       ],
       "triggers": [
         "logging",
+        "kotlin-logging",
         "Kermit",
-        "log levels",
         "KMP logging",
         "crash reporting",
         "logger setup",
