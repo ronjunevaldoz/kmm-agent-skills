@@ -47,10 +47,12 @@ flowchart LR
   U[User request] --> E[kotlin-multiplatform-expert]
 
   E --> S[Consumer skills in skills/]
+  E --> X[Designer agent]
   E --> D[Repo docs maintainer]
   E --> R[Release pipeline]
 
   S --> P[Downstream KMP project]
+  X --> Z[Design-system, accessibility, preview, and copy skills]
   D --> RD[README, docs/, AGENTS, commands, routing text]
   R --> C[CHANGELOG.md, Git tags, GitHub Release]
 
@@ -64,6 +66,9 @@ flowchart LR
 Consumer skills are the installable surface downstream projects use. Repo docs,
 agents, commands, and scripts maintain this repository's own workflow and release
 surface.
+
+Designer keeps KMM and Compose component decisions aligned with the repo design system
+before implementation starts.
 
 Update this diagram whenever a skill, agent, command, or routing rule changes. Keep
 it aligned with `skills/kotlin-multiplatform-expert/SKILL.md`, `agents/*.md`, and the
@@ -103,7 +108,9 @@ flowchart LR
   R[User request] --> E[kotlin-multiplatform-expert]
   E --> L[Priority ladder]
   L --> S[Smallest relevant skill set]
+  L --> D[Designer agent]
   S --> A[Implementer or docs maintainer]
+  D --> A
   A --> V[Validator or reviewer]
   V --> P[Release pipeline]
   P --> C[Published docs / release notes]
@@ -111,6 +118,8 @@ flowchart LR
 
 Consumer routing starts with the expert, not with every matching skill. Route to the
 earliest tier that answers the request, then expand only when the next layer is needed.
+For UI/UX or component work, the designer agent runs before implementation so the
+design system and Compose patterns stay consistent.
 
 ---
 
@@ -186,13 +195,14 @@ earliest tier that answers the request, then expand only when the next layer is 
 
 ## Agent Pipeline
 
-Six specialized agents orchestrate end-to-end feature work and repo docs. Agents
+Seven specialized agents orchestrate end-to-end feature work and repo docs. Agents
 communicate via a structured plan contract and read `.claude/pipeline-context.json` to
 avoid repeating past mistakes.
 
 | Agent | Role |
 |---|---|
 | [`planner`](agents/planner.md) | Analyzes the task, loads only relevant skills, produces a layer-by-layer plan, gates on user approval |
+| [`designer`](agents/designer.md) | Shapes KMM/Compose wireframes, diagrams, layouts, component APIs, accessibility, previews, and copy before implementation |
 | [`implementer`](agents/implementer.md) | Executes the approved plan in 6-layer build order, generates complete runnable code |
 | [`reviewer`](agents/reviewer.md) | Checks layer boundaries, Koin wiring, MVI contracts, and test coverage; runs `audit_project.py` |
 | [`docs-maintainer`](agents/docs-maintainer.md) | Keeps README, `docs/` reference material, agent docs, command docs, and skill routing text aligned with the repo |

@@ -53,8 +53,10 @@ these work types, and stop at the earliest tier that answers the request:
 | State container choice (remember vs ViewModel) | `compose-state-container`, `compose-state-hoisting` |
 | Custom graphics, canvas, visual effects | `graphics-modifiers` |
 | Adaptive / responsive layouts | `adaptive-layout`, `roborazzi` |
+| Wireframes, screen flows, or layout specs | `designer`, `design-handoff`, `adaptive-layout`, `design-system`, `preview-driven-development`, `roborazzi` |
 | Design system setup or token changes | `design-system` |
 | Design system component library | `design-system-extended`, `design-system` |
+| UI/UX design or component API shaping | `designer`, `design-system`, `design-system-extended`, `compose-slot-api`, `compose-state-hoisting`, `accessibility`, `preview-driven-development`, `roborazzi` |
 | Paging / paginated lists | `paging`, `repository-pattern` |
 | Kotlin RPC (full-stack Kotlin backend) | `kotlin-rpc`, `network-layer` |
 | MongoDB backend / Ktor server data layer | `mongodb-database`, `kotlin-rpc` |
