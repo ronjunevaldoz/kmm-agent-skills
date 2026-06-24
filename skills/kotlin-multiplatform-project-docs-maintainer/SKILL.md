@@ -73,6 +73,10 @@ the default:
 ```text
 docs/
 ├── tasks.md
+├── tasks/
+│   ├── YYYY-MM-DD-phase-1.md
+│   ├── YYYY-MM-DD-phase-2.md
+│   └── YYYY-MM-DD-task-log.md
 ├── roadmap.md
 ├── architecture.md
 ├── deployment.md
@@ -80,7 +84,9 @@ docs/
 ```
 
 Use it like this:
-- `docs/tasks.md` — single source of truth for current work and active decisions
+- `docs/tasks.md` — single source of truth for current work, active decisions, and links
+  into dated task/phasing notes
+- `docs/tasks/` — dated task and phase records when work history gets too dense for one file
 - `docs/roadmap.md` — consolidated planning, including integration and project planning
 - `docs/architecture.md` — system design, kept as the stable long-form architecture doc
 - `docs/deployment.md` — consolidated deployment and publishing flow
@@ -88,15 +94,18 @@ Use it like this:
 
 Rules:
 - make `docs/tasks.md` the primary entrypoint for day-to-day updates
+- put detailed phase history, approvals, and dated execution notes in `docs/tasks/`
 - consolidate overlapping planning or deployment docs instead of duplicating them
 - keep `docs/reference/` out of the main flow; it supports the core docs, it does not replace them
 - link from README or onboarding docs to `docs/tasks.md` if the project has a lot of moving parts
+- if older task files exist at the root, consolidate them into `docs/tasks/` and leave a pointer
+  from `docs/tasks.md` instead of keeping parallel task indexes
 
 ### Project Doc Change Checklist
 
 | Change | Update |
 |---|---|
-| New module or command | README, onboarding docs, and any `docs/reference*` page that mentions it |
+| New module, command, or phase | README, onboarding docs, `docs/tasks.md`, and any `docs/reference*` page that mentions it |
 | Renamed command or path | Every docs mention, code sample, and navigation link |
 | Architecture shift | README plus the affected reference pages and diagrams |
 | Release or setup change | RELEASING, INSTALL, and any onboarding checklist that relies on it |
@@ -136,6 +145,7 @@ Use this validation matrix for project docs:
 | Case | Expected |
 |---|---|
 | README mentions a module or command | The referenced file or command exists |
+| `docs/tasks/` updates | `docs/tasks.md` links to the dated record and the dated record has a date-stamped filename |
 | `docs/reference*` updates | Links resolve and match the code or configuration it documents |
 | Onboarding docs change | The setup steps match the current project workflow |
 | Release/setup docs change | Version numbers, paths, and commands reflect the current repo |
@@ -167,5 +177,6 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-06-24 | Expanded the default topology to include `docs/tasks/` for dated task and phase logs, with `docs/tasks.md` as the entrypoint. |
 | 2026-06-24 | Added default docs topology: `docs/tasks.md`, `docs/roadmap.md`, `docs/architecture.md`, `docs/deployment.md`, and `docs/reference/` as the preferred organization for downstream projects. |
 | 2026-06-24 | Initial release — consumer-facing project docs workflow, onboarding and reference-doc sync, link hygiene, and validation guidance. |
