@@ -1,5 +1,5 @@
 {
-  "version": "1.25.16",
+  "version": "1.25.17",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -97,7 +97,16 @@
         "screen size breakpoint",
         "layout per screen size",
         "detect all screen layouts",
-        "all screen sizes"
+        "all screen sizes",
+        "page layout",
+        "layout consistency",
+        "consistent layout",
+        "screen consistency",
+        "redesign page",
+        "layout redesign",
+        "page consistency",
+        "uniform layout",
+        "layout patterns"
       ],
       "scripts": []
     },
@@ -434,7 +443,14 @@
         "scaffold pattern",
         "component design",
         "RowScope slot",
-        "inversion of control Compose"
+        "inversion of control Compose",
+        "redesign component",
+        "component redesign",
+        "flexible layout",
+        "reusable component",
+        "component architecture",
+        "component pattern",
+        "composable design"
       ],
       "scripts": []
     },
@@ -724,7 +740,21 @@
         "app theme setup",
         "brand colors",
         "design token system",
-        "custom typography"
+        "custom typography",
+        "redesign",
+        "visual consistency",
+        "UI consistency",
+        "design consistency",
+        "page design",
+        "screen design",
+        "UI look and feel",
+        "consistent styling",
+        "style guide",
+        "branding",
+        "component library",
+        "theming",
+        "color palette",
+        "visual identity"
       ],
       "scripts": [
         "scan_design_violations.py",
@@ -792,7 +822,17 @@
         "separator",
         "icon button",
         "form label",
-        "extended design system"
+        "extended design system",
+        "redesign",
+        "visual consistency",
+        "UI components",
+        "component library",
+        "page components",
+        "add components",
+        "component set",
+        "UI kit",
+        "component design",
+        "redesign page"
       ],
       "scripts": []
     },
