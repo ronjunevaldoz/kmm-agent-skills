@@ -452,7 +452,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "XCFramework", "Swift Package Manager", "SPM", "iOS binary" | `kotlin-multiplatform-xcframework-spm` |
 | "expect actual", "platform-specific", "@ObjCName", "iOS interop" | `kotlin-multiplatform-expect-actual` |
 | "repository", "data layer", "offline-first", "cache", "single source of truth" | `kotlin-multiplatform-repository-pattern` |
-| "navigation", "screen routing", "NavHost", "deep links" | `kotlin-multiplatform-navigation` |
+| "navigation", "screen routing", "NavHost", "deep links", "web routing", "browser fragment", "hash navigation" | `kotlin-multiplatform-navigation` |
 | "paging", "Paging 3", "PagingSource", "infinite scroll", "load more", "next page", "cursor pagination", "offset pagination", "LazyPagingItems", "paginate" | `kotlin-multiplatform-paging` |
 | "shared strings", "localization", "image assets", "fonts" | `kotlin-multiplatform-shared-resources` |
 | "MVI", "ViewModel state", "one-shot effects", "Screen/Content split" | `kotlin-multiplatform-mvi` |
@@ -592,6 +592,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 |---|---|
 | 2026-06-24 | Added architecture-diagram / library-docs / app-docs routing keywords for `kotlin-multiplatform-project-docs-maintainer`. |
 | 2026-06-24 | Added explicit release routing keywords (`release project`, `cut release`, `ship version`) so project release requests route to `kotlin-multiplatform-release`. |
+| 2026-06-24 | Added web routing / browser fragment / hash navigation keywords for `kotlin-multiplatform-navigation`. |
 | 2026-06-22 | Fixed kotlin-multiplatform-jni-pro routing: was tagged with Kotlin/Native cinterop vocabulary (`CPointer`, `kotlin native interop`) but the skill is strictly JVM JNI. Corrected description + trigger map to JNI terms (`JNIEnv`, `Java_*`, `wrapper.cpp`, `vendor C++`, `C-shim`); added expect-actual disambiguation row for cinterop. |
 | 2026-06-21 | Removed private project reference from docs-first rule; rule is now generic. |
 | 2026-06-18 | Initial release — 30-skill routing map, dependency graph, build order, decision trees, anti-pattern checklist. |

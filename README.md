@@ -14,6 +14,9 @@ explicit review loops before code is generated.
 Read [GETTING_STARTED.md](GETTING_STARTED.md) for the quick overview, then use
 `kotlin-multiplatform-expert` first. It routes you to the smallest relevant skill set.
 
+**Start here:** read [GETTING_STARTED.md](GETTING_STARTED.md), then ask
+`kotlin-multiplatform-expert` what to use next.
+
 ---
 
 ## Quick Start
@@ -314,7 +317,7 @@ Phrases that activate each skill automatically.
 | [`xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) | "XCFramework", "Swift Package Manager", "iOS distribution", "Package.swift" |
 | [`expect-actual`](skills/kotlin-multiplatform-expect-actual/) | "iOS only code", "platform-specific implementation", "expect fun", "actual class" |
 | [`repository-pattern`](skills/kotlin-multiplatform-repository-pattern/) | "offline-first", "cache-first", "single source of truth", "data layer strategy" |
-| [`navigation`](skills/kotlin-multiplatform-navigation/) | "navigate to screen", "nav graph", "pass arguments", "back stack" |
+| [`navigation`](skills/kotlin-multiplatform-navigation/) | "navigate to screen", "nav graph", "pass arguments", "back stack", "web routing", "browser fragment" |
 | [`shared-resources`](skills/kotlin-multiplatform-shared-resources/) | "i18n", "translations", "app strings KMP", "localize", "compose resources" |
 | [`mvi`](skills/kotlin-multiplatform-mvi/) | "MVI pattern", "navigation effect", "one-shot event", "UiState / UiIntent / UiEffect" |
 | [`logging`](skills/kotlin-multiplatform-logging/) | "logger wrapper", "logger facade", "kotlin-logging", "Kermit", "KMP logging", "crash reporting", "log levels" |
