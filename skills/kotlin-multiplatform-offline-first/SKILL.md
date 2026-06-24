@@ -37,7 +37,9 @@ Do NOT use this skill when:
 - Real-time streaming is the requirement — use `kotlin-rpc` or WebSockets instead
 
 **Trigger keywords:** offline first, offline-first, local first, sync, optimistic update,
-conflict resolution, background sync, single source of truth, cache-then-network.
+conflict resolution, background sync, single source of truth, cache-then-network,
+data redundancy, content sync, data consistency, sync strategy, data duplication,
+conflict handling, cache management, background data sync.
 
 **Freshness rule:** `WorkManager` and `BGTaskScheduler` APIs change — recheck
 [WorkManager releases](https://developer.android.com/jetpack/androidx/releases/work)

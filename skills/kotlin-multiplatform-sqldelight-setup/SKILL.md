@@ -63,7 +63,9 @@ Use this skill when you need to:
 **Trigger keywords:** SQLDelight, database, SQLite, schema, migrations, type adapter,
 Flow query, Android driver, Native driver, Desktop driver, Web driver,
 local database KMP, Room alternative, offline storage, local persistence,
-SQLite KMP, persist to database, store data locally, local data layer.
+SQLite KMP, persist to database, store data locally, local data layer,
+data storage, persistence layer, data redundancy, content storage, local cache,
+database design, data schema, persistent storage, offline data.
 
 **Freshness rule:** SQLDelight support changes across targets, so recheck the current
 driver matrix and WasmJs status before copying setup code.
