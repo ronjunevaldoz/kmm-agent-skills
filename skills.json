@@ -1,5 +1,5 @@
 {
-  "version": "1.25.20",
+  "version": "1.26.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -766,6 +766,7 @@
         "visual identity"
       ],
       "scripts": [
+        "scaffold_preview_coverage.py",
         "scan_design_violations.py",
         "update_design_system.py"
       ]
