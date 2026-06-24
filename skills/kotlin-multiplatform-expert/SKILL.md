@@ -440,6 +440,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "Koin", "dependency injection", "manual modules", "annotated mode" | `kotlin-multiplatform-dependency-injection` |
 | "review my KMP project", "audit this repo", "what's wrong with this architecture" | `kotlin-multiplatform-audit` |
 | "project docs", "consumer docs", "README", "getting started", "docs reference", "onboarding docs", "architecture diagram", "library docs", "app docs" | `kotlin-multiplatform-project-docs-maintainer` |
+| "wireframes", "screen flows", "layout specs", "design handoff", "component API", "visual direction" | `designer` |
 | "logging", "logger wrapper", "logger facade", "kotlin-logging", "KotlinLogging", "Kermit", "log level", "crash reporting", "Crashlytics logging" | `kotlin-multiplatform-logging` |
 | "auth", "authentication", "authorization", "JWT", "sessions", "Ktor RPC" | `kotlin-multiplatform-ktor-auth-service` |
 | "MongoDB", "database", "collection", "Flow", "change stream", "server-side Kotlin" | `kotlin-multiplatform-mongodb-database` |
@@ -593,6 +594,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 | 2026-06-24 | Added architecture-diagram / library-docs / app-docs routing keywords for `kotlin-multiplatform-project-docs-maintainer`. |
 | 2026-06-24 | Added explicit release routing keywords (`release project`, `cut release`, `ship version`) so project release requests route to `kotlin-multiplatform-release`. |
 | 2026-06-24 | Added web routing / browser fragment / hash navigation keywords for `kotlin-multiplatform-navigation`. |
+| 2026-06-24 | Added direct designer routing for wireframes, screen flows, layout specs, and design handoff requests. |
 | 2026-06-22 | Fixed kotlin-multiplatform-jni-pro routing: was tagged with Kotlin/Native cinterop vocabulary (`CPointer`, `kotlin native interop`) but the skill is strictly JVM JNI. Corrected description + trigger map to JNI terms (`JNIEnv`, `Java_*`, `wrapper.cpp`, `vendor C++`, `C-shim`); added expect-actual disambiguation row for cinterop. |
 | 2026-06-21 | Removed private project reference from docs-first rule; rule is now generic. |
 | 2026-06-18 | Initial release — 30-skill routing map, dependency graph, build order, decision trees, anti-pattern checklist. |
