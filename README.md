@@ -202,6 +202,9 @@ Enforce skill compliance automatically in your CI — violations block the build
 }
 ```
 
+Pin a release tag in `version` rather than `main` or another mutable ref. The
+governance check fails if the pin is missing or not tag-shaped.
+
 **2. Add a governance workflow:**
 
 ```yaml

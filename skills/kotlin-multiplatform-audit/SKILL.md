@@ -11,7 +11,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-13'
+  last-updated: '2026-06-24'
   keywords:
     - KMP audit
     - project audit
@@ -225,7 +225,9 @@ Run the governance check in a consumer project's CI so violations block the buil
 }
 ```
 
-Commit this file. It declares which skills collection version the project targets. The governance check prints it on every run so drift is visible.
+Commit this file. It declares which skills collection version the project targets and
+must pin a release tag, not a mutable ref like `main`. The governance check prints it
+on every run and fails if the file is missing or the version is not tag-pinned.
 
 ### Step 2 — Wire the reusable workflow
 
@@ -245,7 +247,7 @@ jobs:
     with:
       project_root: .
       fail_on: HIGH
-      skills_ref: main   # pin to a tag (e.g. v1.24.1) for reproducibility
+      skills_ref: v1.24.1   # pin to a tag for reproducibility
 ```
 
 That is the complete consumer setup — no scripts to copy, no dependencies to install beyond Python 3.12 (provided by the workflow).
@@ -282,7 +284,8 @@ python3 ../kmm-agent-skills/skills/kotlin-multiplatform-audit/scripts/governance
 ## Bundled Script
 
 - `scripts/governance_check.py` — CI enforcement orchestrator. Runs both scanners, reads
-  `.kmm-skills` for version pinning, exits non-zero on findings at or above the threshold.
+  `.kmm-skills` for version pinning, fails on missing or mutable pins, and exits non-zero
+  on findings at or above the threshold.
   Used by the reusable workflow at `.github/workflows/kmm-audit.yml`.
 - `scripts/audit_project.py` — runs a lightweight scan for a few common KMP architecture
   smells such as effect replay bugs, state copy races, and obvious UI/data boundary leaks.
@@ -322,6 +325,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-06-24 | Added a skills-version pin guard to governance: `.kmm-skills` must exist and must point at a release tag, not `main` or another mutable ref. |
 | 2026-06-23 | Added "Governance & CI Enforcement" section: governance_check.py, reusable workflow, .kmm-skills version file, threshold guide. |
 | 2026-06-22 | Added "Native / JNI boundary" inspection section (#6): 3rd-party C++ immutability, opaque-handle cleanup, acquire/release pairing, C-shim wrapping — closes the cross-skill enforcement gap for the immutability rule. Hands off to kotlin-multiplatform-jni-pro. |
 | 2026-06-21 | GitHub issue title format defined: `[category] short description`. Category table added with 8 categories (`[arch]`, `[mvi]`, `[presenter]`, `[data]`, `[ui]`, `[di]`, `[build]`, `[test]`). |

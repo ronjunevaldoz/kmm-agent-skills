@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -33,6 +34,7 @@ AUDIT_PROJECT = REPO_ROOT / "skills/kotlin-multiplatform-audit/scripts/audit_pro
 
 SEVERITY_RANK: dict[str, int] = {"HIGH": 2, "MEDIUM": 1, "LOW": 0}
 _SCAN_SEVERITY_MAP: dict[str, str] = {"error": "HIGH", "warning": "MEDIUM"}
+SKILLS_VERSION_PATTERN = re.compile(r"^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$")
 
 
 def read_skills_version(project_root: Path) -> str | None:
@@ -44,6 +46,42 @@ def read_skills_version(project_root: Path) -> str | None:
         return data.get("version")
     except (json.JSONDecodeError, OSError):
         return None
+
+
+def validate_skills_version_pin(project_root: Path) -> list[dict]:
+    skills_file = project_root / ".kmm-skills"
+    if not skills_file.exists():
+        return [{
+            "source": "skills_version_pin",
+            "severity": "HIGH",
+            "type": "missing_version_pin",
+            "file": ".kmm-skills",
+            "line": 0,
+            "message": "Missing .kmm-skills version pin. Pin the skills collection to a release tag before running governance.",
+        }]
+
+    version = read_skills_version(project_root)
+    if not version:
+        return [{
+            "source": "skills_version_pin",
+            "severity": "HIGH",
+            "type": "invalid_version_pin",
+            "file": ".kmm-skills",
+            "line": 0,
+            "message": "Malformed .kmm-skills file. Pin the skills collection to a release tag such as v1.25.11.",
+        }]
+
+    if not SKILLS_VERSION_PATTERN.match(version):
+        return [{
+            "source": "skills_version_pin",
+            "severity": "HIGH",
+            "type": "mutable_version_pin",
+            "file": ".kmm-skills",
+            "line": 0,
+            "message": f"Mutable skills ref '{version}' detected. Use a release tag such as v1.25.11 instead of a branch or alias.",
+        }]
+
+    return []
 
 
 def run_scan_violations(project_root: Path) -> list[dict]:
@@ -152,7 +190,7 @@ def main() -> int:
     threshold = SEVERITY_RANK[args.fail_on]
     version = read_skills_version(root)
 
-    all_findings = run_scan_violations(root) + run_audit_project(root)
+    all_findings = validate_skills_version_pin(root) + run_scan_violations(root) + run_audit_project(root)
     failing = [f for f in all_findings if SEVERITY_RANK.get(f["severity"], 0) >= threshold]
 
     if args.json_output:
