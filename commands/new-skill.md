@@ -22,7 +22,15 @@ If a duplicate concern exists, load the existing skill and use `/modify-skill` i
 
 ## Step 2 — Define the skill scope
 
-Before writing anything, answer these questions:
+Before writing anything, confirm the scope:
+
+| Scope | What to do |
+|---|---|
+| Consumer-facing skill | Continue with this command and scaffold under `skills/` |
+| Repo-internal workflow | Stop here and update `agents/`, `commands/`, `scripts/`, or repo docs instead |
+| Consumer changelog / release notes | Hand off to `agents/changelog.md` and `/release-notes` |
+
+Then answer these questions:
 
 1. **What one problem does this skill solve?** (one sentence)
 2. **What are the 3 trigger phrases** that should route to this skill?

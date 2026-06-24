@@ -59,6 +59,23 @@ kmm-agent-skills/
 
 ---
 
+## Scope boundary
+
+Use this rule before creating anything new:
+
+- `skills/` is for consumer-facing capabilities that downstream projects install.
+- `agents/`, `commands/`, and `scripts/` are for repo-internal workflow, validation,
+  and maintenance.
+- Consumer release notes and per-skill changelog updates belong to
+  `agents/changelog.md` and `/release-notes`, not a new skill.
+- If a request is repo-internal, do not scaffold a skill; update the relevant agent,
+  command, or repo doc instead.
+
+If the scope is unclear, confirm it before writing files. That keeps consumer skills
+and repo maintenance paths separate.
+
+---
+
 ## File naming conventions
 
 | Location | Convention | Examples |
@@ -78,6 +95,9 @@ Everything inside a subdirectory uses `kebab-case` (or `snake_case` for Python s
 ---
 
 ## Adding a new skill
+
+Before you scaffold, make sure the request is truly a consumer-facing skill and not
+repo-internal maintenance or consumer changelog work.
 
 ### 1. Create the skill directory
 
