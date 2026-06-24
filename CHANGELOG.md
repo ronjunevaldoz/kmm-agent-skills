@@ -2,6 +2,23 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.8] — 2026-06-24
+
+### Docs
+
+- docs: clarify skill scope and changelog path
+- docs: add fix maturity lanes
+- docs: add task lifecycle guidance
+- docs: define archived task docs policy
+- docs: support dated task docs folders
+- docs: add default project docs topology
+- docs: keep skills consumer-facing
+- docs: add project and skill docs maintainers
+- docs: clarify docs maintainer scope
+- docs: add docs maintainer agent
+
+---
+
 ## [v1.25.7] — 2026-06-23
 
 ### Docs

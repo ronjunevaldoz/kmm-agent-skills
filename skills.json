@@ -1,5 +1,5 @@
 {
-  "version": "1.25.7",
+  "version": "1.25.8",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -848,7 +848,7 @@
       "path": "skills/kotlin-multiplatform-expert",
       "description": "KMP Expert Orchestrator \u2014 maps all skills in this collection, their dependency order, and how to sequence them for any Kotlin Multiplatform project. Use this skill first to decide which other skill to invoke, in what order, for a given task. Covers: skill dependency graph, layer-by-layer build order, feature-slice assembly sequence, decision trees for the most common \"what do I use here?\" questions, and when to hand off to the project audit skill. This is a meta-skill; it delegates to domain skills for implementation and review, and it can turn confirmed audit findings into issue drafts or question drafts when the repo needs tracking. The long-term goal is to keep this skills collection aligned with the cleanest KMM architecture patterns possible.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-22",
+      "last_updated": "2026-06-24",
       "keywords": [
         "KMP expert",
         "orchestrator",
@@ -1689,6 +1689,45 @@
         "desktop app run",
         "JVM preview",
         "preview workflow"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-project-docs-maintainer",
+      "path": "skills/kotlin-multiplatform-project-docs-maintainer",
+      "description": "Maintains consumer-facing KMP project documentation: README, GETTING_STARTED, INSTALL, RELEASING, docs/reference pages, onboarding guides, and architecture notes. Use this skill when project docs need to match the actual code, commands, config, or folder layout. Does NOT cover consumer release-note generation, per-skill changelogs, or skills-repo documentation.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-24",
+      "keywords": [
+        "project docs",
+        "consumer docs",
+        "README",
+        "getting started",
+        "install guide",
+        "releasing guide",
+        "docs reference",
+        "onboarding docs",
+        "architecture docs",
+        "docs drift",
+        "documentation maintainer",
+        "project documentation",
+        "repo docs",
+        "docs sync"
+      ],
+      "triggers": [
+        "project docs",
+        "consumer docs",
+        "README",
+        "getting started",
+        "install",
+        "releasing",
+        "docs reference",
+        "onboarding docs",
+        "architecture docs",
+        "docs drift",
+        "documentation maintainer",
+        "project documentation",
+        "repo docs"
       ],
       "scripts": []
     },
