@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.20] — 2026-06-24
+
+### Docs
+
+- docs: refine routing precedence
+
+---
+
 ## [v1.25.19] — 2026-06-24
 
 ### Docs
