@@ -26,7 +26,7 @@ these work types, and stop at the earliest tier that answers the request:
 |---|---|
 | New screen or feature end-to-end | `feature-scaffold`, `clean-architecture`, `presenter-module`, `mvi` |
 | Data access (network, cache, persistence) | `repository-pattern`, `network-layer`, `sqldelight-setup`, `datastore` |
-| UI only (composables, states, theming) | `mvi`, `design-system`, `compose-state-hoisting`, `preview-driven-development`, `roborazzi` |
+| UI only (composables, states, theming) | `designer`, `mvi`, `design-system`, `compose-state-hoisting`, `preview-driven-development`, `roborazzi` |
 | Screen navigation or deep links | `navigation`, `mvi`, `deep-linking` |
 | Deep links (App Links / Universal Links) | `deep-linking`, `navigation` |
 | Authentication or token handling | `ktor-auth-service`, `network-layer`, `dependency-injection` |
