@@ -2,6 +2,15 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.16] — 2026-06-24
+
+### Docs
+
+- docs: add wasmjs hash routing guidance
+- docs: simplify README overview
+
+---
+
 ## [v1.25.15] — 2026-06-24
 
 ### Docs

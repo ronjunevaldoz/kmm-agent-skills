@@ -1,5 +1,5 @@
 {
-  "version": "1.25.15",
+  "version": "1.25.16",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1433,7 +1433,7 @@
       "path": "skills/kotlin-multiplatform-navigation",
       "description": "Sets up type-safe navigation in a Kotlin Multiplatform Compose project using Jetpack Navigation Compose for KMP (org.jetbrains.androidx.navigation). Covers: route definitions with kotlinx.serialization, NavHost setup in a :app:shared or :feature:*:ui nav graph, type-safe arguments, deep links, and bottom navigation wiring. Works on Android, iOS, Desktop (JVM), and Web (JS/WasmJs). Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-06-24",
       "keywords": [
         "Navigation Compose",
         "KMP navigation",
@@ -1465,7 +1465,11 @@
         "pass arguments",
         "route arguments",
         "nested navigation",
-        "screen transition"
+        "screen transition",
+        "web routing",
+        "browser fragment",
+        "hash navigation",
+        "wasmJs routing"
       ],
       "scripts": []
     },
