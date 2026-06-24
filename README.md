@@ -239,7 +239,7 @@ What to say to activate each skill. The agent matches these phrases automaticall
 | Skill | Say something like… |
 |---|---|
 | [`expert`](skills/kotlin-multiplatform-expert/) | "where do I start KMP", "which skill should I use", "KMP architecture decision" |
-| [`project-docs-maintainer`](skills/kotlin-multiplatform-project-docs-maintainer/) | "project docs", "consumer docs", "README", "getting started", "docs reference" |
+| [`project-docs-maintainer`](skills/kotlin-multiplatform-project-docs-maintainer/) | "project docs", "consumer docs", "README", "getting started", "docs reference", "architecture diagram", "library docs", "app docs" |
 | [`feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) | "new KMP feature", "add a screen", "scaffold feature module", "create module" |
 | [`clean-architecture`](skills/kotlin-multiplatform-clean-architecture/) | "6-layer architecture", "which layer does this go in", "layer contract", "domain isolation" |
 | [`presenter-module`](skills/kotlin-multiplatform-presenter-module/) | "KMP ViewModel", "presenter layer", "pure Kotlin ViewModel", "StateFlow ViewModel" |

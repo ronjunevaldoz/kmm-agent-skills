@@ -2,10 +2,10 @@
 name: kotlin-multiplatform-project-docs-maintainer
 description: >
   Maintains consumer-facing KMP project documentation: README, GETTING_STARTED, INSTALL,
-  RELEASING, docs/reference pages, onboarding guides, and architecture notes. Use this
-  skill when project docs need to match the actual code, commands, config, or folder
-  layout. Does NOT cover consumer release-note generation, per-skill changelogs, or
-  skills-repo documentation.
+  RELEASING, docs/reference pages, onboarding guides, architecture notes, and
+  architecture diagrams. Use this skill when project docs need to match the actual code,
+  commands, config, folder layout, or app/library structure. Does NOT cover consumer
+  release-note generation, per-skill changelogs, or skills-repo documentation.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
@@ -20,6 +20,7 @@ metadata:
     - docs reference
     - onboarding docs
     - architecture docs
+    - architecture diagram
     - docs drift
     - documentation maintainer
     - project documentation
@@ -42,8 +43,9 @@ Do NOT use this skill when:
 - you are implementing product code instead of updating documentation
 
 **Trigger keywords:** project docs, consumer docs, README, getting started, install,
-releasing, docs reference, onboarding docs, architecture docs, docs drift,
-documentation maintainer, project documentation, repo docs.
+releasing, docs reference, onboarding docs, architecture docs, architecture diagram,
+docs drift, documentation maintainer, project documentation, repo docs, library docs,
+app docs.
 
 **Freshness rule:** project docs drift whenever code, commands, config, or folder names
 change — re-read the live project README, the touched docs, and the relevant source files
@@ -64,6 +66,21 @@ Why:
 - project docs are only useful when they match the code people actually run
 - stale onboarding or README guidance causes more confusion than missing guidance
 - keeping one canonical phrasing across README, onboarding, and reference docs avoids drift
+
+### Architecture Diagram Rule
+
+If the downstream project is an app or a library, include a simple architecture diagram
+in the README or `docs/architecture.md` that shows the major modules, layers, or
+runtime flow.
+
+Use the diagram to answer "what is the shape of this project?" at a glance:
+- app projects should show user-facing entry points, feature modules, and shared layers
+- library projects should show public API surface, internal implementation modules, and
+  the main integration points
+- keep the diagram short enough that it stays useful in the README, then expand details
+  in `docs/architecture.md` or reference pages when needed
+
+Update the diagram whenever a module, boundary, or release flow changes.
 
 ### Default Docs Topology
 
@@ -137,7 +154,7 @@ Rules:
 |---|---|
 | New module, command, or phase | README, onboarding docs, `docs/tasks.md`, and any `docs/reference*` page that mentions it |
 | Renamed command or path | Every docs mention, code sample, and navigation link |
-| Architecture shift | README plus the affected reference pages and diagrams |
+| Architecture shift | README plus the affected reference pages, diagrams, and architecture notes |
 | Release or setup change | RELEASING, INSTALL, and any onboarding checklist that relies on it |
 
 ## Project Doc Workflow
@@ -264,4 +281,5 @@ Keep the response focused on the project's docs surface and the source files it 
 | 2026-06-24 | Added archive policy: completed task and phase notes move to `docs/tasks/archive/` with date-stamped filenames and a backlink from `docs/tasks.md`. |
 | 2026-06-24 | Expanded the default topology to include `docs/tasks/` for dated task and phase logs, with `docs/tasks.md` as the entrypoint. |
 | 2026-06-24 | Added default docs topology: `docs/tasks.md`, `docs/roadmap.md`, `docs/architecture.md`, `docs/deployment.md`, and `docs/reference/` as the preferred organization for downstream projects. |
+| 2026-06-24 | Added architecture-diagram guidance for downstream app and library projects so the README or `docs/architecture.md` shows the major modules and flow. |
 | 2026-06-24 | Initial release — consumer-facing project docs workflow, onboarding and reference-doc sync, link hygiene, and validation guidance. |
