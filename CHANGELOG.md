@@ -2,6 +2,17 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.15] — 2026-06-24
+
+### Docs
+
+- docs: split repo and project docs routing
+- docs: route ui-only planning through designer
+- docs: add design handoff template
+- docs: add designer agent for wireframes and layouts
+
+---
+
 ## [v1.25.14] — 2026-06-24
 
 ### Docs
