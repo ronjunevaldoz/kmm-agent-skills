@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.12] — 2026-06-24
+
+### Docs
+
+- docs: guard consumer skill version pins
+
+---
+
 ## [v1.25.11] — 2026-06-24
 
 ### Docs
