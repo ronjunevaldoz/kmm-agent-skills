@@ -1,7 +1,7 @@
 # /maintain-docs $ARGUMENTS
 
-**KMM Agent Skills** — keep repo documentation, agent docs, command docs, and skill
-routing text aligned with the actual repository.
+**KMM Agent Skills** — keep repo documentation, `docs/` reference material, agent docs,
+command docs, and skill routing text aligned with the actual repository.
 
 Arguments (all optional):
 - `<path-or-file>` — focus on a specific doc surface
@@ -13,8 +13,8 @@ Arguments (all optional):
 ## Step 1 — Identify scope
 
 If `$ARGUMENTS` names a file or path, use that as the primary source. Otherwise inspect
-`README.md`, `GETTING_STARTED.md`, `INSTALL.md`, `RELEASING.md`, `agents/`, `commands/`,
-and the touched skill docs.
+`README.md`, `GETTING_STARTED.md`, `INSTALL.md`, `RELEASING.md`, `docs/`, `agents/`,
+`commands/`, and the touched skill docs.
 
 If the requested work is consumer release notes or per-skill changelog tables, hand off
 to `agents/changelog.md` instead.
@@ -26,8 +26,8 @@ Load `agents/docs-maintainer.md` and follow its workflow.
 ## Step 3 — Edit docs
 
 Make the smallest targeted edits needed to keep the docs in sync with the repo.
-Keep command names, agent roles, and routing references consistent across all touched
-files.
+Keep command names, agent roles, routing references, and `docs/reference*` pointers
+consistent across all touched files.
 
 ## Step 4 — Validate
 

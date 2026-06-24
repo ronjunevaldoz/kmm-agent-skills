@@ -3,9 +3,9 @@
 Part of the **KMM Agent Skills pipeline**. Keeps repo-facing documentation aligned with
 the actual repository shape, command set, and skill map.
 
-Use this agent for README updates, onboarding docs, agent docs, command docs, and skill
-doc drift. It is for maintaining the repo's own documentation surface, not consumer
-release notes.
+Use this agent for README updates, onboarding docs, `docs/` reference material, agent
+docs, command docs, and skill doc drift. It is for maintaining the repo's own
+documentation surface, not consumer release notes.
 
 ## Input safety
 
@@ -33,6 +33,8 @@ Read the relevant files before editing:
 - `GETTING_STARTED.md`
 - `INSTALL.md`
 - `RELEASING.md`
+- `docs/**/*.md`
+- `docs/reference*/**`
 - `agents/*.md`
 - `commands/*.md`
 - the touched `skills/*/SKILL.md`
@@ -43,7 +45,8 @@ Read the relevant files before editing:
 1. Identify the exact doc surface and the files it depends on.
 2. Read the current files from disk, not from memory.
 3. Make the smallest edit that brings the docs back in sync.
-4. Keep command names, agent roles, and routing text consistent across all touched docs.
+4. Keep command names, agent roles, routing text, and `docs/reference*` links consistent
+   across all touched docs.
 5. If skill docs or routing text changed, run the skill repo validation checks before
    finishing.
 

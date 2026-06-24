@@ -108,7 +108,7 @@ avoid repeating past mistakes.
 | [`planner`](agents/planner.md) | Analyzes the task, loads only relevant skills, produces a layer-by-layer plan, gates on user approval |
 | [`implementer`](agents/implementer.md) | Executes the approved plan in 6-layer build order, generates complete runnable code |
 | [`reviewer`](agents/reviewer.md) | Checks layer boundaries, Koin wiring, MVI contracts, and test coverage; runs `audit_project.py` |
-| [`docs-maintainer`](agents/docs-maintainer.md) | Keeps README, agent docs, command docs, and skill routing text aligned with the repo |
+| [`docs-maintainer`](agents/docs-maintainer.md) | Keeps README, `docs/` reference material, agent docs, command docs, and skill routing text aligned with the repo |
 | [`validator`](agents/validator.md) | Runs Gradle compilation and `jvmTest` in escalating levels; stops at first failure |
 | [`fixer`](agents/fixer.md) | Applies minimum targeted fixes for reviewer/validator blockers; rates confidence; asks user for LOW-confidence calls |
 
