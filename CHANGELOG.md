@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.11] — 2026-06-24
+
+### Docs
+
+- docs: add architecture diagram guidance for project docs
+
+---
+
 ## [v1.25.10] — 2026-06-24
 
 ### Docs

@@ -1,5 +1,5 @@
 {
-  "version": "1.25.10",
+  "version": "1.25.11",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1695,7 +1695,7 @@
     {
       "name": "kotlin-multiplatform-project-docs-maintainer",
       "path": "skills/kotlin-multiplatform-project-docs-maintainer",
-      "description": "Maintains consumer-facing KMP project documentation: README, GETTING_STARTED, INSTALL, RELEASING, docs/reference pages, onboarding guides, and architecture notes. Use this skill when project docs need to match the actual code, commands, config, or folder layout. Does NOT cover consumer release-note generation, per-skill changelogs, or skills-repo documentation.",
+      "description": "Maintains consumer-facing KMP project documentation: README, GETTING_STARTED, INSTALL, RELEASING, docs/reference pages, onboarding guides, architecture notes, and architecture diagrams. Use this skill when project docs need to match the actual code, commands, config, folder layout, or app/library structure. Does NOT cover consumer release-note generation, per-skill changelogs, or skills-repo documentation.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-24",
       "keywords": [
@@ -1708,6 +1708,7 @@
         "docs reference",
         "onboarding docs",
         "architecture docs",
+        "architecture diagram",
         "docs drift",
         "documentation maintainer",
         "project documentation",
@@ -1724,10 +1725,13 @@
         "docs reference",
         "onboarding docs",
         "architecture docs",
+        "architecture diagram",
         "docs drift",
         "documentation maintainer",
         "project documentation",
-        "repo docs"
+        "repo docs",
+        "library docs",
+        "app docs"
       ],
       "scripts": []
     },
