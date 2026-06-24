@@ -7,36 +7,29 @@
 
 AI agent skills for **Kotlin Multiplatform (KMP)** development.
 
-Goal: keep KMM architecture clean, repeatable, and easy to audit. The skills here
-favor clear module boundaries, version catalogs, build-logic convention plugins,
-and explicit review loops before code is generated.
+The goal is simple: keep KMP work clean, repeatable, and easy to audit. These skills
+favor clear module boundaries, version catalogs, build-logic convention plugins, and
+explicit review loops before code is generated.
 
-The repo files are the source of truth. Re-read this README and the relevant
-`skills/*/SKILL.md` files before making recommendations so each session uses the
-latest skill set and wording.
-
-**Start here:** Read [GETTING_STARTED.md](GETTING_STARTED.md) for the 5-minute overview, then use `kotlin-multiplatform-expert` first on any new project or feature.
-It maps the skills, build order, and the best next step.
+Read [GETTING_STARTED.md](GETTING_STARTED.md) for the quick overview, then use
+`kotlin-multiplatform-expert` first. It routes you to the smallest relevant skill set.
 
 ---
 
 ## Quick Start
 
-1. Use `kotlin-multiplatform-expert` to choose the smallest relevant skill set in priority order.
-2. Use `kotlin-multiplatform-feature-scaffold` to start a new project from `Kotlin/kmp-wizard` `all-targets`.
-3. Use the domain skills below to fill in auth, data, UI, navigation, and audits.
+1. Start with `kotlin-multiplatform-expert`.
+2. Use `kotlin-multiplatform-feature-scaffold` for new projects from `Kotlin/kmp-wizard` `all-targets`.
+3. Add the domain skills below only when the task needs them.
 
 ## Priority Guide
 
-Treat the skill map as a ladder, not a checklist.
+Treat the skill map as a ladder, not a checklist:
 
 1. Start with `kotlin-multiplatform-expert`.
-2. Load only the smallest set that can answer the request.
-3. Use contract and foundation skills first: `clean-architecture`, `feature-scaffold`, and the base project tools they enable.
-4. Add domain, platform, or UI skills only when the task touches that area.
-5. Finish with testing, docs, audit, or release skills once the implementation needs verification or publication.
-
-If two skills overlap, prefer the one earlier in the dependency graph and defer the rest until the task actually needs them.
+2. Load the smallest set that answers the request.
+3. Prefer contract and foundation skills before domain, UI, testing, docs, or release skills.
+4. If two skills overlap, pick the one earlier in the dependency graph.
 
 ## Skill Map
 
@@ -65,10 +58,8 @@ flowchart LR
 
 Consumer skills are the installable surface downstream projects use. Repo docs,
 agents, commands, and scripts maintain this repository's own workflow and release
-surface.
-
-Designer keeps KMM and Compose component decisions aligned with the repo design system
-before implementation starts.
+surface. The designer agent keeps KMM and Compose component decisions aligned before
+implementation starts.
 
 Update this diagram whenever a skill, agent, command, or routing rule changes. Keep
 it aligned with `skills/kotlin-multiplatform-expert/SKILL.md`, `agents/*.md`, and the
@@ -95,9 +86,8 @@ flowchart TB
   T --> Q[unit tests, screenshots, code quality, accessibility]
 ```
 
-This is the downstream project shape the skills are meant to support. Use the
-earliest relevant layer, then add lower layers only when the feature truly needs
-them.
+This is the downstream project shape the skills support. Use the earliest relevant
+layer, then add lower layers only when the feature truly needs them.
 
 ---
 
@@ -116,10 +106,10 @@ flowchart LR
   P --> C[Published docs / release notes]
 ```
 
-Consumer routing starts with the expert, not with every matching skill. Route to the
-earliest tier that answers the request, then expand only when the next layer is needed.
-For UI/UX or component work, the designer agent runs before implementation so the
-design system and Compose patterns stay consistent.
+Consumer routing starts with the expert. Route to the earliest tier that answers the
+request, then expand only when the next layer is needed. For UI/UX or component work,
+the designer agent runs before implementation so the design system and Compose patterns
+stay consistent.
 
 ---
 
@@ -256,7 +246,7 @@ ln -sf ../../hooks/pre-commit-audit.sh .git/hooks/pre-commit
 
 ## Governance (for skill consumers)
 
-Enforce skill compliance automatically in your CI — violations block the build, no manual audit needed.
+Enforce skill compliance automatically in your CI.
 
 **1. Add `.kmm-skills` to your project root:**
 
@@ -286,7 +276,8 @@ jobs:
       skills_ref: v1.25.0   # pin to a tag for reproducibility
 ```
 
-That is the complete setup. The reusable workflow checks out this repo and runs `governance_check.py` — no scripts to copy, no dependencies to install.
+That is the complete setup. The reusable workflow checks out this repo and runs
+`governance_check.py`.
 
 | `fail_on` | What it catches |
 |---|---|
@@ -302,7 +293,7 @@ File here only if the skill guidance itself is wrong or incomplete. If you appli
 
 ## Trigger Keywords
 
-What to say to activate each skill. The agent matches these phrases automatically.
+Phrases that activate each skill automatically.
 
 | Skill | Say something like… |
 |---|---|
