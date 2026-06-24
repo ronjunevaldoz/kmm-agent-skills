@@ -60,9 +60,11 @@ The audit catches:
 |---|---|
 | **New KMP project from scratch** | `kotlin-multiplatform-feature-scaffold` (after reading `clean-architecture` for the rules) |
 | **Add a new feature** | `kotlin-multiplatform-expert` (it will route you) |
+| **Update this skills repo's README, agents, or commands** | `docs-maintainer` |
 | **Design a screen, wireframe, diagram, or component** | `designer` (it keeps KMM/Compose UI aligned with the design system) |
 | **Audit an existing project** | `kotlin-multiplatform-audit` |
 | **Set up CI/CD** | `kotlin-multiplatform-ci-github-actions` |
+| **Write consumer release notes or changelogs** | `changelog` |
 | **Publish to Maven Central** | `kotlin-multiplatform-release` |
 | **Debug architecture issues** | `kotlin-multiplatform-audit` (produces findings), then `kotlin-multiplatform-expert` (routes fixes) |
 

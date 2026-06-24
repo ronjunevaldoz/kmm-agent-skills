@@ -90,6 +90,19 @@ When more than one skill could apply, rank them instead of enabling everything.
 
 Load the earliest tier that answers the request, then add lower tiers only when the task genuinely needs them.
 
+## Routing Precedence
+
+When a request could fit more than one surface, use this order:
+
+1. Repo README, `docs/`, agent docs, command docs, or routing text -> `docs-maintainer`
+2. Downstream project README, onboarding docs, or reference docs -> `project-docs-maintainer`
+3. Wireframes, screen flows, layout specs, design handoff, or component API direction -> `designer`
+4. Consumer release notes, `CHANGELOG.md`, or per-skill changelog tables -> `changelog`
+5. Project release, versioning, or publishing flow -> `release`
+6. Navigation structure -> `navigation`; external URL handling -> `deep-linking`
+
+If the request still spans two surfaces after that, route the earlier-layer owner first and name the follow-up skill explicitly.
+
 ---
 
 ## Freshness Rule
@@ -439,8 +452,10 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "presenter module", "ViewModel no Compose", "MVI ViewModel", "UiState UiIntent" | `kotlin-multiplatform-presenter-module` |
 | "Koin", "dependency injection", "manual modules", "annotated mode" | `kotlin-multiplatform-dependency-injection` |
 | "review my KMP project", "audit this repo", "what's wrong with this architecture" | `kotlin-multiplatform-audit` |
-| "project docs", "consumer docs", "README", "getting started", "docs reference", "onboarding docs", "architecture diagram", "library docs", "app docs" | `kotlin-multiplatform-project-docs-maintainer` |
+| "project docs", "consumer docs", "project README", "getting started", "project docs reference", "onboarding docs", "architecture diagram", "library docs", "app docs" | `kotlin-multiplatform-project-docs-maintainer` |
+| "repo README", "repo docs", "agent docs", "command docs", "routing text", "skills repo docs" | `docs-maintainer` |
 | "wireframes", "screen flows", "layout specs", "design handoff", "component API", "visual direction" | `designer` |
+| "release notes", "consumer release notes", "per-skill changelog", "CHANGELOG.md" | `changelog` |
 | "logging", "logger wrapper", "logger facade", "kotlin-logging", "KotlinLogging", "Kermit", "log level", "crash reporting", "Crashlytics logging" | `kotlin-multiplatform-logging` |
 | "auth", "authentication", "authorization", "JWT", "sessions", "Ktor RPC" | `kotlin-multiplatform-ktor-auth-service` |
 | "MongoDB", "database", "collection", "Flow", "change stream", "server-side Kotlin" | `kotlin-multiplatform-mongodb-database` |
@@ -591,6 +606,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
+| 2026-06-24 | Refined routing precedence for repo docs, downstream docs, changelogs, and navigation/deep-link collisions. |
 | 2026-06-24 | Added architecture-diagram / library-docs / app-docs routing keywords for `kotlin-multiplatform-project-docs-maintainer`. |
 | 2026-06-24 | Added explicit release routing keywords (`release project`, `cut release`, `ship version`) so project release requests route to `kotlin-multiplatform-release`. |
 | 2026-06-24 | Added web routing / browser fragment / hash navigation keywords for `kotlin-multiplatform-navigation`. |

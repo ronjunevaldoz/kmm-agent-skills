@@ -35,8 +35,9 @@ these work types, and stop at the earliest tier that answers the request:
 | Koin wiring only | `dependency-injection` |
 | Tests only | `unit-testing`, `roborazzi` |
 | CI or build changes | `ci-github-actions`, `code-quality` |
-| Repo docs, agent docs, or command docs | `docs-maintainer`, `audit` |
-| Downstream project docs or onboarding docs | `project-docs-maintainer`, `audit` |
+| Repo README, repo docs, agent docs, or command docs | `docs-maintainer`, `audit` |
+| Downstream project README, docs, or onboarding docs | `project-docs-maintainer`, `audit` |
+| Consumer release notes or per-skill changelogs | `changelog` |
 | Release, versioning, or Maven Central publishing | `release`, `ci-github-actions`, `xcframework-spm` |
 | Legal docs (privacy policy, terms, GDPR, data safety) | `legal-docs`, `flavor-environment`, `datastore` |
 | Strings, fonts, or localization | `shared-resources` |
