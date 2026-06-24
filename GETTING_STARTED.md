@@ -29,6 +29,7 @@ I need to add a login feature
 
 The expert skill will:
 - Map which skills you need and in what order
+- Pick the smallest relevant set instead of enabling every matching skill
 - Explain the 6-layer architecture (model → api → domain → data → presenter → ui)
 - Hand off to the right domain skill (e.g., `ktor-auth-service` for the backend, `mvi` for the UI)
 
@@ -79,7 +80,7 @@ See [README.md](README.md#trigger-keywords) for the full keyword list.
 
 ## Skill Collection Overview
 
-**49 skills** organized into layers:
+**50 skills** organized into layers:
 
 - **Foundation** (6 skills) — project setup, clean architecture rules, DI, CI
 - **Infrastructure** (8 skills) — networking, databases, auth, logging
@@ -88,6 +89,9 @@ See [README.md](README.md#trigger-keywords) for the full keyword list.
 - **Testing & Quality** (3 skills) — unit tests, screenshots, code quality
 - **Meta** (2 skills) — expert routing, project audit
 - **Plus:** JNI bridge, legal docs, push notifications, analytics, biometric auth, and more
+
+Treat that list as a priority ladder, not a checkbox list. Start with the expert, then
+add only the skills the task actually needs.
 
 See [README.md](README.md#skill-map) for the full map.
 

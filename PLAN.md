@@ -44,7 +44,7 @@ Update when skills are added, revised, or completed.
 | `kotlin-multiplatform-sqldelight-setup` | ✅ | SQLDelight 2, platform drivers, schema, migrations, Flow queries |
 | `kotlin-multiplatform-datastore` | ✅ | Preferences + Proto DataStore, expect/actual factory, Koin wiring |
 | `kotlin-multiplatform-xcframework-spm` | ✅ | XCFramework build, SPM binary target, CI release |
-| `kotlin-multiplatform-logging` | ✅ | Kermit, log levels, pluggable writers, crash boundary, Koin wiring |
+| `kotlin-multiplatform-logging` | ✅ | kotlin-logging or Kermit, log levels, logger factory, crash boundary, Koin wiring |
 
 ### Layer 3 — Platform Patterns
 | Skill | Status | Notes |

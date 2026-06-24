@@ -78,6 +78,18 @@ Why:
 Use this skill as an entry point for open-ended KMP questions. Then hand off to the specific skill.
 Do not implement — route and explain.
 
+## Priority Ladder
+
+When more than one skill could apply, rank them instead of enabling everything.
+
+1. Contract and scaffold skills first: `clean-architecture`, `feature-scaffold`, `presenter-module`
+2. Foundation and project plumbing next: `dependency-injection`, `flavor-environment`, `ci-github-actions`, `logging`
+3. Core infrastructure after the foundation is clear: `network-layer`, `sqldelight-setup`, `datastore`, `logging`, `kotlin-rpc`, `ktor-auth-service`, `mongodb-database`, `xcframework-spm`
+4. Feature building blocks after the data and platform shape is known: `navigation`, `mvi`, `repository-pattern`, `shared-resources`, `paging`, `analytics`, `form-validation`, `image-loading`, `permissions`, `deep-linking`, `biometric-auth`, `push-notifications`, `workmanager`, `feature-flags`, `offline-first`, `crash-reporting`
+5. UI, testing, quality, docs, and release last: `design-system`, `design-system-extended`, `adaptive-layout`, `compose-*`, `preview-driven-development`, `unit-testing`, `roborazzi`, `code-quality`, `accessibility`, `project-docs-maintainer`, `audit`, `release`
+
+Load the earliest tier that answers the request, then add lower tiers only when the task genuinely needs them.
+
 ---
 
 ## Freshness Rule
@@ -119,7 +131,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-sqldelight-setup` | SQLDelight 2, platform drivers, schema files, migrations, Flow queries |
 | `kotlin-multiplatform-datastore` | Preferences DataStore + Proto DataStore, expect/actual factory, Koin wiring, SharedPreferences migration |
 | `kotlin-multiplatform-xcframework-spm` | XCFramework build, SPM binary target, Xcode integration |
-| `kotlin-multiplatform-logging` | Kermit, log levels, pluggable writers, crash boundary, Koin-injected logger |
+| `kotlin-multiplatform-logging` | kotlin-logging or Kermit, log levels, logger factory, crash breadcrumb bridge, Koin wiring |
 
 ### Layer 3 — Platform Patterns
 | Skill | Owns |
@@ -145,7 +157,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-workmanager` | `CoroutineWorker`, `BGTaskScheduler`, `expect/actual BackgroundScheduler`, one-time + periodic, retry |
 | `kotlin-multiplatform-feature-flags` | `FeatureFlag` enum, `FeatureFlagProvider`, Firebase Remote Config, A/B variants, kill switch, fake provider |
 | `kotlin-multiplatform-offline-first` | `SyncState` sealed class, `SyncManager` interface, optimistic updates with rollback, conflict resolution, local-first read pattern |
-| `kotlin-multiplatform-crash-reporting` | `CrashReporter` interface, Firebase Crashlytics + Sentry actuals, Kermit `CrashReporterLogWriter`, dSYM symbolication |
+| `kotlin-multiplatform-crash-reporting` | `CrashReporter` interface, Firebase Crashlytics + Sentry actuals, breadcrumb logger bridge, dSYM symbolication |
 
 ### Layer 5 — UI System
 | Skill | Owns |
@@ -230,7 +242,7 @@ kotlin-multiplatform-feature-scaffold       ← scaffold second (implements the 
 3. **`flavor-environment`** — set up dev/staging/prod before writing any API code
 4. **`network-layer`** — Ktor client, `NetworkResult`, auth interceptor
 5. **`sqldelight-setup`** — local database, platform drivers, Koin wiring
-6. **`logging`** — Kermit setup before any feature adds log calls
+6. **`logging`** — structured logging setup before any feature adds log calls
 7. **`ci-github-actions`** — CI before any feature merges
 8. **`code-quality`** — Ktlint + Detekt as CI gates from day one
 
@@ -428,7 +440,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "Koin", "dependency injection", "manual modules", "annotated mode" | `kotlin-multiplatform-dependency-injection` |
 | "review my KMP project", "audit this repo", "what's wrong with this architecture" | `kotlin-multiplatform-audit` |
 | "project docs", "consumer docs", "README", "getting started", "docs reference", "onboarding docs", "architecture diagram", "library docs", "app docs" | `kotlin-multiplatform-project-docs-maintainer` |
-| "logging", "Kermit", "log level", "crash reporting", "Crashlytics logging" | `kotlin-multiplatform-logging` |
+| "logging", "kotlin-logging", "KotlinLogging", "Kermit", "log level", "crash reporting", "Crashlytics logging" | `kotlin-multiplatform-logging` |
 | "auth", "authentication", "authorization", "JWT", "sessions", "Ktor RPC" | `kotlin-multiplatform-ktor-auth-service` |
 | "MongoDB", "database", "collection", "Flow", "change stream", "server-side Kotlin" | `kotlin-multiplatform-mongodb-database` |
 | "kotlin rpc", "kRPC", "kotlinx rpc", "RPC service", "shared RPC models" | `kotlin-multiplatform-kotlin-rpc` |
@@ -472,7 +484,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "accessibility", "a11y", "TalkBack", "VoiceOver", "contentDescription", "semantic role", "screen reader", "touch target", "WCAG", "traversal order", "mergeDescendants" | `kotlin-multiplatform-accessibility` |
 | "animation", "AnimatedVisibility", "animateContentSize", "Crossfade", "AnimatedContent", "animateFloatAsState", "shared element", "enter transition", "exit transition", "reduced motion", "spring animation" | `kotlin-multiplatform-compose-animation` |
 | "offline first", "offline-first", "local first", "sync", "optimistic update", "conflict resolution", "background sync", "SyncManager", "single source of truth", "cache then network" | `kotlin-multiplatform-offline-first` |
-| "crash reporting", "crashlytics", "firebase crashes", "sentry", "non-fatal", "symbolication", "dSYM", "kermit crash", "crash handler", "breadcrumb crash" | `kotlin-multiplatform-crash-reporting` |
+| "crash reporting", "crashlytics", "firebase crashes", "sentry", "non-fatal", "symbolication", "dSYM", "breadcrumb bridge", "crash handler", "breadcrumb crash" | `kotlin-multiplatform-crash-reporting` |
 | "DataStore", "Preferences DataStore", "Proto DataStore", "save settings", "persist user prefs", "SharedPreferences migration", "createDataStore", "local key-value store" | `kotlin-multiplatform-datastore` |
 | "JNI", "JNI bridge", "native bridge", "JNIEnv", "Java_*", "GetStringUTFChars", "jbyteArray", "wrapper.cpp", "vendor C++", "3rd-party C++", "CMake JNI", "NDK", "call C++ from Kotlin/JVM", "native memory leak", "symbol conflict", "C-shim", "header compatibility" | `kotlin-multiplatform-jni-pro` |
 | Disambiguation — "platform-specific code", "iOS implementation", "CPointer", "cinterop", ".def file", "Kotlin/Native" → `kotlin-multiplatform-expect-actual` (NOT `kotlin-multiplatform-jni-pro`; JNI is JVM-only) | — |

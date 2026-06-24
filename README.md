@@ -22,9 +22,21 @@ It maps the skills, build order, and the best next step.
 
 ## Quick Start
 
-1. Use `kotlin-multiplatform-expert` to choose the next skill.
+1. Use `kotlin-multiplatform-expert` to choose the smallest relevant skill set in priority order.
 2. Use `kotlin-multiplatform-feature-scaffold` to start a new project from `Kotlin/kmp-wizard` `all-targets`.
 3. Use the domain skills below to fill in auth, data, UI, navigation, and audits.
+
+## Priority Guide
+
+Treat the skill map as a ladder, not a checklist.
+
+1. Start with `kotlin-multiplatform-expert`.
+2. Load only the smallest set that can answer the request.
+3. Use contract and foundation skills first: `clean-architecture`, `feature-scaffold`, and the base project tools they enable.
+4. Add domain, platform, or UI skills only when the task touches that area.
+5. Finish with testing, docs, audit, or release skills once the implementation needs verification or publication.
+
+If two skills overlap, prefer the one earlier in the dependency graph and defer the rest until the task actually needs them.
 
 ## Skill Map
 
@@ -59,6 +71,49 @@ public command docs.
 
 ---
 
+### KMM Architecture
+
+```mermaid
+flowchart TB
+  R[Feature request] --> C[Clean architecture contract]
+  C --> F[Foundation]
+  F --> I[Infrastructure]
+  I --> P[Patterns]
+  P --> U[UI system]
+  U --> T[Testing and quality]
+
+  C --> L[model / api / domain / data / presenter / ui]
+  F --> B[build logic, DI, CI, release]
+  I --> N[network, database, logging, auth]
+  P --> S[repository, navigation, offline-first, paging]
+  U --> V[design system, layout, animation, previews]
+  T --> Q[unit tests, screenshots, code quality, accessibility]
+```
+
+This is the downstream project shape the skills are meant to support. Use the
+earliest relevant layer, then add lower layers only when the feature truly needs
+them.
+
+---
+
+### Consumer Routing Architecture
+
+```mermaid
+flowchart LR
+  R[User request] --> E[kotlin-multiplatform-expert]
+  E --> L[Priority ladder]
+  L --> S[Smallest relevant skill set]
+  S --> A[Implementer or docs maintainer]
+  A --> V[Validator or reviewer]
+  V --> P[Release pipeline]
+  P --> C[Published docs / release notes]
+```
+
+Consumer routing starts with the expert, not with every matching skill. Route to the
+earliest tier that answers the request, then expand only when the next layer is needed.
+
+---
+
 ### Foundation
 
 - [`kotlin-multiplatform-feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) - 6-layer module structure, build-logic, TOML catalog, Koin
@@ -87,7 +142,7 @@ public command docs.
 - [`kotlin-multiplatform-deep-linking`](skills/kotlin-multiplatform-deep-linking/) - App Links, Universal Links, NavHost deep-link routing
 - [`kotlin-multiplatform-shared-resources`](skills/kotlin-multiplatform-shared-resources/) - shared resources and localization
 - [`kotlin-multiplatform-mvi`](skills/kotlin-multiplatform-mvi/) - State / Intent / Effect flow
-- [`kotlin-multiplatform-logging`](skills/kotlin-multiplatform-logging/) - Kermit, log levels, crash boundary, Koin wiring
+- [`kotlin-multiplatform-logging`](skills/kotlin-multiplatform-logging/) - kotlin-logging or Kermit, log levels, crash boundary, Koin wiring
 - [`kotlin-multiplatform-crash-reporting`](skills/kotlin-multiplatform-crash-reporting/) - Firebase Crashlytics + Sentry, CrashReporter interface, dSYM symbolication
 - [`kotlin-multiplatform-offline-first`](skills/kotlin-multiplatform-offline-first/) - SyncState, SyncManager, optimistic updates, conflict resolution
 - [`kotlin-multiplatform-paging`](skills/kotlin-multiplatform-paging/) - Paging 3, PagingSource, RemoteMediator, load-state handling
@@ -261,7 +316,7 @@ What to say to activate each skill. The agent matches these phrases automaticall
 | [`navigation`](skills/kotlin-multiplatform-navigation/) | "navigate to screen", "nav graph", "pass arguments", "back stack" |
 | [`shared-resources`](skills/kotlin-multiplatform-shared-resources/) | "i18n", "translations", "app strings KMP", "localize", "compose resources" |
 | [`mvi`](skills/kotlin-multiplatform-mvi/) | "MVI pattern", "navigation effect", "one-shot event", "UiState / UiIntent / UiEffect" |
-| [`logging`](skills/kotlin-multiplatform-logging/) | "Kermit", "KMP logging", "crash reporting", "log levels" |
+| [`logging`](skills/kotlin-multiplatform-logging/) | "kotlin-logging", "Kermit", "KMP logging", "crash reporting", "log levels" |
 | [`design-system`](skills/kotlin-multiplatform-design-system/) | "AppTheme", "design tokens", "Material3 alternative", "custom typography" |
 | [`design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) | "bottom sheet", "dialog", "snackbar", "skeleton", "extended components" |
 | [`compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) | "slot API", "content lambda", "composable slot", "flexible component" |
