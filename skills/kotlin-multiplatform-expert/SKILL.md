@@ -131,7 +131,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-sqldelight-setup` | SQLDelight 2, platform drivers, schema files, migrations, Flow queries |
 | `kotlin-multiplatform-datastore` | Preferences DataStore + Proto DataStore, expect/actual factory, Koin wiring, SharedPreferences migration |
 | `kotlin-multiplatform-xcframework-spm` | XCFramework build, SPM binary target, Xcode integration |
-| `kotlin-multiplatform-logging` | kotlin-logging or Kermit, log levels, logger factory, crash breadcrumb bridge, Koin wiring |
+| `kotlin-multiplatform-logging` | logger wrapper, kotlin-logging or Kermit, log levels, logger factory, crash breadcrumb bridge, Koin wiring |
 
 ### Layer 3 — Platform Patterns
 | Skill | Owns |
@@ -242,7 +242,7 @@ kotlin-multiplatform-feature-scaffold       ← scaffold second (implements the 
 3. **`flavor-environment`** — set up dev/staging/prod before writing any API code
 4. **`network-layer`** — Ktor client, `NetworkResult`, auth interceptor
 5. **`sqldelight-setup`** — local database, platform drivers, Koin wiring
-6. **`logging`** — structured logging setup before any feature adds log calls
+6. **`logging`** — structured logging wrapper setup before any feature adds log calls
 7. **`ci-github-actions`** — CI before any feature merges
 8. **`code-quality`** — Ktlint + Detekt as CI gates from day one
 
@@ -440,7 +440,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "Koin", "dependency injection", "manual modules", "annotated mode" | `kotlin-multiplatform-dependency-injection` |
 | "review my KMP project", "audit this repo", "what's wrong with this architecture" | `kotlin-multiplatform-audit` |
 | "project docs", "consumer docs", "README", "getting started", "docs reference", "onboarding docs", "architecture diagram", "library docs", "app docs" | `kotlin-multiplatform-project-docs-maintainer` |
-| "logging", "kotlin-logging", "KotlinLogging", "Kermit", "log level", "crash reporting", "Crashlytics logging" | `kotlin-multiplatform-logging` |
+| "logging", "logger wrapper", "logger facade", "kotlin-logging", "KotlinLogging", "Kermit", "log level", "crash reporting", "Crashlytics logging" | `kotlin-multiplatform-logging` |
 | "auth", "authentication", "authorization", "JWT", "sessions", "Ktor RPC" | `kotlin-multiplatform-ktor-auth-service` |
 | "MongoDB", "database", "collection", "Flow", "change stream", "server-side Kotlin" | `kotlin-multiplatform-mongodb-database` |
 | "kotlin rpc", "kRPC", "kotlinx rpc", "RPC service", "shared RPC models" | `kotlin-multiplatform-kotlin-rpc` |

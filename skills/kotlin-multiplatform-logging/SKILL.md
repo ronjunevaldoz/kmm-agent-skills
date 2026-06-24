@@ -44,18 +44,45 @@ and the [Kermit repository](https://github.com/touchlab/Kermit) before pinning a
 
 ## Recommendation First
 
-Default to **one logging facade per project**.
+Default to **one public logging wrapper per project**.
 
 Why:
+- a wrapper keeps feature code stable even if the backing library changes later
 - kotlin-logging is KMP-supported and gives you a consistent Kotlin-style facade across targets
 - Kermit is also KMP-native and remains a good fit for existing projects already on it
 - lazy lambda messages keep expensive strings out of hot paths
 - a logger factory can be injected once and reused everywhere
 - crash breadcrumbs stay separate from the logging facade, which keeps the architecture clean
 
-Use `KotlinLogging.logger {}` when the project is on kotlin-logging. If the project already
-uses Kermit, keep that path consistent instead of mixing both facades inside the same
-module graph. In both cases, keep the logger behind a factory or small adapter.
+Feature code should only know about the wrapper. The wrapper owns the backend choice and
+adapts either `kotlin-logging` or Kermit under the hood. If the project already uses one
+backend, keep that path consistent instead of mixing both facades inside the same module
+graph.
+
+---
+
+## Wrapper Contract
+
+Use a tiny interface in `commonMain` so the rest of the app never depends on a specific
+logging library:
+
+```kotlin
+interface LoggerFacade {
+    fun debug(message: () -> String)
+    fun info(message: () -> String)
+    fun warn(message: () -> String, throwable: Throwable? = null)
+    fun error(message: () -> String, throwable: Throwable? = null)
+}
+
+fun interface LoggerFactory {
+    fun create(tag: String): LoggerFacade
+}
+```
+
+Keep the wrapper small on purpose:
+- the wrapper stays stable if the backend changes
+- feature modules inject `LoggerFacade`, not `KotlinLogging` or `Logger`
+- backend-specific imports stay in the logging infrastructure module
 
 ---
 
@@ -78,41 +105,65 @@ kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 ```kotlin
 sourceSets {
     commonMain.dependencies {
-        implementation(libs.kotlin.logging) // swap to libs.kermit if the project already uses Kermit
+        implementation(libs.kotlin.logging) // or libs.kermit, behind the wrapper
     }
 }
 ```
 
-Feature modules receive the logger facade transitively via `:core:common`. Do not add
-logging dependencies per feature. Pick one facade for the project and keep it uniform.
-If the repository already standardizes on Kermit, keep that path and do not mix in
-kotlin-logging in the same module graph.
+Feature modules receive the wrapper transitively via `:core:common` or `:core:logging`.
+Do not add logging dependencies per feature. Pick one backend for the project and keep
+it uniform behind the wrapper.
 
 ---
 
 ## Logger Usage
 
-### Shared code with kotlin-logging
+### Wrapper usage in shared code
 
 ```kotlin
-import io.github.oshai.kotlinlogging.KotlinLogging
+class AuthViewModel(
+    private val loggerFactory: LoggerFactory,
+) : ViewModel() {
+    private val logger = loggerFactory.create("AuthViewModel")
 
-private val logger = KotlinLogging.logger {}
-
-fun loadUser(userId: String) {
-    logger.debug { "Loading user $userId" }
+    fun loadUser(userId: String) {
+        logger.info { "Loading user $userId" }
+    }
 }
 ```
 
-### Shared code with Kermit
+### kotlin-logging adapter
+
+```kotlin
+import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+class KotlinLoggingFacade(
+    private val logger: KLogger,
+) : LoggerFacade {
+    override fun debug(message: () -> String) = logger.debug(message)
+    override fun info(message: () -> String) = logger.info(message)
+    override fun warn(message: () -> String, throwable: Throwable?) = logger.warn(throwable) { message() }
+    override fun error(message: () -> String, throwable: Throwable?) = logger.error(throwable) { message() }
+}
+```
+
+### Kermit adapter
 
 ```kotlin
 import co.touchlab.kermit.Logger
 
-private val logger = Logger.withTag("AuthViewModel")
-
-fun loadUser(userId: String) {
-    logger.d { "Loading user $userId" }
+class KermitFacade(
+    private val logger: Logger,
+) : LoggerFacade {
+    override fun debug(message: () -> String) = logger.d { message() }
+    override fun info(message: () -> String) = logger.i { message() }
+    override fun warn(message: () -> String, throwable: Throwable?) {
+        logger.w(throwable) { message() }
+    }
+    override fun error(message: () -> String, throwable: Throwable?) {
+        logger.e(throwable) { message() }
+    }
 }
 ```
 
@@ -138,15 +189,17 @@ Inject a logger factory instead of scattering direct logger construction across 
 ```kotlin
 // :core:common - CoreModule.kt
 val coreModule = module {
-    factory { (name: String) -> KotlinLogging.logger(name) }
+    factory<LoggerFactory> {
+        LoggerFactory { tag ->
+            KotlinLoggingFacade(KotlinLogging.logger(tag))
+        }
+    }
 }
 ```
 
 ### Consuming in a ViewModel
 
-Choose the concrete logger type that matches the facade the project uses. If you need a
-shared abstraction, keep it tiny and map it to the chosen logger in the infrastructure
-layer.
+Inject `LoggerFacade` or `LoggerFactory` and keep backend-specific code out of features.
 
 ---
 
@@ -171,19 +224,21 @@ class CrashReporterBreadcrumbSink(
 ```
 
 Route `warn` and `error` messages through the bridge when the project wants crash context.
+The bridge should live beside the logger wrapper so you can swap logging backends without
+touching feature modules.
 
 ---
 
 ## Silencing Logs in Tests
 
-Keep tests quiet by injecting a no-op logger or by configuring the test backend to suppress
-output. Do not use production logging configuration in commonTest.
+Keep tests quiet by injecting a no-op `LoggerFacade` or by configuring the test backend
+to suppress output. Do not use production logging configuration in `commonTest`.
 
 ---
 
 ## Related Skills
 
-- `kotlin-multiplatform-feature-scaffold` - logger factory lives in `:core:common`
+- `kotlin-multiplatform-feature-scaffold` - logger wrapper lives in `:core:common`
 - `kotlin-multiplatform-unit-testing` - use a quiet test logger or no-op sink in `commonTest`
 - `kotlin-multiplatform-dependency-injection` - Koin wiring for the logger factory
 - `kotlin-multiplatform-crash-reporting` - breadcrumb bridge for crash reports
@@ -212,14 +267,15 @@ does not leak production output into unit tests.
 
 ## Common Anti-Patterns
 
+- exposing backend logger types in feature modules - only the wrapper belongs there
 - constructing loggers inside tight loops - create them once and inject them
-- using `println` or `System.out.println` for debug output - keep a real logger facade
+- using `println` or `System.out.println` for debug output - keep a real logger wrapper
 - logging secrets or tokens - redact sensitive values before emitting them
 - enabling verbose logging in release builds - it creates noise and hides signal
 - coupling feature modules directly to crash SDK APIs - keep the bridge in infrastructure
 
-If logs are not appearing where expected, check the selected kotlin-logging artifact for
-that target and make sure the logger factory is wired before feature code executes.
+If logs are not appearing where expected, check the selected backend artifact for that
+target and make sure the wrapper factory is wired before feature code executes.
 
 ---
 
@@ -227,7 +283,7 @@ that target and make sure the logger factory is wired before feature code execut
 
 When asked about logging in KMP, respond in this order:
 1. Gradle dependency (toml + convention plugin)
-2. logger creation in shared code
+2. wrapper contract in shared code
 3. log level guidelines
 4. Koin injection pattern (factory with tag/name)
 5. crash breadcrumb bridge if the project needs crash context
@@ -238,4 +294,4 @@ When asked about logging in KMP, respond in this order:
 
 | Date | Change |
 |---|---|
-| 2026-06-24 | Supported both kotlin-logging and Kermit, with a single-facade rule and shared breadcrumb bridge guidance. |
+| 2026-06-24 | Added a logger wrapper contract so kotlin-logging or Kermit can be swapped behind one stable facade. |

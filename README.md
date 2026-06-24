@@ -142,7 +142,7 @@ earliest tier that answers the request, then expand only when the next layer is 
 - [`kotlin-multiplatform-deep-linking`](skills/kotlin-multiplatform-deep-linking/) - App Links, Universal Links, NavHost deep-link routing
 - [`kotlin-multiplatform-shared-resources`](skills/kotlin-multiplatform-shared-resources/) - shared resources and localization
 - [`kotlin-multiplatform-mvi`](skills/kotlin-multiplatform-mvi/) - State / Intent / Effect flow
-- [`kotlin-multiplatform-logging`](skills/kotlin-multiplatform-logging/) - kotlin-logging or Kermit, log levels, crash boundary, Koin wiring
+- [`kotlin-multiplatform-logging`](skills/kotlin-multiplatform-logging/) - logger wrapper, kotlin-logging or Kermit, crash boundary, Koin wiring
 - [`kotlin-multiplatform-crash-reporting`](skills/kotlin-multiplatform-crash-reporting/) - Firebase Crashlytics + Sentry, CrashReporter interface, dSYM symbolication
 - [`kotlin-multiplatform-offline-first`](skills/kotlin-multiplatform-offline-first/) - SyncState, SyncManager, optimistic updates, conflict resolution
 - [`kotlin-multiplatform-paging`](skills/kotlin-multiplatform-paging/) - Paging 3, PagingSource, RemoteMediator, load-state handling
@@ -316,7 +316,7 @@ What to say to activate each skill. The agent matches these phrases automaticall
 | [`navigation`](skills/kotlin-multiplatform-navigation/) | "navigate to screen", "nav graph", "pass arguments", "back stack" |
 | [`shared-resources`](skills/kotlin-multiplatform-shared-resources/) | "i18n", "translations", "app strings KMP", "localize", "compose resources" |
 | [`mvi`](skills/kotlin-multiplatform-mvi/) | "MVI pattern", "navigation effect", "one-shot event", "UiState / UiIntent / UiEffect" |
-| [`logging`](skills/kotlin-multiplatform-logging/) | "kotlin-logging", "Kermit", "KMP logging", "crash reporting", "log levels" |
+| [`logging`](skills/kotlin-multiplatform-logging/) | "logger wrapper", "logger facade", "kotlin-logging", "Kermit", "KMP logging", "crash reporting", "log levels" |
 | [`design-system`](skills/kotlin-multiplatform-design-system/) | "AppTheme", "design tokens", "Material3 alternative", "custom typography" |
 | [`design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) | "bottom sheet", "dialog", "snackbar", "skeleton", "extended components" |
 | [`compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) | "slot API", "content lambda", "composable slot", "flexible component" |

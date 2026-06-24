@@ -57,7 +57,7 @@ The pattern is the same for both providers:
 1. Define a `CrashReporter` interface in `commonMain`
 2. Implement it per platform using the native SDK
 3. Wire through Koin — inject into the root `App()` and your error boundaries
-4. Route your logger facade to the crash reporter so logs appear as breadcrumbs
+4. Route your logger wrapper to the crash reporter so logs appear as breadcrumbs
 
 ```kotlin
 // commonMain — :api
@@ -194,7 +194,7 @@ class SentryCrashReporterImpl : CrashReporter {
 
 ## Logger Breadcrumb Bridge
 
-Route your logger facade to the crash reporter so every log becomes a breadcrumb:
+Route your logger wrapper to the crash reporter so every log becomes a breadcrumb:
 
 ```kotlin
 class CrashReporterBreadcrumbSink(private val reporter: CrashReporter) {
@@ -321,7 +321,7 @@ class FakeCrashReporter : CrashReporter {
 
 ## Related Skills
 
-- `kotlin-multiplatform-logging` — structured logging; wire the logger facade into the breadcrumb bridge
+- `kotlin-multiplatform-logging` — structured logging; wire the logger wrapper into the breadcrumb bridge
 - `kotlin-multiplatform-analytics` — event tracking; crash reporting is about exceptions, not behaviour
 - `kotlin-multiplatform-expect-actual` — alternative approach if you prefer `expect class` over interface injection
 - `kotlin-multiplatform-dependency-injection` — Koin wiring for `CrashReporter` binding per platform
