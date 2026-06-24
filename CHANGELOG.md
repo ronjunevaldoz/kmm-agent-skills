@@ -2,6 +2,15 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.10] — 2026-06-24
+
+### Docs
+
+- docs: add repo architecture diagram
+- docs: route release project to release skill
+
+---
+
 ## [v1.25.9] — 2026-06-24
 
 ### Docs

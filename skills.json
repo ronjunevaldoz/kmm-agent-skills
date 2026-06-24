@@ -1,5 +1,5 @@
 {
-  "version": "1.25.9",
+  "version": "1.25.10",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1776,7 +1776,7 @@
       "path": "skills/kotlin-multiplatform-release",
       "description": "End-to-end KMP library and app release pipeline. Covers versioning strategy (gradle.properties as source of truth), Maven Central publishing via the vanniktech plugin, GPG signing, Sonatype Central Portal, changelog generation with git-cliff and Conventional Commits, GitHub Release creation, and secrets management patterns. Distinct from the CI skill (which owns workflow YAML) and the xcframework-spm skill (which owns SPM binary distribution).",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-23",
+      "last_updated": "2026-06-24",
       "keywords": [
         "Maven Central",
         "publish",
@@ -1799,6 +1799,9 @@
         "publish to Maven Central",
         "Maven publish",
         "release library",
+        "release project",
+        "cut release",
+        "ship version",
         "versioning",
         "semantic versioning",
         "bump version",
