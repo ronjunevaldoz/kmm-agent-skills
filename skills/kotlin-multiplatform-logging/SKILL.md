@@ -65,7 +65,7 @@ module graph. In both cases, keep the logger behind a factory or small adapter.
 
 ```toml
 [versions]
-kotlin-logging = "7.0.3"
+kotlin-logging = "8.0.4"
 kermit = "2.1.0"
 
 [libraries]
