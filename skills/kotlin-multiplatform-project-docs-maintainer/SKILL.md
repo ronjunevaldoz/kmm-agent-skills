@@ -125,7 +125,6 @@ Use this validation matrix for project docs:
 - `kotlin-multiplatform-audit` — catches doc drift when the docs repo or consumer project needs a health check.
 - `kotlin-multiplatform-release` — use when project docs need to explain versioning or publishing flow.
 - `kotlin-multiplatform-legal-docs` — use when the docs are specifically about privacy, terms, or compliance.
-- `kotlin-multiplatform-skill-docs-maintainer` — use this instead for skill collection `SKILL.md` and routing-map maintenance.
 
 ## Output Style
 

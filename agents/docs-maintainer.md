@@ -22,13 +22,13 @@ Use this agent when:
 
 Do not use this agent when:
 - the task is consumer release notes or per-skill changelog updates
-- the task is `SKILL.md` routing, freshness, or skill-map maintenance
 - the task is a downstream project's README, onboarding, or docs/reference maintenance
 - the task is feature implementation or code fixes
 
 For release notes and skill changelog tables, hand off to `agents/changelog.md`.
-For skill-doc maintenance, hand off to `kotlin-multiplatform-skill-docs-maintainer`.
 For downstream project docs, hand off to `kotlin-multiplatform-project-docs-maintainer`.
+For skill-doc maintenance, use this agent directly; it keeps the skills collection docs
+aligned with the repo without creating a separate consumer skill.
 
 ## Source of truth
 

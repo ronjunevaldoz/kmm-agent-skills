@@ -92,7 +92,6 @@ It maps the skills, build order, and the best next step.
 
 - [`kotlin-multiplatform-expert`](skills/kotlin-multiplatform-expert/) - skill routing and build order
 - [`kotlin-multiplatform-project-docs-maintainer`](skills/kotlin-multiplatform-project-docs-maintainer/) - consumer-facing project docs, onboarding, and docs/reference sync
-- [`kotlin-multiplatform-skill-docs-maintainer`](skills/kotlin-multiplatform-skill-docs-maintainer/) - skill doc hygiene, routing maps, freshness, and SKILL.md maintenance
 - [`kotlin-multiplatform-audit`](skills/kotlin-multiplatform-audit/) - repo review, fix sequencing, and CI governance gate
 - [`kotlin-multiplatform-release`](skills/kotlin-multiplatform-release/) - versioning, Maven Central publishing, pre-release suffixes, git-cliff changelog, GitHub Release
 - [`kotlin-multiplatform-legal-docs`](skills/kotlin-multiplatform-legal-docs/) - privacy policy, terms, data-safety labels, consent gates, and legal compliance screens
@@ -206,7 +205,6 @@ What to say to activate each skill. The agent matches these phrases automaticall
 |---|---|
 | [`expert`](skills/kotlin-multiplatform-expert/) | "where do I start KMP", "which skill should I use", "KMP architecture decision" |
 | [`project-docs-maintainer`](skills/kotlin-multiplatform-project-docs-maintainer/) | "project docs", "consumer docs", "README", "getting started", "docs reference" |
-| [`skill-docs-maintainer`](skills/kotlin-multiplatform-skill-docs-maintainer/) | "skill docs", "SKILL.md", "skill map", "routing map", "freshness rule" |
 | [`feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) | "new KMP feature", "add a screen", "scaffold feature module", "create module" |
 | [`clean-architecture`](skills/kotlin-multiplatform-clean-architecture/) | "6-layer architecture", "which layer does this go in", "layer contract", "domain isolation" |
 | [`presenter-module`](skills/kotlin-multiplatform-presenter-module/) | "KMP ViewModel", "presenter layer", "pure Kotlin ViewModel", "StateFlow ViewModel" |
