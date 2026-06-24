@@ -52,8 +52,10 @@ First` section states the default approach, and the anti-patterns list what to a
 Before writing the direction:
 1. Check the touched screen or component files.
 2. Read the current KMM design-system docs or preview files if they exist.
-3. Check whether the project already has token, preview, or accessibility conventions.
-4. Read `.claude/pipeline-context.json` for recurring design issues or proven patterns.
+3. If `docs/reference/design-handoff.md` exists, use it as the default doc shape for the
+   handoff and keep it aligned with the current UI surface.
+4. Check whether the project already has token, preview, or accessibility conventions.
+5. Read `.claude/pipeline-context.json` for recurring design issues or proven patterns.
 
 ## Step 3: Write the design direction
 
@@ -82,6 +84,12 @@ OPEN QUESTIONS:
 ```
 
 Do not write code. Output the design direction only.
+
+If the project has no design reference but the app is already implemented, treat the live
+UI and existing Compose screens as the source of truth. Reverse-engineer the current
+screen flow, layouts, and component patterns into `docs/reference/design-handoff.md`
+before proposing changes. Clearly label anything inferred from the implementation rather
+than explicitly documented.
 
 ## Step 4: Gate
 
