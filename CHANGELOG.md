@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.19] — 2026-06-24
+
+### Docs
+
+- docs: refine designer routing guidance
+
+---
+
 ## [v1.25.18] — 2026-06-24
 
 ### Added
