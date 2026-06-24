@@ -2,6 +2,15 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.14] — 2026-06-24
+
+### Docs
+
+- docs: add logger wrapper contract
+- docs: bump kotlin-logging to 8.0.4
+
+---
+
 ## [v1.25.13] — 2026-06-24
 
 ### Docs
