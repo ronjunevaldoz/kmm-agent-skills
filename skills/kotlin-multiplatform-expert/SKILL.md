@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-22'
+  last-updated: '2026-06-24'
   keywords:
     - KMP expert
     - orchestrator
@@ -89,7 +89,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 49 Skills and What They Own
+## The 51 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -106,6 +106,8 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-ci-github-actions` | GitHub Actions, test matrix, XCFramework release workflow YAML |
 | `kotlin-multiplatform-release` | Versioning (`gradle.properties`), Maven Central (vanniktech), GPG signing, git-cliff changelog, GitHub Release, secrets management, local publish script |
 | `kotlin-multiplatform-audit` | Existing project health checks, boundary review, architecture drift, readiness gaps |
+| `kotlin-multiplatform-project-docs-maintainer` | Consumer-facing README, onboarding, and docs/reference sync for downstream KMP projects |
+| `kotlin-multiplatform-skill-docs-maintainer` | Skill `SKILL.md` maintenance, routing map sync, freshness notes, trigger keyword upkeep |
 | `kotlin-multiplatform-legal-docs` | Privacy Policy, Terms & Conditions, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, in-app `LegalDocsScreen`, consent gate |
 
 ### Layer 2 — Core Infrastructure
@@ -180,6 +182,8 @@ kotlin-multiplatform-feature-scaffold       ← scaffold second (implements the 
 ├── kotlin-multiplatform-release            (depends on: ci-github-actions, xcframework-spm)
 ├── kotlin-multiplatform-dependency-injection (no deps)
 ├── kotlin-multiplatform-audit              (no deps for review work)
+├── kotlin-multiplatform-project-docs-maintainer (depends on: audit)
+├── kotlin-multiplatform-skill-docs-maintainer (depends on: expert, audit)
 ├── kotlin-multiplatform-logging            (depends on: scaffold)
 ├── kotlin-multiplatform-ktor-auth-service  (no deps)
 ├── kotlin-multiplatform-mongodb-database   (no deps)
@@ -425,6 +429,8 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "presenter module", "ViewModel no Compose", "MVI ViewModel", "UiState UiIntent" | `kotlin-multiplatform-presenter-module` |
 | "Koin", "dependency injection", "manual modules", "annotated mode" | `kotlin-multiplatform-dependency-injection` |
 | "review my KMP project", "audit this repo", "what's wrong with this architecture" | `kotlin-multiplatform-audit` |
+| "project docs", "consumer docs", "README", "getting started", "docs reference", "onboarding docs" | `kotlin-multiplatform-project-docs-maintainer` |
+| "skill docs", "SKILL.md", "skill map", "routing map", "trigger keywords", "last-updated", "freshness rule", "modify skill", "new skill", "docs drift" | `kotlin-multiplatform-skill-docs-maintainer` |
 | "logging", "Kermit", "log level", "crash reporting", "Crashlytics logging" | `kotlin-multiplatform-logging` |
 | "auth", "authentication", "authorization", "JWT", "sessions", "Ktor RPC" | `kotlin-multiplatform-ktor-auth-service` |
 | "MongoDB", "database", "collection", "Flow", "change stream", "server-side Kotlin" | `kotlin-multiplatform-mongodb-database` |
@@ -552,6 +558,8 @@ already has multiple same-named concepts or the component is part of a shared li
 ## Related Skills
 
 - `kotlin-multiplatform-audit` — run this after every feature to verify no architecture smells were introduced
+- `kotlin-multiplatform-project-docs-maintainer` — use this when a downstream project's README, onboarding, or reference docs drift from the actual code
+- `kotlin-multiplatform-skill-docs-maintainer` — use this when the skill collection itself needs a `SKILL.md`, routing-map, or freshness update
 - `kotlin-multiplatform-clean-architecture` — the 6-layer contract that all skill routing assumes
 - `kotlin-multiplatform-feature-scaffold` — establishes the module structure before any feature skills are loaded
 - `kotlin-multiplatform-dependency-injection` — every feature plan must include Koin wiring; load this if the plan references bindings

@@ -18,6 +18,10 @@ If `$ARGUMENTS` names a file or path, use that as the primary source. Otherwise 
 
 If the requested work is consumer release notes or per-skill changelog tables, hand off
 to `agents/changelog.md` instead.
+If the requested work is `SKILL.md` routing, freshness, or skill-map maintenance,
+hand off to `kotlin-multiplatform-skill-docs-maintainer`.
+If the requested work is a downstream project's README or `docs/reference*` pages,
+hand off to `kotlin-multiplatform-project-docs-maintainer`.
 
 ## Step 2 — Load the docs agent
 
