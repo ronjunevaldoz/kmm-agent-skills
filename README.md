@@ -99,15 +99,21 @@ It maps the skills, build order, and the best next step.
 
 ## Agent Pipeline
 
-Five specialized agents orchestrate end-to-end feature work. Agents communicate via a structured plan contract and read `.claude/pipeline-context.json` to avoid repeating past mistakes.
+Six specialized agents orchestrate end-to-end feature work and repo docs. Agents
+communicate via a structured plan contract and read `.claude/pipeline-context.json` to
+avoid repeating past mistakes.
 
 | Agent | Role |
 |---|---|
 | [`planner`](agents/planner.md) | Analyzes the task, loads only relevant skills, produces a layer-by-layer plan, gates on user approval |
 | [`implementer`](agents/implementer.md) | Executes the approved plan in 6-layer build order, generates complete runnable code |
 | [`reviewer`](agents/reviewer.md) | Checks layer boundaries, Koin wiring, MVI contracts, and test coverage; runs `audit_project.py` |
+| [`docs-maintainer`](agents/docs-maintainer.md) | Keeps README, agent docs, command docs, and skill routing text aligned with the repo |
 | [`validator`](agents/validator.md) | Runs Gradle compilation and `jvmTest` in escalating levels; stops at first failure |
 | [`fixer`](agents/fixer.md) | Applies minimum targeted fixes for reviewer/validator blockers; rates confidence; asks user for LOW-confidence calls |
+
+The `changelog` agent is separate and handles consumer release notes plus per-skill
+`## Changelog` updates.
 
 ---
 
@@ -120,6 +126,7 @@ Use these in Claude Code to run the full pipeline with a single command.
 | `/execute-ticket <id>` | Fetch a GitHub Issue (or paste any ticket), plan → branch → implement → validate → review → commit |
 | `/implement-feature <name>` | Plan → Implement → Validate → Review a new KMP feature end-to-end |
 | `/review-changes` | Review current git diff against 6-layer rules and skill anti-patterns |
+| `/maintain-docs [scope]` | Reconcile repo docs, agent docs, command docs, and skill routing text |
 | `/run-audit [path]` | Run `audit_project.py` with per-finding remediation from the relevant skill |
 
 ---
