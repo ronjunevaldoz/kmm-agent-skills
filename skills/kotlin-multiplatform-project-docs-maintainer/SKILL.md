@@ -98,10 +98,17 @@ Use it like this:
 
 Rules:
 - make `docs/tasks.md` the primary entrypoint for day-to-day updates
+- treat the layout as agile-friendly: backlog/current work lives in `docs/tasks.md`, execution
+  history lives in dated task notes, and stable decisions graduate into architecture/docs
 - put detailed phase history, approvals, and dated execution notes in `docs/tasks/`
 - when a phase or task is complete, move its dated note into `docs/tasks/archive/` and keep
   a short index line or backlink in `docs/tasks.md`
 - use date-stamped filenames in the archive (`YYYY-MM-DD-...`) so old work remains sortable
+- if a note is still needed for current work, keep it in `docs/tasks/`; if it is done but
+  still relevant to search, move it to `docs/tasks/archive/`
+- if a note contains durable design or operating guidance, promote that guidance into
+  `docs/architecture.md`, `docs/deployment.md`, or `docs/reference/` instead of leaving
+  it only in task logs
 - consolidate overlapping planning or deployment docs instead of duplicating them
 - keep `docs/reference/` out of the main flow; it supports the core docs, it does not replace them
 - link from README or onboarding docs to `docs/tasks.md` if the project has a lot of moving parts
@@ -133,6 +140,48 @@ Keep the docs narrow and accurate:
 - update examples to match the current repo shape
 - remove references to deleted files, commands, or options
 
+### 2a) Use the default task template
+
+When creating a new downstream project, start `docs/tasks.md` with this structure:
+
+```markdown
+# Tasks
+
+## Current Objective
+
+## Active Phase
+
+## Open Questions
+
+## Task Log
+
+- [YYYY-MM-DD-phase-1](tasks/YYYY-MM-DD-phase-1.md)
+- [YYYY-MM-DD-phase-2](tasks/YYYY-MM-DD-phase-2.md)
+
+## Archive Index
+
+- [YYYY](tasks/archive/YYYY/)
+```
+
+### 2b) Use dated task filenames
+
+Use short, action-first filenames for the dated notes:
+- `YYYY-MM-DD-plan.md`
+- `YYYY-MM-DD-refine.md`
+- `YYYY-MM-DD-build.md`
+- `YYYY-MM-DD-change-request.md`
+- `YYYY-MM-DD-approval.md`
+- `YYYY-MM-DD-retro.md`
+
+Keep the filename focused on the phase or decision, not the whole feature name.
+
+### 2c) Promote or archive
+
+When a dated note is finished:
+- archive it if it is still useful as a historical record
+- promote stable guidance into `architecture.md`, `deployment.md`, or `reference/`
+- leave a backlink in `docs/tasks.md` so the current work page still points to the history
+
 ### 3) Validate
 
 Use the project's own checks when the docs mention build steps, commands, or generated
@@ -154,6 +203,7 @@ Use this validation matrix for project docs:
 | README mentions a module or command | The referenced file or command exists |
 | `docs/tasks/` updates | `docs/tasks.md` links to the dated record and the dated record has a date-stamped filename |
 | `docs/tasks/archive/` updates | Completed notes retain date-stamped filenames and `docs/tasks.md` still points to them |
+| Task history becomes dense | The oldest active notes move to `docs/tasks/archive/` and durable guidance moves to architecture/reference docs |
 | `docs/reference*` updates | Links resolve and match the code or configuration it documents |
 | Onboarding docs change | The setup steps match the current project workflow |
 | Release/setup docs change | Version numbers, paths, and commands reflect the current repo |
@@ -185,6 +235,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-06-24 | Added task lifecycle guidance: default task template, dated filename convention, archive/promotion rules, and agile-friendly lifecycle flow. |
 | 2026-06-24 | Added archive policy: completed task and phase notes move to `docs/tasks/archive/` with date-stamped filenames and a backlink from `docs/tasks.md`. |
 | 2026-06-24 | Expanded the default topology to include `docs/tasks/` for dated task and phase logs, with `docs/tasks.md` as the entrypoint. |
 | 2026-06-24 | Added default docs topology: `docs/tasks.md`, `docs/roadmap.md`, `docs/architecture.md`, `docs/deployment.md`, and `docs/reference/` as the preferred organization for downstream projects. |
