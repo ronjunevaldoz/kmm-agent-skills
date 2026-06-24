@@ -116,6 +116,10 @@ avoid repeating past mistakes.
 The `changelog` agent is separate and handles consumer release notes plus per-skill
 `## Changelog` updates.
 
+Consumer repos should keep docs organization, `CHANGELOG.md`, and release notes aligned
+with the release flow; this repo enforces that through the changelog agent and release
+validation.
+
 ---
 
 ## Slash Commands

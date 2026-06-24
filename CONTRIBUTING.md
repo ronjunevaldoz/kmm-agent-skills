@@ -74,6 +74,10 @@ Use this rule before creating anything new:
 If the scope is unclear, confirm it before writing files. That keeps consumer skills
 and repo maintenance paths separate.
 
+For consumer-facing repos, treat docs organization, `CHANGELOG.md`, and release notes
+as a single release surface: keep them in sync as part of the release flow, not as
+separate optional updates.
+
 ---
 
 ## File naming conventions
