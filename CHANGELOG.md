@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.9] — 2026-06-24
+
+### Docs
+
+- docs: clarify consumer docs and changelog policy
+
+---
+
 ## [v1.25.8] — 2026-06-24
 
 ### Docs
