@@ -65,6 +65,33 @@ Why:
 - stale onboarding or README guidance causes more confusion than missing guidance
 - keeping one canonical phrasing across README, onboarding, and reference docs avoids drift
 
+### Default Docs Topology
+
+If a downstream project does not already have a clear docs layout, use this structure as
+the default:
+
+```text
+docs/
+├── tasks.md
+├── roadmap.md
+├── architecture.md
+├── deployment.md
+└── reference/
+```
+
+Use it like this:
+- `docs/tasks.md` — single source of truth for current work and active decisions
+- `docs/roadmap.md` — consolidated planning, including integration and project planning
+- `docs/architecture.md` — system design, kept as the stable long-form architecture doc
+- `docs/deployment.md` — consolidated deployment and publishing flow
+- `docs/reference/` — searchable technical audits, model setup notes, and deep references
+
+Rules:
+- make `docs/tasks.md` the primary entrypoint for day-to-day updates
+- consolidate overlapping planning or deployment docs instead of duplicating them
+- keep `docs/reference/` out of the main flow; it supports the core docs, it does not replace them
+- link from README or onboarding docs to `docs/tasks.md` if the project has a lot of moving parts
+
 ### Project Doc Change Checklist
 
 | Change | Update |
@@ -140,4 +167,5 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-06-24 | Added default docs topology: `docs/tasks.md`, `docs/roadmap.md`, `docs/architecture.md`, `docs/deployment.md`, and `docs/reference/` as the preferred organization for downstream projects. |
 | 2026-06-24 | Initial release — consumer-facing project docs workflow, onboarding and reference-doc sync, link hygiene, and validation guidance. |
