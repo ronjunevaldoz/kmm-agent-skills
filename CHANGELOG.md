@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.25.18] — 2026-06-24
+
+### Added
+
+- feat: expand trigger keywords for data/content architecture requests
+
+---
+
 ## [v1.25.17] — 2026-06-24
 
 ### Added

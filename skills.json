@@ -1,5 +1,5 @@
 {
-  "version": "1.25.17",
+  "version": "1.25.18",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -326,7 +326,16 @@
         "api contract",
         "dependency inversion",
         "layer ownership",
-        "where does this code go"
+        "where does this code go",
+        "architecture design",
+        "content design",
+        "code organization",
+        "module design",
+        "project structure",
+        "layer design",
+        "data architecture",
+        "content strategy",
+        "code structure"
       ],
       "scripts": []
     },
@@ -1556,7 +1565,15 @@
         "REST client",
         "HTTP interceptor",
         "API client setup",
-        "network error handling"
+        "network error handling",
+        "data fetching",
+        "content retrieval",
+        "remote data",
+        "backend integration",
+        "API integration",
+        "data redundancy",
+        "content synchronization",
+        "remote content"
       ],
       "scripts": []
     },
@@ -1587,7 +1604,15 @@
         "conflict resolution",
         "background sync",
         "single source of truth",
-        "cache-then-network"
+        "cache-then-network",
+        "data redundancy",
+        "content sync",
+        "data consistency",
+        "sync strategy",
+        "data duplication",
+        "conflict handling",
+        "cache management",
+        "background data sync"
       ],
       "scripts": []
     },
@@ -1916,7 +1941,15 @@
         "repository implementation",
         "data source",
         "optimistic update",
-        "sync strategy"
+        "sync strategy",
+        "data redundancy",
+        "content management",
+        "data handling",
+        "cache strategy",
+        "data consistency",
+        "data sync",
+        "fetch strategy",
+        "content duplication"
       ],
       "scripts": []
     },
@@ -2062,7 +2095,16 @@
         "SQLite KMP",
         "persist to database",
         "store data locally",
-        "local data layer"
+        "local data layer",
+        "data storage",
+        "persistence layer",
+        "data redundancy",
+        "content storage",
+        "local cache",
+        "database design",
+        "data schema",
+        "persistent storage",
+        "offline data"
       ],
       "scripts": []
     },
