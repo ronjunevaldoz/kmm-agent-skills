@@ -76,7 +76,7 @@ docs/
 ├── tasks/
 │   ├── YYYY-MM-DD-phase-1.md
 │   ├── YYYY-MM-DD-phase-2.md
-│   └── YYYY-MM-DD-task-log.md
+│   ├── YYYY-MM-DD-task-log.md
 │   └── archive/
 │       └── YYYY/
 ├── roadmap.md
@@ -95,6 +95,22 @@ Use it like this:
 - `docs/architecture.md` — system design, kept as the stable long-form architecture doc
 - `docs/deployment.md` — consolidated deployment and publishing flow
 - `docs/reference/` — searchable technical audits, model setup notes, and deep references
+
+### Fix Maturity Lanes
+
+Use one of these lanes for every fix note in `docs/tasks/`:
+
+| Lane | Meaning | Where it lives |
+|---|---|---|
+| Dev | Investigating, changing fast, or not yet validated | `docs/tasks/` |
+| Beta | Tested enough to share, but still under observation | `docs/tasks/` with a `beta` marker |
+| Stable | Accepted and durable enough for the wider project | `docs/architecture.md`, `docs/deployment.md`, or `docs/reference/` |
+
+Lifecycle rules:
+- keep dev fixes in the dated task notes while they are still moving
+- mark beta fixes clearly in `docs/tasks.md` or the dated note so they do not get mistaken for final guidance
+- once a fix becomes stable, promote the final guidance into durable docs and leave the task note as history
+- if a stable fix later regresses, open a new dated task note instead of rewriting history
 
 Rules:
 - make `docs/tasks.md` the primary entrypoint for day-to-day updates
@@ -153,6 +169,12 @@ When creating a new downstream project, start `docs/tasks.md` with this structur
 
 ## Open Questions
 
+## Fix Lanes
+
+- Dev:
+- Beta:
+- Stable:
+
 ## Task Log
 
 - [YYYY-MM-DD-phase-1](tasks/YYYY-MM-DD-phase-1.md)
@@ -181,6 +203,7 @@ When a dated note is finished:
 - archive it if it is still useful as a historical record
 - promote stable guidance into `architecture.md`, `deployment.md`, or `reference/`
 - leave a backlink in `docs/tasks.md` so the current work page still points to the history
+- keep beta notes in the active task trail until they either stabilize or are discarded
 
 ### 3) Validate
 
@@ -204,6 +227,7 @@ Use this validation matrix for project docs:
 | `docs/tasks/` updates | `docs/tasks.md` links to the dated record and the dated record has a date-stamped filename |
 | `docs/tasks/archive/` updates | Completed notes retain date-stamped filenames and `docs/tasks.md` still points to them |
 | Task history becomes dense | The oldest active notes move to `docs/tasks/archive/` and durable guidance moves to architecture/reference docs |
+| Dev/Beta/Stable fix lanes | Lane markers stay visible until a fix is promoted into durable docs |
 | `docs/reference*` updates | Links resolve and match the code or configuration it documents |
 | Onboarding docs change | The setup steps match the current project workflow |
 | Release/setup docs change | Version numbers, paths, and commands reflect the current repo |
@@ -235,6 +259,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-06-24 | Added fix maturity lanes for dev, beta, and stable fixes, plus a task template section for tracking them in `docs/tasks.md`. |
 | 2026-06-24 | Added task lifecycle guidance: default task template, dated filename convention, archive/promotion rules, and agile-friendly lifecycle flow. |
 | 2026-06-24 | Added archive policy: completed task and phase notes move to `docs/tasks/archive/` with date-stamped filenames and a backlink from `docs/tasks.md`. |
 | 2026-06-24 | Expanded the default topology to include `docs/tasks/` for dated task and phase logs, with `docs/tasks.md` as the entrypoint. |
