@@ -934,6 +934,8 @@ When adding a feature to an existing project:
    ```kotlin
    implementation(projects.feature.FEATURE_NAME.ui)
    ```
+5. Add a preview stub beside each `*Content.kt` in `:feature:FEATURE_NAME:ui` so preview
+   coverage is part of the scaffold, not an optional follow-up.
 
 ---
 
@@ -984,6 +986,8 @@ src/commonMain/kotlin/GROUP_ID/feature/FEATURE_NAME/presenter/
 src/commonMain/kotlin/GROUP_ID/feature/FEATURE_NAME/ui/
     FEATURE_NAMEScreen.kt            ← wires ViewModel from :presenter via koinViewModel()
     FEATURE_NAMEContent.kt           ← stateless @Composable, accepts state parameter
+    previews/
+        FEATURE_NAMEContentPreview.kt ← required preview stub for the Content composable
 ```
 
 ---
@@ -1021,7 +1025,8 @@ The module exposes (via `api()`):
 ## Bundled Script
 
 - `scripts/validate_module_graph.py` — checks a target project for the expected
-  `:model/:api/:domain/:data/:presenter/:ui` feature module files and the `androidApp` feature UI link.
+  `:model/:api/:domain/:data/:presenter/:ui` feature module files, the `androidApp`
+  feature UI link, and the required preview stub for each `*Content.kt` in `:feature:*:ui`.
 
 ### Turbine usage pattern
 
@@ -1078,6 +1083,8 @@ After scaffolding, verify in order:
 5. Confirm no module references another module that it should not (enforce the layer rules:
    `:ui` depends only on `:presenter`; `:presenter` has NO Compose dep; `:domain` must not depend on `:data`;
    `:data` must not depend on `:domain` or `:presenter`)
+6. Confirm every `*Content.kt` in `:feature:FEATURE_NAME:ui` has a matching preview stub
+   (`*ContentPreview.kt` or `previews/*ContentPreview.kt`)
 
 ---
 
@@ -1110,6 +1117,7 @@ After scaffolding, verify in order:
 - adding `implementation` dependencies in `:api` modules — `:api` must stay dependency-free (only `:model`)
 - adding Compose deps to `:presenter` — breaks JVM testability; Compose belongs only in `:ui`
 - having `:ui` depend on `:domain` or `:data` directly — all state must flow through `:presenter`
+- shipping a `:feature:*:ui` module with `*Content.kt` but no preview stub — preview coverage must be scaffolded, not added later
 - putting domain types (data classes, sealed types) in `:api` instead of `:model` — `:api` should be interfaces only
 - using string project references (`:feature:auth:api`) instead of typesafe accessors — breaks refactoring
 - **scaffolding by hand instead of cloning kmp-wizard** — always use `git clone Kotlin/kmp-wizard` as the base; writing build-logic, convention plugins, or settings.gradle.kts from scratch causes broken Gradle included builds, missing platform targets, and cascading precompiled script plugin failures that are very hard to debug

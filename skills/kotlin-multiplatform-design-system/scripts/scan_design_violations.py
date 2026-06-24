@@ -10,6 +10,7 @@ Detects:
   direct_textstyle     TextStyle(...) construction — use AppTextStyle enum
   nested_container     Card { Card { or Surface { Surface { — redundant nesting
   layout_inconsistency Mixed flat/card/tabbed patterns across *Content.kt files in the same feature ui/ dir
+  preview_coverage     Missing preview stub, multi-device preview coverage, or Roborazzi screenshot test
 
 Usage:
   python3 scan_design_violations.py <project_root>
@@ -81,10 +82,13 @@ _TABBED_RE = re.compile(r"\bTabRow\b")
 # AppCard( or Card( — excludes Card used as a type annotation (Card:)
 _CARD_LAYOUT_RE = re.compile(r"\b(?:App)?Card\s*\(")
 
+_MULTI_DEVICE_WIDTHS = ("360", "673", "1280")
+
 # Files / directories that are design-system source — allowed to use primitives directly
 _SKIP_NAME_SUFFIXES = (
     "Styles.kt", "Theme.kt", "Tokens.kt",
     "Colors.kt", "Typography.kt", "Spacing.kt", "Shapes.kt",
+    "ScreenshotTest.kt",
 )
 _SKIP_DIR_FRAGMENTS = {"designsystem", "design_system", "theme"}
 
@@ -155,6 +159,137 @@ def _scan_nested_containers(path: Path, lines: list[str]) -> list[dict]:
                 # Pop containers that have now closed
                 while stack and stack[-1][1] >= depth:
                     stack.pop()
+
+    return findings
+
+
+def _has_preview_stub(content_file: Path) -> bool:
+    preview_name = f"{content_file.stem}Preview.kt"
+    return content_file.with_name(preview_name).exists() or (
+        content_file.parent / "previews" / preview_name
+    ).exists()
+
+
+def _preview_file_for_content(content_file: Path) -> Path | None:
+    preview_name = f"{content_file.stem}Preview.kt"
+    same_dir = content_file.with_name(preview_name)
+    if same_dir.exists():
+        return same_dir
+    nested = content_file.parent / "previews" / preview_name
+    if nested.exists():
+        return nested
+    return None
+
+
+def _screenshot_test_for_content(content_file: Path) -> Path | None:
+    screenshot_name = f"{content_file.stem}ScreenshotTest.kt"
+    base = Path(
+        content_file.as_posix().replace("/src/commonMain/kotlin/", "/src/jvmTest/kotlin/")
+    )
+    candidates = (
+        base.with_name(screenshot_name),
+        base.parent / "previews" / screenshot_name,
+    )
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def _looks_like_feature_content(path: Path) -> bool:
+    parts = path.parts
+    return "feature" in parts and "ui" in parts and path.name.endswith("Content.kt")
+
+
+def _looks_like_design_component(path: Path) -> bool:
+    parts = path.parts
+    return "components" in parts and path.name.endswith(".kt") and not path.name.endswith("Preview.kt")
+
+
+def _scan_preview_coverage(project_root: Path) -> list[dict]:
+    findings: list[dict] = []
+
+    candidate_files = []
+    for kt_file in sorted(project_root.rglob("*.kt")):
+        if _should_skip(kt_file) and not _looks_like_design_component(kt_file):
+            continue
+        if _looks_like_feature_content(kt_file) or _looks_like_design_component(kt_file):
+            candidate_files.append(kt_file)
+
+    for source_file in candidate_files:
+        preview_file = _preview_file_for_content(source_file)
+        if preview_file is None:
+            findings.append({
+                "type": "preview_coverage",
+                "severity": "error",
+                "file": str(source_file),
+                "line": 1,
+                "code": source_file.name,
+                "message": (
+                    f"Missing preview stub for {source_file.name}. "
+                    f"Create {source_file.stem}Preview.kt (or previews/{source_file.stem}Preview.kt)."
+                ),
+            })
+        else:
+            preview_text = preview_file.read_text(encoding="utf-8", errors="replace")
+            if "@MultiDevicePreview" not in preview_text and not all(
+                width in preview_text for width in _MULTI_DEVICE_WIDTHS
+            ):
+                findings.append({
+                    "type": "preview_coverage",
+                    "severity": "error",
+                    "file": str(preview_file),
+                    "line": 1,
+                    "code": preview_file.name,
+                    "message": (
+                        "Preview file is missing multi-device coverage. "
+                        "Use @MultiDevicePreview or explicit 360/673/1280 dp preview sizes."
+                    ),
+                })
+
+        if _looks_like_feature_content(source_file):
+            screenshot_file = _screenshot_test_for_content(source_file)
+            if screenshot_file is None:
+                findings.append({
+                    "type": "preview_coverage",
+                    "severity": "error",
+                    "file": str(source_file),
+                    "line": 1,
+                    "code": source_file.name,
+                    "message": (
+                        f"Missing Roborazzi screenshot test for {source_file.name}. "
+                        f"Create {source_file.stem}ScreenshotTest.kt under src/jvmTest/kotlin/."
+                    ),
+                })
+            else:
+                screenshot_text = screenshot_file.read_text(encoding="utf-8", errors="replace")
+                if "captureRoboImage" not in screenshot_text:
+                    findings.append({
+                        "type": "preview_coverage",
+                        "severity": "error",
+                        "file": str(screenshot_file),
+                        "line": 1,
+                        "code": screenshot_file.name,
+                        "message": "Roborazzi screenshot test must call captureRoboImage().",
+                    })
+                if not all(width in screenshot_text for width in _MULTI_DEVICE_WIDTHS):
+                    findings.append({
+                        "type": "preview_coverage",
+                        "severity": "error",
+                        "file": str(screenshot_file),
+                        "line": 1,
+                        "code": screenshot_file.name,
+                        "message": "Roborazzi screenshot test must cover phone, tablet, and desktop sizes.",
+                    })
+                if "darkTheme = true" not in screenshot_text and "AppTheme(darkTheme = true)" not in screenshot_text:
+                    findings.append({
+                        "type": "preview_coverage",
+                        "severity": "error",
+                        "file": str(screenshot_file),
+                        "line": 1,
+                        "code": screenshot_file.name,
+                        "message": "Roborazzi screenshot test must capture both light and dark variants.",
+                    })
 
     return findings
 
@@ -232,6 +367,7 @@ def scan(project_root: Path, single_file: Path | None = None) -> list[dict]:
             continue
         all_findings.extend(scan_file(kt_file))
     all_findings.extend(scan_layout_consistency(project_root))
+    all_findings.extend(_scan_preview_coverage(project_root))
     return all_findings
 
 

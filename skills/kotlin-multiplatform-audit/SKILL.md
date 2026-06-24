@@ -119,6 +119,8 @@ the user and the other skills what to do next.
 - Verify tokens, palette rules, and typography are consistent
 - Check whether components use the right pattern for the repo's chosen UI system
 - Flag hardcoded colors, sizes, and text styles
+- Require a preview stub for each `*Content.kt` in a feature `ui/` module so the
+  preview workflow stays part of the scaffold, not a manual afterthought
 - **Layout pattern consistency** — every `*Content.kt` in the same feature `ui/` dir must use the same top-level layout pattern (flat `Column`/`LazyColumn`, card-sectioned `AppCard`, or tabbed `TabRow`+`HorizontalPager`); mixed patterns are a `layout_inconsistency` violation. Run `scan_design_violations.py <project_root>` — it detects this cross-screen.
 
 ### 6) Native / JNI boundary (only if `*-jni.cpp`, `*-wrapper.cpp`, or `CMakeLists.txt` exist)
@@ -185,7 +187,7 @@ The description names the symptom, not the fix.
 | `[mvi]` | Effect replay, state copy race, wrong state container |
 | `[presenter]` | ViewModel has Compose import, wrong scope, missing test |
 | `[data]` | Pass-through repository, DTO escaping layer, no cache |
-| `[ui]` | Stateless composable violates, missing Preview, design drift |
+| `[ui]` | Stateless composable violates, missing Preview stub, design drift |
 | `[di]` | Koin module scope wrong, missing factory/viewModel registration |
 | `[build]` | Convention plugin misconfiguration, version drift |
 | `[test]` | Missing test coverage, mock instead of fake, wrong scope |
@@ -196,7 +198,7 @@ The description names the symptom, not the fix.
 [mvi] Effect replayed on recomposition in TodoListScreen
 [presenter] ViewModel imports Compose in :feature:todo:presenter
 [data] Repository is pass-through — no local cache
-[ui] AddTodoContent missing Preview for error state
+[ui] AddTodoContent missing Preview stub for error state
 [di] TodoListViewModel registered as factory instead of viewModel
 ```
 
@@ -257,7 +259,8 @@ That is the complete consumer setup — no scripts to copy, no dependencies to i
 | Scanner | Detects | Severity |
 |---|---|---|
 | `scan_design_violations.py` | Hardcoded colors, dp literals, Material theme usage, TextStyle construction, nested containers, layout inconsistency | HIGH (error), MEDIUM (warning) |
-| `audit_project.py` | State copy races, SharedFlow replay effects, NetworkResult in UI state, DTO import in UI layer, magic color literals, hardcoded spacing | HIGH |
+| `audit_project.py` | State copy races, SharedFlow replay effects, NetworkResult in UI state, DTO import in UI layer, magic color literals, hardcoded spacing, missing preview stubs | HIGH |
+| `validate_module_graph.py` | Missing feature module files, missing `androidApp` UI link, missing `*ContentPreview.kt` stub beside feature UI content | HIGH |
 
 Findings at or above `fail_on` exit non-zero and fail the CI job. Findings below the threshold are reported but do not fail.
 
@@ -289,6 +292,8 @@ python3 ../kmm-agent-skills/skills/kotlin-multiplatform-audit/scripts/governance
   Used by the reusable workflow at `.github/workflows/kmm-audit.yml`.
 - `scripts/audit_project.py` — runs a lightweight scan for a few common KMP architecture
   smells such as effect replay bugs, state copy races, and obvious UI/data boundary leaks.
+- `scripts/validate_module_graph.py` — checks an existing project’s feature module layout and
+  requires a preview stub for each `*Content.kt` in `:feature:*:ui`.
 - `scripts/audit_skills_repo.py` — checks the skills repo for metadata, freshness, scripts,
   and documentation gaps.
 - `scripts/draft_issue.py` — renders a GitHub-ready issue or question draft with an

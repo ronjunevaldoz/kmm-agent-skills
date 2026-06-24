@@ -197,6 +197,9 @@ Use `/fix-design` to scan an existing project for violations (hardcoded colors, 
 `MaterialTheme.*` usage, `TextStyle()` construction, nested containers, component
 reimplementations, direct token imports) and fix them file-by-file with per-file
 confirmation. Primary scanner: `detekt-rules/` (PSI-based); fallback: `scripts/scan_design_violations.py`.
+The fallback scanner also flags missing preview stubs, missing multi-device preview coverage,
+and missing Roborazzi screenshot tests for feature `*Content.kt` files so preview drift gets
+caught with the rest of the design cleanup.
 
 Use `/record-design-baselines` after fixing to record new Roborazzi golden PNGs.
 Use `/audit-design-visual` to run a vision pass over the goldens and catch spacing,
@@ -1483,6 +1486,9 @@ These previews serve three purposes:
 3. **`/fix-design` verification** — after a theme token change, run
    `:core:designsystem:jvmTest` to confirm all components still look correct
    before running full feature tests
+
+Feature UI modules follow the same rule: every `*Content.kt` must have a preview stub and
+matching Roborazzi screenshot coverage for phone, tablet, and desktop sizes.
 
 > **Skill-owned.** Preview files follow the same ownership rule as components —
 > updateable via `/update-design-system`. Never edit preview files to reflect

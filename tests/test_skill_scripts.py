@@ -186,6 +186,16 @@ class ValidateModuleGraphTests(unittest.TestCase):
                 module_dir = root / "feature" / "auth" / module
                 module_dir.mkdir(parents=True)
                 (module_dir / "build.gradle.kts").write_text("", encoding="utf-8")
+            ui_src = root / "feature" / "auth" / "ui" / "src" / "commonMain" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui"
+            ui_src.mkdir(parents=True)
+            (ui_src / "LoginContent.kt").write_text(
+                "fun LoginContent() { Column { } }",
+                encoding="utf-8",
+            )
+            (ui_src / "LoginContentPreview.kt").write_text(
+                "fun LoginContentPreview() { LoginContent() }",
+                encoding="utf-8",
+            )
 
             self.assertEqual(scaffold_scripts.validate_module_graph(root, "auth"), [])
 
@@ -205,6 +215,31 @@ class ValidateModuleGraphTests(unittest.TestCase):
                 "androidApp/build.gradle.kts does not reference projects.feature.auth.ui",
                 scaffold_scripts.validate_module_graph(root, "auth"),
             )
+
+    def test_validate_module_graph_reports_missing_preview_stub(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "settings.gradle.kts").write_text("", encoding="utf-8")
+            (root / "build-logic").mkdir()
+            (root / "androidApp").mkdir()
+            (root / "androidApp" / "build.gradle.kts").write_text(
+                "implementation(projects.feature.auth.ui)",
+                encoding="utf-8",
+            )
+            for module in ("model", "api", "domain", "data", "presenter", "ui"):
+                module_dir = root / "feature" / "auth" / module
+                module_dir.mkdir(parents=True)
+                (module_dir / "build.gradle.kts").write_text("", encoding="utf-8")
+            ui_src = root / "feature" / "auth" / "ui" / "src" / "commonMain" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui"
+            ui_src.mkdir(parents=True)
+            (ui_src / "LoginContent.kt").write_text(
+                "fun LoginContent() { Column { } }",
+                encoding="utf-8",
+            )
+
+            errors = scaffold_scripts.validate_module_graph(root, "auth")
+
+            self.assertTrue(any("missing preview stub" in error for error in errors))
 
 
 class AuditProjectTests(unittest.TestCase):
@@ -1485,6 +1520,11 @@ scan_design_violations_scripts = load_module(
     REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "scripts" / "scan_design_violations.py",
 )
 
+scaffold_preview_coverage_scripts = load_module(
+    "scaffold_preview_coverage",
+    REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "scripts" / "scaffold_preview_coverage.py",
+)
+
 update_design_system_scripts = load_module(
     "update_design_system",
     REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "scripts" / "update_design_system.py",
@@ -1875,6 +1915,167 @@ class ScanDesignViolationsTests(unittest.TestCase):
             result = scan_design_violations_scripts.scan(Path(tmp))
         self.assertEqual(result, [])
 
+    def test_preview_coverage_flags_missing_preview_and_screenshot(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            content = root / "feature" / "auth" / "ui" / "src" / "commonMain" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui" / "LoginContent.kt"
+            content.parent.mkdir(parents=True, exist_ok=True)
+            content.write_text(
+                """package com.example.feature.auth.ui
+
+import androidx.compose.runtime.Composable
+
+@Composable
+fun LoginContent(
+    state: LoginUiState,
+    onIntent: (LoginIntent) -> Unit,
+) {}
+""",
+                encoding="utf-8",
+            )
+            findings = scan_design_violations_scripts.scan(root)
+        types = [f["type"] for f in findings]
+        self.assertIn("preview_coverage", types)
+        self.assertTrue(any("Missing preview stub" in f["message"] for f in findings))
+        self.assertTrue(any("Missing Roborazzi screenshot test" in f["message"] for f in findings))
+
+    def test_preview_coverage_accepts_multi_device_preview_and_roborazzi(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            base = root / "feature" / "auth" / "ui" / "src"
+            common = base / "commonMain" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui"
+            previews = common / "previews"
+            tests = base / "jvmTest" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui" / "previews"
+            previews.mkdir(parents=True, exist_ok=True)
+            tests.mkdir(parents=True, exist_ok=True)
+
+            (common / "LoginContent.kt").write_text(
+                """package com.example.feature.auth.ui
+
+import androidx.compose.runtime.Composable
+
+@Composable
+fun LoginContent(
+    state: LoginUiState,
+    onIntent: (LoginIntent) -> Unit,
+) {}
+""",
+                encoding="utf-8",
+            )
+            (previews / "MultiDevicePreview.kt").write_text(
+                """package com.example.feature.auth.ui.previews
+
+import org.jetbrains.compose.ui.tooling.preview.Preview
+
+@Preview(name = "Phone", widthDp = 360, heightDp = 640)
+@Preview(name = "Tablet", widthDp = 673, heightDp = 841)
+@Preview(name = "Desktop", widthDp = 1280, heightDp = 800)
+annotation class MultiDevicePreview
+""",
+                encoding="utf-8",
+            )
+            (previews / "LoginContentPreview.kt").write_text(
+                """package com.example.feature.auth.ui.previews
+
+import androidx.compose.runtime.Composable
+
+@MultiDevicePreview
+@Composable
+fun LoginContentPreview() {}
+""",
+                encoding="utf-8",
+            )
+            (tests / "LoginContentScreenshotTest.kt").write_text(
+                """package com.example.feature.auth.ui.previews
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.github.takahirom.roborazzi.captureRoboImage
+import com.example.core.designsystem.theme.AppTheme
+import kotlin.test.Test
+
+class LoginContentScreenshotTest {
+    @Test fun phone_light() {
+        captureRoboImage("login_content_phone_light.png") {
+            AppTheme {
+                Box(modifier = Modifier.size(360.dp, 640.dp)) {}
+            }
+        }
+    }
+
+    @Test fun phone_dark() {
+        captureRoboImage("login_content_phone_dark.png") {
+            AppTheme(darkTheme = true) {
+                Box(modifier = Modifier.size(360.dp, 640.dp)) {}
+            }
+        }
+    }
+
+    @Test fun tablet_light() {
+        captureRoboImage("login_content_tablet_light.png") {
+            AppTheme {
+                Box(modifier = Modifier.size(673.dp, 841.dp)) {}
+            }
+        }
+    }
+
+    @Test fun tablet_dark() {
+        captureRoboImage("login_content_tablet_dark.png") {
+            AppTheme(darkTheme = true) {
+                Box(modifier = Modifier.size(673.dp, 841.dp)) {}
+            }
+        }
+    }
+
+    @Test fun desktop_light() {
+        captureRoboImage("login_content_desktop_light.png") {
+            AppTheme {
+                Box(modifier = Modifier.size(1280.dp, 800.dp)) {}
+            }
+        }
+    }
+
+    @Test fun desktop_dark() {
+        captureRoboImage("login_content_desktop_dark.png") {
+            AppTheme(darkTheme = true) {
+                Box(modifier = Modifier.size(1280.dp, 800.dp)) {}
+            }
+        }
+    }
+}
+""",
+                encoding="utf-8",
+            )
+            findings = scan_design_violations_scripts.scan(root)
+        self.assertFalse(any(f["type"] == "preview_coverage" for f in findings))
+
+    def test_scaffold_preview_coverage_creates_missing_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            content = root / "feature" / "auth" / "ui" / "src" / "commonMain" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui" / "LoginContent.kt"
+            content.parent.mkdir(parents=True, exist_ok=True)
+            content.write_text(
+                """package com.example.feature.auth.ui
+
+import androidx.compose.runtime.Composable
+
+@Composable
+fun LoginContent(
+    state: LoginUiState,
+    onIntent: (LoginIntent) -> Unit,
+) {}
+""",
+                encoding="utf-8",
+            )
+
+            created = scaffold_preview_coverage_scripts.scaffold_preview_coverage(root)
+
+            self.assertTrue(any(path.endswith("LoginContentPreview.kt") for path in created))
+            self.assertTrue(any(path.endswith("LoginContentScreenshotTest.kt") for path in created))
+            self.assertTrue(any(path.endswith("MultiDevicePreview.kt") for path in created))
+
     def test_clean_file_returns_empty(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             findings = self._scan(
@@ -2031,9 +2232,99 @@ class GovernanceCheckTests(unittest.TestCase):
             '{"skills_repo": "ronjunevaldoz/kmm-agent-skills", "version": "1.25.11"}',
             encoding="utf-8",
         )
-        (root / "feature" / "auth" / "ui").mkdir(parents=True)
-        (root / "feature" / "auth" / "ui" / "LoginContent.kt").write_text(
+        ui_src = root / "feature" / "auth" / "ui" / "src" / "commonMain" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui"
+        ui_src.mkdir(parents=True)
+        (ui_src / "LoginContent.kt").write_text(
             "fun LoginContent() { Column { } }", encoding="utf-8"
+        )
+        (ui_src / "LoginContentPreview.kt").write_text(
+            """package com.example.feature.auth.ui.previews
+
+import androidx.compose.runtime.Composable
+
+@MultiDevicePreview
+@Composable
+fun LoginContentPreview() { LoginContent() }
+""",
+            encoding="utf-8"
+        )
+        (ui_src.parent / "previews").mkdir(parents=True, exist_ok=True)
+        (ui_src.parent / "previews" / "MultiDevicePreview.kt").write_text(
+            """package com.example.feature.auth.ui.previews
+
+import org.jetbrains.compose.ui.tooling.preview.Preview
+
+@Preview(name = "Phone", widthDp = 360, heightDp = 640)
+@Preview(name = "Tablet", widthDp = 673, heightDp = 841)
+@Preview(name = "Desktop", widthDp = 1280, heightDp = 800)
+annotation class MultiDevicePreview
+""",
+            encoding="utf-8"
+        )
+        jvm_previews = root / "feature" / "auth" / "ui" / "src" / "jvmTest" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui" / "previews"
+        jvm_previews.mkdir(parents=True, exist_ok=True)
+        (jvm_previews / "LoginContentScreenshotTest.kt").write_text(
+            """package com.example.feature.auth.ui.previews
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.github.takahirom.roborazzi.captureRoboImage
+import com.example.core.designsystem.theme.AppTheme
+import kotlin.test.Test
+
+class LoginContentScreenshotTest {
+    @Test fun phone_light() {
+        captureRoboImage("login_content_phone_light.png") {
+            AppTheme {
+                Box(modifier = Modifier.size(360.dp, 640.dp)) {}
+            }
+        }
+    }
+
+    @Test fun phone_dark() {
+        captureRoboImage("login_content_phone_dark.png") {
+            AppTheme(darkTheme = true) {
+                Box(modifier = Modifier.size(360.dp, 640.dp)) {}
+            }
+        }
+    }
+
+    @Test fun tablet_light() {
+        captureRoboImage("login_content_tablet_light.png") {
+            AppTheme {
+                Box(modifier = Modifier.size(673.dp, 841.dp)) {}
+            }
+        }
+    }
+
+    @Test fun tablet_dark() {
+        captureRoboImage("login_content_tablet_dark.png") {
+            AppTheme(darkTheme = true) {
+                Box(modifier = Modifier.size(673.dp, 841.dp)) {}
+            }
+        }
+    }
+
+    @Test fun desktop_light() {
+        captureRoboImage("login_content_desktop_light.png") {
+            AppTheme {
+                Box(modifier = Modifier.size(1280.dp, 800.dp)) {}
+            }
+        }
+    }
+
+    @Test fun desktop_dark() {
+        captureRoboImage("login_content_desktop_dark.png") {
+            AppTheme(darkTheme = true) {
+                Box(modifier = Modifier.size(1280.dp, 800.dp)) {}
+            }
+        }
+    }
+}
+""",
+            encoding="utf-8"
         )
         return root
 
@@ -2060,10 +2351,98 @@ class GovernanceCheckTests(unittest.TestCase):
     def test_medium_finding_does_not_fail_on_high_threshold(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = self._project(tmp)
-            ui = root / "feature" / "auth" / "ui"
+            ui = root / "feature" / "auth" / "ui" / "src" / "commonMain" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui"
             # layout inconsistency → warning → MEDIUM (audit_project does not flag this)
             (ui / "LoginContent.kt").write_text("fun LoginContent() { Column { } }", encoding="utf-8")
             (ui / "ProfileContent.kt").write_text("fun ProfileContent() { AppCard() { } }", encoding="utf-8")
+            (ui / "ProfileContentPreview.kt").write_text(
+                """package com.example.feature.auth.ui.previews
+
+import androidx.compose.runtime.Composable
+
+@MultiDevicePreview
+@Composable
+fun ProfileContentPreview() { ProfileContent() }
+""",
+                encoding="utf-8",
+            )
+            (ui.parent / "previews" / "MultiDevicePreview.kt").write_text(
+                """package com.example.feature.auth.ui.previews
+
+import org.jetbrains.compose.ui.tooling.preview.Preview
+
+@Preview(name = "Phone", widthDp = 360, heightDp = 640)
+@Preview(name = "Tablet", widthDp = 673, heightDp = 841)
+@Preview(name = "Desktop", widthDp = 1280, heightDp = 800)
+annotation class MultiDevicePreview
+""",
+                encoding="utf-8",
+            )
+            jvm_previews = root / "feature" / "auth" / "ui" / "src" / "jvmTest" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui" / "previews"
+            jvm_previews.mkdir(parents=True, exist_ok=True)
+            (jvm_previews / "ProfileContentScreenshotTest.kt").write_text(
+                """package com.example.feature.auth.ui.previews
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.github.takahirom.roborazzi.captureRoboImage
+import com.example.core.designsystem.theme.AppTheme
+import kotlin.test.Test
+
+class ProfileContentScreenshotTest {
+    @Test fun phone_light() {
+        captureRoboImage("profile_content_phone_light.png") {
+            AppTheme {
+                Box(modifier = Modifier.size(360.dp, 640.dp)) {}
+            }
+        }
+    }
+
+    @Test fun phone_dark() {
+        captureRoboImage("profile_content_phone_dark.png") {
+            AppTheme(darkTheme = true) {
+                Box(modifier = Modifier.size(360.dp, 640.dp)) {}
+            }
+        }
+    }
+
+    @Test fun tablet_light() {
+        captureRoboImage("profile_content_tablet_light.png") {
+            AppTheme {
+                Box(modifier = Modifier.size(673.dp, 841.dp)) {}
+            }
+        }
+    }
+
+    @Test fun tablet_dark() {
+        captureRoboImage("profile_content_tablet_dark.png") {
+            AppTheme(darkTheme = true) {
+                Box(modifier = Modifier.size(673.dp, 841.dp)) {}
+            }
+        }
+    }
+
+    @Test fun desktop_light() {
+        captureRoboImage("profile_content_desktop_light.png") {
+            AppTheme {
+                Box(modifier = Modifier.size(1280.dp, 800.dp)) {}
+            }
+        }
+    }
+
+    @Test fun desktop_dark() {
+        captureRoboImage("profile_content_desktop_dark.png") {
+            AppTheme(darkTheme = true) {
+                Box(modifier = Modifier.size(1280.dp, 800.dp)) {}
+            }
+        }
+    }
+}
+""",
+                encoding="utf-8",
+            )
             findings = (
                 governance_scripts.run_scan_violations(root)
                 + governance_scripts.run_audit_project(root)
