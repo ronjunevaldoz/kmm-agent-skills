@@ -435,7 +435,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "add Ktor", "network layer", "API calls", "token refresh" | `kotlin-multiplatform-network-layer` |
 | "local database", "SQLite", "SQLDelight", "offline storage" | `kotlin-multiplatform-sqldelight-setup` |
 | "CI", "GitHub Actions", "run KMP tests" | `kotlin-multiplatform-ci-github-actions` |
-| "publish to Maven Central", "Maven publish", "release library", "versioning", "semantic versioning", "bump version", "vanniktech", "Sonatype", "git-cliff", "changelog", "GitHub Release", "release pipeline", "GPG signing" | `kotlin-multiplatform-release` |
+| "publish to Maven Central", "Maven publish", "release library", "release project", "cut release", "ship version", "versioning", "semantic versioning", "bump version", "vanniktech", "Sonatype", "git-cliff", "changelog", "GitHub Release", "release pipeline", "GPG signing" | `kotlin-multiplatform-release` |
 | "dev/staging/prod", "BuildKonfig", "environment config" | `kotlin-multiplatform-flavor-environment` |
 | "XCFramework", "Swift Package Manager", "SPM", "iOS binary" | `kotlin-multiplatform-xcframework-spm` |
 | "expect actual", "platform-specific", "@ObjCName", "iOS interop" | `kotlin-multiplatform-expect-actual` |
@@ -578,6 +578,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
+| 2026-06-24 | Added explicit release routing keywords (`release project`, `cut release`, `ship version`) so project release requests route to `kotlin-multiplatform-release`. |
 | 2026-06-22 | Fixed kotlin-multiplatform-jni-pro routing: was tagged with Kotlin/Native cinterop vocabulary (`CPointer`, `kotlin native interop`) but the skill is strictly JVM JNI. Corrected description + trigger map to JNI terms (`JNIEnv`, `Java_*`, `wrapper.cpp`, `vendor C++`, `C-shim`); added expect-actual disambiguation row for cinterop. |
 | 2026-06-21 | Removed private project reference from docs-first rule; rule is now generic. |
 | 2026-06-18 | Initial release — 30-skill routing map, dependency graph, build order, decision trees, anti-pattern checklist. |

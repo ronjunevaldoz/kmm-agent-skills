@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-23'
+  last-updated: '2026-06-24'
   keywords:
     - Maven Central
     - publish
@@ -39,13 +39,14 @@ Use when you need to:
 - Generate a structured CHANGELOG.md from git history
 - Create a GitHub Release with auto-generated release notes
 - Decide between secrets management approaches (GitHub Secrets / Doppler / env vars)
+- Cut a project release end to end, including version bump, tag, changelog, and GitHub Release
 
-**Trigger keywords:** publish to Maven Central, Maven publish, release library, versioning,
-semantic versioning, bump version, gradle.properties version, vanniktech, Sonatype,
-Central Portal, GPG signing, git-cliff, changelog, conventional commits, GitHub Release,
-release pipeline, publish KMP library, release workflow, secrets management publish,
-alpha release, beta release, release candidate, pre-release, snapshot, development version,
-GitHub Packages, promote to stable, version suffix.
+**Trigger keywords:** publish to Maven Central, Maven publish, release library, release project,
+cut release, ship version, versioning, semantic versioning, bump version, gradle.properties
+version, vanniktech, Sonatype, Central Portal, GPG signing, git-cliff, changelog,
+conventional commits, GitHub Release, release pipeline, publish KMP library, release workflow,
+secrets management publish, alpha release, beta release, release candidate, pre-release,
+snapshot, development version, GitHub Packages, promote to stable, version suffix.
 
 **Freshness rule:** Sonatype Central Portal API and the vanniktech plugin change frequently —
 recheck the [vanniktech plugin releases](https://github.com/vanniktech/gradle-maven-publish-plugin/releases)
@@ -469,4 +470,5 @@ Never generate credentials or keys. If GPG setup is needed, give the commands th
 
 | Date | Change |
 |---|---|
+| 2026-06-24 | Added explicit `release project` / `cut release` / `ship version` trigger keywords so project release requests route here instead of the consumer changelog agent. |
 | 2026-06-23 | Initial release — versioning, Maven Central, git-cliff, GitHub Release, local publish script, anti-patterns. |

@@ -239,7 +239,7 @@ What to say to activate each skill. The agent matches these phrases automaticall
 | [`roborazzi`](skills/kotlin-multiplatform-roborazzi/) | "screenshot test", "visual regression", "test layout", "canvas test", "100% accuracy" |
 | [`code-quality`](skills/kotlin-multiplatform-code-quality/) | "Ktlint", "Detekt", "code style", "static analysis", "layer violation" |
 | [`audit`](skills/kotlin-multiplatform-audit/) | "audit repo", "project health", "what is wrong with this project", "architecture drift", "governance check", "CI enforcement" |
-| [`release`](skills/kotlin-multiplatform-release/) | "publish to Maven Central", "release library", "bump version", "git-cliff", "alpha release", "GitHub Release" |
+| [`release`](skills/kotlin-multiplatform-release/) | "publish to Maven Central", "release project", "cut release", "release library", "bump version", "git-cliff", "alpha release", "GitHub Release" |
 
 ---
 
