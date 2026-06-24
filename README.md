@@ -28,6 +28,37 @@ It maps the skills, build order, and the best next step.
 
 ## Skill Map
 
+### Repo Architecture
+
+```mermaid
+flowchart LR
+  U[User request] --> E[kotlin-multiplatform-expert]
+
+  E --> S[Consumer skills in skills/]
+  E --> D[Repo docs maintainer]
+  E --> R[Release pipeline]
+
+  S --> P[Downstream KMP project]
+  D --> RD[README, docs/, AGENTS, commands, routing text]
+  R --> C[CHANGELOG.md, Git tags, GitHub Release]
+
+  RN[/release-notes/] --> A[agents/changelog.md]
+  A --> C
+
+  MD[/maintain-docs/] --> D
+  NS[/new-skill/] --> E
+```
+
+Consumer skills are the installable surface downstream projects use. Repo docs,
+agents, commands, and scripts maintain this repository's own workflow and release
+surface.
+
+Update this diagram whenever a skill, agent, command, or routing rule changes. Keep
+it aligned with `skills/kotlin-multiplatform-expert/SKILL.md`, `agents/*.md`, and the
+public command docs.
+
+---
+
 ### Foundation
 
 - [`kotlin-multiplatform-feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) - 6-layer module structure, build-logic, TOML catalog, Koin

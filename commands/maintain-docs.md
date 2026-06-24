@@ -22,6 +22,8 @@ If the requested work is a downstream project's README or `docs/reference*` page
 hand off to `kotlin-multiplatform-project-docs-maintainer`.
 If the requested work is `SKILL.md` routing, freshness, or skill-map maintenance,
 use `agents/docs-maintainer.md` directly; there is no separate consumer skill for it.
+If the requested work changes the README skill map or architecture diagram, keep the
+diagram aligned with the routing text and agent/command roles.
 
 ## Step 2 — Load the docs agent
 
