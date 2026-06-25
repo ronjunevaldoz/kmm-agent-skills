@@ -9,7 +9,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-22'
+  last-updated: '2026-06-25'
   keywords:
     - JNI
     - Kotlin native
@@ -45,6 +45,7 @@ You have confirmed and fixed all of these classes of bug. You do not repeat them
 - `references/wrapper-patterns.md` — concrete C wrapper templates: lifecycle, streaming, callback/trampoline, multi-library pipeline
 - `references/header-compatibility-matrix.md` — deterministic `.h` audit; classify every type/paradigm as Supported / Conditional / Unsupported before any code
 - `references/architectural-feedback-schema.md` — structured halt-and-report format when a header has Unsupported constructs; C-shim design strategies
+- https://developer.android.com/ndk/guides/jni-tips — Android JNI tips for footprint, threading, local refs, and release discipline
 
 ---
 
@@ -66,6 +67,16 @@ native handle, JNI memory safety, native C++ bridge, shared library Kotlin.
 **Freshness rule:** NDK JNI API and CMake Android toolchain change with each NDK release — recheck
 the NDK guides before pinning toolchain configs. Native libraries update their APIs independently —
 recheck their headers before writing any bridge code against a new version.
+
+## JNI Tips
+
+- Minimize crossings over the boundary; prefer fewer, larger JNI calls over chatty marshalling.
+- Keep JNI interface code in a small number of easily identified source files.
+- Treat `JNIEnv*` as thread-local; never cache or share it across threads.
+- Attach native worker threads before JNI use and detach them when done.
+- Release local references in loops or long-lived attached threads with `DeleteLocalRef`.
+- Match every `GetStringUTFChars`, `GetStringChars`, `GetByteArrayElements`, and similar acquire call with the required release call on every path.
+- Prefer synchronous ownership and explicit handoff over async ping-pong across managed/native layers.
 
 ---
 
@@ -370,6 +381,9 @@ See `references/error-patterns.md` for full evidence and context.
 | Wrong array release mode | `JNI_ABORT` for read-only arrays — `0` triggers an unnecessary write-back (EP-3) |
 | Native logic in JNI bridge | `*-jni.cpp` calls one wrapper fn only — computation in wrapper or library (EP-4) |
 | Algorithm reimplementation | Phase 0 first; if the library has it, call it — never rewrite (EP-1) |
+| Shared `JNIEnv*` across threads | `JNIEnv*` is thread-local; never cache it or pass it across threads |
+| Missing local ref cleanup in loops | Call `DeleteLocalRef` in long loops or attached native threads to avoid local ref buildup |
+| Unreleased JNI string/array access | Always release `GetStringUTFChars` / `GetByteArrayElements` / similar acquisitions on every path |
 | RTLD_GLOBAL symbol conflict | Use `RTLD_LOCAL`; verify with `nm -D`; see `references/shared-lib-loading.md` (EP-5) |
 | GPU output read without sync | `synchronize()` before reading native output (EP-6) |
 | Hardcoded constants | Read from library header or `get_*` accessor — never guess (EP-7) |
@@ -443,4 +457,5 @@ Never reimplement a library function found in step 1 — cite it by name.
 | 2026-06-22 | Added references/cmake-jni-setup.md (3 inclusion options, compile-definition config, Dockerfile checklist, CMake boundary guard) and references/wrapper-patterns.md (4 concrete patterns: lifecycle, streaming, callback/trampoline, multi-library pipeline; anti-patterns table). Wired both into References and Integration sections. |
 | 2026-06-22 | Added Phase 0 (library-first discovery gate): grep commands, decision table, and wrapper-call pattern with concrete header/wrapper/JNI code template. Updated pre-task checklist to require Phase 0. Updated anti-patterns with reinvention wrong-vs-right example. Updated output style to require discovery result and 3rd party check as first two response items. |
 | 2026-06-22 | Added HARD STOP section on 3rd party file immutability: path-detection heuristics, wrapper-pattern alternatives table, pre-task checklist item. Added EP-9 to error-patterns.md. |
+| 2026-06-25 | Added official Android JNI tips reference plus a compact JNI tips section covering thread-local `JNIEnv*`, attach/detach discipline, local ref cleanup, and string/array release rules. Expanded anti-patterns with thread-sharing and release pitfalls. |
 | 2026-06-20 | Initial release. |

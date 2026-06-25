@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-06'
+  last-updated: '2026-06-26'
   keywords:
     - Slot API
     - composable lambda
@@ -243,6 +243,37 @@ AppButton(onClick = {}) {
     AppText("Save", modifier = Modifier.weight(1f))   // weight() works because of RowScope
 }
 ```
+
+---
+
+## Restricted Scope Template Pattern
+
+A **restricted scope template** is a slot with guardrails: the caller still provides
+content, but only inside a narrow, purpose-built contract. Use it when the region should
+stay visually and behaviorally consistent across the product, and plain `@Composable () -> Unit`
+would make the API too open-ended.
+
+Typical forms:
+- a scoped slot like `@Composable RowScope.() -> Unit` or `@Composable ColumnScope.() -> Unit`
+- a custom receiver such as `CardHeaderScope` or `ToolbarScope`
+- a template component that exposes only a few child-building functions instead of raw layout
+  primitives
+
+Use this pattern when:
+- the region has a fixed purpose and ordering, like a header row, title bar, or card footer
+- callers need a little layout freedom, but not full compositional freedom
+- you want consistent spacing, alignment, and typography across all call sites
+
+Avoid this pattern when:
+- the content region is genuinely arbitrary and should accept any composable
+- the component is a simple leaf and a plain slot would stay clearer
+- the only real requirement is choosing between a few variants; use data/variant params instead
+
+| Pattern | Best for | Example |
+|---|---|---|
+| Plain slot | Fully custom caller-owned content | `content: @Composable () -> Unit` |
+| Restricted scope template | Caller content inside a fixed region with guardrails | `content: @Composable RowScope.() -> Unit` |
+| Data/variant API | A small set of predefined looks or behaviors | `variant: ButtonVariant` |
 
 ---
 
@@ -530,4 +561,5 @@ Keep snippets small. If the user provides a component name, use it in the exampl
 
 | Date | Change |
 |---|---|
+| 2026-06-26 | Added restricted scope template guidance plus a pattern comparison table to distinguish plain slots, guarded scopes, and data/variant APIs. |
 | 2026-06-06 | Initial release. |

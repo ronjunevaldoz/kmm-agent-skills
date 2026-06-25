@@ -10,7 +10,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-21'
+  last-updated: '2026-06-26'
   keywords:
     - adaptive layout
     - WindowSizeClass
@@ -53,6 +53,16 @@ redesign page, layout redesign, page consistency, uniform layout, layout pattern
 **Freshness rule:** `material3-adaptive` is still evolving — recheck the API when upgrading
 `androidx.compose.material3.adaptive`. `calculateWindowSizeClass()` moved packages between
 CMP releases; verify the import against the current version in `libs.versions.toml`.
+
+## Compose Layout Fundamentals
+
+- https://developer.android.com/develop/ui/compose/layouts — official Compose layout overview; use this before picking a container or custom pattern
+- https://developer.android.com/develop/ui/compose/layouts/adaptive/get-started-with-adaptive-apps — official adaptive-app entry point for phones, tablets, foldables, and other form factors
+- https://developer.android.com/develop/ui/compose/layouts/adaptive/canonical-layouts — canonical adaptive layout patterns for list-detail, supporting pane, and related responsive structures
+- https://developer.android.com/develop/ui/compose/layouts/adaptive/build-adaptive-navigation — adaptive navigation patterns for bottom bar, rail, drawer, and multi-pane navigation shells
+- https://developer.android.com/develop/ui/compose/layouts/custom — official custom-layout guide; use when built-in containers are not enough
+- `Layout fundamentals` in the Compose docs covers the base mental model for `Box`, `Row`, `Column`, `Spacer`, modifiers, and constraints
+- `Layout containers` and `Advanced and custom layouts` in the same doc tree cover lazy lists/grids, flow layouts, custom layouts, alignment lines, and intrinsic measurement
 
 ---
 
@@ -356,3 +366,6 @@ When implementing adaptive layout, respond in this order:
 | Date | Change |
 |---|---|
 | 2026-06-21 | Initial release. |
+| 2026-06-26 | Added official Compose layouts overview to the skill’s reference layer and called out the layout fundamentals / layout containers / custom layouts doc family for base container and constraint guidance. |
+| 2026-06-26 | Added the official adaptive apps getting-started page and the Compose custom layouts guide as direct reference links for adaptive and custom layout work. |
+| 2026-06-26 | Added canonical adaptive layouts and adaptive navigation reference pages so the skill now points to the full official adaptive layout path. |

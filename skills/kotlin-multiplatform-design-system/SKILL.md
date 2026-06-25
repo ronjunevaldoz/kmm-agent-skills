@@ -14,7 +14,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-25'
+  last-updated: '2026-06-26'
   keywords:
     - design system
     - Compose Styles API
@@ -70,6 +70,22 @@ Why:
 
 Use Material3 only when the product targets Material Design explicitly and design token ownership
 is not a concern.
+
+## Component API Placement
+
+Use the smallest API that still preserves the product’s structure.
+
+| Component type | Preferred pattern | Why |
+|---|---|---|
+| App shell / page chrome | Slot API | The caller owns the region content, but the shell stays fixed |
+| Fixed visual region with a narrow contract | Restricted scope template | Keeps layout and ordering consistent while still allowing caller content |
+| Small leaf control | Data + variant params | Simpler than slots when the content is not meaningfully custom |
+| Deep theme / app-wide metadata | CompositionLocal | Shared context, not positional content |
+
+Concrete KMM design-system mapping:
+- `AppScaffold`, `AppTopAppBar`, `AppCard`, `AppDialog`, `AppBottomSheet` -> slot API
+- `CardHeader`, `ToolbarRow`, `SectionHeader`, `ActionRow` -> restricted scope template when the region needs guardrails
+- `AppButton`, `AppBadge`, `AppTextField`, `AppText`, `AppChip` -> data/variant APIs first; add slots only if callers truly need custom body content
 
 ---
 
@@ -2331,6 +2347,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-06-26 | Added component API placement guidance that maps shell components to slots, guarded regions to restricted scope templates, and leaf controls to data/variant APIs. |
 | 2026-06-22 | Added `references/design-system-template.md` — project-facing living document covering tokens, component inventory, detekt overrides, multi-device preview coverage, and audit log. Wired copy instructions into Ownership Model section. |
 | 2026-06-22 | Added `RedundantScreenTitleRule` (flags `Text`/`AppText` with string literals inside `*Content`/`*Screen` composables) and `HardcodedGridColumnsRule` (flags `GridCells.Fixed(N≥2)`). Added `@MultiDevicePreview` annotation (phone 360dp / tablet 673dp / desktop 1280dp) to `AppThemePreviewWrapper.kt`; applied to base light/dark variants of all 6 core component previews. Updated `/audit-design-visual` with duplicate title check and multi-device layout table. Updated `/record-design-baselines` with multi-device PNG naming. |
 | 2026-06-22 | Added `detekt-rules/` PSI-based scanner module with 7 rules (HardcodedColor, HardcodedDp, MaterialThemeUsage, DirectTextStyle, NestedContainer, ComponentRegistryViolation, DesignTokenImportBoundary). Added `/record-design-baselines` and `/audit-design-visual` commands. Updated `/fix-design` to use detekt as primary scanner. |
