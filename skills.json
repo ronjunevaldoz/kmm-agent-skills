@@ -1,5 +1,5 @@
 {
-  "version": "1.27.0",
+  "version": "1.27.1",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1682,20 +1682,14 @@
         "offline first",
         "offline-first",
         "local first",
-        "sync",
         "optimistic update",
         "conflict resolution",
-        "background sync",
-        "single source of truth",
-        "cache-then-network",
-        "data redundancy",
-        "content sync",
-        "data consistency",
-        "sync strategy",
-        "data duplication",
         "conflict handling",
-        "cache management",
-        "background data sync"
+        "background sync",
+        "background data sync",
+        "cache-then-network",
+        "SyncManager",
+        "SyncState"
       ],
       "scripts": []
     },

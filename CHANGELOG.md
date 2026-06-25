@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.27.1] — 2026-06-25
+
+### Fixed
+
+- fix(routing): make offline-first opt-in, stop auto-triggering on generic data terms
+
+---
+
 ## [v1.27.0] — 2026-06-25
 
 ### Added
