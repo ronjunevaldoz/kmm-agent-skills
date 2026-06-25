@@ -32,7 +32,9 @@ Use when you need to:
 - Run ViewModel tests on plain JVM without a device or emulator
 
 **Trigger keywords:** unit test, runTest, Turbine, Flow test, ViewModel test, fake repository,
-:core:testing, coroutines test, JVM test, fake over mock, test fixtures, test builders.
+:core:testing, coroutines test, JVM test, fake over mock, test fixtures, test builders,
+test, write test, test code, coverage, test ViewModel, test logic, testing, write tests,
+unit testing, test this, how to test, test the screen.
 
 **Freshness rule:** Turbine API changes between minor versions — recheck `awaitItem()` vs
 `awaitComplete()` semantics when upgrading. Kotlin coroutines test API is stable but

@@ -49,7 +49,9 @@ Use when you need to:
 UI test JVM, screenshot diff, CI visual test, testTag, test tag, compose test rule, onNodeWithTag,
 createComposeRule, interaction test, compose UI test, semantics node, visual accuracy,
 pixel-perfect, layout test, canvas test, arrangement test, layout regression, 100% accuracy,
-UI layout verification, canvas layout test, visual confirmation, test layout.
+UI layout verification, canvas layout test, visual confirmation, test layout,
+test UI, test screen, UI testing, visual test, test this screen, test the layout,
+screenshot testing, visual regression testing, UI coverage, test composable.
 
 **Freshness rule:** Roborazzi is actively developed — the Gradle plugin API and the
 `captureRoboImage` API change between minor versions. Recheck the GitHub releases page before

@@ -38,7 +38,9 @@ Do NOT use this skill when:
 - You need user behaviour analytics — use `kotlin-multiplatform-analytics`
 
 **Trigger keywords:** crash reporting, crashlytics, firebase crashes, sentry, non-fatal error,
-symbolication, dSYM, breadcrumb bridge, crash handler, crash analytics, crash tracking.
+symbolication, dSYM, breadcrumb bridge, crash handler, crash analytics, crash tracking,
+crash, exception handling, error reporting, track errors, exception tracking, app crash,
+error tracking, report errors, debug crashes, crash diagnostics.
 
 **Freshness rule:** Firebase Crashlytics and Sentry SDKs update frequently. Recheck the
 [Firebase BoM](https://firebase.google.com/support/release-notes/android) and the

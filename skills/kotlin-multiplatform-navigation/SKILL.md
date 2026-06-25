@@ -46,7 +46,9 @@ Use this skill when you need to:
 KMP navigation, type-safe routes, Decompose, Navigation Compose,
 navigate to screen, go to screen, back stack, push screen, pop back,
 navigate back, pass arguments, route arguments, nested navigation, screen transition,
-web routing, browser fragment, hash navigation, wasmJs routing.
+web routing, browser fragment, hash navigation, wasmJs routing,
+navigate, routing, move between screens, switch screens, go to, page navigation,
+navigate from screen, pass data between screens, link screens.
 
 **Freshness rule:** recheck the JetBrains Navigation Compose docs before upgrading or
 copying snippets into a new project.

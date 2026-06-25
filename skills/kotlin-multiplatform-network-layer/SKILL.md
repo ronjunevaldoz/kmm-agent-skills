@@ -77,7 +77,9 @@ token refresh, NetworkResult, safeRequest, OkHttp, Darwin, CIO, JS engine,
 API call, HTTP request, REST API, make a request, fetch data, network call,
 call API, REST client, HTTP interceptor, API client setup, network error handling,
 data fetching, content retrieval, remote data, backend integration, API integration,
-data redundancy, content synchronization, remote content.
+data redundancy, content synchronization, remote content,
+handle errors, error handling, error state, catch errors, HTTP error,
+network error, request error, response error, retry, handle failure.
 
 **Freshness rule:** Ktor changes quickly, so recheck the current client engine,
 auth, and serialization docs before using or updating this skill.
