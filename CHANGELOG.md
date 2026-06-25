@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.28.4] — 2026-06-26
+
+### Docs
+
+- docs: refine layout and slot guidance
+
+---
+
 ## [v1.28.3] — 2026-06-25
 
 ### Docs

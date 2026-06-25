@@ -1,5 +1,5 @@
 {
-  "version": "1.28.3",
+  "version": "1.28.4",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -58,7 +58,7 @@
       "path": "skills/kotlin-multiplatform-adaptive-layout",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-21",
+      "last_updated": "2026-06-26",
       "keywords": [
         "adaptive layout",
         "WindowSizeClass",
@@ -440,7 +440,7 @@
       "path": "skills/kotlin-multiplatform-compose-slot-api",
       "description": "The Slot API pattern in Compose Multiplatform \u2014 designing components with composable lambda parameters (slots) instead of data parameters. Covers: single and named slots, scoped slots with receiver types (RowScope, ColumnScope), trailing lambda convention, slot-based component library design, CompositionLocal as a deep-slot alternative, performance characteristics, and when NOT to use slots. Zero new dependencies.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-06-26",
       "keywords": [
         "Slot API",
         "composable lambda",
@@ -736,7 +736,7 @@
       "path": "skills/kotlin-multiplatform-design-system",
       "description": "Scaffolds a custom Compose Multiplatform design system in :core:designsystem using the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles, @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates: color/typography/shape/spacing tokens, AppTheme with light/dark support, StyleScope extensions for token access, shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant, ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision), and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText) built on BasicXxx CMP primitives. No Material dependency \u2014 fully custom, fully owned.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-25",
+      "last_updated": "2026-06-26",
       "keywords": [
         "design system",
         "Compose Styles API",
@@ -1230,7 +1230,7 @@
       "path": "skills/kotlin-multiplatform-jni-pro",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-22",
+      "last_updated": "2026-06-25",
       "keywords": [
         "JNI",
         "Kotlin native",
