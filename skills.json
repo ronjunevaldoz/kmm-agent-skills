@@ -1,5 +1,5 @@
 {
-  "version": "1.26.0",
+  "version": "1.26.1",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1474,7 +1474,22 @@
         "trigger navigation",
         "event driven UI",
         "MVVM vs MVI",
-        "unidirectional event"
+        "unidirectional event",
+        "screen",
+        "implement screen",
+        "add screen",
+        "new screen",
+        "screen logic",
+        "UI logic",
+        "screen behavior",
+        "screen interaction",
+        "handle user input",
+        "form state",
+        "form handling",
+        "user interaction",
+        "screen state management",
+        "UI state",
+        "state management"
       ],
       "scripts": []
     },
@@ -1729,7 +1744,18 @@
         "UiState UiIntent",
         "StateFlow ViewModel",
         "presenter layer",
-        "no Compose ViewModel"
+        "no Compose ViewModel",
+        "screen logic",
+        "UI state",
+        "state management",
+        "screen state",
+        "ViewModel setup",
+        "test ViewModel",
+        "screen behavior",
+        "handle user input",
+        "form state",
+        "form handling",
+        "screen interaction"
       ],
       "scripts": []
     },

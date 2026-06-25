@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.26.1] — 2026-06-25
+
+### Added
+
+- feat: expand MVI and presenter trigger keywords for natural requests
+
+---
+
 ## [v1.26.0] — 2026-06-24
 
 ### Docs
