@@ -64,6 +64,10 @@ agents, commands, and scripts maintain this repository's own workflow and releas
 surface. The designer agent keeps KMM and Compose component decisions aligned before
 implementation starts.
 
+Before routing any docs task, classify it as repo-internal or downstream consumer.
+Repo docs stay with `docs-maintainer`; downstream project docs go to
+`project-docs-maintainer`.
+
 Update this diagram whenever a skill, agent, command, or routing rule changes. Keep
 it aligned with `skills/kotlin-multiplatform-expert/SKILL.md`, `agents/*.md`, and the
 public command docs.

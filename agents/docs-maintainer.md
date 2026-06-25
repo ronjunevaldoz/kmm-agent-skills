@@ -30,6 +30,14 @@ For downstream project docs, hand off to `kotlin-multiplatform-project-docs-main
 For skill-doc maintenance, use this agent directly; it keeps the skills collection docs
 aligned with the repo without creating a separate consumer skill.
 
+## Scope check
+
+Before editing docs, classify the target first:
+- repo-internal docs, agents, commands, or routing text -> this agent
+- downstream consumer docs -> `kotlin-multiplatform-project-docs-maintainer`
+
+If the request could mean either one, resolve the scope before changing files.
+
 ## Source of truth
 
 Read the relevant files before editing:

@@ -28,6 +28,7 @@ Full routing matrix is in `routing_rules.json`. Hard boundaries (quoted from `ha
 - **JNI (JVM, JNIEnv, Java_*) → `kotlin-multiplatform-jni-pro`.** Kotlin/Native cinterop (CPointer, .def) → `kotlin-multiplatform-expect-actual`. Different mechanisms — never conflate.
 - **Any `.cpp`/`.h` under `vendor/` or a submodule is read-only.** Edits are a violation (EP-9). Adapt in `*-wrapper.cpp` or a C-shim.
 - **Opaque native pointer held as Kotlin `Long` MUST have a matching `dispose()`/`close()` → JNI `_free`.**
+- **Docs scope first:** confirm whether a docs request targets this repo or a downstream consumer project before routing it to a docs skill.
 
 ---
 

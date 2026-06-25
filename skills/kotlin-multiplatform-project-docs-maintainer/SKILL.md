@@ -1,15 +1,16 @@
 ---
 name: kotlin-multiplatform-project-docs-maintainer
 description: >
-  Maintains consumer-facing KMP project documentation: README, GETTING_STARTED, INSTALL,
-  RELEASING, docs/reference pages, onboarding guides, architecture notes, and
-  architecture diagrams. Use this skill when project docs need to match the actual code,
-  commands, config, folder layout, or app/library structure. Does NOT cover consumer
-  release-note generation, per-skill changelogs, or skills-repo documentation.
+  Maintains downstream consumer-facing KMP project documentation only: README,
+  GETTING_STARTED, INSTALL, RELEASING, docs/reference pages, onboarding guides,
+  architecture notes, and architecture diagrams. Use this skill when project docs need to
+  match the actual code, commands, config, folder layout, or app/library structure.
+  Does NOT cover consumer release-note generation, per-skill changelogs, or
+  skills-repo documentation.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-24'
+  last-updated: '2026-06-25'
   keywords:
     - project docs
     - consumer docs
@@ -41,6 +42,8 @@ Do NOT use this skill when:
 - you are writing consumer release notes or per-skill changelog tables
 - you are maintaining the skills repo's own README, agents, commands, or skill docs
 - you are implementing product code instead of updating documentation
+
+If the target is this repository, route to `docs-maintainer` instead.
 
 **Trigger keywords:** project docs, consumer docs, README, getting started, install,
 releasing, docs reference, onboarding docs, architecture docs, architecture diagram,

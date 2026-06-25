@@ -120,6 +120,28 @@ class ValidateSkillMapTests(unittest.TestCase):
             self.assertTrue(any("declares 1 skills but repo has 2 skill folders" in e for e in errors))
 
 
+class DocsScopeBoundaryTests(unittest.TestCase):
+    def test_repo_and_consumer_docs_boundary_is_explicit(self) -> None:
+        normalize = lambda text: " ".join(text.lower().split())
+
+        docs_maintainer = normalize((REPO_ROOT / "agents" / "docs-maintainer.md").read_text(encoding="utf-8"))
+        planner = normalize((REPO_ROOT / "agents" / "planner.md").read_text(encoding="utf-8"))
+        expert = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "SKILL.md").read_text(encoding="utf-8"))
+        project_docs = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-project-docs-maintainer" / "SKILL.md").read_text(encoding="utf-8"))
+        readme = normalize((REPO_ROOT / "README.md").read_text(encoding="utf-8"))
+
+        self.assertIn("repo-internal docs", docs_maintainer)
+        self.assertIn("downstream consumer docs", docs_maintainer)
+        self.assertIn("repo-internal docs -> `docs-maintainer`", planner)
+        self.assertIn("downstream consumer docs -> `project-docs-maintainer`", planner)
+        self.assertIn("docs scope guard", expert)
+        self.assertIn("repo-internal docs", expert)
+        self.assertIn("downstream consumer docs", expert)
+        self.assertIn("downstream consumer-facing kmp project documentation only", project_docs)
+        self.assertIn("if the target is this repository, route to `docs-maintainer` instead.", project_docs)
+        self.assertIn("classify it as repo-internal or downstream consumer", readme)
+
+
 class ReleaseScriptTests(unittest.TestCase):
     def test_release_validation_invokes_all_gates_in_order(self) -> None:
         calls: list[str] = []

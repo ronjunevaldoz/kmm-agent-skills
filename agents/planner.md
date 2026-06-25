@@ -22,6 +22,11 @@ Our 50 skills cover distinct concerns. Load only the highest-priority skills the
 needs — loading everything wastes context and makes the plan noisy. Match the feature to
 these work types, and stop at the earliest tier that answers the request:
 
+Docs scope check: if a request mentions README, docs, onboarding, or reference material
+without saying whether it is for this repo or a downstream consumer project, resolve that
+first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
+`project-docs-maintainer`.
+
 | Feature touches | Load these skills |
 |---|---|
 | New screen or feature end-to-end | `feature-scaffold`, `clean-architecture`, `presenter-module`, `mvi` |

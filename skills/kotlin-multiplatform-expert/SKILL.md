@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-24'
+  last-updated: '2026-06-25'
   keywords:
     - KMP expert
     - orchestrator
@@ -151,6 +151,14 @@ When a request could fit more than one surface, use this order:
 6. Navigation structure -> `navigation`; external URL handling -> `deep-linking`
 
 If the request still spans two surfaces after that, route the earlier-layer owner first and name the follow-up skill explicitly.
+
+### Docs Scope Guard
+
+Before routing docs work, classify the target:
+- repo-internal docs, agents, commands, or routing text -> `docs-maintainer`
+- downstream consumer docs -> `project-docs-maintainer`
+
+If the user has not said which one they mean, resolve the scope before editing.
 
 ---
 
