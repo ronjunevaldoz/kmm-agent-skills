@@ -11,7 +11,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-24'
+  last-updated: '2026-06-25'
   keywords:
     - KMP audit
     - project audit
@@ -112,7 +112,12 @@ the user and the other skills what to do next.
 
 ### 4) Multiplatform code
 - Prefer shared code in `commonMain`
+- Prefer a pure `commonMain` implementation before abstractions; only split to an
+  interface or `expect/actual` when shared code cannot express the behavior cleanly
 - Use `expect/actual` only when platform behavior is genuinely different
+- Flag JVM-only utilities in `commonMain` such as `String.format`, `DecimalFormat`, or
+  `SimpleDateFormat`; keep the shared API in common code and move the implementation to
+  the platform that owns it
 - Check platform target coverage against the product goal
 
 ### 5) Design system

@@ -4,14 +4,15 @@ description: >
   The expect/actual mechanism in Kotlin Multiplatform — when to use it, when NOT
   to, and how to do it correctly. Covers: the four categories that genuinely warrant
   expect/actual (platform APIs, platform types, performance-critical code, SDK
-  integration), the interface-injection alternative that handles most cases better,
+  integration), the common-first rule that prefers a pure `commonMain` implementation
+  before abstractions, the interface-injection alternative that handles most cases better,
   the "actual everywhere" anti-pattern, typealias actual for platform types, @ObjCName
   for clean Swift API surfaces, and Kotlin/Native memory considerations. Zero new
   dependencies.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-06'
+  last-updated: '2026-06-25'
   keywords:
     - expect actual
     - expect class
@@ -52,9 +53,17 @@ recheck the Kotlin Multiplatform docs before upgrading past a minor version.
 
 ## Recommendation First
 
-Default to **interface in `commonMain` + Koin injection of platform implementations**.
+Default to **implementing the behavior in `commonMain` first**.
+
+If `commonMain` can express it cleanly and portably, keep it there. Do not add an
+abstraction just because the code feels reusable; add one only when shared logic still
+cannot model the behavior across targets.
+
+When `commonMain` cannot express the behavior, default to **interface in `commonMain` +
+Koin injection of platform implementations**.
 
 Why:
+- the simplest KMP solution is often a pure shared utility
 - interfaces are easier to mock in tests than `actual` declarations
 - Koin injection means platform code stays in platform source sets without compiler tricks
 - `expect/actual` adds K2 compiler surface area that breaks more often across Kotlin upgrades
@@ -84,6 +93,10 @@ Does it wrap a platform SDK that cannot be abstracted at the interface level?
 
 The interface approach is more flexible, testable, and doesn't require a compiler mechanism.
 Reserve `expect/actual` for the cases below where interfaces genuinely can't work.
+
+For formatting and other utility work, ask first: "Can this be a pure Kotlin helper in
+`commonMain`?" If yes, keep it there. If the helper needs platform-specific behavior, then
+split the behavior behind an interface or `expect/actual`.
 
 ---
 
@@ -415,6 +428,9 @@ opening the file.
 
 ## Common Anti-Patterns
 
+- **JVM-only utility in `commonMain`** — `String.format`, `DecimalFormat`, `SimpleDateFormat`,
+  or any other JVM-only formatter in shared code; keep the shared API in `commonMain`, but
+  move the JVM-specific implementation to `jvmMain` or hide it behind a platform adapter.
 - **`expect` class with state** — if an `expect class` has mutable state, it cannot be tested in `commonTest` without a real platform target. Extract the state to a shared type and keep the `actual` stateless.
 - **Wrapping a single function** — `expect fun getPlatformName()` is fine; `expect class PlatformNameProvider` to wrap it is overcomplicated. Use `expect fun` directly.
 - **`expect`/`actual` for dependency injection** — inject the platform dependency through Koin instead; reserve `expect`/`actual` for platform capabilities that are not injectable objects.

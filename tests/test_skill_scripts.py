@@ -142,6 +142,23 @@ class DocsScopeBoundaryTests(unittest.TestCase):
         self.assertIn("classify it as repo-internal or downstream consumer", readme)
 
 
+class CommonFirstSharedCodeTests(unittest.TestCase):
+    def test_common_first_formatting_rule_is_explicit(self) -> None:
+        normalize = lambda text: " ".join(text.lower().replace("`", "").split())
+
+        expert = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "SKILL.md").read_text(encoding="utf-8"))
+        expect_actual = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-expect-actual" / "SKILL.md").read_text(encoding="utf-8"))
+        audit = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "SKILL.md").read_text(encoding="utf-8"))
+
+        self.assertIn("string.format", expert)
+        self.assertIn("shared formatter", expert)
+        self.assertIn("implementing the behavior in commonmain first", expect_actual)
+        self.assertIn("commonmain can express it cleanly and portably", expect_actual)
+        self.assertIn("jvm-only utility in commonmain", expect_actual)
+        self.assertIn("prefer a pure commonmain implementation before abstractions", audit)
+        self.assertIn("jvm-only utilities in commonmain", audit)
+
+
 class ReleaseScriptTests(unittest.TestCase):
     def test_release_validation_invokes_all_gates_in_order(self) -> None:
         calls: list[str] = []

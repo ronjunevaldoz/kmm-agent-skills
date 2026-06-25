@@ -514,6 +514,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "wireframes", "screen flows", "layout specs", "design handoff", "component API", "visual direction" | `designer` |
 | "release notes", "consumer release notes", "per-skill changelog", "CHANGELOG.md" | `changelog` |
 | "logging", "logger wrapper", "logger facade", "kotlin-logging", "KotlinLogging", "Kermit", "log level", "crash reporting", "Crashlytics logging" | `kotlin-multiplatform-logging` |
+| "string.format", "decimalformat", "simpledateformat", "locale formatting", "number formatting", "date formatting", "shared formatter", "kmp formatter" | `kotlin-multiplatform-expect-actual` |
 | "auth", "authentication", "authorization", "JWT", "sessions", "Ktor RPC" | `kotlin-multiplatform-ktor-auth-service` |
 | "MongoDB", "database", "collection", "Flow", "change stream", "server-side Kotlin" | `kotlin-multiplatform-mongodb-database` |
 | "kotlin rpc", "kRPC", "kotlinx rpc", "RPC service", "shared RPC models" | `kotlin-multiplatform-kotlin-rpc` |
