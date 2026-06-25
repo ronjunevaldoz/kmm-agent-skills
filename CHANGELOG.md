@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.28.1] — 2026-06-25
+
+### Docs
+
+- docs: clarify repo vs consumer docs routing
+
+---
+
 ## [v1.28.0] — 2026-06-25
 
 ### Docs
