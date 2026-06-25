@@ -1,5 +1,5 @@
 {
-  "version": "1.26.1",
+  "version": "1.27.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -42,7 +42,14 @@
         "live region",
         "role = button",
         "accessibility label",
-        "semantic tree"
+        "semantic tree",
+        "accessible",
+        "screen reader support",
+        "accessible app",
+        "a11y compliance",
+        "accessibility audit",
+        "accessible design",
+        "make accessible"
       ],
       "scripts": []
     },
@@ -415,7 +422,16 @@
         "bounce",
         "ease",
         "reduced motion",
-        "motion accessibility"
+        "motion accessibility",
+        "animate",
+        "animated transition",
+        "smooth transition",
+        "animate appearance",
+        "animate change",
+        "motion",
+        "visual transition",
+        "page transition",
+        "screen transition"
       ],
       "scripts": []
     },
@@ -570,7 +586,17 @@
         "breadcrumb bridge",
         "crash handler",
         "crash analytics",
-        "crash tracking"
+        "crash tracking",
+        "crash",
+        "exception handling",
+        "error reporting",
+        "track errors",
+        "exception tracking",
+        "app crash",
+        "error tracking",
+        "report errors",
+        "debug crashes",
+        "crash diagnostics"
       ],
       "scripts": []
     },
@@ -842,7 +868,18 @@
         "component set",
         "UI kit",
         "component design",
-        "redesign page"
+        "redesign page",
+        "button",
+        "dialog",
+        "component",
+        "use component",
+        "add button",
+        "create component",
+        "show dialog",
+        "show toast",
+        "loading state",
+        "empty state",
+        "error state"
       ],
       "scripts": []
     },
@@ -1097,7 +1134,18 @@
         "FieldState",
         "form state KMP",
         "input validation",
-        "field error message"
+        "field error message",
+        "form",
+        "validate",
+        "validation",
+        "form field",
+        "input validation",
+        "form handling",
+        "form state",
+        "error message",
+        "check input",
+        "validate input",
+        "form submission"
       ],
       "scripts": []
     },
@@ -1534,7 +1582,16 @@
         "web routing",
         "browser fragment",
         "hash navigation",
-        "wasmJs routing"
+        "wasmJs routing",
+        "navigate",
+        "routing",
+        "move between screens",
+        "switch screens",
+        "go to",
+        "page navigation",
+        "navigate from screen",
+        "pass data between screens",
+        "link screens"
       ],
       "scripts": []
     },
@@ -1589,7 +1646,17 @@
         "API integration",
         "data redundancy",
         "content synchronization",
-        "remote content"
+        "remote content",
+        "handle errors",
+        "error handling",
+        "error state",
+        "catch errors",
+        "HTTP error",
+        "network error",
+        "request error",
+        "response error",
+        "retry",
+        "handle failure"
       ],
       "scripts": []
     },
@@ -2038,7 +2105,17 @@
         "UI layout verification",
         "canvas layout test",
         "visual confirmation",
-        "test layout"
+        "test layout",
+        "test UI",
+        "test screen",
+        "UI testing",
+        "visual test",
+        "test this screen",
+        "test the layout",
+        "screenshot testing",
+        "visual regression testing",
+        "UI coverage",
+        "test composable"
       ],
       "scripts": []
     },
@@ -2166,7 +2243,19 @@
         "JVM test",
         "fake over mock",
         "test fixtures",
-        "test builders"
+        "test builders",
+        "test",
+        "write test",
+        "test code",
+        "coverage",
+        "test ViewModel",
+        "test logic",
+        "testing",
+        "write tests",
+        "unit testing",
+        "test this",
+        "how to test",
+        "test the screen"
       ],
       "scripts": []
     },

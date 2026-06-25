@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.27.0] — 2026-06-25
+
+### Added
+
+- feat: expand trigger keywords across 8 core skills for broad coverage
+
+---
+
 ## [v1.26.1] — 2026-06-25
 
 ### Added
