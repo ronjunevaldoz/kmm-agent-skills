@@ -85,10 +85,13 @@ When more than one skill could apply, rank them instead of enabling everything.
 1. Contract and scaffold skills first: `clean-architecture`, `feature-scaffold`, `presenter-module`
 2. Foundation and project plumbing next: `dependency-injection`, `flavor-environment`, `ci-github-actions`, `logging`
 3. Core infrastructure after the foundation is clear: `network-layer`, `sqldelight-setup`, `datastore`, `logging`, `kotlin-rpc`, `ktor-auth-service`, `mongodb-database`, `xcframework-spm`
-4. Feature building blocks after the data and platform shape is known: `navigation`, `mvi`, `repository-pattern`, `shared-resources`, `paging`, `analytics`, `form-validation`, `image-loading`, `permissions`, `deep-linking`, `biometric-auth`, `push-notifications`, `workmanager`, `feature-flags`, `offline-first`, `crash-reporting`
+4. Feature building blocks after the data and platform shape is known: `navigation`, `mvi`, `repository-pattern`, `shared-resources`, `paging`, `analytics`, `form-validation`, `image-loading`, `permissions`, `deep-linking`, `biometric-auth`, `push-notifications`, `workmanager`, `feature-flags`, `crash-reporting`
 5. UI, testing, quality, docs, and release last: `design-system`, `design-system-extended`, `adaptive-layout`, `compose-*`, `preview-driven-development`, `unit-testing`, `roborazzi`, `code-quality`, `accessibility`, `project-docs-maintainer`, `audit`, `release`
 
 Load the earliest tier that answers the request, then add lower tiers only when the task genuinely needs them.
+
+**Opt-in skills (never auto-select — require an explicit request):**
+- `offline-first` — only when the user names "offline-first", "background sync", or "conflict resolution". For plain caching or a local source of truth, use `repository-pattern` + `sqldelight-setup` instead. Offline-first layers `SyncManager` + `WorkManager`/`BGTaskScheduler` on top, which is overkill unless explicitly wanted.
 
 ## Routing Precedence
 
@@ -499,7 +502,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "feature flags", "feature toggle", "remote config", "Firebase Remote Config", "A/B test", "experiment", "kill switch", "flag evaluation", "FeatureFlagProvider" | `kotlin-multiplatform-feature-flags` |
 | "accessibility", "a11y", "TalkBack", "VoiceOver", "contentDescription", "semantic role", "screen reader", "touch target", "WCAG", "traversal order", "mergeDescendants" | `kotlin-multiplatform-accessibility` |
 | "animation", "AnimatedVisibility", "animateContentSize", "Crossfade", "AnimatedContent", "animateFloatAsState", "shared element", "enter transition", "exit transition", "reduced motion", "spring animation" | `kotlin-multiplatform-compose-animation` |
-| "offline first", "offline-first", "local first", "sync", "optimistic update", "conflict resolution", "background sync", "SyncManager", "single source of truth", "cache then network" | `kotlin-multiplatform-offline-first` |
+| "offline first", "offline-first", "local first", "conflict resolution", "conflict handling", "background sync", "SyncManager", "SyncState" (opt-in — do NOT match on bare "sync", "cache", or "single source of truth"; those route to `repository-pattern`/`sqldelight-setup`) | `kotlin-multiplatform-offline-first` |
 | "crash reporting", "crashlytics", "firebase crashes", "sentry", "non-fatal", "symbolication", "dSYM", "breadcrumb bridge", "crash handler", "breadcrumb crash" | `kotlin-multiplatform-crash-reporting` |
 | "DataStore", "Preferences DataStore", "Proto DataStore", "save settings", "persist user prefs", "SharedPreferences migration", "createDataStore", "local key-value store" | `kotlin-multiplatform-datastore` |
 | "JNI", "JNI bridge", "native bridge", "JNIEnv", "Java_*", "GetStringUTFChars", "jbyteArray", "wrapper.cpp", "vendor C++", "3rd-party C++", "CMake JNI", "NDK", "call C++ from Kotlin/JVM", "native memory leak", "symbol conflict", "C-shim", "header compatibility" | `kotlin-multiplatform-jni-pro` |

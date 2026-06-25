@@ -36,10 +36,15 @@ Do NOT use this skill when:
 - The app is network-only and an error state is acceptable with no connectivity
 - Real-time streaming is the requirement — use `kotlin-rpc` or WebSockets instead
 
-**Trigger keywords:** offline first, offline-first, local first, sync, optimistic update,
-conflict resolution, background sync, single source of truth, cache-then-network,
-data redundancy, content sync, data consistency, sync strategy, data duplication,
-conflict handling, cache management, background data sync.
+> **Opt-in skill — only when explicitly requested.** Do NOT activate for generic data terms
+> like "cache", "data consistency", "single source of truth", "sync", or "data redundancy" —
+> those belong to `repository-pattern` (data layer + fetch strategy) or `sqldelight-setup`
+> (local persistence). Offline-first adds the heavier `SyncManager` + `WorkManager`/`BGTaskScheduler`
+> machinery and must be **named explicitly** before it is selected.
+
+**Trigger keywords:** offline first, offline-first, local first, optimistic update,
+conflict resolution, conflict handling, background sync, background data sync,
+cache-then-network, SyncManager, SyncState.
 
 **Freshness rule:** `WorkManager` and `BGTaskScheduler` APIs change — recheck
 [WorkManager releases](https://developer.android.com/jetpack/androidx/releases/work)
