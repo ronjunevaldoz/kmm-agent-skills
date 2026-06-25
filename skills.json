@@ -1,5 +1,5 @@
 {
-  "version": "1.28.1",
+  "version": "1.28.2",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -158,7 +158,7 @@
       "path": "skills/kotlin-multiplatform-audit",
       "description": "KMP project audit skill for reviewing an existing Kotlin Multiplatform codebase. Use this skill to inspect architecture, module boundaries, state handling, repository and network layering, Compose patterns, expect/actual usage, shared resources, design system usage, test coverage, platform readiness, and the skills repo itself. Produces findings, risk levels, and a fix sequence instead of implementation code. Pair with kotlin-multiplatform-expert to route any follow-up work to the right domain skills.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-24",
+      "last_updated": "2026-06-25",
       "keywords": [
         "KMP audit",
         "project audit",
@@ -886,9 +886,9 @@
     {
       "name": "kotlin-multiplatform-expect-actual",
       "path": "skills/kotlin-multiplatform-expect-actual",
-      "description": "The expect/actual mechanism in Kotlin Multiplatform \u2014 when to use it, when NOT to, and how to do it correctly. Covers: the four categories that genuinely warrant expect/actual (platform APIs, platform types, performance-critical code, SDK integration), the interface-injection alternative that handles most cases better, the \"actual everywhere\" anti-pattern, typealias actual for platform types, @ObjCName for clean Swift API surfaces, and Kotlin/Native memory considerations. Zero new dependencies.",
+      "description": "The expect/actual mechanism in Kotlin Multiplatform \u2014 when to use it, when NOT to, and how to do it correctly. Covers: the four categories that genuinely warrant expect/actual (platform APIs, platform types, performance-critical code, SDK integration), the common-first rule that prefers a pure `commonMain` implementation before abstractions, the interface-injection alternative that handles most cases better, the \"actual everywhere\" anti-pattern, typealias actual for platform types, @ObjCName for clean Swift API surfaces, and Kotlin/Native memory considerations. Zero new dependencies.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-06-25",
       "keywords": [
         "expect actual",
         "expect class",
