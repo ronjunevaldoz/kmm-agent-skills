@@ -14,7 +14,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-22'
+  last-updated: '2026-06-25'
   keywords:
     - design system
     - Compose Styles API
@@ -193,9 +193,10 @@ version and selectively apply fixes. The comparison is powered by
 `scripts/update_design_system.py`, which MD5-hashes each component block from this SKILL.md
 against the project file and reports CURRENT / MODIFIED / MISSING status.
 
-Use `/fix-design` to scan an existing project for violations (hardcoded colors, dp literals,
-`MaterialTheme.*` usage, `TextStyle()` construction, nested containers, component
-reimplementations, direct token imports) and fix them file-by-file with per-file
+Use `/fix-design` to scan an existing project for violations (hardcoded colors, hardcoded
+user-facing strings, dp literals, `MaterialTheme.*` usage, `TextStyle()` construction,
+nested containers, component reimplementations, direct token imports) and fix them
+file-by-file with per-file
 confirmation. Primary scanner: `detekt-rules/` (PSI-based); fallback: `scripts/scan_design_violations.py`.
 The fallback scanner also flags missing preview stubs, missing multi-device preview coverage,
 and missing Roborazzi screenshot tests for feature `*Content.kt` files so preview drift gets

@@ -6,6 +6,7 @@ design-system usage violations.
 Detects:
   hardcoded_color      Color(0xFF...) or Color(r, g, b) — use appTheme.colors.*
   hardcoded_dp         Literal dp values in layout modifiers — use AppSpacing tokens
+  hardcoded_string     User-facing string literals in Compose UI — use strings.xml / stringResource()
   material_theme       MaterialTheme.colors/typography/shapes — use appTheme.*
   direct_textstyle     TextStyle(...) construction — use AppTextStyle enum
   nested_container     Card { Card { or Surface { Surface { — redundant nesting
@@ -55,6 +56,15 @@ _PATTERNS: list[tuple[str, str, str, re.Pattern]] = [
             # Spacer with literal dp
             r"|Spacer\s*\(\s*modifier\s*=\s*Modifier\s*\.\s*(?:height|width)\s*\(\s*"
             r"(?:[2-9]|\d{2,})(?:\.\d+)?\.dp",
+        ),
+    ),
+    (
+        "hardcoded_string",
+        "error",
+        "Use strings.xml / stringResource() instead of hardcoded user-facing text",
+        re.compile(
+            r"\b(?:Text|AppText|AppButton|AppBadge|AppChip|AppLabel|AppTextField|Button|OutlinedButton|FilledButton|ElevatedButton|TextField|OutlinedTextField|BasicTextField)\s*\([^)]*\"(?:[^\"\\]|\\.)+\""
+            r"|\b(?:contentDescription|label|title|placeholder|supportingText)\s*=\s*\"(?:[^\"\\]|\\.)+\"",
         ),
     ),
     (

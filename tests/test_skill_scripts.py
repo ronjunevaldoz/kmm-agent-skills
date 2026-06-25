@@ -1901,6 +1901,32 @@ class ScanDesignViolationsTests(unittest.TestCase):
         types = [f["type"] for f in findings]
         self.assertNotIn("direct_textstyle", types)
 
+    # ── hardcoded_string ────────────────────────────────────────────────────
+
+    def test_flags_hardcoded_text_in_text_composable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            findings = self._scan(tmp, "Text(\"Continue\")\n")
+        types = [f["type"] for f in findings]
+        self.assertIn("hardcoded_string", types)
+
+    def test_flags_hardcoded_content_description(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            findings = self._scan(tmp, "Icon(contentDescription = \"Back\")\n")
+        types = [f["type"] for f in findings]
+        self.assertIn("hardcoded_string", types)
+
+    def test_allows_state_driven_text(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            findings = self._scan(tmp, "Text(text = state.title)\n")
+        types = [f["type"] for f in findings]
+        self.assertNotIn("hardcoded_string", types)
+
+    def test_allows_string_resource_text(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            findings = self._scan(tmp, "Text(stringResource(Res.string.continue_label))\n")
+        types = [f["type"] for f in findings]
+        self.assertNotIn("hardcoded_string", types)
+
     # ── nested_container ─────────────────────────────────────────────────────
 
     def test_flags_nested_card(self) -> None:
@@ -1925,10 +1951,11 @@ class ScanDesignViolationsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             findings = self._scan(
                 tmp,
-                "@Composable\nfun Foo() {\n  Card {\n    Text(\"hi\")\n  }\n}\n",
+                "@Composable\nfun Foo() {\n  Card {\n    Text(text = state.title)\n  }\n}\n",
             )
         types = [f["type"] for f in findings]
         self.assertNotIn("nested_container", types)
+        self.assertNotIn("hardcoded_string", types)
 
     # ── skip rules ───────────────────────────────────────────────────────────
 

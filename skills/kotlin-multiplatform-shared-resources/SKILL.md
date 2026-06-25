@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-06'
+  last-updated: '2026-06-25'
   keywords:
     - Compose Resources
     - KMP resources
@@ -48,7 +48,7 @@ Use this skill when you need to:
 - Localize content or package shared fonts and icons
 - Recheck Compose Resources docs before changing the resource layout
 
-**Trigger keywords:** shared resources, compose resources, strings, plurals, fonts,
+**Trigger keywords:** shared resources, compose resources, strings, strings.xml, hardcoded strings, stringResource, plurals, fonts,
 images, localization, resource module, Res, resource packaging,
 i18n, l10n, internationalization, translations, localize app, app strings KMP,
 string resources KMP, multiplatform images, drawable KMP, translate strings.
@@ -360,8 +360,9 @@ sourceSets {
 
 - Keep all shared resources in a single `:core:ui` or `:core:resources` module — avoid scattering across feature modules
 - Always provide at least a default locale (`values/strings.xml`) — never rely on locale-only files
+- Treat `values/strings.xml` as the source of truth for user-facing copy in Compose screens
 - Use SVG for all icons — PNG is only for photos or assets that need per-density control
-- Avoid hardcoded strings in Composables — always use `stringResource()`
+- Avoid hardcoded strings in Composables — always use `stringResource(Res.string.*)` or a resource-backed API
 - Font files should be subset to only the characters your app uses — reduces binary size
 - Use `files/` for config or data assets; never put secrets there
 
@@ -420,6 +421,7 @@ sourceSets {
 ## Common Anti-Patterns
 
 - hardcoding string literals in composables instead of using `Res.string` — blocks localization
+- putting user-facing copy directly in `Text("...")`, `AppText(text = "...")`, or `contentDescription = "..."`
 - storing images outside `composeResources/` — they won't be picked up by the resource accessor generator
 - using platform-specific string files (`strings.xml` on Android only) for shared strings
 - importing `Res` from a non-Compose module — resource accessors require a Compose-enabled source set
