@@ -49,7 +49,10 @@ Turbine are already present.
 unidirectional data flow, ViewModel state, one-shot effects, side effects, screen architecture,
 StateFlow screen, channel effect, Contract pattern,
 navigation effect, one-shot event, single event, show toast from ViewModel,
-trigger navigation, event driven UI, MVVM vs MVI, unidirectional event.
+trigger navigation, event driven UI, MVVM vs MVI, unidirectional event,
+screen, implement screen, add screen, new screen, screen logic, UI logic,
+screen behavior, screen interaction, handle user input, form state, form handling,
+user interaction, screen state management, UI state, state management.
 
 **Freshness rule:** `lifecycle-viewmodel-compose` and CMP lifecycle integration change between
 releases — recheck the AndroidX lifecycle and JetBrains CMP docs before upgrading.
