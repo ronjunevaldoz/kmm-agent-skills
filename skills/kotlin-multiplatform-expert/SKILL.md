@@ -32,6 +32,11 @@ metadata:
     - architecture review
     - issue draft
     - question draft
+    - kmm-agent-skills
+    - kmm-skills
+    - KMM agent skills
+    - skill collection
+    - skills index
 ---
 
 ## When to Use This Skill

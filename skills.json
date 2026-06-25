@@ -179,7 +179,12 @@
         "script audit",
         "skills repo audit",
         "issue draft",
-        "question draft"
+        "question draft",
+        "kmm-agent-skills",
+        "kmm-skills",
+        "KMM agent skills",
+        "skill collection",
+        "skills index"
       ],
       "triggers": [
         "audit repo",
@@ -953,7 +958,12 @@
         "project review",
         "architecture review",
         "issue draft",
-        "question draft"
+        "question draft",
+        "kmm-agent-skills",
+        "kmm-skills",
+        "KMM agent skills",
+        "skill collection",
+        "skills index"
       ],
       "triggers": [
         "where do I start KMP",
