@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.28.3] — 2026-06-25
+
+### Docs
+
+- docs: enforce string resources in compose ui
+
+---
+
 ## [v1.28.2] — 2026-06-25
 
 ### Docs

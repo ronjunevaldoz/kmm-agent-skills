@@ -1,5 +1,5 @@
 {
-  "version": "1.28.2",
+  "version": "1.28.3",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -736,7 +736,7 @@
       "path": "skills/kotlin-multiplatform-design-system",
       "description": "Scaffolds a custom Compose Multiplatform design system in :core:designsystem using the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles, @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates: color/typography/shape/spacing tokens, AppTheme with light/dark support, StyleScope extensions for token access, shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant, ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision), and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText) built on BasicXxx CMP primitives. No Material dependency \u2014 fully custom, fully owned.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-22",
+      "last_updated": "2026-06-25",
       "keywords": [
         "design system",
         "Compose Styles API",
@@ -2118,7 +2118,7 @@
       "path": "skills/kotlin-multiplatform-shared-resources",
       "description": "Sets up Compose Multiplatform Resources (compose-resources) for sharing strings, plurals, images, fonts, and raw files across all KMP targets (Android, iOS, Desktop, Web). Covers: resource directory structure, string localization, plurals, image assets, custom fonts, accessing resources from Composables and non-Composable code, and resource module setup. Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-06-25",
       "keywords": [
         "Compose Resources",
         "KMP resources",
@@ -2134,6 +2134,9 @@
         "shared resources",
         "compose resources",
         "strings",
+        "strings.xml",
+        "hardcoded strings",
+        "stringResource",
         "plurals",
         "fonts",
         "images",
