@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.28.0] — 2026-06-25
+
+### Docs
+
+- docs(expert): add Required vs Optional skill classification
+
+---
+
 ## [v1.27.1] — 2026-06-25
 
 ### Fixed
