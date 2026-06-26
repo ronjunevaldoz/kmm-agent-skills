@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.28.5] — 2026-06-26
+
+### Other
+
+- Add collection discovery keywords to expert and audit skills
+
+---
+
 ## [v1.28.4] — 2026-06-26
 
 ### Docs
