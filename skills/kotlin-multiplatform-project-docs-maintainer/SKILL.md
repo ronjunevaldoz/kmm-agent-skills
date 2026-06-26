@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-25'
+  last-updated: '2026-06-27'
   keywords:
     - project docs
     - consumer docs
@@ -48,7 +48,8 @@ If the target is this repository, route to `docs-maintainer` instead.
 **Trigger keywords:** project docs, consumer docs, README, getting started, install,
 releasing, docs reference, onboarding docs, architecture docs, architecture diagram,
 docs drift, documentation maintainer, project documentation, repo docs, library docs,
-app docs.
+app docs, clean docs, clean up docs, tidy docs, docs cleanup, update docs, fix docs,
+refresh docs, docs out of date, stale docs, docs are wrong.
 
 **Freshness rule:** project docs drift whenever code, commands, config, or folder names
 change — re-read the live project README, the touched docs, and the relevant source files
@@ -279,6 +280,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-06-27 | Added cleanup-intent trigger keywords: clean docs, tidy docs, docs cleanup, update docs, fix docs, stale docs, docs are wrong. |
 | 2026-06-24 | Added fix maturity lanes for dev, beta, and stable fixes, plus a task template section for tracking them in `docs/tasks.md`. |
 | 2026-06-24 | Added task lifecycle guidance: default task template, dated filename convention, archive/promotion rules, and agile-friendly lifecycle flow. |
 | 2026-06-24 | Added archive policy: completed task and phase notes move to `docs/tasks/archive/` with date-stamped filenames and a backlink from `docs/tasks.md`. |
