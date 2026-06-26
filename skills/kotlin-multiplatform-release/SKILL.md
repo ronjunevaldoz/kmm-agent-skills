@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-24'
+  last-updated: '2026-06-26'
   keywords:
     - Maven Central
     - publish
@@ -185,7 +185,10 @@ Each stage is its own commit + tag (`v1.2.0-alpha01`, `v1.2.0-beta01`, etc.) so 
 ```toml
 # gradle/libs.versions.toml
 [versions]
-vanniktech-publish = "0.30.0"
+vanniktech-publish = "0.37.0"
+
+[libraries]
+vanniktech-publish-gradlePlugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vanniktech-publish" }
 
 [plugins]
 vanniktech-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-publish" }
@@ -197,7 +200,10 @@ compileOnly(libs.vanniktech.publish.gradlePlugin)
 ```
 
 ```kotlin
-// GROUP_ID.library.publish.gradle.kts  (convention plugin for publishable modules)
+// build-logic/convention/src/main/kotlin/GROUP_ID.library.publish.gradle.kts
+// Centralized publish convention — apply this in every publishable module.
+// Shared POM metadata, signing, and Central Portal target live here once.
+// Each module overrides only its own artifactId via mavenPublishing { coordinates() }.
 plugins {
     id("com.vanniktech.maven.publish")
 }
@@ -207,8 +213,8 @@ mavenPublishing {
     signAllPublications()
 
     pom {
-        name.set("Your Library")
-        description.set("A KMP library.")
+        name.set(project.name)
+        description.set(project.description ?: project.name)
         url.set("https://github.com/yourhandle/your-repo")
         licenses {
             license {
@@ -223,9 +229,28 @@ mavenPublishing {
             }
         }
         scm {
+            connection.set("scm:git:git://github.com/yourhandle/your-repo.git")
+            developerConnection.set("scm:git:ssh://github.com/yourhandle/your-repo.git")
             url.set("https://github.com/yourhandle/your-repo")
         }
     }
+}
+```
+
+Each publishable module applies the convention plugin and sets its own coordinates:
+
+```kotlin
+// feature/core/build.gradle.kts
+plugins {
+    id("GROUP_ID.library.publish")
+}
+
+mavenPublishing {
+    coordinates(
+        groupId = "io.github.yourhandle",
+        artifactId = "your-library-core",
+        version = providers.gradleProperty("VERSION").getOrElse(error("VERSION not set")),
+    )
 }
 ```
 
@@ -248,7 +273,7 @@ Store these in your secrets manager of choice and inject them at publish time. N
 ./gradlew publishAllPublicationsToMavenCentralRepository --no-configuration-cache
 ```
 
-`--no-configuration-cache` is required — the vanniktech plugin is not configuration-cache compatible as of v0.30.
+`--no-configuration-cache` is required — the vanniktech plugin is not configuration-cache compatible as of v0.37.
 
 ### Secrets management options
 
@@ -470,5 +495,6 @@ Never generate credentials or keys. If GPG setup is needed, give the commands th
 
 | Date | Change |
 |---|---|
+| 2026-06-26 | Bumped vanniktech maven-publish plugin base version to 0.37.0. |
 | 2026-06-24 | Added explicit `release project` / `cut release` / `ship version` trigger keywords so project release requests route here instead of the consumer changelog agent. |
 | 2026-06-23 | Initial release — versioning, Maven Central, git-cliff, GitHub Release, local publish script, anti-patterns. |

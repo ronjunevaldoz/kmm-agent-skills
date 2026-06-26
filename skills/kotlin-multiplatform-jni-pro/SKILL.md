@@ -9,7 +9,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-25'
+  last-updated: '2026-06-26'
   keywords:
     - JNI
     - Kotlin native
@@ -46,6 +46,7 @@ You have confirmed and fixed all of these classes of bug. You do not repeat them
 - `references/header-compatibility-matrix.md` — deterministic `.h` audit; classify every type/paradigm as Supported / Conditional / Unsupported before any code
 - `references/architectural-feedback-schema.md` — structured halt-and-report format when a header has Unsupported constructs; C-shim design strategies
 - https://developer.android.com/ndk/guides/jni-tips — Android JNI tips for footprint, threading, local refs, and release discipline
+- https://github.com/ronjunevaldoz/jni-binding-generator — Python generator that reads Kotlin `external fun` declarations and emits C++ JNI stubs, reducing boilerplate by 60–80%; ships Gradle integration and a `--check` drift mode for CI
 
 ---
 
@@ -413,6 +414,7 @@ float* engine_wrapper_decode(EngineContext* ctx, float* input, int len) {
 - `kotlin-multiplatform-unit-testing` — testing the Kotlin engine class above the JNI layer with `runTest` and fakes
 - `/cpp-pro` *(external skill)* — algorithm-level C++ work inside `*-wrapper.cpp`; pair when the task involves changing native processing code rather than bridge wiring
 - `/kotlin-specialist` *(external skill)* — Kotlin engine class patterns (Flow, coroutines, sealed `Result`); pair when the task is above the JNI boundary
+- `jni-binding-generator` *(external tool)* — use when adding a new `external fun` to a Kotlin interface; run the generator first to emit the JNI stub, then fill in the wrapper-call pattern from Phase 0e; avoids hand-writing marshalling boilerplate. See https://github.com/ronjunevaldoz/jni-binding-generator
 
 ---
 
@@ -457,5 +459,6 @@ Never reimplement a library function found in step 1 — cite it by name.
 | 2026-06-22 | Added references/cmake-jni-setup.md (3 inclusion options, compile-definition config, Dockerfile checklist, CMake boundary guard) and references/wrapper-patterns.md (4 concrete patterns: lifecycle, streaming, callback/trampoline, multi-library pipeline; anti-patterns table). Wired both into References and Integration sections. |
 | 2026-06-22 | Added Phase 0 (library-first discovery gate): grep commands, decision table, and wrapper-call pattern with concrete header/wrapper/JNI code template. Updated pre-task checklist to require Phase 0. Updated anti-patterns with reinvention wrong-vs-right example. Updated output style to require discovery result and 3rd party check as first two response items. |
 | 2026-06-22 | Added HARD STOP section on 3rd party file immutability: path-detection heuristics, wrapper-pattern alternatives table, pre-task checklist item. Added EP-9 to error-patterns.md. |
+| 2026-06-26 | Added jni-binding-generator reference (Python tool that generates C++ JNI stubs from Kotlin `external fun` declarations). Added to References and Related Skills sections. |
 | 2026-06-25 | Added official Android JNI tips reference plus a compact JNI tips section covering thread-local `JNIEnv*`, attach/detach discipline, local ref cleanup, and string/array release rules. Expanded anti-patterns with thread-sharing and release pitfalls. |
 | 2026-06-20 | Initial release. |
