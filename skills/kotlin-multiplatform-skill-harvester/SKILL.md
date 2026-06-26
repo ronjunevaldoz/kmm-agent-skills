@@ -36,7 +36,8 @@ Use when you need to:
 
 **Trigger keywords:** harvest lessons, upstream lessons, incorporate feedback,
 update skills from projects, skills review, skill amendments, process lessons,
-consumer corrections, skill training, feedback loop.
+consumer corrections, skill training, feedback loop, process lesson issues,
+triage lesson reports, harvest GitHub issues.
 
 **Freshness rule:** recheck `kotlin-multiplatform-expert` and the source skill's
 changelog before proposing amendments — the gap may already be fixed in a
@@ -53,6 +54,34 @@ Why: the script catches malformed frontmatter, duplicate findings, and
 already-resolved gaps faster than manual review. The manual pass catches
 nuance the script cannot — whether a lesson is project-specific or truly
 generalizable.
+
+---
+
+## Input Sources
+
+Lessons reach the harvester through two paths:
+
+| Source | How | Who |
+|---|---|---|
+| `docs/lessons/*.md` | Consumer writes a structured markdown file in their own project; we run the harvester against their repo | Developers with local access to the consumer project |
+| GitHub issue (`lesson` label) | Consumer files a [Lesson Report](https://github.com/ronjunevaldoz/kmm-agent-skills/issues/new?template=lesson_report.yml) issue on this repo | Any external user — no repo access needed |
+
+Both paths produce the same fields (`skill`, `severity`, `type`, what broke, correct pattern, evidence) and feed into the same amendment flow.
+
+### Fetching open lesson issues
+
+```bash
+# List all open issues with the lesson label
+gh issue list --repo ronjunevaldoz/kmm-agent-skills --label lesson --state open
+
+# View a specific issue
+gh issue view <number> --repo ronjunevaldoz/kmm-agent-skills
+```
+
+Treat each lesson issue the same as a `docs/lessons/*.md` file — apply the
+same filter criteria (Step 2) before drafting any amendment. Close the issue
+with a comment referencing the skill changelog entry once the amendment is
+applied.
 
 ---
 
@@ -265,4 +294,5 @@ See `kotlin-multiplatform-offline-first` for the connectivity monitor pattern.
 
 | Date | Change |
 |---|---|
+| 2026-06-26 | Added GitHub Issues as a second input source alongside docs/lessons/. Added lesson_report.yml issue template. |
 | 2026-06-26 | Initial release — harvest flow, filter criteria, amendment patterns, bundled script. |

@@ -1,0 +1,137 @@
+name: "Lesson Report"
+description: "Share something you learned in a real project — skill guidance that was wrong, incomplete, or where a better pattern exists."
+labels: ["lesson", "consumer-feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing what you learned! Lessons from real projects are the best way to improve these skills.
+        Fill in as much as you can — the more evidence you provide, the faster we can apply the fix.
+
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Which skill does this apply to?
+      description: Pick the closest match. Use "Unknown / Not sure" if it spans multiple skills.
+      options:
+        - kotlin-multiplatform-accessibility
+        - kotlin-multiplatform-adaptive-layout
+        - kotlin-multiplatform-analytics
+        - kotlin-multiplatform-audit
+        - kotlin-multiplatform-biometric-auth
+        - kotlin-multiplatform-ci-github-actions
+        - kotlin-multiplatform-clean-architecture
+        - kotlin-multiplatform-code-quality
+        - kotlin-multiplatform-compose-animation
+        - kotlin-multiplatform-compose-slot-api
+        - kotlin-multiplatform-compose-state-container
+        - kotlin-multiplatform-compose-state-hoisting
+        - kotlin-multiplatform-crash-reporting
+        - kotlin-multiplatform-datastore
+        - kotlin-multiplatform-deep-linking
+        - kotlin-multiplatform-dependency-injection
+        - kotlin-multiplatform-design-system
+        - kotlin-multiplatform-design-system-extended
+        - kotlin-multiplatform-expect-actual
+        - kotlin-multiplatform-expert
+        - kotlin-multiplatform-feature-flags
+        - kotlin-multiplatform-feature-scaffold
+        - kotlin-multiplatform-flavor-environment
+        - kotlin-multiplatform-form-validation
+        - kotlin-multiplatform-graphics-modifiers
+        - kotlin-multiplatform-image-loading
+        - kotlin-multiplatform-jni-pro
+        - kotlin-multiplatform-kotlin-rpc
+        - kotlin-multiplatform-ktor-auth-service
+        - kotlin-multiplatform-legal-docs
+        - kotlin-multiplatform-logging
+        - kotlin-multiplatform-mongodb-database
+        - kotlin-multiplatform-mvi
+        - kotlin-multiplatform-navigation
+        - kotlin-multiplatform-network-layer
+        - kotlin-multiplatform-offline-first
+        - kotlin-multiplatform-paging
+        - kotlin-multiplatform-permissions
+        - kotlin-multiplatform-presenter-module
+        - kotlin-multiplatform-preview-driven-development
+        - kotlin-multiplatform-push-notifications
+        - kotlin-multiplatform-release
+        - kotlin-multiplatform-repository-pattern
+        - kotlin-multiplatform-roborazzi
+        - kotlin-multiplatform-shared-resources
+        - kotlin-multiplatform-sqldelight-setup
+        - kotlin-multiplatform-unit-testing
+        - kotlin-multiplatform-workmanager
+        - kotlin-multiplatform-xcframework-spm
+        - Unknown / Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type of finding
+      options:
+        - "correction — skill guidance was wrong or led to a bug"
+        - "gap — skill had no guidance for this scenario"
+        - "better-pattern — skill was correct but a better approach exists"
+        - "deprecation — skill references a stale API, version, or library"
+        - "confirmation — skill guidance worked well (worth reinforcing)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - "high — caused a bug in production or required significant rework"
+        - "medium — caused wasted time or a non-trivial workaround"
+        - "low — minor inconvenience or edge case"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-was-followed
+    attributes:
+      label: What the skill said (or didn't say)
+      description: Quote or describe the guidance you followed, or what topic the skill was silent about.
+      placeholder: "The skill said to emit one-shot effects via SharedFlow..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-broke
+    attributes:
+      label: What broke or what you discovered
+      description: Be specific — include the symptom, not just the root cause.
+      placeholder: "On navigating back and returning to the screen, the effect was replayed because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: correct-pattern
+    attributes:
+      label: Correct pattern
+      description: The right way to do it. A minimal code snippet helps a lot.
+      placeholder: |
+        ```kotlin
+        // Always use replay=0 for one-shot UI effects
+        private val _effects = MutableSharedFlow<ScreenEffect>(replay = 0)
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence (optional but helpful)
+      description: File paths, error messages, test output, or commit references that back this up.
+      placeholder: "feature/todo/presenter/.../TodoListViewModel.kt line 34. Bug reproduced in TodoListScreenTest#navigateBackAndReturn."
+
+  - type: textarea
+    id: proposed-change
+    attributes:
+      label: Where should this land in the skill? (optional)
+      description: Section name, error-patterns entry, or new reference file — whatever you think fits.
+      placeholder: "Add to error-patterns.md as EP-10. Also add a row to Common Anti-Patterns table."
