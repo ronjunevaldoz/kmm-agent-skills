@@ -1,15 +1,17 @@
 ---
 name: kotlin-multiplatform-layout-system
 description: >-
-  Creates and maintains a docs/layout-system/ directory in any KMP consumer project.
-  Each screen gets its own markdown file with a component table and ASCII wireframe.
-  A shared _components.md holds the project-wide component registry. Use this skill
-  whenever a new screen is added, an existing screen's layout changes, a layout review
-  is requested, or a project has no layout-system docs yet. Trigger proactively on
-  project setup — every project should have this. Trigger keywords: layout system,
-  screen layout, wireframe, layout spec, layout docs, add screen layout, document layout,
-  layout-system, component layout, screen wireframe, layout diagram, screen structure,
-  layout missing, no layout docs, create layout, update layout.
+  Drafts and documents screen layouts for any KMP consumer project. Creates
+  docs/layout-system/ with one markdown file per screen — each file has a component
+  table and an ASCII wireframe. A shared _components.md holds the project-wide
+  component registry. Use this skill whenever a new screen is being designed, an
+  existing screen changes, a layout review is requested, or a project has no
+  layout-system docs yet. Trigger proactively on any new project or new screen —
+  layout-system docs should exist before or alongside implementation, not after.
+  Trigger keywords: layout system, screen layout, wireframe, layout spec, layout docs,
+  draft screen, add screen layout, document layout, layout-system, component layout,
+  screen wireframe, layout diagram, screen structure, layout missing, no layout docs,
+  create layout, update layout, design screen, sketch layout, plan screen.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
@@ -23,28 +25,41 @@ metadata:
     - layout spec
     - docs layout-system
     - screen structure
-    - layout docs
+    - layout draft
     - layout diagram
+---
+
+## Purpose
+
+This skill drafts and documents app screens — it is a **living spec**, not a constraint.
+Wireframes here describe intent before (or alongside) implementation. They are updated
+as the design evolves, not frozen once written.
+
+Use this skill to:
+- Sketch a new screen before writing a single line of Compose
+- Record what a screen looks like after a layout change
+- Give the team a shared visual reference that lives in the repo
+
+Do NOT use this skill for Compose implementation — use `kotlin-multiplatform-adaptive-layout`
+for breakpoint-driven responsive layouts.
+
+**Freshness rule:** recheck wireframes whenever a panel is added or removed, navigation
+chrome changes (e.g. bottom bar replaces NavRail on phone), or a modal becomes a full screen.
+
 ---
 
 ## When to Use This Skill
 
-Use whenever you:
-- Add a new screen to a KMP project
-- Change an existing screen's layout (panels added/removed, nav changes, modal added)
-- Are asked to review, document, or audit screen layouts
-- Set up a project that has no `docs/layout-system/` yet
+- New screen being designed — draft before or alongside implementation
+- Existing screen layout changes
+- Layout review or audit requested
+- Project has no `docs/layout-system/` yet
 
-**Trigger automatically on project setup** — every project should have this directory.
-If it is missing, create it before finishing any screen implementation task.
+**Trigger automatically on project setup.** If the directory is missing, create it before
+finishing any screen implementation task.
 
-Do NOT use this skill for:
-- Compose implementation details (use `kotlin-multiplatform-adaptive-layout` for breakpoint-driven responsiveness)
-- Design tokens or theming (use `kotlin-multiplatform-design-system`)
-
-**Freshness rule:** this skill produces static markdown — no library versions to track.
-Recheck the ASCII format rules if the project's screen topology changes significantly
-(e.g., bottom bar replaces NavRail on phone, or a new persistent panel is introduced).
+**Trigger keywords:** layout system, screen layout, wireframe, layout spec, draft screen,
+document layout, layout diagram, sketch layout, plan screen, no layout docs.
 
 ---
 
@@ -52,16 +67,16 @@ Recheck the ASCII format rules if the project's screen topology changes signific
 
 ```
 docs/layout-system/
-├── _components.md        ← shared component registry (always read this first)
+├── _components.md        <- shared component registry (read this first)
 ├── home.md
 ├── jobs.md
 ├── settings.md
-└── <screen-name>.md      ← one file per distinct screen
+└── <screen-name>.md      <- one file per distinct screen
 ```
 
-**Naming rules:**
+Naming rules:
 - Directory: `docs/layout-system/` (kebab-case)
-- Screen files: kebab-case, named after the screen (`jobs.md`, `profile.md`)
+- Screen files: kebab-case, named after the screen
 - `_components.md` uses a leading underscore so it sorts first
 
 ---
@@ -71,39 +86,28 @@ docs/layout-system/
 When `docs/layout-system/` does not exist:
 
 1. Create the directory.
-2. Create `_components.md` using the Component Registry format below.
+2. Create `_components.md` from the Component Registry format below.
 3. Create one screen file per major screen already in the project.
-4. Link from `docs/architecture.md` or `README.md` if either exists.
+4. Link to `docs/layout-system/` from `docs/architecture.md` or `README.md`.
 
 ---
 
-## File Formats
-
-### `_components.md` — Component Registry
+## `_components.md` — Component Registry
 
 ```markdown
 # Component Registry
 
-Components shared across screens. Update this file whenever a component's
-dimensions, visibility rules, or behavior changes.
+Update this file when a component's dimensions, visibility, or behavior changes.
 
-| Component     | Width / Height | Visibility              | Notes                        |
-|---------------|---------------|-------------------------|------------------------------|
-| NavRail       | 52 dp         | Always visible          | Icon-only. Emoji icons.      |
-| ModePanel     | 180 dp        | Home only               | Hidden on all other screens. |
-| BottomBar     | full / 56 dp  | Phone only              | Replaces NavRail on Compact. |
-| Toolbar row   | full / 48 dp  | Context-dependent       | Mode-specific action buttons.|
-| Input bar     | full / 56 dp  | Always visible (chat)   | Single row. Send on Enter.   |
-| Sheet         | modal         | Overlay — no canvas swap| Help and Settings only.      |
+| Component   | Width / Height | Visibility             | Notes                       |
+|-------------|----------------|------------------------|-----------------------------|
+| NavRail     | 52 dp          | Always visible         | Icon-only. Emoji in legend. |
+| ModePanel   | 180 dp         | Home only              | Hidden on all other screens.|
+| BottomBar   | full / 56 dp   | Phone (Compact) only   | Replaces NavRail on phone.  |
+| Toolbar row | full / 48 dp   | Context-dependent      | Mode-specific action row.   |
+| Input bar   | full / 56 dp   | Always visible (chat)  | Single row. Send on Enter.  |
+| Sheet       | modal          | Overlay — no swap      | Help and Settings only.     |
 ```
-
-### Screen file — `<screen>.md`
-
-Each screen file has three sections:
-
-1. **Components table** — which components are visible and at what size
-2. **Wireframe(s)** — one ASCII block per layout variant (default, empty state, modal open, etc.)
-3. **Interaction notes** — navigation, gestures, state transitions
 
 ---
 
@@ -111,167 +115,181 @@ Each screen file has three sections:
 
 ### Rules
 
-- Total width: **80 characters** (including the outer `|` borders)
-- Borders: `+` at corners and intersections, `-` for horizontal, `|` for vertical
-- **No Unicode box-drawing characters** — ASCII only (`+`, `-`, `|`)
-- **Emoji allowed** for nav icons and media-type indicators
-- Column widths: fixed, must add up to 80 chars including borders
-- Header row: always present — shows component name on line 1, size on line 2
-- Sub-region break: `+----+` partial divider **only on the column being split**
-- Active nav item: `[ * ]` suffix on the same row as the emoji and label
-- Inactive nav item: emoji + label only, no suffix
+- **No emoji inside the grid.** Emoji are double-width in monospace fonts and break
+  alignment. Use short `[label]` placeholders inside the grid. Map labels to emoji
+  in a **Legend** line directly below the wireframe.
+- Active nav item: append `*` to the label — e.g. `[home]*`.
+- Borders: `+` at corners/intersections, `-` horizontal, `|` vertical. ASCII only.
+- All rows in a wireframe must be the **same character width**.
+- Sub-region breaks (toolbar, input bar): use `|---|` only on the column being split.
+  Columns that are not split keep `|   |` on that row.
+- Column widths are fixed per wireframe. Pick widths that reflect proportions and
+  stay consistent across all rows, then stick to them.
 
-### Column width reference
-
-| Component   | Chars (incl. borders) |
-|-------------|----------------------|
-| NavRail     | 12                   |
-| ModePanel   | 15                   |
-| Main canvas | remainder to 80      |
-
-Total: 12 + 15 + 1 (border) + canvas + 1 (border) = 80 → canvas = 51 chars
-
-Adjust when ModePanel is hidden: canvas takes the full 80 − 12 = 68 chars.
-
-### Wireframe template — three-column (NavRail + ModePanel + Canvas)
+### Standard column widths — 78 chars total
 
 ```
-+------------+---------------+---------------------------------------------------+
-| NavRail    | ModePanel     | <Canvas Name>                                     |
-| 52 dp      | 180 dp        | flex 1                                            |
-+------------+---------------+---------------------------------------------------+
-|            |               |                                                   |
-| 🏠 [ * ]   | Image         | [bubble] User message                             |
-|            | Video         | [bubble] Assistant reply                          |
-|            | Short         |                                                   |
-|            | Voice         |                                                   |
-|            | Text          |                                                   |
-|            |               |                                                   |
-| - - - - -  |               +---------------------------------------------------+
-|            |               | [Model v]  [Style v]  [Ratio v]  (toolbar row)    |
-| ❓          |               +---------------------------------------------------+
-| ⚙️          |               | [ Type a prompt...                    ]  [Send]   |
-+------------+---------------+---------------------------------------------------+
++------------+--------------+------------------------------------------------+
+  12 inner      14 inner        48 inner
 ```
 
-### Wireframe template — two-column (NavRail + Canvas, ModePanel hidden)
+- NavRail: 12 inner chars (14 with both `|`)
+- ModePanel: 14 inner chars (15 with right `|`)
+- Canvas: 48 inner chars (49 with right `|`)
+- Total: 1 + 12 + 1 + 14 + 1 + 48 + 1 = **78**
+
+When ModePanel is hidden, canvas expands: 1 + 12 + 1 + 62 + 1 = **77**.
+(Adjust the canvas width to keep all rows the same length.)
+
+---
+
+## Wireframe Templates
+
+### Three-column — NavRail + ModePanel + Canvas
 
 ```
-+------------+------------------------------------------------------------------+
-| NavRail    | <Canvas Name>                                                    |
-| 52 dp      | flex 1  (ModePanel not rendered)                                 |
-+------------+------------------------------------------------------------------+
-|            |                                                                  |
-| 🏠          | [tab] All   [tab] Images   [tab] Video   [tab] Audio             |
-|            +------------------------------------------------------------------+
-| 📦 [ * ]   |                                                                  |
-|            |  +----------+  +----------+  +----------+  +----------+         |
-|            |  |          |  |          |  |  ~~~~~~  |  |  [>]     |         |
-|            |  +----------+  +----------+  +----------+  +----------+         |
-|            |  image         image         audio          video                |
-| - - - - -  |  2 min ago     5 min ago     12 min ago     1 hr ago             |
-|            |                                                                  |
-| ❓          |                                                                  |
-| ⚙️          |                                                                  |
-+------------+------------------------------------------------------------------+
++------------+--------------+------------------------------------------------+
+| NavRail    | ModePanel    | Chat Canvas                                    |
+| 52 dp      | 180 dp       | flex 1                                         |
++------------+--------------+------------------------------------------------+
+|            |              |                                                |
+| [home]*    | Image        | [bubble] Hello, create a video                 |
+|            | Video        | [bubble] Sure! Pick a style:                   |
+|            | Short        |   [card] Cinematic   [card] Anime              |
+|            | Voice        |                                                |
+|            | Text         |                                                |
+|            |              |                                                |
+|            |              |------------------------------------------------|
+| [help]     |              | [Model v]  [Style v]  [Ratio v]                |
+| [settings] |              |------------------------------------------------|
+|            |              | [ Type a prompt...              ]  [Send]      |
++------------+--------------+------------------------------------------------+
+Legend: [home] = Home  [help] = Help / FAQ  [settings] = Settings
+        * = active
 ```
 
-### Wireframe template — modal sheet overlay
+### Two-column — NavRail + Canvas (ModePanel hidden)
 
 ```
-+------------+------------------------------------------------------------------+
-| NavRail    | [current canvas stays behind — no swap]                         |
-| 52 dp      |                                                                  |
-+------------+------------------------------------------------------------------+
-|            |                                                                  |
-| 🏠          |     +------------------------------------------------+           |
-|            |     | Help / FAQ                                   X |           |
-| 📦          |     | ---------------------------------------------- |           |
-|            |     | Getting started                                 |           |
-| ❓ [ * ]   |     | Connecting to your server                       |           |
-|            |     | Modes: Image / Video / Short                    |           |
-| ⚙️          |     |                                                 |           |
-|            |     +------------------------------------------------+           |
-+------------+------------------------------------------------------------------+
++------------+--------------------------------------------------------------+
+| NavRail    | Artifacts Canvas                                             |
+| 52 dp      | flex 1  (ModePanel not rendered)                             |
++------------+--------------------------------------------------------------+
+|            |                                                              |
+| [home]     | [tab] All  [tab] Images  [tab] Video  [tab] Audio  [tab] +   |
+|            +--------------------------------------------------------------+
+| [jobs]*    |                                                              |
+|            |  +--------+  +--------+  +--------+  +--------+              |
+|            |  |        |  |        |  | ~~~~~~ |  |  [>]   |              |
+|            |  +--------+  +--------+  +--------+  +--------+              |
+|            |  image        image        audio       video                 |
+|            |  2 min ago    5 min ago    12 min ago  1 hr ago              |
+|            |                                                              |
+| [help]     |                                                              |
+| [settings] |                                                              |
++------------+--------------------------------------------------------------+
+Legend: [home] = Home  [jobs] = Jobs / Artifacts  [help] = Help / FAQ
+        [settings] = Settings  * = active
+```
+
+### Modal sheet overlay
+
+```
++------------+--------------------------------------------------------------+
+| NavRail    | [canvas stays in place — no swap]                            |
+| 52 dp      |                                                              |
++------------+--------------------------------------------------------------+
+|            |                                                              |
+| [home]     |     +----------------------------------------------+         |
+|            |     | Help / FAQ                                 X |         |
+| [jobs]     |     | -------------------------------------------- |         |
+|            |     | Getting started                              |         |
+| [help]*    |     | Connecting to your server                    |         |
+| [settings] |     | Modes: Image / Video / Short                 |         |
+|            |     +----------------------------------------------+         |
++------------+--------------------------------------------------------------+
+Legend: [home] = Home  [jobs] = Jobs / Artifacts  [help] = Help / FAQ
+        [settings] = Settings  * = active
 ```
 
 ---
 
-## Screen File Example — `home.md`
+## Screen File Format
 
-```markdown
-# Home screen
-
-## Components
-
-| Component   | Width   | Visible | Notes                                      |
-|-------------|---------|---------|---------------------------------------------|
-| NavRail     | 52 dp   | Yes     | Icon-only. Active: 🏠 [ * ]                 |
-| ModePanel   | 180 dp  | Yes     | Creation modes list.                        |
-| Chat canvas | flex 1  | Yes     | Bubble list + toolbar row + input bar.      |
-| Toolbar row | full    | Yes     | Mode-specific buttons above input.          |
-| Input bar   | full    | Yes     | Always-on. Send on Enter.                   |
-| Sheet       | modal   | On tap  | Help / Settings — overlay, no canvas swap.  |
+Each screen file has four sections: **Components table**, **Wireframe(s)**,
+and **Interaction notes**. Example:
 
 ---
 
-## Default — creation mode active
+**`# Home screen`**
 
-+------------+---------------+---------------------------------------------------+
-| NavRail    | ModePanel     | Chat Canvas                                       |
-| 52 dp      | 180 dp        | flex 1                                            |
-+------------+---------------+---------------------------------------------------+
-|            |               |                                                   |
-| 🏠 [ * ]   | Image         | [bubble] Hello, create a video of a sunset        |
-|            | Video         | [bubble] Sure! Pick a style:                      |
-|            | Short         |   [card] Cinematic   [card] Anime                 |
-|            | Voice         |                                                   |
-|            | Text          |                                                   |
-|            |               |                                                   |
-| - - - - -  |               +---------------------------------------------------+
-|            |               | [Model v]  [Style v]  [Ratio v]                   |
-| ❓          |               +---------------------------------------------------+
-| ⚙️          |               | [ Type a prompt...                    ]  [Send]   |
-+------------+---------------+---------------------------------------------------+
+**`## Components`**
 
----
+| Component   | Width   | Visible | Notes                      |
+|-------------|---------|---------|----------------------------|
+| NavRail     | 52 dp   | Yes     | Icon-only.                 |
+| ModePanel   | 180 dp  | Yes     | Creation modes list.       |
+| Chat canvas | flex 1  | Yes     | Bubbles + toolbar + input. |
+| Toolbar row | full    | Yes     | Mode-specific buttons.     |
+| Input bar   | full    | Yes     | Always-on. Send on Enter.  |
+| Sheet       | modal   | On tap  | Overlay — no canvas swap.  |
 
-## Interaction notes
+**`## Default — creation mode active`**
 
-- Tapping a ModePanel item switches the toolbar row buttons — canvas does not reload.
-- ❓ and ⚙️ open a bottom sheet overlay. Canvas stays in place.
-- NavRail active state uses `[ * ]` suffix on the icon row.
+```
++------------+--------------+------------------------------------------------+
+| NavRail    | ModePanel    | Chat Canvas                                    |
+| 52 dp      | 180 dp       | flex 1                                         |
++------------+--------------+------------------------------------------------+
+|            |              |                                                |
+| [home]*    | Image        | [bubble] Hello, create a video                 |
+|            | Video        | [bubble] Sure! Pick a style:                   |
+|            | Short        |   [card] Cinematic   [card] Anime              |
+|            | Voice        |                                                |
+|            | Text         |                                                |
+|            |              |                                                |
+|            |              |------------------------------------------------|
+| [help]     |              | [Model v]  [Style v]  [Ratio v]                |
+| [settings] |              |------------------------------------------------|
+|            |              | [ Type a prompt...              ]  [Send]      |
++------------+--------------+------------------------------------------------+
+Legend: [home] = Home  [help] = Help / FAQ  [settings] = Settings
+        * = active
+```
+
+**`## Interaction notes`**
+
+- Tapping a ModePanel item switches the toolbar row — canvas does not reload.
+- [help] and [settings] open a bottom sheet overlay. Canvas stays in place.
 - Input bar is always visible; toolbar row appears only when a mode is selected.
-```
+- NavRail active state: append `*` to the label in the wireframe.
 
 ---
 
 ## Validation Checklist
 
-Before finishing any layout-system update, verify:
-
 | Check | Expected |
 |---|---|
 | `_components.md` updated | Any new or changed component appears in the registry |
-| Screen file exists | One `.md` per screen in the project |
-| Header row present | Every wireframe has a component-name row and a size row |
-| Column widths sum to 80 | Count chars across the widest row |
-| No Unicode box chars | Only `+`, `-`, `|` in wireframe borders |
-| Active state shown | Active nav item uses `[ * ]` suffix |
-| Modal variant present | Any screen with a sheet/dialog has a separate wireframe block |
-| Interaction notes | Each screen file has a short notes section |
+| Screen file exists | One `.md` per screen |
+| No emoji in grid | All emoji are in the Legend line below the wireframe |
+| Active state shown | Active nav item uses `*` suffix, e.g. `[home]*` |
+| All rows same width | Longest and shortest row in the wireframe are identical |
+| Sub-region dividers | `|---|` only on the column being split; others show `|   |` |
+| Variants present | Separate wireframe block per layout variant (modal, empty state, etc.) |
+| Interaction notes | Each screen file ends with a short notes section |
 
 ---
 
 ## Related Skills
 
-- `kotlin-multiplatform-adaptive-layout` — use when implementing breakpoint-driven
-  Compose layouts (Compact/Medium/Expanded). Layout-system docs describe intent;
-  adaptive-layout implements it.
-- `kotlin-multiplatform-design-system` — design tokens, colors, typography used
+- `kotlin-multiplatform-adaptive-layout` — Compose implementation of breakpoint-driven
+  layouts (Compact/Medium/Expanded). Layout-system docs describe intent; this skill
+  implements it.
+- `kotlin-multiplatform-design-system` — Design tokens, colors, and typography used
   by the components listed in `_components.md`.
-- `kotlin-multiplatform-project-docs-maintainer` — keeps `docs/` structure healthy;
-  layout-system files follow the same kebab-case and line-limit rules.
+- `kotlin-multiplatform-project-docs-maintainer` — Keeps `docs/` healthy. Layout-system
+  files follow the same kebab-case and line-limit hygiene rules.
 
 ---
 
@@ -279,4 +297,5 @@ Before finishing any layout-system update, verify:
 
 | Date | Change |
 |---|---|
+| 2026-06-27 | Reframed as a draft/document tool, not an enforcement layer. Fixed ASCII wireframe: removed emoji from grid, added Legend line below wireframes, fixed all row widths to 78 chars, replaced partial `+---+` dividers with `\|---\|` style. |
 | 2026-06-27 | Initial release — layout system format, ASCII wireframe spec, component registry, screen file template, bootstrap flow. |
