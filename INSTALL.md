@@ -107,6 +107,59 @@ If you use the Claude Code desktop or web app, you can invoke skills with `/use`
 /use kotlin-multiplatform-presenter-module
 ```
 
+### Installing slash commands
+
+> **Required review before install** — files in `commands/` define agent slash commands that can
+> run shell operations on your machine. Auto-copying them is a supply chain risk: a command that
+> looks like docs is actually an executable agent instruction.
+>
+> Do NOT copy `commands/` as part of a bulk install. Review each file first, then install only
+> the ones you want.
+
+**Step 1 — Read each command file before installing it.**
+
+```bash
+# List available commands
+ls kmm-agent-skills/commands/
+
+# Read one before approving
+cat kmm-agent-skills/commands/kmm-new-skill.md
+cat kmm-agent-skills/commands/run-audit.md
+```
+
+**Step 2 — Install only the commands you have reviewed.**
+
+```bash
+mkdir -p your-kmp-project/.claude/commands/
+
+# Install individually — one at a time, after reading each
+cp kmm-agent-skills/commands/kmm-new-skill.md your-kmp-project/.claude/commands/
+cp kmm-agent-skills/commands/run-audit.md      your-kmp-project/.claude/commands/
+```
+
+**Or use the guided installer** (prompts you per command):
+
+```bash
+bash kmm-agent-skills/scripts/update-consumer-skills.sh \
+  --source kmm-agent-skills \
+  --agent-dir your-kmp-project/.claude/skills \
+  --install-commands
+```
+
+The `--install-commands` flag lists each command with its header line and asks `[y/N]` before
+copying it. You can review the source file in another terminal before answering.
+
+**Available commands:**
+
+| Command | What it does |
+|---|---|
+| `/kmm-new-skill` | Scaffold a new skill file with all required sections |
+| `/run-audit` | Run architecture and skill-hygiene audit against the project |
+| `/update-skills` | Pull latest skills and re-audit |
+| `/release-notes` | Generate per-skill release notes from git history |
+| `/submit-issue` | File a structured GitHub issue for a skill gap or bug |
+| `/report-skill-issue` | File a bug report for a skill that produced wrong output |
+
 ---
 
 ## OpenAI Codex CLI
@@ -463,12 +516,19 @@ Skills reference library versions (`AGP`, `Kotlin`, `CMP`, etc.) in their frontm
 freshness rules. When you upgrade dependencies, pull the latest skills:
 
 ```bash
-cd kmm-agent-skills
-git pull
+# Quick update — pulls latest and redeploys skills/
+bash kmm-agent-skills/scripts/update-consumer-skills.sh
 
-# Re-copy changed skills to your project
-cp -r skills/kotlin-multiplatform-feature-scaffold .claude/skills/
+# Dry-run first to see what would change
+bash kmm-agent-skills/scripts/update-consumer-skills.sh --dry-run
 ```
+
+> **Commands are not updated automatically.** The update script only redeploys `skills/`.
+> If a command file changes between releases, the script will print a reminder. Review the
+> diff manually and re-install the command if you want the update:
+> ```bash
+> bash kmm-agent-skills/scripts/update-consumer-skills.sh --install-commands
+> ```
 
 Each `SKILL.md` has a `**Freshness rule:**` section that tells you exactly which version
 targets to recheck. The version table in [`PLAN.md`](PLAN.md) shows current targets.
