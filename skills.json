@@ -1,5 +1,5 @@
 {
-  "version": "1.28.5",
+  "version": "1.29.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1240,7 +1240,7 @@
       "path": "skills/kotlin-multiplatform-jni-pro",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-25",
+      "last_updated": "2026-06-26",
       "keywords": [
         "JNI",
         "Kotlin native",
@@ -1372,6 +1372,27 @@
       ]
     },
     {
+      "name": "kotlin-multiplatform-layout-system",
+      "path": "skills/kotlin-multiplatform-layout-system",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-27",
+      "keywords": [
+        "layout system",
+        "wireframe",
+        "screen layout",
+        "ASCII wireframe",
+        "component registry",
+        "layout spec",
+        "docs layout-system",
+        "screen structure",
+        "layout draft",
+        "layout diagram"
+      ],
+      "triggers": [],
+      "scripts": []
+    },
+    {
       "name": "kotlin-multiplatform-legal-docs",
       "path": "skills/kotlin-multiplatform-legal-docs",
       "description": "Lawyer agent for KMP apps: generates Privacy Policy and Terms & Conditions tailored to the data your app actually collects. Covers Google Play data safety section, App Store privacy nutrition labels, GDPR (EU), CCPA (California), and in-app display via a CMP composable. Produces web-ready markdown and a KMP WebView/ScrollView screen for showing the docs inside the app. Does NOT provide legal advice \u2014 output is a best-practice template that must be reviewed by a qualified lawyer before publishing.",
@@ -1411,6 +1432,38 @@
       "scripts": [
         "detect_data_collection.py"
       ]
+    },
+    {
+      "name": "kotlin-multiplatform-lessons",
+      "path": "skills/kotlin-multiplatform-lessons",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-26",
+      "keywords": [
+        "lessons learned",
+        "skill feedback",
+        "knowledge capture",
+        "consumer training",
+        "skill amendment",
+        "docs/lessons",
+        "pattern discovery",
+        "correction",
+        "skill gap"
+      ],
+      "triggers": [
+        "write a lesson",
+        "capture lesson",
+        "document what we learned",
+        "skill was wrong",
+        "skill gap",
+        "better pattern",
+        "correction",
+        "docs/lessons",
+        "what we should have done",
+        "upstream this",
+        "feed back to skills"
+      ],
+      "scripts": []
     },
     {
       "name": "kotlin-multiplatform-logging",
@@ -1867,7 +1920,7 @@
       "path": "skills/kotlin-multiplatform-project-docs-maintainer",
       "description": "Maintains downstream consumer-facing KMP project documentation only: README, GETTING_STARTED, INSTALL, RELEASING, docs/reference pages, onboarding guides, architecture notes, and architecture diagrams. Use this skill when project docs need to match the actual code, commands, config, folder layout, or app/library structure. Does NOT cover consumer release-note generation, per-skill changelogs, or skills-repo documentation.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-25",
+      "last_updated": "2026-06-27",
       "keywords": [
         "project docs",
         "consumer docs",
@@ -1901,7 +1954,17 @@
         "project documentation",
         "repo docs",
         "library docs",
-        "app docs"
+        "app docs",
+        "clean docs",
+        "clean up docs",
+        "tidy docs",
+        "docs cleanup",
+        "update docs",
+        "fix docs",
+        "refresh docs",
+        "docs out of date",
+        "stale docs",
+        "docs are wrong"
       ],
       "scripts": []
     },
@@ -1950,7 +2013,7 @@
       "path": "skills/kotlin-multiplatform-release",
       "description": "End-to-end KMP library and app release pipeline. Covers versioning strategy (gradle.properties as source of truth), Maven Central publishing via the vanniktech plugin, GPG signing, Sonatype Central Portal, changelog generation with git-cliff and Conventional Commits, GitHub Release creation, and secrets management patterns. Distinct from the CI skill (which owns workflow YAML) and the xcframework-spm skill (which owns SPM binary distribution).",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-24",
+      "last_updated": "2026-06-27",
       "keywords": [
         "Maven Central",
         "publish",
@@ -2166,6 +2229,41 @@
         "translate strings"
       ],
       "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-skill-harvester",
+      "path": "skills/kotlin-multiplatform-skill-harvester",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-26",
+      "keywords": [
+        "lesson harvester",
+        "skill feedback",
+        "consumer training",
+        "skill amendment",
+        "upstream",
+        "knowledge loop",
+        "docs/lessons",
+        "skill improvement"
+      ],
+      "triggers": [
+        "harvest lessons",
+        "upstream lessons",
+        "incorporate feedback",
+        "update skills from projects",
+        "skills review",
+        "skill amendments",
+        "process lessons",
+        "consumer corrections",
+        "skill training",
+        "feedback loop",
+        "process lesson issues",
+        "triage lesson reports",
+        "harvest GitHub issues"
+      ],
+      "scripts": [
+        "harvest_lessons.py"
+      ]
     },
     {
       "name": "kotlin-multiplatform-sqldelight-setup",

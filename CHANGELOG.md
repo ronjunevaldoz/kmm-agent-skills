@@ -2,6 +2,23 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.0] — 2026-06-28
+
+### Added
+
+- feat(release): add versioning tiers, commit-msg hook, and changelog policy
+
+### Fixed
+
+- fix(skills): add missing required sections and register layout-system, lessons, skill-harvester in expert/planner/README
+
+### Docs
+
+- docs(versioning): trim versioning-policy.md to under 150 lines
+- docs: add dependency compatibility matrix with conflict zones
+
+---
+
 ## [Unreleased]
 
 _Dev commits accumulate here. This section is auto-promoted to a versioned entry when `scripts/release.py` is run. Do not edit this section manually — use conventional commits so the release script generates meaningful entries._
