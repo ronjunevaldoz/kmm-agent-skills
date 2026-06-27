@@ -96,12 +96,12 @@ List every persistent UI component in the project. Fill in real names and real v
 
 Update this file when a component's dimensions, visibility, or behavior changes.
 
-| Component       | Width / Height | Visibility                  | Notes                        |
-|-----------------|----------------|-----------------------------|------------------------------|
-| <Component A>   | <N> dp         | <always / screen X only>    | <short description>          |
-| <Component B>   | <N> dp         | <always / conditional>      | <short description>          |
-| <Component C>   | full / <N> dp  | <phone only / always>       | <short description>          |
-| <Modal / Sheet> | modal          | Overlay on <trigger>        | No canvas swap.              |
+| Component       | Width / Height | Visibility                  | Platform          | Notes                   |
+|-----------------|----------------|-----------------------------|-------------------|-------------------------|
+| <Component A>   | <N> dp         | <always / screen X only>    | Both / Android / iOS | <short description>  |
+| <Component B>   | <N> dp         | <always / conditional>      | Both              | <short description>     |
+| <Component C>   | full / <N> dp  | <phone only / always>       | Both              | <short description>     |
+| <Modal / Sheet> | modal          | Overlay on <trigger>        | Both              | No canvas swap.         |
 ```
 
 ---
@@ -120,6 +120,11 @@ Update this file when a component's dimensions, visibility, or behavior changes.
   split. Other columns keep `|   |` on the same row.
 - Column widths are fixed per wireframe. Pick widths that reflect real proportions,
   then hold them across every row in that wireframe.
+- **Scrollable regions:** add `[scroll]` to the right side of the first content row
+  in a scrollable area. Use `~ ~ ~ ~` as a "more content below" divider row when
+  the list is long and content is truncated in the wireframe.
+- **Phone variant:** if the nav chrome changes on phone (e.g. rail → bottom bar),
+  add a separate wireframe block in the same screen file labeled `Phone variant`.
 
 ### Column sizing guide
 
@@ -203,6 +208,27 @@ Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>
 +----------+------------------------------------------------------------+
 Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>
         [nav-4] = <name>  * = active
+```
+
+### Pattern D — full-screen (no persistent nav)
+
+For login, onboarding, splash, or any screen where no nav chrome is visible.
+
+```
++------------------------------------------------------------------------+
+| <Screen Title>                                                         |
+| full width                                                             |
++------------------------------------------------------------------------+
+|                                                                        |
+|  <header / hero content>                                               |
+|                                                                        |
+|  <content row>                                       [scroll]          |
+|  <content row>                                                         |
+|  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~   |
+|                                                                        |
+|  [ <Primary action>                                                  ] |
+|  <secondary action>                                                    |
++------------------------------------------------------------------------+
 ```
 
 ---
@@ -292,7 +318,8 @@ Each screen file follows this structure:
 | Active state shown | Active nav item uses `*` suffix, e.g. `[nav-1]*` |
 | All rows same width | Every row in the wireframe is the same character count |
 | Sub-region dividers | `|---|` only on the column being split |
-| Variants present | Separate wireframe block per layout variant |
+| Variants present | Separate wireframe block per layout variant (modal, empty state, etc.) |
+| Phone variant | If nav chrome differs on phone, a `Phone variant` block exists in the screen file |
 | Interaction notes | Each screen file has a short notes section |
 
 ---
