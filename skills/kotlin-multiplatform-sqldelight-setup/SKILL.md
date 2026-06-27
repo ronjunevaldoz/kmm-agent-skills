@@ -486,7 +486,7 @@ import org.koin.dsl.module
  * iOS/Desktop: module { single { DriverFactory() } }
  */
 val databaseModule = module {
-    single { DatabaseFactory.create(get()) }
+    single { createDatabase(get()) }
     single { UserLocalDataSource(get()) }
 }
 ```
@@ -559,23 +559,23 @@ fun testDriver(): SqlDriver {
 
 @Test fun `insert and query round-trip`() = runTest {
     val db = AppDatabase(testDriver())
-    db.userQueries.insert(id = "1", name = "Alice", email = "a@example.com")
-    val result = db.userQueries.selectById("1").executeAsOne()
+    db.userQueries.insertUser(id = "1", name = "Alice", email = "a@example.com", createdAt = 0L)
+    val result = db.userQueries.selectUserById("1").executeAsOne()
     assertEquals("Alice", result.name)
 }
 
 @Test fun `delete removes row`() = runTest {
     val db = AppDatabase(testDriver())
-    db.userQueries.insert(id = "1", name = "Alice", email = "a@example.com")
-    db.userQueries.deleteById("1")
-    assertNull(db.userQueries.selectById("1").executeAsOneOrNull())
+    db.userQueries.insertUser(id = "1", name = "Alice", email = "a@example.com", createdAt = 0L)
+    db.userQueries.deleteUserById("1")
+    assertNull(db.userQueries.selectUserById("1").executeAsOneOrNull())
 }
 
 @Test fun `query emits updates via flow`() = runTest {
     val db = AppDatabase(testDriver())
-    db.userQueries.selectAll().asFlow().mapToList(coroutineContext).test {
+    db.userQueries.selectAllUsers().asFlow().mapToList(coroutineContext).test {
         assertEquals(emptyList(), awaitItem())
-        db.userQueries.insert(id = "1", name = "Alice", email = "a@example.com")
+        db.userQueries.insertUser(id = "1", name = "Alice", email = "a@example.com", createdAt = 0L)
         assertEquals(1, awaitItem().size)
         cancelAndIgnoreRemainingEvents()
     }

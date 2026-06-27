@@ -141,7 +141,7 @@ Use these exact versions. Do not substitute without explicit user confirmation.
 ```toml
 agp                   = "9.0.1"
 kotlin                = "2.4.0"
-ksp                   = "2.3.9"
+ksp                   = "2.4.0-2.0.0"
 koin                  = "4.2.1"
 koin-annotations      = "2.3.1"
 ktor                  = "3.1.3"
@@ -393,6 +393,9 @@ koin-compose               = { module = "io.insert-koin:koin-compose",          
 koin-compose-viewmodel     = { module = "io.insert-koin:koin-compose-viewmodel",     version.ref = "koin" }
 koin-android               = { module = "io.insert-koin:koin-android",               version.ref = "koin" }
 koin-androidx-compose      = { module = "io.insert-koin:koin-androidx-compose",      version.ref = "koin" }
+
+[plugins]
+kotlin-koin                = { id = "org.jetbrains.kotlin.plugin.koin", version.ref = "kotlin" }
 ```
 
 ---
@@ -695,7 +698,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("org.jetbrains.kotlin.plugin.koin")
+    alias(libs.plugins.kotlin.koin)
 }
 
 android {

@@ -440,7 +440,7 @@ class RootComponent(
     composeRule.setContent {
         val navController = rememberTestNavController()
         AppNavHost(navController = navController)
-        LaunchedEffect(Unit) { navController.navigate(Screen.Detail(id = "42")) }
+        LaunchedEffect(Unit) { navController.navigate(UserDetailRoute(userId = "42")) }
     }
     composeRule.waitForIdle()
     composeRule.onNodeWithTag(DetailTestTags.ROOT).assertExists()
@@ -451,7 +451,7 @@ class RootComponent(
         val navController = rememberTestNavController()
         AppNavHost(navController = navController)
         LaunchedEffect(Unit) {
-            navController.navigate(Screen.Detail(id = "1"))
+            navController.navigate(UserDetailRoute(userId = "1"))
             navController.popBackStack()
         }
     }

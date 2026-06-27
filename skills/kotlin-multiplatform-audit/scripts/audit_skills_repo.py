@@ -155,6 +155,34 @@ _KNOWN_NON_DOC_SUBDIRS = {"archive"}
 _SNAKE_CASE_RE = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)+$")
 
 
+_JVM_ONLY_APIS = (
+    "String.format(",
+    ".format(",
+    "DecimalFormat(",
+    "SimpleDateFormat(",
+    "java.text.",
+    "java.util.Locale",
+    "java.util.Date",
+    "java.util.Calendar",
+)
+
+
+def _check_commonmain_jvm_apis(root: Path, findings: list[str]) -> None:
+    """Flag JVM-only APIs used in commonMain Kotlin source files."""
+    for common_main in root.rglob("commonMain"):
+        if not common_main.is_dir():
+            continue
+        for kt in common_main.rglob("*.kt"):
+            text = kt.read_text(encoding="utf-8")
+            hits = [api for api in _JVM_ONLY_APIS if api in text]
+            if hits:
+                findings.append(
+                    f"jvm-only in commonMain: {kt.relative_to(root)} uses "
+                    + ", ".join(f"`{h.rstrip('(')}`" for h in hits)
+                    + " — replace with Kotlin string templates or an expect/actual formatter"
+                )
+
+
 def _check_docs_hygiene(root: Path, findings: list[str]) -> None:
     """Flag bloated, stale, or un-archived docs/ files in a consumer project."""
     docs_dir = root / "docs"
@@ -295,6 +323,7 @@ def audit_skills_repo(root: Path) -> list[str]:
 
     _check_naming_conventions(root, findings)
     _check_docs_hygiene(root, findings)
+    _check_commonmain_jvm_apis(root, findings)
 
     readme = root / "README.md"
     if readme.exists():
@@ -317,12 +346,20 @@ def main() -> int:
         action="store_true",
         help="Run only the docs/ hygiene checks (line limits, stale lessons, done tasks)",
     )
+    parser.add_argument(
+        "--jvm-api-only",
+        action="store_true",
+        help="Scan only for JVM-only APIs in commonMain Kotlin files",
+    )
     args = parser.parse_args()
 
     root = args.root.resolve()
     if args.docs_hygiene_only:
         findings: list[str] = []
         _check_docs_hygiene(root, findings)
+    elif args.jvm_api_only:
+        findings = []
+        _check_commonmain_jvm_apis(root, findings)
     else:
         findings = audit_skills_repo(root)
     for finding in findings:
