@@ -47,6 +47,7 @@ KMP navigation, type-safe routes, Decompose, Navigation Compose,
 navigate to screen, go to screen, back stack, push screen, pop back,
 navigate back, pass arguments, route arguments, nested navigation, screen transition,
 web routing, browser fragment, hash navigation, wasmJs routing,
+bindToBrowserNavigation, browser history sync, SerialName route, hash deep link,
 navigate, routing, move between screens, switch screens, go to, page navigation,
 navigate from screen, pass data between screens, link screens.
 
@@ -320,6 +321,80 @@ https://example.com/#login
 If you customize route-to-URL mapping, keep generated routes fragment-safe and use the
 browser fragment as the source of truth for manual entry and copy/paste.
 
+#### WasmJs: binding browser history to NavController (`bindToBrowserNavigation`)
+
+Use `bindToBrowserNavigation` (from `androidx.navigation:navigation-compose`) in
+`wasmJsMain/main.kt` so that the browser's URL bar, Back button, and history stack stay
+in sync with the in-app NavController. This requires no server configuration — the `#`
+prefix means every URL is handled client-side.
+
+**Step 1 — annotate every route with `@SerialName`** so the fragment is a short,
+stable token instead of the full qualified class name:
+
+```kotlin
+// commonMain
+@Serializable @SerialName("home")         data object HomeRoute
+@Serializable @SerialName("login")        data object LoginRoute
+@Serializable @SerialName("profile")      data object ProfileRoute
+@Serializable @SerialName("admin_dashboard") data object AdminDashboardRoute
+
+// Routes with arguments still use @SerialName on the class
+@Serializable @SerialName("accept_invite")
+data class AcceptInviteRoute(val code: String)
+```
+
+**Step 2 — call `bindToBrowserNavigation` inside `onNavHostReady`** in `wasmJsMain`:
+
+```kotlin
+// wasmJsMain/main.kt
+@OptIn(ExperimentalBrowserHistoryApi::class)
+fun main() {
+    ComposeViewport {
+        App(
+            onNavHostReady = { navController ->
+                // ① On first load: read the URL hash and navigate to the matching route
+                val hash = window.location.hash.substringAfter('#', "")
+                when {
+                    hash.startsWith("accept_invite/") ->
+                        navController.navigate(AcceptInviteRoute(hash.substringAfter("accept_invite/")))
+                    hash == "profile" -> navController.navigate(ProfileRoute)
+                    hash.startsWith("login") -> navController.navigate(LoginRoute)
+                    // … other deep-link paths …
+                }
+
+                // ② Translate NavController destinations → browser URL fragments
+                navController.bindToBrowserNavigation { entry ->
+                    val route = entry.destination.route.orEmpty()
+                    when {
+                        // Parametric routes: reconstruct the fragment from the typed route
+                        route.startsWith("accept_invite") ->
+                            "#accept_invite/${entry.toRoute<AcceptInviteRoute>().code}"
+                        // No-arg routes: @SerialName becomes the fragment directly
+                        else -> {
+                            val name = route.substringBefore("/").substringBefore("?")
+                            if (name.isNotBlank()) "#$name" else ""
+                        }
+                    }
+                }
+            }
+        )
+    }
+}
+```
+
+**Step 3 — add the opt-in annotation** to the file or module that calls
+`bindToBrowserNavigation`:
+
+```kotlin
+@OptIn(ExperimentalBrowserHistoryApi::class)
+```
+
+**Rules:**
+- Always use `#` prefix — bare paths require server-side rewrite rules
+- `@SerialName` on every no-arg route gives you short, human-readable fragments
+- Read `window.location.hash` before binding so users can share and reload URLs
+- For argument routes, extract values via `entry.toRoute<T>()` inside the lambda
+
 ---
 
 ### Step 7: Pass NavController to feature ViewModels via Koin (optional)
@@ -502,5 +577,6 @@ Keep each snippet to one route and one composable destination. Map to the user's
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Added `bindToBrowserNavigation` pattern with full WasmJs hash-routing example and `@SerialName` route convention. |
 | 2026-06-24 | Added web/WasmJs browser fragment routing guidance and hash-navigation keywords. |
 | 2026-06-06 | Initial release. |
