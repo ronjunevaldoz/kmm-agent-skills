@@ -11,6 +11,8 @@ license: Apache-2.0
 metadata:
   author: kmm-agent-skills
   last-updated: '2026-06-27'
+  references:
+    - references/docs-hygiene.md
   keywords:
     - project docs
     - consumer docs
@@ -253,74 +255,16 @@ Use this validation matrix for project docs:
 | Onboarding docs change | The setup steps match the current project workflow |
 | Release/setup docs change | Version numbers, paths, and commands reflect the current repo |
 
-## Doc Classification
+## Doc Classification and Hygiene
 
-Before deciding where a file lives or whether to archive it, classify it first.
-Every file in `docs/` is one of three kinds — and the right action depends on which.
-
-| Kind | Test question | Lifetime | Location |
-|---|---|---|---|
-| **Reference** | "How does this work?" | Permanent — update in place as the system changes | `docs/` root or `docs/reference/` |
-| **Task** | "What are we doing right now?" | Temporary — exists while the work is active | `docs/tasks/` while active, `docs/tasks/archive/` when done |
-| **Non-doc** | "Is this a fixture, spec, or generated file?" | Belongs elsewhere — not in `docs/` at all | `tests/fixtures/`, `api/`, `spec/`, or project root |
-
-### Classification examples
-
-| File | Kind | Reason | Action |
-|---|---|---|---|
-| `architecture.md` | Reference | Answers "how are modules connected?" — permanent | Keep in `docs/` |
-| `deployment.md` | Reference | Ops knowledge that doesn't expire | Keep in `docs/` |
-| `engine_rules.md` | Reference | Stable feature registry — updated in place | Keep in `docs/` |
-| `engine_memory_management.md` | Reference | How-it-works for a subsystem | Keep in `docs/` |
-| `reference/` | Reference | Targeted reference sub-docs | Keep in `docs/reference/` |
-| `graphyn_editor_blockers.md` | Task | "What are we blocked on?" — expires when resolved | Move to `docs/tasks/`; archive when blockers clear |
-| `mvp_video_shorts.md` | Task | Milestone tracker — temporary by nature | Move to `docs/tasks/`; archive when milestone ships |
-| `studio_ui_gap_plan.md` | Task | W1-W4 plan — active only while the plan runs | Move to `docs/tasks/`; archive when complete |
-| `tasks.md` | Task | Main task entrypoint | Keep at `docs/tasks.md` |
-| `smoke/*.json` | Non-doc | Test fixtures — not documentation | Move to `tests/fixtures/` or `src/test/resources/` |
-| `openapi.json` | Non-doc | API spec — not a doc | Move to `api/` or `spec/` at project root |
-
-### When a file is ambiguous
-
-Ask: **will this still be useful and accurate six months from now without edits?**
-- Yes → Reference. Keep it.
-- No → Task. Archive it when done.
-- It's neither → Non-doc. Move it out of `docs/`.
-
----
-
-## Docs Hygiene Rules
-
-Keep `docs/` thin so it stays readable and maintainable. The audit script
-(`audit_skills_repo.py`) enforces these automatically — fix findings before merging.
-
-| Rule | Limit | Action when exceeded |
-|---|---|---|
-| Any `docs/` file (outside `archive/`) | 150 lines | Split into sub-docs or move completed sections to `archive/` |
-| Unprocessed lessons in `docs/lessons/` | 20 files | Run `kotlin-multiplatform-skill-harvester` and archive processed files |
-| Lesson file age without harvest | 30 days | Harvest or archive — stale lessons rot and lose context |
-| Task file marked `status: done` in active `docs/tasks/` | 0 | Move to `docs/tasks/archive/` immediately |
-
-### Lesson lifecycle
-
-```
-docs/lessons/YYYY-MM-DD-slug.md
-    ↓  harvested and skill amended
-docs/lessons/archive/YYYY-MM-DD-slug.md   ← move here, don't delete
-```
-
-Archive rather than delete — the lesson file is evidence the skill was fixed and
-provides historical context if the same issue resurfaces.
-
-### Running hygiene check locally
-
-```bash
-# Full audit including docs hygiene
-python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .
-
-# Docs hygiene only (fast, for consumer projects)
-python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py . --docs-hygiene-only
-```
+Read `references/docs-hygiene.md` before any clean-up task. It covers:
+- Three-kind classification (Reference / Task / Non-doc) with examples
+- `docs/` root vs `docs/reference/` placement rule
+- Clean-up sequence (classify → check references → update links → move → consolidate → validate)
+- Consolidation rule for task files scattered at the `docs/` root
+- Naming convention (kebab-case; snake_case is flagged by the audit script)
+- Hygiene limits table (line limits, lesson backlog, stale lessons, non-doc files)
+- Lesson lifecycle and hygiene check commands
 
 ---
 
@@ -351,8 +295,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
-| 2026-06-27 | Added Doc Classification section: reference vs task vs non-doc with classification table, examples, and the six-month ambiguity test. |
-| 2026-06-27 | Added Docs Hygiene Rules section: 150-line limit, 20-file lesson backlog limit, 30-day stale lesson threshold, done-task archive rule, lesson lifecycle, and hygiene check commands. |
+| 2026-06-27 | Extracted classification + hygiene into references/docs-hygiene.md. Added: docs/ root vs reference/ placement rule, clean-up sequence, consolidation rule, naming convention (kebab-case), non-doc file detection. Slimmed SKILL.md to a pointer. |
 | 2026-06-27 | Added cleanup-intent trigger keywords: clean docs, tidy docs, docs cleanup, update docs, fix docs, stale docs, docs are wrong. |
 | 2026-06-24 | Added fix maturity lanes for dev, beta, and stable fixes, plus a task template section for tracking them in `docs/tasks.md`. |
 | 2026-06-24 | Added task lifecycle guidance: default task template, dated filename convention, archive/promotion rules, and agile-friendly lifecycle flow. |

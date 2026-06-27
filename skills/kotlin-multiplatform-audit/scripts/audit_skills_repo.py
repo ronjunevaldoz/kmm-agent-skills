@@ -142,6 +142,18 @@ DOCS_MAX_LINES = 150
 LESSON_STALE_DAYS = 30
 LESSON_BACKLOG_LIMIT = 20
 
+# Non-doc extensions that do not belong directly inside docs/
+_NON_DOC_EXTENSIONS = {
+    ".json", ".yaml", ".yml", ".xml", ".csv", ".toml",
+    ".proto", ".graphql", ".sql", ".sh", ".py", ".kt",
+}
+
+# Subdirectory names that are known non-doc homes inside docs/
+# (do not flag files inside these — they were intentionally placed)
+_KNOWN_NON_DOC_SUBDIRS = {"archive"}
+
+_SNAKE_CASE_RE = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)+$")
+
 
 def _check_docs_hygiene(root: Path, findings: list[str]) -> None:
     """Flag bloated, stale, or un-archived docs/ files in a consumer project."""
@@ -207,6 +219,33 @@ def _check_docs_hygiene(root: Path, findings: list[str]) -> None:
                     f"docs hygiene: {md.relative_to(root)} is marked done "
                     "— move to docs/tasks/archive/"
                 )
+
+    # 5. Non-markdown files sitting directly in docs/ (flag as non-docs)
+    for f in docs_dir.iterdir():
+        if f.is_file() and f.suffix in _NON_DOC_EXTENSIONS:
+            findings.append(
+                f"docs hygiene: {f.relative_to(root)} is a non-doc file in docs/ "
+                f"— move to a purpose-specific directory (api/, spec/, tests/fixtures/, etc.)"
+            )
+        if f.is_dir() and f.name not in _KNOWN_NON_DOC_SUBDIRS:
+            # Check for non-doc files one level inside subdirs (e.g. docs/smoke/*.json)
+            for sub in f.iterdir():
+                if sub.is_file() and sub.suffix in _NON_DOC_EXTENSIONS:
+                    findings.append(
+                        f"docs hygiene: {sub.relative_to(root)} is a non-doc file inside docs/ "
+                        f"— move to tests/fixtures/, api/, or spec/"
+                    )
+
+    # 6. Snake_case filenames in docs/ (should be kebab-case)
+    for md in docs_dir.rglob("*.md"):
+        if "archive" in md.parts:
+            continue
+        if _SNAKE_CASE_RE.match(md.stem):
+            kebab = md.stem.replace("_", "-")
+            findings.append(
+                f"docs hygiene: {md.relative_to(root)} uses snake_case "
+                f"— rename to {kebab}.md"
+            )
 
 
 def audit_skills_repo(root: Path) -> list[str]:
