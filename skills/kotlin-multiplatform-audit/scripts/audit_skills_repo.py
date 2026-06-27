@@ -113,7 +113,7 @@ KEBAB_DIRS = ("agents", "commands", "docs", "samples")
 
 # Root-level .md files must be SCREAMING_CASE (all uppercase stem + optional underscores/hyphens)
 _SCREAMING_RE = re.compile(r"^[A-Z][A-Z0-9_-]*$")
-_KEBAB_RE = re.compile(r"^[a-z][a-z0-9-]*$")
+_KEBAB_RE = re.compile(r"^(\d{4}-\d{2}-\d{2}-)?[a-z][a-z0-9-]*$")
 
 
 def _check_naming_conventions(root: Path, findings: list[str]) -> None:
