@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.28.6] — 2026-06-27
+
+### Chore
+
+- Bump all library versions to latest stable: agp 9.2.0, koin 4.2.2, ktor 3.5.0, sqldelight 2.3.2, buildkonfig 0.22.0, androidx-lifecycle 2.11.0, coroutines 1.11.0, roborazzi 1.64.0, navigation-compose 2.9.2, decompose 3.5.0
+- Add `kotlin-multiplatform-layout-system` skill with ASCII wireframe templates (Patterns A–D), scroll annotations, phone variants, and platform column in component registry
+- Fix compile-breaking issues across 7 skills: `id()` → `alias()`, missing catalog entries, KSP version scheme, CMP `@Preview` import, navigation test types, startKoin guard, cross-platform `sed`
+- Add JVM-only API lint check to audit script (`_check_commonmain_jvm_apis`)
+- Fix audit regex to accept YYYY-MM-DD-prefixed filenames
+
+---
+
 ## [v1.28.5] — 2026-06-26
 
 ### Other
