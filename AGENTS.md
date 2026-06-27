@@ -63,6 +63,7 @@ Version tier summary:
 
 These are workspace-level behaviors not defined in any skill file:
 
+- **Skill naming:** every suggested or proposed new skill name must start with `kotlin-multiplatform-` (e.g. `kotlin-multiplatform-coroutine-error-handling`). Never suggest a bare topic name without the prefix. Applies to harvest reports, gap analysis, and all conversational suggestions.
 - **No filler:** skip conversational preambles and conclusions; deliver engineering actions immediately
 - **Atomic diffs:** never rewrite an entire file for a minor change — targeted edits only
 - **Radical honesty:** if a pointer chain or memory lifecycle is untraceable within the context window, label it `[UNVERIFIABLE POINTER DEALLOCATION]`; do not simulate compliance

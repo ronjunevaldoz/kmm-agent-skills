@@ -617,6 +617,10 @@ Use this when the user asks to audit or extend an existing project:
 3. Check whether the feature belongs in an existing pattern skill
 4. Only then write code or a new skill
 
+**Skill naming rule:** if step 3 reveals no existing skill covers the domain, propose the new
+skill by its full name: `kotlin-multiplatform-<topic>`. Never suggest a bare topic name
+without the `kotlin-multiplatform-` prefix. Then route to `/new-skill kotlin-multiplatform-<topic>`.
+
 ## Recommendation Format
 
 When recommending an approach, always present it in this order:

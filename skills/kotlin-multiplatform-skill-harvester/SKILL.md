@@ -115,7 +115,8 @@ Not every lesson warrants a skill change. Apply this filter before drafting any 
 |---|---|
 | `correction` (high severity) | Always amend — add to error-patterns or anti-patterns |
 | `correction` (medium/low) | Amend if it would prevent a real mistake; skip if project-specific |
-| `gap` (high severity) | Add a new section or cross-skill note |
+| `gap` (high severity, fits existing skill) | Add a new section or cross-skill note |
+| `gap` (high severity, new domain) | Propose a new skill — name it `kotlin-multiplatform-<topic>` |
 | `gap` (medium/low) | Add a note in "Related Skills" or defer |
 | `better-pattern` | Amend only if the improvement is general, not project-specific |
 | `deprecation` | Always amend — stale references mislead every consumer |
@@ -142,9 +143,21 @@ For each lesson that passes the filter, produce one of:
 Add to `references/error-patterns.md` and cross-reference in the
 "Common Anti-Patterns" table in SKILL.md.
 
-**B) New section or subsection** (for `gap` type):
+**B) New section or subsection** (for `gap` type, fits existing skill):
 Add the missing guidance directly to SKILL.md under the relevant heading,
 or create a new references/ file if the content is large (>50 lines).
+
+**E) New skill proposal** (for `gap` type, new domain — no existing skill covers it):
+```
+## Proposed new skill: kotlin-multiplatform-<topic>
+
+Reason: <N> lessons report a gap that no existing skill covers.
+Suggested name: kotlin-multiplatform-<topic>
+Covers: <one-sentence scope>
+Run: /new-skill kotlin-multiplatform-<topic>
+```
+The suggested name must start with `kotlin-multiplatform-`. Never suggest a bare
+topic name without the prefix.
 
 **C) Version/API update** (for `deprecation` type):
 Update the version reference and add a freshness note if one is missing.
@@ -285,7 +298,8 @@ The harvester is a document-analysis and diff-generation tool, not runtime code.
 
 - Run the bundled harvest script against a sample `docs/lessons/` directory and verify the report lists only findings that match the configured filter thresholds
 - Check that each proposed amendment in the report references a real `skill` directory name
-- Verify the `amendment_type` field is one of: `add_section`, `update_section`, `add_example`, `add_anti_pattern`, `add_version_note`
+- Verify the `amendment_type` field is one of: `add_section`, `update_section`, `add_example`, `add_anti_pattern`, `add_version_note`, `create_skill`
+- For `create_skill` proposals: the suggested skill name must start with `kotlin-multiplatform-`
 - Confirm the report excludes lessons already marked `applied: true`
 
 Run `python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .` to catch naming and line-limit violations in harvested output files.
