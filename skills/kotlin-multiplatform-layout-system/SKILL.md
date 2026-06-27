@@ -32,19 +32,22 @@ metadata:
 ## Purpose
 
 This skill drafts and documents app screens — it is a **living spec**, not a constraint.
-Wireframes here describe intent before (or alongside) implementation. They are updated
-as the design evolves, not frozen once written.
+Wireframes describe intent before (or alongside) implementation. They are updated as the
+design evolves, not frozen once written.
 
 Use this skill to:
 - Sketch a new screen before writing a single line of Compose
 - Record what a screen looks like after a layout change
 - Give the team a shared visual reference that lives in the repo
 
+The skill is **fully generic** — component names, widths, and nav labels all come from
+the actual project. Templates use `<placeholders>`; fill them in from the project.
+
 Do NOT use this skill for Compose implementation — use `kotlin-multiplatform-adaptive-layout`
 for breakpoint-driven responsive layouts.
 
 **Freshness rule:** recheck wireframes whenever a panel is added or removed, navigation
-chrome changes (e.g. bottom bar replaces NavRail on phone), or a modal becomes a full screen.
+chrome changes, or a modal becomes a full screen.
 
 ---
 
@@ -58,55 +61,47 @@ chrome changes (e.g. bottom bar replaces NavRail on phone), or a modal becomes a
 **Trigger automatically on project setup.** If the directory is missing, create it before
 finishing any screen implementation task.
 
-**Trigger keywords:** layout system, screen layout, wireframe, layout spec, draft screen,
-document layout, layout diagram, sketch layout, plan screen, no layout docs.
-
 ---
 
 ## Directory Structure
 
 ```
 docs/layout-system/
-├── _components.md        <- shared component registry (read this first)
-├── home.md
-├── jobs.md
-├── settings.md
-└── <screen-name>.md      <- one file per distinct screen
+├── _components.md          <- shared component registry (read this first)
+├── <screen-name>.md        <- one file per distinct screen
+└── <screen-name>.md
 ```
 
-Naming rules:
 - Directory: `docs/layout-system/` (kebab-case)
-- Screen files: kebab-case, named after the screen
-- `_components.md` uses a leading underscore so it sorts first
+- Screen files: kebab-case, named after the screen (`home.md`, `profile.md`, `feed.md`)
+- `_components.md` uses a leading underscore so it sorts first and is clearly a reference
 
 ---
 
 ## Bootstrap (project has no layout-system yet)
 
-When `docs/layout-system/` does not exist:
-
-1. Create the directory.
-2. Create `_components.md` from the Component Registry format below.
-3. Create one screen file per major screen already in the project.
+1. Read the project source to identify all existing screens and persistent components.
+2. Create `docs/layout-system/` and `_components.md`.
+3. Create one screen file per major screen.
 4. Link to `docs/layout-system/` from `docs/architecture.md` or `README.md`.
 
 ---
 
 ## `_components.md` — Component Registry
 
+List every persistent UI component in the project. Fill in real names and real values.
+
 ```markdown
 # Component Registry
 
 Update this file when a component's dimensions, visibility, or behavior changes.
 
-| Component   | Width / Height | Visibility             | Notes                       |
-|-------------|----------------|------------------------|-----------------------------|
-| NavRail     | 52 dp          | Always visible         | Icon-only. Emoji in legend. |
-| ModePanel   | 180 dp         | Home only              | Hidden on all other screens.|
-| BottomBar   | full / 56 dp   | Phone (Compact) only   | Replaces NavRail on phone.  |
-| Toolbar row | full / 48 dp   | Context-dependent      | Mode-specific action row.   |
-| Input bar   | full / 56 dp   | Always visible (chat)  | Single row. Send on Enter.  |
-| Sheet       | modal          | Overlay — no swap      | Help and Settings only.     |
+| Component       | Width / Height | Visibility                  | Notes                        |
+|-----------------|----------------|-----------------------------|------------------------------|
+| <Component A>   | <N> dp         | <always / screen X only>    | <short description>          |
+| <Component B>   | <N> dp         | <always / conditional>      | <short description>          |
+| <Component C>   | full / <N> dp  | <phone only / always>       | <short description>          |
+| <Modal / Sheet> | modal          | Overlay on <trigger>        | No canvas swap.              |
 ```
 
 ---
@@ -118,151 +113,171 @@ Update this file when a component's dimensions, visibility, or behavior changes.
 - **No emoji inside the grid.** Emoji are double-width in monospace fonts and break
   alignment. Use short `[label]` placeholders inside the grid. Map labels to emoji
   in a **Legend** line directly below the wireframe.
-- Active nav item: append `*` to the label — e.g. `[home]*`.
+- Active nav item: append `*` to the label — e.g. `[nav-1]*`.
 - Borders: `+` at corners/intersections, `-` horizontal, `|` vertical. ASCII only.
 - All rows in a wireframe must be the **same character width**.
-- Sub-region breaks (toolbar, input bar): use `|---|` only on the column being split.
-  Columns that are not split keep `|   |` on that row.
-- Column widths are fixed per wireframe. Pick widths that reflect proportions and
-  stay consistent across all rows, then stick to them.
+- Sub-region breaks (action rows, input areas): use `|---|` only on the column being
+  split. Other columns keep `|   |` on the same row.
+- Column widths are fixed per wireframe. Pick widths that reflect real proportions,
+  then hold them across every row in that wireframe.
 
-### Standard column widths — 78 chars total
+### Column sizing guide
 
-```
-+------------+--------------+------------------------------------------------+
-  12 inner      14 inner        48 inner
-```
+Choose widths based on the project's actual layout proportions:
 
-- NavRail: 12 inner chars (14 with both `|`)
-- ModePanel: 14 inner chars (15 with right `|`)
-- Canvas: 48 inner chars (49 with right `|`)
-- Total: 1 + 12 + 1 + 14 + 1 + 48 + 1 = **78**
+| Panel type          | Typical inner width | Notes                             |
+|---------------------|--------------------|------------------------------------|
+| Narrow nav strip    | 8–12 chars         | Icon-only side rail                |
+| Secondary panel     | 14–20 chars        | List, mode selector, sidebar       |
+| Main content area   | remainder          | Always `flex 1`                    |
+| Full-width canvas   | all remaining      | When secondary panel is hidden     |
 
-When ModePanel is hidden, canvas expands: 1 + 12 + 1 + 62 + 1 = **77**.
-(Adjust the canvas width to keep all rows the same length.)
+Total row width (including all `|` and `-` borders) must be the same for every row.
 
 ---
 
 ## Wireframe Templates
 
-### Three-column — NavRail + ModePanel + Canvas
+Use whichever pattern matches the screen. Replace every `<placeholder>` with the
+project's real component name, size, label, or content.
+
+### Pattern A — narrow nav + secondary panel + main area
 
 ```
-+------------+--------------+------------------------------------------------+
-| NavRail    | ModePanel    | Chat Canvas                                    |
-| 52 dp      | 180 dp       | flex 1                                         |
-+------------+--------------+------------------------------------------------+
-|            |              |                                                |
-| [home]*    | Image        | [bubble] Hello, create a video                 |
-|            | Video        | [bubble] Sure! Pick a style:                   |
-|            | Short        |   [card] Cinematic   [card] Anime              |
-|            | Voice        |                                                |
-|            | Text         |                                                |
-|            |              |                                                |
-|            |              |------------------------------------------------|
-| [help]     |              | [Model v]  [Style v]  [Ratio v]                |
-| [settings] |              |------------------------------------------------|
-|            |              | [ Type a prompt...              ]  [Send]      |
-+------------+--------------+------------------------------------------------+
-Legend: [home] = Home  [help] = Help / FAQ  [settings] = Settings
-        * = active
++----------+------------------+----------------------------------------------+
+| <Nav>    | <Side Panel>     | <Main Area>                                  |
+| <N> dp   | <N> dp           | flex 1                                       |
++----------+------------------+----------------------------------------------+
+|          |                  |                                              |
+| [nav-1]* | <item>           | <primary content>                            |
+| [nav-2]  | <item>           | <primary content>                            |
+| [nav-3]  | <item>           |                                              |
+|          |                  |                                              |
+|          |                  |----------------------------------------------|
+| [nav-4]  |                  | <action row>                                 |
+| [nav-5]  |                  |----------------------------------------------|
+|          |                  | <input area>                                 |
++----------+------------------+----------------------------------------------+
+Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>
+        [nav-4] = <name>  [nav-5] = <name>  * = active
 ```
 
-### Two-column — NavRail + Canvas (ModePanel hidden)
+### Pattern B — narrow nav + main area (secondary panel hidden)
 
 ```
-+------------+--------------------------------------------------------------+
-| NavRail    | Artifacts Canvas                                             |
-| 52 dp      | flex 1  (ModePanel not rendered)                             |
-+------------+--------------------------------------------------------------+
-|            |                                                              |
-| [home]     | [tab] All  [tab] Images  [tab] Video  [tab] Audio  [tab] +   |
-|            +--------------------------------------------------------------+
-| [jobs]*    |                                                              |
-|            |  +--------+  +--------+  +--------+  +--------+              |
-|            |  |        |  |        |  | ~~~~~~ |  |  [>]   |              |
-|            |  +--------+  +--------+  +--------+  +--------+              |
-|            |  image        image        audio       video                 |
-|            |  2 min ago    5 min ago    12 min ago  1 hr ago              |
-|            |                                                              |
-| [help]     |                                                              |
-| [settings] |                                                              |
-+------------+--------------------------------------------------------------+
-Legend: [home] = Home  [jobs] = Jobs / Artifacts  [help] = Help / FAQ
-        [settings] = Settings  * = active
++----------+------------------------------------------------------------+
+| <Nav>    | <Main Area>                                                |
+| <N> dp   | flex 1  (<Side Panel> not rendered)                        |
++----------+------------------------------------------------------------+
+|          |                                                            |
+| [nav-1]  | [tab] <Tab A>  [tab] <Tab B>  [tab] <Tab C>                |
+|          +------------------------------------------------------------+
+| [nav-2]* |                                                            |
+|          |  +--------+  +--------+  +--------+  +--------+            |
+|          |  |        |  |        |  |        |  |        |            |
+|          |  +--------+  +--------+  +--------+  +--------+            |
+|          |  <label>      <label>      <label>     <label>             |
+|          |                                                            |
+| [nav-3]  |                                                            |
+| [nav-4]  |                                                            |
++----------+------------------------------------------------------------+
+Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>
+        [nav-4] = <name>  * = active
 ```
 
-### Modal sheet overlay
+### Pattern C — modal / sheet overlay
 
 ```
-+------------+--------------------------------------------------------------+
-| NavRail    | [canvas stays in place — no swap]                            |
-| 52 dp      |                                                              |
-+------------+--------------------------------------------------------------+
-|            |                                                              |
-| [home]     |     +----------------------------------------------+         |
-|            |     | Help / FAQ                                 X |         |
-| [jobs]     |     | -------------------------------------------- |         |
-|            |     | Getting started                              |         |
-| [help]*    |     | Connecting to your server                    |         |
-| [settings] |     | Modes: Image / Video / Short                 |         |
-|            |     +----------------------------------------------+         |
-+------------+--------------------------------------------------------------+
-Legend: [home] = Home  [jobs] = Jobs / Artifacts  [help] = Help / FAQ
-        [settings] = Settings  * = active
++----------+------------------------------------------------------------+
+| <Nav>    | [canvas stays in place — no swap]                          |
+| <N> dp   |                                                            |
++----------+------------------------------------------------------------+
+|          |                                                            |
+| [nav-1]  |     +--------------------------------------------------+   |
+|          |     | <Sheet title>                                  X |   |
+| [nav-2]  |     | ------------------------------------------------ |   |
+|          |     | <content line>                                   |   |
+| [nav-3]* |     | <content line>                                   |   |
+| [nav-4]  |     | <content line>                                   |   |
+|          |     +--------------------------------------------------+   |
++----------+------------------------------------------------------------+
+Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>
+        [nav-4] = <name>  * = active
+```
+
+---
+
+## Filled Example
+
+The templates above filled in for a generic messaging app (3 screens shown):
+
+**`docs/layout-system/inbox.md`**
+
+```
++----------+------------------+----------------------------------------------+
+| Left Nav | Thread List      | Message View                                 |
+| 48 dp    | 240 dp           | flex 1                                       |
++----------+------------------+----------------------------------------------+
+|          |                  |                                              |
+| [ch]*    | Alice            | [bubble] Hey, are you free tonight?          |
+|          | Bob              | [bubble] Yeah! What did you have in mind?    |
+| [cont]   | Team Alpha       |                                              |
+|          |                  |                                              |
+|          |                  |----------------------------------------------|
+| [sett]   |                  | [ Type a message...              ]  [Send]   |
++----------+------------------+----------------------------------------------+
+Legend: [ch] = Chats  [cont] = Contacts  [sett] = Settings  * = active
+```
+
+**`docs/layout-system/contacts.md`** — Thread List hidden
+
+```
++----------+------------------------------------------------------------+
+| Left Nav | Contacts                                                   |
+| 48 dp    | flex 1  (Thread List not rendered)                         |
++----------+------------------------------------------------------------+
+|          |                                                            |
+| [ch]     | [tab] All  [tab] Favorites  [tab] Groups                   |
+|          +------------------------------------------------------------+
+| [cont]*  |                                                            |
+|          |  Alice Romano          alice@example.com                   |
+|          |  Bob Tanaka            bob@example.com                     |
+|          |  Team Alpha            3 members                           |
+|          |                                                            |
+| [sett]   |                                                            |
++----------+------------------------------------------------------------+
+Legend: [ch] = Chats  [cont] = Contacts  [sett] = Settings  * = active
 ```
 
 ---
 
 ## Screen File Format
 
-Each screen file has four sections: **Components table**, **Wireframe(s)**,
-and **Interaction notes**. Example:
+Each screen file follows this structure:
+
+```
+# <Screen name>
+
+## Components
+
+| Component      | Width   | Visible         | Notes                     |
+|----------------|---------|-----------------|---------------------------|
+| <Component A>  | <N> dp  | <always / when> | <short note>              |
+| <Component B>  | flex 1  | Yes             | <short note>              |
 
 ---
 
-**`# Home screen`**
+## <Variant name>
 
-**`## Components`**
+<wireframe here>
 
-| Component   | Width   | Visible | Notes                      |
-|-------------|---------|---------|----------------------------|
-| NavRail     | 52 dp   | Yes     | Icon-only.                 |
-| ModePanel   | 180 dp  | Yes     | Creation modes list.       |
-| Chat canvas | flex 1  | Yes     | Bubbles + toolbar + input. |
-| Toolbar row | full    | Yes     | Mode-specific buttons.     |
-| Input bar   | full    | Yes     | Always-on. Send on Enter.  |
-| Sheet       | modal   | On tap  | Overlay — no canvas swap.  |
+---
 
-**`## Default — creation mode active`**
+## Interaction notes
 
+- <tap / swipe / gesture> → <what happens>
+- <state change> → <how it looks>
 ```
-+------------+--------------+------------------------------------------------+
-| NavRail    | ModePanel    | Chat Canvas                                    |
-| 52 dp      | 180 dp       | flex 1                                         |
-+------------+--------------+------------------------------------------------+
-|            |              |                                                |
-| [home]*    | Image        | [bubble] Hello, create a video                 |
-|            | Video        | [bubble] Sure! Pick a style:                   |
-|            | Short        |   [card] Cinematic   [card] Anime              |
-|            | Voice        |                                                |
-|            | Text         |                                                |
-|            |              |                                                |
-|            |              |------------------------------------------------|
-| [help]     |              | [Model v]  [Style v]  [Ratio v]                |
-| [settings] |              |------------------------------------------------|
-|            |              | [ Type a prompt...              ]  [Send]      |
-+------------+--------------+------------------------------------------------+
-Legend: [home] = Home  [help] = Help / FAQ  [settings] = Settings
-        * = active
-```
-
-**`## Interaction notes`**
-
-- Tapping a ModePanel item switches the toolbar row — canvas does not reload.
-- [help] and [settings] open a bottom sheet overlay. Canvas stays in place.
-- Input bar is always visible; toolbar row appears only when a mode is selected.
-- NavRail active state: append `*` to the label in the wireframe.
 
 ---
 
@@ -270,14 +285,15 @@ Legend: [home] = Home  [help] = Help / FAQ  [settings] = Settings
 
 | Check | Expected |
 |---|---|
-| `_components.md` updated | Any new or changed component appears in the registry |
+| `_components.md` updated | Any new or changed component in the registry |
 | Screen file exists | One `.md` per screen |
-| No emoji in grid | All emoji are in the Legend line below the wireframe |
-| Active state shown | Active nav item uses `*` suffix, e.g. `[home]*` |
-| All rows same width | Longest and shortest row in the wireframe are identical |
-| Sub-region dividers | `|---|` only on the column being split; others show `|   |` |
-| Variants present | Separate wireframe block per layout variant (modal, empty state, etc.) |
-| Interaction notes | Each screen file ends with a short notes section |
+| Placeholders filled in | No `<placeholder>` left in committed files |
+| No emoji in grid | Emoji only in the Legend line below the wireframe |
+| Active state shown | Active nav item uses `*` suffix, e.g. `[nav-1]*` |
+| All rows same width | Every row in the wireframe is the same character count |
+| Sub-region dividers | `|---|` only on the column being split |
+| Variants present | Separate wireframe block per layout variant |
+| Interaction notes | Each screen file has a short notes section |
 
 ---
 
@@ -285,7 +301,7 @@ Legend: [home] = Home  [help] = Help / FAQ  [settings] = Settings
 
 - `kotlin-multiplatform-adaptive-layout` — Compose implementation of breakpoint-driven
   layouts (Compact/Medium/Expanded). Layout-system docs describe intent; this skill
-  implements it.
+  implements it in code.
 - `kotlin-multiplatform-design-system` — Design tokens, colors, and typography used
   by the components listed in `_components.md`.
 - `kotlin-multiplatform-project-docs-maintainer` — Keeps `docs/` healthy. Layout-system
@@ -297,5 +313,6 @@ Legend: [home] = Home  [help] = Help / FAQ  [settings] = Settings
 
 | Date | Change |
 |---|---|
-| 2026-06-27 | Reframed as a draft/document tool, not an enforcement layer. Fixed ASCII wireframe: removed emoji from grid, added Legend line below wireframes, fixed all row widths to 78 chars, replaced partial `+---+` dividers with `\|---\|` style. |
+| 2026-06-27 | Made all templates fully generic — replaced project-specific component names with `<placeholders>`. Added filled example using a neutral messaging app. Reframed purpose as draft/document, not limit. |
+| 2026-06-27 | Fixed ASCII wireframe alignment: removed emoji from grid, moved to Legend line, standardized row widths per template. |
 | 2026-06-27 | Initial release — layout system format, ASCII wireframe spec, component registry, screen file template, bootstrap flow. |
