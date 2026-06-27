@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-26'
+  last-updated: '2026-06-27'
   keywords:
     - Maven Central
     - publish
@@ -192,6 +192,8 @@ vanniktech-publish-gradlePlugin = { module = "com.vanniktech:gradle-maven-publis
 
 [plugins]
 vanniktech-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-publish" }
+# Convention plugin — id matches the precompiled script filename in build-logic
+GROUP_ID-library-publish = { id = "GROUP_ID.library.publish", version = "unspecified" }
 ```
 
 ```kotlin
@@ -205,7 +207,7 @@ compileOnly(libs.vanniktech.publish.gradlePlugin)
 // Shared POM metadata, signing, and Central Portal target live here once.
 // Each module overrides only its own artifactId via mavenPublishing { coordinates() }.
 plugins {
-    id("com.vanniktech.maven.publish")
+    alias(libs.plugins.vanniktech.publish)
 }
 
 mavenPublishing {
@@ -242,7 +244,7 @@ Each publishable module applies the convention plugin and sets its own coordinat
 ```kotlin
 // feature/core/build.gradle.kts
 plugins {
-    id("GROUP_ID.library.publish")
+    alias(libs.plugins.GROUP_ID.library.publish)
 }
 
 mavenPublishing {
@@ -495,6 +497,7 @@ Never generate credentials or keys. If GPG setup is needed, give the commands th
 
 | Date | Change |
 |---|---|
+| 2026-06-27 | Replaced id("...") with alias(libs.plugins.*) in both the convention plugin and consuming modules. Added convention plugin alias to libs.versions.toml. |
 | 2026-06-26 | Bumped vanniktech maven-publish plugin base version to 0.37.0. |
 | 2026-06-24 | Added explicit `release project` / `cut release` / `ship version` trigger keywords so project release requests route here instead of the consumer changelog agent. |
 | 2026-06-23 | Initial release — versioning, Maven Central, git-cliff, GitHub Release, local publish script, anti-patterns. |
