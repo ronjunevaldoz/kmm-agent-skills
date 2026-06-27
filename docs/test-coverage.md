@@ -1,12 +1,6 @@
 # Test coverage
 
-All tests live in `tests/test_skill_scripts.py` and run with:
-
-```
-python3 -m pytest tests/ -v
-```
-
-Current status: **16 tests, 16 passing**.
+All tests live in `tests/test_skill_scripts.py`. Current status: **16 tests, 16 passing**.
 
 ---
 
