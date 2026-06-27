@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.1] — 2026-06-28
+
+### Added
+
+- feat(consumer): add quick-update script, commit-msg hook, compat-matrix drift check, and fix stale README versions
+
+---
+
 ## [v1.29.0] — 2026-06-28
 
 ### Added
