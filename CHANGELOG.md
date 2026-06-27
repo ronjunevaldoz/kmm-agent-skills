@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.4] — 2026-06-28
+
+### Added
+
+- feat(navigation): add bindToBrowserNavigation pattern for WasmJs hash routing
+
+### Fixed
+
+- fix(install): separate skills auto-deploy from commands manual install
+
+---
+
 ## [v1.29.3] — 2026-06-28
 
 ### Other

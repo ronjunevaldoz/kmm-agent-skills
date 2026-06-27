@@ -1,5 +1,5 @@
 {
-  "version": "1.29.3",
+  "version": "1.29.4",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1646,6 +1646,10 @@
         "browser fragment",
         "hash navigation",
         "wasmJs routing",
+        "bindToBrowserNavigation",
+        "browser history sync",
+        "SerialName route",
+        "hash deep link",
         "navigate",
         "routing",
         "move between screens",
