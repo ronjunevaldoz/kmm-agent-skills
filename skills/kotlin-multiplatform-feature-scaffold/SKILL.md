@@ -1112,6 +1112,7 @@ After scaffolding, verify in order:
 
 ## Related Skills
 
+- `docs/reference/compatibility-matrix.md` — compatibility table and conflict zones for all versions declared in this skill's version catalog
 - `kotlin-multiplatform-dependency-injection` — wire Koin after the module structure is in place
 - `kotlin-multiplatform-navigation` — add type-safe navigation after scaffold is complete
 - `kotlin-multiplatform-mvi` — screen architecture layer built on top of this scaffold

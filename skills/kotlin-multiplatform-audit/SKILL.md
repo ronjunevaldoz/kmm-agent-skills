@@ -315,6 +315,7 @@ python3 ../kmm-agent-skills/skills/kotlin-multiplatform-audit/scripts/governance
 
 ## Related Skills
 
+- `docs/reference/compatibility-matrix.md` — version compatibility table and conflict zones; check before bumping any library
 - `kotlin-multiplatform-expert` — use before running the audit; the expert skill identifies which domain skills apply and what build order to follow
 - `kotlin-multiplatform-clean-architecture` — defines the 6-layer boundary rules the audit script enforces
 - `kotlin-multiplatform-mvi` — most `state copy race` and `sharedflow replay effect` findings require this skill to fix correctly
