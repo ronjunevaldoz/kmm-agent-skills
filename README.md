@@ -368,14 +368,21 @@ npx skills add ronjunevaldoz/kmm-agent-skills
 
 ## Versions
 
-- AGP 9.0.1
+- AGP 9.2.0
 - Kotlin 2.4.0
+- KSP 2.4.0-2.0.0
 - Compose Multiplatform 1.11.1
-- Koin 4.2.1
-- Ktor 3.1.3
-- SQLDelight 2.0.2
-- BuildKonfig 0.21.2
-- Turbine 1.2.1
+- Coroutines 1.11.0
+- AndroidX Lifecycle 2.11.0
+- Navigation Compose 2.9.2
+- Koin 4.2.2
+- Ktor 3.5.0
+- SQLDelight 2.3.2
+- BuildKonfig 0.22.0
+- Decompose 3.5.0
+- Roborazzi 1.64.0
+
+See [`docs/reference/compatibility-matrix.md`](docs/reference/compatibility-matrix.md) for the full compatibility table and conflict zones.
 
 ---
 

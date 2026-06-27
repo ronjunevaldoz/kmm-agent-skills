@@ -63,6 +63,7 @@ AUDIT_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" /
 SCAN_ISSUES_SCRIPT = REPO_ROOT / "scripts" / "scan_skill_issues.py"
 VALIDATE_SKILL_MAP_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_skill_map.py"
 VALIDATE_KEYWORD_ROUTING_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_keyword_routing.py"
+CHECK_COMPAT_MATRIX_SCRIPT = REPO_ROOT / "scripts" / "check_compat_matrix.py"
 TESTS_DIR = REPO_ROOT / "tests"
 
 
@@ -161,11 +162,23 @@ def run_tests() -> None:
     ok(f"All tests pass ({count} passed)")
 
 
+def run_compat_matrix_check() -> None:
+    result = run(["python3", str(CHECK_COMPAT_MATRIX_SCRIPT)], check=False)
+    if result.returncode != 0:
+        fail(
+            "Compatibility matrix is out of sync with skill files. "
+            "Update docs/reference/compatibility-matrix.md before releasing.\n"
+            + result.stdout
+        )
+    ok("Compatibility matrix in sync")
+
+
 def run_release_validation() -> None:
     run_audit()
     run_scan_skill_issues()
     run_skill_map_validation()
     run_keyword_routing_validation()
+    run_compat_matrix_check()
     run_tests()
 
 
