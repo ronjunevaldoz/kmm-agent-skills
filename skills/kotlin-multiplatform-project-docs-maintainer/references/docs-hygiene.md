@@ -33,14 +33,14 @@ Rule of thumb: if you'd link to it from README, it belongs in `docs/` root. If y
 |---|---|---|
 | `architecture.md` | Reference (root) | Keep — primary, README-linked |
 | `deployment.md` | Reference (root) | Keep — primary, README-linked |
-| `engine_rules.md` | Reference (root) | Keep — stable registry, updated in place |
-| `engine_memory_management.md` | Reference (reference/) | Move to `docs/reference/` — subsystem deep-dive |
+| `stable-feature-rules.md` | Reference (root) | Keep — stable registry, updated in place |
+| `auth-flow-internals.md` | Reference (reference/) | Move to `docs/reference/` — subsystem deep-dive |
 | `reference/*.md` | Reference (reference/) | Keep in `docs/reference/` |
-| `graphyn_editor_blockers.md` | Task | Rename to `YYYY-MM-DD-editor-blockers.md`, move to `docs/tasks/`; archive when resolved |
-| `mvp_video_shorts.md` | Task | Rename + move to `docs/tasks/`; archive when milestone ships |
-| `studio_ui_gap_plan.md` | Task | Rename + move to `docs/tasks/`; archive when plan completes |
+| `known-blockers.md` | Task | Rename to `YYYY-MM-DD-known-blockers.md`, move to `docs/tasks/`; archive when resolved |
+| `milestone-tracker.md` | Task | Rename + move to `docs/tasks/`; archive when milestone ships |
+| `q3-gap-plan.md` | Task | Rename + move to `docs/tasks/`; archive when plan completes |
 | `tasks.md` | Task (entrypoint) | Keep at `docs/tasks.md` |
-| `smoke/*.json` | Non-doc | Move to `tests/fixtures/` or `src/test/resources/` |
+| `fixtures/*.json` | Non-doc | Move to `tests/fixtures/` or `src/test/resources/` |
 | `openapi.json` | Non-doc | Move to `api/` or `spec/` at project root |
 
 ### Ambiguity test
@@ -88,9 +88,9 @@ All `docs/` files use **kebab-case**. Snake_case is a violation.
 
 | Wrong | Correct |
 |---|---|
-| `engine_memory_management.md` | `engine-memory-management.md` |
-| `mvp_video_shorts.md` | `2026-06-27-mvp-video-shorts.md` (task) or `mvp-video-shorts.md` (reference) |
-| `studio_ui_gap_plan.md` | `2026-06-27-studio-ui-gap-plan.md` |
+| `auth_flow_internals.md` | `auth-flow-internals.md` |
+| `milestone_tracker.md` | `2026-06-27-milestone-tracker.md` (task) or `milestone-tracker.md` (reference) |
+| `q3_gap_plan.md` | `2026-06-27-q3-gap-plan.md` |
 
 Task files also get a `YYYY-MM-DD-` prefix. Reference files do not need a date prefix.
 
