@@ -177,7 +177,7 @@ Require coordination across multiple files or introduce breaking changes to exis
 
 - Every skill must follow the "real skill" principle: 80% patterns/decisions/pitfalls, ≤20% dependency setup
 - Skill descriptions must be specific enough to trigger correctly — test against the keyword list before shipping
-- Use `/new-skill` to scaffold — it enforces all required sections at creation time
+- Use `/kmm-new-skill` to scaffold — it enforces all required sections at creation time
 - Use `/modify-skill` to edit — it prevents accidental removal of required sections
 - Run `python3 scripts/scan_skill_issues.py` after any SKILL.md change to verify zero HIGH findings
 - Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .` after adding a skill to confirm README, expert, and planner are all updated

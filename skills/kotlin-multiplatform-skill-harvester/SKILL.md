@@ -154,7 +154,7 @@ or create a new references/ file if the content is large (>50 lines).
 Reason: <N> lessons report a gap that no existing skill covers.
 Suggested name: kotlin-multiplatform-<topic>
 Covers: <one-sentence scope>
-Run: /new-skill kotlin-multiplatform-<topic>
+Run: /kmm-new-skill kotlin-multiplatform-<topic>
 ```
 The suggested name must start with `kotlin-multiplatform-`. Never suggest a bare
 topic name without the prefix.

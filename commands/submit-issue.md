@@ -16,7 +16,7 @@ Determine the type before writing anything:
 |---|---|
 | `skill-gap` | A skill is missing a Testing section, anti-pattern, freshness rule, or required section |
 | `skill-bug` | A code snippet in a skill is wrong, outdated, or won't compile |
-| `new-skill` | A KMP concern is not covered by any existing skill |
+| `kmm-new-skill` | A KMP concern is not covered by any existing skill |
 | `pipeline-bug` | An agent (planner, implementer, reviewer, fixer, validator) produces wrong output |
 | `improvement` | A skill covers the topic but the guidance could be clearer or more complete |
 
@@ -95,7 +95,7 @@ will fill this in.>
 |---|---|
 | Missing Testing section | `skill-gap`, `testing` |
 | Wrong or outdated code | `skill-bug` |
-| New skill request | `new-skill` |
+| New skill request | `kmm-new-skill` |
 | Agent produces wrong output | `pipeline-bug` |
 | Clarity improvement | `improvement` |
 | HIGH severity from scanner | `priority: high` |

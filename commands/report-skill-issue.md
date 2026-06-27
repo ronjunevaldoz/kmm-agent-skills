@@ -40,7 +40,7 @@ Determine the type before writing anything:
 |---|---|---|
 | `skill-bug` | `skill-bug` | A snippet, example, or rule in a skill is wrong or won't compile |
 | `skill-gap` | `improvement` | A skill is missing a section, anti-pattern, or edge case |
-| `new-skill` | `enhancement` | A KMP / JNI / Android concern is not covered by any existing skill |
+| `kmm-new-skill` | `enhancement` | A KMP / JNI / Android concern is not covered by any existing skill |
 | `improvement` | `improvement` | Guidance exists but could be clearer or more complete |
 | `pipeline-bug` | `skill-bug` | Claude activated the wrong skill, or produced wrong output for a trigger phrase |
 

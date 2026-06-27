@@ -56,7 +56,7 @@ flowchart LR
   A --> C
 
   MD[/maintain-docs/] --> D
-  NS[/new-skill/] --> E
+  NS[/kmm-new-skill/] --> E
 ```
 
 Consumer skills are the installable surface downstream projects use. Repo docs,

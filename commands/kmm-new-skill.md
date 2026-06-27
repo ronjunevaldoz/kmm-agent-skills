@@ -1,10 +1,10 @@
-# /new-skill $ARGUMENTS
+# /kmm-new-skill $ARGUMENTS
 
 **KMM Agent Skills** — scaffold a new SKILL.md from scratch, following every structural
 rule enforced by `audit_skills_repo.py` and `scan_skill_issues.py`.
 
 Skill name (kebab-case): **$ARGUMENTS**  
-Example: `new-skill kotlin-multiplatform-offline-first`
+Example: `kmm-new-skill kotlin-multiplatform-offline-first`
 
 ---
 

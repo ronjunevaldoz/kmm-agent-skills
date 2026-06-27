@@ -619,7 +619,7 @@ Use this when the user asks to audit or extend an existing project:
 
 **Skill naming rule:** if step 3 reveals no existing skill covers the domain, propose the new
 skill by its full name: `kotlin-multiplatform-<topic>`. Never suggest a bare topic name
-without the `kotlin-multiplatform-` prefix. Then route to `/new-skill kotlin-multiplatform-<topic>`.
+without the `kotlin-multiplatform-` prefix. Then route to `/kmm-new-skill kotlin-multiplatform-<topic>`.
 
 ## Recommendation Format
 
