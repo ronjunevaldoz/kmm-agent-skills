@@ -138,6 +138,77 @@ def _check_naming_conventions(root: Path, findings: list[str]) -> None:
                 )
 
 
+DOCS_MAX_LINES = 150
+LESSON_STALE_DAYS = 30
+LESSON_BACKLOG_LIMIT = 20
+
+
+def _check_docs_hygiene(root: Path, findings: list[str]) -> None:
+    """Flag bloated, stale, or un-archived docs/ files in a consumer project."""
+    docs_dir = root / "docs"
+    if not docs_dir.exists():
+        return
+
+    import datetime
+
+    today = datetime.date.today()
+
+    # 1. Any docs/ file (outside archive/) exceeding the line limit
+    for md in docs_dir.rglob("*.md"):
+        if "archive" in md.parts:
+            continue
+        lines = md.read_text(encoding="utf-8").count("\n")
+        if lines > DOCS_MAX_LINES:
+            findings.append(
+                f"docs hygiene: {md.relative_to(root)} is {lines} lines "
+                f"(limit {DOCS_MAX_LINES}) — split or archive completed sections"
+            )
+
+    # 2. Lessons older than LESSON_STALE_DAYS still in active lessons dir
+    lessons_dir = docs_dir / "lessons"
+    if lessons_dir.exists():
+        stale = []
+        for md in sorted(lessons_dir.glob("*.md")):
+            # Filename must start with YYYY-MM-DD
+            stem = md.stem
+            try:
+                file_date = datetime.date.fromisoformat(stem[:10])
+                age = (today - file_date).days
+                if age > LESSON_STALE_DAYS:
+                    stale.append((md.relative_to(root), age))
+            except ValueError:
+                findings.append(
+                    f"docs hygiene: {md.relative_to(root)} filename does not start "
+                    "with YYYY-MM-DD — rename to match lesson convention"
+                )
+        for path, age in stale:
+            findings.append(
+                f"docs hygiene: {path} is {age} days old and not yet harvested "
+                "— run kotlin-multiplatform-skill-harvester or archive"
+            )
+
+        # 3. Too many unprocessed lessons
+        total = sum(1 for _ in lessons_dir.glob("*.md"))
+        if total > LESSON_BACKLOG_LIMIT:
+            findings.append(
+                f"docs hygiene: {total} lesson files in docs/lessons/ "
+                f"(limit {LESSON_BACKLOG_LIMIT}) — harvest and archive processed lessons"
+            )
+
+    # 4. Task files marked done still in active tasks dir (not archive)
+    tasks_dir = docs_dir / "tasks"
+    if tasks_dir.exists():
+        for md in tasks_dir.glob("*.md"):
+            if "archive" in md.parts:
+                continue
+            text = md.read_text(encoding="utf-8").lower()
+            if re.search(r"status:\s*(done|completed|closed)", text):
+                findings.append(
+                    f"docs hygiene: {md.relative_to(root)} is marked done "
+                    "— move to docs/tasks/archive/"
+                )
+
+
 def audit_skills_repo(root: Path) -> list[str]:
     findings: list[str] = []
     skills_dir = root / "skills"
@@ -184,6 +255,7 @@ def audit_skills_repo(root: Path) -> list[str]:
             )
 
     _check_naming_conventions(root, findings)
+    _check_docs_hygiene(root, findings)
 
     readme = root / "README.md"
     if readme.exists():
@@ -201,9 +273,19 @@ def audit_skills_repo(root: Path) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Audit the skills repo for documentation hygiene.")
     parser.add_argument("root", type=Path, help="Repo root")
+    parser.add_argument(
+        "--docs-hygiene-only",
+        action="store_true",
+        help="Run only the docs/ hygiene checks (line limits, stale lessons, done tasks)",
+    )
     args = parser.parse_args()
 
-    findings = audit_skills_repo(args.root.resolve())
+    root = args.root.resolve()
+    if args.docs_hygiene_only:
+        findings: list[str] = []
+        _check_docs_hygiene(root, findings)
+    else:
+        findings = audit_skills_repo(root)
     for finding in findings:
         print(finding)
     return 1 if findings else 0

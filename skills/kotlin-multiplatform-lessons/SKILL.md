@@ -227,6 +227,12 @@ lesson co-located with the evidence in git history.
 
 ---
 
+**Freshness rule:** the lesson format and harvester schema may evolve — recheck
+`kotlin-multiplatform-skill-harvester` before writing a batch of lessons to confirm
+the frontmatter fields haven't changed.
+
+---
+
 ## Related Skills
 
 - `kotlin-multiplatform-skill-harvester` — reads all lessons in a project (or

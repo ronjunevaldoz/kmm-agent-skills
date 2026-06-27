@@ -253,6 +253,41 @@ Use this validation matrix for project docs:
 | Onboarding docs change | The setup steps match the current project workflow |
 | Release/setup docs change | Version numbers, paths, and commands reflect the current repo |
 
+## Docs Hygiene Rules
+
+Keep `docs/` thin so it stays readable and maintainable. The audit script
+(`audit_skills_repo.py`) enforces these automatically — fix findings before merging.
+
+| Rule | Limit | Action when exceeded |
+|---|---|---|
+| Any `docs/` file (outside `archive/`) | 150 lines | Split into sub-docs or move completed sections to `archive/` |
+| Unprocessed lessons in `docs/lessons/` | 20 files | Run `kotlin-multiplatform-skill-harvester` and archive processed files |
+| Lesson file age without harvest | 30 days | Harvest or archive — stale lessons rot and lose context |
+| Task file marked `status: done` in active `docs/tasks/` | 0 | Move to `docs/tasks/archive/` immediately |
+
+### Lesson lifecycle
+
+```
+docs/lessons/YYYY-MM-DD-slug.md
+    ↓  harvested and skill amended
+docs/lessons/archive/YYYY-MM-DD-slug.md   ← move here, don't delete
+```
+
+Archive rather than delete — the lesson file is evidence the skill was fixed and
+provides historical context if the same issue resurfaces.
+
+### Running hygiene check locally
+
+```bash
+# Full audit including docs hygiene
+python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .
+
+# Docs hygiene only (fast, for consumer projects)
+python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py . --docs-hygiene-only
+```
+
+---
+
 ## Common Anti-Patterns
 
 - Leaving a stale command name in README or onboarding docs after a rename.
@@ -280,6 +315,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-06-27 | Added Docs Hygiene Rules section: 150-line limit, 20-file lesson backlog limit, 30-day stale lesson threshold, done-task archive rule, lesson lifecycle, and hygiene check commands. |
 | 2026-06-27 | Added cleanup-intent trigger keywords: clean docs, tidy docs, docs cleanup, update docs, fix docs, stale docs, docs are wrong. |
 | 2026-06-24 | Added fix maturity lanes for dev, beta, and stable fixes, plus a task template section for tracking them in `docs/tasks.md`. |
 | 2026-06-24 | Added task lifecycle guidance: default task template, dated filename convention, archive/promotion rules, and agile-friendly lifecycle flow. |
