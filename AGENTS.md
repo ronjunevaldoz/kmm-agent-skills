@@ -18,6 +18,8 @@ The rules below are maintained in these files. **Do not apply a remembered copy 
 | Confirmed error patterns (EP-1 through EP-9) | `skills/kotlin-multiplatform-jni-pro/references/error-patterns.md` |
 | File-extension and path-based skill routing | `routing_rules.json` |
 | KMP skill map, build order, and 30-skill routing index | `skills/kotlin-multiplatform-expert/SKILL.md` |
+| Versioning tiers, commit format, CHANGELOG rules, release commands | `docs/reference/versioning-policy.md` |
+| Library version compatibility and conflict zones | `docs/reference/compatibility-matrix.md` |
 
 ---
 
@@ -29,6 +31,31 @@ Full routing matrix is in `routing_rules.json`. Hard boundaries (quoted from `ha
 - **Any `.cpp`/`.h` under `vendor/` or a submodule is read-only.** Edits are a violation (EP-9). Adapt in `*-wrapper.cpp` or a C-shim.
 - **Opaque native pointer held as Kotlin `Long` MUST have a matching `dispose()`/`close()` → JNI `_free`.**
 - **Docs scope first:** confirm whether a docs request targets this repo or a downstream consumer project before routing it to a docs skill.
+
+---
+
+### Versioning & Release — Hard Rules
+
+Full policy is in `docs/reference/versioning-policy.md`. Summary of rules that must never be broken:
+
+- **Never run `git tag` manually.** Always use `python3 scripts/release.py`.
+- **Never edit `CHANGELOG.md` manually** for dev work. CHANGELOG is auto-generated from git log by the release script. The only allowed manual edit is fixing a typo in an already-released entry.
+- **Every commit must follow Conventional Commit format:** `<type>[scope]: <description>`. Types: `feat | fix | chore | docs | refactor | test | style | perf | build | ci`. The `commit-msg` hook enforces this.
+- **Do not push tags or release commits** without explicit user confirmation.
+
+Release commands:
+```
+python3 scripts/release.py patch        # stable release → vX.Y.Z
+python3 scripts/release.py patch --rc   # release candidate → vX.Y.Z-rc.N
+python3 scripts/release.py patch --dry-run
+```
+
+Version tier summary:
+| Tier | Tag | CHANGELOG | GitHub Release |
+|---|---|---|---|
+| dev | none | not touched | none |
+| rc | vX.Y.Z-rc.N | auto-generated | pre-release |
+| stable | vX.Y.Z | auto-generated | full release |
 
 ---
 

@@ -3,14 +3,21 @@
 Release script for kmm-agent-skills.
 
 Usage:
-    python3 scripts/release.py patch   # bug fixes, audit pattern fixes, freshness updates
-    python3 scripts/release.py minor   # new skills, new agents/commands, new reviewer checks
-    python3 scripts/release.py major   # breaking structure changes (skill section renames, etc.)
-    python3 scripts/release.py --dry-run minor
+    python3 scripts/release.py patch          # stable release — bug fixes, version bumps
+    python3 scripts/release.py minor          # stable release — new skills, new features
+    python3 scripts/release.py major          # stable release — breaking changes
+    python3 scripts/release.py patch --rc     # release candidate — vX.Y.Z-rc.N tag
+    python3 scripts/release.py patch --dry-run
+    python3 scripts/release.py patch --rc --dry-run
+
+Versioning tiers (see docs/reference/versioning-policy.md for the full policy):
+    dev    — no tag; dev commits accumulate freely; CHANGELOG is never touched manually
+    rc     — vX.Y.Z-rc.N tag; pre-release GitHub Release; CHANGELOG auto-generated
+    stable — vX.Y.Z tag; full GitHub Release; CHANGELOG auto-generated
 
 Versioning policy:
     patch — fixes only: audit false-positive corrections, typos, freshness date bumps,
-            KNOWN_ISSUES updates, PLAN.md housekeeping
+            KNOWN_ISSUES updates, PLAN.md housekeeping, library version bumps
     minor — additive work: new skill, new audit pattern, new reviewer check, new command,
             new fixer rule, new agent, layout/theme enforcement additions
     major — breaking: skill section headers renamed (breaks external tooling that parses
@@ -23,18 +30,19 @@ What it does (in order):
     4.  Run validate_skill_map.py — README, expert map, and planner must match
     5.  Run validate_keyword_routing.py — every skill must have routing coverage
     6.  Run pytest — must be 100% passing
-    7.  Bump version in skills.json (semver)
+    7.  Bump version in skills.json (semver base version, no pre-release suffix)
     8.  Regenerate all skill entries in skills.json from SKILL.md frontmatter
     9.  Update shipped skill count in PLAN.md
     10. Prepend new section to CHANGELOG.md (auto-generated from git log)
     11. Stage skills.json, PLAN.md, CHANGELOG.md
-    12. Create a release commit: "Release vX.Y.Z"
-    13. Create an annotated git tag vX.Y.Z
-    14. Create a GitHub Release via gh CLI (release notes from CHANGELOG section)
+    12. Create a release commit: "Release vX.Y.Z" or "Release vX.Y.Z-rc.N"
+    13. Create an annotated git tag vX.Y.Z or vX.Y.Z-rc.N
+    14. --rc: create pre-release GitHub Release
+        stable: create full GitHub Release
     15. Print push instructions — does NOT push automatically
 
 Agents: run this script exactly as shown above. Do not push to remote
-without explicit user confirmation.
+without explicit user confirmation. Never run `git tag` manually.
 """
 
 from __future__ import annotations
@@ -257,6 +265,30 @@ def get_previous_tag() -> str:
     return result.stdout.strip() if result.returncode == 0 else ""
 
 
+def get_previous_stable_tag() -> str:
+    """Return the most recent stable tag (no -rc suffix), or empty string."""
+    result = run(["git", "tag", "--list", "v*", "--sort=-version:refname"], check=False)
+    if result.returncode != 0:
+        return ""
+    for tag in result.stdout.strip().splitlines():
+        if re.match(r"^v\d+\.\d+\.\d+$", tag.strip()):
+            return tag.strip()
+    return ""
+
+
+def get_next_rc_number(base_version: str) -> int:
+    """Return the next RC number for the given base version (1-based)."""
+    result = run(["git", "tag", "--list", f"v{base_version}-rc.*"], check=False)
+    if result.returncode != 0 or not result.stdout.strip():
+        return 1
+    nums = [
+        int(m.group(1))
+        for tag in result.stdout.strip().splitlines()
+        if (m := re.search(r"-rc\.(\d+)$", tag.strip()))
+    ]
+    return max(nums) + 1 if nums else 1
+
+
 def generate_changelog_section(new_version: str, prev_tag: str) -> str:
     """Build a CHANGELOG section from git log since prev_tag."""
     import datetime
@@ -315,31 +347,36 @@ def update_changelog(new_version: str, prev_tag: str, dry_run: bool) -> str:
     return section
 
 
-def create_github_release(tag: str, changelog_section: str, dry_run: bool) -> None:
-    # Check gh CLI is available
+def create_github_release(tag: str, changelog_section: str, dry_run: bool, prerelease: bool = False) -> None:
     result = run(["gh", "--version"], check=False)
     if result.returncode != 0:
         info("gh CLI not found — skipping GitHub Release creation")
         return
 
     if dry_run:
-        info(f"[dry-run] would create GitHub Release {tag}")
+        kind = "pre-release" if prerelease else "release"
+        info(f"[dry-run] would create GitHub {kind} {tag}")
         return
 
-    result = run(
-        ["gh", "release", "create", tag,
-         "--title", tag,
-         "--notes", changelog_section],
-        check=False,
-    )
+    cmd = ["gh", "release", "create", tag, "--title", tag, "--notes", changelog_section]
+    if prerelease:
+        cmd.append("--prerelease")
+
+    result = run(cmd, check=False)
     if result.returncode == 0:
         ok(f"GitHub Release {tag} created")
     else:
         info(f"GitHub Release creation failed (non-fatal): {result.stderr.strip()}")
 
 
-def git_commit_and_tag(new_version: str, skill_count: int, changelog_section: str, dry_run: bool) -> None:
-    tag = f"v{new_version}"
+def git_commit_and_tag(
+    new_version: str,
+    tag: str,
+    skill_count: int,
+    changelog_section: str,
+    dry_run: bool,
+    prerelease: bool = False,
+) -> None:
     msg = f"Release {tag}\n\n{skill_count} skills shipped. See CHANGELOG.md for details."
 
     if dry_run:
@@ -352,7 +389,7 @@ def git_commit_and_tag(new_version: str, skill_count: int, changelog_section: st
     run(["git", "commit", "-m", msg])
     run(["git", "tag", "-a", tag, "-m", f"Release {tag} — {skill_count} skills"])
     ok(f"Committed and tagged {tag}")
-    create_github_release(tag, changelog_section, dry_run=False)
+    create_github_release(tag, changelog_section, dry_run=False, prerelease=prerelease)
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
@@ -361,46 +398,58 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Release kmm-agent-skills")
     parser.add_argument("bump", choices=["major", "minor", "patch"],
                         help="Version component to bump")
+    parser.add_argument("--rc", action="store_true",
+                        help="Create a release candidate tag (vX.Y.Z-rc.N) instead of a stable tag")
     parser.add_argument("--dry-run", action="store_true",
                         help="Validate and preview without writing anything")
     args = parser.parse_args()
 
-    print(f"\n{'[DRY RUN] ' if args.dry_run else ''}kmm-agent-skills release — bump: {args.bump}\n")
+    tier = "RC" if args.rc else "STABLE"
+    print(f"\n{'[DRY RUN] ' if args.dry_run else ''}kmm-agent-skills release — bump: {args.bump}, tier: {tier}\n")
 
     if not args.dry_run:
         check_clean_tree()
 
     run_release_validation()
 
-    # Determine new version
+    # Determine new base version
     manifest = json.loads(SKILLS_JSON.read_text())
     current_version = manifest["version"]
-    new_version = bump_version(current_version, args.bump)
-    info(f"Version: {current_version} → {new_version}")
+    new_base_version = bump_version(current_version, args.bump)
+
+    # Build the full tag string
+    if args.rc:
+        rc_num = get_next_rc_number(new_base_version)
+        full_version = f"{new_base_version}-rc.{rc_num}"
+    else:
+        full_version = new_base_version
+
+    tag = f"v{full_version}"
+    info(f"Version: {current_version} → {new_base_version}  |  Tag: {tag}")
 
     if args.dry_run:
         skills = extract_skills()
         info(f"Skills count: {len(skills)}")
         prev_tag = get_previous_tag()
         info(f"Previous tag: {prev_tag or '(none)'}")
-        update_changelog(new_version, prev_tag, dry_run=True)
-        git_commit_and_tag(new_version, len(skills), "", dry_run=True)
+        update_changelog(full_version, prev_tag, dry_run=True)
+        git_commit_and_tag(new_base_version, tag, len(skills), "", dry_run=True, prerelease=args.rc)
         info("Dry run complete — nothing written")
         return 0
 
     prev_tag = get_previous_tag()
     info(f"Previous tag: {prev_tag or '(none)'}")
 
-    update_skills_json(new_version)
+    # skills.json always stores the base semver (no -rc suffix)
+    update_skills_json(new_base_version)
     skill_count = len(json.loads(SKILLS_JSON.read_text())["skills"])
     update_plan_md(skill_count)
-    changelog_section = update_changelog(new_version, prev_tag, dry_run=False)
-    git_commit_and_tag(new_version, skill_count, changelog_section, dry_run=False)
+    changelog_section = update_changelog(full_version, prev_tag, dry_run=False)
+    git_commit_and_tag(new_base_version, tag, skill_count, changelog_section, dry_run=False, prerelease=args.rc)
 
-    tag = f"v{new_version}"
     print(f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Release {tag} ready.
+  {'Release candidate' if args.rc else 'Release'} {tag} ready.
 
   Push when confirmed:
     git push origin main

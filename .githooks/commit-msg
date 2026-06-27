@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Enforces Conventional Commit format on every commit.
+# See docs/reference/versioning-policy.md for the full policy.
+#
+# Activate for this repo:
+#   git config core.hooksPath .githooks
+
+set -euo pipefail
+
+MSG_FILE="$1"
+MSG=$(cat "$MSG_FILE")
+
+# Allow merge commits, revert commits, and fixup/squash (interactive rebase)
+if echo "$MSG" | grep -qE "^(Merge |Revert |fixup! |squash! )"; then
+  exit 0
+fi
+
+# Allow release script commits ("Release vX.Y.Z")
+if echo "$MSG" | grep -qE "^Release v[0-9]+\.[0-9]+\.[0-9]+"; then
+  exit 0
+fi
+
+# Conventional Commit pattern: type[(scope)]: description (min 1 char description)
+PATTERN="^(feat|fix|chore|docs|refactor|test|style|perf|build|ci)(\([a-z0-9][a-z0-9 _-]*\))?: .{1,}"
+
+FIRST_LINE=$(echo "$MSG" | head -1)
+
+if ! echo "$FIRST_LINE" | grep -qE "$PATTERN"; then
+  echo "" >&2
+  echo "  ❌  Commit rejected — message does not follow Conventional Commit format." >&2
+  echo "" >&2
+  echo "  Format:  <type>[optional scope]: <description>" >&2
+  echo "  Types:   feat | fix | chore | docs | refactor | test | style | perf | build | ci" >&2
+  echo "" >&2
+  echo "  Examples:" >&2
+  echo "    feat(skills): add kotlin-multiplatform-layout-system skill" >&2
+  echo "    fix: correct KSP version in feature-scaffold" >&2
+  echo "    chore(versions): bump ktor 3.1.3 → 3.5.0" >&2
+  echo "    docs: add dependency compatibility matrix" >&2
+  echo "" >&2
+  echo "  Your message: $FIRST_LINE" >&2
+  echo "" >&2
+  echo "  See: docs/reference/versioning-policy.md" >&2
+  echo "" >&2
+  exit 1
+fi
+
+exit 0

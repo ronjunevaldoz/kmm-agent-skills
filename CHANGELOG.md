@@ -2,6 +2,12 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [Unreleased]
+
+_Dev commits accumulate here. This section is auto-promoted to a versioned entry when `scripts/release.py` is run. Do not edit this section manually — use conventional commits so the release script generates meaningful entries._
+
+---
+
 ## [v1.28.6] — 2026-06-27
 
 ### Chore
