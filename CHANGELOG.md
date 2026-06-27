@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.2] — 2026-06-28
+
+### Added
+
+- feat(skills): enforce kotlin-multiplatform- prefix on all suggested new skill names
+
+---
+
 ## [v1.29.1] — 2026-06-28
 
 ### Added
