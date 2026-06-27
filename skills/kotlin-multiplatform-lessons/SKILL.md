@@ -233,6 +233,42 @@ the frontmatter fields haven't changed.
 
 ---
 
+## Recommendation First
+
+Write a lesson immediately after discovering a pattern mismatch — while the context is still fresh. One lesson per finding. Use the `correct` field to capture the fix, not just the problem.
+
+If you are unsure whether a finding warrants a lesson: if it took more than one lookup or correction to resolve, it warrants a lesson.
+
+---
+
+## Common Anti-Patterns
+
+- Writing a lesson that describes the symptom but not the root cause — the `what_broke` field should explain _why_, not just _what_
+- Using vague titles like `fix` or `update` — the title is the primary search key; make it specific enough to find without reading the body
+- Filing a lesson for a one-off project quirk rather than a repeatable pattern — lessons are only useful if the finding could recur in another project
+- Skipping `evidence` — without a file path or line reference, the lesson cannot be verified or acted on by the harvester
+
+---
+
+## Testing
+
+Lessons are structured YAML-like markdown files, not code. Validation is structural:
+
+- Required fields present: `title`, `skill`, `what_we_followed`, `what_broke`, `correct_pattern`, `evidence`
+- `skill` value matches a directory name under `skills/` in the skills repo
+- `evidence` contains at least one file path or code excerpt
+- File name follows `YYYY-MM-DD-kebab-case-title.md` convention in `docs/lessons/`
+
+Run `python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .` to catch naming violations.
+
+---
+
+## Output Style
+
+When writing a lesson, respond with the complete lesson file content — no surrounding explanation. The file is the output. Only add prose if the user asks for a summary or context.
+
+---
+
 ## Related Skills
 
 - `kotlin-multiplatform-skill-harvester` — reads all lessons in a project (or

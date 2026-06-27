@@ -176,7 +176,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 50 Skills and What They Own
+## The 53 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -194,6 +194,9 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-release` | Versioning (`gradle.properties`), Maven Central (vanniktech), GPG signing, git-cliff changelog, GitHub Release, secrets management, local publish script |
 | `kotlin-multiplatform-audit` | Existing project health checks, boundary review, architecture drift, readiness gaps |
 | `kotlin-multiplatform-project-docs-maintainer` | Consumer-facing README, onboarding, and docs/reference sync for downstream KMP projects |
+| `kotlin-multiplatform-layout-system` | ASCII wireframe docs for screens — draft and document app layout before or after implementation; lives in `docs/layout-system/` |
+| `kotlin-multiplatform-lessons` | Structured lesson files capturing pattern mismatches and fixes; feeds the skill-harvester |
+| `kotlin-multiplatform-skill-harvester` | Reads accumulated lesson files and proposes amendments to source skills; produces a harvest report |
 | `kotlin-multiplatform-legal-docs` | Privacy Policy, Terms & Conditions, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, in-app `LegalDocsScreen`, consent gate |
 
 ### Layer 2 — Core Infrastructure
@@ -269,6 +272,9 @@ kotlin-multiplatform-feature-scaffold       ← scaffold second (implements the 
 ├── kotlin-multiplatform-dependency-injection (no deps)
 ├── kotlin-multiplatform-audit              (no deps for review work)
 ├── kotlin-multiplatform-project-docs-maintainer (depends on: audit)
+├── kotlin-multiplatform-layout-system      (no deps)
+├── kotlin-multiplatform-lessons            (no deps)
+├── kotlin-multiplatform-skill-harvester    (depends on: lessons)
 ├── kotlin-multiplatform-logging            (depends on: scaffold)
 ├── kotlin-multiplatform-ktor-auth-service  (no deps)
 ├── kotlin-multiplatform-mongodb-database   (no deps)
@@ -515,6 +521,9 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "Koin", "dependency injection", "manual modules", "annotated mode" | `kotlin-multiplatform-dependency-injection` |
 | "review my KMP project", "audit this repo", "what's wrong with this architecture" | `kotlin-multiplatform-audit` |
 | "project docs", "consumer docs", "project README", "getting started", "project docs reference", "onboarding docs", "architecture diagram", "library docs", "app docs" | `kotlin-multiplatform-project-docs-maintainer` |
+| "layout system", "screen wireframe", "ASCII wireframe", "draft screen", "document screen layout", "layout doc", "screen layout", "layout-system" | `kotlin-multiplatform-layout-system` |
+| "write a lesson", "capture lesson", "document a finding", "pattern mismatch", "lesson file" | `kotlin-multiplatform-lessons` |
+| "harvest lessons", "propose skill amendments", "skill harvester", "harvest findings", "update skills from lessons" | `kotlin-multiplatform-skill-harvester` |
 | "repo README", "repo docs", "agent docs", "command docs", "routing text", "skills repo docs" | `docs-maintainer` |
 | "wireframes", "screen flows", "layout specs", "design handoff", "component API", "visual direction" | `designer` |
 | "release notes", "consumer release notes", "per-skill changelog", "CHANGELOG.md" | `changelog` |

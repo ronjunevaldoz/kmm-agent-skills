@@ -279,6 +279,31 @@ See `kotlin-multiplatform-offline-first` for the connectivity monitor pattern.
 
 ---
 
+## Testing
+
+The harvester is a document-analysis and diff-generation tool, not runtime code. Validation is output-driven:
+
+- Run the bundled harvest script against a sample `docs/lessons/` directory and verify the report lists only findings that match the configured filter thresholds
+- Check that each proposed amendment in the report references a real `skill` directory name
+- Verify the `amendment_type` field is one of: `add_section`, `update_section`, `add_example`, `add_anti_pattern`, `add_version_note`
+- Confirm the report excludes lessons already marked `applied: true`
+
+Run `python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .` to catch naming and line-limit violations in harvested output files.
+
+---
+
+## Output Style
+
+When running a harvest, respond in this order:
+1. State how many lessons were scanned and how many findings passed the filter threshold
+2. Show the harvest report (grouped by skill, then by amendment type)
+3. For each HIGH-severity finding, include the proposed diff inline
+4. End with a summary: `N amendments proposed, M skills affected`
+
+Do not narrate what each amendment means unless the user asks. The report is the primary output.
+
+---
+
 ## Related Skills
 
 - `kotlin-multiplatform-lessons` — consumer-side skill for writing the lesson

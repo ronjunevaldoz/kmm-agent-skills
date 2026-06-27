@@ -324,6 +324,52 @@ Each screen file follows this structure:
 
 ---
 
+## Recommendation First
+
+Default to creating `docs/layout-system/` when none exists. One file per screen, plus `_components.md`. Start with the screen that has the most shared components — it reveals the most reuse early.
+
+Use Pattern A (3-col) for tablet/desktop, Pattern B (2-col) when the side panel is hidden, Pattern D for full-screen flows (login/onboarding/splash). Add a Phone variant block when nav chrome changes between breakpoints.
+
+---
+
+## Common Anti-Patterns
+
+- Putting project-specific component names directly in the wireframe template rather than in a Filled Example section
+- Skipping the phone variant when the nav layout changes at mobile breakpoints
+- Using emoji inside the ASCII grid (breaks monospace alignment) — put emoji only in the Legend line
+- Letting `_components.md` drift from the actual Compose component names — it is a living registry, not a snapshot
+- Writing `docs/layout-system/` files that describe the current implementation rather than the intended design; the layout doc should lead the code, not follow it
+
+---
+
+## Testing
+
+This skill produces markdown documentation, not runtime code. The validation equivalent of a test is the **Validation Checklist** at the end of each screen file:
+
+- All `<placeholder>` tags replaced with real names in committed files
+- All rows in every ASCII block are the same character width
+- Phone variant block present when nav changes at mobile breakpoints
+- No emoji inside the grid (only in Legend lines)
+- `_components.md` registry lists every component that appears in any screen file
+- Platform column (`Both` / `Android` / `iOS`) filled for every row
+
+Run `python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .` to catch line-limit and naming violations across the `docs/layout-system/` directory.
+
+---
+
+## Output Style
+
+When asked to create or update layout-system docs, respond in this order:
+1. State which screens will be created or updated and which pattern applies to each
+2. Create or update `_components.md` first — it is the registry everything else references
+3. Create screen files one at a time, starting with the screen that has the most shared components
+4. Show the ASCII wireframe inline for each screen so the user can review alignment before committing
+5. End with the Validation Checklist filled out for the files just written
+
+Keep explanations short. The wireframe is the primary output — do not narrate what each row means unless the user asks.
+
+---
+
 ## Related Skills
 
 - `kotlin-multiplatform-adaptive-layout` — Compose implementation of breakpoint-driven

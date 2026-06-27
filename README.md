@@ -185,6 +185,9 @@ stay consistent.
 - [`kotlin-multiplatform-expert`](skills/kotlin-multiplatform-expert/) - skill routing and build order
 - [`kotlin-multiplatform-project-docs-maintainer`](skills/kotlin-multiplatform-project-docs-maintainer/) - consumer-facing project docs, onboarding, and docs/reference sync
 - [`kotlin-multiplatform-audit`](skills/kotlin-multiplatform-audit/) - repo review, fix sequencing, and CI governance gate
+- [`kotlin-multiplatform-layout-system`](skills/kotlin-multiplatform-layout-system/) - ASCII wireframe docs for screens in `docs/layout-system/`; draft and document app layout
+- [`kotlin-multiplatform-lessons`](skills/kotlin-multiplatform-lessons/) - structured lesson files capturing pattern mismatches and fixes
+- [`kotlin-multiplatform-skill-harvester`](skills/kotlin-multiplatform-skill-harvester/) - reads lesson files and proposes amendments to source skills
 - [`kotlin-multiplatform-release`](skills/kotlin-multiplatform-release/) - versioning, Maven Central publishing, pre-release suffixes, git-cliff changelog, GitHub Release
 - [`kotlin-multiplatform-legal-docs`](skills/kotlin-multiplatform-legal-docs/) - privacy policy, terms, data-safety labels, consent gates, and legal compliance screens
 

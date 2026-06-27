@@ -42,6 +42,9 @@ first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
 | CI or build changes | `ci-github-actions`, `code-quality` |
 | Repo README, repo docs, agent docs, or command docs | `docs-maintainer`, `audit` |
 | Downstream project README, docs, or onboarding docs | `project-docs-maintainer`, `audit` |
+| Screen wireframes or layout docs | `layout-system` |
+| Lesson files for pattern mismatches | `lessons` |
+| Harvest lessons and propose skill amendments | `skill-harvester`, `lessons` |
 | Consumer release notes or per-skill changelogs | `changelog` |
 | Release, versioning, or Maven Central publishing | `release`, `ci-github-actions`, `xcframework-spm` |
 | Legal docs (privacy policy, terms, GDPR, data safety) | `legal-docs`, `flavor-environment`, `datastore` |
