@@ -402,7 +402,12 @@ esac
 echo "Bumping $CURRENT → $NEW_VERSION"
 
 # Bump version
-sed -i '' "s/^VERSION=.*/VERSION=$NEW_VERSION/" "$PROPS"
+# cross-platform: BSD (macOS) and GNU (Linux) sed differ on -i syntax
+if sed --version 2>/dev/null | grep -q GNU; then
+    sed -i "s/^VERSION=.*/VERSION=$NEW_VERSION/" "$PROPS"
+else
+    sed -i '' "s/^VERSION=.*/VERSION=$NEW_VERSION/" "$PROPS"
+fi
 
 # Run publish (credentials injected via env or secrets manager)
 ./gradlew publishAllPublicationsToMavenCentralRepository --no-configuration-cache

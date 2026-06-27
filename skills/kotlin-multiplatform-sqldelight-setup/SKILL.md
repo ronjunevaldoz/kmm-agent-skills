@@ -125,8 +125,8 @@ The `GROUP_ID.core` plugin already adds all KMP targets. Add `sqldelight {}` and
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    id("GROUP_ID.core")
-    id("app.cash.sqldelight")
+    alias(libs.plugins.GROUP_ID.core)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {

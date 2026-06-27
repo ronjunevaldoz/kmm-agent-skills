@@ -131,7 +131,7 @@ The `GROUP_ID.core` convention plugin already adds all targets. Confirm the modu
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    id("GROUP_ID.core")
+    alias(libs.plugins.GROUP_ID.core)
 }
 
 kotlin {

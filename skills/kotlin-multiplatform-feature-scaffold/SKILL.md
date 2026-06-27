@@ -395,7 +395,14 @@ koin-android               = { module = "io.insert-koin:koin-android",          
 koin-androidx-compose      = { module = "io.insert-koin:koin-androidx-compose",      version.ref = "koin" }
 
 [plugins]
-kotlin-koin                = { id = "org.jetbrains.kotlin.plugin.koin", version.ref = "kotlin" }
+kotlin-multiplatform       = { id = "org.jetbrains.kotlin.multiplatform",              version.ref = "kotlin" }
+kotlin-android             = { id = "org.jetbrains.kotlin.android",                    version.ref = "kotlin" }
+kotlin-compose             = { id = "org.jetbrains.kotlin.plugin.compose",             version.ref = "kotlin" }
+kotlin-koin                = { id = "org.jetbrains.kotlin.plugin.koin",                version.ref = "kotlin" }
+compose-multiplatform      = { id = "org.jetbrains.compose",                           version.ref = "compose-multiplatform" }
+android-application        = { id = "com.android.application",                         version.ref = "agp" }
+android-library-kmp        = { id = "com.android.kotlin.multiplatform.library",        version.ref = "agp" }
+sqldelight                 = { id = "app.cash.sqldelight",                             version.ref = "sqldelight" }
 ```
 
 ---
@@ -421,8 +428,8 @@ Pure KMP — no framework deps. Data classes, sealed types, enums. Zero dependen
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.jetbrains.kotlin.multiplatform")
-    id("com.android.kotlin.multiplatform.library")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library.kmp)
 }
 
 kotlin {
@@ -456,8 +463,8 @@ Pure KMP — no Compose, no Koin. Exposes interfaces, navigation contracts. Depe
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.jetbrains.kotlin.multiplatform")
-    id("com.android.kotlin.multiplatform.library")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library.kmp)
 }
 
 kotlin {
@@ -490,8 +497,8 @@ Pure KMP — use cases and business logic. No Compose, no data layer deps.
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.jetbrains.kotlin.multiplatform")
-    id("com.android.kotlin.multiplatform.library")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library.kmp)
 }
 
 kotlin {
@@ -526,9 +533,9 @@ KMP + platform implementations — Ktor for networking, SQLDelight for persisten
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.jetbrains.kotlin.multiplatform")
-    id("com.android.kotlin.multiplatform.library")
-    id("app.cash.sqldelight")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library.kmp)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
@@ -573,8 +580,8 @@ Pure KMP — ViewModels and MVI contracts. No Compose dependency. Testable on pl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.jetbrains.kotlin.multiplatform")
-    id("com.android.kotlin.multiplatform.library")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library.kmp)
 }
 
 kotlin {
@@ -612,10 +619,10 @@ CMP — Compose Multiplatform screens only. Depends on `:presenter`, not on `:do
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.jetbrains.kotlin.multiplatform")
-    id("com.android.kotlin.multiplatform.library")
-    id("org.jetbrains.compose")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library.kmp)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.compose)
 }
 
 kotlin {
@@ -659,8 +666,8 @@ Base for all `:core:*` modules. Apply additional plugins per-module as needed.
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.jetbrains.kotlin.multiplatform")
-    id("com.android.kotlin.multiplatform.library")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library.kmp)
 }
 
 kotlin {
@@ -694,10 +701,10 @@ Android application entry point.
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.compose")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.koin)
 }
 

@@ -50,6 +50,30 @@ recheck the Koin docs and changelog when upgrading past a minor version.
 
 ---
 
+## Version Catalog Entries
+
+Add to `gradle/libs.versions.toml` before wiring any Koin module:
+
+```toml
+[versions]
+koin = "4.2.1"
+
+[libraries]
+koin-core              = { module = "io.insert-koin:koin-core",              version.ref = "koin" }
+koin-core-viewmodel    = { module = "io.insert-koin:koin-core-viewmodel",    version.ref = "koin" }
+koin-compose           = { module = "io.insert-koin:koin-compose",           version.ref = "koin" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
+koin-android           = { module = "io.insert-koin:koin-android",           version.ref = "koin" }
+koin-androidx-compose  = { module = "io.insert-koin:koin-androidx-compose",  version.ref = "koin" }
+
+[plugins]
+kotlin-koin            = { id = "org.jetbrains.kotlin.plugin.koin",          version.ref = "kotlin" }
+```
+
+> If `feature-scaffold` was applied first, these entries are already present — do not duplicate them.
+
+---
+
 ## Recommendation First
 
 Default to **manual modules + constructor injection**.
@@ -145,6 +169,11 @@ startKoin {
     )
 }
 ```
+
+> **Existing project:** if `startKoin` is already called somewhere in the app, do **not** add
+> a second call — that throws `KoinApplicationAlreadyStartedException`. Instead, add new
+> modules to the existing `modules(...)` list, or call `loadKoinModules(newModule)` at any
+> point after startup.
 
 Use manual mode when you want:
 - explicit dependencies

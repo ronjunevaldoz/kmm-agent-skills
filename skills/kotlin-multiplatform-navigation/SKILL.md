@@ -89,7 +89,8 @@ decompose          = "3.3.0"    # optional alternative
 
 [libraries]
 # Navigation Compose (KMP)
-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
+navigation-compose         = { module = "org.jetbrains.androidx.navigation:navigation-compose",  version.ref = "navigation-compose" }
+navigation-compose-testing = { module = "org.jetbrains.androidx.navigation:navigation-testing", version.ref = "navigation-compose" }
 
 # Decompose (optional alternative)
 decompose          = { module = "com.arkivanov.decompose:decompose",               version.ref = "decompose" }
@@ -424,8 +425,8 @@ class RootComponent(
 ## Testing
 
 ```kotlin
-// Use TestNavHostController from the Navigation testing artifact
-// testImplementation("org.jetbrains.androidx.navigation:navigation-testing:<version>")
+// Add to androidTest source set — navigation-testing is Android-only
+// androidTestImplementation(libs.navigation.compose.testing)
 @get:Rule val composeRule = createComposeRule()
 
 @Test fun `start destination renders home screen`() {
