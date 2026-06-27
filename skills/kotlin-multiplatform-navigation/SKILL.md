@@ -83,9 +83,9 @@ Add to `gradle/libs.versions.toml`:
 
 ```toml
 [versions]
-navigation-compose = "2.9.0"    # JetBrains KMP fork; check latest at
+navigation-compose = "2.9.2"    # JetBrains KMP fork; check latest at
                                  # https://github.com/JetBrains/compose-multiplatform
-decompose          = "3.3.0"    # optional alternative
+decompose          = "3.5.0"    # optional alternative
 
 [libraries]
 # Navigation Compose (KMP)

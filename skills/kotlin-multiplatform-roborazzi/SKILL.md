@@ -84,7 +84,7 @@ Why:
 
 ```toml
 [versions]
-roborazzi = "1.29.0"
+roborazzi = "1.64.0"
 
 [libraries]
 roborazzi             = { module = "io.github.takahirom.roborazzi:roborazzi",             version.ref = "roborazzi" }

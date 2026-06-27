@@ -139,21 +139,21 @@ In **Add Feature mode**, only `GROUP_ID`, `FEATURE_NAME`, and `DI_APPROACH` are 
 Use these exact versions. Do not substitute without explicit user confirmation.
 
 ```toml
-agp                   = "9.0.1"
+agp                   = "9.2.0"
 kotlin                = "2.4.0"
 ksp                   = "2.4.0-2.0.0"
-koin                  = "4.2.1"
+koin                  = "4.2.2"
 koin-annotations      = "2.3.1"
-ktor                  = "3.1.3"
-sqldelight            = "2.0.2"
+ktor                  = "3.5.0"
+sqldelight            = "2.3.2"
 compose-multiplatform = "1.11.1"
-buildkonfig           = "0.21.2"
+buildkonfig           = "0.22.0"
 android-compileSdk    = "36"
 android-minSdk        = "24"
 android-targetSdk     = "36"
-androidx-lifecycle    = "2.11.0-beta01"
+androidx-lifecycle    = "2.11.0"
 androidx-activity     = "1.13.0"
-coroutines            = "1.10.2"
+coroutines            = "1.11.0"
 serialization         = "1.11.0"
 datetime              = "0.8.0"
 ```
@@ -288,7 +288,7 @@ rootProject.name = "PROJECT_NAME"
 
 **`gradle/libs.versions.toml`** — update to the target versions from Step 2:
 ```toml
-agp                   = "9.0.1"
+agp                   = "9.2.0"
 kotlin                = "2.4.0"
 compose-multiplatform = "1.11.1"
 # … update all version entries to match Step 2 table
@@ -370,11 +370,11 @@ Only add what the wizard doesn't already have (check before adding):
 
 ```toml
 [versions]
-sqldelight            = "2.0.2"
-roborazzi             = "1.29.0"
+sqldelight            = "2.3.2"
+roborazzi             = "1.64.0"
 turbine               = "1.2.1"
 datetime              = "0.8.0"
-koin                  = "4.2.1"
+koin                  = "4.2.2"
 
 [libraries]
 sqldelight-runtime         = { module = "app.cash.sqldelight:runtime",               version.ref = "sqldelight" }

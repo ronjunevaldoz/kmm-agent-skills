@@ -56,7 +56,7 @@ Add to `gradle/libs.versions.toml` before wiring any Koin module:
 
 ```toml
 [versions]
-koin = "4.2.1"
+koin = "4.2.2"
 
 [libraries]
 koin-core              = { module = "io.insert-koin:koin-core",              version.ref = "koin" }

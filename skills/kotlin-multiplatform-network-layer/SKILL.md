@@ -111,7 +111,7 @@ migration cost outweighs the consistency benefit.
 ## Version Reference
 
 ```toml
-ktor                 = "3.1.3"
+ktor                 = "3.5.0"
 ```
 
 Verify these libraries exist in `libs.versions.toml`:

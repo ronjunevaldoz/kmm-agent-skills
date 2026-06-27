@@ -98,7 +98,7 @@ Use Room only if the team is Android-only and the shared-module investment is no
 
 ```toml
 [versions]
-sqldelight = "2.0.2"
+sqldelight = "2.3.2"
 
 [libraries]
 sqldelight-runtime           = { module = "app.cash.sqldelight:runtime",                   version.ref = "sqldelight" }

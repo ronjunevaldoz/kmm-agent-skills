@@ -79,7 +79,7 @@ All variants produce a `BuildKonfig` object in commonMain with constants like
 
 - Project scaffolded with `kotlin-multiplatform-feature-scaffold`
 - `:androidApp` applies `GROUP_ID.android.app` convention plugin (already includes BuildKonfig)
-- `buildkonfig = "0.21.2"` in `libs.versions.toml`
+- `buildkonfig = "0.22.0"` in `libs.versions.toml`
 
 ---
 
