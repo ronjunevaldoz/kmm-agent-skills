@@ -149,16 +149,45 @@ bash kmm-agent-skills/scripts/update-consumer-skills.sh \
 The `--install-commands` flag lists each command with its header line and asks `[y/N]` before
 copying it. You can review the source file in another terminal before answering.
 
-**Available commands:**
+**Consumer commands** (install these in your project):
 
 | Command | What it does |
 |---|---|
-| `/kmm-new-skill` | Scaffold a new skill file with all required sections |
-| `/kmm-run-audit` | Run architecture and skill-hygiene audit against the project |
-| `/kmm-update-skills` | Pull latest skills and re-audit |
-| `/kmm-release-notes` | Generate per-skill release notes from git history |
-| `/kmm-submit-issue` | File a structured GitHub issue for a skill gap or bug |
-| `/kmm-report-skill-issue` | File a bug report for a skill that produced wrong output |
+| `/kmm-new-project <description>` | Scaffold a full KMP project from natural language |
+| `/kmm-setup-agents [path]` | Initialize `.claude/` agent setup in an existing KMP project |
+| `/kmm-implement-feature <name>` | Plan → Implement → Validate → Review a new feature |
+| `/kmm-execute-ticket <id>` | Implement a GitHub issue end-to-end |
+| `/kmm-run-audit [path]` | Run architecture audit with per-finding remediation |
+| `/kmm-verify [path]` | Full validation pipeline: tests, audit, screenshots |
+| `/kmm-review-changes` | Review git diff against 6-layer rules |
+| `/kmm-fix-design [path]` | Scan and fix design system violations |
+| `/kmm-update-design-system [path]` | Pull latest design system components |
+| `/kmm-record-design-baselines` | Record Roborazzi golden PNGs |
+| `/kmm-audit-screenshots [path]` | Vision audit of Roborazzi goldens |
+| `/kmm-audit-design-visual [path]` | Cross-screen visual consistency check |
+| `/kmm-update-skills` | Pull latest skills and re-deploy |
+| `/kmm-check-updates` | Check whether a newer version is available |
+| `/kmm-report-skill-issue` | File a structured skill bug report |
+
+**Or use the guided installer** to set up the full `.claude/` in one step:
+
+```bash
+# New project — scaffolds code + generates .claude/ at the end
+/kmm-new-project "build a todo app with offline sync"
+
+# Existing project — generates .claude/AGENTS.md, installs commands, deploys skills
+/kmm-setup-agents .
+```
+
+Or run the shell script manually with the `--setup-agents` flag:
+
+```bash
+bash kmm-agent-skills/scripts/update-consumer-skills.sh \
+  --source kmm-agent-skills \
+  --agent-dir your-kmp-project/.claude/skills \
+  --install-commands \
+  --setup-agents
+```
 
 ---
 

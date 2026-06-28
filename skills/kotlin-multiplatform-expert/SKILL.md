@@ -199,6 +199,9 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-lessons` | Structured lesson files capturing pattern mismatches and fixes; feeds the skill-harvester |
 | `kotlin-multiplatform-skill-harvester` | Reads accumulated lesson files and proposes amendments to source skills; produces a harvest report |
 | `kotlin-multiplatform-legal-docs` | Privacy Policy, Terms & Conditions, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, in-app `LegalDocsScreen`, consent gate |
+| `kotlin-multiplatform-proguard-r8` | R8 minification for KMP Android release builds: keep rules per library (Koin, Ktor, SQLDelight, serialization), release crash diagnosis, mapping.txt management |
+| `kotlin-multiplatform-in-app-purchases` | IAP and subscriptions: shared `PurchaseState` domain model, Play Billing (Android) and StoreKit 2 (iOS) implementations, MVI ViewModel integration, server-side validation |
+| `kotlin-multiplatform-desktop-app` | Desktop-specific: window management, system tray, file picker, native menu bar, keyboard shortcuts, drag-and-drop, JPackage packaging (dmg/msi/deb) |
 
 ### Layer 2 — Core Infrastructure
 | Skill | Owns |
@@ -580,6 +583,9 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "JNI", "JNI bridge", "native bridge", "JNIEnv", "Java_*", "GetStringUTFChars", "jbyteArray", "wrapper.cpp", "vendor C++", "3rd-party C++", "CMake JNI", "NDK", "call C++ from Kotlin/JVM", "native memory leak", "symbol conflict", "C-shim", "header compatibility" | `kotlin-multiplatform-jni-pro` |
 | Disambiguation — "platform-specific code", "iOS implementation", "CPointer", "cinterop", ".def file", "Kotlin/Native" → `kotlin-multiplatform-expect-actual` (NOT `kotlin-multiplatform-jni-pro`; JNI is JVM-only) | — |
 | "privacy policy", "terms and conditions", "terms of service", "GDPR", "CCPA", "data safety", "App Store privacy", "legal docs", "user data disclosure", "consent screen", "privacy screen", "play store legal", "app store compliance" | `kotlin-multiplatform-legal-docs` |
+| "ProGuard", "R8", "obfuscation", "minification", "keep rules", "proguard-rules.pro", "release build crash", "ClassNotFoundException release", "NoSuchMethodException release", "APK size", "minifyEnabled", "shrinkResources", "Koin keep", "Ktor keep", "SQLDelight keep", "kotlinx.serialization keep" | `kotlin-multiplatform-proguard-r8` |
+| "in-app purchases", "IAP", "subscriptions", "Play Billing", "StoreKit", "StoreKit 2", "paywall", "premium feature", "purchase flow", "restore purchases", "entitlement", "billing", "unlock premium", "one-time purchase", "auto-renewing subscription" | `kotlin-multiplatform-in-app-purchases` |
+| "Desktop target", "Compose Desktop", "CMP Desktop", "window management", "system tray", "file picker", "native menu bar", "keyboard shortcut Desktop", "drag and drop Desktop", "packaging Desktop", "distributable", "macOS app", "Windows app", "Linux app", "rememberWindowState", "jpackage", "dmg", "msi" | `kotlin-multiplatform-desktop-app` |
 
 ---
 

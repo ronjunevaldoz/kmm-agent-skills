@@ -22,6 +22,7 @@ SKILLS_SOURCE=""
 AGENT_DIR=""
 COMMANDS_DIR=""
 INSTALL_COMMANDS=false
+SETUP_AGENTS=false
 DRY_RUN=false
 
 while [[ $# -gt 0 ]]; do
@@ -30,6 +31,7 @@ while [[ $# -gt 0 ]]; do
     --agent-dir)        AGENT_DIR="$2"; shift 2 ;;
     --commands-dir)     COMMANDS_DIR="$2"; shift 2 ;;
     --install-commands) INSTALL_COMMANDS=true; shift ;;
+    --setup-agents)     SETUP_AGENTS=true; shift ;;
     --dry-run)          DRY_RUN=true; shift ;;
     *) echo "Unknown argument: $1" >&2; exit 1 ;;
   esac
@@ -201,6 +203,65 @@ if $INSTALL_COMMANDS; then
 
     if $DRY_RUN; then
       echo "  [dry-run] would prompt to install each command above"
+    fi
+  fi
+fi
+
+# ── Agent setup (--setup-agents) ─────────────────────────────────────────────
+
+if $SETUP_AGENTS; then
+  CLAUDE_DIR="$(dirname "$AGENT_DIR")"
+  AGENTS_MD="$CLAUDE_DIR/AGENTS.md"
+
+  echo ""
+  echo "Setting up agent configuration…"
+
+  if [[ -f "$AGENTS_MD" ]]; then
+    echo "  ⚠️  $AGENTS_MD already exists — skipping (run /kmm-setup-agents to regenerate)."
+  else
+    # Detect project name from settings.gradle.kts
+    PROJECT_NAME="KMP Project"
+    for f in settings.gradle.kts settings.gradle; do
+      if [[ -f "$f" ]]; then
+        PROJECT_NAME=$(grep 'rootProject.name' "$f" | head -1 | sed 's/.*= *"//;s/".*//')
+        break
+      fi
+    done
+
+    if $DRY_RUN; then
+      echo "  [dry-run] would write $AGENTS_MD for project: $PROJECT_NAME"
+    else
+      cat > "$AGENTS_MD" <<AGENTS_EOF
+# AGENTS.md — $PROJECT_NAME
+
+This project uses [kmm-agent-skills](https://github.com/ronjunevaldoz/kmm-agent-skills).
+Skills are installed in \`.claude/skills/\`.
+
+## Skill routing
+
+| Topic | Skill |
+|---|---|
+| New feature end-to-end | \`kotlin-multiplatform-feature-scaffold\` → \`kotlin-multiplatform-clean-architecture\` → \`kotlin-multiplatform-mvi\` |
+| ViewModel / screen state | \`kotlin-multiplatform-mvi\` |
+| Navigation | \`kotlin-multiplatform-navigation\` |
+| Dependency injection | \`kotlin-multiplatform-dependency-injection\` |
+| Design system | \`kotlin-multiplatform-design-system\` |
+| Unit tests | \`kotlin-multiplatform-unit-testing\` |
+| Architecture audit | \`kotlin-multiplatform-audit\` |
+
+## Commands installed
+
+See \`.claude/commands/kmm-*.md\` for available slash commands.
+Key commands:
+- \`/kmm-implement-feature <name>\` — plan → implement → validate → review a new feature
+- \`/kmm-run-audit\` — run architecture audit with per-finding remediation
+- \`/kmm-verify\` — full validation pipeline (tests, audit, design, screenshots)
+- \`/kmm-execute-ticket <id>\` — implement a GitHub issue end-to-end
+- \`/kmm-fix-design\` — scan and fix design system violations
+- \`/kmm-update-skills\` — pull latest skills and re-deploy
+AGENTS_EOF
+      echo "  ✅  $AGENTS_MD generated"
+      echo "  ℹ️   Run /kmm-setup-agents for a version tailored to your module graph"
     fi
   fi
 fi

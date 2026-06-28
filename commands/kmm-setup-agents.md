@@ -173,7 +173,33 @@ to sync changed skills without prompting for each file (skills are passive docs)
 
 ---
 
-## Step 7 — Write `.claude/settings.json`
+## Step 7 — Write `CLAUDE.md`
+
+If `CLAUDE.md` does not exist in the project root, create a minimal one that tells
+Claude Code where the skills live and which conventions to follow:
+
+```markdown
+### Claude Code Project Profile
+
+### Load skills context on initialization
+--system-prompt-file=".claude/AGENTS.md"
+
+### Default flags
+--compact
+--verbose=false
+
+### Ignore generated and vendor directories
+--ignore="**/build/**"
+--ignore="**/.gradle/**"
+--ignore="**/vendor/**"
+--ignore="**/third_party/**"
+```
+
+If `CLAUDE.md` already exists, print its contents and skip — do not overwrite.
+
+---
+
+## Step 9 — Write `.claude/settings.json`
 
 If `.claude/settings.json` does not exist, create it with a Bash allowlist for
 common read-only and build operations:
@@ -198,7 +224,7 @@ If it already exists, print the current permissions and skip — do not overwrit
 
 ---
 
-## Step 8 — Summary
+## Step 10 — Summary
 
 ```
 AGENT SETUP COMPLETE
@@ -208,7 +234,8 @@ Features:  <N> detected (<list>)
 Skills:    <N> deployed → .claude/skills/
 
 Generated:
-  ✅ .claude/AGENTS.md          — skill routing tailored to this project
+  ✅ CLAUDE.md                   — project profile (--system-prompt-file, --compact, ignores)
+  ✅ .claude/AGENTS.md           — skill routing tailored to this project
   ✅ .claude/commands/           — <N> consumer commands installed
   ✅ .claude/skills/             — <N> skills deployed
   ✅ .claude/settings.json       — Bash allowlist

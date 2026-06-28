@@ -191,6 +191,9 @@ stay consistent.
 - [`kotlin-multiplatform-migration`](skills/kotlin-multiplatform-migration/) - incremental adoption for existing projects: assess current state, prioritized skill order, MVVM→MVI, monolith→multi-module migration paths
 - [`kotlin-multiplatform-release`](skills/kotlin-multiplatform-release/) - versioning, Maven Central publishing, pre-release suffixes, git-cliff changelog, GitHub Release
 - [`kotlin-multiplatform-legal-docs`](skills/kotlin-multiplatform-legal-docs/) - privacy policy, terms, data-safety labels, consent gates, and legal compliance screens
+- [`kotlin-multiplatform-proguard-r8`](skills/kotlin-multiplatform-proguard-r8/) - R8 minification, keep rules for KMP libraries (Koin, Ktor, SQLDelight, serialization), release build validation
+- [`kotlin-multiplatform-in-app-purchases`](skills/kotlin-multiplatform-in-app-purchases/) - IAP and subscriptions via Play Billing and StoreKit 2, shared PurchaseState domain model, MVI integration
+- [`kotlin-multiplatform-desktop-app`](skills/kotlin-multiplatform-desktop-app/) - Desktop-specific: window management, system tray, file picker, native menu bar, keyboard shortcuts, packaging
 
 ---
 
@@ -391,6 +394,9 @@ Phrases that activate each skill automatically.
 | [`lessons`](skills/kotlin-multiplatform-lessons/) | "capture lesson", "pattern mismatch", "document fix", "lesson file" |
 | [`skill-harvester`](skills/kotlin-multiplatform-skill-harvester/) | "harvest lessons", "upstream lessons", "process lesson issues", "skill amendment" |
 | [`layout-system`](skills/kotlin-multiplatform-layout-system/) | "wireframe", "screen flow", "layout spec", "ASCII diagram", "layout doc" |
+| [`proguard-r8`](skills/kotlin-multiplatform-proguard-r8/) | "ProGuard", "R8", "obfuscation", "minification", "keep rules", "proguard-rules.pro", "release build crash", "ClassNotFoundException release", "APK size", "minifyEnabled" |
+| [`in-app-purchases`](skills/kotlin-multiplatform-in-app-purchases/) | "in-app purchases", "IAP", "subscriptions", "Play Billing", "StoreKit", "paywall", "premium feature", "purchase flow", "restore purchases", "entitlement" |
+| [`desktop-app`](skills/kotlin-multiplatform-desktop-app/) | "Desktop target", "Compose Desktop", "window management", "system tray", "file picker", "native menu bar", "keyboard shortcut Desktop", "packaging Desktop", "distributable", "macOS app", "Windows app", "rememberWindowState" |
 | [`release`](skills/kotlin-multiplatform-release/) | "publish to Maven Central", "release project", "cut release", "release library", "bump version", "git-cliff", "alpha release", "GitHub Release" |
 
 ---
