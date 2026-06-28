@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.7] — 2026-06-28
+
+### Added
+
+- feat(mvi): add ViewModel size rule, decomposition guide, and god ViewModel anti-patterns
+
+---
+
 ## [v1.29.6] — 2026-06-28
 
 ### Added
