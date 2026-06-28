@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.16] — 2026-06-29
+
+### Added
+
+- feat(commands): add /kmm-setup-agents command; agent generation in /kmm-new-project; expand README commands table
+
+---
+
 ## [v1.29.15] — 2026-06-29
 
 ### Docs
