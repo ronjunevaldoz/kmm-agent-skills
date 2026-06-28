@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.11] — 2026-06-28
+
+### Added
+
+- feat(skills): collectAsStateWithLifecycle rule, LaunchedEffect decision table, SavedStateHandle Koin wiring
+
+---
+
 ## [v1.29.10] — 2026-06-28
 
 ### Fixed
