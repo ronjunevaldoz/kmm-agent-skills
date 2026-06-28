@@ -26,9 +26,10 @@ Do not use this agent when:
 - the task is feature implementation or code fixes
 
 For release notes and skill changelog tables, hand off to `agents/changelog.md`.
-For downstream project docs, hand off to `kotlin-multiplatform-project-docs-maintainer`.
-For skill-doc maintenance, use this agent directly; it keeps the skills collection docs
-aligned with the repo without creating a separate consumer skill.
+For downstream consumer project docs (consumer README, onboarding, architecture notes),
+hand off to the `kotlin-multiplatform-project-docs-maintainer` skill — it lives in
+`skills/` because consumer projects install and invoke it directly.
+For skill-doc maintenance in this repo, use this agent directly.
 
 ## Scope check
 

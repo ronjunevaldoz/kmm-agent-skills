@@ -194,28 +194,35 @@ stay consistent.
 
 ---
 
+## Skills vs Agents
+
+**Skills** (`skills/`) are passive reference documents — patterns, code examples, and
+anti-patterns. Consumer projects install them into `.claude/skills/`; the agent reads them
+as context when a trigger keyword matches.
+
+**Agents** (`agents/`) are active pipeline roles — they orchestrate steps, run scripts,
+and produce structured outputs. They reference skills for content but own the workflow.
+
 ## Agent Pipeline
 
-Seven specialized agents orchestrate end-to-end feature work and repo docs. Agents
-communicate via a structured plan contract and read `.claude/pipeline-context.json` to
-avoid repeating past mistakes.
+Ten specialized agents orchestrate end-to-end feature work, repo maintenance, and consumer
+adoption. Agents read skills as context and communicate via a structured plan contract.
 
 | Agent | Role |
 |---|---|
+| [`router`](agents/router.md) | Matches the request to the right skills, determines build order and tier (thin/medium/full), hands off to implementer |
 | [`planner`](agents/planner.md) | Analyzes the task, loads only relevant skills, produces a layer-by-layer plan, gates on user approval |
 | [`designer`](agents/designer.md) | Shapes KMM/Compose wireframes, diagrams, layouts, component APIs, accessibility, previews, and copy before implementation |
 | [`implementer`](agents/implementer.md) | Executes the approved plan in 6-layer build order, generates complete runnable code |
 | [`reviewer`](agents/reviewer.md) | Checks layer boundaries, Koin wiring, MVI contracts, and test coverage; runs `audit_project.py` |
-| [`docs-maintainer`](agents/docs-maintainer.md) | Keeps README, `docs/` reference material, agent docs, command docs, and skill routing text aligned with the repo |
+| [`auditor`](agents/auditor.md) | Runs violation audit or adoption roadmap against a consumer project or the skills repo; produces findings the fixer resolves |
+| [`docs-maintainer`](agents/docs-maintainer.md) | Keeps this repo's README, agent docs, command docs, and skill routing text aligned; downstream project docs route to the `project-docs-maintainer` skill |
+| [`harvester`](agents/harvester.md) | Reads lesson files and GitHub issues, filters by impact, proposes and applies skill amendments after approval |
 | [`validator`](agents/validator.md) | Runs Gradle compilation and `jvmTest` in escalating levels; stops at first failure |
 | [`fixer`](agents/fixer.md) | Applies minimum targeted fixes for reviewer/validator blockers; rates confidence; asks user for LOW-confidence calls |
 
 The `changelog` agent is separate and handles consumer release notes plus per-skill
 `## Changelog` updates.
-
-Consumer repos should keep docs organization, `CHANGELOG.md`, and release notes aligned
-with the release flow; this repo enforces that through the changelog agent and release
-validation.
 
 ---
 

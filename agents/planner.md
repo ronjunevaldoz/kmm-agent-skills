@@ -44,8 +44,8 @@ first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
 | Downstream project README, docs, or onboarding docs | `project-docs-maintainer`, `audit` |
 | Screen wireframes or layout docs | `layout-system` |
 | Lesson files for pattern mismatches | `lessons` |
-| Harvest lessons and propose skill amendments | `skill-harvester`, `lessons` |
-| Migrate existing project / incremental adoption / MVVM→MVI | `migration`, `audit` |
+| Harvest lessons and propose skill amendments | `harvester` agent, `skill-harvester`, `lessons` |
+| Migrate existing project / incremental adoption / MVVM→MVI | `migration`, `auditor` agent |
 | Consumer release notes or per-skill changelogs | `changelog` |
 | Release, versioning, or Maven Central publishing | `release`, `ci-github-actions`, `xcframework-spm` |
 | Legal docs (privacy policy, terms, GDPR, data safety) | `legal-docs`, `flavor-environment`, `datastore` |
