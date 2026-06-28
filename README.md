@@ -188,6 +188,7 @@ stay consistent.
 - [`kotlin-multiplatform-layout-system`](skills/kotlin-multiplatform-layout-system/) - ASCII wireframe docs for screens in `docs/layout-system/`; draft and document app layout
 - [`kotlin-multiplatform-lessons`](skills/kotlin-multiplatform-lessons/) - structured lesson files capturing pattern mismatches and fixes
 - [`kotlin-multiplatform-skill-harvester`](skills/kotlin-multiplatform-skill-harvester/) - reads lesson files and proposes amendments to source skills
+- [`kotlin-multiplatform-migration`](skills/kotlin-multiplatform-migration/) - incremental adoption for existing projects: assess current state, prioritized skill order, MVVM→MVI, monolith→multi-module migration paths
 - [`kotlin-multiplatform-release`](skills/kotlin-multiplatform-release/) - versioning, Maven Central publishing, pre-release suffixes, git-cliff changelog, GitHub Release
 - [`kotlin-multiplatform-legal-docs`](skills/kotlin-multiplatform-legal-docs/) - privacy policy, terms, data-safety labels, consent gates, and legal compliance screens
 

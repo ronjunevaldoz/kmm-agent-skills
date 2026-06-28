@@ -17,7 +17,7 @@ Update when skills are added, revised, or completed.
 
 ---
 
-## Shipped Skills (53) — v1.16.0
+## Shipped Skills (54) — v1.16.0
 
 ### Layer 0 — Architecture Contract
 | Skill | Status | Notes |
@@ -97,7 +97,8 @@ Update when skills are added, revised, or completed.
 | Skill | Status | Notes |
 |---|---|---|
 | `kotlin-multiplatform-legal-docs` | ✅ | Privacy Policy + T&C templates, auto-detect scanner, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, consent gate, CI gate |
-| `kotlin-multiplatform-expert` | ✅ | 49-skill routing map, dependency graph, invocation map, build order |
+| `kotlin-multiplatform-expert` | ✅ | 54-skill routing map, dependency graph, invocation map, build order |
+| `kotlin-multiplatform-migration` | ✅ | Incremental adoption: assess current state, MVVM→MVI, monolith→multi-module, Hilt→Koin migration paths |
 
 ---
 
