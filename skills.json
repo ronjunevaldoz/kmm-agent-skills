@@ -1,5 +1,5 @@
 {
-  "version": "1.29.4",
+  "version": "1.29.5",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -307,7 +307,7 @@
       "path": "skills/kotlin-multiplatform-clean-architecture",
       "description": "Defines the 6-layer clean architecture contract for KMP feature modules: :model / :api / :domain / :data / :presenter / :ui. Covers layer dependency rules, :model vs :api split, internal visibility enforcement, and Detekt architecture fitness functions that make violations fail the build.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-18",
+      "last_updated": "2026-06-28",
       "keywords": [
         "clean architecture",
         "Kotlin Multiplatform",
@@ -347,7 +347,22 @@
         "layer design",
         "data architecture",
         "content strategy",
-        "code structure"
+        "code structure",
+        "core module",
+        "feature module",
+        "core vs feature",
+        "shared module",
+        "use case pattern",
+        "mapper pattern",
+        "DTO mapper",
+        "domain error",
+        "typed error",
+        "sealed error",
+        "DomainError",
+        "cross-feature navigation",
+        "navigate to another feature",
+        "AppNavigator",
+        "feature dependency"
       ],
       "scripts": []
     },
@@ -1501,6 +1516,49 @@
       "scripts": []
     },
     {
+      "name": "kotlin-multiplatform-migration",
+      "path": "skills/kotlin-multiplatform-migration",
+      "description": "Incremental adoption guide for teams moving an existing Android or KMP project toward the kmm-agent-skills architecture. Covers assessment of current state, prioritized skill adoption order, migration paths from MVVM+LiveData to MVI, monolith to multi-module, and how to migrate without breaking a live app. Use this skill when a project already exists and the team wants to adopt KMP skills one feature or one layer at a time.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-06-28",
+      "keywords": [
+        "migration",
+        "incremental adoption",
+        "existing project",
+        "MVVM to MVI",
+        "LiveData to StateFlow",
+        "monolith to multi-module",
+        "legacy migration",
+        "refactor architecture",
+        "adopt clean architecture",
+        "retrofit existing project",
+        "migrate ViewModel",
+        "architecture migration",
+        "how to start",
+        "where to begin",
+        "old project adoption",
+        "brownfield"
+      ],
+      "triggers": [
+        "migrate existing project",
+        "adopt MVI",
+        "LiveData to StateFlow",
+        "migrate to clean architecture",
+        "incremental adoption",
+        "where to start",
+        "existing project",
+        "brownfield",
+        "refactor architecture",
+        "add layers to project",
+        "how to adopt skills",
+        "migration path",
+        "legacy project",
+        "retrofit architecture",
+        "migrate ViewModel"
+      ],
+      "scripts": []
+    },
+    {
       "name": "kotlin-multiplatform-mongodb-database",
       "path": "skills/kotlin-multiplatform-mongodb-database",
       "description": "MongoDB Kotlin Coroutine Driver pattern for Kotlin Multiplatform full-stack apps. Covers: server-side MongoDB access, document mapping, repository boundaries, typed database errors, reactive reads with Flow, change streams, and a scaffold script for repeated database setup. Use this for the backend data layer, not shared client persistence.",
@@ -1541,7 +1599,7 @@
       "path": "skills/kotlin-multiplatform-mvi",
       "description": "MVI (Model-View-Intent) architecture pattern for Kotlin Multiplatform + Compose Multiplatform. Covers: the Contract pattern (State/Intent/Effect per screen), MviViewModel base class with StateFlow for state and Channel for one-shot effects, atomic state updates, Compose screen/content split, testing ViewModels with Turbine, and the most common MVI pitfalls in KMP. Zero new dependencies \u2014 builds on androidx.lifecycle.ViewModel and kotlinx.coroutines already present in feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-06-28",
       "keywords": [
         "MVI",
         "Model-View-Intent",
@@ -1600,7 +1658,18 @@
         "user interaction",
         "screen state management",
         "UI state",
-        "state management"
+        "state management",
+        "nav args ViewModel",
+        "route arguments ViewModel",
+        "pass id to ViewModel",
+        "search debounce ViewModel",
+        "cancel job intent",
+        "in-flight cancellation",
+        "typed error state",
+        "UiError sealed",
+        "shared ViewModel",
+        "wizard ViewModel",
+        "multi-step flow"
       ],
       "scripts": []
     },

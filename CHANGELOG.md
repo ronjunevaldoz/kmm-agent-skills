@@ -2,6 +2,19 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.5] — 2026-06-28
+
+### Added
+
+- feat(skills): add migration skill, audit roadmap, and scaffold layer-depth decision
+- feat(skills): refine MVI + clean-architecture skills and make both mandatory
+
+### Other
+
+- refactor(skills): enforce start-thin principle in MVI and clean-architecture
+
+---
+
 ## [v1.29.4] — 2026-06-28
 
 ### Added
