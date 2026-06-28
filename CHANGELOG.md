@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.22] — 2026-06-29
+
+### Added
+
+- feat(commands): add planning phase to /kmm-new-project (Step 3)
+
+---
+
 ## [v1.29.21] — 2026-06-29
 
 ### Added
