@@ -185,12 +185,12 @@ Skills to load per common feature type:
 
 ---
 
-## Step 7 — Run `/verify`
+## Step 7 — Run `/kmm-verify`
 
 After all features are implemented:
 
 ```bash
-/verify .
+/kmm-verify .
 ```
 
 This runs the full validation pipeline:
@@ -200,11 +200,93 @@ This runs the full validation pipeline:
 - jvmTest (unit tests + Roborazzi diffs)
 - Visual design audit on generated screenshot goldens
 
-Fix any blockers. Do not mark the project complete until `/verify` reports `RESULT: PASS`.
+Fix any blockers. Do not mark the project complete until `/kmm-verify` reports `RESULT: PASS`.
 
 ---
 
-## Step 8 — Summary
+## Step 8 — Generate agent setup
+
+After verify passes, generate a `.claude/` directory in the scaffolded project so the team
+gets agent-driven workflows on day one.
+
+**Write `.claude/AGENTS.md`** — route the skills the project actually uses:
+
+```markdown
+# AGENTS.md — <PROJECT_NAME>
+
+This project uses [kmm-agent-skills](https://github.com/ronjunevaldoz/kmm-agent-skills).
+Skills are installed in `.claude/skills/`.
+
+## Skill routing
+
+| Topic | Skill |
+|---|---|
+| New feature end-to-end | `kotlin-multiplatform-feature-scaffold` → `kotlin-multiplatform-clean-architecture` → `kotlin-multiplatform-mvi` |
+| ViewModel / screen state | `kotlin-multiplatform-mvi` |
+| Navigation | `kotlin-multiplatform-navigation` |
+| Dependency injection | `kotlin-multiplatform-dependency-injection` |
+<if auth was scaffolded>| Auth / login | `kotlin-multiplatform-ktor-auth-service` |</if>
+<if SQLDelight was scaffolded>| Local database | `kotlin-multiplatform-sqldelight-setup` |</if>
+<if network was scaffolded>| REST API / network | `kotlin-multiplatform-network-layer` |</if>
+| Design system | `kotlin-multiplatform-design-system` |
+| Unit tests | `kotlin-multiplatform-unit-testing` |
+| Architecture audit | `kotlin-multiplatform-audit` |
+
+## Commands installed
+
+See `.claude/commands/kmm-*.md` for available slash commands.
+Key commands:
+- `/kmm-implement-feature <name>` — plan → implement → validate → review a new feature
+- `/kmm-run-audit` — run architecture audit with per-finding remediation
+- `/kmm-verify` — full validation pipeline (tests, audit, design, screenshots)
+- `/kmm-execute-ticket <id>` — implement a GitHub issue end-to-end
+- `/kmm-fix-design` — scan and fix design system violations
+- `/kmm-update-skills` — pull latest skills and re-deploy
+```
+
+**Copy the consumer command set** into `.claude/commands/`:
+
+```
+Commands to copy (these are safe for consumer projects):
+  kmm-implement-feature.md
+  kmm-run-audit.md
+  kmm-verify.md
+  kmm-execute-ticket.md
+  kmm-fix-design.md
+  kmm-audit-screenshots.md
+  kmm-record-design-baselines.md
+  kmm-audit-design-visual.md
+  kmm-update-design-system.md
+  kmm-update-skills.md
+  kmm-report-skill-issue.md
+  kmm-check-updates.md
+```
+
+Do NOT copy repo-internal commands (`kmm-new-skill.md`, `kmm-modify-skill.md`,
+`kmm-maintain-docs.md`, `kmm-release-notes.md`, `kmm-setup-hooks.md`) —
+those are for maintaining this skills repo, not consumer projects.
+
+**Write `.claude/settings.json`** with allowlist for common read operations:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew *)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(python3 .claude/skills/kotlin-multiplatform-audit/scripts/*)",
+      "Bash(find . -name *.kt*)",
+      "Bash(grep *)"
+    ]
+  }
+}
+```
+
+---
+
+## Step 9 — Summary
 
 Print a summary of everything generated:
 
@@ -225,6 +307,11 @@ Generated:
   Tests:        <N> unit tests, <N> Roborazzi screenshot tests
   Screenshots:  <N> PNG goldens (<N> light, <N> dark)
 
+Agent setup:
+  .claude/AGENTS.md          — skill routing for this project
+  .claude/commands/kmm-*.md  — <N> slash commands installed
+  .claude/settings.json      — Bash allowlist
+
 Verify:     PASS
 Skills used: <list>
 
@@ -232,6 +319,7 @@ Next steps:
   ./gradlew :androidApp:assembleDebug    — build Android
   ./gradlew :desktopApp:run              — run Desktop
   ./gradlew jvmTest                      — run all tests
+  /kmm-implement-feature <name>          — add your first feature
 ```
 
 ---

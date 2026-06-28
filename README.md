@@ -228,15 +228,39 @@ The `changelog` agent is separate and handles consumer release notes plus per-sk
 
 ## Slash Commands
 
-Use these in Claude Code to run the full pipeline with a single command.
+All commands are prefixed with `kmm-` so they don't collide with your project's own `.claude/commands/`.
+
+### Consumer commands — install these in your project
 
 | Command | What it does |
 |---|---|
-| `/kmm-execute-ticket <id>` | Fetch a GitHub Issue (or paste any ticket), plan → branch → implement → validate → review → commit |
+| `/kmm-new-project <description>` | Scaffold a full KMP project from a natural language description |
+| `/kmm-setup-agents [path]` | Initialize `.claude/` agent setup in an existing KMP project |
 | `/kmm-implement-feature <name>` | Plan → Implement → Validate → Review a new KMP feature end-to-end |
-| `/kmm-review-changes` | Review current git diff against 6-layer rules and skill anti-patterns |
-| `/kmm-maintain-docs [scope]` | Reconcile repo docs, agent docs, command docs, and skill routing text |
+| `/kmm-execute-ticket <id>` | Fetch a GitHub Issue (or paste any ticket), plan → branch → implement → validate → review → commit |
 | `/kmm-run-audit [path]` | Run `audit_project.py` with per-finding remediation from the relevant skill |
+| `/kmm-verify [path]` | Full validation pipeline: module graph, tests, audit, screenshot diff, design |
+| `/kmm-review-changes` | Review current git diff against 6-layer rules and skill anti-patterns |
+| `/kmm-fix-design [path]` | Scan and fix design system violations file-by-file with diff confirmation |
+| `/kmm-update-design-system [path]` | Pull latest design system components; diff and confirm before applying |
+| `/kmm-record-design-baselines [path]` | Record Roborazzi golden PNGs after fixing design violations |
+| `/kmm-audit-screenshots [path]` | Vision audit of Roborazzi PNG goldens for design-system compliance |
+| `/kmm-audit-design-visual [path]` | Cross-screen visual consistency check (spacing, color, typography) |
+| `/kmm-update-skills` | Pull latest skills and re-deploy to `.claude/skills/` |
+| `/kmm-check-updates` | Check whether a newer version of kmm-agent-skills is available |
+| `/kmm-report-skill-issue` | File a structured skill bug report to the kmm-agent-skills repo |
+
+### Repo-internal commands — for maintaining this skills repo
+
+| Command | What it does |
+|---|---|
+| `/kmm-new-skill <name>` | Scaffold a new skill with all required sections and audit hooks |
+| `/kmm-modify-skill <name>` | Safely edit an existing skill without removing required sections |
+| `/kmm-summarize-issues` | Scan all skills for quality gaps and output paste-ready fix prompts |
+| `/kmm-submit-issue` | File a structured GitHub issue (skill gap, bug, or feature request) |
+| `/kmm-maintain-docs [scope]` | Reconcile repo docs, agent docs, command docs, and skill routing text |
+| `/kmm-release-notes` | Draft release notes for a version bump |
+| `/kmm-setup-hooks` | Install git hooks for architecture hygiene enforcement |
 
 ---
 
