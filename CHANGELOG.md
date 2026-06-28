@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.20] — 2026-06-29
+
+### Fixed
+
+- fix(commands): fix /kmm-new-project header prefix and add empty-args prompt
+
+---
+
 ## [v1.29.19] — 2026-06-29
 
 ### Added
