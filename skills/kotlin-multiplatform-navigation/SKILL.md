@@ -397,25 +397,46 @@ fun main() {
 
 ---
 
-### Step 7: Pass NavController to feature ViewModels via Koin (optional)
+### Step 7: AppNavigator — cross-feature navigation from ViewModels
 
-For navigation triggered from a ViewModel (e.g., after a successful login):
+When a ViewModel in `:presenter` needs to navigate across features (e.g., cart → checkout),
+inject `AppNavigator` from `:core:api`. Use a `NavControllerHolder` so Koin can construct
+the impl at startup before the `NavController` exists in Compose:
 
 ```kotlin
-// In :feature:auth:domain
-interface AuthNavigator {
+// :core:api
+interface AppNavigator {
     fun navigateToHome()
-    fun navigateToRegister()
+    fun navigateToCheckout(cartId: String)
 }
 
-// In :shared (Android/common)
-class AuthNavigatorImpl(private val navController: NavController) : AuthNavigator {
-    override fun navigateToHome() = navController.navigate(HomeRoute)
-    override fun navigateToRegister() = navController.navigate(RegisterRoute)
+// :app — holder bridges Koin startup time and Compose time
+class NavControllerHolder { var current: NavController? = null }
+
+class AppNavigatorImpl(private val holder: NavControllerHolder) : AppNavigator {
+    override fun navigateToHome() =
+        holder.current?.navigate(HomeRoute) ?: Unit
+    override fun navigateToCheckout(cartId: String) =
+        holder.current?.navigate(CheckoutRoute(cartId)) ?: Unit
+}
+
+val appModule = module {
+    single { NavControllerHolder() }
+    single<AppNavigator> { AppNavigatorImpl(get()) }
+}
+
+// AppNavHost — set the holder as soon as navController is ready
+@Composable
+fun AppNavHost() {
+    val navController = rememberNavController()
+    val holder: NavControllerHolder = koinInject()
+    DisposableEffect(navController) {
+        holder.current = navController
+        onDispose { holder.current = null }
+    }
+    NavHost(navController = navController, startDestination = HomeRoute) { ... }
 }
 ```
-
-Register in Koin scoped to the NavController lifecycle.
 
 ---
 
@@ -775,7 +796,7 @@ Keep each snippet to one route and one composable destination. Map to the user's
 
 | Date | Change |
 |---|---|
-| 2026-06-28 | Added end-to-end MVI + NavHost + Clean Architecture wiring section: lambda vs AppNavigator rule, NavGraphBuilder extension boundary, auth gate with LaunchedEffect, result passing via SavedStateHandle, Scaffold innerPadding rule. Four new anti-patterns. |
+| 2026-06-28 | Fixed AppNavigator Step 7: use NavControllerHolder singleton so Koin can construct AppNavigatorImpl at startup; AppNavHost sets holder.current via DisposableEffect. Added end-to-end MVI + NavHost + Clean Architecture wiring section, auth gate, result passing, innerPadding rule. Four new anti-patterns. |
 | 2026-06-28 | Added `bindToBrowserNavigation` pattern with full WasmJs hash-routing example and `@SerialName` route convention. |
 | 2026-06-24 | Added web/WasmJs browser fragment routing guidance and hash-navigation keywords. |
 | 2026-06-06 | Initial release. |

@@ -321,36 +321,47 @@ interface AppNavigator {
 }
 ```
 
-The `:app` module provides the `AppNavigator` implementation. Because `AppNavigatorImpl`
-holds a `NavController`, it must be created **after** `rememberNavController()` inside the
-`AppNavHost` composable — it cannot be a Koin singleton.
+The `:app` module provides the `AppNavigator` implementation. `NavController` is only
+available after `rememberNavController()` inside a composable, so `AppNavigatorImpl` cannot
+be constructed at Koin startup. The solution is a `NavControllerHolder` singleton that
+`AppNavHost` populates at composition time:
 
 ```kotlin
-// :app — AppNavigatorImpl wraps the live NavController
-class AppNavigatorImpl(private val navController: NavController) : AppNavigator {
-    override fun navigateToProfile(userId: String) =
-        navController.navigate(ProfileRoute(userId))
-    override fun navigateToCheckout(cartId: String) =
-        navController.navigate(CheckoutRoute(cartId))
-    override fun navigateToHome() =
-        navController.navigate(HomeRoute) { popUpTo<HomeRoute> { inclusive = true } }
+// :app — holder bridges Koin DI time and Compose time
+class NavControllerHolder {
+    var current: NavController? = null
 }
 
-// :app — AppNavHost creates the impl and provides it via Koin's LocalKoinScope
-// Do NOT bind AppNavigatorImpl as a Koin single{} — NavController is not available at DI time
+class AppNavigatorImpl(private val holder: NavControllerHolder) : AppNavigator {
+    override fun navigateToProfile(userId: String) =
+        holder.current?.navigate(ProfileRoute(userId))
+    override fun navigateToCheckout(cartId: String) =
+        holder.current?.navigate(CheckoutRoute(cartId))
+    override fun navigateToHome() =
+        holder.current?.navigate(HomeRoute) { popUpTo<HomeRoute> { inclusive = true } }
+}
+
+// :app — Koin DI module (constructs at startup, holder is empty until AppNavHost runs)
+val appModule = module {
+    single { NavControllerHolder() }
+    single<AppNavigator> { AppNavigatorImpl(get()) }
+}
+
+// :app — AppNavHost sets the holder as soon as navController is ready
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
-    val navigator: AppNavigator = remember(navController) { AppNavigatorImpl(navController) }
+    val holder: NavControllerHolder = koinInject()
 
-    // Override the Koin binding for this composition subtree
-    KoinApplicationContext {
-        modules(module { single<AppNavigator> { navigator } })
-        NavHost(navController = navController, startDestination = HomeRoute) {
-            homeGraph()
-            cartGraph()
-            profileGraph()
-        }
+    DisposableEffect(navController) {
+        holder.current = navController
+        onDispose { holder.current = null }   // clear on teardown — prevents leaks
+    }
+
+    NavHost(navController = navController, startDestination = HomeRoute) {
+        homeGraph()
+        cartGraph()
+        profileGraph()
     }
 }
 ```
@@ -519,6 +530,6 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
-| 2026-06-28 | Fixed AppNavigator Koin binding: AppNavigatorImpl must be created inside AppNavHost via remember(navController), not as a Koin single{}. Added NavGraphBuilder extension boundary rule and two new anti-patterns. |
+| 2026-06-28 | Fixed AppNavigator Koin binding: use NavControllerHolder singleton pattern so AppNavigatorImpl can be a Koin single{} while NavController is set by AppNavHost via DisposableEffect. |
 | 2026-06-28 | Added "Layer Weight" section with ViewModel/use-case/data decision tables and thin feature pattern. Updated Recommendation First to lead with start-thin principle. Added: core vs feature split, use case pattern, mapper pattern, typed domain errors, cross-feature navigation. |
 | 2026-06-18 | Initial release. |

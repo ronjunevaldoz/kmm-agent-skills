@@ -332,21 +332,41 @@ Phrases that activate each skill automatically.
 | [`xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) | "XCFramework", "Swift Package Manager", "iOS distribution", "Package.swift" |
 | [`expect-actual`](skills/kotlin-multiplatform-expect-actual/) | "iOS only code", "platform-specific implementation", "expect fun", "actual class" |
 | [`repository-pattern`](skills/kotlin-multiplatform-repository-pattern/) | "offline-first", "cache-first", "single source of truth", "data layer strategy" |
-| [`navigation`](skills/kotlin-multiplatform-navigation/) | "navigate to screen", "nav graph", "pass arguments", "back stack", "web routing", "browser fragment" |
+| [`navigation`](skills/kotlin-multiplatform-navigation/) | "navigate to screen", "nav graph", "pass arguments", "back stack", "web routing", "browser fragment", "auth gate", "NavHost", "AppNavigator", "result back to screen" |
+| [`deep-linking`](skills/kotlin-multiplatform-deep-linking/) | "deep link", "App Links", "Universal Links", "intent filter", "URI scheme", "link to screen" |
 | [`shared-resources`](skills/kotlin-multiplatform-shared-resources/) | "i18n", "translations", "app strings KMP", "localize", "compose resources" |
-| [`mvi`](skills/kotlin-multiplatform-mvi/) | "MVI pattern", "navigation effect", "one-shot event", "UiState / UiIntent / UiEffect" |
-| [`logging`](skills/kotlin-multiplatform-logging/) | "logger wrapper", "logger facade", "kotlin-logging", "Kermit", "KMP logging", "crash reporting", "log levels" |
+| [`mvi`](skills/kotlin-multiplatform-mvi/) | "MVI pattern", "navigation effect", "one-shot event", "UiState / UiIntent / UiEffect", "god ViewModel", "ViewModel too big", "split ViewModel", "extract use case" |
+| [`logging`](skills/kotlin-multiplatform-logging/) | "logger wrapper", "logger facade", "kotlin-logging", "Kermit", "KMP logging", "log levels" |
+| [`crash-reporting`](skills/kotlin-multiplatform-crash-reporting/) | "Crashlytics", "Sentry", "crash report", "dSYM", "crash boundary", "non-fatal error" |
+| [`offline-first`](skills/kotlin-multiplatform-offline-first/) | "offline-first", "sync state", "optimistic update", "conflict resolution", "cache invalidation" |
+| [`paging`](skills/kotlin-multiplatform-paging/) | "pagination", "Paging 3", "PagingSource", "load more", "infinite scroll", "RemoteMediator" |
+| [`image-loading`](skills/kotlin-multiplatform-image-loading/) | "load image", "Coil", "AsyncImage", "image cache", "image placeholder" |
+| [`permissions`](skills/kotlin-multiplatform-permissions/) | "request permission", "camera permission", "location permission", "PermissionState", "runtime permission" |
+| [`push-notifications`](skills/kotlin-multiplatform-push-notifications/) | "push notification", "FCM", "APNs", "notification token", "NotificationHandler" |
+| [`workmanager`](skills/kotlin-multiplatform-workmanager/) | "background job", "WorkManager", "CoroutineWorker", "background task", "BGTaskScheduler" |
+| [`analytics`](skills/kotlin-multiplatform-analytics/) | "track event", "analytics", "screen tracking", "Firebase Analytics", "Amplitude", "event logging" |
+| [`feature-flags`](skills/kotlin-multiplatform-feature-flags/) | "feature flag", "remote config", "A/B test", "kill switch", "toggle feature" |
+| [`form-validation`](skills/kotlin-multiplatform-form-validation/) | "form validation", "field validation", "submit gate", "ValidationResult", "FieldState" |
+| [`biometric-auth`](skills/kotlin-multiplatform-biometric-auth/) | "biometric", "fingerprint", "Face ID", "BiometricPrompt", "biometric auth" |
 | [`design-system`](skills/kotlin-multiplatform-design-system/) | "AppTheme", "design tokens", "Material3 alternative", "custom typography" |
 | [`design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) | "bottom sheet", "dialog", "snackbar", "skeleton", "extended components" |
-| [`compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) | "slot API", "content lambda", "composable slot", "flexible component" |
+| [`adaptive-layout`](skills/kotlin-multiplatform-adaptive-layout/) | "responsive layout", "WindowSizeClass", "Compact Medium Expanded", "list-detail", "adaptive UI" |
+| [`compose-animation`](skills/kotlin-multiplatform-compose-animation/) | "Compose animation", "AnimatedVisibility", "Crossfade", "AnimatedContent", "shared element transition" |
+| [`compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) | "slot API", "content lambda", "composable slot", "flexible component", "CompositionLocal", "compositionLocalOf", "staticCompositionLocalOf" |
 | [`compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) | "state hoisting", "lift state", "stateless composable", "where does state go" |
 | [`compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) | "remember vs ViewModel", "state survival", "config change", "process death" |
 | [`graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) | "custom drawing", "Canvas", "graphicsLayer", "workflow node", "node editor" |
 | [`preview-driven-development`](skills/kotlin-multiplatform-preview-driven-development/) | "PDD", "@Preview", "desktop preview", "PreviewParameterProvider", "fast UI iteration" |
+| [`accessibility`](skills/kotlin-multiplatform-accessibility/) | "accessibility", "a11y", "screen reader", "contentDescription", "touch target", "WCAG" |
 | [`unit-testing`](skills/kotlin-multiplatform-unit-testing/) | "unit test", "runTest", "Turbine", "test ViewModel", "fake repository" |
 | [`roborazzi`](skills/kotlin-multiplatform-roborazzi/) | "screenshot test", "visual regression", "test layout", "canvas test", "100% accuracy" |
 | [`code-quality`](skills/kotlin-multiplatform-code-quality/) | "Ktlint", "Detekt", "code style", "static analysis", "layer violation" |
 | [`audit`](skills/kotlin-multiplatform-audit/) | "audit repo", "project health", "what is wrong with this project", "architecture drift", "governance check", "CI enforcement" |
+| [`migration`](skills/kotlin-multiplatform-migration/) | "migrate existing project", "MVVM to MVI", "monolith to multi-module", "incremental adoption", "Hilt to Koin", "legacy codebase" |
+| [`legal-docs`](skills/kotlin-multiplatform-legal-docs/) | "privacy policy", "terms of service", "data safety", "GDPR", "consent gate", "legal screen" |
+| [`lessons`](skills/kotlin-multiplatform-lessons/) | "capture lesson", "pattern mismatch", "document fix", "lesson file" |
+| [`skill-harvester`](skills/kotlin-multiplatform-skill-harvester/) | "harvest lessons", "upstream lessons", "process lesson issues", "skill amendment" |
+| [`layout-system`](skills/kotlin-multiplatform-layout-system/) | "wireframe", "screen flow", "layout spec", "ASCII diagram", "layout doc" |
 | [`release`](skills/kotlin-multiplatform-release/) | "publish to Maven Central", "release project", "cut release", "release library", "bump version", "git-cliff", "alpha release", "GitHub Release" |
 
 ---
