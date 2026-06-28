@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.23] — 2026-06-29
+
+### Added
+
+- feat(commands): planning phase always drafts recommendations for easy selection
+
+---
+
 ## [v1.29.22] — 2026-06-29
 
 ### Added
