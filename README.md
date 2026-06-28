@@ -335,7 +335,7 @@ Phrases that activate each skill automatically.
 | [`navigation`](skills/kotlin-multiplatform-navigation/) | "navigate to screen", "nav graph", "pass arguments", "back stack", "web routing", "browser fragment", "auth gate", "NavHost", "AppNavigator", "result back to screen" |
 | [`deep-linking`](skills/kotlin-multiplatform-deep-linking/) | "deep link", "App Links", "Universal Links", "intent filter", "URI scheme", "link to screen" |
 | [`shared-resources`](skills/kotlin-multiplatform-shared-resources/) | "i18n", "translations", "app strings KMP", "localize", "compose resources" |
-| [`mvi`](skills/kotlin-multiplatform-mvi/) | "MVI pattern", "navigation effect", "one-shot event", "UiState / UiIntent / UiEffect", "god ViewModel", "ViewModel too big", "split ViewModel", "extract use case" |
+| [`mvi`](skills/kotlin-multiplatform-mvi/) | "MVI pattern", "navigation effect", "one-shot event", "UiState / UiIntent / UiEffect", "god ViewModel", "ViewModel too big", "split ViewModel", "extract use case", "@Stable State", "@Immutable State", "CoroutineExceptionHandler viewModelScope", "rememberUpdatedState" |
 | [`logging`](skills/kotlin-multiplatform-logging/) | "logger wrapper", "logger facade", "kotlin-logging", "Kermit", "KMP logging", "log levels" |
 | [`crash-reporting`](skills/kotlin-multiplatform-crash-reporting/) | "Crashlytics", "Sentry", "crash report", "dSYM", "crash boundary", "non-fatal error" |
 | [`offline-first`](skills/kotlin-multiplatform-offline-first/) | "offline-first", "sync state", "optimistic update", "conflict resolution", "cache invalidation" |
@@ -353,8 +353,8 @@ Phrases that activate each skill automatically.
 | [`adaptive-layout`](skills/kotlin-multiplatform-adaptive-layout/) | "responsive layout", "WindowSizeClass", "Compact Medium Expanded", "list-detail", "adaptive UI" |
 | [`compose-animation`](skills/kotlin-multiplatform-compose-animation/) | "Compose animation", "AnimatedVisibility", "Crossfade", "AnimatedContent", "shared element transition" |
 | [`compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) | "slot API", "content lambda", "composable slot", "flexible component", "CompositionLocal", "compositionLocalOf", "staticCompositionLocalOf" |
-| [`compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) | "state hoisting", "lift state", "stateless composable", "where does state go" |
-| [`compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) | "remember vs ViewModel", "state survival", "config change", "process death" |
+| [`compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) | "state hoisting", "lift state", "stateless composable", "where does state go", "@Stable", "@Immutable", "Compose stability", "unstable type", "skip recomposition" |
+| [`compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) | "remember vs ViewModel", "state survival", "config change", "process death", "rememberUpdatedState", "stale lambda LaunchedEffect", "latest callback effect" |
 | [`graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) | "custom drawing", "Canvas", "graphicsLayer", "workflow node", "node editor" |
 | [`preview-driven-development`](skills/kotlin-multiplatform-preview-driven-development/) | "PDD", "@Preview", "desktop preview", "PreviewParameterProvider", "fast UI iteration" |
 | [`accessibility`](skills/kotlin-multiplatform-accessibility/) | "accessibility", "a11y", "screen reader", "contentDescription", "touch target", "WCAG" |
