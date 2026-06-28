@@ -110,13 +110,17 @@ def _detect_version_catalog(root: Path) -> str:
 
 
 def assess_project(root: Path) -> dict:
+    vm_info = _detect_viewmodel_size(root)
     return {
         "state_mgmt":       _detect_state_mgmt(root),
         "modules":          _detect_modules(root),
+        "feature_split":    _detect_feature_split(root),
         "di":               _detect_di(root),
         "tests":            _detect_tests(root),
         "detekt":           _detect_detekt(root),
         "version_catalog":  _detect_version_catalog(root),
+        "viewmodel_max_lines": vm_info["max_lines"],
+        "large_vms":        vm_info["large_vms"],
     }
 
 
@@ -185,6 +189,37 @@ ADOPTION_PLAN = [
         "Few tests — coverage is too thin to migrate safely at speed",
         "Add tests for every ViewModel being migrated before the migration PR",
     ),
+    (
+        lambda s: s["viewmodel_max_lines"] >= 300,
+        "HIGH",
+        "kotlin-multiplatform-mvi",
+        "God ViewModel detected (300+ lines) — business logic has leaked into the ViewModel",
+        "Extract business operations into use cases (see 'ViewModel Size and Decomposition' in mvi skill); "
+        "each handleIntent branch that touches 2+ repos belongs in a use case",
+    ),
+    (
+        lambda s: 150 <= s["viewmodel_max_lines"] < 300,
+        "MEDIUM",
+        "kotlin-multiplatform-mvi",
+        "Large ViewModel detected (150–299 lines) — growing toward monolithic",
+        "Review handleIntent branches for inline logic that can be extracted to use cases before size crosses 300 lines",
+    ),
+    (
+        lambda s: "no feature layer split" in s["feature_split"] and "multi-module" in s["modules"],
+        "HIGH",
+        "kotlin-multiplatform-clean-architecture",
+        "Multi-module project but features have no :presenter / :domain / :ui layer split",
+        "Apply the start-thin tier decision: each feature needs at least :ui; add :presenter when "
+        "the screen has its own ViewModel; add :domain when use cases are shared or complex",
+    ),
+    (
+        lambda s: "thin split" in s["feature_split"],
+        "MEDIUM",
+        "kotlin-multiplatform-clean-architecture",
+        "Features have :ui modules only — no :presenter separation",
+        "Promote features with complex ViewModels to medium tier (:presenter + :ui); "
+        "reserve full tier for CRUD / offline-first features",
+    ),
 ]
 
 
@@ -211,10 +246,21 @@ def print_roadmap(root: Path, state: dict, plan: list[dict]) -> None:
     print("Current state:")
     print(f"  State management : {state['state_mgmt']}")
     print(f"  Module structure : {state['modules']}")
+    print(f"  Feature split    : {state['feature_split']}")
     print(f"  DI               : {state['di']}")
     print(f"  Tests            : {state['tests']}")
     print(f"  Detekt           : {state['detekt']}")
     print(f"  Version catalog  : {state['version_catalog']}")
+    vm_max = state["viewmodel_max_lines"]
+    if vm_max > 0:
+        vm_label = "god ViewModel (300+)" if vm_max >= 300 else "large (150–299)"
+        print(f"  Largest ViewModel: {vm_max} lines ({vm_label})")
+        if state["large_vms"]:
+            top = state["large_vms"][:3]
+            for rel, n in top:
+                print(f"    - {rel} ({n} lines)")
+    else:
+        print(f"  Largest ViewModel: not detected")
     print()
 
     if not plan:
@@ -235,6 +281,44 @@ def print_roadmap(root: Path, state: dict, plan: list[dict]) -> None:
 
 # ── Standard audit ────────────────────────────────────────────────────────────
 
+def _detect_viewmodel_size(root: Path) -> dict:
+    """Return max line count and list of oversized ViewModel files."""
+    large: list[tuple[Path, int]] = []
+    for path in root.rglob("*ViewModel.kt"):
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        count = len(lines)
+        if count >= 150:
+            large.append((path, count))
+    large.sort(key=lambda x: x[1], reverse=True)
+    return {
+        "max_lines": large[0][1] if large else 0,
+        "large_vms": [(str(p.relative_to(root)), n) for p, n in large],
+    }
+
+
+def _detect_feature_split(root: Path) -> str:
+    """Detect whether features follow the layer split convention."""
+    settings = root / "settings.gradle.kts"
+    if not settings.exists():
+        settings = root / "settings.gradle"
+    if not settings.exists():
+        return "unknown (no settings.gradle)"
+    text = settings.read_text(encoding="utf-8", errors="ignore")
+    presenter = re.findall(r'include\("[^"]*:presenter[^"]*"\)', text)
+    domain    = re.findall(r'include\("[^"]*:domain[^"]*"\)', text)
+    ui        = re.findall(r'include\("[^"]*:ui[^"]*"\)', text)
+    if presenter and domain and ui:
+        return f"full split (presenter={len(presenter)}, domain={len(domain)}, ui={len(ui)})"
+    if ui and not presenter:
+        return f"thin split (:ui only, {len(ui)} modules — no :presenter or :domain)"
+    if presenter and not domain:
+        return f"medium split (:presenter+:ui, no :domain)"
+    return "no feature layer split detected"
+
+
 def iter_files(root: Path):
     for path in root.rglob("*"):
         if path.is_file() and path.suffix in {".kt", ".kts", ".md"}:
@@ -243,6 +327,12 @@ def iter_files(root: Path):
 
 def audit_project(root: Path) -> list[str]:
     findings: list[str] = []
+
+    # ── ViewModel size check (not regex-detectable, needs line count) ──────────
+    vm_info = _detect_viewmodel_size(root)
+    for rel_path, line_count in vm_info["large_vms"]:
+        severity = "god viewmodel" if line_count >= 300 else "large viewmodel"
+        findings.append(f"{severity} ({line_count} lines): {rel_path}")
 
     for path in iter_files(root):
         text = path.read_text(encoding="utf-8", errors="ignore")
