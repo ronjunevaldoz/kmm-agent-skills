@@ -6,13 +6,14 @@
 - A plain description: `build a todo app in kmm`
 - A path to a sample spec: `samples/todo-app.md`
 
-This command drives the full pipeline end-to-end. No clarifying questions — the agent
-infers everything from the description and uses the 47 skills to fill all gaps.
+This command drives the full pipeline end-to-end. It starts with a short intake for the
+project identity and product intent, then infers the rest from the description and uses
+the skills collection to fill any remaining gaps.
 Any assumptions made are printed before implementation begins.
 
 ---
 
-## Step 1 — Read the description
+## Step 1 — Read the description and collect the intake
 
 If `$ARGUMENTS` ends in `.md` and the file exists, read it as the full project spec.
 Otherwise treat `$ARGUMENTS` as the raw description.
@@ -31,11 +32,28 @@ WARNING: directory is not empty — scaffolding will add files alongside existin
 ```
 Do not stop — continue regardless.
 
+Then collect the project intake. Ask for the minimum information needed to start a
+consumer project cleanly:
+
+| Field | Ask | Default if omitted |
+|---|---|---|
+| `PROJECT_NAME` | What is the app/project name? | Derived from the description |
+| `GROUP_ID` | What package/group ID should the project use? | `com.example.<project>` |
+| `APP_TYPE` | What kind of app is this? | Derived from the description |
+| `WHAT_IT_DOES` | What does the app do in one sentence? | Derived from the description |
+| `PLATFORMS` | Which targets should we scaffold? | Android + Desktop |
+| `PERSISTENCE` | Does it need local storage, settings, or neither? | Inferred |
+| `BACKEND` | Does it talk to an API, auth service, or server? | none |
+| `AUTH` | Does it have login / sign-in / identity? | none |
+| `DI_APPROACH` | Annotated or manual DI? | annotated |
+
+If the user omits a field, state the assumption before proceeding and keep moving.
+
 ---
 
 ## Step 2 — Infer feature set and load expert routing
 
-Pass the description to `kotlin-multiplatform-expert` to identify which skills are needed.
+Pass the description and intake answers to `kotlin-multiplatform-expert` to identify which skills are needed.
 
 From the description, extract:
 - **App type** (todo, social feed, e-commerce, etc.)
