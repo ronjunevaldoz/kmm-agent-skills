@@ -5,471 +5,227 @@
 [![Repo size](https://img.shields.io/github/repo-size/ronjunevaldoz/kmm-agent-skills)](https://github.com/ronjunevaldoz/kmm-agent-skills)
 [![Last commit](https://img.shields.io/github/last-commit/ronjunevaldoz/kmm-agent-skills)](https://github.com/ronjunevaldoz/kmm-agent-skills)
 
-AI agent skills for **Kotlin Multiplatform (KMP)** development.
+AI agent skills for **Kotlin Multiplatform (KMP)** development — clean module boundaries,
+version catalogs, build-logic convention plugins, and explicit review loops before code is generated.
 
-The goal is simple: keep KMP work clean, repeatable, and easy to audit. These skills
-favor clear module boundaries, version catalogs, build-logic convention plugins, and
-explicit review loops before code is generated.
+---
 
-Read [GETTING_STARTED.md](GETTING_STARTED.md) for the quick overview, then use
-`kotlin-multiplatform-expert` first. It routes you to the smallest relevant skill set.
+## Main Use Cases
 
-**Start here:** read [GETTING_STARTED.md](GETTING_STARTED.md), then ask
-`kotlin-multiplatform-expert` what to use next.
+### Start a new KMP project
+
+Run `/kmm-new-project` with a natural language description. The agent asks for your group ID, project
+name, and what the app does — then scaffolds a full multi-module KMP project with clean architecture,
+a design system, and a ready-to-use `.claude/` agent setup.
+
+```
+/kmm-new-project "A shopping app with auth, product listing, and orders"
+```
+
+The 9-step pipeline handles everything: module graph → clean-arch layers → Koin/Ktor/SQLDelight
+wiring → design system → feature scaffolds → `.claude/AGENTS.md` tailored to your modules.
+
+### Set up agents in an existing project
+
+Run `/kmm-setup-agents` in any existing KMP project. It reads your `settings.gradle.kts` and
+`libs.versions.toml`, then generates a custom `AGENTS.md` routing table based on the libraries
+and feature modules it finds.
+
+```
+/kmm-setup-agents
+```
+
+Writes: `.claude/AGENTS.md` (tailored skill routing), `CLAUDE.md` (CLI flags), all consumer
+commands (`kmm-*.md`), deployed skills, and a `settings.json` Bash allowlist.
+
+### Audit an existing project
+
+```
+/kmm-run-audit
+```
+
+Runs `audit_project.py` across your project and produces per-finding remediation steps using
+the relevant skill. Catches architecture boundary violations, missing Koin bindings, layer leaks,
+hardcoded colors, and Material theme usage. See [`kotlin-multiplatform-audit`](skills/kotlin-multiplatform-audit/) for what it checks.
 
 ---
 
 ## Quick Start
 
-1. Start with `kotlin-multiplatform-expert`.
-2. Use `kotlin-multiplatform-feature-scaffold` for new projects from `Kotlin/kmp-wizard` `all-targets`.
-3. Add the domain skills below only when the task needs them.
-
-## Priority Guide
-
-Treat the skill map as a ladder, not a checklist:
-
-1. Start with `kotlin-multiplatform-expert`.
-2. Load the smallest set that answers the request.
-3. Prefer contract and foundation skills before domain, UI, testing, docs, or release skills.
-4. If two skills overlap, pick the one earlier in the dependency graph.
-
-## Skill Map
-
-### Repo Architecture
-
-```mermaid
-flowchart LR
-  U[User request] --> E[kotlin-multiplatform-expert]
-
-  E --> S[Consumer skills in skills/]
-  E --> X[Designer agent]
-  E --> D[Repo docs maintainer]
-  E --> R[Release pipeline]
-
-  S --> P[Downstream KMP project]
-  X --> Z[Design-system, accessibility, preview, and copy skills]
-  D --> RD[README, docs/, AGENTS, commands, routing text]
-  R --> C[CHANGELOG.md, Git tags, GitHub Release]
-
-  RN[/kmm-release-notes/] --> A[agents/changelog.md]
-  A --> C
-
-  MD[/kmm-maintain-docs/] --> D
-  NS[/kmm-new-skill/] --> E
+```bash
+npx skills add ronjunevaldoz/kmm-agent-skills
 ```
 
-Consumer skills are the installable surface downstream projects use. Repo docs,
-agents, commands, and scripts maintain this repository's own workflow and release
-surface. The designer agent keeps KMM and Compose component decisions aligned before
-implementation starts.
+Then in Claude Code:
 
-Before routing any docs task, classify it as repo-internal or downstream consumer.
-Repo docs stay with `docs-maintainer`; downstream project docs go to
-`project-docs-maintainer`.
+1. **New project** → `/kmm-new-project <description>`
+2. **Existing project** → `/kmm-setup-agents`
+3. **Audit** → `/kmm-run-audit`
+4. **Implement a feature** → `/kmm-implement-feature <name>`
 
-Update this diagram whenever a skill, agent, command, or routing rule changes. Keep
-it aligned with `skills/kotlin-multiplatform-expert/SKILL.md`, `agents/*.md`, and the
-public command docs.
+Not sure which skill to use? Ask `kotlin-multiplatform-expert` — it routes you to the smallest
+relevant skill set.
 
 ---
 
-### KMM Architecture
+## Skills
 
-```mermaid
-flowchart TB
-  R[Feature request] --> C[Clean architecture contract]
-  C --> F[Foundation]
-  F --> I[Infrastructure]
-  I --> P[Patterns]
-  P --> U[UI system]
-  U --> T[Testing and quality]
-
-  C --> L[model / api / domain / data / presenter / ui]
-  F --> B[build logic, DI, CI, release]
-  I --> N[network, database, logging, auth]
-  P --> S[repository, navigation, offline-first, paging]
-  U --> V[design system, layout, animation, previews]
-  T --> Q[unit tests, screenshots, code quality, accessibility]
-```
-
-This is the downstream project shape the skills support. Use the earliest relevant
-layer, then add lower layers only when the feature truly needs them.
-
----
-
-### Consumer Routing Architecture
-
-```mermaid
-flowchart LR
-  R[User request] --> E[kotlin-multiplatform-expert]
-  E --> L[Priority ladder]
-  L --> S[Smallest relevant skill set]
-  L --> D[Designer agent]
-  S --> A[Implementer or docs maintainer]
-  D --> A
-  A --> V[Validator or reviewer]
-  V --> P[Release pipeline]
-  P --> C[Published docs / release notes]
-```
-
-Consumer routing starts with the expert. Route to the earliest tier that answers the
-request, then expand only when the next layer is needed. For UI/UX or component work,
-the designer agent runs before implementation so the design system and Compose patterns
-stay consistent.
-
----
+57 skills covering the full KMP stack. Load the smallest set that answers the request.
 
 ### Foundation
-
-- [`kotlin-multiplatform-feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) - 6-layer module structure, build-logic, TOML catalog, Koin
-- [`kotlin-multiplatform-clean-architecture`](skills/kotlin-multiplatform-clean-architecture/) - layer contract, `:model` vs `:api`, `internal` rules, Detekt enforcement
-- [`kotlin-multiplatform-presenter-module`](skills/kotlin-multiplatform-presenter-module/) - pure-Kotlin ViewModel, MVI contracts, no Compose dep, Koin wiring
-- [`kotlin-multiplatform-dependency-injection`](skills/kotlin-multiplatform-dependency-injection/) - Koin wiring and scopes
-- [`kotlin-multiplatform-flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) - BuildKonfig, secrets, env setup
-- [`kotlin-multiplatform-ci-github-actions`](skills/kotlin-multiplatform-ci-github-actions/) - CI matrix and release workflow
+- [`feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) — 6-layer module structure, build-logic, TOML catalog, Koin
+- [`clean-architecture`](skills/kotlin-multiplatform-clean-architecture/) — layer contract, `:model` vs `:api`, `internal` rules
+- [`presenter-module`](skills/kotlin-multiplatform-presenter-module/) — pure-Kotlin ViewModel, MVI contracts, no Compose dep
+- [`dependency-injection`](skills/kotlin-multiplatform-dependency-injection/) — Koin wiring and scopes
+- [`flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) — BuildKonfig, secrets, env setup
+- [`ci-github-actions`](skills/kotlin-multiplatform-ci-github-actions/) — CI matrix and release workflow
 
 ### Infrastructure
-
-- [`kotlin-multiplatform-ktor-auth-service`](skills/kotlin-multiplatform-ktor-auth-service/) - auth service, bearer/JWT, sessions, RPC
-- [`kotlin-multiplatform-mongodb-database`](skills/kotlin-multiplatform-mongodb-database/) - MongoDB coroutine driver and repositories
-- [`kotlin-multiplatform-kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) - Kotlin RPC boundaries and scaffolding
-- [`kotlin-multiplatform-network-layer`](skills/kotlin-multiplatform-network-layer/) - Ktor client, auth refresh, result mapping
-- [`kotlin-multiplatform-sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) - SQLDelight schema, drivers, migrations
-- [`kotlin-multiplatform-datastore`](skills/kotlin-multiplatform-datastore/) - Preferences DataStore + Proto DataStore, expect/actual factory, Koin wiring, SharedPreferences migration
-- [`kotlin-multiplatform-xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) - XCFramework and SPM export
-- [`kotlin-multiplatform-jni-pro`](skills/kotlin-multiplatform-jni-pro/) - JVM JNI bridge to native C/C++ libraries, wrapper/C-shim discipline, memory-safe interop
+- [`ktor-auth-service`](skills/kotlin-multiplatform-ktor-auth-service/) — auth service, bearer/JWT, sessions
+- [`network-layer`](skills/kotlin-multiplatform-network-layer/) — Ktor client, auth refresh, result mapping
+- [`sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) — SQLDelight schema, drivers, migrations
+- [`datastore`](skills/kotlin-multiplatform-datastore/) — Preferences DataStore + Proto DataStore
+- [`xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) — XCFramework and SPM export
+- [`mongodb-database`](skills/kotlin-multiplatform-mongodb-database/) — MongoDB coroutine driver and repositories
+- [`kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) — Kotlin RPC boundaries and scaffolding
+- [`jni-pro`](skills/kotlin-multiplatform-jni-pro/) — JVM JNI bridge to native C/C++
 
 ### Patterns
-
-- [`kotlin-multiplatform-expect-actual`](skills/kotlin-multiplatform-expect-actual/) - platform differences
-- [`kotlin-multiplatform-repository-pattern`](skills/kotlin-multiplatform-repository-pattern/) - repository boundary and fetch strategy
-- [`kotlin-multiplatform-navigation`](skills/kotlin-multiplatform-navigation/) - type-safe navigation
-- [`kotlin-multiplatform-deep-linking`](skills/kotlin-multiplatform-deep-linking/) - App Links, Universal Links, NavHost deep-link routing
-- [`kotlin-multiplatform-shared-resources`](skills/kotlin-multiplatform-shared-resources/) - shared resources and localization
-- [`kotlin-multiplatform-mvi`](skills/kotlin-multiplatform-mvi/) - State / Intent / Effect flow
-- [`kotlin-multiplatform-logging`](skills/kotlin-multiplatform-logging/) - logger wrapper, kotlin-logging or Kermit, crash boundary, Koin wiring
-- [`kotlin-multiplatform-crash-reporting`](skills/kotlin-multiplatform-crash-reporting/) - Firebase Crashlytics + Sentry, CrashReporter interface, dSYM symbolication
-- [`kotlin-multiplatform-offline-first`](skills/kotlin-multiplatform-offline-first/) - SyncState, SyncManager, optimistic updates, conflict resolution
-- [`kotlin-multiplatform-paging`](skills/kotlin-multiplatform-paging/) - Paging 3, PagingSource, RemoteMediator, load-state handling
-- [`kotlin-multiplatform-image-loading`](skills/kotlin-multiplatform-image-loading/) - Coil 3, AsyncImage, single ImageLoader, cache
-- [`kotlin-multiplatform-permissions`](skills/kotlin-multiplatform-permissions/) - PermissionState, expect/actual PermissionController, Android + iOS
-- [`kotlin-multiplatform-push-notifications`](skills/kotlin-multiplatform-push-notifications/) - FCM + APNs, PushToken, NotificationHandler expect/actual
-- [`kotlin-multiplatform-workmanager`](skills/kotlin-multiplatform-workmanager/) - CoroutineWorker, BGTaskScheduler, expect/actual BackgroundScheduler
-- [`kotlin-multiplatform-analytics`](skills/kotlin-multiplatform-analytics/) - sealed AnalyticsEvent, Firebase/Amplitude, screen tracking, FakeAnalytics
-- [`kotlin-multiplatform-feature-flags`](skills/kotlin-multiplatform-feature-flags/) - FeatureFlag enum, Firebase Remote Config, A/B variants, kill switch
-- [`kotlin-multiplatform-form-validation`](skills/kotlin-multiplatform-form-validation/) - ValidationResult, FieldState, synchronous + async validators, submit gating
-- [`kotlin-multiplatform-biometric-auth`](skills/kotlin-multiplatform-biometric-auth/) - BiometricResult, expect/actual BiometricAuthenticator, BiometricPrompt
+- [`mvi`](skills/kotlin-multiplatform-mvi/) — State / Intent / Effect, Channel effects, MviViewModel base
+- [`expect-actual`](skills/kotlin-multiplatform-expect-actual/) — platform-specific implementations
+- [`repository-pattern`](skills/kotlin-multiplatform-repository-pattern/) — repository boundary, fetch strategy
+- [`navigation`](skills/kotlin-multiplatform-navigation/) — type-safe navigation, auth gate
+- [`deep-linking`](skills/kotlin-multiplatform-deep-linking/) — App Links, Universal Links, URI schemes
+- [`offline-first`](skills/kotlin-multiplatform-offline-first/) — SyncState, optimistic updates, conflict resolution
+- [`paging`](skills/kotlin-multiplatform-paging/) — Paging 3, PagingSource, RemoteMediator
+- [`logging`](skills/kotlin-multiplatform-logging/) — logger wrapper, kotlin-logging or Kermit
+- [`crash-reporting`](skills/kotlin-multiplatform-crash-reporting/) — Crashlytics + Sentry, dSYM symbolication
+- [`analytics`](skills/kotlin-multiplatform-analytics/) — sealed AnalyticsEvent, Firebase/Amplitude
+- [`feature-flags`](skills/kotlin-multiplatform-feature-flags/) — FeatureFlag enum, Remote Config, A/B variants
+- [`form-validation`](skills/kotlin-multiplatform-form-validation/) — ValidationResult, FieldState, submit gating
+- [`permissions`](skills/kotlin-multiplatform-permissions/) — PermissionState, expect/actual PermissionController
+- [`push-notifications`](skills/kotlin-multiplatform-push-notifications/) — FCM + APNs, PushToken expect/actual
+- [`workmanager`](skills/kotlin-multiplatform-workmanager/) — CoroutineWorker, BGTaskScheduler
+- [`biometric-auth`](skills/kotlin-multiplatform-biometric-auth/) — BiometricResult, expect/actual BiometricAuthenticator
+- [`image-loading`](skills/kotlin-multiplatform-image-loading/) — Coil 3, AsyncImage, image cache
+- [`shared-resources`](skills/kotlin-multiplatform-shared-resources/) — shared resources and localization
+- [`in-app-purchases`](skills/kotlin-multiplatform-in-app-purchases/) — Play Billing + StoreKit 2, PurchaseState, MVI paywall
+- [`proguard-r8`](skills/kotlin-multiplatform-proguard-r8/) — R8 keep rules for KMP libraries, release build validation
+- [`desktop-app`](skills/kotlin-multiplatform-desktop-app/) — window management, tray, file picker, packaging
 
 ### UI System
-
-- [`kotlin-multiplatform-design-system`](skills/kotlin-multiplatform-design-system/) - tokens and core components
-- [`kotlin-multiplatform-design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) - extended component set
-- [`kotlin-multiplatform-adaptive-layout`](skills/kotlin-multiplatform-adaptive-layout/) - WindowSizeClass, Compact/Medium/Expanded breakpoints, list-detail split
-- [`kotlin-multiplatform-compose-animation`](skills/kotlin-multiplatform-compose-animation/) - AnimatedVisibility, Crossfade, AnimatedContent, shared elements
-- [`kotlin-multiplatform-compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) - slot-based component APIs
-- [`kotlin-multiplatform-compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) - hoisting rules
-- [`kotlin-multiplatform-compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) - `remember` vs `ViewModel`
-- [`kotlin-multiplatform-graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) - canvas and graph surfaces
-- [`kotlin-multiplatform-preview-driven-development`](skills/kotlin-multiplatform-preview-driven-development/) - Desktop-first `@Preview` workflow, `PreviewParameterProvider`, PDD cycle
+- [`design-system`](skills/kotlin-multiplatform-design-system/) — tokens and core components
+- [`design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) — bottom sheet, dialog, snackbar, skeleton
+- [`compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) — hoisting rules, `@Stable`, `@Immutable`
+- [`compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) — `remember` vs `ViewModel`, `rememberUpdatedState`
+- [`compose-animation`](skills/kotlin-multiplatform-compose-animation/) — AnimatedVisibility, Crossfade, shared elements
+- [`compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) — slot-based component APIs, CompositionLocal
+- [`adaptive-layout`](skills/kotlin-multiplatform-adaptive-layout/) — WindowSizeClass, list-detail split
+- [`graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) — Canvas, graphicsLayer
+- [`preview-driven-development`](skills/kotlin-multiplatform-preview-driven-development/) — Desktop-first `@Preview` workflow, PDD cycle
+- [`layout-system`](skills/kotlin-multiplatform-layout-system/) — ASCII wireframe docs per screen
 
 ### Testing & Quality
-
-- [`kotlin-multiplatform-unit-testing`](skills/kotlin-multiplatform-unit-testing/) - `runTest`, Turbine, fake-over-mock, `:core:testing` fixtures
-- [`kotlin-multiplatform-roborazzi`](skills/kotlin-multiplatform-roborazzi/) - screenshot tests from `@Preview` on JVM, golden images, CI diff
-- [`kotlin-multiplatform-code-quality`](skills/kotlin-multiplatform-code-quality/) - Ktlint (formatting) + Detekt (architecture rules), CI gates
-- [`kotlin-multiplatform-accessibility`](skills/kotlin-multiplatform-accessibility/) - semantic roles, contentDescription, touch targets, Roborazzi a11y snapshots
+- [`unit-testing`](skills/kotlin-multiplatform-unit-testing/) — `runTest`, Turbine, fake-over-mock
+- [`roborazzi`](skills/kotlin-multiplatform-roborazzi/) — screenshot tests from `@Preview` on JVM
+- [`code-quality`](skills/kotlin-multiplatform-code-quality/) — Ktlint + Detekt, CI gates
+- [`accessibility`](skills/kotlin-multiplatform-accessibility/) — semantic roles, contentDescription, WCAG
 
 ### Meta
-
-- [`kotlin-multiplatform-expert`](skills/kotlin-multiplatform-expert/) - skill routing and build order
-- [`kotlin-multiplatform-project-docs-maintainer`](skills/kotlin-multiplatform-project-docs-maintainer/) - consumer-facing project docs, onboarding, and docs/reference sync
-- [`kotlin-multiplatform-audit`](skills/kotlin-multiplatform-audit/) - repo review, fix sequencing, and CI governance gate
-- [`kotlin-multiplatform-layout-system`](skills/kotlin-multiplatform-layout-system/) - ASCII wireframe docs for screens in `docs/layout-system/`; draft and document app layout
-- [`kotlin-multiplatform-lessons`](skills/kotlin-multiplatform-lessons/) - structured lesson files capturing pattern mismatches and fixes
-- [`kotlin-multiplatform-skill-harvester`](skills/kotlin-multiplatform-skill-harvester/) - reads lesson files and proposes amendments to source skills
-- [`kotlin-multiplatform-migration`](skills/kotlin-multiplatform-migration/) - incremental adoption for existing projects: assess current state, prioritized skill order, MVVM→MVI, monolith→multi-module migration paths
-- [`kotlin-multiplatform-release`](skills/kotlin-multiplatform-release/) - versioning, Maven Central publishing, pre-release suffixes, git-cliff changelog, GitHub Release
-- [`kotlin-multiplatform-legal-docs`](skills/kotlin-multiplatform-legal-docs/) - privacy policy, terms, data-safety labels, consent gates, and legal compliance screens
-- [`kotlin-multiplatform-proguard-r8`](skills/kotlin-multiplatform-proguard-r8/) - R8 minification, keep rules for KMP libraries (Koin, Ktor, SQLDelight, serialization), release build validation
-- [`kotlin-multiplatform-in-app-purchases`](skills/kotlin-multiplatform-in-app-purchases/) - IAP and subscriptions via Play Billing and StoreKit 2, shared PurchaseState domain model, MVI integration
-- [`kotlin-multiplatform-desktop-app`](skills/kotlin-multiplatform-desktop-app/) - Desktop-specific: window management, system tray, file picker, native menu bar, keyboard shortcuts, packaging
+- [`expert`](skills/kotlin-multiplatform-expert/) — skill routing and build order
+- [`audit`](skills/kotlin-multiplatform-audit/) — repo review, fix sequencing, CI governance gate
+- [`migration`](skills/kotlin-multiplatform-migration/) — MVVM→MVI, monolith→multi-module, incremental adoption
+- [`project-docs-maintainer`](skills/kotlin-multiplatform-project-docs-maintainer/) — consumer-facing project docs and onboarding
+- [`legal-docs`](skills/kotlin-multiplatform-legal-docs/) — privacy policy, terms, GDPR, data-safety labels
+- [`lessons`](skills/kotlin-multiplatform-lessons/) — structured lesson files for pattern mismatches
+- [`skill-harvester`](skills/kotlin-multiplatform-skill-harvester/) — reads lessons, proposes skill amendments
+- [`release`](skills/kotlin-multiplatform-release/) — versioning, Maven Central, git-cliff, GitHub Release
 
 ---
 
-## Skills vs Agents
+## Commands
 
-**Skills** (`skills/`) are passive reference documents — patterns, code examples, and
-anti-patterns. Consumer projects install them into `.claude/skills/`; the agent reads them
-as context when a trigger keyword matches.
-
-**Agents** (`agents/`) are active pipeline roles — they orchestrate steps, run scripts,
-and produce structured outputs. They reference skills for content but own the workflow.
-
-## Agent Pipeline
-
-Ten specialized agents orchestrate end-to-end feature work, repo maintenance, and consumer
-adoption. Agents read skills as context and communicate via a structured plan contract.
-
-| Agent | Role |
-|---|---|
-| [`router`](agents/router.md) | Matches the request to the right skills, determines build order and tier (thin/medium/full), hands off to implementer |
-| [`planner`](agents/planner.md) | Analyzes the task, loads only relevant skills, produces a layer-by-layer plan, gates on user approval |
-| [`designer`](agents/designer.md) | Shapes KMM/Compose wireframes, diagrams, layouts, component APIs, accessibility, previews, and copy before implementation |
-| [`implementer`](agents/implementer.md) | Executes the approved plan in 6-layer build order, generates complete runnable code |
-| [`reviewer`](agents/reviewer.md) | Checks layer boundaries, Koin wiring, MVI contracts, and test coverage; runs `audit_project.py` |
-| [`auditor`](agents/auditor.md) | Runs violation audit or adoption roadmap against a consumer project or the skills repo; produces findings the fixer resolves |
-| [`docs-maintainer`](agents/docs-maintainer.md) | Keeps this repo's README, agent docs, command docs, and skill routing text aligned; downstream project docs route to the `project-docs-maintainer` skill |
-| [`harvester`](agents/harvester.md) | Reads lesson files and GitHub issues, filters by impact, proposes and applies skill amendments after approval |
-| [`validator`](agents/validator.md) | Runs Gradle compilation and `jvmTest` in escalating levels; stops at first failure |
-| [`fixer`](agents/fixer.md) | Applies minimum targeted fixes for reviewer/validator blockers; rates confidence; asks user for LOW-confidence calls |
-
-The `changelog` agent is separate and handles consumer release notes plus per-skill
-`## Changelog` updates.
-
----
-
-## Slash Commands
-
-All commands are prefixed with `kmm-` so they don't collide with your project's own `.claude/commands/`.
+All commands are `kmm-` prefixed so they don't collide with your own `.claude/commands/`.
 
 ### Consumer commands — install these in your project
 
 | Command | What it does |
 |---|---|
-| `/kmm-new-project <description>` | Scaffold a full KMP project from a natural language description |
-| `/kmm-setup-agents [path]` | Initialize `.claude/` agent setup in an existing KMP project |
-| `/kmm-implement-feature <name>` | Plan → Implement → Validate → Review a new KMP feature end-to-end |
-| `/kmm-execute-ticket <id>` | Fetch a GitHub Issue (or paste any ticket), plan → branch → implement → validate → review → commit |
-| `/kmm-run-audit [path]` | Run `audit_project.py` with per-finding remediation from the relevant skill |
-| `/kmm-verify [path]` | Full validation pipeline: module graph, tests, audit, screenshot diff, design |
-| `/kmm-review-changes` | Review current git diff against 6-layer rules and skill anti-patterns |
-| `/kmm-fix-design [path]` | Scan and fix design system violations file-by-file with diff confirmation |
-| `/kmm-update-design-system [path]` | Pull latest design system components; diff and confirm before applying |
-| `/kmm-record-design-baselines [path]` | Record Roborazzi golden PNGs after fixing design violations |
-| `/kmm-audit-screenshots [path]` | Vision audit of Roborazzi PNG goldens for design-system compliance |
-| `/kmm-audit-design-visual [path]` | Cross-screen visual consistency check (spacing, color, typography) |
+| `/kmm-new-project <description>` | Scaffold a full KMP project from a description |
+| `/kmm-setup-agents [path]` | Initialize `.claude/` agent setup in an existing project |
+| `/kmm-implement-feature <name>` | Plan → Implement → Validate → Review a feature |
+| `/kmm-execute-ticket <id>` | Implement a GitHub Issue end-to-end |
+| `/kmm-run-audit [path]` | Architecture audit with per-finding remediation |
+| `/kmm-verify [path]` | Full pipeline: build, tests, audit, screenshots, design |
+| `/kmm-review-changes` | Review git diff against 6-layer rules and anti-patterns |
+| `/kmm-fix-design [path]` | Scan and fix design system violations |
+| `/kmm-update-design-system [path]` | Pull latest design system components |
+| `/kmm-record-design-baselines [path]` | Record Roborazzi golden PNGs |
+| `/kmm-audit-screenshots [path]` | Vision audit of screenshot goldens |
+| `/kmm-audit-design-visual [path]` | Cross-screen visual consistency check |
 | `/kmm-update-skills` | Pull latest skills and re-deploy to `.claude/skills/` |
-| `/kmm-check-updates` | Check whether a newer version of kmm-agent-skills is available |
-| `/kmm-report-skill-issue` | File a structured skill bug report to the kmm-agent-skills repo |
+| `/kmm-check-updates` | Check for a newer version of kmm-agent-skills |
+| `/kmm-report-skill-issue` | File a structured skill bug report |
 
-### Repo-internal commands — for maintaining this skills repo
+### Repo-internal commands
 
 | Command | What it does |
 |---|---|
-| `/kmm-new-skill <name>` | Scaffold a new skill with all required sections and audit hooks |
-| `/kmm-modify-skill <name>` | Safely edit an existing skill without removing required sections |
-| `/kmm-summarize-issues` | Scan all skills for quality gaps and output paste-ready fix prompts |
-| `/kmm-submit-issue` | File a structured GitHub issue (skill gap, bug, or feature request) |
-| `/kmm-maintain-docs [scope]` | Reconcile repo docs, agent docs, command docs, and skill routing text |
+| `/kmm-new-skill <name>` | Scaffold a new skill with all required sections |
+| `/kmm-modify-skill <name>` | Safely edit an existing skill |
+| `/kmm-summarize-issues` | Scan all skills for quality gaps |
+| `/kmm-submit-issue` | File a structured GitHub issue |
+| `/kmm-maintain-docs [scope]` | Reconcile repo docs and routing text |
 | `/kmm-release-notes` | Draft release notes for a version bump |
-| `/kmm-setup-hooks` | Install git hooks for architecture hygiene enforcement |
-
----
-
-## Hooks
-
-Shell scripts for enforcing architecture hygiene locally and in CI.
-
-| Hook | Trigger | What it does |
-|---|---|---|
-| [`pre-commit-audit.sh`](hooks/pre-commit-audit.sh) | Before `git commit` | Blocks commit if staged `.kt` files have architecture findings |
-| [`validate-architecture.sh`](hooks/validate-architecture.sh) | Claude Code `PostToolUse` | Runs audit after any file edit |
-| [`check-skill-freshness.sh`](hooks/check-skill-freshness.sh) | Manual / CI schedule | Warns if any skill's `last-updated` is > 90 days old |
-
-**Install all hooks (one command):**
-```bash
-bash scripts/install-hooks.sh
-```
-
-Or manually:
-```bash
-ln -sf ../../hooks/pre-commit-audit.sh .git/hooks/pre-commit
-```
-
----
-
-## Governance (for skill consumers)
-
-Enforce skill compliance automatically in your CI.
-
-**1. Add `.kmm-skills` to your project root:**
-
-```json
-{
-  "skills_repo": "ronjunevaldoz/kmm-agent-skills",
-  "version": "1.25.0"
-}
-```
-
-Pin a release tag in `version` rather than `main` or another mutable ref. The
-governance check fails if the pin is missing or not tag-shaped.
-
-**2. Add a governance workflow:**
-
-```yaml
-# .github/workflows/governance.yml
-name: KMM Governance
-on: [pull_request, push]
-
-jobs:
-  kmm-governance:
-    uses: ronjunevaldoz/kmm-agent-skills/.github/workflows/kmm-audit.yml@main
-    with:
-      project_root: .
-      fail_on: HIGH          # or MEDIUM for stricter enforcement
-      skills_ref: v1.25.0   # pin to a tag for reproducibility
-```
-
-That is the complete setup. The reusable workflow checks out this repo and runs
-`governance_check.py`.
-
-| `fail_on` | What it catches |
-|---|---|
-| `HIGH` (default) | Architecture boundary violations, hardcoded colors, Material theme usage |
-| `MEDIUM` | Also catches hardcoded dp literals and layout pattern inconsistency |
-| `LOW` | Full enforcement — any finding fails the build |
-
-<a name="when-to-file-here"></a>
-**When to file an issue here vs. in your own project:**
-File here only if the skill guidance itself is wrong or incomplete. If you applied the guidance correctly and your project still broke, file the issue in your own repo. Use `/kmm-report-skill-issue` from any Claude session to file skill issues with the correct template.
-
----
-
-## Trigger Keywords
-
-Phrases that activate each skill automatically.
-
-| Skill | Say something like… |
-|---|---|
-| [`expert`](skills/kotlin-multiplatform-expert/) | "where do I start KMP", "which skill should I use", "KMP architecture decision" |
-| [`project-docs-maintainer`](skills/kotlin-multiplatform-project-docs-maintainer/) | "project docs", "consumer docs", "README", "getting started", "docs reference", "architecture diagram", "library docs", "app docs" |
-| [`feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) | "new KMP feature", "add a screen", "scaffold feature module", "create module" |
-| [`clean-architecture`](skills/kotlin-multiplatform-clean-architecture/) | "6-layer architecture", "which layer does this go in", "layer contract", "domain isolation" |
-| [`presenter-module`](skills/kotlin-multiplatform-presenter-module/) | "KMP ViewModel", "presenter layer", "pure Kotlin ViewModel", "StateFlow ViewModel" |
-| [`dependency-injection`](skills/kotlin-multiplatform-dependency-injection/) | "Koin setup", "inject dependency", "wire dependencies", "Hilt alternative" |
-| [`flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) | "staging URL", "API endpoint config", "dev/staging/prod", "environment variable" |
-| [`ci-github-actions`](skills/kotlin-multiplatform-ci-github-actions/) | "set up CI", "GitHub Actions", "continuous integration", "automate build" |
-| [`ktor-auth-service`](skills/kotlin-multiplatform-ktor-auth-service/) | "sign in", "JWT auth", "bearer token", "refresh token", "OAuth" |
-| [`mongodb-database`](skills/kotlin-multiplatform-mongodb-database/) | "MongoDB", "server-side database", "document collection" |
-| [`kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) | "Kotlin RPC", "shared API contract", "client/server contract" |
-| [`network-layer`](skills/kotlin-multiplatform-network-layer/) | "API call", "HTTP request", "REST API", "Ktor client", "safeRequest" |
-| [`sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) | "local database KMP", "Room alternative", "SQLite KMP", "offline storage" |
-| [`datastore`](skills/kotlin-multiplatform-datastore/) | "save user settings", "local storage KMP", "Preferences DataStore", "app settings" |
-| [`xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) | "XCFramework", "Swift Package Manager", "iOS distribution", "Package.swift" |
-| [`expect-actual`](skills/kotlin-multiplatform-expect-actual/) | "iOS only code", "platform-specific implementation", "expect fun", "actual class" |
-| [`repository-pattern`](skills/kotlin-multiplatform-repository-pattern/) | "offline-first", "cache-first", "single source of truth", "data layer strategy" |
-| [`navigation`](skills/kotlin-multiplatform-navigation/) | "navigate to screen", "nav graph", "pass arguments", "back stack", "web routing", "browser fragment", "auth gate", "NavHost", "AppNavigator", "result back to screen" |
-| [`deep-linking`](skills/kotlin-multiplatform-deep-linking/) | "deep link", "App Links", "Universal Links", "intent filter", "URI scheme", "link to screen" |
-| [`shared-resources`](skills/kotlin-multiplatform-shared-resources/) | "i18n", "translations", "app strings KMP", "localize", "compose resources" |
-| [`mvi`](skills/kotlin-multiplatform-mvi/) | "MVI pattern", "navigation effect", "one-shot event", "UiState / UiIntent / UiEffect", "god ViewModel", "ViewModel too big", "split ViewModel", "extract use case", "@Stable State", "@Immutable State", "CoroutineExceptionHandler viewModelScope", "rememberUpdatedState" |
-| [`logging`](skills/kotlin-multiplatform-logging/) | "logger wrapper", "logger facade", "kotlin-logging", "Kermit", "KMP logging", "log levels" |
-| [`crash-reporting`](skills/kotlin-multiplatform-crash-reporting/) | "Crashlytics", "Sentry", "crash report", "dSYM", "crash boundary", "non-fatal error" |
-| [`offline-first`](skills/kotlin-multiplatform-offline-first/) | "offline-first", "sync state", "optimistic update", "conflict resolution", "cache invalidation" |
-| [`paging`](skills/kotlin-multiplatform-paging/) | "pagination", "Paging 3", "PagingSource", "load more", "infinite scroll", "RemoteMediator" |
-| [`image-loading`](skills/kotlin-multiplatform-image-loading/) | "load image", "Coil", "AsyncImage", "image cache", "image placeholder" |
-| [`permissions`](skills/kotlin-multiplatform-permissions/) | "request permission", "camera permission", "location permission", "PermissionState", "runtime permission" |
-| [`push-notifications`](skills/kotlin-multiplatform-push-notifications/) | "push notification", "FCM", "APNs", "notification token", "NotificationHandler" |
-| [`workmanager`](skills/kotlin-multiplatform-workmanager/) | "background job", "WorkManager", "CoroutineWorker", "background task", "BGTaskScheduler" |
-| [`analytics`](skills/kotlin-multiplatform-analytics/) | "track event", "analytics", "screen tracking", "Firebase Analytics", "Amplitude", "event logging" |
-| [`feature-flags`](skills/kotlin-multiplatform-feature-flags/) | "feature flag", "remote config", "A/B test", "kill switch", "toggle feature" |
-| [`form-validation`](skills/kotlin-multiplatform-form-validation/) | "form validation", "field validation", "submit gate", "ValidationResult", "FieldState" |
-| [`biometric-auth`](skills/kotlin-multiplatform-biometric-auth/) | "biometric", "fingerprint", "Face ID", "BiometricPrompt", "biometric auth" |
-| [`design-system`](skills/kotlin-multiplatform-design-system/) | "AppTheme", "design tokens", "Material3 alternative", "custom typography" |
-| [`design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) | "bottom sheet", "dialog", "snackbar", "skeleton", "extended components" |
-| [`adaptive-layout`](skills/kotlin-multiplatform-adaptive-layout/) | "responsive layout", "WindowSizeClass", "Compact Medium Expanded", "list-detail", "adaptive UI" |
-| [`compose-animation`](skills/kotlin-multiplatform-compose-animation/) | "Compose animation", "AnimatedVisibility", "Crossfade", "AnimatedContent", "shared element transition" |
-| [`compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) | "slot API", "content lambda", "composable slot", "flexible component", "CompositionLocal", "compositionLocalOf", "staticCompositionLocalOf" |
-| [`compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) | "state hoisting", "lift state", "stateless composable", "where does state go", "@Stable", "@Immutable", "Compose stability", "unstable type", "skip recomposition" |
-| [`compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) | "remember vs ViewModel", "state survival", "config change", "process death", "rememberUpdatedState", "stale lambda LaunchedEffect", "latest callback effect" |
-| [`graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) | "custom drawing", "Canvas", "graphicsLayer", "workflow node", "node editor" |
-| [`preview-driven-development`](skills/kotlin-multiplatform-preview-driven-development/) | "PDD", "@Preview", "desktop preview", "PreviewParameterProvider", "fast UI iteration" |
-| [`accessibility`](skills/kotlin-multiplatform-accessibility/) | "accessibility", "a11y", "screen reader", "contentDescription", "touch target", "WCAG" |
-| [`unit-testing`](skills/kotlin-multiplatform-unit-testing/) | "unit test", "runTest", "Turbine", "test ViewModel", "fake repository" |
-| [`roborazzi`](skills/kotlin-multiplatform-roborazzi/) | "screenshot test", "visual regression", "test layout", "canvas test", "100% accuracy" |
-| [`code-quality`](skills/kotlin-multiplatform-code-quality/) | "Ktlint", "Detekt", "code style", "static analysis", "layer violation" |
-| [`audit`](skills/kotlin-multiplatform-audit/) | "audit repo", "project health", "what is wrong with this project", "architecture drift", "governance check", "CI enforcement" |
-| [`migration`](skills/kotlin-multiplatform-migration/) | "migrate existing project", "MVVM to MVI", "monolith to multi-module", "incremental adoption", "Hilt to Koin", "legacy codebase" |
-| [`legal-docs`](skills/kotlin-multiplatform-legal-docs/) | "privacy policy", "terms of service", "data safety", "GDPR", "consent gate", "legal screen" |
-| [`lessons`](skills/kotlin-multiplatform-lessons/) | "capture lesson", "pattern mismatch", "document fix", "lesson file" |
-| [`skill-harvester`](skills/kotlin-multiplatform-skill-harvester/) | "harvest lessons", "upstream lessons", "process lesson issues", "skill amendment" |
-| [`layout-system`](skills/kotlin-multiplatform-layout-system/) | "wireframe", "screen flow", "layout spec", "ASCII diagram", "layout doc" |
-| [`proguard-r8`](skills/kotlin-multiplatform-proguard-r8/) | "ProGuard", "R8", "obfuscation", "minification", "keep rules", "proguard-rules.pro", "release build crash", "ClassNotFoundException release", "APK size", "minifyEnabled" |
-| [`in-app-purchases`](skills/kotlin-multiplatform-in-app-purchases/) | "in-app purchases", "IAP", "subscriptions", "Play Billing", "StoreKit", "paywall", "premium feature", "purchase flow", "restore purchases", "entitlement" |
-| [`desktop-app`](skills/kotlin-multiplatform-desktop-app/) | "Desktop target", "Compose Desktop", "window management", "system tray", "file picker", "native menu bar", "keyboard shortcut Desktop", "packaging Desktop", "distributable", "macOS app", "Windows app", "rememberWindowState" |
-| [`release`](skills/kotlin-multiplatform-release/) | "publish to Maven Central", "release project", "cut release", "release library", "bump version", "git-cliff", "alpha release", "GitHub Release" |
-
----
-
-## Targets
-
-- Android - `androidTarget()` - `:androidApp`
-- iOS - `iosArm64()`, `iosSimulatorArm64()` - `:iosApp`
-- Desktop - `jvm()` - `:desktopApp`
-- Web - `js { browser() }`, `wasmJs { browser() }` - `:webApp`
+| `/kmm-setup-hooks` | Install git hooks for architecture hygiene |
 
 ---
 
 ## Installation
 
-See **[RELEASING.md](RELEASING.md)** for the release process (used by both humans and agents).
-
-See **[INSTALL.md](INSTALL.md)** for full setup instructions for every assistant:
-Claude Code, OpenAI Codex CLI, GitHub Copilot, Cursor, Windsurf, Gemini CLI, Aider, and Continue.
-
-Quickest install (auto-detects your agent):
 ```bash
 npx skills add ronjunevaldoz/kmm-agent-skills
 ```
+
+See [INSTALL.md](INSTALL.md) for setup instructions for Claude Code, OpenAI Codex CLI,
+GitHub Copilot, Cursor, Windsurf, Gemini CLI, Aider, and Continue.
 
 ---
 
 ## Versions
 
-- AGP 9.2.0
-- Kotlin 2.4.0
-- KSP 2.4.0-2.0.0
-- Compose Multiplatform 1.11.1
-- Coroutines 1.11.0
-- AndroidX Lifecycle 2.11.0
-- Navigation Compose 2.9.2
-- Koin 4.2.2
-- Ktor 3.5.0
-- SQLDelight 2.3.2
-- BuildKonfig 0.22.0
-- Decompose 3.5.0
-- Roborazzi 1.64.0
+| Library | Version |
+|---|---|
+| AGP | 9.2.0 |
+| Kotlin | 2.4.0 |
+| Compose Multiplatform | 1.11.1 |
+| Coroutines | 1.11.0 |
+| AndroidX Lifecycle | 2.11.0 |
+| Navigation Compose | 2.9.2 |
+| Koin | 4.2.2 |
+| Ktor | 3.5.0 |
+| SQLDelight | 2.3.2 |
+| Roborazzi | 1.64.0 |
 
-See [`docs/reference/compatibility-matrix.md`](docs/reference/compatibility-matrix.md) for the full compatibility table and conflict zones.
-
----
-
-## Roadmap
-
-See [PLAN.md](PLAN.md) for full scope and priority details.
+Full compatibility table: [`docs/reference/compatibility-matrix.md`](docs/reference/compatibility-matrix.md)
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for skill authoring, commit format, PR checklist, and release process.
-
----
+See [CONTRIBUTING.md](CONTRIBUTING.md) for skill authoring, commit format, and PR checklist.
 
 ## References
 
 - [Kotlin/kotlin-agent-skills](https://github.com/Kotlin/kotlin-agent-skills) — official Kotlin agent skills
 - [android/skills](https://github.com/android/skills) — official Android agent skills
-- [Kotlin/kmp-wizard](https://github.com/Kotlin/kmp-wizard) — AGP 9 KMP project templates; use the `all-targets` branch for Android, iOS, Web, Desktop, and Server
-
----
+- [Kotlin/kmp-wizard](https://github.com/Kotlin/kmp-wizard) — AGP 9 KMP project templates
 
 ## Support
 
-Help keep these skills free and maintained:
 - ⭐ Star this repo
 - 💬 Share feedback via issues
-- 💰 [Support via donation](FUNDING.md) — Kaia USDT, Ethereum, Bitcoin, or traditional payment
+- 💰 [Support via donation](FUNDING.md)
 
 ## License
 
