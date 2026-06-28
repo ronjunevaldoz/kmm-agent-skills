@@ -63,8 +63,8 @@ Then in Claude Code:
 3. **Audit** → `/kmm-run-audit`
 4. **Implement a feature** → `/kmm-implement-feature <name>`
 
-Not sure which skill to use? Ask `kotlin-multiplatform-expert` — it routes you to the smallest
-relevant skill set.
+**Start here:** not sure which skill to use? Ask `kotlin-multiplatform-expert` — it routes you
+to the smallest relevant skill set.
 
 ---
 
@@ -208,6 +208,12 @@ GitHub Copilot, Cursor, Windsurf, Gemini CLI, Aider, and Continue.
 | Roborazzi | 1.64.0 |
 
 Full compatibility table: [`docs/reference/compatibility-matrix.md`](docs/reference/compatibility-matrix.md)
+
+---
+
+## Roadmap
+
+See [PLAN.md](PLAN.md) for full scope and priority details.
 
 ---
 
