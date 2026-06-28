@@ -49,6 +49,9 @@ first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
 | Consumer release notes or per-skill changelogs | `changelog` |
 | Release, versioning, or Maven Central publishing | `release`, `ci-github-actions`, `xcframework-spm` |
 | Legal docs (privacy policy, terms, GDPR, data safety) | `legal-docs`, `flavor-environment`, `datastore` |
+| ProGuard / R8 / obfuscation / release build crashes / keep rules | `proguard-r8` |
+| In-app purchases / subscriptions / Play Billing / StoreKit / paywall | `in-app-purchases`, `mvi`, `dependency-injection` |
+| Desktop target / window / tray / file picker / menu bar / packaging | `desktop-app`, `expect-actual` |
 | Strings, fonts, or localization | `shared-resources` |
 | Multi-environment config (dev/staging/prod) | `flavor-environment` |
 | Image loading (Coil, AsyncImage, cache) | `image-loading` |
