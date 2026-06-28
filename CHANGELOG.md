@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.12] — 2026-06-28
+
+### Added
+
+- feat(skills): combine/flatMapLatest/snapshotFlow patterns, WhileSubscribed rule, session scope, derivedStateOf
+
+---
+
 ## [v1.29.11] — 2026-06-28
 
 ### Added
