@@ -199,7 +199,7 @@ If `CLAUDE.md` already exists, print its contents and skip — do not overwrite.
 
 ---
 
-## Step 9 — Write `.claude/settings.json`
+## Step 8 — Write `.claude/settings.json`
 
 If `.claude/settings.json` does not exist, create it with a Bash allowlist for
 common read-only and build operations:
@@ -224,7 +224,7 @@ If it already exists, print the current permissions and skip — do not overwrit
 
 ---
 
-## Step 10 — Summary
+## Step 9 — Summary
 
 ```
 AGENT SETUP COMPLETE

@@ -41,7 +41,9 @@ consumer project cleanly:
 | `GROUP_ID` | What package/group ID should the project use? | `com.example.<project>` |
 | `APP_TYPE` | What kind of app is this? | Derived from the description |
 | `WHAT_IT_DOES` | What does the app do in one sentence? | Derived from the description |
-| `PLATFORMS` | Which targets should we scaffold? | Android + Desktop |
+| `PLATFORMS` | Which targets should we scaffold? | Android + iOS |
+| `MIN_SDK` | Minimum Android SDK version? | 26 |
+| `IOS_TARGET` | Minimum iOS deployment target? | 16.0 |
 | `PERSISTENCE` | Does it need local storage, settings, or neither? | Inferred |
 | `BACKEND` | Does it talk to an API, auth service, or server? | none |
 | `AUTH` | Does it have login / sign-in / identity? | none |
@@ -57,7 +59,7 @@ Pass the description and intake answers to `kotlin-multiplatform-expert` to iden
 
 From the description, extract:
 - **App type** (todo, social feed, e-commerce, etc.)
-- **Platforms** — default: Android + Desktop if not stated
+- **Platforms** — default: Android + iOS if not stated
 - **Features** — derive from the app type; list each as a ticket-sized unit
 - **Data layer** — default: SQLDelight (offline-first) if persistence is implied; DataStore if settings/preferences only
 - **Backend** — default: none (local-only) unless the description mentions API, server, sync, or auth
@@ -68,7 +70,7 @@ Print the inferred plan for transparency — do not wait for approval, proceed i
 ```
 INFERRED PLAN
 ─────────────
-Platforms:  Android, Desktop
+Platforms:  <platforms from intake>
 Features:
   F-01  Project scaffold          → kotlin-multiplatform-feature-scaffold
   F-02  Clean architecture        → kotlin-multiplatform-clean-architecture
@@ -126,8 +128,11 @@ Only generate what the inferred plan requires. Run each in dependency order:
 | Auth flow | `kotlin-multiplatform-ktor-auth-service` | Bearer/JWT, login/refresh/logout |
 | DI | `kotlin-multiplatform-dependency-injection` | Koin modules, scope rules |
 | Logging | `kotlin-multiplatform-logging` | Kermit setup, log levels, Koin wiring |
+| CI/CD | `kotlin-multiplatform-ci-github-actions` | GitHub Actions matrix: build, test, detekt, ktlint |
+| Code quality | `kotlin-multiplatform-code-quality` | Ktlint + Detekt config, baseline, CI gate |
 
-Skip any row not needed by the inferred plan.
+Always include CI/CD and Code quality — every new project needs them from day one.
+Skip the remaining rows if not needed by the inferred plan.
 
 ---
 
@@ -266,6 +271,22 @@ Do NOT copy repo-internal commands (`kmm-new-skill.md`, `kmm-modify-skill.md`,
 `kmm-maintain-docs.md`, `kmm-release-notes.md`, `kmm-setup-hooks.md`) —
 those are for maintaining this skills repo, not consumer projects.
 
+**Write `.claude/pipeline-context.json`** — seed the project planner with initial context:
+
+```json
+{
+  "project": "<PROJECT_NAME>",
+  "group_id": "<GROUP_ID>",
+  "platforms": ["<platform list>"],
+  "skills_used": ["<skill list from this run>"],
+  "recurring_issues": [],
+  "proven_patterns": []
+}
+```
+
+The `planner` agent reads this to avoid known pitfalls and reuse proven approaches.
+Update `recurring_issues` and `proven_patterns` manually as the project evolves.
+
 **Write `.claude/settings.json`** with allowlist for common read operations:
 
 ```json
@@ -294,7 +315,7 @@ Print a summary of everything generated:
 PROJECT COMPLETE
 ────────────────
 App:        <name> — <one-line description>
-Platforms:  Android, Desktop
+Platforms:  <platforms from intake>
 Features:   <N> implemented
   ✅ F-01  Project scaffold
   ✅ F-02  Clean architecture
@@ -308,9 +329,10 @@ Generated:
   Screenshots:  <N> PNG goldens (<N> light, <N> dark)
 
 Agent setup:
-  .claude/AGENTS.md          — skill routing for this project
-  .claude/commands/kmm-*.md  — <N> slash commands installed
-  .claude/settings.json      — Bash allowlist
+  .claude/AGENTS.md                — skill routing for this project
+  .claude/commands/kmm-*.md        — <N> slash commands installed
+  .claude/pipeline-context.json    — project context for the planner agent
+  .claude/settings.json            — Bash allowlist
 
 Verify:     PASS
 Skills used: <list>

@@ -2,164 +2,126 @@
 
 You have a Kotlin Multiplatform (KMP) project or want to start one. These agent skills guide you through architecture decisions, module structure, and implementation — end-to-end, one feature at a time.
 
-**This is not a tutorial.** You don't read it. You use Claude Code (or your AI assistant) to invoke these skills directly in your project.
+**This is not a tutorial.** You don't read it. You use Claude Code to invoke these skills directly in your project.
 
-## 5-Minute Start
+---
 
-### 1. Open Claude Code in your KMP project
+## Main Use Cases
+
+### Start a brand-new KMP project
+
+```
+/kmm-new-project "A shopping app with auth, product listing, and orders"
+```
+
+Collects your group ID, project name, platforms, and what the app does — then runs a
+9-step pipeline: scaffold → clean architecture → infrastructure → design system →
+features → tests → `.claude/` agent setup. Everything is wired and ready to build.
+
+### Add agent workflows to an existing project
+
+```
+/kmm-setup-agents
+```
+
+Reads your `settings.gradle.kts` and `libs.versions.toml`, generates a tailored
+`AGENTS.md` routing table, installs consumer commands, deploys skills, and writes `CLAUDE.md`.
+
+### Audit an existing project
+
+```
+/kmm-run-audit
+```
+
+Runs `audit_project.py` and produces per-finding remediation using the relevant skill.
+
+---
+
+## 5-Minute Start (existing project)
 
 ```bash
 cd your-kmp-project
-claude code
+claude
 ```
 
-Or use the web app at [claude.ai/code](https://claude.ai/code).
+Then in Claude Code:
 
-### 2. Ask for help routing your next task
+1. **New project** → `/kmm-new-project <description>`
+2. **Existing project** → `/kmm-setup-agents`
+3. **Audit** → `/kmm-run-audit`
+4. **Add a feature** → `/kmm-implement-feature <name>`
+5. **Not sure?** → Ask `kotlin-multiplatform-expert` — it routes you to the smallest relevant skill set
 
-Type in the chat:
-```
-Use kotlin-multiplatform-expert — I need to add a login feature to my KMP app
-```
-
-Or simpler:
-```
-I need to add a login feature
-```
-
-The expert skill will:
-- Map which skills you need and in what order
-- Pick the smallest relevant set instead of enabling every matching skill
-- Explain the 6-layer architecture (model → api → domain → data → presenter → ui)
-- Hand off to the right domain skill (e.g., `ktor-auth-service` for the backend, `mvi` for the UI)
-
-### 3. Follow the skill's guidance step-by-step
-
-Each skill produces:
-- Boilerplate code you copy/paste
-- Architecture contracts you follow
-- Anti-patterns to avoid
-- Links to the full SKILL.md for deep dives
-
-### 4. Audit your work
-
-Before shipping:
-```
-Use kotlin-multiplatform-audit to review my changes
-```
-
-The audit catches:
-- Layer boundary violations
-- State handling mistakes
-- Missing tests
-- Design system inconsistencies
+---
 
 ## Common Starting Points
 
-| Goal | Use this skill first |
+| Goal | Command / Skill |
 |---|---|
-| **New KMP project from scratch** | `kotlin-multiplatform-feature-scaffold` (after reading `clean-architecture` for the rules) |
-| **Add a new feature** | `kotlin-multiplatform-expert` (it will route you) |
-| **Update this skills repo's README, agents, or commands** | `docs-maintainer` |
-| **Design a screen, wireframe, diagram, or component** | `designer` (it keeps KMM/Compose UI aligned with the design system) |
-| **Audit an existing project** | `kotlin-multiplatform-audit` |
-| **Set up CI/CD** | `kotlin-multiplatform-ci-github-actions` |
-| **Write consumer release notes or changelogs** | `changelog` |
-| **Publish to Maven Central** | `kotlin-multiplatform-release` |
-| **Debug architecture issues** | `kotlin-multiplatform-audit` (produces findings), then `kotlin-multiplatform-expert` (routes fixes) |
+| **New KMP project from scratch** | `/kmm-new-project <description>` |
+| **Set up agents in existing project** | `/kmm-setup-agents` |
+| **Add a new feature** | `/kmm-implement-feature <name>` or ask `kotlin-multiplatform-expert` |
+| **Audit an existing project** | `/kmm-run-audit` |
+| **Implement a GitHub issue end-to-end** | `/kmm-execute-ticket <id>` |
+| **Fix design system violations** | `/kmm-fix-design` |
+| **Set up CI/CD** | `kotlin-multiplatform-ci-github-actions` skill |
+| **Publish to Maven Central** | `kotlin-multiplatform-release` skill |
+| **Migrate MVVM → MVI** | `kotlin-multiplatform-migration` skill |
+| **Debug architecture issues** | `/kmm-run-audit` → `kotlin-multiplatform-expert` routes fixes |
+
+---
 
 ## How Skill Triggering Works
 
-Skills auto-activate when you mention a trigger keyword. You don't need to say the skill name explicitly.
+Skills auto-activate when you mention a trigger keyword. You don't need to say the skill name.
 
-Say this:
 ```
 How do I set up auth with JWT?
 ```
 
-Claude will invoke `kotlin-multiplatform-ktor-auth-service` automatically because "JWT" and "auth" are trigger keywords.
+Claude invokes `kotlin-multiplatform-ktor-auth-service` automatically because "JWT" and
+"auth" are trigger keywords. See [README.md](README.md) for the full keyword list.
 
-See [README.md](README.md#trigger-keywords) for the full keyword list.
+---
 
 ## Skill Collection Overview
 
-**50 skills** organized into layers:
+**57 skills** organized into layers:
 
 - **Foundation** (6 skills) — project setup, clean architecture rules, DI, CI
 - **Infrastructure** (8 skills) — networking, databases, auth, logging
-- **Patterns** (11 skills) — repositories, navigation, offline-first, paging
-- **UI System** (9 skills) — design tokens, components, animations, state hoisting
-- **Testing & Quality** (3 skills) — unit tests, screenshots, code quality
-- **Meta** (2 skills) — expert routing, project audit
-- **Plus:** JNI bridge, legal docs, push notifications, analytics, biometric auth, and more
+- **Patterns** (19 skills) — repositories, navigation, offline-first, paging, IAP, push, analytics, and more
+- **UI System** (9 skills) — design tokens, components, animations, state hoisting, previews
+- **Testing & Quality** (4 skills) — unit tests, screenshots, code quality, accessibility
+- **Meta** (8 skills) — expert routing, audit, migration, legal docs, release, lessons
 
-Treat that list as a priority ladder, not a checkbox list. Start with the expert, then
-add only the skills the task actually needs.
+See [README.md](README.md) for the full map.
 
-See [README.md](README.md#skill-map) for the full map.
+---
 
 ## Versioning & Stability
 
-Install the latest collection:
 ```bash
 npx skills add ronjunevaldoz/kmm-agent-skills
 ```
 
-Or pin to a specific version in `.kmm-skills`:
+Or pin in `.kmm-skills`:
 ```json
 {
   "skills_repo": "ronjunevaldoz/kmm-agent-skills",
-  "version": "1.25.2"
+  "version": "1.29.18"
 }
 ```
 
-All skills are tested and versioned together. [CHANGELOG.md](CHANGELOG.md) tracks what changed each release.
+[CHANGELOG.md](CHANGELOG.md) tracks what changed each release.
 
-## Governance: Enforce Skills in CI
-
-Automatically fail builds that violate skill guidance:
-
-**.kmm-skills** (project root)
-```json
-{
-  "skills_repo": "ronjunevaldoz/kmm-agent-skills",
-  "version": "1.25.2"
-}
-```
-
-**.github/workflows/governance.yml**
-```yaml
-name: KMM Governance
-on: [pull_request, push]
-
-jobs:
-  kmm-governance:
-    uses: ronjunevaldoz/kmm-agent-skills/.github/workflows/kmm-audit.yml@main
-    with:
-      project_root: .
-      fail_on: HIGH
-      skills_ref: v1.25.2
-```
-
-Done. The workflow will catch architecture violations, hardcoded colors, Material theme usage, and layout inconsistencies before merge.
+---
 
 ## File an Issue if Something's Wrong
 
 <a name="when-to-file-here"></a>
-**File here** if a skill gave you wrong guidance or missed a case.
+**File here** if a skill gave wrong guidance or missed a case.
 
-**File in your own repo** if you applied the guidance correctly and something in your project broke (that's a project bug, not a skill bug).
+**File in your own repo** if you applied the guidance correctly and something in your project broke.
 
 Use `/kmm-report-skill-issue` from Claude Code to file with the right template.
-
-## Next Steps
-
-1. **Explore the skills:** Read [README.md](README.md#skill-map) to see what's available
-2. **Ask the expert:** "What should I do next with my KMP project?" → `kotlin-multiplatform-expert` routes you
-3. **Read one skill fully:** Pick a relevant SKILL.md and read it top-to-bottom to understand the contract
-4. **Start a feature:** "Add a login screen" → skills guide you step-by-step
-5. **Audit and ship:** `kotlin-multiplatform-audit` before merge, then release with `kotlin-multiplatform-release`
-
----
-
-Questions? See [README.md](README.md) for installation, [CONTRIBUTING.md](CONTRIBUTING.md) for extending skills, or open an issue for bugs.
