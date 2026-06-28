@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.13] — 2026-06-28
+
+### Added
+
+- feat(skills): @Stable/@Immutable annotations, CoroutineExceptionHandler, rememberUpdatedState
+
+---
+
 ## [v1.29.12] — 2026-06-28
 
 ### Added
