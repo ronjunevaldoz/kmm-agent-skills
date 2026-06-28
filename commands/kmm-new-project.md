@@ -1,9 +1,10 @@
-# /new-project $ARGUMENTS
+# /kmm-new-project $ARGUMENTS
 
 **KMM Agent Skills** — scaffold a complete KMP project from a natural language description.
 
-`$ARGUMENTS` is either:
-- A plain description: `build a todo app in kmm`
+`$ARGUMENTS` is optional:
+- Omitted: the command asks what the app does before proceeding
+- Plain description: `build a todo app in kmm`
 - A path to a sample spec: `samples/todo-app.md`
 
 This command drives the full pipeline end-to-end. It starts with a short intake for the
@@ -14,6 +15,12 @@ Any assumptions made are printed before implementation begins.
 ---
 
 ## Step 1 — Read the description and collect the intake
+
+If `$ARGUMENTS` is empty, ask first:
+```
+What does your app do? (describe in one sentence or a few words)
+```
+Wait for the answer and use it as the description before continuing.
 
 If `$ARGUMENTS` ends in `.md` and the file exists, read it as the full project spec.
 Otherwise treat `$ARGUMENTS` as the raw description.
