@@ -616,7 +616,7 @@ _Dev commits accumulate here. This section is auto-promoted to a versioned entry
 ### Added
 
 - feat(design-system): add `scripts/scan_design_violations.py` — scans Compose files for hardcoded colors, dp literals, MaterialTheme usage, TextStyle construction, and nested containers; exit 0/1/2, `--json` and `--file` modes
-- feat(design-system): add `commands/fix-design.md` — fix violations file-by-file with per-file diff confirmation, regenerate Roborazzi screenshots, and verify fixes with Claude vision
+- feat(design-system): add `commands/kmm-fix-design.md` — fix violations file-by-file with per-file diff confirmation, regenerate Roborazzi screenshots, and verify fixes with Claude vision
 - feat(expert): add `/fix-design` routing keywords to Skill Invocation Map
 - test: add 22 tests for `scan_design_violations.py` (total: 120 tests passing)
 
@@ -698,7 +698,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - `CONTRIBUTING.md` — contribution guide covering skill authoring, commit format, PR checklist, and release process
 - `agents/changelog.md` — changelog agent: categorizes git + skill diff into Breaking/New/Improved/Fixed and generates consumer-facing release notes
-- `commands/release-notes.md` — `/release-notes` command: generates per-skill or collection release notes from git history and `## Changelog` tables
+- `commands/kmm-release-notes.md` — `/release-notes` command: generates per-skill or collection release notes from git history and `## Changelog` tables
 - `scripts/generate_release_notes.py` — reads git log, maps commits to skills, parses per-skill `## Changelog` tables; outputs structured JSON for the changelog agent
 - `## Changelog` section added to all 47 skills — consumer-facing release note table travels with each skill when installed
 
@@ -898,7 +898,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `agents/reviewer.md` — Architecture Reviewer with 5 checks and APPROVE / NEEDS_FIXES verdict
 - `agents/validator.md` — Build Validator with 4 graduated validation levels
 - `agents/fixer.md` — Targeted Fixer with per-blocker fix rules and confidence ratings
-- `commands/implement-feature.md`, `commands/review-changes.md`, `commands/run-audit.md`
+- `commands/kmm-implement-feature.md`, `commands/kmm-review-changes.md`, `commands/kmm-run-audit.md`
 - `hooks/pre-commit-audit.sh`, `hooks/validate-architecture.sh`, `hooks/check-skill-freshness.sh`
 - `.claude/pipeline-context.json` — pipeline state store shared across agents
 

@@ -207,7 +207,7 @@ test coverage for exit codes 0/1/2 until manually identified and fixed).
 **Fix:** `hooks/pre-commit-audit.sh` now blocks any commit that stages a `.py` file
 under `scripts/` or `skills/*/scripts/` without also staging `tests/test_skill_scripts.py`.
 The pre-commit message names the changed scripts and explains the requirement.
-Reviewer Check 12, implementer Script test maintenance section, and `/modify-skill` Rule 8
+Reviewer Check 12, implementer Script test maintenance section, and `/kmm-modify-skill` Rule 8
 all mirror the same rule so the enforcement is layered — the hook is the hard gate,
 but agents enforce it before a commit is ever attempted.
 
@@ -255,8 +255,8 @@ but agents enforce it before a commit is ever attempted.
 **Resolved:** `v1.13.0` — `feat(expert+tests): keyword routing coverage, validate_keyword_routing.py, visual design audit`  
 **Was:** Roborazzi golden diffs catch pixel-level regressions but could not detect whether a committed golden was design-system-compliant. A developer could record a new golden with a missing TopAppBar, broken dark mode, or hardcoded colors — the screenshot tests would pass, but the screen would violate the design contract.  
 **Fix:**
-- Created `commands/audit-screenshots.md` — a `/audit-screenshots` command that uses Claude vision to analyze light/dark PNG pairs against design-system rules (color tokens, AppScaffold structure, dark mode parity, spacing, typography, contrast)
-- Wired as Step 5 of `commands/verify.md` — runs automatically after `jvmTest` if new/modified PNGs are present
+- Created `commands/kmm-audit-screenshots.md` — a `/kmm-audit-screenshots` command that uses Claude vision to analyze light/dark PNG pairs against design-system rules (color tokens, AppScaffold structure, dark mode parity, spacing, typography, contrast)
+- Wired as Step 5 of `commands/kmm-verify.md` — runs automatically after `jvmTest` if new/modified PNGs are present
 - Wired as Check 13 of `agents/reviewer.md` — reviewer invokes the audit on screenshot goldens modified in the session
 - Added Visual Design Audit section to `skills/kotlin-multiplatform-roborazzi/SKILL.md`
 
@@ -266,12 +266,12 @@ but agents enforce it before a commit is ever attempted.
 
 ### KI-R16 — Design system had no update path once code was copied to a project
 
-**Resolved:** `v1.17.0` — `feat(design-system): ownership model, stability tiers, /update-design-system command`  
+**Resolved:** `v1.17.0` — `feat(design-system): ownership model, stability tiers, /kmm-update-design-system command`  
 **Was:** The design-system skill generated code by copying snippets from SKILL.md into the project. Once copied, there was no way for the agent to know whether a project's component had drifted from the skill reference, so bug fixes and improvements in the skill were silently ignored by all existing projects.  
 **Fix:**
 - Added `## Ownership Model` section to base and extended SKILL.md — splits files into project-owned (tokens, theme) and skill-owned (components)
 - Created `scripts/update_design_system.py` — parses `### components/AppXxx.kt` blocks from SKILL.md, MD5-compares against project files, reports CURRENT / MODIFIED / MISSING; `--diff AppButton` shows unified diff
-- Created `commands/update-design-system.md` — 5-step command: run script, present report, diff modified files one at a time, apply approved changes, compile
+- Created `commands/kmm-update-design-system.md` — 5-step command: run script, present report, diff modified files one at a time, apply approved changes, compile
 - Added stability tiers (Stable / Experimental) to all 33 components across base and extended skills
 - Added routing keywords to expert Skill Invocation Map ("update design system", "sync components", etc.)
 - Added 13 tests for `update_design_system.py` (total test suite: 98 tests)
@@ -282,11 +282,11 @@ but agents enforce it before a commit is ever attempted.
 
 ### KI-R17 — No automated way to find design violations in existing project code
 
-**Resolved:** `v1.18.0` — `feat(design-system): add /fix-design command with Roborazzi vision verification`  
+**Resolved:** `v1.18.0` — `feat(design-system): add /kmm-fix-design command with Roborazzi vision verification`  
 **Was:** The agent had no systematic way to find hardcoded colors, literal dp values, `MaterialTheme.*` access, `TextStyle()` construction, or nested Card/Surface containers in an existing project. When asked to "fix the design," it improvised — reading a few files and guessing, with no ordered priority and no safety guard.  
 **Fix:**
 - Created `scripts/scan_design_violations.py` — scans `*.kt` files for 5 violation categories, skips design-system source files, outputs JSON with file/line/severity; exit 0=clean, 1=violations, 2=not found
-- Created `commands/fix-design.md` — 5-step command: scan → summarize → fix each file with per-file diff+confirmation → regenerate Roborazzi screenshots → vision verify
+- Created `commands/kmm-fix-design.md` — 5-step command: scan → summarize → fix each file with per-file diff+confirmation → regenerate Roborazzi screenshots → vision verify
 - Vision verification step reads light+dark PNGs with Claude vision and checks: brand color on primary actions, spacing consistency, no nested-card double-shadow, dark mode background, typography hierarchy
 - Added routing keywords to expert Skill Invocation Map
 - Added 22 tests for `scan_design_violations.py` (total: 120 tests passing)

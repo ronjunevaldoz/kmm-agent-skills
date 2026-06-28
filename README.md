@@ -52,10 +52,10 @@ flowchart LR
   D --> RD[README, docs/, AGENTS, commands, routing text]
   R --> C[CHANGELOG.md, Git tags, GitHub Release]
 
-  RN[/release-notes/] --> A[agents/changelog.md]
+  RN[/kmm-release-notes/] --> A[agents/changelog.md]
   A --> C
 
-  MD[/maintain-docs/] --> D
+  MD[/kmm-maintain-docs/] --> D
   NS[/kmm-new-skill/] --> E
 ```
 
@@ -232,11 +232,11 @@ Use these in Claude Code to run the full pipeline with a single command.
 
 | Command | What it does |
 |---|---|
-| `/execute-ticket <id>` | Fetch a GitHub Issue (or paste any ticket), plan → branch → implement → validate → review → commit |
-| `/implement-feature <name>` | Plan → Implement → Validate → Review a new KMP feature end-to-end |
-| `/review-changes` | Review current git diff against 6-layer rules and skill anti-patterns |
-| `/maintain-docs [scope]` | Reconcile repo docs, agent docs, command docs, and skill routing text |
-| `/run-audit [path]` | Run `audit_project.py` with per-finding remediation from the relevant skill |
+| `/kmm-execute-ticket <id>` | Fetch a GitHub Issue (or paste any ticket), plan → branch → implement → validate → review → commit |
+| `/kmm-implement-feature <name>` | Plan → Implement → Validate → Review a new KMP feature end-to-end |
+| `/kmm-review-changes` | Review current git diff against 6-layer rules and skill anti-patterns |
+| `/kmm-maintain-docs [scope]` | Reconcile repo docs, agent docs, command docs, and skill routing text |
+| `/kmm-run-audit [path]` | Run `audit_project.py` with per-finding remediation from the relevant skill |
 
 ---
 
@@ -305,7 +305,7 @@ That is the complete setup. The reusable workflow checks out this repo and runs
 
 <a name="when-to-file-here"></a>
 **When to file an issue here vs. in your own project:**
-File here only if the skill guidance itself is wrong or incomplete. If you applied the guidance correctly and your project still broke, file the issue in your own repo. Use `/report-skill-issue` from any Claude session to file skill issues with the correct template.
+File here only if the skill guidance itself is wrong or incomplete. If you applied the guidance correctly and your project still broke, file the issue in your own repo. Use `/kmm-report-skill-issue` from any Claude session to file skill issues with the correct template.
 
 ---
 

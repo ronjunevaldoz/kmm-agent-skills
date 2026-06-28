@@ -52,12 +52,12 @@ No backend. No auth. Local persistence only.
 
 This spec is used to test whether the KMM skills pipeline can produce a complete,
 correct project from a minimal description. The following must all be true when
-`/new-project samples/todo-app.md` finishes:
+`/kmm-new-project samples/todo-app.md` finishes:
 
 - [ ] `python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py .` → zero findings
 - [ ] `./gradlew jvmTest` → all tests pass
 - [ ] Roborazzi goldens exist for every screen state (empty, loading, error, populated) in light + dark
-- [ ] `/audit-screenshots .` → no FAIL findings (TopAppBar present, dark mode distinct, no raw colors)
+- [ ] `/kmm-audit-screenshots .` → no FAIL findings (TopAppBar present, dark mode distinct, no raw colors)
 - [ ] Every `:presenter` ViewModel has unit tests covering at least: load success, load error, action happy path
 - [ ] No screen imports from `:data` or `:domain` directly
 - [ ] Koin modules wire every ViewModel and repository

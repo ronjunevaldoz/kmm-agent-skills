@@ -88,7 +88,7 @@ and apply the same `@ExperimentalStylesApi` token pattern as the core system.
 
 ## Ownership Model
 
-> **Skill-owned.** All extended components are updateable via `/update-design-system`.
+> **Skill-owned.** All extended components are updateable via `/kmm-update-design-system`.
 > Project-owned files (`tokens/`, `theme/`) are never touched.
 
 ## Component Overview

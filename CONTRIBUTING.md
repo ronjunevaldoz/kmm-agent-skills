@@ -39,7 +39,7 @@ pip install pytest
 ```
 kmm-agent-skills/
 ├── agents/              # Pipeline agent definitions (planner, implementer, etc.)
-├── commands/            # Slash commands (/new-project, /verify, /audit-screenshots, …)
+├── commands/            # Slash commands (/kmm-new-project, /kmm-verify, /kmm-audit-screenshots, …)
 ├── samples/             # E2E test specs (e.g. samples/todo-app.md)
 ├── scripts/             # Shared scripts (release.py, validate_keyword_routing.py, …)
 ├── skills/              # One directory per skill
@@ -67,7 +67,7 @@ Use this rule before creating anything new:
 - `agents/`, `commands/`, and `scripts/` are for repo-internal workflow, validation,
   and maintenance.
 - Consumer release notes and per-skill changelog updates belong to
-  `agents/changelog.md` and `/release-notes`, not a new skill.
+  `agents/changelog.md` and `/kmm-release-notes`, not a new skill.
 - If a request is repo-internal, do not scaffold a skill; update the relevant agent,
   command, or repo doc instead.
 
@@ -86,7 +86,7 @@ separate optional updates.
 |---|---|---|
 | Root-level docs | `SCREAMING_CASE.md` | `README.md`, `CHANGELOG.md`, `PLAN.md` |
 | `agents/` | `kebab-case.md` | `planner.md`, `changelog.md` |
-| `commands/` | `kebab-case.md` | `new-project.md`, `run-audit.md` |
+| `commands/` | `kmm-kebab-case.md` | `kmm-new-project.md`, `kmm-run-audit.md` |
 | `docs/` | `kebab-case.md` | `goal-gap-analysis.md` |
 | `samples/` | `kebab-case.md` | `todo-app.md` |
 | `skills/<name>/` | `SKILL.md` (fixed) | Same reasoning as `README.md` — primary entry file |

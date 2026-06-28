@@ -150,7 +150,7 @@ Done. The workflow will catch architecture violations, hardcoded colors, Materia
 
 **File in your own repo** if you applied the guidance correctly and something in your project broke (that's a project bug, not a skill bug).
 
-Use `/report-skill-issue` from Claude Code to file with the right template.
+Use `/kmm-report-skill-issue` from Claude Code to file with the right template.
 
 ## Next Steps
 

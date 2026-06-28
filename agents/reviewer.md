@@ -254,7 +254,7 @@ This check mirrors the pre-commit hook in `hooks/pre-commit-audit.sh`. If the ho
 If the session added or changed UI composables that have Roborazzi tests, check whether committed golden images are visually consistent with the design system.
 
 1. List PNG files in `src/jvmTest/snapshots/` (or wherever goldens are committed)
-2. If any PNGs exist and were modified or newly added in this session, run `/audit-screenshots <snapshots path>`
+2. If any PNGs exist and were modified or newly added in this session, run `/kmm-audit-screenshots <snapshots path>`
 3. Skip silently if no PNG files exist or no screenshots were modified
 
 Flag as **`[THEME]`** blocker for FAIL-level findings (broken dark mode, invisible text).
@@ -316,9 +316,9 @@ Recurring findings detected: [<BLOCKER_TYPE>] appeared in <N> files.
 This pattern may indicate a systemic gap in the skill or project conventions.
 
 Track as GitHub issue?
-  [y] Yes — run /submit-issue with the finding summary pre-filled
+  [y] Yes — run /kmm-submit-issue with the finding summary pre-filled
   [n] No  — continue
 ```
 
-If the user chooses yes, load `commands/submit-issue.md` with the blocker type, affected files,
+If the user chooses yes, load `commands/kmm-submit-issue.md` with the blocker type, affected files,
 and the relevant skill as pre-filled context. Do not file automatically — always confirm first.

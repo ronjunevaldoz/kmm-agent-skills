@@ -196,20 +196,20 @@ This gives full brand control without forking a library.
 
 | Layer | Ownership | Update path |
 |---|---|---|
-| `tokens/` — `AppColors`, `AppTypography`, `AppShapes`, `AppSpacing` | **Project-owned** | Customize freely — never touched by `/update-design-system` |
+| `tokens/` — `AppColors`, `AppTypography`, `AppShapes`, `AppSpacing` | **Project-owned** | Customize freely — never touched by `/kmm-update-design-system` |
 | `theme/` — `AppTheme`, `StyleScopeExtensions` | **Project-owned** | Customize freely |
-| `components/` — `App*.kt` | **Skill-owned** | Run `/update-design-system` to pull in bug fixes and new variants without touching tokens |
+| `components/` — `App*.kt` | **Skill-owned** | Run `/kmm-update-design-system` to pull in bug fixes and new variants without touching tokens |
 
 **Why not a published library?** The Compose Styles API (`@ExperimentalStylesApi`) changes
 between CMP releases. A published library would break every downstream project on CMP upgrades.
 The scaffold approach keeps each project on its own upgrade schedule.
 
-Use `/update-design-system` to compare your project's components against the latest skill
+Use `/kmm-update-design-system` to compare your project's components against the latest skill
 version and selectively apply fixes. The comparison is powered by
 `scripts/update_design_system.py`, which MD5-hashes each component block from this SKILL.md
 against the project file and reports CURRENT / MODIFIED / MISSING status.
 
-Use `/fix-design` to scan an existing project for violations (hardcoded colors, hardcoded
+Use `/kmm-fix-design` to scan an existing project for violations (hardcoded colors, hardcoded
 user-facing strings, dp literals, `MaterialTheme.*` usage, `TextStyle()` construction,
 nested containers, component reimplementations, direct token imports) and fix them
 file-by-file with per-file
@@ -218,8 +218,8 @@ The fallback scanner also flags missing preview stubs, missing multi-device prev
 and missing Roborazzi screenshot tests for feature `*Content.kt` files so preview drift gets
 caught with the rest of the design cleanup.
 
-Use `/record-design-baselines` after fixing to record new Roborazzi golden PNGs.
-Use `/audit-design-visual` to run a vision pass over the goldens and catch spacing,
+Use `/kmm-record-design-baselines` after fixing to record new Roborazzi golden PNGs.
+Use `/kmm-audit-design-visual` to run a vision pass over the goldens and catch spacing,
 contrast, and cross-screen consistency issues that have no code-level signal.
 
 ### Project documentation template
@@ -311,7 +311,7 @@ include(":core:designsystem")
 
 ## Step 2: Design Tokens
 
-> **Project-owned.** Customize `tokens/` and `theme/` freely — `/update-design-system`
+> **Project-owned.** Customize `tokens/` and `theme/` freely — `/kmm-update-design-system`
 > will never modify these files. This is your brand layer.
 
 ### Palette guidance
@@ -1027,7 +1027,7 @@ sealed interface TextFieldVariant {
 
 ## Step 6: Core Components
 
-> **Skill-owned.** Components are updateable via `/update-design-system`. Avoid deep
+> **Skill-owned.** Components are updateable via `/kmm-update-design-system`. Avoid deep
 > customisations here — put brand-specific variants in project-level composables that
 > wrap these primitives instead.
 
@@ -1500,7 +1500,7 @@ These previews serve three purposes:
    (`./gradlew :desktopApp:run` or Android Studio compose preview)
 2. **Roborazzi per-component goldens** — captured by
    `./gradlew :core:designsystem:jvmTest`, producing one PNG per state
-3. **`/fix-design` verification** — after a theme token change, run
+3. **`/kmm-fix-design` verification** — after a theme token change, run
    `:core:designsystem:jvmTest` to confirm all components still look correct
    before running full feature tests
 
@@ -1508,7 +1508,7 @@ Feature UI modules follow the same rule: every `*Content.kt` must have a preview
 matching Roborazzi screenshot coverage for phone, tablet, and desktop sizes.
 
 > **Skill-owned.** Preview files follow the same ownership rule as components —
-> updateable via `/update-design-system`. Never edit preview files to reflect
+> updateable via `/kmm-update-design-system`. Never edit preview files to reflect
 > project-specific states; create separate preview composables in the feature UI module.
 
 ---
@@ -2349,9 +2349,9 @@ Keep snippets small. Use the user's package name and token names when provided.
 |---|---|
 | 2026-06-26 | Added component API placement guidance that maps shell components to slots, guarded regions to restricted scope templates, and leaf controls to data/variant APIs. |
 | 2026-06-22 | Added `references/design-system-template.md` — project-facing living document covering tokens, component inventory, detekt overrides, multi-device preview coverage, and audit log. Wired copy instructions into Ownership Model section. |
-| 2026-06-22 | Added `RedundantScreenTitleRule` (flags `Text`/`AppText` with string literals inside `*Content`/`*Screen` composables) and `HardcodedGridColumnsRule` (flags `GridCells.Fixed(N≥2)`). Added `@MultiDevicePreview` annotation (phone 360dp / tablet 673dp / desktop 1280dp) to `AppThemePreviewWrapper.kt`; applied to base light/dark variants of all 6 core component previews. Updated `/audit-design-visual` with duplicate title check and multi-device layout table. Updated `/record-design-baselines` with multi-device PNG naming. |
-| 2026-06-22 | Added `detekt-rules/` PSI-based scanner module with 7 rules (HardcodedColor, HardcodedDp, MaterialThemeUsage, DirectTextStyle, NestedContainer, ComponentRegistryViolation, DesignTokenImportBoundary). Added `/record-design-baselines` and `/audit-design-visual` commands. Updated `/fix-design` to use detekt as primary scanner. |
-| 2026-06-22 | Added `scripts/scan_design_violations.py` and `/fix-design` command: scans Compose files for hardcoded colors/dp/MaterialTheme/nested containers, fixes file-by-file, verifies with Roborazzi vision. |
+| 2026-06-22 | Added `RedundantScreenTitleRule` (flags `Text`/`AppText` with string literals inside `*Content`/`*Screen` composables) and `HardcodedGridColumnsRule` (flags `GridCells.Fixed(N≥2)`). Added `@MultiDevicePreview` annotation (phone 360dp / tablet 673dp / desktop 1280dp) to `AppThemePreviewWrapper.kt`; applied to base light/dark variants of all 6 core component previews. Updated `/kmm-audit-design-visual` with duplicate title check and multi-device layout table. Updated `/kmm-record-design-baselines` with multi-device PNG naming. |
+| 2026-06-22 | Added `detekt-rules/` PSI-based scanner module with 7 rules (HardcodedColor, HardcodedDp, MaterialThemeUsage, DirectTextStyle, NestedContainer, ComponentRegistryViolation, DesignTokenImportBoundary). Added `/kmm-record-design-baselines` and `/kmm-audit-design-visual` commands. Updated `/kmm-fix-design` to use detekt as primary scanner. |
+| 2026-06-22 | Added `scripts/scan_design_violations.py` and `/kmm-fix-design` command: scans Compose files for hardcoded colors/dp/MaterialTheme/nested containers, fixes file-by-file, verifies with Roborazzi vision. |
 | 2026-06-22 | Added ownership model section (project-owned tokens vs skill-owned components). Added stability tiers to component overview. Added `scripts/update_design_system.py` reference. |
 | 2026-06-22 | Added `AppTextField` component (was missing from Step 6). Renamed `TextStyle` enum → `AppTextStyle` to avoid Compose collision. Fixed test code: `AppTheme.spacing.*` → `appTheme.*`, `Text()` → `AppText()`. Added `@OptIn` note to Steps 5–6. Fixed missing `sp`/`FontWeight` imports in Button/Badge/Chip/TextField style snippets. Fixed `CardSize` hardcoded dp → `AppSpacing()` tokens. Added cross-skill note for `AppScaffold`/`AppTopAppBar`. |
 | 2026-06-06 | Initial release. |

@@ -124,7 +124,7 @@ None. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for tracked open items.
 |---|---|---|
 | `## Changelog` in all 47 skills | ✅ Shipped | Consumer-facing release note table in every SKILL.md; travels with the skill on install |
 | `agents/changelog.md` | ✅ Shipped | Changelog agent: categorizes git + skill diff into Breaking/New/Improved/Fixed, writes consumer release notes |
-| `commands/release-notes.md` | ✅ Shipped | `/release-notes` command: per-skill or collection release notes from git history |
+| `commands/kmm-release-notes.md` | ✅ Shipped | `/kmm-release-notes` command: per-skill or collection release notes from git history |
 | `scripts/generate_release_notes.py` | ✅ Shipped | Reads git log + per-skill `## Changelog` tables, outputs structured JSON for the changelog agent |
 | App versioning pattern | ✅ Shipped | `gradle.properties` as single source of truth for `VERSION_NAME`/`VERSION_CODE`; `BuildKonfig` exposes `APP_VERSION` to `commonMain` |
 | `CONTRIBUTING.md` | ✅ Shipped | Full contribution guide: skill authoring, commit format, PR checklist, release process |
@@ -135,7 +135,7 @@ None. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for tracked open items.
 
 | Item | Status | Description |
 |---|---|---|
-| `/new-project` command | ✅ Shipped | Natural language → full KMP project scaffold. Drives full pipeline: feature-scaffold → clean-arch → infrastructure → design system → features → verify |
+| `/kmm-new-project` command | ✅ Shipped | Natural language → full KMP project scaffold. Drives full pipeline: feature-scaffold → clean-arch → infrastructure → design system → features → verify |
 | `samples/todo-app.md` | ✅ Shipped | E2E test spec: 12 skills, local persistence, form validation, MVI, Roborazzi. Pass/fail is objective (audit + jvmTest + screenshot audit) |
 | More sample specs | 📋 Planned | `samples/social-feed.md` (paging, image loading, kRPC), `samples/settings-app.md` (DataStore, biometric auth) |
 
@@ -156,7 +156,7 @@ Require coordination across multiple files or introduce breaking changes to exis
 | Kotlin 2.x / K2 verification pass | HIGH | Audit every skill's code snippets against K2 — some `expect/actual` and annotation patterns changed. Update minimum Kotlin version across all TOML snippets. |
 | AGP 10 migration | MEDIUM | AGP 10 changes module graph declaration API. Update `feature-scaffold` and `clean-architecture` skills when AGP 10 stable ships. |
 | Compose Multiplatform 2.x readiness | MEDIUM | CMP 2.x expected to stabilize shared navigation and resources API. `navigation`, `shared-resources`, and `adaptive-layout` skills will need version bumps and pattern updates. |
-| Skill freshness CI gate | LOW | `/setup-hooks Option C` describes a weekly cron. Post-v2.0 add it to the repo's own `.github/workflows/` so freshness warnings surface without a local install. |
+| Skill freshness CI gate | LOW | `/kmm-setup-hooks Option C` describes a weekly cron. Post-v2.0 add it to the repo's own `.github/workflows/` so freshness warnings surface without a local install. |
 | `kotlin-multiplatform-testing-robot` | 💡 Deferred | UI test robot pattern (Page Object Model for Compose). Deferred until Roborazzi + compose-test-rule coverage feels insufficient in practice. |
 
 ---
@@ -179,10 +179,10 @@ Require coordination across multiple files or introduce breaking changes to exis
 - Every skill must follow the "real skill" principle: 80% patterns/decisions/pitfalls, ≤20% dependency setup
 - Skill descriptions must be specific enough to trigger correctly — test against the keyword list before shipping
 - Use `/kmm-new-skill` to scaffold — it enforces all required sections at creation time
-- Use `/modify-skill` to edit — it prevents accidental removal of required sections
+- Use `/kmm-modify-skill` to edit — it prevents accidental removal of required sections
 - Run `python3 scripts/scan_skill_issues.py` after any SKILL.md change to verify zero HIGH findings
 - Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .` after adding a skill to confirm README, expert, and planner are all updated
 - Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py` after adding invocation map rows to confirm every skill has keyword routing coverage
-- Run `/audit-screenshots` after recording Roborazzi goldens to verify design-system compliance visually
-- Use `/new-project <description or samples/*.md>` to bootstrap a full KMP project from scratch
-- To run E2E tests against a sample spec: clone a clean sandbox repo, then run `/new-project samples/todo-app.md`
+- Run `/kmm-audit-screenshots` after recording Roborazzi goldens to verify design-system compliance visually
+- Use `/kmm-new-project <description or samples/*.md>` to bootstrap a full KMP project from scratch
+- To run E2E tests against a sample spec: clone a clean sandbox repo, then run `/kmm-new-project samples/todo-app.md`

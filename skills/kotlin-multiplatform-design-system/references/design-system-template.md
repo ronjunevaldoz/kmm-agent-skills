@@ -29,7 +29,7 @@
 :core:designsystem
   ├── tokens/        ← project-owned, customize freely
   ├── theme/         ← project-owned, customize freely
-  ├── components/    ← skill-owned, update via /update-design-system
+  ├── components/    ← skill-owned, update via /kmm-update-design-system
   ├── previews/      ← one file per component
   └── detekt-rules/  ← PSI-based violation scanner
 ```
@@ -38,7 +38,7 @@
 
 ## Design Tokens
 
-> **These are project-owned.** The `/update-design-system` command will never touch
+> **These are project-owned.** The `/kmm-update-design-system` command will never touch
 > `tokens/` or `theme/`. Change these freely to match your brand.
 
 ### Color palette
@@ -165,9 +165,9 @@ Add rows as each extended component is scaffolded:
 |---|---|---|---|
 | Tokens | `tokens/AppColors.kt`, `AppTypography.kt`, `AppShapes.kt`, `AppSpacing.kt` | **Project** | Edit freely — never touched by skill updates |
 | Theme | `theme/AppTheme.kt`, `StyleScopeExtensions.kt` | **Project** | Edit freely |
-| Components | `components/COMPONENT_PREFIX*.kt` | **Skill** | Run `/update-design-system` to pull bug fixes; review diff before applying |
+| Components | `components/COMPONENT_PREFIX*.kt` | **Skill** | Run `/kmm-update-design-system` to pull bug fixes; review diff before applying |
 | Previews | `previews/COMPONENT_PREFIX*Preview.kt` | **Skill** | Regenerated when component updates |
-| Detekt rules | `detekt-rules/` | **Skill** | Pulled via `/update-design-system`; config in `detekt-design-system.yml` is project-owned |
+| Detekt rules | `detekt-rules/` | **Skill** | Pulled via `/kmm-update-design-system`; config in `detekt-design-system.yml` is project-owned |
 
 ---
 
@@ -226,10 +226,10 @@ understand why the code looks different from the skill template:
 
 ## Design Audit Log
 
-Record the last time `/fix-design` and `/audit-design-visual` were run:
+Record the last time `/kmm-fix-design` and `/kmm-audit-design-visual` were run:
 
 | Date | Command | Findings | Action taken |
 |---|---|---|---|
-| _fill in_ | `/fix-design` | _N violations_ | _fixed / deferred_ |
-| _fill in_ | `/audit-design-visual` | _N screens reviewed_ | _fixed / deferred_ |
-| _fill in_ | `/record-design-baselines` | _N goldens updated_ | |
+| _fill in_ | `/kmm-fix-design` | _N violations_ | _fixed / deferred_ |
+| _fill in_ | `/kmm-audit-design-visual` | _N screens reviewed_ | _fixed / deferred_ |
+| _fill in_ | `/kmm-record-design-baselines` | _N goldens updated_ | |

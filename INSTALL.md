@@ -124,7 +124,7 @@ ls kmm-agent-skills/commands/
 
 # Read one before approving
 cat kmm-agent-skills/commands/kmm-new-skill.md
-cat kmm-agent-skills/commands/run-audit.md
+cat kmm-agent-skills/commands/kmm-run-audit.md
 ```
 
 **Step 2 — Install only the commands you have reviewed.**
@@ -134,7 +134,7 @@ mkdir -p your-kmp-project/.claude/commands/
 
 # Install individually — one at a time, after reading each
 cp kmm-agent-skills/commands/kmm-new-skill.md your-kmp-project/.claude/commands/
-cp kmm-agent-skills/commands/run-audit.md      your-kmp-project/.claude/commands/
+cp kmm-agent-skills/commands/kmm-run-audit.md      your-kmp-project/.claude/commands/
 ```
 
 **Or use the guided installer** (prompts you per command):
@@ -154,11 +154,11 @@ copying it. You can review the source file in another terminal before answering.
 | Command | What it does |
 |---|---|
 | `/kmm-new-skill` | Scaffold a new skill file with all required sections |
-| `/run-audit` | Run architecture and skill-hygiene audit against the project |
-| `/update-skills` | Pull latest skills and re-audit |
-| `/release-notes` | Generate per-skill release notes from git history |
-| `/submit-issue` | File a structured GitHub issue for a skill gap or bug |
-| `/report-skill-issue` | File a bug report for a skill that produced wrong output |
+| `/kmm-run-audit` | Run architecture and skill-hygiene audit against the project |
+| `/kmm-update-skills` | Pull latest skills and re-audit |
+| `/kmm-release-notes` | Generate per-skill release notes from git history |
+| `/kmm-submit-issue` | File a structured GitHub issue for a skill gap or bug |
+| `/kmm-report-skill-issue` | File a bug report for a skill that produced wrong output |
 
 ---
 
