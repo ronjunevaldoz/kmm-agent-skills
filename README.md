@@ -211,6 +211,13 @@ Full compatibility table: [`docs/reference/compatibility-matrix.md`](docs/refere
 
 ---
 
+## Docs tasks
+
+Before routing any docs request, classify it as repo-internal or downstream consumer.
+Repo docs stay with `docs-maintainer`; downstream project docs go to `project-docs-maintainer`.
+
+---
+
 ## Roadmap
 
 See [PLAN.md](PLAN.md) for full scope and priority details.
