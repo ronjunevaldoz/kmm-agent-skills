@@ -7,9 +7,8 @@
 - Plain description: `build a todo app in kmm`
 - A path to a sample spec: `samples/todo-app.md`
 
-This command drives the full pipeline end-to-end. It starts with a short intake for the
-project identity and product intent, then infers the rest from the description and uses
-the skills collection to fill any remaining gaps.
+This command drives the full pipeline end-to-end across 10 steps:
+intake → infer → scaffold → infrastructure → design system → **screen layouts + previews** → features → verify → agent setup → summary.
 Any assumptions made are printed before implementation begins.
 
 ---
@@ -158,7 +157,70 @@ If the inferred plan has more than 3 screens, also load
 
 ---
 
-## Step 6 — Features (in dependency order)
+## Step 6 — Screen layouts and design
+
+Before writing any composable, generate layout docs and wireframes for every screen in
+the inferred plan. Design must be agreed on before implementation starts — changing
+layout after code is written wastes time.
+
+**6a — ASCII wireframes (layout-system)**
+
+Load `kotlin-multiplatform-layout-system`. For each screen in the inferred feature set,
+generate a file in `docs/layout-system/<feature>/<ScreenName>.md` containing:
+
+- **Component table** — every visible element, its type, and the design-system component it maps to
+- **ASCII wireframe** — structural layout showing slot positions, spacing zones, and scroll regions
+- **State variants** — one wireframe per meaningful state (loading, empty, error, filled)
+
+Example for a product list screen:
+```
+docs/layout-system/
+  products/
+    ProductListScreen.md   — list, loading, empty state variants
+    ProductDetailScreen.md — hero image, details, CTA button
+  auth/
+    LoginScreen.md         — form fields, submit, forgot password link
+  orders/
+    OrderHistoryScreen.md  — grouped list, empty state
+  _components.md           — shared component registry (AppButton, AppTextField, etc.)
+```
+
+**6b — Design previews (preview-driven-development)**
+
+Load `kotlin-multiplatform-preview-driven-development`. For each screen, generate stub
+`Content` composables with `@Preview` annotations covering all state variants — before
+the real implementation. This makes layout mistakes visible immediately on Desktop
+without running a device or emulator.
+
+```kotlin
+// Generated stub — real logic added in Step 7
+@Composable
+fun ProductListContent(
+    state: ProductListContract.State = ProductListContract.State(),
+    onIntent: (ProductListContract.Intent) -> Unit = {},
+) {
+    // TODO: implement — layout spec in docs/layout-system/products/ProductListScreen.md
+}
+
+@Preview @Composable
+private fun ProductListLoadingPreview() =
+    AppThemePreview { ProductListContent(state = ProductListContract.State(isLoading = true)) }
+
+@Preview @Composable
+private fun ProductListEmptyPreview() =
+    AppThemePreview { ProductListContent(state = ProductListContract.State(products = emptyList())) }
+
+@Preview @Composable
+private fun ProductListFilledPreview() =
+    AppThemePreview { ProductListContent(state = ProductListContract.State(products = sampleProducts)) }
+```
+
+After generating stubs: run `./gradlew :composeApp:jvmRun` (or open Android Studio
+previews) and confirm the slot structure looks right before moving to Step 7.
+
+---
+
+## Step 7 — Features (in dependency order)
 
 For each feature in the inferred plan (F-03 onwards):
 
@@ -197,7 +259,7 @@ Skills to load per common feature type:
 
 ---
 
-## Step 7 — Run `/kmm-verify`
+## Step 8 — Run `/kmm-verify`
 
 After all features are implemented:
 
@@ -216,7 +278,7 @@ Fix any blockers. Do not mark the project complete until `/kmm-verify` reports `
 
 ---
 
-## Step 8 — Generate agent setup
+## Step 9 — Generate agent setup
 
 After verify passes, generate a `.claude/` directory in the scaffolded project so the team
 gets agent-driven workflows on day one.
@@ -314,7 +376,7 @@ Update `recurring_issues` and `proven_patterns` manually as the project evolves.
 
 ---
 
-## Step 9 — Summary
+## Step 10 — Summary
 
 Print a summary of everything generated:
 
