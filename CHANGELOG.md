@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.6] — 2026-06-28
+
+### Added
+
+- feat(agents): add router, auditor, harvester agents; clarify skills vs agents split
+
+---
+
 ## [v1.29.5] — 2026-06-28
 
 ### Added
