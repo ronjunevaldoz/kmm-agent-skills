@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.10] — 2026-06-28
+
+### Fixed
+
+- fix(skills): correct AppNavigator Koin binding; expand CompositionLocal; complete README trigger keywords
+
+---
+
 ## [v1.29.9] — 2026-06-28
 
 ### Added
