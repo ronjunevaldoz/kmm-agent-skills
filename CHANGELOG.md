@@ -2,6 +2,19 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.15] — 2026-06-29
+
+### Docs
+
+- docs: add new project intake flow
+
+### Other
+
+- test: update command filename assertions to kmm- prefix
+- refactor(commands): add kmm- prefix to all slash commands for namespacing
+
+---
+
 ## [v1.29.14] — 2026-06-28
 
 ### Docs
