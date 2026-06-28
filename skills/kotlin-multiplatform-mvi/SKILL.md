@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-06'
+  last-updated: '2026-06-28'
   keywords:
     - MVI
     - Model-View-Intent
@@ -52,7 +52,10 @@ navigation effect, one-shot event, single event, show toast from ViewModel,
 trigger navigation, event driven UI, MVVM vs MVI, unidirectional event,
 screen, implement screen, add screen, new screen, screen logic, UI logic,
 screen behavior, screen interaction, handle user input, form state, form handling,
-user interaction, screen state management, UI state, state management.
+user interaction, screen state management, UI state, state management,
+nav args ViewModel, route arguments ViewModel, pass id to ViewModel,
+search debounce ViewModel, cancel job intent, in-flight cancellation,
+typed error state, UiError sealed, shared ViewModel, wizard ViewModel, multi-step flow.
 
 **Freshness rule:** `lifecycle-viewmodel-compose` and CMP lifecycle integration change between
 releases — recheck the AndroidX lifecycle and JetBrains CMP docs before upgrading.
@@ -535,6 +538,91 @@ class AuthViewModel(private val authRepository: AuthRepository) : MviViewModel<.
 
 ---
 
+## Nav Args as Initial State
+
+Route arguments (e.g. `userId`, `orderId`) must reach the ViewModel as constructor
+parameters — not as `Intent`. They are identity, not user input.
+
+```kotlin
+// commonMain nav route
+@Serializable
+data class UserProfileRoute(val userId: String)
+
+// ViewModel receives the arg directly
+class UserProfileViewModel(
+    private val userId: String,           // from NavBackStackEntry via Koin
+    private val repo: UserProfileRepository,
+) : MviViewModel<UserProfileContract.State, ...>(UserProfileContract.State.Loading) {
+
+    init { loadProfile() }
+
+    private fun loadProfile() {
+        viewModelScope.launch {
+            updateState { UserProfileContract.State.Loading }
+            repo.getProfile(userId).fold(
+                onSuccess = { updateState { UserProfileContract.State.Success(it) } },
+                onFailure = { updateState { UserProfileContract.State.Error(it.message.orEmpty()) } },
+            )
+        }
+    }
+}
+```
+
+Wire the arg through Koin using `getNavArguments()` or a `SavedStateHandle`:
+
+```kotlin
+// :feature:profile:ui/di
+val profileUiModule = module {
+    viewModel { params ->
+        UserProfileViewModel(userId = params.get(), repo = get())
+    }
+}
+
+// Screen — passes arg at call site
+@Composable
+fun UserProfileScreen(
+    route: UserProfileRoute,
+    onBack: () -> Unit,
+    viewModel: UserProfileViewModel = koinViewModel(parameters = { parametersOf(route.userId) }),
+) { ... }
+```
+
+**Rule:** never pass identity args as `Intent.Load(id)` — the ViewModel would need to
+guard against double-loads and the arg would not survive process death.
+
+---
+
+## In-flight Cancellation
+
+When an intent triggers a job that should supersede any prior job of the same type
+(search, filter, reload), cancel the previous job before launching the new one.
+
+```kotlin
+private var searchJob: Job? = null
+
+private fun search(query: String) {
+    searchJob?.cancel()
+    if (query.isBlank()) {
+        updateState { copy(results = emptyList(), isSearching = false) }
+        return
+    }
+    searchJob = viewModelScope.launch {
+        updateState { copy(isSearching = true) }
+        delay(300)                    // debounce — skip if cancelled during delay
+        val results = repo.search(query)
+        updateState { copy(results = results, isSearching = false) }
+    }
+}
+```
+
+The `delay(300)` acts as a debounce: if a new `SearchQueryChanged` intent arrives within
+300 ms the coroutine is cancelled before the network call fires.
+
+**When NOT to cancel:** submit, save, and delete actions should not be cancellable by
+re-typing — guard those with an `isLoading` flag instead (see `login()` example above).
+
+---
+
 ## Testing
 
 ### Test state transitions
@@ -736,6 +824,85 @@ class UserProfileViewModel(
 | `data class State(isLoading: Boolean, ...)` | Screen shows content AND a loading overlay simultaneously (e.g., saving while form is visible) |
 | `sealed interface State { Loading; Success; Error }` | Screen shows fundamentally different UI in each phase (skeleton vs content vs error page) |
 
+### Typed errors in State
+
+Prefer a `sealed class UiError` over raw `String` when the screen needs to distinguish
+error categories (network vs auth vs validation) to show different UI or recovery actions.
+
+```kotlin
+// :feature:auth:ui
+object AuthContract {
+
+    sealed class UiError {
+        data object NetworkUnavailable : UiError()
+        data object InvalidCredentials : UiError()
+        data class Unknown(val message: String) : UiError()
+    }
+
+    data class State(
+        val isLoading: Boolean = false,
+        val error: UiError? = null,
+    )
+}
+
+// ViewModel maps domain error → UiError at the boundary
+private suspend fun login() {
+    updateState { copy(isLoading = true, error = null) }
+    when (val result = repo.login(email, password)) {
+        is LoginResult.Success -> {
+            updateState { copy(isLoading = false) }
+            sendEffect(AuthContract.Effect.NavigateToHome)
+        }
+        is LoginResult.Error.Network ->
+            updateState { copy(isLoading = false, error = AuthContract.UiError.NetworkUnavailable) }
+        is LoginResult.Error.Unauthorized ->
+            updateState { copy(isLoading = false, error = AuthContract.UiError.InvalidCredentials) }
+        is LoginResult.Error.Unknown ->
+            updateState { copy(isLoading = false, error = AuthContract.UiError.Unknown(result.message)) }
+    }
+}
+```
+
+The content composable switches on `UiError` type to show the right copy and recovery action
+(retry button for network errors, inline message for auth errors).
+
+Use raw `String` only when there is one error category and the message is always safe to
+display directly (e.g., form validation messages from the server).
+
+### Shared ViewModel (multi-step flow / wizard)
+
+When multiple screens form a linear flow (onboarding, checkout, multi-step form), scope a
+single ViewModel to the parent `NavBackStackEntry` so all steps share state without
+passing data through route arguments.
+
+```kotlin
+// The shared ViewModel — lives in :feature:onboarding:ui
+class OnboardingViewModel : MviViewModel<OnboardingContract.State, ...>(OnboardingContract.State()) {
+    override suspend fun handleIntent(intent: OnboardingContract.Intent) { ... }
+}
+
+// Parent destination in NavHost (the flow entry point)
+composable<OnboardingRoute> { parentEntry ->
+    val viewModel: OnboardingViewModel = koinViewModel(viewModelStoreOwner = parentEntry)
+    OnboardingFlowHost(viewModel = viewModel)
+}
+
+// Step screen inside the flow — retrieves the same ViewModel instance
+@Composable
+fun OnboardingStep1Screen(navController: NavController) {
+    val parentEntry = remember(navController) {
+        navController.getBackStackEntry<OnboardingRoute>()
+    }
+    val viewModel: OnboardingViewModel = koinViewModel(viewModelStoreOwner = parentEntry)
+    ...
+}
+```
+
+**Rules:**
+- The shared ViewModel is owned by the parent entry — it is cleared when the user exits the flow
+- Each step screen must retrieve it via `getBackStackEntry<ParentRoute>()`, never via `koinViewModel()` alone (that would create a separate instance per step)
+- Only use this pattern when steps genuinely share mutable state; if steps are independent, give each its own ViewModel
+
 ---
 
 ## Common Anti-Patterns
@@ -783,4 +950,5 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Added Nav Args as Initial State, In-flight Cancellation, Typed Errors in State, Shared ViewModel (multi-step flow). Expanded keywords. |
 | 2026-06-06 | Initial release. |

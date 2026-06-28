@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-18'
+  last-updated: '2026-06-28'
   keywords:
     - clean architecture
     - Kotlin Multiplatform
@@ -36,7 +36,10 @@ internal visibility, architecture violation, Detekt architecture, layer rule, fe
 module boundaries, 6-layer architecture, domain isolation, which layer, domain model,
 api contract, dependency inversion, layer ownership, where does this code go,
 architecture design, content design, code organization, module design, project structure,
-layer design, data architecture, content strategy, code structure.
+layer design, data architecture, content strategy, code structure,
+core module, feature module, core vs feature, shared module, use case pattern,
+mapper pattern, DTO mapper, domain error, typed error, sealed error, DomainError,
+cross-feature navigation, navigate to another feature, AppNavigator, feature dependency.
 
 **Freshness rule:** Detekt rule set API changes between minor versions — recheck the
 `ArchitectureRule` DSL when upgrading Detekt.
@@ -86,6 +89,223 @@ The Gradle graph makes illegal dependencies impossible to compile; Detekt catche
 | `:data` | `RepositoryImpl`, DTOs, mappers, data sources | UI state, ViewModels |
 | `:presenter` | `ViewModel`, MVI `UiState`, `UiIntent` sealed classes | Compose imports, UI framework |
 | `:ui` | `@Composable` screens, `@Preview` functions | Business logic, direct repo/use-case calls |
+
+---
+
+## `:core` vs `:feature` Split
+
+`:core` modules are **shared infrastructure** — code that multiple features depend on
+but that has no feature-specific logic. `:feature` modules are **vertical slices** — one
+module group per product feature.
+
+| Module | Lives in | What it contains |
+|---|---|---|
+| `:core:model` | `:core` | Shared domain types (e.g. `User`, `Money`, `AppError`) used across features |
+| `:core:api` | `:core` | Shared repository interfaces (e.g. `SessionRepository`, `ConfigRepository`) |
+| `:core:domain` | `:core` | Cross-feature use cases (e.g. `GetCurrentUserUseCase`) |
+| `:core:data` | `:core` | Shared data-source implementations, network client, DB driver setup |
+| `:core:testing` | `:core` | Fake implementations, test fixtures, `FakeSessionRepository` etc. |
+| `:core:ui` | `:core` | Design system, `AppTheme`, reusable components, `MviViewModel` base class |
+| `:feature:auth` | `:feature` | Auth flow — `auth:model`, `auth:api`, `auth:domain`, `auth:data`, `auth:presenter`, `auth:ui` |
+| `:feature:profile` | `:feature` | Profile flow — same 6-layer structure |
+
+**Rules:**
+- A `:feature` module must never depend on another `:feature` module directly.
+  Cross-feature navigation goes through `:core:api` nav contracts (see Cross-Feature Navigation).
+- `:core:ui` is the only place with Compose outside `:feature:*:ui` modules.
+- `:core:testing` is a `testImplementation` / `commonTest` dependency only — never ship it in production.
+
+```
+app/
+├── core/
+│   ├── model/
+│   ├── api/
+│   ├── domain/
+│   ├── data/
+│   ├── testing/
+│   └── ui/
+└── feature/
+    ├── auth/
+    │   ├── model/
+    │   ├── api/
+    │   ├── domain/
+    │   ├── data/
+    │   ├── presenter/
+    │   └── ui/
+    └── profile/
+        └── ...
+```
+
+---
+
+## Use Case Pattern
+
+Use cases live in `:domain` (feature or core). Each use case is a single class with
+`operator fun invoke(...)` — one responsibility, directly invokable.
+
+```kotlin
+// :feature:auth:domain
+class LoginUseCase(
+    private val authRepository: AuthRepository,   // from :feature:auth:api
+    private val sessionRepository: SessionRepository, // from :core:api
+) {
+    suspend operator fun invoke(email: String, password: String): Result<User> {
+        val user = authRepository.login(email, password).getOrElse { return Result.failure(it) }
+        sessionRepository.saveSession(user.token)
+        return Result.success(user)
+    }
+}
+```
+
+**Rules:**
+- One class, one public function (`invoke`). No utility use cases with multiple methods.
+- Use cases depend on **interfaces** from `:api`, never on `:data` implementations.
+- Use cases may call other use cases from `:core:domain` — never from sibling `:feature` domains.
+- DI annotation (`@Single`, etc.) goes on the `:domain` module's Koin module, not on the use case class.
+
+---
+
+## Mapper Pattern
+
+DTOs (data transfer objects from Ktor/SQLDelight) must not leak into `:domain` or `:presenter`.
+Mappers live in `:data` and convert at the repository boundary.
+
+```kotlin
+// :feature:auth:data — DTO (internal to :data)
+internal data class UserDto(
+    val id: String,
+    val email: String,
+    val displayName: String,
+    val avatarUrl: String?,
+)
+
+// :feature:auth:data — mapper (internal)
+internal fun UserDto.toDomain(): User = User(
+    id = UserId(id),
+    email = Email(email),
+    displayName = displayName,
+    avatarUrl = avatarUrl,
+)
+
+// :feature:auth:data — repository impl calls mapper at the boundary
+internal class AuthRepositoryImpl(
+    private val api: AuthApiService,
+) : AuthRepository {
+
+    override suspend fun login(email: String, password: String): Result<User> =
+        runCatching { api.login(email, password).toDomain() }
+}
+```
+
+**Rules:**
+- Mappers are `internal` extension functions in `:data` — never public, never in `:domain`.
+- Map **away from** the DTO before returning from any `Repository` function.
+- SQLDelight-generated types (e.g. `SelectAllUsers`) are also DTOs — map them at the
+  `DataSource` or `RepositoryImpl` boundary, not at the use-case level.
+
+---
+
+## Typed Domain Errors
+
+Typed errors let callers distinguish and handle failure cases without parsing strings.
+They live in `:model` (if shared) or `:feature:*:model` (if feature-specific).
+
+```kotlin
+// :core:model or :feature:auth:model
+sealed class AuthError {
+    data object InvalidCredentials : AuthError()
+    data object AccountLocked : AuthError()
+    data class NetworkError(val cause: Throwable) : AuthError()
+    data class Unknown(val cause: Throwable) : AuthError()
+}
+```
+
+Repository interface in `:api` returns `Result<T>` wrapping the typed error:
+
+```kotlin
+// :feature:auth:api
+interface AuthRepository {
+    suspend fun login(email: String, password: String): Result<User>
+    // throws AuthError subtypes captured in Result.failure(...)
+}
+```
+
+The `:data` impl maps HTTP/network errors to the sealed type:
+
+```kotlin
+override suspend fun login(email: String, password: String): Result<User> = runCatching {
+    api.login(email, password).toDomain()
+}.mapFailure { cause ->
+    when {
+        cause is HttpException && cause.code == 401 -> AuthError.InvalidCredentials
+        cause is HttpException && cause.code == 423 -> AuthError.AccountLocked
+        cause is IOException -> AuthError.NetworkError(cause)
+        else -> AuthError.Unknown(cause)
+    }
+}
+```
+
+The `:presenter` maps `AuthError` to a `UiError` for display — domain errors never flow
+to the UI layer as-is (see `kotlin-multiplatform-mvi` for the `UiError` sealed type).
+
+---
+
+## Cross-Feature Navigation
+
+`:feature` modules must not depend on each other. When feature A needs to navigate to
+feature B, the nav contract is declared in `:core:api` (or the target feature's `:api`)
+and both features depend only on that.
+
+```kotlin
+// :core:api — navigation contracts visible to all features
+interface AppNavigator {
+    fun navigateToProfile(userId: String)
+    fun navigateToCheckout(cartId: String)
+    fun navigateToHome()
+}
+```
+
+The `:app` module (or a `:core:navigation` impl module) provides the `AppNavigator`
+implementation that calls the actual NavController:
+
+```kotlin
+// :app
+class AppNavigatorImpl(private val navController: NavController) : AppNavigator {
+    override fun navigateToProfile(userId: String) =
+        navController.navigate(ProfileRoute(userId))
+    override fun navigateToCheckout(cartId: String) =
+        navController.navigate(CheckoutRoute(cartId))
+    override fun navigateToHome() =
+        navController.navigate(HomeRoute) { popUpTo<HomeRoute> { inclusive = true } }
+}
+
+// Koin binding in :app
+single<AppNavigator> { AppNavigatorImpl(get()) }
+```
+
+The feature `:presenter` injects `AppNavigator` and calls it from `sendEffect` or directly:
+
+```kotlin
+class CartViewModel(
+    private val navigator: AppNavigator,
+    private val repo: CartRepository,
+) : MviViewModel<CartContract.State, CartContract.Intent, CartContract.Effect>(...) {
+
+    override suspend fun handleIntent(intent: CartContract.Intent) {
+        when (intent) {
+            CartContract.Intent.CheckoutClicked -> {
+                val cartId = state.value.cartId
+                navigator.navigateToCheckout(cartId)
+            }
+        }
+    }
+}
+```
+
+**Rules:**
+- `AppNavigator` is the single cross-feature navigation surface — one interface, one impl, in `:app`.
+- Within a feature, use NavController directly (it is scoped to the feature's NavHost).
+- Never pass a `NavController` into a `:presenter` ViewModel — that creates a Compose dependency.
 
 ---
 
@@ -197,6 +417,11 @@ Wire these as CI gates via `kotlin-multiplatform-ci-github-actions`.
 - `:ui` importing from `:data` directly — all state must route through `:presenter`
 - `:domain` depending on `:data` — use cases should depend on repository *interfaces* from `:api`, not implementations
 - skipping `internal` on `RepositoryImpl` — leaks the implementation type across modules
+- one `:feature` depending on another `:feature` — cross-feature calls go through `:core:api` contracts
+- leaking DTOs into `:domain` — map to domain types at the `:data` repository boundary
+- using raw `String` for domain errors in multi-category failure scenarios — use a `sealed class` in `:model`
+- passing `NavController` into a `:presenter` ViewModel — use `AppNavigator` from `:core:api` instead
+- putting cross-feature shared types in a feature `:model` — shared types belong in `:core:model`
 
 If a layer violation is hard to fix, it usually means a type belongs one layer lower (closer to `:model`).
 
@@ -217,4 +442,5 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Added: core vs feature split, use case pattern, mapper pattern, typed domain errors, cross-feature navigation. Expanded keywords and anti-patterns. |
 | 2026-06-18 | Initial release. |

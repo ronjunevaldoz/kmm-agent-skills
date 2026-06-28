@@ -18,6 +18,8 @@ The rules below are maintained in these files. **Do not apply a remembered copy 
 | Confirmed error patterns (EP-1 through EP-9) | `skills/kotlin-multiplatform-jni-pro/references/error-patterns.md` |
 | File-extension and path-based skill routing | `routing_rules.json` |
 | KMP skill map, build order, and 30-skill routing index | `skills/kotlin-multiplatform-expert/SKILL.md` |
+| MVI contract, ViewModel base, effect handling, state patterns | `skills/kotlin-multiplatform-mvi/SKILL.md` |
+| 6-layer dependency contract, module boundaries, Detekt rules | `skills/kotlin-multiplatform-clean-architecture/SKILL.md` |
 | Versioning tiers, commit format, CHANGELOG rules, release commands | `docs/reference/versioning-policy.md` |
 | Library version compatibility and conflict zones | `docs/reference/compatibility-matrix.md` |
 
