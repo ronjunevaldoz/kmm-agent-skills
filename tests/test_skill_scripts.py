@@ -857,21 +857,21 @@ class AuditSkillsRepoTests(unittest.TestCase):
             self.assertIn(section, content, f"Template missing section: {section}")
 
     def test_record_design_baselines_command_exists(self) -> None:
-        cmd = REPO_ROOT / "commands" / "record-design-baselines.md"
+        cmd = REPO_ROOT / "commands" / "kmm-record-design-baselines.md"
         self.assertTrue(cmd.exists())
         content = cmd.read_text()
         self.assertIn("roborazzi.record=true", content)
         self.assertIn("roborazzi.verify=true", content)
 
     def test_audit_design_visual_command_exists(self) -> None:
-        cmd = REPO_ROOT / "commands" / "audit-design-visual.md"
+        cmd = REPO_ROOT / "commands" / "kmm-audit-design-visual.md"
         self.assertTrue(cmd.exists())
         content = cmd.read_text()
         self.assertIn("snapshots", content)
         self.assertIn("vision", content.lower())
 
     def test_fix_design_references_detekt_as_primary(self) -> None:
-        cmd = REPO_ROOT / "commands" / "fix-design.md"
+        cmd = REPO_ROOT / "commands" / "kmm-fix-design.md"
         content = cmd.read_text()
         self.assertIn("detekt", content)
         self.assertIn("detekt-design-system.yml", content)
