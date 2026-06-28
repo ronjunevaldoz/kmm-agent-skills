@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.9] — 2026-06-28
+
+### Added
+
+- feat(skills): tie MVI + NavHost + clean architecture together end-to-end
+
+---
+
 ## [v1.29.8] — 2026-06-28
 
 ### Added
