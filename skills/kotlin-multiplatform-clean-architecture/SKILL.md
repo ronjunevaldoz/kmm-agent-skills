@@ -48,16 +48,20 @@ cross-feature navigation, navigate to another feature, AppNavigator, feature dep
 
 ## Recommendation First
 
-Default to **strict unidirectional dependency flow: `:model` → `:api` → `:domain` → `:presenter` → `:ui`** with `:data` as a sibling of `:presenter` (both depend on `:api`, neither depends on the other).
+**Start thin. Add layers only when they carry weight.** The 6-layer structure is the maximum for a complex feature — not a template to fill in by default.
 
-Why:
-- `:presenter` with no Compose dependency = ViewModels testable on plain JVM
-- `:model` as the dependency root = types shared across all layers with no circular risk
+When you do need the full structure, enforce **strict unidirectional dependency flow:
+`:model` → `:api` → `:domain` → `:presenter` → `:ui`** with `:data` as a sibling of
+`:presenter` (both depend on `:api`, neither depends on the other).
+
+Why the contract matters when you reach this point:
+- `:presenter` with no Compose dep = ViewModels testable on plain JVM
+- `:model` as the root = types shared across all layers with no circular risk
 - `:ui` depending only on `:presenter` = Compose screens are pure render functions
 - `internal` at module boundaries = no accidental cross-layer coupling
 
-Enforce the contract with Gradle dependency declarations first, Detekt rules second.
-The Gradle graph makes illegal dependencies impossible to compile; Detekt catches import-level violations.
+Enforce with Gradle dependency declarations first (makes violations uncompilable),
+Detekt rules second (catches import-level violations within a valid dep graph).
 
 ---
 
@@ -89,6 +93,58 @@ The Gradle graph makes illegal dependencies impossible to compile; Detekt catche
 | `:data` | `RepositoryImpl`, DTOs, mappers, data sources | UI state, ViewModels |
 | `:presenter` | `ViewModel`, MVI `UiState`, `UiIntent` sealed classes | Compose imports, UI framework |
 | `:ui` | `@Composable` screens, `@Preview` functions | Business logic, direct repo/use-case calls |
+
+---
+
+## Layer Weight — Add Only When It Carries Weight
+
+The 6-layer structure is the **maximum** for a complex feature. Start thin and add
+layers only when they justify the indirection.
+
+### ViewModel — when to add
+
+| Screen type | ViewModel? | Why |
+|---|---|---|
+| Static display (help, about, legal) | No | No state to manage |
+| Simple local toggle / counter | No | `remember` handles it |
+| Async load, display only | Yes — thin | Lifecycle awareness needed |
+| Async + user actions + navigation | Yes — full MVI | All three concerns present |
+
+A ViewModel with a single `val state = flow { ... }.stateIn(...)` and no intent handling
+is valid — do not wrap it in `MviViewModel` just to follow the pattern.
+
+### Use case — when to add
+
+| Scenario | Use case? | Why |
+|---|---|---|
+| `return repository.getUser(id)` | No | Pure passthrough — no value added |
+| Calls two repositories and combines results | Yes | Orchestration logic belongs in `:domain` |
+| Applies a business rule before saving | Yes | Rule must be testable without a ViewModel |
+| Same logic needed in two different ViewModels | Yes | Reuse justifies the layer |
+
+If the use case would be one line, call the repository from the ViewModel directly.
+
+### `:data` module — when to add
+
+| Scenario | Separate `:data`? | Why |
+|---|---|---|
+| Single local data source (DataStore) | Can inline in `:domain` | No DTO mapping or multiple sources |
+| Remote + local with caching | Yes | Sync logic and mapping belong in `:data` |
+| Multiple data sources with conflict resolution | Yes | Complexity justifies isolation |
+
+### The thin feature — all layers optional
+
+A screen that loads a list and navigates on tap can be as thin as:
+
+```
+:feature:notifications
+└── ui/            ← Screen composable + NotificationsViewModel (StateFlow only)
+    └── SKILL.md   ← no :model, :api, :domain, :data modules needed
+```
+
+Only add `:domain` when there is a use case that earns its place. Only add `:data` when
+there is a repository implementation worth isolating. The 6-layer structure exists for
+features that need it — not as a template to fill in by default.
 
 ---
 
@@ -442,5 +498,5 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
-| 2026-06-28 | Added: core vs feature split, use case pattern, mapper pattern, typed domain errors, cross-feature navigation. Expanded keywords and anti-patterns. |
+| 2026-06-28 | Added "Layer Weight" section with ViewModel/use-case/data decision tables and thin feature pattern. Updated Recommendation First to lead with start-thin principle. Added: core vs feature split, use case pattern, mapper pattern, typed domain errors, cross-feature navigation. |
 | 2026-06-18 | Initial release. |

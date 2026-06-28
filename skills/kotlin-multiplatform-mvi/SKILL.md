@@ -64,15 +64,82 @@ releases — recheck the AndroidX lifecycle and JetBrains CMP docs before upgrad
 
 ## Recommendation First
 
-Default to the **Contract pattern + MviViewModel + `Channel<Effect>`**.
+**Start thin. Add MviViewModel + Contract only when the screen has async state, user intents, and one-shot effects — all three.**
 
-Why:
-- sealed `State`, `Intent`, and `Effect` types make the screen contract explicit and testable
+Decision in order:
+1. No async, no persistent state → plain `@Composable`, no ViewModel
+2. Async load only (no user actions) → thin `ViewModel` + `StateFlow`, no Contract
+3. Async + user actions + navigation → full `MviViewModel` + `Contract`
+
+When you do reach step 3, default to the **Contract pattern + MviViewModel + `Channel<Effect>`**:
+- sealed `State`, `Intent`, and `Effect` make the full screen contract visible in one place
 - `Channel<Effect>` prevents one-shot effects from replaying on recomposition
-- `MutableStateFlow.update {}` avoids state-copy races under concurrent updates
+- `MutableStateFlow.update {}` is atomic under concurrent intent handling
 
-Use a different state container only when the screen has no side effects and no ViewModel
-boundary — for example, a purely presentational component owned by a parent screen.
+---
+
+## When NOT to Use MviViewModel
+
+Start with the thinnest option that works. Add layers only when they carry weight.
+
+| Screen type | Pattern | Why |
+|---|---|---|
+| Static display (help, legal, empty state) | `@Composable` with no ViewModel | No state to manage — props come from the caller |
+| Simple local toggle / counter | `remember` / `rememberSaveable` | State doesn't survive process death anyway; no business logic |
+| Parent-owned form field | Stateless composable + lambda | Parent screen owns the state; child just renders |
+| Async load, no user actions | Thin `ViewModel` + `StateFlow` (no Contract) | Lifecycle awareness needed, but no intents or effects |
+| Async load + user actions + navigation | Full `MviViewModel` + Contract | All three concerns present — Contract pays for itself |
+| Multi-step flow | One shared `MviViewModel` + thin step screens | Steps share state; per-step ViewModels add no value |
+
+### Thin pattern 1 — no ViewModel at all
+
+```kotlin
+// Static screen — no ViewModel, no Contract
+@Composable
+fun TermsScreen(onAccept: () -> Unit, onDecline: () -> Unit) {
+    Column {
+        TermsContent()
+        AppButton(onClick = onAccept) { AppText("Accept") }
+        AppButton(onClick = onDecline, variant = ButtonVariant.Ghost) { AppText("Decline") }
+    }
+}
+```
+
+### Thin pattern 2 — ViewModel with no Contract
+
+For screens that load data and display it with no user-driven state transitions:
+
+```kotlin
+// No Contract object, no sealed Intent, no Channel<Effect>
+class UserProfileViewModel(
+    private val userId: String,
+    private val repo: UserProfileRepository,
+) : ViewModel() {
+
+    val state: StateFlow<ProfileState> = flow { emit(repo.getProfile(userId)) }
+        .map<User, ProfileState> { ProfileState.Success(it) }
+        .catch { emit(ProfileState.Error(it.message.orEmpty())) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileState.Loading)
+}
+
+sealed interface ProfileState {
+    data object Loading : ProfileState
+    data class Success(val user: User) : ProfileState
+    data class Error(val message: String) : ProfileState
+}
+```
+
+The `ProfileState` sealed interface lives in the same file as the ViewModel — no
+`Contract` object wrapper needed until there are Intents and Effects to group with it.
+
+### When the full Contract pattern earns its place
+
+Add a `Contract` object when a screen has **at least two** of:
+- Observable state with multiple fields that change independently
+- User intents that trigger async operations
+- One-shot effects (navigation, toasts, dialogs)
+
+If only one is present, the thin pattern handles it with less indirection.
 
 ---
 
@@ -950,5 +1017,5 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
-| 2026-06-28 | Added Nav Args as Initial State, In-flight Cancellation, Typed Errors in State, Shared ViewModel (multi-step flow). Expanded keywords. |
+| 2026-06-28 | Added "When NOT to Use MviViewModel" with thin patterns (no-ViewModel, no-Contract). Updated Recommendation First to lead with start-thin principle. Added Nav Args as Initial State, In-flight Cancellation, Typed Errors in State, Shared ViewModel. |
 | 2026-06-06 | Initial release. |
