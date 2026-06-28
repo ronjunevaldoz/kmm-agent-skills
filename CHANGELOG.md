@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.26] — 2026-06-29
+
+### Added
+
+- feat(commands): close all remaining /kmm-new-project gaps
+
+---
+
 ## [v1.29.25] — 2026-06-29
 
 ### Added
