@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.19] — 2026-06-29
+
+### Added
+
+- feat(commands): fix kmm-new-project gaps; update GETTING_STARTED
+
+---
+
 ## [v1.29.18] — 2026-06-29
 
 ### Docs
