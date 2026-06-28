@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.17] — 2026-06-29
+
+### Added
+
+- feat(skills): add proguard-r8, in-app-purchases, desktop-app; close remaining gaps
+
+### Fixed
+
+- fix(skills): update expert skill count 54→57; add new skills to planner routing table
+
+---
+
 ## [v1.29.16] — 2026-06-29
 
 ### Added
