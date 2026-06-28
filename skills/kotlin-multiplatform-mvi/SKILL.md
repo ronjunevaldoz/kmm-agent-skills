@@ -572,6 +572,65 @@ private fun AuthContentErrorPreview() {
 }
 ```
 
+### `collectAsStateWithLifecycle` vs `collectAsState`
+
+Always use `collectAsStateWithLifecycle()` in production screens. It pauses collection
+when the composable's lifecycle drops below `STARTED` (screen goes to background) —
+saving battery and stopping unnecessary work.
+
+```kotlin
+// ❌ collectAsState — keeps collecting even when the screen is in the background
+val state by viewModel.state.collectAsState()
+
+// ✓ collectAsStateWithLifecycle — pauses when lifecycle < STARTED
+val state by viewModel.state.collectAsStateWithLifecycle()
+```
+
+| | `collectAsState` | `collectAsStateWithLifecycle` |
+|---|---|---|
+| Lifecycle-aware | No — always active | Yes — pauses below `STARTED` |
+| Battery / CPU | Wastes work in background | Efficient |
+| Use in | `@Preview`, tests | Production screens |
+| Import | `androidx.compose.runtime` | `androidx.lifecycle.compose` |
+
+Exception: inside `@Preview` composables there is no lifecycle, so `collectAsState` is
+required. Never use `collectAsStateWithLifecycle` in a preview — it throws at preview time.
+
+---
+
+### `LaunchedEffect` vs `DisposableEffect` vs `SideEffect`
+
+| Effect API | When it runs | Has cleanup? | Use for |
+|---|---|---|---|
+| `LaunchedEffect(key)` | On entry + when key changes; cancels on exit or key change | No (cancel is implicit) | Collecting flows, one-shot coroutines, side-effect on key change |
+| `DisposableEffect(key)` | Synchronously on entry + when key changes; `onDispose` on exit | Yes — `onDispose {}` | Add/remove listeners, set/clear a holder, subscribe/unsubscribe resources |
+| `SideEffect` | After **every** successful recomposition; no key | No | Sync Compose state to non-Compose code (analytics screen name, system UI flags) |
+
+```kotlin
+// LaunchedEffect — collect effects from ViewModel (coroutine, cancels when composable exits)
+LaunchedEffect(viewModel) {
+    viewModel.effect.collect { effect -> handleEffect(effect) }
+}
+
+// DisposableEffect — set/clear NavControllerHolder (synchronous, cleanup guaranteed)
+DisposableEffect(navController) {
+    holder.current = navController
+    onDispose { holder.current = null }
+}
+
+// SideEffect — push current screen name to analytics after every recomposition
+SideEffect {
+    analytics.setCurrentScreen(screenName)
+}
+```
+
+**Choosing between them:**
+1. If you need a coroutine → `LaunchedEffect`
+2. If you need guaranteed cleanup (listener, holder, resource) → `DisposableEffect`
+3. If you need to push state out to non-Compose code on every frame → `SideEffect`
+
+---
+
 ### Why `LaunchedEffect(viewModel)` not `LaunchedEffect(Unit)`?
 
 `LaunchedEffect(Unit)` is started once per composition entry and cancelled when the
@@ -589,13 +648,33 @@ cases, but `viewModel` is more correct when the ViewModel outlives a single comp
 package GROUP_ID.feature.auth.ui.di
 
 import GROUP_ID.feature.auth.ui.AuthViewModel
-import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
 val authUiModule = module {
-    viewModel { AuthViewModel(get()) }
+    viewModelOf(::AuthViewModel)   // preferred — Koin 4 zero-boilerplate form
 }
 ```
+
+Use `viewModel { AuthViewModel(get()) }` only when you need custom qualifiers or
+conditional wiring. For everything else, `viewModelOf` is less code and identical behavior.
+
+**ViewModels that need `SavedStateHandle`** (nav args, back-stack results):
+
+```kotlin
+class CheckoutViewModel(
+    private val savedStateHandle: SavedStateHandle,
+    private val repo: CheckoutRepository,
+) : MviViewModel<...>(...) { ... }
+
+val checkoutModule = module {
+    viewModelOf(::CheckoutViewModel)   // SavedStateHandle injected automatically via CreationExtras
+}
+```
+
+Never construct `SavedStateHandle()` yourself — Koin's ViewModelFactory provides it from
+the AndroidX `CreationExtras` bag. See `kotlin-multiplatform-dependency-injection` for
+the full SavedStateHandle + Koin reference.
 
 With **Koin annotated mode** (Koin Compiler Plugin):
 ```kotlin
@@ -1091,6 +1170,10 @@ must stay synchronized — see the Shared ViewModel section above for the patter
 - using `GlobalScope` or bare `CoroutineScope()` in a ViewModel — always use `viewModelScope`
 - calling `onIntent` from inside the ViewModel — `onIntent` is a UI-layer API; call private suspend functions directly
 - using `LaunchedEffect(state.someField)` for effect collection — restarts on every state change; use `LaunchedEffect(viewModel)` instead
+- using `collectAsState()` instead of `collectAsStateWithLifecycle()` in production screens — keeps collecting in the background; wastes battery; use `collectAsState()` only in `@Preview`
+- using `LaunchedEffect` when cleanup is needed — if you add a listener or set a holder, use `DisposableEffect` so `onDispose` can remove it
+- using `SideEffect` for coroutines — `SideEffect` is synchronous and has no cancel; use `LaunchedEffect` for any suspend work
+- constructing `SavedStateHandle()` manually — always let Koin/AndroidX provide it via `viewModelOf(::ViewModel)` or `viewModel { ViewModel(get(), get()) }`
 - god ViewModel (400–900+ lines) — all screen logic in one place instead of delegating business operations to use cases; extract any `handleIntent` branch that touches two or more repos into a use case
 - direct repository calls in ViewModel for complex orchestration — if the ViewModel `when` branch needs multiple repos or has business rules, it belongs in a use case, not the ViewModel
 - storing auth status as `isAuthenticated: Boolean` in `State` and navigating on state change — use `SessionViewModel` + a `LaunchedEffect` in `AppNavHost` to guard the entire nav graph; MVI screens should not own auth gate logic
@@ -1127,6 +1210,7 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Add collectAsStateWithLifecycle vs collectAsState rule; LaunchedEffect vs DisposableEffect vs SideEffect decision table; SavedStateHandle + viewModelOf Koin wiring; four new anti-patterns.
 | 2026-06-28 | Add auth gate and back-stack anti-patterns. Two new anti-patterns: storing auth state in MVI State for nav, and Effect.NavigateBack without popUpTo contract. |
 | 2026-06-28 | Add ViewModel size rule, god ViewModel symptoms, use case extraction guide, and ViewModel split patterns. Two new anti-patterns for monolithic ViewModels. |
 | 2026-06-28 | Added "When NOT to Use MviViewModel" with thin patterns (no-ViewModel, no-Contract). Updated Recommendation First to lead with start-thin principle. Added Nav Args as Initial State, In-flight Cancellation, Typed Errors in State, Shared ViewModel. |

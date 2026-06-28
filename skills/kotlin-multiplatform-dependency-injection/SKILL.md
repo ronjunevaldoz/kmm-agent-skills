@@ -155,6 +155,51 @@ val authUiModule = module {
 }
 ```
 
+### ViewModels with `SavedStateHandle`
+
+Koin's AndroidX ViewModel integration provides `SavedStateHandle` automatically via
+`CreationExtras` — you do not need to resolve it manually. Declare it as a constructor
+parameter and use `viewModelOf` (Koin 4+ DSL) or the `get()` shorthand:
+
+```kotlin
+// ViewModel — SavedStateHandle is just another constructor parameter
+class CheckoutViewModel(
+    private val savedStateHandle: SavedStateHandle,
+    private val repo: CheckoutRepository,
+) : MviViewModel<CheckoutContract.State, CheckoutContract.Intent, CheckoutContract.Effect>(
+    initialState = CheckoutContract.State(),
+) {
+    // Read nav result written by a child screen
+    init {
+        viewModelScope.launch {
+            savedStateHandle.getStateFlow<String?>("selected_city", null)
+                .filterNotNull()
+                .collect { city ->
+                    updateState { copy(city = city) }
+                    savedStateHandle["selected_city"] = null  // consume once
+                }
+        }
+    }
+}
+
+// Koin module — option 1: viewModelOf (Koin 4, zero boilerplate)
+val checkoutUiModule = module {
+    viewModelOf(::CheckoutViewModel)   // resolves SavedStateHandle + CheckoutRepository automatically
+}
+
+// Koin module — option 2: explicit viewModel {} if you need custom qualifiers
+val checkoutUiModule = module {
+    viewModel { CheckoutViewModel(get(), get()) }
+    // get() for SavedStateHandle is resolved by Koin's ViewModelFactory from CreationExtras
+}
+```
+
+**Rules:**
+- `viewModelOf(::ClassName)` is the preferred form — less code, same behavior
+- Never construct `SavedStateHandle()` yourself — always let Koin/AndroidX provide it
+- `savedStateHandle.getStateFlow<T?>(key, null)` is the idiomatic way to receive back-stack results
+- Access nav-args set by Navigation Compose via the same `savedStateHandle`: the navigation library writes route arguments there automatically
+
 ```kotlin
 // androidApp/src/main/kotlin/.../App.kt
 startKoin {
@@ -278,6 +323,8 @@ Prefer replacing:
 
 ## Common Anti-Patterns
 
+- constructing `SavedStateHandle()` manually — always use `viewModelOf` or `viewModel { ViewModel(get()) }`; Koin provides it from CreationExtras
+- using `viewModel { ViewModel(get(), get()) }` when `viewModelOf(::ViewModel)` would do — adds boilerplate for no gain; only use the explicit form for custom qualifiers
 - injecting business rules into Koin modules
 - resolving dependencies inside composables when screen-boundary injection is enough
 - making everything a singleton by habit
@@ -307,4 +354,5 @@ bindings to the actual module names in the repo.
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Add SavedStateHandle + Koin wiring section: viewModelOf preferred form, automatic CreationExtras injection, getStateFlow for back-stack results. Two new anti-patterns. |
 | 2026-06-13 | Initial release. |
