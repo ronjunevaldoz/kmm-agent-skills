@@ -54,6 +54,10 @@ consumer project cleanly:
 | `BACKEND` | Does it talk to an API, auth service, or server? | none |
 | `AUTH` | Does it have login / sign-in / identity? | none |
 | `DI_APPROACH` | Annotated or manual DI? | annotated |
+| `DISTRIBUTION` | Where will the app be distributed? | Play Store + App Store |
+
+Distribution options: `Play Store + App Store` · `Internal / enterprise` · `Open source / side project`
+This affects signing config, ProGuard aggressiveness, and whether the CI release lane includes store upload.
 
 If the user omits a field, state the assumption before proceeding and keep moving.
 
@@ -256,7 +260,15 @@ git clone --depth 1 --branch all-targets \
 cd <PROJECT_NAME> && rm -rf .git && git init
 ```
 
-Then configure the clone (rename project, update group ID, update version catalog).
+Then configure the clone using the intake values:
+- Rename project to `PROJECT_NAME`
+- Set `group = GROUP_ID` in `gradle.properties`
+- Set `android.minSdk = MIN_SDK` in `libs.versions.toml` or `build.gradle.kts`
+- Set `iosDeploymentTarget = IOS_TARGET` in the iOS Gradle target block
+- If `DISTRIBUTION` is `Play Store + App Store`: keep default signing placeholders; enable ProGuard in release build type
+- If `DISTRIBUTION` is `Internal / enterprise`: configure release signing from env vars; disable store-upload CI step
+- If `DISTRIBUTION` is `Open source / side project`: skip signing config; CI publishes only artifacts, no store upload
+
 Then add the 6-layer convention plugins on top of what kmp-wizard already ships.
 Run `./gradlew help` — must be `BUILD SUCCESSFUL` before any feature work begins.
 
@@ -273,22 +285,21 @@ After each foundation step: run `validate_module_graph.py` and confirm zero erro
 
 ## Step 5 — Core infrastructure (if needed)
 
-Only generate what the inferred plan requires. Run each in dependency order:
+Use intake answers directly — do not re-infer. Run each in dependency order:
 
-| Inferred need | Skill | What it generates |
+| Intake value | Skill | What it generates |
 |---|---|---|
-| Local persistence | `kotlin-multiplatform-sqldelight-setup` | Schema, drivers, migrations, Flow queries |
-| Key-value / settings | `kotlin-multiplatform-datastore` | Preferences DataStore, expect/actual factory |
-| REST API | `kotlin-multiplatform-network-layer` | Ktor client, NetworkResult<T>, safeRequest |
-| kRPC backend | `kotlin-multiplatform-kotlin-rpc` | Shared contract, Ktor auth integration |
-| Auth flow | `kotlin-multiplatform-ktor-auth-service` | Bearer/JWT, login/refresh/logout |
-| DI | `kotlin-multiplatform-dependency-injection` | Koin modules, scope rules |
-| Logging | `kotlin-multiplatform-logging` | Kermit setup, log levels, Koin wiring |
-| CI/CD | `kotlin-multiplatform-ci-github-actions` | GitHub Actions matrix: build, test, detekt, ktlint |
-| Code quality | `kotlin-multiplatform-code-quality` | Ktlint + Detekt config, baseline, CI gate |
+| `PERSISTENCE = local` | `kotlin-multiplatform-sqldelight-setup` | Schema, drivers, migrations, Flow queries |
+| `PERSISTENCE = settings` | `kotlin-multiplatform-datastore` | Preferences DataStore, expect/actual factory |
+| `BACKEND = REST API` | `kotlin-multiplatform-network-layer` | Ktor client, NetworkResult<T>, safeRequest |
+| `BACKEND = kRPC` | `kotlin-multiplatform-kotlin-rpc` | Shared contract, Ktor auth integration |
+| `AUTH = yes` | `kotlin-multiplatform-ktor-auth-service` | Bearer/JWT, login/refresh/logout |
+| always | `kotlin-multiplatform-dependency-injection` | Koin modules, scope rules |
+| always | `kotlin-multiplatform-logging` | Kermit setup, log levels, Koin wiring |
+| always | `kotlin-multiplatform-ci-github-actions` | GitHub Actions matrix: build, test, detekt, ktlint |
+| always | `kotlin-multiplatform-code-quality` | Ktlint + Detekt config, baseline, CI gate |
 
-Always include CI/CD and Code quality — every new project needs them from day one.
-Skip the remaining rows if not needed by the inferred plan.
+CI/CD, code quality, DI, and logging are always included — every new project needs them from day one.
 
 ---
 
@@ -367,7 +378,7 @@ Before writing any composable, generate layout docs and wireframes for every scr
 the inferred plan. Design must be agreed on before implementation starts — changing
 layout after code is written wastes time.
 
-**6a — ASCII wireframes (layout-system)**
+**7a — ASCII wireframes (layout-system)**
 
 Load `kotlin-multiplatform-layout-system`. For each screen in the inferred feature set,
 generate a file in `docs/layout-system/<feature>/<ScreenName>.md` containing:
@@ -389,7 +400,7 @@ docs/layout-system/
   _components.md           — shared component registry (AppButton, AppTextField, etc.)
 ```
 
-**6b — Design previews (preview-driven-development)**
+**7b — Design previews (preview-driven-development)**
 
 Load `kotlin-multiplatform-preview-driven-development`. For each screen, generate stub
 `Content` composables with `@Preview` annotations covering all state variants — before
@@ -397,7 +408,7 @@ the real implementation. This makes layout mistakes visible immediately on Deskt
 without running a device or emulator.
 
 ```kotlin
-// Generated stub — real logic added in Step 7
+// Generated stub — real logic added in Step 8
 @Composable
 fun ProductListContent(
     state: ProductListContract.State = ProductListContract.State(),
@@ -420,7 +431,7 @@ private fun ProductListFilledPreview() =
 ```
 
 After generating stubs: run `./gradlew :composeApp:jvmRun` (or open Android Studio
-previews) and confirm the slot structure looks right before moving to Step 7.
+previews) and confirm the slot structure looks right before moving to Step 8.
 
 ---
 
@@ -471,7 +482,14 @@ For each task in the sprint:
 
 **8c — Sprint review gate**
 
-After all tasks in the sprint are done, print a summary and stop:
+After all tasks in the sprint are done, commit the sprint work then stop:
+
+```bash
+git add -A
+git commit -m "feat(<sprint-name>): complete Sprint <N> — <sprint goal>"
+```
+
+Then print a summary and stop:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -509,20 +527,28 @@ Skills to load per common feature type:
 
 ---
 
-## Step 9 — Run `/kmm-verify`
+## Step 9 — Record goldens + run `/kmm-verify`
 
-After all features are implemented:
+After all sprints are complete, record Roborazzi golden images first — screenshot tests
+always fail on a fresh project if goldens haven't been recorded yet:
+
+```bash
+./gradlew recordRoborazziJvm
+git add src/**/roborazzi/**/*.png
+git commit -m "test: record initial Roborazzi screenshot goldens"
+```
+
+Then run the full validation pipeline:
 
 ```bash
 /kmm-verify .
 ```
 
-This runs the full validation pipeline:
+This runs:
 - Architecture audit
-- ktlint
-- detekt
-- jvmTest (unit tests + Roborazzi diffs)
-- Visual design audit on generated screenshot goldens
+- ktlint + detekt
+- jvmTest (unit tests + Roborazzi diffs against the just-recorded goldens)
+- Visual design audit on screenshot goldens
 
 Fix any blockers. Do not mark the project complete until `/kmm-verify` reports `RESULT: PASS`.
 
@@ -533,7 +559,7 @@ Fix any blockers. Do not mark the project complete until `/kmm-verify` reports `
 After verify passes, generate a `.claude/` directory in the scaffolded project so the team
 gets agent-driven workflows on day one.
 
-**Write `.claude/AGENTS.md`** — route the skills the project actually uses:
+**Write `.claude/AGENTS.md`** — tailored to this project's actual modules and stack:
 
 ```markdown
 # AGENTS.md — <PROJECT_NAME>
@@ -545,16 +571,34 @@ Skills are installed in `.claude/skills/`.
 
 | Topic | Skill |
 |---|---|
-| New feature end-to-end | `kotlin-multiplatform-feature-scaffold` → `kotlin-multiplatform-clean-architecture` → `kotlin-multiplatform-mvi` |
-| ViewModel / screen state | `kotlin-multiplatform-mvi` |
-| Navigation | `kotlin-multiplatform-navigation` |
-| Dependency injection | `kotlin-multiplatform-dependency-injection` |
-<if auth was scaffolded>| Auth / login | `kotlin-multiplatform-ktor-auth-service` |</if>
-<if SQLDelight was scaffolded>| Local database | `kotlin-multiplatform-sqldelight-setup` |</if>
-<if network was scaffolded>| REST API / network | `kotlin-multiplatform-network-layer` |</if>
-| Design system | `kotlin-multiplatform-design-system` |
-| Unit tests | `kotlin-multiplatform-unit-testing` |
-| Architecture audit | `kotlin-multiplatform-audit` |
+| New feature end-to-end | `feature-scaffold` → `clean-architecture` → `mvi` |
+| ViewModel / screen state | `mvi` |
+| Navigation | `navigation` |
+| Dependency injection | `dependency-injection` |
+<only rows for skills actually scaffolded in this project:>
+| Auth / login | `ktor-auth-service` |
+| Local database | `sqldelight-setup` |
+| REST API / network | `network-layer` |
+| Key-value settings | `datastore` |
+| Screenshot tests | `roborazzi` |
+| ProGuard / release build | `proguard-r8` |
+| Design system | `design-system` |
+| Unit tests | `unit-testing` |
+| Architecture audit | `audit` |
+
+## Feature modules
+
+| Feature | Layers |
+|---|---|
+<one row per :feature:<name> module group, e.g.:>
+| auth | :domain :data :presenter :ui |
+| <feature> | :domain :data :presenter :ui |
+
+## Stack
+
+| Library | Skill |
+|---|---|
+<one row per library detected in libs.versions.toml>
 
 ## Commands installed
 
@@ -566,6 +610,82 @@ Key commands:
 - `/kmm-execute-ticket <id>` — implement a GitHub issue end-to-end
 - `/kmm-fix-design` — scan and fix design system violations
 - `/kmm-update-skills` — pull latest skills and re-deploy
+```
+
+**Write `README.md`** at the project root:
+
+```markdown
+# <PROJECT_NAME>
+
+<WHAT_IT_DOES>
+
+## Platforms
+
+<list platforms from intake>
+
+## Build
+
+```bash
+./gradlew :androidApp:assembleDebug     # Android APK
+./gradlew :iosApp:buildReleaseXCFramework  # iOS XCFramework (if iOS target)
+./gradlew jvmTest                        # All tests
+```
+
+## Architecture
+
+6-layer clean architecture per feature: `:model` → `:api` → `:domain` → `:data` → `:presenter` → `:ui`
+
+See `docs/architecture.md` for the full structure.
+
+## Agent workflows
+
+Install [kmm-agent-skills](https://github.com/ronjunevaldoz/kmm-agent-skills), then:
+- `/kmm-implement-feature <name>` — add a feature end-to-end
+- `/kmm-run-audit` — check architecture health
+- `/kmm-verify` — full validation pipeline
+```
+
+**Write `docs/`** — project documentation scaffold:
+
+```
+docs/
+  architecture.md     — 6-layer module structure, dependency rules, naming conventions
+  decisions/          — Architecture Decision Records (ADRs)
+    001-mvi-pattern.md
+    002-sqldelight-vs-room.md   (if SQLDelight was chosen)
+    003-koin-di.md
+  layout-system/      — already written by Step 7 (screen wireframes per feature)
+```
+
+`docs/architecture.md` contents:
+```markdown
+# Architecture — <PROJECT_NAME>
+
+## Module structure
+
+Each feature follows the 6-layer pattern:
+  :feature:<name>:model      — data classes, sealed results (no deps)
+  :feature:<name>:api        — repository interfaces (depends on :model)
+  :feature:<name>:domain     — use cases (depends on :api)
+  :feature:<name>:data       — repository implementations (depends on :api)
+  :feature:<name>:presenter  — MVI ViewModel (depends on :domain)
+  :feature:<name>:ui         — Compose screens (depends on :presenter)
+
+## Rules
+
+- Domain layer has zero Android/iOS imports
+- ViewModel never imports a Composable
+- No business logic in Composables — intents only
+- Repository interface in :api, implementation in :data
+- Koin bindings in *Module.kt files only
+
+## Features
+
+<list of features from the sprint plan>
+
+## Stack
+
+<key libraries and versions from libs.versions.toml>
 ```
 
 **Copy the consumer command set** into `.claude/commands/`:
@@ -647,8 +767,14 @@ Generated:
   Tests:        <N> unit tests, <N> Roborazzi screenshot tests
   Screenshots:  <N> PNG goldens (<N> light, <N> dark)
 
+Docs:
+  README.md                        — project overview, build commands, architecture link
+  docs/architecture.md             — 6-layer rules, module map, stack
+  docs/decisions/                  — ADRs for key tech choices
+  docs/layout-system/              — ASCII wireframes per screen
+
 Agent setup:
-  .claude/AGENTS.md                — skill routing for this project
+  .claude/AGENTS.md                — skill routing + feature module table
   .claude/commands/kmm-*.md        — <N> slash commands installed
   .claude/pipeline-context.json    — project context for the planner agent
   .claude/settings.json            — Bash allowlist
@@ -657,10 +783,11 @@ Verify:     PASS
 Skills used: <list>
 
 Next steps:
-  ./gradlew :androidApp:assembleDebug    — build Android
-  ./gradlew :desktopApp:run              — run Desktop
-  ./gradlew jvmTest                      — run all tests
-  /kmm-implement-feature <name>          — add your first feature
+<if Android in platforms>  ./gradlew :androidApp:assembleDebug           — build Android APK</if>
+<if iOS in platforms>      ./gradlew :iosApp:buildReleaseXCFramework      — build iOS XCFramework</if>
+<if Desktop in platforms>  ./gradlew :desktopApp:run                      — run Desktop app</if>
+  ./gradlew jvmTest                                — run all tests
+  /kmm-implement-feature <name>                    — add your next feature
 ```
 
 ---
