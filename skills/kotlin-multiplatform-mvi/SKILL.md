@@ -972,6 +972,111 @@ fun OnboardingStep1Screen(navController: NavController) {
 
 ---
 
+## ViewModel Size and Decomposition
+
+A ViewModel that grows beyond ~150 lines is a smell. Beyond 300 lines it is a violation —
+the ViewModel has taken on responsibilities that belong elsewhere.
+
+### God ViewModel symptoms
+
+Stop and decompose when the ViewModel:
+- calls more than two unrelated repositories directly
+- has multiple `private suspend fun` blocks that each contain their own business logic branches
+- mixes data fetching, validation, formatting, and navigation logic in `handleIntent`
+- has a `State` data class with more than ~8 fields
+- contains `if/else` or `when` chains that span more than 10–15 lines per branch
+
+### Decision table: what to extract
+
+| Symptom | Extract to |
+|---|---|
+| `handleIntent` branch calls multiple repos in sequence | Use case (`operator fun invoke`) in `:domain` |
+| Business rule lives inline (validate, calculate, transform) | Use case or domain function |
+| Two unrelated screen sections share one ViewModel | Split into parent + child (shared ViewModel or separate) |
+| State has a sub-group of fields that only change together | Nested data class in `State`, or separate ViewModel |
+| The same logic appears in two different ViewModels | Use case extracted to `:domain`, shared via injection |
+
+### Extracting a use case
+
+Move logic out of the ViewModel when a `handleIntent` branch:
+- calls two or more repositories
+- contains branching business rules (eligibility, validation, rollback)
+- is long enough to need its own test suite independent of UI state
+
+```kotlin
+// ❌ Before — business logic inline in ViewModel (god ViewModel symptom)
+private suspend fun placeOrder() {
+    val cart = cartRepo.getCart()
+    if (cart.items.isEmpty()) {
+        updateState { copy(error = "Cart is empty") }
+        return
+    }
+    val inventory = inventoryRepo.check(cart.items)
+    if (!inventory.allAvailable) {
+        updateState { copy(error = "Some items out of stock") }
+        return
+    }
+    val order = orderRepo.place(cart)
+    updateState { copy(isLoading = false) }
+    sendEffect(Effect.NavigateToConfirmation(order.id))
+}
+
+// ✓ After — use case owns the orchestration
+class PlaceOrderUseCase(
+    private val cartRepo: CartRepository,
+    private val inventoryRepo: InventoryRepository,
+    private val orderRepo: OrderRepository,
+) {
+    suspend operator fun invoke(): PlaceOrderResult {
+        val cart = cartRepo.getCart()
+        if (cart.items.isEmpty()) return PlaceOrderResult.EmptyCart
+        val inventory = inventoryRepo.check(cart.items)
+        if (!inventory.allAvailable) return PlaceOrderResult.OutOfStock(inventory.unavailable)
+        val order = orderRepo.place(cart)
+        return PlaceOrderResult.Success(order.id)
+    }
+}
+
+// ViewModel is now thin — one call, one when
+private suspend fun placeOrder() {
+    updateState { copy(isLoading = true) }
+    when (val result = placeOrderUseCase()) {
+        is PlaceOrderResult.Success      -> sendEffect(Effect.NavigateToConfirmation(result.orderId))
+        PlaceOrderResult.EmptyCart       -> updateState { copy(isLoading = false, error = "Cart is empty") }
+        is PlaceOrderResult.OutOfStock   -> updateState { copy(isLoading = false, error = "Some items out of stock") }
+    }
+    updateState { copy(isLoading = false) }
+}
+```
+
+### Splitting a ViewModel
+
+Split into two ViewModels when the screen has two genuinely independent sections —
+different data sources, different lifecycles, no shared state between them.
+
+```kotlin
+// ✓ Profile screen with independent "user info" and "activity feed" sections
+// Each has its own loading state, error state, and data source
+
+class ProfileInfoViewModel(private val userRepo: UserRepository) :
+    MviViewModel<ProfileInfoContract.State, ...>(...) { ... }
+
+class ActivityFeedViewModel(private val feedRepo: FeedRepository) :
+    MviViewModel<ActivityFeedContract.State, ...>(...) { ... }
+
+@Composable
+fun ProfileScreen(...) {
+    val infoVm: ProfileInfoViewModel = koinViewModel()
+    val feedVm: ActivityFeedViewModel = koinViewModel()
+    // each section gets its own ViewModel, no shared ViewModel needed
+}
+```
+
+Split into a **shared (parent) ViewModel** only when sections share mutable state and
+must stay synchronized — see the Shared ViewModel section above for the pattern.
+
+---
+
 ## Common Anti-Patterns
 
 - using `SharedFlow` for effects — events replay on new collectors and break "fire once" guarantees
@@ -986,8 +1091,11 @@ fun OnboardingStep1Screen(navController: NavController) {
 - using `GlobalScope` or bare `CoroutineScope()` in a ViewModel — always use `viewModelScope`
 - calling `onIntent` from inside the ViewModel — `onIntent` is a UI-layer API; call private suspend functions directly
 - using `LaunchedEffect(state.someField)` for effect collection — restarts on every state change; use `LaunchedEffect(viewModel)` instead
+- god ViewModel (400–900+ lines) — all screen logic in one place instead of delegating business operations to use cases; extract any `handleIntent` branch that touches two or more repos into a use case
+- direct repository calls in ViewModel for complex orchestration — if the ViewModel `when` branch needs multiple repos or has business rules, it belongs in a use case, not the ViewModel
 
 If effects are replaying or the state machine is hard to test, audit the above list first.
+If the ViewModel is growing beyond 150–200 lines, apply the decomposition decision table above.
 
 ---
 
@@ -1017,5 +1125,6 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Add ViewModel size rule, god ViewModel symptoms, use case extraction guide, and ViewModel split patterns. Two new anti-patterns for monolithic ViewModels. |
 | 2026-06-28 | Added "When NOT to Use MviViewModel" with thin patterns (no-ViewModel, no-Contract). Updated Recommendation First to lead with start-thin principle. Added Nav Args as Initial State, In-flight Cancellation, Typed Errors in State, Shared ViewModel. |
 | 2026-06-06 | Initial release. |
