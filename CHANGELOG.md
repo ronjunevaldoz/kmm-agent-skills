@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.14] — 2026-06-28
+
+### Docs
+
+- docs(readme): add trigger keywords for @Stable/@Immutable, CoroutineExceptionHandler, rememberUpdatedState
+
+---
+
 ## [v1.29.13] — 2026-06-28
 
 ### Added
