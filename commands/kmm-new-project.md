@@ -71,10 +71,13 @@ From the description, extract:
 - **Backend** — default: none (local-only) unless the description mentions API, server, sync, or auth
 - **Auth** — default: none unless mentioned
 
-Print the raw feature list — do not start implementation yet:
+⛔ **No code is written during Steps 1–3.** Planning and implementation are strictly
+separated. The first line of code is written only after the user confirms the plan in Step 3e.
+
+Print the raw feature list:
 
 ```
-INFERRED FEATURES
+INFERRED FEATURES  [planning only — no code yet]
 ─────────────────
 Platforms:  <platforms from intake>
 Features (raw):
@@ -86,7 +89,7 @@ Data:       SQLDelight (offline-first)
 Backend:    none (local-only)
 Auth:       none
 
-→ Proceeding to planning phase...
+→ Proceeding to planning phase (Steps 3–6a). Implementation starts at Step 4 after approval.
 ```
 
 ---
@@ -421,33 +424,78 @@ previews) and confirm the slot structure looks right before moving to Step 7.
 
 ---
 
-## Step 8 — Features (MVP sprint order)
+## Step 8 — Features (sprint by sprint, gated)
 
-Execute the sprint plan approved in Step 3. Work sprint by sprint, feature by feature.
-For each MVP feature task:
+Execute the approved sprint plan one sprint at a time. **Never start the next sprint
+until the user reviews and confirms the current one.**
+
+### For each sprint:
+
+**8a — Announce the sprint**
+
+Print before writing any code for that sprint:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SPRINT <N> — <Sprint name>
+Tasks: [X-01] [X-02] ... [X-N]
+Goal:  <sprint goal from approved plan>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Starting — this will generate code. Proceed? [yes / adjust tasks]
+```
+
+Wait for confirmation before writing any code for the sprint.
+
+**8b — Implement the sprint tasks in order**
+
+For each task in the sprint:
 
 1. **Implement** — load the relevant skill(s), generate all 6 layers:
    - `:model` — data classes, sealed results
    - `:api` — repository interface
    - `:domain` — use cases
-   - `:data` — repository implementation, mappers, SQLDelight/network calls
+   - `:data` — repository impl, mappers, SQLDelight/network calls
    - `:presenter` — MVI ViewModel, UiState, UiEffect, Channel
-   - `:ui` — `Screen` (with real ViewModel), `Content` (pure state, injectable)
-
-2. **Wire DI** — add all new bindings to the Koin module for this feature.
-
-3. **Add navigation** — if the feature has a screen, add a type-safe route to the
-   NavHost. Load `kotlin-multiplatform-navigation` on first screen, reuse pattern on subsequent ones.
-
+   - `:ui` — `Screen` (wired ViewModel) + `Content` (pure, previewable)
+2. **Wire DI** — add bindings to the feature's Koin module.
+3. **Add navigation** — add a type-safe route to NavHost. Load
+   `kotlin-multiplatform-navigation` on first screen, reuse pattern for subsequent ones.
 4. **Write tests** — for every feature:
-   - `:presenter` unit tests with `runTest` + Turbine (load `kotlin-multiplatform-unit-testing`)
-   - Roborazzi screenshot tests — all states, light + dark (load `kotlin-multiplatform-roborazzi`)
-
-5. **Validate** — after each feature, run:
+   - `:presenter` unit tests with `runTest` + Turbine
+   - Roborazzi screenshot tests — all state variants, light + dark
+5. **Validate** — after each task:
    ```bash
    python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py .
    ```
-   Fix any findings before moving to the next feature.
+   Fix any findings before moving to the next task.
+
+**8c — Sprint review gate**
+
+After all tasks in the sprint are done, print a summary and stop:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SPRINT <N> COMPLETE — review before continuing
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Done:
+  ✅ [X-01] <task name>
+  ✅ [X-02] <task name>
+  ...
+
+Audit: PASS  |  Tests: <N> passed  |  Screenshots: <N> recorded
+
+Next up — Sprint <N+1>: <sprint name>
+  Tasks: [Y-01] [Y-02] ...
+
+Options:
+  ↩  "continue" / "next sprint"  — start Sprint <N+1>
+  ✏  "redo [X-02]"               — redo a specific task
+  ✏  "add <thing> to this sprint" — insert a task before moving on
+  ⏸  "stop here"                 — end session, resume later with /kmm-implement-feature
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Do not start the next sprint until the user responds.**
 
 Skills to load per common feature type:
 
