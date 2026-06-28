@@ -291,11 +291,65 @@ Skip the remaining rows if not needed by the inferred plan.
 
 ## Step 6 — Design system
 
-Always generate the design system before any UI feature — UI layers depend on it.
+### 6a — Draft design decisions (always pre-recommend, always confirm before generating)
 
-Load `kotlin-multiplatform-design-system`. Generate:
-- `AppTheme` with light and dark color schemes
-- `AppColors`, `AppTypography`, `AppSpacing` token objects
+Before generating a single token, draft a design recommendation based on the app type.
+Present it as a numbered draft so the user can accept or swap items by number.
+
+**Color palette** — infer from app type:
+
+| App type | Recommended palette |
+|---|---|
+| E-commerce / retail | Neutral base (white/gray) + strong accent (indigo or orange) |
+| Finance / banking | Trust blues + conservative gray, minimal accent |
+| Health / fitness | Energetic green or orange primary, white surface |
+| Social / community | Vibrant primary (purple or teal), warm neutrals |
+| Productivity / tools | Cool gray base, single accent (blue), minimal decoration |
+| Food / restaurant | Warm base (cream/orange tint), rich accent (red or amber) |
+| Education | Friendly blue or purple primary, soft surfaces |
+| Travel | Sky blue or teal primary, warm secondary |
+
+Always draft three concrete color options, not just a category name:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DRAFT — DESIGN TOKENS  (recommended ✦)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Color palette (pick one):
+  [1] ✦ <Name> — primary #XXXXXX · surface #XXXXXX · accent #XXXXXX
+                  (recommended for <app type> — <one-line reason>)
+  [2]   <Name> — primary #XXXXXX · surface #XXXXXX · accent #XXXXXX
+  [3]   <Name> — primary #XXXXXX · surface #XXXXXX · accent #XXXXXX
+
+Mode:
+  [4] ✦ Light + Dark  (system default)
+  [5]   Light only
+  [6]   Dark first
+
+Typography:
+  [7] ✦ Sans-serif system font  (clean, native feel — recommended for most apps)
+  [8]   Rounded sans  (friendly, consumer apps)
+  [9]   Slab serif   (editorial, content-heavy)
+
+Corner radius:
+  [10] ✦ Medium (8dp cards, 12dp sheets)  — modern standard
+  [11]   Small (4dp)  — compact / dense UI
+  [12]   Large (16dp) — playful / expressive
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+→ Recommended: [1][4][7][10]. Say a number to swap, or "looks good" to proceed.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Do not generate any design system code until the user confirms this draft.**
+
+### 6b — Generate the design system using confirmed tokens
+
+Load `kotlin-multiplatform-design-system`. Generate using the confirmed choices:
+- `AppColors` — light and dark color schemes with the confirmed palette
+- `AppTypography` — type scale using the confirmed font style
+- `AppSpacing` — spacing scale (4dp base grid)
+- `AppTheme` — wires colors + typography + shapes
 - `AppScaffold` and `AppTopAppBar` base components
 - `AppThemePreview` wrapper for Roborazzi
 
