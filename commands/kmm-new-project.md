@@ -7,8 +7,8 @@
 - Plain description: `build a todo app in kmm`
 - A path to a sample spec: `samples/todo-app.md`
 
-This command drives the full pipeline end-to-end across 10 steps:
-intake → infer → scaffold → infrastructure → design system → **screen layouts + previews** → features → verify → agent setup → summary.
+This command drives the full pipeline end-to-end across 11 steps:
+intake → infer → **plan (MVP + sprints, gated approval)** → scaffold → infrastructure → design system → screen layouts + previews → features → verify → agent setup → summary.
 Any assumptions made are printed before implementation begins.
 
 ---
@@ -71,28 +71,147 @@ From the description, extract:
 - **Backend** — default: none (local-only) unless the description mentions API, server, sync, or auth
 - **Auth** — default: none unless mentioned
 
-Print the inferred plan for transparency — do not wait for approval, proceed immediately:
+Print the raw feature list — do not start implementation yet:
 
 ```
-INFERRED PLAN
-─────────────
+INFERRED FEATURES
+─────────────────
 Platforms:  <platforms from intake>
-Features:
-  F-01  Project scaffold          → kotlin-multiplatform-feature-scaffold
-  F-02  Clean architecture        → kotlin-multiplatform-clean-architecture
-  F-03  <feature name>            → <skill>
+Features (raw):
+  F-01  Project scaffold
+  F-02  Clean architecture
+  F-03  <feature name>
   ...
 Data:       SQLDelight (offline-first)
 Backend:    none (local-only)
 Auth:       none
 
-Skills loaded: <N>
-Starting implementation...
+→ Proceeding to planning phase...
 ```
 
 ---
 
-## Step 3 — Foundation (always first, always in this order)
+## Step 3 — Plan: MVP, phases, tasks, sprints
+
+This is the gate before any code is written. Produce a concrete project plan and get
+user approval before touching the scaffold.
+
+### 3a — Define the MVP
+
+From the inferred feature list, cut to the **smallest shippable version** — the one
+that delivers core value with no extras. Apply these rules:
+
+- Every MVP must have: navigation shell + at least one data-bearing screen
+- Auth is MVP only if the app requires it to function (not if it can work anonymously first)
+- Nice-to-have screens (settings, profile, onboarding, notifications) default to post-MVP
+- No analytics, crash reporting, or push notifications in MVP unless explicitly requested
+
+Print the MVP cut:
+
+```
+MVP SCOPE
+─────────
+IN:
+  ✅ <feature> — <one-line reason>
+  ✅ <feature> — <one-line reason>
+
+OUT (post-MVP):
+  ⏳ <feature> — <one-line reason>
+  ⏳ <feature> — <one-line reason>
+```
+
+### 3b — Phase the full roadmap
+
+Group all features (MVP + post-MVP) into milestones:
+
+```
+ROADMAP
+───────
+Milestone 1 — MVP (target: shippable to testers)
+  <feature list>
+
+Milestone 2 — v1.1
+  <feature list>
+
+Milestone 3 — v2.0 (or "backlog" if timing is unknown)
+  <feature list>
+```
+
+### 3c — Break MVP into tasks
+
+For each MVP feature, produce a task list. Each task is one implementable unit —
+one layer, one screen, one integration. Use this format:
+
+```
+TASKS — <Feature Name>
+──────────────────────
+T-01  Scaffold :feature:<name>:domain / :data / :presenter / :ui modules
+T-02  Define <Name>Contract (State, Intent, Effect)
+T-03  Implement <Name>Repository interface + fake
+T-04  Implement <Name>RepositoryImpl (SQLDelight / Ktor)
+T-05  Implement <Name>ViewModel with MVI
+T-06  Wire Koin bindings in <name>Module.kt
+T-07  Implement <Name>Screen + <Name>Content composables
+T-08  Add route to NavHost
+T-09  Write ViewModel unit tests (happy path, error, loading)
+T-10  Write Roborazzi screenshot tests (all state variants)
+```
+
+Repeat for each MVP feature. Foundation tasks (scaffold, clean-arch, design system,
+CI, code quality) always come first as fixed tasks before any feature tasks.
+
+### 3d — Group tasks into sprints
+
+Group tasks into 1-week sprints. Each sprint should be independently releasable to
+testers if possible. Default sprint capacity: ~8–10 tasks.
+
+```
+SPRINT PLAN
+───────────
+Sprint 1 — Foundation
+  T-F01  Clone kmp-wizard, configure project
+  T-F02  Apply 6-layer clean-arch structure
+  T-F03  Set up Koin DI
+  T-F04  Set up Ktlint + Detekt
+  T-F05  Set up GitHub Actions CI
+  T-F06  Generate design system (AppTheme, tokens, components)
+  T-F07  Set up navigation shell
+
+Sprint 2 — <First feature>
+  T-01 … T-10 for first MVP feature
+
+Sprint 3 — <Second feature>
+  T-01 … T-10 for second MVP feature
+
+...
+
+Sprint N — Polish + QA
+  Screenshot tests across all screens
+  Accessibility pass
+  Roborazzi golden baseline recording
+  Release build + ProGuard validation
+```
+
+### 3e — Gate: wait for approval
+
+Print the full plan (MVP scope + roadmap + task list + sprint plan) and ask:
+
+```
+Does this plan look right?
+  - Adjust MVP scope?
+  - Change milestone grouping?
+  - Add or remove tasks?
+  - Change sprint boundaries?
+
+Confirm to start implementation, or tell me what to change.
+```
+
+**Do not proceed to Step 4 until the user confirms.**
+If the user requests changes, update the plan and re-present it.
+
+---
+
+## Step 4 — Foundation (always first, always in this order)
 
 Run these two before any feature work. They establish the module graph and layer contract
 everything else depends on.
@@ -121,7 +240,7 @@ After each foundation step: run `validate_module_graph.py` and confirm zero erro
 
 ---
 
-## Step 4 — Core infrastructure (if needed)
+## Step 5 — Core infrastructure (if needed)
 
 Only generate what the inferred plan requires. Run each in dependency order:
 
@@ -142,7 +261,7 @@ Skip the remaining rows if not needed by the inferred plan.
 
 ---
 
-## Step 5 — Design system
+## Step 6 — Design system
 
 Always generate the design system before any UI feature — UI layers depend on it.
 
@@ -157,7 +276,7 @@ If the inferred plan has more than 3 screens, also load
 
 ---
 
-## Step 6 — Screen layouts and design
+## Step 7 — Screen layouts and design
 
 Before writing any composable, generate layout docs and wireframes for every screen in
 the inferred plan. Design must be agreed on before implementation starts — changing
@@ -220,9 +339,10 @@ previews) and confirm the slot structure looks right before moving to Step 7.
 
 ---
 
-## Step 7 — Features (in dependency order)
+## Step 8 — Features (MVP sprint order)
 
-For each feature in the inferred plan (F-03 onwards):
+Execute the sprint plan approved in Step 3. Work sprint by sprint, feature by feature.
+For each MVP feature task:
 
 1. **Implement** — load the relevant skill(s), generate all 6 layers:
    - `:model` — data classes, sealed results
@@ -259,7 +379,7 @@ Skills to load per common feature type:
 
 ---
 
-## Step 8 — Run `/kmm-verify`
+## Step 9 — Run `/kmm-verify`
 
 After all features are implemented:
 
@@ -278,7 +398,7 @@ Fix any blockers. Do not mark the project complete until `/kmm-verify` reports `
 
 ---
 
-## Step 9 — Generate agent setup
+## Step 10 — Generate agent setup
 
 After verify passes, generate a `.claude/` directory in the scaffolded project so the team
 gets agent-driven workflows on day one.
@@ -376,7 +496,7 @@ Update `recurring_issues` and `proven_patterns` manually as the project evolves.
 
 ---
 
-## Step 10 — Summary
+## Step 11 — Summary
 
 Print a summary of everything generated:
 
