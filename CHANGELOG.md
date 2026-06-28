@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.8] — 2026-06-28
+
+### Added
+
+- feat(audit): detect god ViewModels and missing feature layer split
+
+---
+
 ## [v1.29.7] — 2026-06-28
 
 ### Added
