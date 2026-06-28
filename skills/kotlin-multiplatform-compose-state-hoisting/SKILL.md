@@ -298,6 +298,56 @@ created on every recomposition and the memoization is lost.
 
 ---
 
+## `@Stable` and `@Immutable` — Compose Stability Annotations
+
+The Compose compiler infers whether a type is **stable** (reads are deterministic and
+Compose is notified of any change) or **unstable** (Compose can't prove this). Composables
+whose parameters are all stable can be **skipped** when the parent recomposes and none of
+the parameters changed.
+
+`data class` parameters that contain only primitives, `String`, and other stable types
+are inferred as stable automatically. Classes with mutable fields, interfaces, or
+non-Compose-aware collections are inferred as **unstable** — which disables skipping for
+every composable that receives them.
+
+Add annotations to opt in explicitly:
+
+```kotlin
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+
+// ✓ @Immutable — all fields are deeply immutable (val + immutable types only)
+@Immutable
+data class ProductCardState(
+    val name: String,
+    val priceFormatted: String,
+    val isFavorite: Boolean,
+)
+
+// ✓ @Stable — fields may include types Compose can't automatically verify
+@Stable
+data class FilterState(
+    val tags: List<String>,     // List<> inferred as unstable without @Stable
+    val sortOrder: SortOrder,
+)
+```
+
+| Annotation | Contract | Use when |
+|---|---|---|
+| `@Immutable` | All public fields are deeply immutable | `data class` with only `val` of primitive / `String` / `@Immutable` types |
+| `@Stable` | Reads are stable; Compose notified of any change | Fields include `List`, `Map`, or other types Compose can't prove are stable |
+| Neither | Compose conservatively marks unstable | When you haven't audited stability yet — add annotations once you know the type is safe |
+
+**Where to apply:**
+- MVI `State` data classes (see `kotlin-multiplatform-mvi`) — the most impactful place
+- Design system types passed down through deep composable trees
+- ViewModel-owned UI model classes that appear as composable parameters
+
+**Do NOT annotate types that genuinely mutate** without notifying Compose — the annotation is
+a contract, and breaking it produces hard-to-debug phantom recompositions.
+
+---
+
 ## When to Stop Hoisting
 
 Not everything belongs in a ViewModel. Over-hoisting creates bloated ViewModels full of
@@ -524,6 +574,8 @@ fun SearchBar(query: String, onQueryChanged: (String) -> Unit) {
 
 - using `derivedStateOf` without `remember` — a new `DerivedState` is created every recomposition and the memoization is lost
 - not using `derivedStateOf` for expensive derived values (filter, sort) — computation runs on every recomposition even when output is unchanged
+- passing a `data class` with `List` or interface fields to a composable without `@Stable` — Compose marks it unstable and recomposes the consumer on every parent recomposition even when the data hasn't changed
+- using `@Immutable` on a class that has mutable fields — breaks the contract; the compiler trusts the annotation and skips recomposition when it should update
 - keeping state internal to avoid "extra parameters" — hides testability problems behind convenience
 - hoisting state higher than the lowest common ancestor — forces unrelated composables to carry state they don't use
 - duplicating state in multiple composables instead of hoisting to a shared ancestor
@@ -559,5 +611,6 @@ Keep snippets small. Use the user's actual composable names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Add @Stable/@Immutable stability annotation section: decision table, where to apply, contract rules. Two new anti-patterns. |
 | 2026-06-28 | Add derivedStateOf section: memoized derived Compose state, decision table (when to use vs plain expression), list-filter example, remember wrapping rule. Two new anti-patterns. |
 | 2026-06-06 | Initial release. |

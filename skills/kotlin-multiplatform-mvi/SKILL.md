@@ -232,6 +232,30 @@ object AuthContract {
 - Always a `data class` — enables `copy()` and structural equality
 - All fields have defaults — the initial state needs no arguments
 - No business objects (domain models) directly in state — map to UI-specific types
+- Annotate `State` with `@Stable` (or `@Immutable` when all fields are truly immutable) so
+  the Compose compiler can skip recomposition of consumers when the reference hasn't changed
+
+```kotlin
+import androidx.compose.runtime.Immutable
+
+@Immutable
+data class State(
+    val email: String = "",
+    val password: String = "",
+    val isLoading: Boolean = false,
+    val error: String? = null,
+)
+```
+
+**`@Stable` vs `@Immutable`:**
+
+| Annotation | Contract | Use when |
+|---|---|---|
+| `@Immutable` | All public fields are deeply immutable (only `val` of immutable types) | `data class` whose fields are primitives, `String`, or other `@Immutable` types |
+| `@Stable` | Reads are stable (same inputs → same outputs) and Compose is notified of changes via snapshot state | Fields include mutable collections or types Compose can't infer stability for |
+
+Without either annotation, the Compose compiler conservatively marks the type as **unstable**
+and recomposes every consumer on every parent recomposition — even when `State` hasn't changed.
 
 **Rules for Intent:**
 - `sealed interface`, not `sealed class` — Kotlin 1.9+ `data object` for no-arg intents
@@ -285,6 +309,7 @@ package GROUP_ID.core.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -327,11 +352,17 @@ abstract class MviViewModel<State : Any, Intent : Any, Effect : Any>(
     private val _effect = Channel<Effect>(Channel.BUFFERED)
     val effect: Flow<Effect> = _effect.receiveAsFlow()
 
+    // Catches uncaught exceptions from handleIntent coroutines; subclasses may override
+    // to update error state instead of crashing silently on KMP targets.
+    protected open val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throw throwable  // rethrow so crash reporters and tests can see it
+    }
+
     /**
      * Called by the UI layer. Routes the intent to [handleIntent] on [viewModelScope].
      */
     fun onIntent(intent: Intent) {
-        viewModelScope.launch { handleIntent(intent) }
+        viewModelScope.launch(exceptionHandler) { handleIntent(intent) }
     }
 
     /**
@@ -628,6 +659,60 @@ SideEffect {
 1. If you need a coroutine → `LaunchedEffect`
 2. If you need guaranteed cleanup (listener, holder, resource) → `DisposableEffect`
 3. If you need to push state out to non-Compose code on every frame → `SideEffect`
+
+---
+
+### `rememberUpdatedState` — latest lambda without restarting the effect
+
+When a `LaunchedEffect` captures a lambda (callback from a parent) that might change
+between recompositions, the effect has two bad options:
+- use the lambda as the key → effect restarts on every callback change (defeats the point)
+- ignore the change → effect calls a stale lambda
+
+`rememberUpdatedState` solves both: it gives the effect a **stable reference** that always
+delegates to the latest value, without restarting the coroutine.
+
+```kotlin
+@Composable
+fun AutoSavingTimer(onAutoSave: () -> Unit) {
+    // ✓ Always reads the latest onAutoSave without restarting the LaunchedEffect
+    val currentOnAutoSave by rememberUpdatedState(onAutoSave)
+
+    LaunchedEffect(Unit) {   // key = Unit — this coroutine never restarts
+        while (true) {
+            delay(30_000)
+            currentOnAutoSave()   // delegates to the latest lambda
+        }
+    }
+}
+```
+
+```kotlin
+// ❌ Without rememberUpdatedState — lambda from parent may be stale after recomposition
+LaunchedEffect(Unit) {
+    while (true) {
+        delay(30_000)
+        onAutoSave()   // captured at launch time, not the latest value
+    }
+}
+
+// ❌ Using the lambda as the key — effect restarts on every parent recomposition
+LaunchedEffect(onAutoSave) {
+    while (true) {
+        delay(30_000)
+        onAutoSave()   // correct value, but the timer resets on every parent recompose
+    }
+}
+```
+
+**When to reach for `rememberUpdatedState`:**
+
+| Situation | Use |
+|---|---|
+| `LaunchedEffect(Unit)` captures a lambda that may change | `rememberUpdatedState(lambda)` |
+| `LaunchedEffect(Unit)` captures a value that may change but shouldn't restart the effect | `rememberUpdatedState(value)` |
+| Effect key already tracks the source of truth (e.g., `LaunchedEffect(viewModel)`) | Not needed — the effect restarts cleanly on key change |
+| The lambda is stable (never reassigned after initial composition) | Not needed |
 
 ---
 
@@ -1273,6 +1358,9 @@ must stay synchronized — see the Shared ViewModel section above for the patter
 - direct repository calls in ViewModel for complex orchestration — if the ViewModel `when` branch needs multiple repos or has business rules, it belongs in a use case, not the ViewModel
 - storing auth status as `isAuthenticated: Boolean` in `State` and navigating on state change — use `SessionViewModel` + a `LaunchedEffect` in `AppNavHost` to guard the entire nav graph; MVI screens should not own auth gate logic
 - using `Effect.NavigateBack` without a clear back-stack contract — always pair it with the correct NavHost `popUpTo` rule; bare `popBackStack()` can leave the user on an authenticated screen after logout
+- not annotating `State` data class with `@Immutable` or `@Stable` — Compose conservatively marks it unstable and recomposes all consumers on every parent recomposition, even when state hasn't changed
+- bare `viewModelScope.launch {}` with no `CoroutineExceptionHandler` — uncaught exceptions from `handleIntent` coroutines are swallowed silently on some KMP targets; override `exceptionHandler` in the ViewModel to surface them as error state
+- reading a changing lambda inside `LaunchedEffect(Unit)` without `rememberUpdatedState` — the effect captures a stale closure and calls the wrong version of the callback; wrap with `val current by rememberUpdatedState(lambda)` and call `current()` inside the loop
 
 If effects are replaying or the state machine is hard to test, audit the above list first.
 If the ViewModel is growing beyond 150–200 lines, apply the decomposition decision table above.
@@ -1305,6 +1393,7 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Add @Stable/@Immutable rule for State types; CoroutineExceptionHandler in MviViewModel base class; rememberUpdatedState section with decision table. Three new anti-patterns.
 | 2026-06-28 | Add multi-source state: combine(), WhileSubscribed(5_000) table, flatMapLatest, snapshotFlow with debounce example. Four new anti-patterns.
 | 2026-06-28 | Add collectAsStateWithLifecycle vs collectAsState rule; LaunchedEffect vs DisposableEffect vs SideEffect decision table; SavedStateHandle + viewModelOf Koin wiring; four new anti-patterns.
 | 2026-06-28 | Add auth gate and back-stack anti-patterns. Two new anti-patterns: storing auth state in MVI State for nav, and Effect.NavigateBack without popUpTo contract. |
