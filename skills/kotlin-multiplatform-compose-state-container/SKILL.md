@@ -370,6 +370,59 @@ var selectedId by savedStateHandle.saveable { mutableStateOf<String?>(null) }
 
 ---
 
+## `derivedStateOf` — Memoized Derived State
+
+When a value is derived from other `State` but changes less frequently than its inputs,
+wrap it in `derivedStateOf` so Compose only recomposes consumers when the derived value
+actually changes.
+
+```kotlin
+// ❌ Recomputes canSubmit on every keystroke — recomposes Button even when result is stable
+val canSubmit = email.isNotBlank() && password.length >= 8
+
+// ✓ derivedStateOf — Button only recomposes when canSubmit flips true ↔ false
+val canSubmit by remember(email, password) {
+    derivedStateOf { email.isNotBlank() && password.length >= 8 }
+}
+```
+
+Always wrap `derivedStateOf` in `remember` — without it, a new `DerivedState` is created
+each recomposition and the memoization is lost.
+
+See `kotlin-multiplatform-compose-state-hoisting` for full decision table and examples.
+
+---
+
+## `snapshotFlow` — Compose State as a Flow
+
+`snapshotFlow` converts Compose `State` into a `Flow` so you can apply coroutine operators
+(debounce, distinctUntilChanged, flatMapLatest) to Compose state changes.
+
+```kotlin
+// Debounce a search field — local Compose state → debounced coroutine → ViewModel intent
+@Composable
+fun SearchBar(onIntent: (SearchContract.Intent) -> Unit) {
+    var query by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { query }
+            .debounce(300)
+            .distinctUntilChanged()
+            .collect { q -> onIntent(SearchContract.Intent.Search(q)) }
+    }
+
+    AppTextField(value = query, onValueChange = { query = it })
+}
+```
+
+| Use `snapshotFlow` when | Avoid it when |
+|---|---|
+| You need to debounce or throttle Compose state changes | The value already comes from a `StateFlow` — collect it normally |
+| You need `distinctUntilChanged` on a Compose state | The transformation is pure — `derivedStateOf` is lighter |
+| Bridging Compose state to analytics, accessibility, or an external SDK | |
+
+---
+
 ## Common Mistakes
 
 **1. `remember` for form data**
@@ -450,6 +503,8 @@ state survival strategy accordingly if cross-platform survival matters.
 
 ## Common Anti-Patterns
 
+- using `derivedStateOf` without `remember` — memoization is lost; wrap every `derivedStateOf` in `remember`
+- reading a `StateFlow` inside `snapshotFlow {}` — collect it with `collectAsState()` first; `snapshotFlow` only tracks Compose `State` objects
 - storing domain objects in `remember` — they don't survive config change and belong in a ViewModel
 - using `rememberSaveable` for large or non-parcelable types without a custom `Saver` — crashes at runtime
 - scoping a ViewModel to the whole NavHost when it belongs to a nested graph — leaks state across features
@@ -486,4 +541,5 @@ Keep the survival matrix reference tight. Map to actual state names when the use
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Add derivedStateOf (memoized derived state, remember rule) and snapshotFlow (Compose State → Flow, debounce bridge) sections. Two new anti-patterns. |
 | 2026-06-06 | Initial release. |

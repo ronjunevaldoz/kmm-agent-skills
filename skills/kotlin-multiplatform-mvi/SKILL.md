@@ -1051,6 +1051,97 @@ fun OnboardingStep1Screen(navController: NavController) {
 
 ---
 
+## Multi-Source State and Flow Operators
+
+### `combine` — merge two or more flows into one State
+
+When a screen's `State` depends on more than one data source, use `combine` to merge
+the flows. The ViewModel then exposes a single `StateFlow<State>` — no separate
+`collect` calls, no manual synchronization.
+
+```kotlin
+class HomeViewModel(
+    private val userRepo: UserRepository,
+    private val feedRepo: FeedRepository,
+) : MviViewModel<HomeContract.State, HomeContract.Intent, HomeContract.Effect>(
+    initialState = HomeContract.State(),
+) {
+    // Derive state from two independent flows
+    val derivedState: StateFlow<HomeContract.State> =
+        combine(userRepo.observeUser(), feedRepo.observeFeed()) { user, feed ->
+            HomeContract.State(
+                userName = user.name,
+                feedItems = feed,
+                isEmpty = feed.isEmpty(),
+            )
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeContract.State())
+}
+```
+
+### `SharingStarted.WhileSubscribed(5_000)` — why 5 000 ms?
+
+| Value | Upstream stops when… | Problem |
+|---|---|---|
+| `Eagerly` | Never | Keeps running even with no collector — wastes battery |
+| `Lazily` | Never (after first subscriber) | Same post-login leak |
+| `WhileSubscribed(5_000)` | 5 s after last collector leaves | Survives rotation (< 1 s); stops after genuine navigation away |
+
+Always use `WhileSubscribed(5_000)` for `stateIn` in ViewModels exposed to the UI.
+
+### `flatMapLatest` — dependent flows (inner depends on outer)
+
+Use `flatMapLatest` when the inner flow must restart every time the outer emits.
+It cancels the running inner coroutine before starting the new one.
+
+```kotlin
+class TeamViewModel(
+    private val memberRepo: MemberRepository,
+    private val selectedTeamId: StateFlow<String>,
+) : ViewModel() {
+
+    // Restarts member observation whenever selected team changes
+    val members: StateFlow<List<Member>> = selectedTeamId
+        .flatMapLatest { teamId -> memberRepo.observeMembers(teamId) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+}
+```
+
+### `snapshotFlow` — convert Compose State to a Flow
+
+`snapshotFlow` reads Compose `State` inside a coroutine and emits whenever the value
+changes. Use it to bridge Compose state into a coroutine for debouncing, analytics,
+or triggering side-effects without polluting the ViewModel with Compose imports.
+
+```kotlin
+// Debounce a search text field — field is Compose State, search is a coroutine
+@Composable
+fun SearchBar(
+    query: String,
+    onIntent: (SearchContract.Intent) -> Unit,
+) {
+    var localQuery by remember { mutableStateOf(query) }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { localQuery }
+            .debounce(300)
+            .distinctUntilChanged()
+            .collect { debouncedQuery ->
+                onIntent(SearchContract.Intent.Search(debouncedQuery))
+            }
+    }
+
+    AppTextField(value = localQuery, onValueChange = { localQuery = it })
+}
+```
+
+**Rules:**
+- `snapshotFlow` only reads `State` declared with `mutableStateOf` / `mutableStateListOf`
+- Do not read a `StateFlow` inside `snapshotFlow` — use `collectAsState()` first, then read the `State`
+- `snapshotFlow` runs in the composition snapshot; avoid side-effects inside the lambda
+
+---
+
 ## ViewModel Size and Decomposition
 
 A ViewModel that grows beyond ~150 lines is a smell. Beyond 300 lines it is a violation —
@@ -1170,6 +1261,10 @@ must stay synchronized — see the Shared ViewModel section above for the patter
 - using `GlobalScope` or bare `CoroutineScope()` in a ViewModel — always use `viewModelScope`
 - calling `onIntent` from inside the ViewModel — `onIntent` is a UI-layer API; call private suspend functions directly
 - using `LaunchedEffect(state.someField)` for effect collection — restarts on every state change; use `LaunchedEffect(viewModel)` instead
+- nesting `collect` inside `collect` for multi-source state — use `combine()` to merge flows into one `StateFlow`
+- using `SharingStarted.Eagerly` or `Lazily` in `stateIn` — upstream never stops after navigation; always use `WhileSubscribed(5_000)`
+- using `flatMap` instead of `flatMapLatest` for dependent flows — the previous inner coroutine keeps running in parallel with the new one
+- reading a `StateFlow` directly inside `snapshotFlow {}` — collect it with `collectAsState()` first, then read the resulting `State` inside the lambda
 - using `collectAsState()` instead of `collectAsStateWithLifecycle()` in production screens — keeps collecting in the background; wastes battery; use `collectAsState()` only in `@Preview`
 - using `LaunchedEffect` when cleanup is needed — if you add a listener or set a holder, use `DisposableEffect` so `onDispose` can remove it
 - using `SideEffect` for coroutines — `SideEffect` is synchronous and has no cancel; use `LaunchedEffect` for any suspend work
@@ -1210,6 +1305,7 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Add multi-source state: combine(), WhileSubscribed(5_000) table, flatMapLatest, snapshotFlow with debounce example. Four new anti-patterns.
 | 2026-06-28 | Add collectAsStateWithLifecycle vs collectAsState rule; LaunchedEffect vs DisposableEffect vs SideEffect decision table; SavedStateHandle + viewModelOf Koin wiring; four new anti-patterns.
 | 2026-06-28 | Add auth gate and back-stack anti-patterns. Two new anti-patterns: storing auth state in MVI State for nav, and Effect.NavigateBack without popUpTo contract. |
 | 2026-06-28 | Add ViewModel size rule, god ViewModel symptoms, use case extraction guide, and ViewModel split patterns. Two new anti-patterns for monolithic ViewModels. |

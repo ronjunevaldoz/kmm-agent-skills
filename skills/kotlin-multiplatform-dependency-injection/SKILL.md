@@ -283,6 +283,47 @@ Do not mix styles randomly. Pick one per project or enforce a clear rule:
 - platform-specific SDK wrappers belong in platform modules
 - inject them through platform-specific modules or `expect/actual` when needed
 
+### Session scope — objects that exist only while the user is logged in
+
+Some objects (authenticated API client, user preferences, per-user cache) must be created
+on login and destroyed on logout. Koin named scopes handle this without polluting the
+app-wide graph with nullable holders.
+
+```kotlin
+// :app — scope definition
+val SESSION_SCOPE_ID = named("user_session")
+
+val sessionModule = module {
+    // Objects that only exist while authenticated
+    scope(SESSION_SCOPE_ID) {
+        scoped { AuthenticatedApiClient(get(), get<UserSession>()) }
+        scoped { UserPreferencesRepository(get<UserSession>().userId, get()) }
+    }
+}
+
+// On login — create the scope with a unique ID
+fun onLoginSuccess(userId: String) {
+    getKoin().createScope("session_$userId", SESSION_SCOPE_ID)
+}
+
+// On logout — close the scope; all scoped objects are destroyed
+fun onLogout(userId: String) {
+    getKoin().getScopeOrNull("session_$userId")?.close()
+}
+
+// Inject from the session scope in a ViewModel
+class ProfileViewModel(
+    private val scope: Scope,   // the session scope
+) : ViewModel() {
+    private val prefs: UserPreferencesRepository by lazy { scope.get() }
+}
+```
+
+**Rules:**
+- Name the scope with a user ID so multiple concurrent sessions (test, multi-account) don't collide
+- Close the scope in `SessionViewModel.onCleared()` or a dedicated logout use case — not in a composable
+- Never use `single {}` for objects that have a logged-in/logged-out lifecycle — they will hold stale state after logout
+
 ---
 
 ## Testing Overrides
@@ -354,5 +395,6 @@ bindings to the actual module names in the repo.
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Add session scope pattern: named Koin scope created on login, closed on logout; rules for auth-gated objects. One new anti-pattern.
 | 2026-06-28 | Add SavedStateHandle + Koin wiring section: viewModelOf preferred form, automatic CreationExtras injection, getStateFlow for back-stack results. Two new anti-patterns. |
 | 2026-06-13 | Initial release. |

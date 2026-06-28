@@ -246,6 +246,58 @@ fun ProfileScreen(viewModel: ProfileViewModel = koinViewModel()) {
 
 ---
 
+## `derivedStateOf` — Memoize Derived Compose State
+
+Use `derivedStateOf` when a computation reads one or more `State` values and you only want
+it to re-run (and trigger recomposition) when the **result** changes, not every time any
+input state ticks.
+
+```kotlin
+// ❌ Recomputes and recomposes on every keystroke, even if canSubmit doesn't change
+@Composable
+fun LoginForm(email: String, password: String, ...) {
+    val canSubmit = email.isNotBlank() && password.length >= 8   // recomputes every recomposition
+    AppButton(enabled = canSubmit, ...) { ... }
+}
+
+// ✓ derivedStateOf — only recomposes the Button when canSubmit actually flips
+@Composable
+fun LoginForm(email: String, password: String, ...) {
+    val canSubmit by remember(email, password) {
+        derivedStateOf { email.isNotBlank() && password.length >= 8 }
+    }
+    AppButton(enabled = canSubmit, ...) { ... }
+}
+```
+
+**When to use `derivedStateOf`:**
+
+| Situation | Use |
+|---|---|
+| Derived value changes less often than inputs (e.g., `isValid` from a text field) | `derivedStateOf` |
+| Derived value changes at the same rate as inputs | Plain expression — `derivedStateOf` adds overhead for no gain |
+| Multiple unrelated states feed one derived value | `derivedStateOf` — avoids redundant recompositions |
+| The expression is expensive (sort, filter a list) | `derivedStateOf` — caches until inputs change |
+
+```kotlin
+// ✓ Filtering a list — only recompose when filteredItems actually changes
+@Composable
+fun ProductList(query: String, products: List<Product>) {
+    val filteredItems by remember(query, products) {
+        derivedStateOf {
+            if (query.isBlank()) products
+            else products.filter { it.name.contains(query, ignoreCase = true) }
+        }
+    }
+    LazyColumn { items(filteredItems) { ProductItem(it) } }
+}
+```
+
+**Rule:** wrap `derivedStateOf` in `remember` — otherwise a new `DerivedState` object is
+created on every recomposition and the memoization is lost.
+
+---
+
 ## When to Stop Hoisting
 
 Not everything belongs in a ViewModel. Over-hoisting creates bloated ViewModels full of
@@ -470,6 +522,8 @@ fun SearchBar(query: String, onQueryChanged: (String) -> Unit) {
 
 ## Common Anti-Patterns
 
+- using `derivedStateOf` without `remember` — a new `DerivedState` is created every recomposition and the memoization is lost
+- not using `derivedStateOf` for expensive derived values (filter, sort) — computation runs on every recomposition even when output is unchanged
 - keeping state internal to avoid "extra parameters" — hides testability problems behind convenience
 - hoisting state higher than the lowest common ancestor — forces unrelated composables to carry state they don't use
 - duplicating state in multiple composables instead of hoisting to a shared ancestor
@@ -505,4 +559,5 @@ Keep snippets small. Use the user's actual composable names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Add derivedStateOf section: memoized derived Compose state, decision table (when to use vs plain expression), list-filter example, remember wrapping rule. Two new anti-patterns. |
 | 2026-06-06 | Initial release. |
