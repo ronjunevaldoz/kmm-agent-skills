@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.24] — 2026-06-29
+
+### Added
+
+- feat(commands): add design token draft step to /kmm-new-project Step 6
+
+---
+
 ## [v1.29.23] — 2026-06-29
 
 ### Added
