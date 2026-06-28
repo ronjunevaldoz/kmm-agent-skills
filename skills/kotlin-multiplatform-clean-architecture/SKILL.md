@@ -321,11 +321,12 @@ interface AppNavigator {
 }
 ```
 
-The `:app` module (or a `:core:navigation` impl module) provides the `AppNavigator`
-implementation that calls the actual NavController:
+The `:app` module provides the `AppNavigator` implementation. Because `AppNavigatorImpl`
+holds a `NavController`, it must be created **after** `rememberNavController()` inside the
+`AppNavHost` composable — it cannot be a Koin singleton.
 
 ```kotlin
-// :app
+// :app — AppNavigatorImpl wraps the live NavController
 class AppNavigatorImpl(private val navController: NavController) : AppNavigator {
     override fun navigateToProfile(userId: String) =
         navController.navigate(ProfileRoute(userId))
@@ -335,13 +336,29 @@ class AppNavigatorImpl(private val navController: NavController) : AppNavigator 
         navController.navigate(HomeRoute) { popUpTo<HomeRoute> { inclusive = true } }
 }
 
-// Koin binding in :app
-single<AppNavigator> { AppNavigatorImpl(get()) }
+// :app — AppNavHost creates the impl and provides it via Koin's LocalKoinScope
+// Do NOT bind AppNavigatorImpl as a Koin single{} — NavController is not available at DI time
+@Composable
+fun AppNavHost() {
+    val navController = rememberNavController()
+    val navigator: AppNavigator = remember(navController) { AppNavigatorImpl(navController) }
+
+    // Override the Koin binding for this composition subtree
+    KoinApplicationContext {
+        modules(module { single<AppNavigator> { navigator } })
+        NavHost(navController = navController, startDestination = HomeRoute) {
+            homeGraph()
+            cartGraph()
+            profileGraph()
+        }
+    }
+}
 ```
 
-The feature `:presenter` injects `AppNavigator` and calls it from `sendEffect` or directly:
+The feature `:presenter` injects `AppNavigator` and calls it directly from `handleIntent`:
 
 ```kotlin
+// :feature:cart:presenter
 class CartViewModel(
     private val navigator: AppNavigator,
     private val repo: CartRepository,
@@ -360,8 +377,10 @@ class CartViewModel(
 
 **Rules:**
 - `AppNavigator` is the single cross-feature navigation surface — one interface, one impl, in `:app`.
-- Within a feature, use NavController directly (it is scoped to the feature's NavHost).
+- `AppNavigatorImpl` must be created inside `AppNavHost` after `rememberNavController()` — never as a Koin `single {}`.
+- Within a feature graph, use navigation lambdas passed from NavHost — not `AppNavigator`.
 - Never pass a `NavController` into a `:presenter` ViewModel — that creates a Compose dependency.
+- Feature `:ui` modules expose `NavGraphBuilder` extensions that accept only lambdas or `AppNavigator`, never `NavController`.
 
 ---
 
@@ -478,6 +497,8 @@ Wire these as CI gates via `kotlin-multiplatform-ci-github-actions`.
 - using raw `String` for domain errors in multi-category failure scenarios — use a `sealed class` in `:model`
 - passing `NavController` into a `:presenter` ViewModel — use `AppNavigator` from `:core:api` instead
 - putting cross-feature shared types in a feature `:model` — shared types belong in `:core:model`
+- binding `AppNavigatorImpl` as a Koin `single {}` — it holds a `NavController` which is only available after `rememberNavController()` inside the `AppNavHost` composable; create it with `remember(navController)` there instead
+- passing `NavController` through a `NavGraphBuilder` extension — extensions receive lambdas or `AppNavigator`, never `NavController` directly
 
 If a layer violation is hard to fix, it usually means a type belongs one layer lower (closer to `:model`).
 
@@ -498,5 +519,6 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Fixed AppNavigator Koin binding: AppNavigatorImpl must be created inside AppNavHost via remember(navController), not as a Koin single{}. Added NavGraphBuilder extension boundary rule and two new anti-patterns. |
 | 2026-06-28 | Added "Layer Weight" section with ViewModel/use-case/data decision tables and thin feature pattern. Updated Recommendation First to lead with start-thin principle. Added: core vs feature split, use case pattern, mapper pattern, typed domain errors, cross-feature navigation. |
 | 2026-06-18 | Initial release. |

@@ -1093,6 +1093,8 @@ must stay synchronized — see the Shared ViewModel section above for the patter
 - using `LaunchedEffect(state.someField)` for effect collection — restarts on every state change; use `LaunchedEffect(viewModel)` instead
 - god ViewModel (400–900+ lines) — all screen logic in one place instead of delegating business operations to use cases; extract any `handleIntent` branch that touches two or more repos into a use case
 - direct repository calls in ViewModel for complex orchestration — if the ViewModel `when` branch needs multiple repos or has business rules, it belongs in a use case, not the ViewModel
+- storing auth status as `isAuthenticated: Boolean` in `State` and navigating on state change — use `SessionViewModel` + a `LaunchedEffect` in `AppNavHost` to guard the entire nav graph; MVI screens should not own auth gate logic
+- using `Effect.NavigateBack` without a clear back-stack contract — always pair it with the correct NavHost `popUpTo` rule; bare `popBackStack()` can leave the user on an authenticated screen after logout
 
 If effects are replaying or the state machine is hard to test, audit the above list first.
 If the ViewModel is growing beyond 150–200 lines, apply the decomposition decision table above.
@@ -1125,6 +1127,7 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
+| 2026-06-28 | Add auth gate and back-stack anti-patterns. Two new anti-patterns: storing auth state in MVI State for nav, and Effect.NavigateBack without popUpTo contract. |
 | 2026-06-28 | Add ViewModel size rule, god ViewModel symptoms, use case extraction guide, and ViewModel split patterns. Two new anti-patterns for monolithic ViewModels. |
 | 2026-06-28 | Added "When NOT to Use MviViewModel" with thin patterns (no-ViewModel, no-Contract). Updated Recommendation First to lead with start-thin principle. Added Nav Args as Initial State, In-flight Cancellation, Typed Errors in State, Shared ViewModel. |
 | 2026-06-06 | Initial release. |
