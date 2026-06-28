@@ -2,6 +2,16 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.18] — 2026-06-29
+
+### Docs
+
+- docs(readme): restore docs-boundary classifier line required by test
+- docs(readme): restore start-here and roadmap markers required by audit
+- docs(readme): simplify README — lead with main use cases, cut diagrams and trigger table
+
+---
+
 ## [v1.29.17] — 2026-06-29
 
 ### Added
