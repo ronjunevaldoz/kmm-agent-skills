@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.21] — 2026-06-29
+
+### Added
+
+- feat(commands): add screen layout and design step to /kmm-new-project
+
+---
+
 ## [v1.29.20] — 2026-06-29
 
 ### Fixed
