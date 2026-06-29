@@ -2,6 +2,15 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.27] — 2026-06-29
+
+### Fixed
+
+- fix(audit): guard _detect_agent_setup to real Gradle projects + fix test for ViewModel data-import exclusion
+- fix(audit): exclude worktrees/ to prevent duplicate findings from .claude/worktrees/
+
+---
+
 ## [v1.29.30] — 2026-06-29
 
 ### Fixed
