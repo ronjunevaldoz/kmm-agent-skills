@@ -287,12 +287,17 @@ class AuditProjectTests(unittest.TestCase):
             root = Path(tmp)
             ui_dir = root / "feature" / "auth" / "ui"
             ui_dir.mkdir(parents=True)
+            # ViewModel file — triggers state/sharedflow checks but NOT data-import (by design)
             (ui_dir / "AuthViewModel.kt").write_text(
                 """
                 _state.value = _state.value.copy(isLoading = true)
                 val flow = MutableSharedFlow<Int>(replay = 1)
-                import foo.bar.data.SecretRepo
                 """.strip(),
+                encoding="utf-8",
+            )
+            # Non-ViewModel UI file — triggers data import check
+            (ui_dir / "AuthScreen.kt").write_text(
+                "import foo.bar.data.SecretRepo",
                 encoding="utf-8",
             )
 

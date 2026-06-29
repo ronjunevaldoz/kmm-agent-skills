@@ -282,6 +282,11 @@ def print_roadmap(root: Path, state: dict, plan: list[dict]) -> None:
 # ── Agent & consumer setup checks ────────────────────────────────────────────
 
 def _detect_agent_setup(root: Path) -> list[str]:
+    # Only meaningful for real Gradle projects; skip bare temp dirs used in unit tests.
+    is_gradle_project = (root / "settings.gradle.kts").exists() or (root / "settings.gradle").exists()
+    if not is_gradle_project:
+        return []
+
     findings: list[str] = []
     claude = root / ".claude"
 
