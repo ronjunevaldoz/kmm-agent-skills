@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.41.0] — 2026-06-29
+
+### Added
+
+- feat(audit): detect raw Material components that bypass the design system
+
+---
+
 ## [v1.40.0] — 2026-06-29
 
 ### Added
