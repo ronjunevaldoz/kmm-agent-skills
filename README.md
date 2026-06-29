@@ -196,6 +196,7 @@ All commands are `kmm-` prefixed so they don't collide with your own `.claude/co
 | `/kmm-audit-adaptive [path]` | Adaptive layout coverage + redundant title check across Compact/Medium/Expanded |
 | `/kmm-verify [path]` | Full pipeline: build, tests, audit, screenshots, design |
 | `/kmm-review-changes` | Review git diff against 6-layer rules and anti-patterns |
+| `/kmm-generate-palette <name=#HEX ...>` | Generate `AppColors.kt` + Compose palette preview from N brand seed colors |
 | `/kmm-fix-design [path]` | Scan and fix design system violations |
 | `/kmm-update-design-system [path]` | Pull latest design system components |
 | `/kmm-record-design-baselines [path]` | Record Roborazzi golden PNGs |
