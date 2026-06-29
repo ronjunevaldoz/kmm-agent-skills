@@ -776,6 +776,104 @@ def _detect_repository_leaks_data_type(root: Path) -> list[str]:
     return findings
 
 
+# ── Raw component bypassing the design system ─────────────────────────────────
+
+# Raw Material/Foundation components that have an App* design-system equivalent.
+_RAW_COMPONENT_MAP = {
+    "Scaffold": "AppScaffold",
+    "TopAppBar": "AppTopAppBar",
+    "CenterAlignedTopAppBar": "AppTopAppBar",
+    "Button": "AppButton",
+    "OutlinedButton": "AppButton",
+    "TextButton": "AppButton",
+    "ElevatedButton": "AppButton",
+    "FilledTonalButton": "AppButton",
+    "Card": "AppCard",
+    "ElevatedCard": "AppCard",
+    "OutlinedCard": "AppCard",
+    "TextField": "AppTextField",
+    "OutlinedTextField": "AppTextField",
+    "AlertDialog": "AppDialog",
+    "ModalBottomSheet": "AppBottomSheet",
+    "IconButton": "AppIconButton",
+    "AssistChip": "AppChip",
+    "FilterChip": "AppChip",
+    "SuggestionChip": "AppChip",
+    "InputChip": "AppChip",
+    "Badge": "AppBadge",
+}
+# Longest names first so e.g. OutlinedButton matches before Button at the same position.
+# Matches both call forms: Component( … ) and the trailing-lambda-only Component { … }.
+_RAW_COMPONENT_RE = re.compile(
+    r"\b(" + "|".join(sorted(map(re.escape, _RAW_COMPONENT_MAP), key=len, reverse=True)) + r")\s*[({]"
+)
+# Markers that a project HAS a design system (so raw components are a bypass, not a choice).
+_DESIGN_SYSTEM_MARKER_RE = re.compile(r"\bAppTheme\b|\bfun\s+App[A-Z]\w*\s*\(")
+# A file that DEFINES App* wrappers — legitimately uses raw primitives internally.
+_APP_WRAPPER_DEF_RE = re.compile(r"\bfun\s+App[A-Z]")
+
+
+def _project_has_design_system(root: Path) -> bool:
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if _DESIGN_SYSTEM_MARKER_RE.search(text):
+            return True
+    return False
+
+
+def _detect_raw_component_bypass(root: Path) -> list[str]:
+    """Flag raw Material/Foundation components used where an App* wrapper exists.
+
+    Only runs when the project HAS a design system (App* components / AppTheme). Files
+    that define App* wrappers, theme/token files, and previews are skipped — they
+    legitimately build on raw primitives. The design-system skill mandates the App*
+    components ('never raw Scaffold'); raw usage elsewhere is a design-system bypass.
+    """
+    if not _project_has_design_system(root):
+        return []
+
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not _is_compose_ui_file(text, path):
+            continue
+        # Skip the design-system definition layer, theme/token files, and previews.
+        if _APP_WRAPPER_DEF_RE.search(text):
+            continue
+        if any(p in path.stem for p in ("Theme", "theme", "Token", "token", "Preview")):
+            continue
+        if "designsystem" in path.as_posix() or "design-system" in path.as_posix():
+            continue
+
+        found: dict[str, str] = {}
+        anchor = None
+        for m in _RAW_COMPONENT_RE.finditer(text):
+            raw = m.group(1)
+            found.setdefault(raw, _RAW_COMPONENT_MAP[raw])
+            if anchor is None:
+                anchor = m
+        if found:
+            line_no, snippet = _at(text, anchor.start())
+            mapping = ", ".join(f"{r}→{a}" for r, a in list(found.items())[:5])
+            findings.append(
+                f"raw component bypass [MEDIUM]: {path.relative_to(root)}:{line_no} "
+                f"— raw components instead of design-system wrappers ({mapping}); use the "
+                f"App* components so styling/tokens stay consistent (see design-system skill)\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
 # ── Redundant title detection ─────────────────────────────────────────────────
 
 # Matches a heading-style text call: AppText/Text with a style that looks like a
@@ -1090,6 +1188,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Repository interface leaking data-layer types ──────────────────────────
     findings.extend(_detect_repository_leaks_data_type(root))
+
+    # ── Raw component bypassing the design system ──────────────────────────────
+    findings.extend(_detect_raw_component_bypass(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))

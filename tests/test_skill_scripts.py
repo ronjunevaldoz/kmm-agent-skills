@@ -836,6 +836,79 @@ class ViewModelInViewModelTests(unittest.TestCase):
             self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
 
 
+class RawComponentBypassTests(unittest.TestCase):
+    def _ds_marker(self, d: Path) -> None:
+        # A file that establishes the project HAS a design system.
+        (d / "AppButton.kt").write_text(
+            "import androidx.compose.runtime.Composable\n"
+            "@Composable\nfun AppButton(onClick: () -> Unit) { BasicText(\"x\") }\n",
+            encoding="utf-8",
+        )
+
+    def test_flags_raw_components_when_design_system_present(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            self._ds_marker(d)
+            (d / "HomeScreen.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\n"
+                "fun HomeScreen() {\n"
+                "    Scaffold {\n"
+                "        Button(onClick = {}) { Text(\"Save\") }\n"
+                "        Card { Text(\"hi\") }\n"
+                "    }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("raw component bypass" in f for f in findings))
+
+    def test_ignores_app_wrapper_definition_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            self._ds_marker(d)
+            # AppCard.kt defines a wrapper and legitimately uses a raw Card internally
+            (d / "AppCard.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun AppCard(content: @Composable () -> Unit) { Card { content() } }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("AppCard.kt" in f and "raw component bypass" in f for f in findings))
+
+    def test_ignores_screen_using_app_components(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            self._ds_marker(d)
+            (d / "GoodScreen.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun GoodScreen() { AppScaffold { AppButton(onClick = {}) {} } }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("GoodScreen.kt" in f and "raw component bypass" in f for f in findings))
+
+    def test_ignores_project_without_design_system(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            # No App* / AppTheme anywhere — raw Material is the project's choice.
+            (d / "HomeScreen.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun HomeScreen() { Scaffold { Button(onClick = {}) {} } }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("raw component bypass" in f for f in findings))
+
+
 class FindingEvidenceTests(unittest.TestCase):
     def test_findings_include_file_line_and_snippet(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
