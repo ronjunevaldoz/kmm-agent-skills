@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.32.1] — 2026-06-29
+
+### Docs
+
+- docs: add kmm-harvest-lessons and kmm-audit-adaptive to README consumer commands table
+
+---
+
 ## [v1.32.0] — 2026-06-29
 
 ### Added
