@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.31.0] — 2026-06-29
+
+### Added
+
+- feat(audit): add redundant-title and adaptive-coverage detectors; new /kmm-audit-adaptive command
+
+---
+
 ## [v1.30.1] — 2026-06-29
 
 ### Docs
