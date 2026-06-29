@@ -771,6 +771,70 @@ class ViewModelInViewModelTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
 
+    def test_flags_viewmodel_held_as_injected_property(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "PropCoordinator.kt").write_text(
+                "class PropCoordinator : MviViewModel<S, I, E>(S()) {\n"
+                "    private val editor: EditorViewModel by inject()\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_flags_viewmodel_instantiated_internally(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "InstCoordinator.kt").write_text(
+                "class InstCoordinator : MviViewModel<S, I, E>(S()) {\n"
+                "    private val editor = EditorViewModel()\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_flags_viewmodel_via_di_generic(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "GenericCoordinator.kt").write_text(
+                "class GenericCoordinator : MviViewModel<S, I, E>(S()) {\n"
+                "    private val editor by inject<EditorViewModel>()\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_ignores_coordinator_holding_state_holder(self) -> None:
+        # The valid Option-2 coordinator holds State Holders + use cases — must NOT flag.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "DashboardCoordinatorViewModel.kt").write_text(
+                "class DashboardCoordinatorViewModel(\n"
+                "    private val saveItem: SaveItemUseCase,\n"
+                "    private val assembler: DashboardStateAssembler,\n"
+                ") : MviViewModel<S, I, E>(S()) {\n"
+                "    private val editor = EditorStateHolder(viewModelScope, saveItem)\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
+
 
 class ViewModelAsComposableParamTests(unittest.TestCase):
     def test_flags_composable_with_required_viewmodel_param(self) -> None:

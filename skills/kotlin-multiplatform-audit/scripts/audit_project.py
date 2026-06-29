@@ -394,8 +394,10 @@ def _detect_design_system_wiring(root: Path) -> list[str]:
 
 # A class that extends a ViewModel base (ViewModel, MviViewModel, BaseViewModel, …).
 # Filename-independent: catches *Presenter.kt, coordinators, *VM.kt, etc.
+# Note: no leading \b before ViewModel — the base may be MviViewModel/BaseViewModel
+# (no word boundary inside the identifier), so we match `…ViewModel` as a suffix.
 _VM_CLASS_DECL_RE = re.compile(
-    r"\bclass\s+\w+[^:{]*:\s*[^{]*\bViewModel\b",
+    r"\bclass\s+\w+[^:{]*:\s*[^{]*ViewModel\b",
     re.DOTALL,
 )
 
@@ -542,10 +544,17 @@ _VM_CLASS_RE = re.compile(
     re.DOTALL,
 )
 _VM_PARAM_RE = re.compile(r":\s*\w*ViewModel\b")
+# A ViewModel held as a property (by inject, by viewModels, type annotation) inside a VM.
+_VM_PROPERTY_RE = re.compile(r"\b(?:val|var)\s+\w+\s*:\s*\w*ViewModel\b")
+# A ViewModel instantiated directly: `= FooViewModel(`
+_VM_INSTANTIATE_RE = re.compile(r"=\s*\w*ViewModel\s*\(")
+# A ViewModel obtained via a DI generic: inject<FooViewModel>() / koinInject<FooViewModel>()
+_VM_INJECT_GENERIC_RE = re.compile(r"\b(?:inject|koinInject|koinViewModel)\s*<\s*\w*ViewModel\b")
 
 
 def _detect_viewmodel_in_viewmodel(root: Path) -> list[str]:
-    """Flag a ViewModel that takes another ViewModel as a constructor parameter.
+    """Flag a ViewModel that depends on another ViewModel — by constructor param,
+    injected property, internal instantiation, or DI generic.
 
     ViewModels are created by ViewModelProvider/factory with their own viewModelScope,
     SavedStateHandle, and CreationExtras — nesting them breaks lifecycle ownership and
@@ -561,22 +570,40 @@ def _detect_viewmodel_in_viewmodel(root: Path) -> list[str]:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
+
+        # The file must define a ViewModel for any of these to be the anti-pattern.
+        if not _is_viewmodel_file(text):
+            continue
+
+        vm_name = path.stem
+        how: str | None = None
+
+        # 1) Constructor param typed *ViewModel (precise — scoped to the ctor block)
         for m in _VM_CLASS_RE.finditer(text):
-            ctor = m.group("ctor")
-            sup = m.group("super")
-            # Only when the class actually IS a ViewModel (extends a VM base)
-            if "ViewModel" not in sup:
-                continue
-            # Look for a constructor param typed `*ViewModel`
-            for param_match in _VM_PARAM_RE.finditer(ctor):
-                # avoid matching the class's own SavedStateHandle etc; param is `: XxxViewModel`
-                findings.append(
-                    f"viewmodel in viewmodel [HIGH]: {path.relative_to(root)} "
-                    f"— {m.group(1)} takes another ViewModel as a constructor param; "
-                    f"demote it to a State Holder (plain class + injected CoroutineScope) "
-                    f"or a use case (see MVI skill → Coordinator ViewModel)"
-                )
-                break  # one finding per class is enough
+            if "ViewModel" in m.group("super") and _VM_PARAM_RE.search(m.group("ctor")):
+                vm_name, how = m.group(1), "a constructor param"
+                break
+
+        # 2) Property / instantiation / DI-generic anywhere in the VM file
+        if how is None:
+            if _VM_PROPERTY_RE.search(text):
+                how = "an injected/declared property"
+            elif _VM_INSTANTIATE_RE.search(text):
+                how = "a directly instantiated property"
+            elif _VM_INJECT_GENERIC_RE.search(text):
+                how = "a DI lookup (inject<…ViewModel>())"
+            if how is not None:
+                cm = re.search(r"\bclass\s+(\w+)", text)
+                if cm:
+                    vm_name = cm.group(1)
+
+        if how is not None:
+            findings.append(
+                f"viewmodel in viewmodel [HIGH]: {path.relative_to(root)} "
+                f"— {vm_name} depends on another ViewModel via {how}; "
+                f"demote it to a State Holder (plain class + injected CoroutineScope) "
+                f"or a use case (see MVI skill → Coordinator ViewModel)"
+            )
     return findings
 
 
