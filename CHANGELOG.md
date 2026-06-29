@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.33.0] — 2026-06-29
+
+### Added
+
+- feat(design-system): add dynamic palette generator with Compose preview output
+
+---
+
 ## [v1.32.1] — 2026-06-29
 
 ### Docs

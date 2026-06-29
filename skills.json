@@ -1,5 +1,5 @@
 {
-  "version": "1.32.1",
+  "version": "1.33.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -824,6 +824,7 @@
         "theme preference setting"
       ],
       "scripts": [
+        "generate_palette.py",
         "scaffold_preview_coverage.py",
         "scan_design_violations.py",
         "update_design_system.py"
