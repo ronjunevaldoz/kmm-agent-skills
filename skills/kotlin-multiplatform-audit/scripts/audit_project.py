@@ -17,6 +17,12 @@ PATTERNS = [
         re.IGNORECASE,
     )),
     ("magic color literal", re.compile(r"\bColor\(0x[0-9A-Fa-f]")),
+    ("named color in ui", re.compile(
+        r"\bColor\.(Black|White|Gray|LightGray|DarkGray|Red|Green|Blue|Yellow|Cyan|Magenta)\b"
+    )),
+    ("hardcoded divider color", re.compile(
+        r"\b(HorizontalDivider|VerticalDivider|Divider)\b[^)]*color\s*=\s*Color\b"
+    )),
     ("system dark theme scatter", re.compile(r"\bisSystemInDarkTheme\(\)")),
     ("hardcoded spacing", re.compile(r"\bpadding\([^)]*[1-9]\d*\.dp")),
     ("livedata in viewmodel", re.compile(r"MutableLiveData|LiveData<")),
@@ -743,6 +749,14 @@ def audit_project(root: Path) -> list[str]:
                 if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
                     continue
                 if any(part in path.stem for part in ("Color", "Token", "Theme", "color", "token", "theme")):
+                    continue
+            if label == "named color in ui":
+                if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+                    continue
+                if any(part in path.stem for part in ("Color", "Token", "Theme", "color", "token", "theme")):
+                    continue
+            if label == "hardcoded divider color":
+                if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
                     continue
             if label == "system dark theme scatter" and any(
                 part in path.stem for part in ("Theme", "theme", "App")

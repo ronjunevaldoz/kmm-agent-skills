@@ -13,7 +13,7 @@ Target project: `$ARGUMENTS` (defaults to `.` if empty)
 python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py "${ARGUMENTS:-.}"
 ```
 
-The script detects 5 architectural smells:
+The script detects architectural and design smells:
 
 | Pattern | What it catches |
 |---|---|
@@ -22,9 +22,13 @@ The script detects 5 architectural smells:
 | `network result in ui` | `NetworkResult<T>` leaking into `:ui` or `:presentation` layer |
 | `data import in ui` | `*.data.*` imported from `:ui` — layer boundary violation |
 | `manual screen capture` | `playwright`, `adb screencap`, `xcrun simctl io` — replace with Roborazzi |
-| `magic color literal` | `Color(0xFF…)` written directly in a composable instead of `AppTheme.colors.X` — design token bypass |
+| `magic color literal` | `Color(0xFF…)` written directly in a composable — dark-mode blind hex color |
+| `named color in ui` | `Color.Black`, `Color.White`, `Color.Gray`, `Color.LightGray` etc. in UI files — static Material colors that don't adapt to dark mode; common in borders and dividers |
+| `hardcoded divider color` | `HorizontalDivider(color = Color.X)` — divider color bypasses the token system |
 | `system dark theme scatter` | `isSystemInDarkTheme()` called inside a composable instead of the theme entry point — dark/light logic scattered |
 | `hardcoded spacing` | `padding(16.dp)` or `padding(horizontal = 8.dp)` in a UI file instead of `AppTheme.spacing.X` — layout inconsistency |
+| `redundant screen title` | `AppTopAppBar` in topBar slot AND heading-style `AppText` in content — title shown twice |
+| `adaptive coverage` | Screen composable missing `windowSizeClass` param while project uses adaptive layout |
 
 ---
 
@@ -69,6 +73,8 @@ For every finding, load the relevant skill and give a concrete fix:
 | `magic color literal` | `design-system` | Replace `Color(0xFF…)` with `AppTheme.colors.X`; define the token in `AppColors.kt` |
 | `system dark theme scatter` | `design-system` | Remove `isSystemInDarkTheme()` from the composable; use a semantic token (`AppTheme.colors.X`) instead |
 | `hardcoded spacing` | `design-system`, `design-system-extended` | Replace `N.dp` with `AppTheme.spacing.X`; load the Screen Layout Contract from the design-system skill |
+| `named color in ui` | `design-system` | Replace `Color.Gray` / `Color.Black` / `Color.White` etc. with `AppTheme.colors.outline` / `AppTheme.colors.onSurface` / `AppTheme.colors.surface` — named Material colors are static and break in dark mode |
+| `hardcoded divider color` | `design-system` | Replace `HorizontalDivider(color = Color.X)` with `HorizontalDivider(color = AppTheme.colors.outline)` or use `AppDivider()` if your design system wraps it |
 | `redundant screen title` | `design-system`, `adaptive-layout` | Remove the heading-style `AppText` from the content body — `AppTopAppBar` already provides the page title |
 | `adaptive coverage` | `adaptive-layout` | Add `windowSizeClass: WindowSizeClass` param; branch layout at Compact / Medium / Expanded; run `/kmm-audit-adaptive` for full breakpoint report |
 

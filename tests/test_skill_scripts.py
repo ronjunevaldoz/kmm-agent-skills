@@ -492,6 +492,66 @@ class AuditProjectTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any("system dark theme scatter" in f for f in findings))
 
+    def test_audit_project_finds_named_color_in_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "Modifier.border(1.dp, Color.Gray)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("named color in ui" in f for f in findings))
+
+    def test_audit_project_ignores_named_color_in_token_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "core" / "designsystem" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "AppColors.kt").write_text(
+                "val gray = Color.Gray",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("named color in ui" in f for f in findings))
+
+    def test_audit_project_ignores_named_color_outside_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "feature" / "home" / "domain" / "src"
+            src_dir.mkdir(parents=True)
+            (src_dir / "HomeUseCase.kt").write_text(
+                "val color = Color.Black",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("named color in ui" in f for f in findings))
+
+    def test_audit_project_finds_hardcoded_divider_color(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeContent.kt").write_text(
+                "HorizontalDivider(color = Color.LightGray)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded divider color" in f for f in findings))
+
+    def test_audit_project_ignores_token_divider(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeContent.kt").write_text(
+                "HorizontalDivider(color = AppTheme.colors.outline)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded divider color" in f for f in findings))
+
 
 class RedundantTitleTests(unittest.TestCase):
     def test_flags_screen_with_topbar_and_heading_text(self) -> None:
