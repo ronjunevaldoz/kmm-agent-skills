@@ -552,6 +552,34 @@ class AuditProjectTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any("hardcoded divider color" in f for f in findings))
 
+    def test_audit_project_finds_color_in_composable_outside_ui_path(self) -> None:
+        # No /ui/ segment, but the file declares @Composable — content detection catches it.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "composeApp" / "src" / "commonMain" / "kotlin" / "home"
+            d.mkdir(parents=True)
+            (d / "HomeScreen.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\n"
+                "fun HomeScreen() { Modifier.border(1.dp, Color.Gray) }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("named color in ui" in f for f in findings))
+
+    def test_audit_project_ignores_color_in_non_compose_outside_ui(self) -> None:
+        # No /ui/ path AND no Compose content — stays skipped (avoids flagging plain constants).
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "core" / "util" / "src"
+            d.mkdir(parents=True)
+            (d / "Constants.kt").write_text(
+                "val brandHex = Color.Gray\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("named color in ui" in f for f in findings))
+
 
 class MultiViewModelScreenTests(unittest.TestCase):
     def test_flags_screen_with_three_or_more_viewmodels(self) -> None:

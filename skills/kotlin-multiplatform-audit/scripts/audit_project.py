@@ -683,6 +683,15 @@ def iter_files(root: Path):
             yield path
 
 
+def _is_compose_ui_file(text: str, path: Path) -> bool:
+    """A file is treated as Compose UI if it declares/imports Compose, OR lives in a
+    conventional UI path. Content detection makes UI smells (hardcoded colors, spacing,
+    dark-theme scatter) fire even when the project does not use a /ui/ module layout."""
+    if "@Composable" in text or "androidx.compose" in text:
+        return True
+    return any(token in path.as_posix() for token in ("/ui/", "/presentation/"))
+
+
 # ── Lesson / positive pattern detection ──────────────────────────────────────
 
 def _detect_positive_patterns(root: Path) -> list[dict]:
@@ -896,39 +905,36 @@ def audit_project(root: Path) -> list[str]:
 
     for path in iter_files(root):
         text = path.read_text(encoding="utf-8", errors="ignore")
+        is_compose = _is_compose_ui_file(text, path)
         for label, pattern in PATTERNS:
-            if label == "network result in ui" and not any(
-                token in path.as_posix() for token in ("/ui/", "/presentation/")
-            ):
+            if label == "network result in ui" and not is_compose:
                 continue
             if label == "data import in ui":
-                in_ui_path = any(token in path.as_posix() for token in ("/ui/", "/presentation/"))
-                is_viewmodel = path.stem.endswith("ViewModel")
-                if not in_ui_path or is_viewmodel:
+                if not is_compose or path.stem.endswith("ViewModel"):
                     continue
             if label == "dto leak to domain" and "/domain/" not in path.as_posix():
                 continue
-            if label == "navcontroller in viewmodel" and "/presenter/" not in path.as_posix():
+            if label == "navcontroller in viewmodel" and not path.stem.endswith("ViewModel"):
                 continue
             if label == "magic color literal":
-                if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+                if not is_compose:
                     continue
                 if any(part in path.stem for part in ("Color", "Token", "Theme", "color", "token", "theme")):
                     continue
             if label == "named color in ui":
-                if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+                if not is_compose:
                     continue
                 if any(part in path.stem for part in ("Color", "Token", "Theme", "color", "token", "theme")):
                     continue
             if label == "hardcoded divider color":
-                if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+                if not is_compose:
                     continue
             if label == "system dark theme scatter" and any(
                 part in path.stem for part in ("Theme", "theme", "App")
             ):
                 continue
             if label == "hardcoded spacing":
-                if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+                if not is_compose:
                     continue
                 if any(part in path.stem for part in ("Spacing", "spacing", "Token", "token", "Theme", "theme")):
                     continue
