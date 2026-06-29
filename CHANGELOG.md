@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.37.2] — 2026-06-29
+
+### Docs
+
+- docs: genericize examples in mvi/navigation skills — remove project-specific names
+
+---
+
 ## [v1.37.1] — 2026-06-29
 
 ### Docs
