@@ -430,6 +430,34 @@ def _detect_feature_split(root: Path) -> str:
     return "no feature layer split detected"
 
 
+_MULTI_VM_RE = re.compile(r'\bkoinViewModel\s*<')
+
+
+def _detect_multi_viewmodel_screen(root: Path) -> list[str]:
+    """Flag Screen composables that instantiate 3+ ViewModels directly.
+
+    Each koinViewModel<>() in a Screen creates tight coupling and makes the
+    screen untestable in isolation.  The fix: move each koinViewModel() into
+    the child composable that actually owns it, or extract a coordinator VM.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*Screen.kt"):
+        if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        count = len(_MULTI_VM_RE.findall(text))
+        if count >= 3:
+            findings.append(
+                f"multi viewmodel screen [MEDIUM]: {path.relative_to(root)} "
+                f"— {count} koinViewModel<> calls; move each into the child composable "
+                f"that owns it, or extract a coordinator ViewModel"
+            )
+    return findings
+
+
 _EXCLUDED_DIRS = {
     "build", ".gradle", ".git", "vendor", "third_party",
     "node_modules", ".idea", ".kotlin", "kotlin-js-store",
@@ -716,6 +744,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Design system wiring ───────────────────────────────────────────────────
     findings.extend(_detect_design_system_wiring(root))
+
+    # ── Multi-ViewModel screen ─────────────────────────────────────────────────
+    findings.extend(_detect_multi_viewmodel_screen(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))

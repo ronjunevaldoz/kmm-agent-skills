@@ -553,6 +553,49 @@ class AuditProjectTests(unittest.TestCase):
             self.assertFalse(any("hardcoded divider color" in f for f in findings))
 
 
+class MultiViewModelScreenTests(unittest.TestCase):
+    def test_flags_screen_with_three_or_more_viewmodels(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "studio" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "StudioScreen.kt").write_text(
+                "val ttiVm = koinViewModel<TextToImageViewModel>()\n"
+                "val img2imgVm = koinViewModel<ImageToImageViewModel>()\n"
+                "val videoVm = koinViewModel<VideoViewModel>()\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("multi viewmodel screen" in f for f in findings))
+
+    def test_ignores_screen_with_two_viewmodels(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "val vm = koinViewModel<HomeViewModel>()\n"
+                "val sharedVm = koinViewModel<SharedViewModel>()\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("multi viewmodel screen" in f for f in findings))
+
+    def test_ignores_viewmodel_file_outside_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "feature" / "studio" / "domain" / "src"
+            src_dir.mkdir(parents=True)
+            (src_dir / "StudioScreen.kt").write_text(
+                "val a = koinViewModel<AViewModel>()\n"
+                "val b = koinViewModel<BViewModel>()\n"
+                "val c = koinViewModel<CViewModel>()\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("multi viewmodel screen" in f for f in findings))
+
+
 class RedundantTitleTests(unittest.TestCase):
     def test_flags_screen_with_topbar_and_heading_text(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

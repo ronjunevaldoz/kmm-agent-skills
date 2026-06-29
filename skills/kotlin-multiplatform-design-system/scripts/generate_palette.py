@@ -450,6 +450,79 @@ private fun SectionLabel(text: String, color: Color) {{
 """
 
 
+# ── Image color extraction ────────────────────────────────────────────────────
+
+def _kmeans(pixels: list[tuple[int, int, int]], k: int, iterations: int = 20) -> list[tuple[int, int, int]]:
+    """Pure-Python k-means — no numpy required."""
+    import random
+    centroids = random.sample(pixels, min(k, len(pixels)))
+    for _ in range(iterations):
+        clusters: list[list[tuple[int, int, int]]] = [[] for _ in range(k)]
+        for px in pixels:
+            dists = [
+                (px[0] - c[0]) ** 2 + (px[1] - c[1]) ** 2 + (px[2] - c[2]) ** 2
+                for c in centroids
+            ]
+            clusters[dists.index(min(dists))].append(px)
+        new_c = []
+        for i, cluster in enumerate(clusters):
+            if cluster:
+                n = len(cluster)
+                new_c.append((
+                    sum(p[0] for p in cluster) // n,
+                    sum(p[1] for p in cluster) // n,
+                    sum(p[2] for p in cluster) // n,
+                ))
+            else:
+                new_c.append(centroids[i])
+        if new_c == centroids:
+            break
+        centroids = new_c
+    return centroids
+
+
+def _filter_near_neutral(colors: list[tuple[int, int, int]], threshold: float = 20.0) -> list[tuple[int, int, int]]:
+    """Remove near-white, near-black, and near-gray clusters (low saturation)."""
+    result = []
+    for r, g, b in colors:
+        _, s, l = rgb_to_hsl(r, g, b)
+        if s >= threshold and 10 <= l <= 90:
+            result.append((r, g, b))
+    return result or colors  # fallback: return all if everything filtered
+
+
+def extract_colors_from_image(image_path: str, n: int = 4) -> list[tuple[int, int, int]]:
+    """Extract N dominant brand colors from an image using PIL + k-means.
+
+    Filters out near-neutral colors (grays, white, black) so the returned
+    palette contains only the most prominent brand hues.
+
+    Requires: pip install Pillow
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        raise SystemExit(
+            "❌  Pillow is required for image color extraction.\n"
+            "    Install with: pip install Pillow\n"
+            "    Or provide colors manually: --brand primary=#HEX --brand accent=#HEX"
+        )
+
+    img = Image.open(image_path).convert("RGB")
+    # Downsample for speed — 120px longest side is plenty for color extraction
+    img.thumbnail((120, 120))
+    pixels = list(img.getdata())
+
+    # Over-cluster then filter neutrals, take top N
+    k_initial = min(n * 3, len(pixels), 24)
+    clusters = _kmeans(pixels, k_initial)
+    brand_clusters = _filter_near_neutral(clusters)
+
+    # Sort by saturation × size-prominence (just saturation here, stable enough)
+    brand_clusters.sort(key=lambda c: rgb_to_hsl(*c)[1], reverse=True)
+    return brand_clusters[:n]
+
+
 # ── CLI ────────────────────────────────────────────────────────────────────────
 
 def parse_brand_args(raw: list[str]) -> dict[str, str]:
@@ -491,8 +564,20 @@ def main() -> None:
         "--brand",
         action="append",
         metavar="name=#HEX",
-        required=True,
-        help="Brand color entry. Repeat for each brand role. E.g. --brand primary=#1E3A5F",
+        default=None,
+        help="Brand color entry. Repeat for each role. E.g. --brand primary=#1E3A5F",
+    )
+    parser.add_argument(
+        "--image",
+        metavar="PATH",
+        help="Extract N dominant brand colors from an image (requires Pillow). "
+             "Use --count to control how many colors to extract.",
+    )
+    parser.add_argument(
+        "--count",
+        type=int,
+        default=4,
+        help="Number of brand colors to extract from --image (default: 4)",
     )
     parser.add_argument(
         "--group-id",
@@ -507,7 +592,27 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    brand_seeds = parse_brand_args(args.brand)
+    if args.image:
+        print(f"Extracting {args.count} dominant colors from {args.image} …")
+        extracted = extract_colors_from_image(args.image, args.count)
+        brand_seeds: dict[str, str] = {}
+        role_names = ["primary", "secondary", "tertiary", "quaternary",
+                      "quinary", "senary", "septenary", "octonary"]
+        for i, (r, g, b) in enumerate(extracted):
+            name = role_names[i] if i < len(role_names) else f"brand{i + 1}"
+            hex_val = rgb_to_hex(r, g, b)
+            brand_seeds[name] = hex_val
+            print(f"  {name}: {hex_val}")
+        print()
+        if args.brand:
+            # Merge: explicit --brand overrides extracted names
+            for entry in args.brand:
+                n, h = entry.split("=", 1)
+                brand_seeds[n.strip().lower()] = h.strip()
+    elif args.brand:
+        brand_seeds = parse_brand_args(args.brand)
+    else:
+        parser.error("Provide --brand name=#HEX or --image path/to/image.png")
     brand_names = list(brand_seeds.keys())
 
     brand_light = {name: derive_family_light(hex_) for name, hex_ in brand_seeds.items()}

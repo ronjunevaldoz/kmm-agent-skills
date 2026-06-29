@@ -9,6 +9,33 @@ Outputs:
 
 ---
 
+## Step 0 — Image input (if an image path or URL is provided)
+
+If `$ARGUMENTS` contains a file path or the user attaches/pastes an image:
+
+1. **Read the image visually** — identify the N most prominent brand hues (ignore near-white,
+   near-black, and near-gray — those are neutrals, not brand colors).
+2. Present a proposed mapping:
+   ```
+   EXTRACTED PALETTE from <filename>:
+     primary   → #1E3A5F  (dominant dark blue)
+     secondary → #E67E22  (accent orange)
+     tertiary  → #2ECC71  (supporting green)
+   
+   Rename any role or drop colors you don't need.
+   Proceed with these? [y] Yes  [e] Edit  [n] Cancel
+   ```
+3. On confirmation, pass extracted colors as `--brand` args to the script (Step 3).
+
+You can also pass an image file directly to the script via `--image`:
+```bash
+python3 generate_palette.py --image design_mockup.png --count 3 --group-id com.example.app
+```
+The script uses PIL (Pillow) for image reading + pure-Python k-means for color extraction.
+If Pillow is not installed: `pip install Pillow`.
+
+---
+
 ## Step 1 — Parse arguments
 
 `$ARGUMENTS` format:
@@ -20,17 +47,19 @@ Examples:
 ```
 /kmm-generate-palette primary=#1E3A5F secondary=#F0F0F0
 /kmm-generate-palette primary=#1E3A5F accent=#E67E22 danger=#E74C3C --group-id com.example.app
+/kmm-generate-palette --image brand_guide.png --count 4
 ```
 
 - Brand entries: `name=#HEX` pairs — **any number, any names you choose**
+- `--image PATH`: extract dominant colors from an image instead of hex input
+- `--count N`: how many colors to extract from the image (default: 4)
 - `--output`: destination directory (default: `src/commonMain/kotlin/<group-id-path>/core/designsystem/`)
 - `--group-id`: Kotlin package prefix (default: read from `build.gradle.kts` or prompt)
 
 If no arguments are given, ask the user:
 ```
 What brand colors does your project use?
-Enter each as  name=#HEX  (e.g. primary=#1E3A5F)
-Separate multiple with spaces.
+Provide hex values (primary=#1E3A5F) or share an image of your brand palette.
 ```
 
 ---

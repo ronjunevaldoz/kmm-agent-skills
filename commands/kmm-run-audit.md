@@ -77,6 +77,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `hardcoded divider color` | `design-system` | Replace `HorizontalDivider(color = Color.X)` with `HorizontalDivider(color = AppTheme.colors.outline)` or use `AppDivider()` if your design system wraps it |
 | `redundant screen title` | `design-system`, `adaptive-layout` | Remove the heading-style `AppText` from the content body — `AppTopAppBar` already provides the page title |
 | `adaptive coverage` | `adaptive-layout` | Add `windowSizeClass: WindowSizeClass` param; branch layout at Compact / Medium / Expanded; run `/kmm-audit-adaptive` for full breakpoint report |
+| `multi viewmodel screen` | `mvi`, `dependency-injection` | Screen instantiates 3+ `koinViewModel<>()` directly — move each into the child composable that owns it, or extract a coordinator ViewModel |
 
 ---
 
