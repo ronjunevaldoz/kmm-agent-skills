@@ -836,6 +836,67 @@ class ViewModelInViewModelTests(unittest.TestCase):
             self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
 
 
+class RepositoryLeakTests(unittest.TestCase):
+    def test_flags_interface_returning_dto(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "user" / "api" / "src"
+            d.mkdir(parents=True)
+            (d / "UserRepository.kt").write_text(
+                "interface UserRepository {\n"
+                "    suspend fun getUser(id: String): UserDto\n"
+                "    fun observeUsers(): Flow<List<UserEntity>>\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("repository leaks data type" in f for f in findings))
+
+    def test_ignores_interface_with_domain_types(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "product" / "api" / "src"
+            d.mkdir(parents=True)
+            (d / "ProductRepository.kt").write_text(
+                "interface ProductRepository {\n"
+                "    suspend fun getProduct(id: String): Product\n"
+                "    fun observeProducts(): Flow<List<Product>>\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("repository leaks data type" in f for f in findings))
+
+    def test_ignores_repository_impl_using_dto_internally(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "product" / "data" / "src"
+            d.mkdir(parents=True)
+            (d / "ProductRepositoryImpl.kt").write_text(
+                "class ProductRepositoryImpl(private val api: ProductApi) : ProductRepository {\n"
+                "    override suspend fun getProduct(id: String): Product {\n"
+                "        val dto: ProductDto = api.fetch(id)\n"
+                "        return dto.toDomain()\n"
+                "    }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("repository leaks data type" in f for f in findings))
+
+    def test_flags_entity_import_in_domain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "user" / "domain" / "src"
+            d.mkdir(parents=True)
+            (d / "GetUser.kt").write_text(
+                "import com.example.data.entity.UserEntity\nclass GetUser {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("dto leak to domain" in f for f in findings))
+
+
 class StringNavigationTests(unittest.TestCase):
     def test_flags_string_routes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

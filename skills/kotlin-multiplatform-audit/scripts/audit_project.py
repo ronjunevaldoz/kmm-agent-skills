@@ -29,7 +29,7 @@ PATTERNS = [
     ("direct state assignment", re.compile(r"_state\.value\s*=")),
     ("globalscope usage", re.compile(r"\bGlobalScope\b")),
     ("navcontroller in viewmodel", re.compile(r"NavController.*ViewModel|ViewModel.*NavController")),
-    ("dto leak to domain", re.compile(r"import .*\.dto\.|@SerialName.*class.*UseCase")),
+    ("dto leak to domain", re.compile(r"import .*\.dto\.|import .*\.entity\.|@SerialName.*class.*UseCase")),
 ]
 
 # ── Roadmap detection ─────────────────────────────────────────────────────────
@@ -697,6 +697,48 @@ def _detect_string_navigation(root: Path) -> list[str]:
     return findings
 
 
+# ── Repository interface leaking data-layer types ─────────────────────────────
+
+_REPO_INTERFACE_RE = re.compile(r"\binterface\s+\w*Repository\b")
+_REPO_CLASS_RE = re.compile(r"\bclass\s+\w*Repository\b")
+# A DTO or DB-entity type referenced by name (UserDto, ProductEntity, …).
+_DATA_TYPE_TOKEN_RE = re.compile(r"\b\w+(?:Dto|Entity)\b")
+
+
+def _detect_repository_leaks_data_type(root: Path) -> list[str]:
+    """Flag a Repository *interface* that mentions DTO or DB-entity types.
+
+    The repository interface belongs in :api and must speak domain types only — DTOs
+    and DB entities never cross the interface boundary (they are mapped in :data). A
+    `*Dto`/`*Entity` anywhere in an interface file is a boundary leak.
+
+    Only interface files are checked — a `*RepositoryImpl` in :data legitimately uses
+    DTOs/entities internally, so files declaring a Repository class are skipped.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not _REPO_INTERFACE_RE.search(text):
+            continue
+        # Skip impl/combined files — the implementation may use DTOs/entities internally.
+        if _REPO_CLASS_RE.search(text):
+            continue
+        leak = _DATA_TYPE_TOKEN_RE.search(text)
+        if leak:
+            findings.append(
+                f"repository leaks data type [MEDIUM]: {path.relative_to(root)} "
+                f"— Repository interface references '{leak.group(0)}'; the interface must "
+                f"speak domain types only. Return domain models (or Result<Domain>) and map "
+                f"DTOs/entities in :data (see repository-pattern skill → Type Mapping)"
+            )
+    return findings
+
+
 # ── Redundant title detection ─────────────────────────────────────────────────
 
 # Matches a heading-style text call: AppText/Text with a style that looks like a
@@ -1006,6 +1048,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── String-based (non-type-safe) navigation ────────────────────────────────
     findings.extend(_detect_string_navigation(root))
+
+    # ── Repository interface leaking data-layer types ──────────────────────────
+    findings.extend(_detect_repository_leaks_data_type(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))

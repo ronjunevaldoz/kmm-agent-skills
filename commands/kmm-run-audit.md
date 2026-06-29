@@ -82,6 +82,8 @@ For every finding, load the relevant skill and give a concrete fix:
 | `viewmodel in viewmodel` | `mvi`, `dependency-injection` | A ViewModel takes another ViewModel as a constructor param — breaks lifecycle/SavedStateHandle/DI; demote the sub-unit to a State Holder (plain class + injected `CoroutineScope`) or a use case |
 | `viewmodel as composable param` | `mvi` | A `@Composable` takes a `*ViewModel` as a required param — use `vm: FooViewModel = koinViewModel()` (defaulted), or split into separate screens (see MVI skill decision order) |
 | `string navigation` | `navigation` | String-based routes (`composable("…")`, `navigate("…")`, `startDestination = "…"`) — switch to `@Serializable` type-safe routes: `composable<Route>`, `navigate(Route)` |
+| `dto leak to domain` | `repository-pattern`, `clean-architecture` | A `:domain` / `*UseCase` file imports `*.dto.*` or `*.entity.*` — map to domain models in `:data`; domain never sees DTOs/entities |
+| `repository leaks data type` | `repository-pattern` | A `*Repository` **interface** references `*Dto` / `*Entity` — the interface must speak domain types only; return domain models and map DTOs/entities in `:data` |
 
 ---
 
