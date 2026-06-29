@@ -244,7 +244,9 @@ Copy the consumer command set to `.claude/commands/`:
 ```
 Consumer commands (safe to install):
   kmm-implement-feature.md      — implement a new feature
-  kmm-run-audit.md              — architecture audit
+  kmm-run-audit.md              — architecture audit + auto skill-gap reporting
+  kmm-harvest-lessons.md        — collect positive patterns; auto-propose GitHub issues
+  kmm-review-changes.md         — review git diff against architecture rules
   kmm-verify.md                 — full validation pipeline
   kmm-execute-ticket.md         — implement a GitHub issue end-to-end
   kmm-fix-design.md             — fix design system violations
@@ -347,7 +349,8 @@ Detected skill set:
   <list of skills matched from libs.versions.toml>
 
 Try it now:
-  /kmm-run-audit                 — check architecture health
+  /kmm-run-audit                 — check architecture health (auto-reports skill gaps)
+  /kmm-harvest-lessons           — collect good patterns; propose GitHub issues upstream
   /kmm-implement-feature <name>  — add a new feature
   /kmm-verify                    — run full validation pipeline
 ```

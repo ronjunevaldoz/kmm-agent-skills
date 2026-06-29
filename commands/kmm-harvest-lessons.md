@@ -162,3 +162,6 @@ DONE — <N> issues submitted, <N> skipped.
 - If running from kmm-agent-skills, the skill paths are relative (`skills/<slug>/SKILL.md`)
 - Lessons from multiple consumer runs accumulate; run harvest on Bytesweep, Graphyn,
   and lordnine-admin to build a full picture before modifying skills
+- **Harvest compares against LOCAL skill files** (`~/.claude/skills/`), not the live GitHub
+  repo. Run `/kmm-update-skills` first to ensure the comparison reflects the latest released
+  skills — otherwise patterns already shipped in a new version may appear as NEW

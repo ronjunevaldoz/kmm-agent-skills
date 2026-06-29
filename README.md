@@ -68,9 +68,44 @@ to the smallest relevant skill set.
 
 ---
 
+## Key Features
+
+### Auto-reporting — consumer side
+Every consumer project running `/kmm-run-audit` or `/kmm-harvest-lessons` can now surface
+issues back to this repo without leaving the terminal:
+
+- `/kmm-run-audit` **Step 7**: detects when a finding points to a *skill gap* (not just bad
+  consumer code) and prompts `[y] Submit / [n] Skip / [v] View draft` — submits via `gh` or
+  falls back to a browser URL
+- `/kmm-harvest-lessons` **Step 6**: after every harvest, each positive pattern that the
+  skills don't yet teach triggers the same interactive prompt to file an improvement proposal
+- Both flows use `draft_issue.py --submit --repo ronjunevaldoz/kmm-agent-skills`
+
+**Who runs it:** the consumer (any project using kmm-agent-skills).
+**Where it goes:** issues land in this repo's GitHub Issues for the skills team to act on.
+
+### Smart versioning — skills-repo side
+`scripts/release.py` now has an `auto` bump mode that reads conventional commits and picks
+the right tier — no more guessing or accumulating patch releases when a `feat` was shipped:
+
+```bash
+python3 scripts/release.py auto           # detects major / minor / patch
+python3 scripts/release.py auto --dry-run # preview first
+```
+
+| Commit type | Bump |
+|---|---|
+| `feat!` or `BREAKING CHANGE` | major |
+| `feat` | minor |
+| `fix`, `chore`, `docs`, `refactor` | patch |
+
+**Who runs it:** only the kmm-agent-skills maintainer when cutting a release.
+
+---
+
 ## Skills
 
-57 skills covering the full KMP stack. Load the smallest set that answers the request.
+58 skills covering the full KMP stack. Load the smallest set that answers the request.
 
 ### Foundation
 - [`feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) — 6-layer module structure, build-logic, TOML catalog, Koin
