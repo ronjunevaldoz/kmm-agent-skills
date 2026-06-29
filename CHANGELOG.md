@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.37.1] — 2026-06-29
+
+### Docs
+
+- docs(navigation): add one-NavHost-+-nested-graphs vs multiple-NavHosts decision table
+
+---
+
 ## [v1.37.0] — 2026-06-29
 
 ### Added
