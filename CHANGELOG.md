@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.36.0] — 2026-06-29
+
+### Added
+
+- feat: detect ViewModel passed as composable param; align finding messages with decision order
+
+---
+
 ## [v1.35.2] — 2026-06-29
 
 ### Docs
