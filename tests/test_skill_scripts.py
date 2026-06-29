@@ -650,6 +650,47 @@ class ViewModelInViewModelTests(unittest.TestCase):
             self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
 
 
+class ViewModelAsComposableParamTests(unittest.TestCase):
+    def test_flags_composable_with_required_viewmodel_param(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "home" / "ui" / "src"
+            d.mkdir(parents=True)
+            (d / "HomeScreen.kt").write_text(
+                "@Composable\n"
+                "fun HomeScreen(studioVm: StudioViewModel, healthVm: HealthViewModel) {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel as composable param" in f for f in findings))
+
+    def test_ignores_defaulted_koinviewmodel_param(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "home" / "ui" / "src"
+            d.mkdir(parents=True)
+            (d / "HomeScreen.kt").write_text(
+                "@Composable\n"
+                "fun HomeScreen(vm: HomeViewModel = koinViewModel()) {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel as composable param" in f for f in findings))
+
+    def test_ignores_content_composable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "home" / "ui" / "src"
+            d.mkdir(parents=True)
+            (d / "HomeContent.kt").write_text(
+                "@Composable\n"
+                "fun HomeContent(state: FooState, onIntent: (FooIntent) -> Unit) {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel as composable param" in f for f in findings))
+
+
 class GodComposableTests(unittest.TestCase):
     def test_flags_screen_with_many_launched_effects(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

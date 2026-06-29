@@ -454,9 +454,55 @@ def _detect_multi_viewmodel_screen(root: Path) -> list[str]:
         if count >= 3:
             findings.append(
                 f"multi viewmodel screen [MEDIUM]: {path.relative_to(root)} "
-                f"— {count} koinViewModel<> calls; move each into the child composable "
-                f"that owns it, or extract a coordinator ViewModel"
+                f"— {count} koinViewModel<> calls; split each feature into its own screen "
+                f"behind a NavHost (one ViewModel per screen), sharing data via a repository "
+                f"(see MVI skill → feature orchestration decision order)"
             )
+    return findings
+
+
+# Matches a @Composable function whose signature has a param typed `*ViewModel`
+# that does NOT have a `= koinViewModel()` default (i.e. the VM is forced in by the caller).
+_COMPOSABLE_FUN_RE = re.compile(
+    r"@Composable\s+(?:private\s+|internal\s+|public\s+)?fun\s+(\w+)\s*\((?P<params>.*?)\)",
+    re.DOTALL,
+)
+_VM_PARAM_NO_DEFAULT_RE = re.compile(
+    r"\b(\w+)\s*:\s*\w*ViewModel\b(?P<after>[^,)]*)"
+)
+
+
+def _detect_viewmodel_as_composable_param(root: Path) -> list[str]:
+    """Flag @Composable functions that receive a ViewModel as a forced parameter.
+
+    A screen should obtain its ViewModel via `vm: FooViewModel = koinViewModel()` (a
+    defaulted param) — never as a required parameter passed down by a parent. A required
+    `*ViewModel` param means the parent is constructing/owning child ViewModels and threading
+    them down: the god-composable shape. The fix is the same decision order: separate screens
+    with their own koinViewModel(), or hoist state (not the VM) into the parent.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for m in _COMPOSABLE_FUN_RE.finditer(text):
+            params = m.group("params")
+            for pm in _VM_PARAM_NO_DEFAULT_RE.finditer(params):
+                after = pm.group("after")
+                # Skip if this param has a koinViewModel()/viewModel() default
+                if "koinViewModel" in after or "= viewModel" in after:
+                    continue
+                findings.append(
+                    f"viewmodel as composable param [MEDIUM]: {path.relative_to(root)} "
+                    f"— @Composable {m.group(1)}(...) takes '{pm.group(1)}: *ViewModel' as a "
+                    f"required param; use 'vm: FooViewModel = koinViewModel()' instead, or split "
+                    f"into separate screens (see MVI skill → feature orchestration decision order)"
+                )
+                break  # one finding per composable
     return findings
 
 
@@ -530,8 +576,9 @@ def _detect_god_composable(root: Path) -> list[str]:
             findings.append(
                 f"god composable [{severity}]: {path.relative_to(root)} "
                 f"— {le_count} LaunchedEffect blocks, {collect_count} effect.collect calls; "
-                f"extract a coordinator ViewModel — move state assembly, effect collection, "
-                f"and persistence into viewModelScope so the screen is just state + onIntent"
+                f"split features into separate screens behind a NavHost (sharing data via a "
+                f"repository), or if they must share one screen, move state assembly + effect "
+                f"collection + persistence into viewModelScope (see MVI skill decision order)"
             )
     return findings
 
@@ -831,6 +878,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── ViewModel taking another ViewModel as a constructor param ──────────────
     findings.extend(_detect_viewmodel_in_viewmodel(root))
+
+    # ── ViewModel passed as a composable parameter ─────────────────────────────
+    findings.extend(_detect_viewmodel_as_composable_param(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))
