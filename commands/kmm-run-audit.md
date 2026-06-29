@@ -81,6 +81,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `god composable` | `mvi` | Screen has 5+ `LaunchedEffect` blocks or 3+ `effect.collect` relays — extract a Coordinator ViewModel; move state assembly, effect collection, and persistence into `viewModelScope` (see MVI skill → Coordinator ViewModel) |
 | `viewmodel in viewmodel` | `mvi`, `dependency-injection` | A ViewModel takes another ViewModel as a constructor param — breaks lifecycle/SavedStateHandle/DI; demote the sub-unit to a State Holder (plain class + injected `CoroutineScope`) or a use case |
 | `viewmodel as composable param` | `mvi` | A `@Composable` takes a `*ViewModel` as a required param — use `vm: FooViewModel = koinViewModel()` (defaulted), or split into separate screens (see MVI skill decision order) |
+| `string navigation` | `navigation` | String-based routes (`composable("…")`, `navigate("…")`, `startDestination = "…"`) — switch to `@Serializable` type-safe routes: `composable<Route>`, `navigate(Route)` |
 
 ---
 

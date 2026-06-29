@@ -652,6 +652,51 @@ _EXCLUDED_DIRS = {
 # Stems that signal a top-level screen/page composable, across naming conventions.
 _SCREEN_STEMS = ("Screen", "Content", "Page", "View", "Route")
 
+# ── String-based (non-type-safe) navigation ───────────────────────────────────
+
+# composable("home") or composable(route = "home") — string route in a NavHost.
+# Type-safe form is composable<Route>{…}, which has no string first arg.
+_STRING_COMPOSABLE_RE = re.compile(r'\bcomposable\s*\(\s*(?:route\s*=\s*)?"')
+# startDestination = "home" — type-safe uses a route object (no quotes).
+_STRING_START_DEST_RE = re.compile(r'\bstartDestination\s*=\s*"')
+# navigate("home") — type-safe uses navigate(Route). A URI (contains "://") is a
+# legitimate deep-link navigation, so those are excluded.
+_STRING_NAVIGATE_RE = re.compile(r'\bnavigate\s*\(\s*"(?![^"]*://)')
+
+
+def _detect_string_navigation(root: Path) -> list[str]:
+    """Flag string-based (non-type-safe) Navigation Compose usage.
+
+    The navigation skill mandates @Serializable type-safe routes
+    (composable<Route>, navigate(Route), startDestination = Route). String routes lose
+    compile-time destination/argument checking. Detected by the string-arg forms; the
+    type-safe forms (which use type params or route objects) never match.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        forms = []
+        if _STRING_COMPOSABLE_RE.search(text):
+            forms.append('composable("…")')
+        if _STRING_START_DEST_RE.search(text):
+            forms.append('startDestination = "…"')
+        if _STRING_NAVIGATE_RE.search(text):
+            forms.append('navigate("…")')
+        if forms:
+            findings.append(
+                f"string navigation [MEDIUM]: {path.relative_to(root)} "
+                f"— string-based routes ({', '.join(forms)}); switch to @Serializable "
+                f"type-safe routes: composable<Route>, navigate(Route), "
+                f"startDestination = Route (see navigation skill → type-safe routes)"
+            )
+    return findings
+
+
 # ── Redundant title detection ─────────────────────────────────────────────────
 
 # Matches a heading-style text call: AppText/Text with a style that looks like a
@@ -958,6 +1003,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── ViewModel passed as a composable parameter ─────────────────────────────
     findings.extend(_detect_viewmodel_as_composable_param(root))
+
+    # ── String-based (non-type-safe) navigation ────────────────────────────────
+    findings.extend(_detect_string_navigation(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))

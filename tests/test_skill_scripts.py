@@ -836,6 +836,52 @@ class ViewModelInViewModelTests(unittest.TestCase):
             self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
 
 
+class StringNavigationTests(unittest.TestCase):
+    def test_flags_string_routes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "AppNavHost.kt").write_text(
+                'NavHost(navController, startDestination = "home") {\n'
+                '    composable("home") { HomeScreen() }\n'
+                '    composable(route = "detail/{id}") { DetailScreen() }\n'
+                '}\n'
+                'fun go() { navController.navigate("home") }\n',
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("string navigation" in f for f in findings))
+
+    def test_ignores_type_safe_routes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "AppNavHost.kt").write_text(
+                'NavHost(navController, startDestination = HomeRoute) {\n'
+                '    composable<HomeRoute> { HomeScreen() }\n'
+                '    composable<DetailRoute> { DetailScreen() }\n'
+                '}\n'
+                'fun go() { navController.navigate(HomeRoute) }\n',
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("string navigation" in f for f in findings))
+
+    def test_ignores_deep_link_uri_navigation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "DeepLink.kt").write_text(
+                'fun open() { navController.navigate("myapp://detail/42") }\n',
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("string navigation" in f for f in findings))
+
+
 class ViewModelAsComposableParamTests(unittest.TestCase):
     def test_flags_composable_with_required_viewmodel_param(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
