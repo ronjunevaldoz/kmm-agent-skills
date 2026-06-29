@@ -191,7 +191,9 @@ All commands are `kmm-` prefixed so they don't collide with your own `.claude/co
 | `/kmm-setup-agents [path]` | Initialize `.claude/` agent setup in an existing project |
 | `/kmm-implement-feature <name>` | Plan → Implement → Validate → Review a feature |
 | `/kmm-execute-ticket <id>` | Implement a GitHub Issue end-to-end |
-| `/kmm-run-audit [path]` | Architecture audit with per-finding remediation |
+| `/kmm-run-audit [path]` | Architecture audit with per-finding remediation + auto skill-gap reporting |
+| `/kmm-harvest-lessons [path]` | Collect positive patterns from consumer project; auto-propose GitHub issues |
+| `/kmm-audit-adaptive [path]` | Adaptive layout coverage + redundant title check across Compact/Medium/Expanded |
 | `/kmm-verify [path]` | Full pipeline: build, tests, audit, screenshots, design |
 | `/kmm-review-changes` | Review git diff against 6-layer rules and anti-patterns |
 | `/kmm-fix-design [path]` | Scan and fix design system violations |
