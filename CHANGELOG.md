@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.37.3] — 2026-06-29
+
+### Fixed
+
+- fix(audit): catch ViewModel-in-ViewModel via property, instantiation, and DI lookup
+
+---
+
 ## [v1.37.2] — 2026-06-29
 
 ### Docs
