@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.32.0] — 2026-06-29
+
+### Added
+
+- feat(audit): detect named color constants and hardcoded divider colors that break dark mode
+
+---
+
 ## [v1.31.0] — 2026-06-29
 
 ### Added
