@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.30.0] — 2026-06-29
+
+### Added
+
+- feat(commands): auto-report skill gaps and lessons as GitHub issues; add release auto-bump
+
+---
+
 ## [v1.29.32] — 2026-06-29
 
 ### Added
