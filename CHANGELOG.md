@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.35.2] — 2026-06-29
+
+### Docs
+
+- docs: lead feature orchestration with separate-screens + NavHost + repository
+
+---
+
 ## [v1.35.1] — 2026-06-29
 
 ### Fixed
