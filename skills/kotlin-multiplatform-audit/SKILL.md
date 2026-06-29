@@ -146,6 +146,17 @@ the user and the other skills what to do next.
 - Complex headers (templates, `std::function`, overloads, exceptions) are wrapped via a
   flat `extern "C"` C-shim, not mapped directly. Full gate: `kotlin-multiplatform-jni-pro`.
 
+### 8) Agent & consumer setup
+- **`CLAUDE.md` missing** → HIGH — no `--system-prompt-file` configured; skills context never loads
+- **`.claude/AGENTS.md` missing** → HIGH — agent has no skill routing, feature table, or module map; run `/kmm-setup-agents`
+- **`.claude/commands/` missing or empty** → MEDIUM — consumer commands (`/kmm-run-audit`, `/kmm-implement-feature`, `/kmm-verify`) not installed
+- **`.claude/skills/` missing or empty** → MEDIUM — skills not deployed; trigger keywords won't activate skill content
+- **`AGENTS.md` covers only one surface of a multi-surface project** → MEDIUM — e.g., engine-only AGENTS.md in a project that also has Studio/UI modules; the active development surface has no routing
+- **`MviViewModel` base class defined in a feature module** → MEDIUM — should live in `:shared:core` or `:core:mvi` so future features can extend it without cross-feature imports
+- **Theme composable wraps `MaterialTheme`** → MEDIUM — blocks custom token ownership and `StyleScope` integration; use `CompositionLocalProvider` with `AppTheme` instead
+- **`darkTheme = false` hardcoded in theme composable** → MEDIUM — system dark mode never applied; replace with `isSystemInDarkTheme()` default
+- **Multiple parallel token files** (`*Tokens.kt`, `*ColorTokens.kt`) with different types (e.g., `ULong` constants vs `Color` values) → LOW — two token systems with no shared access pattern; consolidate under a single `AppColors` data class
+
 ### 7) Skills repo hygiene
 - Ensure every skill has `name`, `description`, and `metadata.last-updated`
 - Ensure trigger guidance is explicit enough to fire in practice
@@ -343,6 +354,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-06-29 | Added section 8 (Agent & Consumer Setup) to audit checklist. Added three new detectors to `audit_project.py`: `_detect_agent_setup` (missing AGENTS.md, commands, skills, CLAUDE.md, single-surface AGENTS.md in multi-surface project), `_detect_mvi_placement` (MviViewModel in feature module instead of shared/core), `_detect_design_system_wiring` (MaterialTheme wrapping, hardcoded darkTheme=false, parallel ULong token files). |
 | 2026-06-24 | Added a skills-version pin guard to governance: `.kmm-skills` must exist and must point at a release tag, not `main` or another mutable ref. |
 | 2026-06-23 | Added "Governance & CI Enforcement" section: governance_check.py, reusable workflow, .kmm-skills version file, threshold guide. |
 | 2026-06-22 | Added "Native / JNI boundary" inspection section (#6): 3rd-party C++ immutability, opaque-handle cleanup, acquire/release pairing, C-shim wrapping — closes the cross-skill enforcement gap for the immutability rule. Hands off to kotlin-multiplatform-jni-pro. |

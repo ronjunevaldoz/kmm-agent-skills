@@ -279,6 +279,106 @@ def print_roadmap(root: Path, state: dict, plan: list[dict]) -> None:
     print()
 
 
+# ── Agent & consumer setup checks ────────────────────────────────────────────
+
+def _detect_agent_setup(root: Path) -> list[str]:
+    findings: list[str] = []
+    claude = root / ".claude"
+
+    if not (root / "CLAUDE.md").exists():
+        findings.append("agent-setup [HIGH]: CLAUDE.md missing — skills context never loads (run /kmm-setup-agents)")
+
+    if not (claude / "AGENTS.md").exists():
+        findings.append("agent-setup [HIGH]: .claude/AGENTS.md missing — no skill routing table (run /kmm-setup-agents)")
+
+    commands_dir = claude / "commands"
+    if not commands_dir.exists() or not any(commands_dir.iterdir()):
+        findings.append("agent-setup [MEDIUM]: .claude/commands/ missing — consumer commands not installed")
+
+    skills_dir = claude / "skills"
+    if not skills_dir.exists() or not any(skills_dir.iterdir()):
+        findings.append("agent-setup [MEDIUM]: .claude/skills/ missing or empty — skills not deployed")
+
+    # Multi-surface project: AGENTS.md exists but only mentions one surface
+    agents_md = claude / "AGENTS.md"
+    if agents_md.exists():
+        text = agents_md.read_text(encoding="utf-8", errors="ignore")
+        settings = root / "settings.gradle.kts"
+        if settings.exists():
+            s = settings.read_text(encoding="utf-8", errors="ignore")
+            has_studio = "studio" in s or "shared" in s
+            has_core   = ":core:" in s or ":native" in s
+            if has_studio and has_core:
+                mentions_studio = "studio" in text.lower() or "shared" in text.lower()
+                mentions_core   = "core" in text.lower() or "native" in text.lower()
+                if not (mentions_studio and mentions_core):
+                    findings.append(
+                        "agent-setup [MEDIUM]: AGENTS.md covers only one surface of a multi-surface project "
+                        "— add routing for the missing surface"
+                    )
+
+    return findings
+
+
+def _detect_mvi_placement(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("MviViewModel.kt"):
+        rel = path.relative_to(root).as_posix()
+        # Flag if it's inside a feature module, not in shared/core
+        if any(seg in rel for seg in ("feature", "studio", "app")) and not any(
+            seg in rel for seg in ("shared/core", "core/mvi", "core/common", ":core:mvi")
+        ):
+            findings.append(
+                f"arch [MEDIUM]: MviViewModel base class in feature module ({rel}) "
+                f"— move to :shared:core or :core:mvi so all features can extend it"
+            )
+    return findings
+
+
+def _detect_design_system_wiring(root: Path) -> list[str]:
+    findings: list[str] = []
+    theme_pattern    = re.compile(r"MaterialTheme\s*\(")
+    dark_hardcoded   = re.compile(r"darkTheme\s*=\s*false")
+    token_file_pattern = re.compile(r"(ULong|Long)\s*=\s*0x[0-9A-Fa-f]{6,}")
+
+    token_files: list[Path] = []
+    for path in root.rglob("*Tokens.kt"):
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if token_file_pattern.search(text):
+            token_files.append(path)
+
+    if len(token_files) >= 2:
+        rel_paths = ", ".join(str(p.relative_to(root)) for p in token_files[:3])
+        findings.append(
+            f"design-system [LOW]: multiple parallel token files with raw ULong constants "
+            f"({rel_paths}) — consolidate under a single AppColors data class"
+        )
+
+    for path in root.rglob("*.kt"):
+        if not any(part in path.stem for part in ("Theme", "theme")):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        rel = path.relative_to(root)
+        if theme_pattern.search(text):
+            findings.append(
+                f"design-system [MEDIUM]: {rel} wraps MaterialTheme — "
+                f"blocks custom token ownership; use CompositionLocalProvider + AppTheme"
+            )
+        if dark_hardcoded.search(text):
+            findings.append(
+                f"design-system [MEDIUM]: {rel} hardcodes darkTheme=false — "
+                f"replace with isSystemInDarkTheme() default"
+            )
+
+    return findings
+
+
 # ── Standard audit ────────────────────────────────────────────────────────────
 
 def _detect_viewmodel_size(root: Path) -> dict:
@@ -327,6 +427,15 @@ def iter_files(root: Path):
 
 def audit_project(root: Path) -> list[str]:
     findings: list[str] = []
+
+    # ── Agent & consumer setup ─────────────────────────────────────────────────
+    findings.extend(_detect_agent_setup(root))
+
+    # ── MVI base class placement ───────────────────────────────────────────────
+    findings.extend(_detect_mvi_placement(root))
+
+    # ── Design system wiring ───────────────────────────────────────────────────
+    findings.extend(_detect_design_system_wiring(root))
 
     # ── ViewModel size check (not regex-detectable, needs line count) ──────────
     vm_info = _detect_viewmodel_size(root)
