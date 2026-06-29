@@ -430,6 +430,81 @@ _EXCLUDED_DIRS = {
     "worktrees",  # .claude/worktrees/ — agent scratch copies of the repo
 }
 
+# ── Redundant title detection ─────────────────────────────────────────────────
+
+# Matches a heading-style text call: AppText/Text with a style that looks like a
+# page-level title (H1/H2/Heading/HeadlineLarge/TitleLarge/DisplaySmall).
+_HEADING_STYLE_RE = re.compile(
+    r"\b(AppText|Text)\s*\([^)]*style\s*=\s*[A-Za-z.]*"
+    r"(?:H1|H2|Heading|HeadlineLarge|TitleLarge|DisplaySmall)\b",
+)
+_TOPBAR_RE = re.compile(r"\b(AppTopAppBar|TopAppBar|CenterAlignedTopAppBar)\b")
+_TOPBAR_SLOT_RE = re.compile(r"\btopBar\s*=\s*\{")
+
+
+def _detect_redundant_title(root: Path) -> list[str]:
+    """Flag Screen/Content files that have a scaffold topBar AND a heading-style
+    Text in the content body — the title is shown twice visually."""
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+            continue
+        if not any(part in path.stem for part in ("Screen", "Content", "Page")):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        has_topbar = _TOPBAR_RE.search(text) and _TOPBAR_SLOT_RE.search(text)
+        has_heading = _HEADING_STYLE_RE.search(text)
+        if has_topbar and has_heading:
+            findings.append(
+                f"redundant screen title [MEDIUM]: {path.relative_to(root)} "
+                f"— AppTopAppBar in topBar slot AND a heading-style Text in content; "
+                f"the title appears twice — remove the in-body heading"
+            )
+    return findings
+
+
+# ── Missing adaptive breakpoint coverage ──────────────────────────────────────
+
+_WINDOW_SIZE_CLASS_RE = re.compile(r"\bWindowSizeClass\b")
+_WINDOW_SIZE_CLASS_PARAM_RE = re.compile(r"windowSizeClass\s*:")
+
+
+def _detect_missing_adaptive_coverage(root: Path) -> list[str]:
+    """If any file in the project uses WindowSizeClass, every Screen composable in
+    a :ui module should accept a windowSizeClass param.  Flag screens that don't."""
+    # First pass — is adaptive layout in use at all?
+    project_uses_adaptive = False
+    for path in root.rglob("*.kt"):
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if _WINDOW_SIZE_CLASS_RE.search(text):
+            project_uses_adaptive = True
+            break
+
+    if not project_uses_adaptive:
+        return []
+
+    findings: list[str] = []
+    for path in root.rglob("*Screen.kt"):
+        if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not _WINDOW_SIZE_CLASS_PARAM_RE.search(text):
+            findings.append(
+                f"adaptive coverage [LOW]: {path.relative_to(root)} "
+                f"— project uses WindowSizeClass but this Screen has no windowSizeClass param; "
+                f"add windowSizeClass: WindowSizeClass and branch layout per breakpoint"
+            )
+    return findings
+
 
 def _is_excluded(path: Path, root: Path) -> bool:
     parts = path.relative_to(root).parts
@@ -635,6 +710,12 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Design system wiring ───────────────────────────────────────────────────
     findings.extend(_detect_design_system_wiring(root))
+
+    # ── Redundant screen title ─────────────────────────────────────────────────
+    findings.extend(_detect_redundant_title(root))
+
+    # ── Missing adaptive breakpoint coverage ───────────────────────────────────
+    findings.extend(_detect_missing_adaptive_coverage(root))
 
     # ── ViewModel size check (not regex-detectable, needs line count) ──────────
     vm_info = _detect_viewmodel_size(root)

@@ -246,6 +246,7 @@ Consumer commands (safe to install):
   kmm-implement-feature.md      — implement a new feature
   kmm-run-audit.md              — architecture audit + auto skill-gap reporting
   kmm-harvest-lessons.md        — collect positive patterns; auto-propose GitHub issues
+  kmm-audit-adaptive.md         — adaptive layout coverage + redundant title check
   kmm-review-changes.md         — review git diff against architecture rules
   kmm-verify.md                 — full validation pipeline
   kmm-execute-ticket.md         — implement a GitHub issue end-to-end

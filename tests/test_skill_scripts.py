@@ -493,6 +493,104 @@ class AuditProjectTests(unittest.TestCase):
             self.assertFalse(any("system dark theme scatter" in f for f in findings))
 
 
+class RedundantTitleTests(unittest.TestCase):
+    def test_flags_screen_with_topbar_and_heading_text(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "fun HomeScreen() {\n"
+                "  AppScaffold(topBar = { AppTopAppBar(title = \"Home\") }) {\n"
+                "    AppText(\"Home\", style = AppTextStyle.HeadlineLarge)\n"
+                "  }\n"
+                "}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("redundant screen title" in f for f in findings))
+
+    def test_ignores_screen_with_only_topbar(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "fun HomeScreen() {\n"
+                "  AppScaffold(topBar = { AppTopAppBar(title = \"Home\") }) {\n"
+                "    AppText(\"Welcome back\", style = AppTextStyle.BodyLarge)\n"
+                "  }\n"
+                "}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("redundant screen title" in f for f in findings))
+
+    def test_ignores_non_screen_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeViewModel.kt").write_text(
+                "fun HomeViewModel() {\n"
+                "  AppScaffold(topBar = { AppTopAppBar(title = \"Home\") }) {\n"
+                "    AppText(\"Home\", style = AppTextStyle.H1)\n"
+                "  }\n"
+                "}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("redundant screen title" in f for f in findings))
+
+
+class AdaptiveCoverageTests(unittest.TestCase):
+    def test_flags_screen_missing_windowsizeclass_when_project_uses_it(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            # One file that uses WindowSizeClass (triggers the check)
+            (ui_dir / "AppRoot.kt").write_text(
+                "val wsc: WindowSizeClass = calculateWindowSizeClass()",
+                encoding="utf-8",
+            )
+            # Screen that doesn't receive it
+            (ui_dir / "HomeScreen.kt").write_text(
+                "fun HomeScreen(onBack: () -> Unit) {}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("adaptive coverage" in f for f in findings))
+
+    def test_ignores_project_without_windowsizeclass(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "fun HomeScreen(onBack: () -> Unit) {}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("adaptive coverage" in f for f in findings))
+
+    def test_ignores_screen_that_has_windowsizeclass_param(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "AppRoot.kt").write_text(
+                "val wsc: WindowSizeClass = calculateWindowSizeClass()",
+                encoding="utf-8",
+            )
+            (ui_dir / "HomeScreen.kt").write_text(
+                "fun HomeScreen(windowSizeClass: WindowSizeClass, onBack: () -> Unit) {}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("adaptive coverage" in f for f in findings))
+
+
 class ScaffoldAuthServiceTests(unittest.TestCase):
     def test_scaffold_auth_service_writes_expected_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
