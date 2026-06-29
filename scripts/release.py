@@ -289,6 +289,36 @@ def get_previous_stable_tag() -> str:
     return ""
 
 
+def detect_bump_type(since_tag: str) -> str:
+    """
+    Infer the correct semver bump from conventional commits since *since_tag*.
+
+    Rules (mirrors the Conventional Commits spec):
+      - Any commit with '!' after the type, or a 'BREAKING CHANGE' footer → major
+      - Any 'feat(...)' or 'feat:' commit                                  → minor
+      - Everything else (fix, chore, docs, refactor, test, build, ci)      → patch
+
+    Falls back to 'patch' if git log cannot be read.
+    """
+    ref = f"{since_tag}..HEAD" if since_tag else "HEAD"
+    result = run(["git", "log", ref, "--pretty=format:%s%n%b"], check=False)
+    if result.returncode != 0 or not result.stdout.strip():
+        return "patch"
+
+    lines = result.stdout.strip().splitlines()
+    has_breaking = any(
+        re.match(r"^[a-z]+(\([^)]+\))?!:", line) or "BREAKING CHANGE" in line
+        for line in lines
+    )
+    has_feat = any(re.match(r"^feat(\([^)]+\))?:", line) for line in lines)
+
+    if has_breaking:
+        return "major"
+    if has_feat:
+        return "minor"
+    return "patch"
+
+
 def get_next_rc_number(base_version: str) -> int:
     """Return the next RC number for the given base version (1-based)."""
     result = run(["git", "tag", "--list", f"v{base_version}-rc.*"], check=False)
@@ -409,8 +439,15 @@ def git_commit_and_tag(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Release kmm-agent-skills")
-    parser.add_argument("bump", choices=["major", "minor", "patch"],
-                        help="Version component to bump")
+    parser.add_argument(
+        "bump",
+        choices=["major", "minor", "patch", "auto"],
+        help=(
+            "Version component to bump. "
+            "'auto' detects from conventional commits: "
+            "feat!/ BREAKING CHANGE → major, feat → minor, fix/chore/docs → patch."
+        ),
+    )
     parser.add_argument("--rc", action="store_true",
                         help="Create a release candidate tag (vX.Y.Z-rc.N) instead of a stable tag")
     parser.add_argument("--dry-run", action="store_true",
@@ -428,7 +465,14 @@ def main() -> int:
     # Determine new base version
     manifest = json.loads(SKILLS_JSON.read_text())
     current_version = manifest["version"]
-    new_base_version = bump_version(current_version, args.bump)
+
+    bump = args.bump
+    if bump == "auto":
+        prev_stable = get_previous_stable_tag()
+        bump = detect_bump_type(prev_stable)
+        info(f"Auto-detected bump: {bump} (based on commits since {prev_stable or 'beginning'})")
+
+    new_base_version = bump_version(current_version, bump)
 
     # Build the full tag string
     if args.rc:

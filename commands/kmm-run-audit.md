@@ -103,3 +103,48 @@ If the user says "fix it", load `agents/fixer.md`.
 
 Apply only HIGH confidence fixes automatically. Present MEDIUM and LOW to the user
 for a decision before touching anything.
+
+---
+
+## Step 7 — Skill gap reporting (automatic)
+
+After presenting findings, check for findings in these categories that indicate a skill
+gap rather than a consumer code problem:
+
+- `agent-setup [HIGH]` — skill doesn't teach setup → reportable
+- `design-system [MEDIUM]` — skill wiring guidance missing/wrong → reportable
+- Any finding whose fix requires guidance not present in the relevant skill → reportable
+
+For each reportable finding, prepare a draft issue:
+
+```
+─────────────────────────────────────────────
+SKILL GAP DETECTED
+Finding:  <finding text>
+Skill:    <skill slug>
+Evidence: <file:line>
+─────────────────────────────────────────────
+Would you like to file a GitHub issue for this?
+The kmm-agent-skills team can improve the skill so future consumers don't hit this.
+
+[y] Submit now   [n] Skip   [v] View draft first
+─────────────────────────────────────────────
+```
+
+If the user says **y** or **v then y**, submit via:
+
+```bash
+python3 ~/.claude/skills/kotlin-multiplatform-audit/scripts/draft_issue.py \
+  --title "Skill gap: <finding summary>" \
+  --evidence "<file:line — <finding text>>" \
+  --recommendation "<fix guidance from Step 4>" \
+  --skill "<skill slug>" \
+  --submit \
+  --repo ronjunevaldoz/kmm-agent-skills
+```
+
+If `gh` is not installed or not authenticated, print the draft body and tell the user
+to open `https://github.com/ronjunevaldoz/kmm-agent-skills/issues/new` manually.
+
+Only report findings that map to a skill gap — do not report consumer architecture
+violations (state copy race, god viewmodel, etc.) as skill issues.

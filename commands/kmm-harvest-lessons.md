@@ -117,6 +117,44 @@ NEXT STEPS:
 
 ---
 
+## Step 6 — Submit lessons as GitHub issues (automatic prompt)
+
+After the final summary, for each actionable lesson (status NEW or ENHANCEMENT), prompt the
+user interactively — one lesson at a time:
+
+```
+─────────────────────────────────────────────────────
+LESSON: <pattern name>  →  <skill slug>
+<description one-liner>
+Evidence: <evidence field>
+
+Would you like to submit this as an improvement proposal?
+[y] Submit   [n] Skip   [v] View draft first
+─────────────────────────────────────────────────────
+```
+
+If the user says **y** or **v then y**, run:
+
+```bash
+python3 ~/.claude/skills/kotlin-multiplatform-audit/scripts/draft_issue.py \
+  --title "Lesson: <pattern name> — <skill slug>" \
+  --evidence "<evidence field from lesson dict>" \
+  --recommendation "<proposed addition summary from Step 4>" \
+  --skill "<skill slug>" \
+  --submit \
+  --repo ronjunevaldoz/kmm-agent-skills
+```
+
+If `gh` is not installed or not authenticated, print the draft body and instruct the user
+to open `https://github.com/ronjunevaldoz/kmm-agent-skills/issues/new` manually.
+
+After all lessons are processed, print:
+```
+DONE — <N> issues submitted, <N> skipped.
+```
+
+---
+
 ## Notes
 
 - This command is read-only — it proposes changes, it does not apply them

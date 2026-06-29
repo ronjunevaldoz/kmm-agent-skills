@@ -58,22 +58,39 @@ Good commit messages → meaningful CHANGELOG entries.
 
 ## Version Bump Decision
 
-| What changed | Bump |
-|---|---|
-| Bug fix, typo, version update, freshness date | `patch` |
-| New skill, new pattern, new reference doc | `minor` |
-| Skill section renamed, schema changed, skill removed | `major` |
+| What changed | Bump | Conventional Commit type |
+|---|---|---|
+| Bug fix, typo, version update, freshness date | `patch` | `fix`, `chore`, `docs`, `refactor`, `test` |
+| New skill, new command, new script, new pattern | `minor` | `feat` |
+| Skill renamed/removed, schema broken, command deleted | `major` | `feat!` or `BREAKING CHANGE` footer |
+
+**Rule:** Multiple small `fix` commits do NOT justify a `minor` bump — only `feat` does.
+**Rule:** Do not accumulate 5+ patch releases in one session without a `minor`. If a session
+adds a new skill or command, that session's release must be `minor`, not a string of patches.
 
 ---
 
 ## Release Commands
 
 ```bash
-python3 scripts/release.py patch --rc      # → vX.Y.Z-rc.1 (or rc.2, rc.3…)
+# Preferred: let the script detect the bump from conventional commits
+python3 scripts/release.py auto            # → detects major/minor/patch from git log
+
+# Manual override (use only when auto gets it wrong)
 python3 scripts/release.py patch           # → vX.Y.Z stable
 python3 scripts/release.py minor           # → vX.(Y+1).0 stable
-python3 scripts/release.py patch --dry-run # preview only
+python3 scripts/release.py major           # → v(X+1).0.0 stable
+
+# Pre-release
+python3 scripts/release.py auto --rc       # → vX.Y.Z-rc.1 (N auto-increments)
+python3 scripts/release.py auto --dry-run  # preview what bump auto would pick
 ```
+
+**`auto` mode logic:**
+- Scans `git log <last-stable-tag>..HEAD` subject + body lines
+- `feat!:` or `BREAKING CHANGE` in any commit → `major`
+- `feat:` or `feat(scope):` in any commit → `minor`
+- Only `fix`/`chore`/`docs`/`refactor`/`test`/`build`/`ci` → `patch`
 
 ---
 
