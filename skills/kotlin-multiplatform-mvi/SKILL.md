@@ -1165,15 +1165,15 @@ coordinator because it feels powerful.**
 #### Option 1 (DEFAULT) — Separate screens + NavHost
 
 **If each feature can be its own screen, make it one.** This is the cleanest decomposition
-and the correct default for tool-like features (a "studio" of generators, a settings hub,
-a dashboard of independent panels). There is no coordinator, no combined state, no relays.
+and the correct default for hub-style apps (a dashboard launching feature screens, a settings
+hub, a set of independent tools). There is no coordinator, no combined state, no relays.
 
 ```kotlin
 // :app navigation — each feature is a route; the host owns nothing
-NavHost(navController, startDestination = StudioRoute) {
-    composable<StudioRoute>      { StudioScreen(onOpen = { navController.navigate(it) }) }
-    composable<TextToImageRoute> { TextToImageScreen() }   // owns its own ViewModel
-    composable<ShortFilmRoute>   { ShortFilmScreen() }     // owns its own ViewModel
+NavHost(navController, startDestination = DashboardRoute) {
+    composable<DashboardRoute> { DashboardScreen(onOpen = { navController.navigate(it) }) }
+    composable<EditorRoute>    { EditorScreen() }   // owns its own ViewModel
+    composable<ImporterRoute>  { ImporterScreen() } // owns its own ViewModel
     // ...
 }
 ```
@@ -1181,10 +1181,10 @@ NavHost(navController, startDestination = StudioRoute) {
 ```kotlin
 // Each feature screen owns exactly ONE ViewModel. No feature imports another's VM.
 @Composable
-fun TextToImageScreen(vm: TextToImageViewModel = koinViewModel()) {
+fun EditorScreen(vm: EditorViewModel = koinViewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     LaunchedEffect(vm) { vm.effect.collect { /* nav + toast only */ } }
-    TextToImageContent(state = state, onIntent = vm::onIntent)
+    EditorContent(state = state, onIntent = vm::onIntent)
 }
 ```
 
@@ -1192,25 +1192,25 @@ fun TextToImageScreen(vm: TextToImageViewModel = koinViewModel()) {
 
 ```kotlin
 // :data — every feature observes and writes this; none know about each other
-interface GenerationRepository {
-    val artifacts: Flow<List<Artifact>>
-    suspend fun save(artifact: Artifact)
+interface ItemRepository {
+    val items: Flow<List<Item>>
+    suspend fun save(item: Item)
 }
 
-class TextToImageViewModel(private val repo: GenerationRepository) : MviViewModel<...> {
-    // writes results via repo.save(...) — never touches Studio
+class EditorViewModel(private val repo: ItemRepository) : MviViewModel<...> {
+    // writes results via repo.save(...) — never touches the dashboard
 }
 
-class StudioViewModel(private val repo: GenerationRepository) : MviViewModel<...> {
+class DashboardViewModel(private val repo: ItemRepository) : MviViewModel<...> {
     // sees every feature's output by observing the repo, not their ViewModels
-    val state = repo.artifacts.map { StudioContract.State(jobs = it) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudioContract.State())
+    val state = repo.items.map { DashboardContract.State(items = it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardContract.State())
 }
 ```
 
-This is what replaces the original `LaunchedEffect { studioVm.onIntent(UpdateGenerations(merged)) }`
-relay: the relay was a symptom of a missing repository. With the repo, Studio's job canvas
-shows generations from every feature without Studio knowing any feature exists.
+This is what replaces a `LaunchedEffect { dashboardVm.onIntent(UpdateItems(merged)) }` relay:
+the relay is a symptom of a missing repository. With the repo, the dashboard shows output from
+every feature without knowing any feature exists.
 
 **Use this when:** features are conceptually separate destinations, even if some share data.
 Sharing data is *not* a reason to merge screens — that is what the repository is for.
@@ -1224,34 +1224,34 @@ machines at once** (a true split-pane editor, not a tab switcher). Each sub-unit
 *State Holder* — a plain class, **not** a `ViewModel` — that receives a `CoroutineScope`.
 
 ```kotlin
-// :feature:studio:presenter — plain class, NOT a ViewModel
-class TextToImageStateHolder(
+// :feature:dashboard:presenter — plain class, NOT a ViewModel
+class EditorStateHolder(
     private val scope: CoroutineScope,             // injected — never its own viewModelScope
-    private val generateImage: GenerateImageUseCase,
+    private val saveItem: SaveItemUseCase,
 ) {
-    private val _state = MutableStateFlow(TextToImageState())
-    val state: StateFlow<TextToImageState> = _state.asStateFlow()
-    fun onIntent(intent: TextToImageIntent) { scope.launch { /* update _state */ } }
+    private val _state = MutableStateFlow(EditorState())
+    val state: StateFlow<EditorState> = _state.asStateFlow()
+    fun onIntent(intent: EditorIntent) { scope.launch { /* update _state */ } }
 }
 
 // The coordinator depends on USE CASES (normal DI), never on ViewModels
-class StudioCoordinatorViewModel(
-    private val generateImage: GenerateImageUseCase,
-    private val assembler: StudioStateAssembler,
-) : MviViewModel<StudioContract.State, StudioContract.Intent, StudioContract.Effect>(
-    initialState = StudioContract.State(),
+class DashboardCoordinatorViewModel(
+    private val saveItem: SaveItemUseCase,
+    private val assembler: DashboardStateAssembler,
+) : MviViewModel<DashboardContract.State, DashboardContract.Intent, DashboardContract.Effect>(
+    initialState = DashboardContract.State(),
 ) {
     // Coordinator owns the holders, created with ITS scope — single lifecycle owner
-    private val tti = TextToImageStateHolder(viewModelScope, generateImage)
+    private val editor = EditorStateHolder(viewModelScope, saveItem)
     // ...
 
-    val state: StateFlow<StudioContract.State> =
-        combine(tti.state, /* ... */) { tti, /* ... */ -> assembler.combine(tti, /* ... */) }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudioContract.State())
+    val state: StateFlow<DashboardContract.State> =
+        combine(editor.state, /* ... */) { editor, /* ... */ -> assembler.combine(editor, /* ... */) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardContract.State())
 
     init { restorePersistedState(); persistOnChanges() }
 
-    override suspend fun handleIntent(intent: StudioContract.Intent) { /* delegates to holders */ }
+    override suspend fun handleIntent(intent: DashboardContract.Intent) { /* delegates to holders */ }
 }
 ```
 
@@ -1280,7 +1280,7 @@ transform, submit) rather than independent state machines.
 - A screen **never** holds 3+ `koinViewModel()` calls — `multi viewmodel screen` finding.
 - A screen **never** has 5+ `LaunchedEffect` blocks or 3+ `effect.collect` relays — `god composable` finding.
 - State Holders are plain classes taking `scope: CoroutineScope`; the coordinator passes its `viewModelScope`. They are never `ViewModel` subclasses and never call `koinViewModel()`.
-- A coordinator depends on **use cases** (regular Koin DI), wired with `viewModelOf(::StudioCoordinatorViewModel)`.
+- A coordinator depends on **use cases** (regular Koin DI), wired with `viewModelOf(::DashboardCoordinatorViewModel)`.
 - State assembly uses `combine(...).stateIn(...)` — never `derivedStateOf` in the composable.
 - Effect collection lives in the ViewModel (`init {}` via `viewModelScope.launch`), never in the screen — the screen keeps exactly one `LaunchedEffect(vm)` for its own nav/toast effects.
 - Extract state-combination into a pure `StateAssembler` object so precedence rules are unit-tested independently of the ViewModel.

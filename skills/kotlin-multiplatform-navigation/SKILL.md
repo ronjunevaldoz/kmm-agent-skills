@@ -234,7 +234,7 @@ NavHost only when two back stacks must be live *at the same time*.
 
 | Situation | Use | Why |
 |---|---|---|
-| Hub → tool → back; sequential flows (e.g. a "studio" of generators) | **One NavHost + nested graph per feature** | Single unified back stack; deep links and `popUpTo` behave predictably; features stay modular |
+| Hub → feature → back; sequential flows (e.g. a dashboard that launches feature screens) | **One NavHost + nested graph per feature** | Single unified back stack; deep links and `popUpTo` behave predictably; features stay modular |
 | A feature owns several screens | **Nested graph** (`navigation<FeatureGraph>{…}`) | Encapsulates the feature; one entry route exposed to the parent |
 | Bottom-navigation tabs that each keep their own history | **Multiple NavHosts** (one per tab) | Each tab needs an independent, concurrent back stack |
 | List-detail / two-pane on large screens | **Multiple NavHosts** (one per pane) | Panes navigate independently and simultaneously |
@@ -245,10 +245,10 @@ transitions break or need manual cross-host coordination. If navigation is seque
 (open a screen, do work, go back), it belongs in **one** NavHost as a nested graph.
 
 ```kotlin
-// ✓ Studio: one NavHost, a nested graph per generation tool, each screen owns its VM
-NavHost(navController, startDestination = StudioRoute) {
-    composable<StudioRoute> { StudioScreen(onOpen = { navController.navigate(it) }) }
-    studioGraph()   // navigation<StudioGraph> { composable<TextToImageRoute>{ TextToImageScreen() } … }
+// ✓ One NavHost, a nested graph per feature, each screen owns its own ViewModel
+NavHost(navController, startDestination = DashboardRoute) {
+    composable<DashboardRoute> { DashboardScreen(onOpen = { navController.navigate(it) }) }
+    featureGraph()   // navigation<FeatureGraph> { composable<EditorRoute>{ EditorScreen() } … }
 }
 ```
 

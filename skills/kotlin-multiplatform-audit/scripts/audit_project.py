@@ -536,7 +536,7 @@ def _detect_viewmodel_as_composable_param(root: Path) -> list[str]:
 
 # Matches ANY class declaration with a primary constructor and a supertype list.
 # The supertype is checked for `ViewModel` separately, so this catches coordinators
-# that extend a VM base without a *ViewModel name (e.g. `class StudioCoordinator(...)`).
+# that extend a VM base without a *ViewModel name (e.g. `class DashboardCoordinator(...)`).
 _VM_CLASS_RE = re.compile(
     r"class\s+(\w+)\s*(?:@\w+(?:\([^)]*\))?\s*)?\((?P<ctor>.*?)\)\s*:\s*(?P<super>[^{]+)",
     re.DOTALL,
