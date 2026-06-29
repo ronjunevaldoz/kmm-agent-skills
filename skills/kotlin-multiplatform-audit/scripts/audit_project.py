@@ -449,6 +449,181 @@ def iter_files(root: Path):
             yield path
 
 
+# ── Lesson / positive pattern detection ──────────────────────────────────────
+
+def _detect_positive_patterns(root: Path) -> list[dict]:
+    """
+    Scan the consumer for patterns that exceed or are absent from current skill guidance.
+    Returns structured lesson candidates for upstreaming.
+    Each entry: { skill, pattern, description, evidence }
+    """
+    lessons: list[dict] = []
+    kt_all = _read_all(root, "*.kt")
+
+    # ── Design system ──────────────────────────────────────────────────────────
+
+    theme_kt = _read_all(root, "*Theme*.kt", "*theme*.kt")
+
+    if "compositionLocalOf<Boolean?>" in theme_kt and "isSystemInDarkTheme()" in theme_kt:
+        lessons.append({
+            "skill": "kotlin-multiplatform-design-system",
+            "pattern": "LocalAppDarkTheme compositionLocalOf<Boolean?> override",
+            "description": (
+                "Consumer defines LocalAppDarkTheme = compositionLocalOf<Boolean?> { null } "
+                "so in-app theme toggles override isSystemInDarkTheme() without changing AppTheme's signature. "
+                "null = follow system, true/false = force. Skill should document this as the canonical override pattern."
+            ),
+            "evidence": "grep -r 'compositionLocalOf<Boolean?>' in *Theme*.kt",
+        })
+
+    if "userPreference" in theme_kt and ("LocalStorage" in theme_kt or "DataStore" in theme_kt or "SharedPreferences" in theme_kt):
+        lessons.append({
+            "skill": "kotlin-multiplatform-design-system",
+            "pattern": "ThemeSettings persistent override with cross-platform storage",
+            "description": (
+                "Consumer persists theme preference via LocalStorage/DataStore into a ThemeSettings object "
+                "backed by mutableStateOf<Boolean?>. Survives app restart. "
+                "Skill should add a 'persisting theme choice' step after LocalAppDarkTheme is wired."
+            ),
+            "evidence": "grep -r 'userPreference' in *Theme*.kt",
+        })
+
+    # currentIsDark() helper
+    if "fun currentIsDark()" in theme_kt or "fun isDark()" in theme_kt:
+        lessons.append({
+            "skill": "kotlin-multiplatform-design-system",
+            "pattern": "currentIsDark() single-call-site helper",
+            "description": (
+                "Consumer wraps the preference-or-system fallback into a @Composable fun currentIsDark(): Boolean. "
+                "Reduces duplication across multiple theme entry points (Android, iOS, Desktop, Web). "
+                "Skill should recommend this helper in multi-platform entry wiring (Step 7)."
+            ),
+            "evidence": "grep -r 'fun currentIsDark' in *Theme*.kt",
+        })
+
+    # ── MVI ───────────────────────────────────────────────────────────────────
+
+    if "BaseViewModel" in kt_all and ("Channel.BUFFERED" in kt_all or "receiveAsFlow()" in kt_all):
+        lessons.append({
+            "skill": "kotlin-multiplatform-mvi",
+            "pattern": "Project-level BaseViewModel wrapping MviViewModel",
+            "description": (
+                "Consumer defines a thin BaseViewModel<S,E,I> that extends MviViewModel from :core, "
+                "adding project-specific defaults (e.g. error handling, logging hooks). "
+                "Skill should mention this as an optional layer between :core:mvi and feature ViewModels."
+            ),
+            "evidence": "grep -r 'class BaseViewModel' in *.kt",
+        })
+
+    if "UNDO_WINDOW_MS" in kt_all or (re.search(r"undoJob.*cancel|cancel.*undoJob", kt_all) and "delay(" in kt_all):
+        lessons.append({
+            "skill": "kotlin-multiplatform-mvi",
+            "pattern": "Timed undo window (soft-delete + cancel)",
+            "description": (
+                "Consumer implements undo via a coroutine Job: on delete intent, schedule actual deletion "
+                "after UNDO_WINDOW_MS delay; an undo intent cancels the Job. "
+                "Skill should add this as a named recipe under 'one-shot delete with undo'."
+            ),
+            "evidence": "grep -r 'UNDO_WINDOW_MS\\|undoJob' in *.kt",
+        })
+
+    # Contract pattern: all three in one sealed object
+    has_intent = re.search(r"sealed (interface|class) Intent", kt_all)
+    has_effect = re.search(r"sealed (interface|class) Effect", kt_all)
+    has_contract_obj = re.search(r"object \w+Contract", kt_all)
+    if has_intent and has_effect and has_contract_obj:
+        lessons.append({
+            "skill": "kotlin-multiplatform-mvi",
+            "pattern": "Contract object groups State + Intent + Effect",
+            "description": (
+                "Consumer colocates State (data class), Intent (sealed interface), and Effect (sealed interface) "
+                "inside a single object FooContract. Improves discoverability vs three separate top-level files. "
+                "Skill already recommends this but should show the grouping as the default."
+            ),
+            "evidence": "grep -r 'object.*Contract' in *.kt",
+        })
+
+    # ── Architecture / structure ───────────────────────────────────────────────
+
+    if (root / "build-logic").exists() and any((root / "build-logic").rglob("*.gradle.kts")):
+        lessons.append({
+            "skill": "kotlin-multiplatform-clean-architecture",
+            "pattern": "build-logic/ convention plugins",
+            "description": (
+                "Consumer uses a build-logic/ includeBuild with convention plugins to centralize AGP/KMP "
+                "configuration across modules. Eliminates copy-paste Gradle config. "
+                "Skill should recommend this pattern for multi-module projects."
+            ),
+            "evidence": "ls build-logic/convention/src/",
+        })
+
+    # FuzzyMatcher for search UX
+    if "FuzzyMatcher" in kt_all or re.search(r"fun fuzzyMatch|levenshtein|editDistance", kt_all, re.IGNORECASE):
+        lessons.append({
+            "skill": "kotlin-multiplatform-clean-architecture",
+            "pattern": "FuzzyMatcher utility for search",
+            "description": (
+                "Consumer ships a FuzzyMatcher (Levenshtein/edit-distance) utility in :core for member/item search. "
+                "Purely platform-agnostic, testable, reusable. "
+                "Skill could mention domain utilities like matchers as candidates for :core:util."
+            ),
+            "evidence": "grep -r 'FuzzyMatcher' in *.kt",
+        })
+
+    # ── CI ────────────────────────────────────────────────────────────────────
+
+    if _has(root, ".github/workflows/governance.yml", ".github/workflows/governance.yaml"):
+        lessons.append({
+            "skill": "kotlin-multiplatform-ci-github-actions",
+            "pattern": "governance.yml quality gate",
+            "description": (
+                "Consumer has a separate governance.yml workflow (distinct from build/test) "
+                "that enforces merge rules, code ownership, or audit checks. "
+                "Skill should add governance workflow as an optional CI step."
+            ),
+            "evidence": "ls .github/workflows/governance.yml",
+        })
+
+    # Multi-surface deployment (separate deploy workflows per target)
+    deploy_workflows = list((root / ".github" / "workflows").glob("deploy-*.yml")) if (root / ".github" / "workflows").exists() else []
+    if len(deploy_workflows) >= 2:
+        lessons.append({
+            "skill": "kotlin-multiplatform-ci-github-actions",
+            "pattern": "Per-surface deploy workflows (deploy-web.yml, deploy-image.yml, …)",
+            "description": (
+                f"Consumer has {len(deploy_workflows)} separate deploy-*.yml workflows, one per deployment surface. "
+                "Keeps CI graphs readable and allows surface-specific secrets/environments. "
+                "Skill should recommend this split for multi-surface KMP projects."
+            ),
+            "evidence": f"ls .github/workflows/deploy-*.yml  ({len(deploy_workflows)} found)",
+        })
+
+    # ── Agent setup ───────────────────────────────────────────────────────────
+
+    claude = root / ".claude"
+    if (claude / "AGENTS.md").exists() and (claude / "commands").exists() and (root / "CLAUDE.md").exists():
+        lessons.append({
+            "skill": "kotlin-multiplatform-audit",
+            "pattern": "Full agent setup (CLAUDE.md + AGENTS.md + commands)",
+            "description": (
+                "Consumer has all three agent setup artifacts in place. "
+                "This project is a good reference for what the /kmm-setup-agents command should produce."
+            ),
+            "evidence": "ls CLAUDE.md .claude/AGENTS.md .claude/commands/",
+        })
+
+    return lessons
+
+
+def harvest_project(root: Path) -> dict:
+    """Return findings + positive lessons as a structured dict (for --harvest JSON output)."""
+    return {
+        "project": str(root),
+        "findings": audit_project(root),
+        "lessons": _detect_positive_patterns(root),
+    }
+
+
 def audit_project(root: Path) -> list[str]:
     findings: list[str] = []
 
@@ -504,12 +679,19 @@ def audit_project(root: Path) -> list[str]:
 
 
 def main() -> int:
+    import json as _json
+
     parser = argparse.ArgumentParser(description="KMP architecture audit and adoption roadmap.")
     parser.add_argument("project_root", type=Path, help="Path to the KMP project root")
     parser.add_argument(
         "--roadmap",
         action="store_true",
         help="Output a prioritized adoption plan instead of violation findings",
+    )
+    parser.add_argument(
+        "--harvest",
+        action="store_true",
+        help="Output findings + positive lessons as JSON for upstreaming to skills",
     )
     args = parser.parse_args()
 
@@ -520,6 +702,13 @@ def main() -> int:
         plan  = build_roadmap(state)
         print_roadmap(root, state, plan)
         return 1 if plan else 0
+
+    if args.harvest:
+        result = harvest_project(root)
+        print(_json.dumps(result, indent=2))
+        # Exit 1 if there are HIGH findings (so CI can gate on it)
+        has_high = any("[HIGH]" in f or "[HIGH]:" in f for f in result["findings"])
+        return 1 if has_high else 0
 
     findings = audit_project(root)
 

@@ -2,6 +2,16 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.31] — 2026-06-29
+
+### Added
+
+- feat(audit): `--harvest` mode in `audit_project.py` — outputs `{ findings, lessons }` JSON; detects 12 positive patterns consumers can upstream to skills (LocalAppDarkTheme, ThemeSettings persistence, currentIsDark(), BaseViewModel wrapper, timed undo window, Contract grouping, build-logic plugins, FuzzyMatcher, governance.yml, per-surface deploy workflows, agent setup)
+- feat(commands): `/kmm-harvest-lessons` command — reads harvest JSON, checks each lesson against the target skill, and outputs actionable skill-update proposals with suggested section text
+- feat(audit): `harvest_project(root)` public function for use in tests and future tooling
+
+---
+
 ## [v1.29.30] — 2026-06-29
 
 ### Fixed

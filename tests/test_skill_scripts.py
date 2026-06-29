@@ -2612,5 +2612,76 @@ class ProfileContentScreenshotTest {
         self.assertIsInstance(parsed, list)
 
 
+class HarvestProjectTests(unittest.TestCase):
+    """Tests for --harvest mode and _detect_positive_patterns."""
+
+    def test_harvest_returns_findings_and_lessons_keys(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result = audit_scripts.harvest_project(root)
+            self.assertIn("project", result)
+            self.assertIn("findings", result)
+            self.assertIn("lessons", result)
+            self.assertIsInstance(result["findings"], list)
+            self.assertIsInstance(result["lessons"], list)
+
+    def test_harvest_detects_local_app_dark_theme_pattern(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "AppTheme.kt").write_text(
+                "val LocalAppDarkTheme = compositionLocalOf<Boolean?> { null }\n"
+                "fun isDark(): Boolean = LocalAppDarkTheme.current ?: isSystemInDarkTheme()\n",
+                encoding="utf-8",
+            )
+            lessons = audit_scripts._detect_positive_patterns(root)
+            patterns = [l["pattern"] for l in lessons]
+            self.assertTrue(
+                any("LocalAppDarkTheme" in p for p in patterns),
+                f"Expected LocalAppDarkTheme lesson, got: {patterns}",
+            )
+
+    def test_harvest_detects_undo_window_pattern(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "FooViewModel.kt").write_text(
+                "private const val UNDO_WINDOW_MS = 4500L\n"
+                "private var undoJob: Job? = null\n",
+                encoding="utf-8",
+            )
+            lessons = audit_scripts._detect_positive_patterns(root)
+            patterns = [l["pattern"] for l in lessons]
+            self.assertTrue(
+                any("undo" in p.lower() for p in patterns),
+                f"Expected undo-window lesson, got: {patterns}",
+            )
+
+    def test_harvest_detects_build_logic_pattern(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_logic = root / "build-logic" / "convention"
+            build_logic.mkdir(parents=True)
+            (build_logic / "build.gradle.kts").write_text("plugins { `kotlin-dsl` }", encoding="utf-8")
+            lessons = audit_scripts._detect_positive_patterns(root)
+            patterns = [l["pattern"] for l in lessons]
+            self.assertTrue(
+                any("build-logic" in p.lower() for p in patterns),
+                f"Expected build-logic lesson, got: {patterns}",
+            )
+
+    def test_harvest_cli_outputs_json(self) -> None:
+        import subprocess, json as _json
+        with tempfile.TemporaryDirectory() as tmp:
+            audit_script = REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_project.py"
+            result = subprocess.run(
+                ["python3", str(audit_script), "--harvest", tmp],
+                capture_output=True,
+                text=True,
+            )
+            self.assertIn(result.returncode, (0, 1), "harvest should exit 0 or 1 only")
+            parsed = _json.loads(result.stdout)
+            self.assertIn("findings", parsed)
+            self.assertIn("lessons", parsed)
+
+
 if __name__ == "__main__":
     unittest.main()

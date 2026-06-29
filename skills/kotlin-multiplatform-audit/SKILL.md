@@ -313,8 +313,13 @@ python3 ../kmm-agent-skills/skills/kotlin-multiplatform-audit/scripts/governance
   `.kmm-skills` for version pinning, fails on missing or mutable pins, and exits non-zero
   on findings at or above the threshold.
   Used by the reusable workflow at `.github/workflows/kmm-audit.yml`.
-- `scripts/audit_project.py` — runs a lightweight scan for a few common KMP architecture
+- `scripts/audit_project.py` — runs a lightweight scan for common KMP architecture
   smells such as effect replay bugs, state copy races, and obvious UI/data boundary leaks.
+  Supports three modes:
+  - default — prints `FINDINGS:` list, exits 1 if any found
+  - `--roadmap` — prints a prioritized adoption plan
+  - `--harvest` — prints JSON `{ findings, lessons }` where `lessons` are positive patterns
+    the consumer does right that could be upstreamed to skills (run `/kmm-harvest-lessons`)
 - `scripts/validate_module_graph.py` — checks an existing project’s feature module layout and
   requires a preview stub for each `*Content.kt` in `:feature:*:ui`.
 - `scripts/audit_skills_repo.py` — checks the skills repo for metadata, freshness, scripts,
