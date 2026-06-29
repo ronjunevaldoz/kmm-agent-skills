@@ -41,6 +41,21 @@ metadata:
     - open source library
 ---
 
+**Trigger keywords:** publish KMP library, Maven Central, publish library, maven-publish,
+vanniktech, mavenPublishing, OSSRH, Sonatype, GitHub Packages library, BOM, bill of materials,
+binary compatibility, apiCheck, apiDump, api dump, kotlinx-binary-compatibility-validator,
+SNAPSHOT library, library release, distribute KMP, KMP library publishing, artifactId, groupId,
+POM metadata, GPG signing library, library consumers, multiplatform library, open source KMP,
+library versioning, staging repository, Central Portal
+
+**Freshness rule:** vanniktech plugin releases frequently; check
+[github.com/vanniktech/gradle-maven-publish-plugin/releases](https://github.com/vanniktech/gradle-maven-publish-plugin/releases)
+and `SonatypeHost.CENTRAL_PORTAL` vs `SonatypeHost.S01` before wiring.
+`binary-compatibility-validator` and `dokka` also track Kotlin releases closely —
+verify versions in `libs.versions.toml` against the latest Kotlin version in the project.
+
+---
+
 ## When to Use This Skill
 
 Use when:
@@ -463,3 +478,11 @@ The release CI should run both publish tasks in the same workflow run when a tag
 | Consumer can't resolve SNAPSHOT | Must add OSSRH snapshot repo: `maven("https://s01.oss.sonatype.org/content/repositories/snapshots")` |
 | `signAllPublications()` fails locally | Set `signing.*` properties in `~/.gradle/gradle.properties`, not in the project |
 | Missing `scm` block in POM | Maven Central validation rejects POMs without SCM — always include it |
+
+---
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| 2026-06-29 | Initial skill — vanniktech plugin, BOM, binary-compat-validator, SNAPSHOT/stable, GPG, GitHub Packages |
