@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.42.0] — 2026-06-29
+
+### Added
+
+- feat(audit): detect fixed widths that overflow a compact phone
+
+---
+
 ## [v1.41.0] — 2026-06-29
 
 ### Added
