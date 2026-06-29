@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.37.0] — 2026-06-29
+
+### Added
+
+- feat(audit): harden detectors against alternate naming and domain-path assumptions
+
+---
+
 ## [v1.36.2] — 2026-06-29
 
 ### Fixed
