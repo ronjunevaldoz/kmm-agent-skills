@@ -50,7 +50,10 @@ typography system, spacing tokens, custom button style, Material3 alternative,
 app theme setup, brand colors, design token system, custom typography,
 redesign, visual consistency, UI consistency, design consistency, page design,
 screen design, UI look and feel, consistent styling, style guide, branding,
-component library, theming, color palette, visual identity.
+component library, theming, color palette, visual identity,
+dark mode toggle, in-app theme override, user theme preference, theme settings,
+LocalAppDarkTheme, isSystemInDarkTheme, system dark mode, follow system theme,
+dynamic theme, runtime theme switch, light dark switch, theme preference setting.
 
 **Freshness rule:** `@ExperimentalStylesApi` is experimental and the Compose Styles API
 changes between CMP releases — recheck the Compose docs before upgrading.

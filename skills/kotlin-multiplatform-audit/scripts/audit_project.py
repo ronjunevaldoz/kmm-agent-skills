@@ -419,9 +419,27 @@ def _detect_feature_split(root: Path) -> str:
     return "no feature layer split detected"
 
 
+_EXCLUDED_DIRS = {
+    "build", ".gradle", ".git", "vendor", "third_party",
+    "node_modules", ".idea", ".kotlin", "kotlin-js-store",
+}
+
+
+def _is_excluded(path: Path, root: Path) -> bool:
+    parts = path.relative_to(root).parts
+    return any(
+        part in _EXCLUDED_DIRS or part.endswith(".cpp")  # excludes llama.cpp/, stable-diffusion.cpp/ submodules
+        for part in parts
+    )
+
+
 def iter_files(root: Path):
     for path in root.rglob("*"):
-        if path.is_file() and path.suffix in {".kt", ".kts", ".md"}:
+        if not path.is_file():
+            continue
+        if _is_excluded(path, root):
+            continue
+        if path.suffix in {".kt", ".kts"}:
             yield path
 
 
@@ -450,10 +468,11 @@ def audit_project(root: Path) -> list[str]:
                 token in path.as_posix() for token in ("/ui/", "/presentation/")
             ):
                 continue
-            if label == "data import in ui" and not any(
-                token in path.as_posix() for token in ("/ui/", "/presentation/")
-            ):
-                continue
+            if label == "data import in ui":
+                in_ui_path = any(token in path.as_posix() for token in ("/ui/", "/presentation/"))
+                is_viewmodel = path.stem.endswith("ViewModel")
+                if not in_ui_path or is_viewmodel:
+                    continue
             if label == "dto leak to domain" and "/domain/" not in path.as_posix():
                 continue
             if label == "navcontroller in viewmodel" and "/presenter/" not in path.as_posix():
