@@ -93,6 +93,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `dto leak to domain` | `repository-pattern`, `clean-architecture` | A `:domain` / `*UseCase` file imports `*.dto.*` or `*.entity.*` — map to domain models in `:data`; domain never sees DTOs/entities |
 | `repository leaks data type` | `repository-pattern` | A `*Repository` **interface** references `*Dto` / `*Entity` — the interface must speak domain types only; return domain models and map DTOs/entities in `:data` |
 | `raw component bypass` | `design-system`, `design-system-extended` | A screen uses raw Material components (`Scaffold`, `Button`, `Card`, `TextField`, …) while the project has a design system — use the `App*` wrappers (`AppScaffold`, `AppButton`, …) so tokens stay consistent |
+| `fixed width overflow` | `adaptive-layout` | A fixed `.width(≥360.dp)` / `.size(≥360.dp)` or constraint-ignoring `.requiredWidth(…)` overflows a compact phone — use `fillMaxWidth()`, `weight()`, or `widthIn(max = …)`. For true "compact enough" verification, render at 360×800 via Roborazzi and run `/kmm-audit-screenshots` |
 
 ---
 

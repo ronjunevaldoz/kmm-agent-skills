@@ -839,7 +839,7 @@ def _detect_raw_component_bypass(root: Path) -> list[str]:
 
     findings: list[str] = []
     for path in root.rglob("*.kt"):
-        if _is_excluded(path, root):
+        if _is_excluded(path, root) or _is_test_source(path):
             continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
@@ -869,6 +869,59 @@ def _detect_raw_component_bypass(root: Path) -> list[str]:
                 f"raw component bypass [MEDIUM]: {path.relative_to(root)}:{line_no} "
                 f"— raw components instead of design-system wrappers ({mapping}); use the "
                 f"App* components so styling/tokens stay consistent (see design-system skill)\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
+# ── Fixed width that overflows a compact phone ────────────────────────────────
+
+# Fixed width/size in dp — overflows a compact phone (~360.dp) when >= threshold.
+_FIXED_WIDTH_RE = re.compile(r"\.(width|size)\s*\(\s*(\d+)\s*\.dp")
+# requiredWidth/requiredSize IGNORE incoming constraints — overflow risk at lower values.
+_REQUIRED_SIZE_RE = re.compile(r"\.(requiredWidth|requiredSize)\s*\(\s*(\d+)\s*\.dp")
+_COMPACT_WIDTH_DP = 360   # standard compact-phone width
+_REQUIRED_OVERFLOW_DP = 200
+
+
+def _detect_fixed_width_overflow(root: Path) -> list[str]:
+    """Flag fixed widths likely to overflow a compact phone.
+
+    'Compact enough' is ultimately a rendered property (see Roborazzi at 360x800), but a
+    fixed `.width(360.dp)` / `.size(360.dp)` or a constraint-ignoring `.requiredWidth(…)`
+    is a reliable static correlate of a non-responsive layout. The fix is `fillMaxWidth()`,
+    `weight()`, or `widthIn(max = …)` so the layout adapts to the available width.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not _is_compose_ui_file(text, path):
+            continue
+        if any(p in path.stem for p in ("Theme", "theme", "Token", "token")):
+            continue
+
+        hit = None
+        for m in _FIXED_WIDTH_RE.finditer(text):
+            if int(m.group(2)) >= _COMPACT_WIDTH_DP:
+                hit = (m, f".{m.group(1)}({m.group(2)}.dp) ≥ {_COMPACT_WIDTH_DP}.dp")
+                break
+        if hit is None:
+            for m in _REQUIRED_SIZE_RE.finditer(text):
+                if int(m.group(2)) >= _REQUIRED_OVERFLOW_DP:
+                    hit = (m, f".{m.group(1)}({m.group(2)}.dp) ignores parent constraints")
+                    break
+        if hit:
+            m, why = hit
+            line_no, snippet = _at(text, m.start())
+            findings.append(
+                f"fixed width overflow [LOW]: {path.relative_to(root)}:{line_no} "
+                f"— {why}; this overflows a compact phone — use fillMaxWidth(), weight(), "
+                f"or widthIn(max = …) so the layout adapts (see adaptive-layout skill)\n"
                 f"    {line_no} | {snippet}"
             )
     return findings
@@ -963,6 +1016,22 @@ def _is_excluded(path: Path, root: Path) -> bool:
         part in _EXCLUDED_DIRS or part.endswith(".cpp")  # excludes llama.cpp/, stable-diffusion.cpp/ submodules
         for part in parts
     )
+
+
+_TEST_DIR_TOKENS = (
+    "/test/", "/commontest/", "/jvmtest/", "/androidtest/", "/androidunittest/",
+    "/androidinstrumentedtest/", "/iostest/", "/desktoptest/", "/unittest/", "/nativetest/",
+)
+
+
+def _is_test_source(path: Path) -> bool:
+    """True for test source sets / test files. Production-UI smells (raw components,
+    fixed widths) should not fire on test fixtures — screenshot tests set fixed canvas
+    sizes and use raw components in capture blocks intentionally."""
+    p = path.as_posix().lower()
+    if any(t in p for t in _TEST_DIR_TOKENS):
+        return True
+    return path.stem.endswith("Test") or path.stem.endswith("Spec")
 
 
 def iter_files(root: Path):
@@ -1191,6 +1260,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Raw component bypassing the design system ──────────────────────────────
     findings.extend(_detect_raw_component_bypass(root))
+
+    # ── Fixed width that overflows a compact phone ─────────────────────────────
+    findings.extend(_detect_fixed_width_overflow(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))

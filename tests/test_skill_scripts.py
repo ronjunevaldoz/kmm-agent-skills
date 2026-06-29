@@ -836,6 +836,47 @@ class ViewModelInViewModelTests(unittest.TestCase):
             self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
 
 
+class FixedWidthOverflowTests(unittest.TestCase):
+    def test_flags_large_fixed_width(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "S.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun S() { Box(Modifier.width(400.dp)) }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("fixed width overflow" in f for f in findings))
+
+    def test_flags_required_width(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "S.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun S() { Card(Modifier.requiredWidth(300.dp)) }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("fixed width overflow" in f for f in findings))
+
+    def test_ignores_small_and_responsive_widths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "S.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun S() { Box(Modifier.width(48.dp).fillMaxWidth()) }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("fixed width overflow" in f for f in findings))
+
+
 class RawComponentBypassTests(unittest.TestCase):
     def _ds_marker(self, d: Path) -> None:
         # A file that establishes the project HAS a design system.
