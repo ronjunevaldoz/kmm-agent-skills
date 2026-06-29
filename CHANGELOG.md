@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.30.1] — 2026-06-29
+
+### Docs
+
+- docs: feature auto-reporting + smart versioning in README; add harvest-lessons to consumer setup
+
+---
+
 ## [v1.30.0] — 2026-06-29
 
 ### Added
