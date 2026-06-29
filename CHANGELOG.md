@@ -2,20 +2,13 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
-## [v1.29.27] — 2026-06-29
-
-### Fixed
-
-- fix(audit): guard _detect_agent_setup to real Gradle projects + fix test for ViewModel data-import exclusion
-- fix(audit): exclude worktrees/ to prevent duplicate findings from .claude/worktrees/
-
----
-
 ## [v1.29.30] — 2026-06-29
 
 ### Fixed
 
 - fix(audit): exclude `worktrees/` directory from `_EXCLUDED_DIRS` — prevents `.claude/worktrees/` agent scratch copies from being scanned, which was causing duplicate findings (same violation reported 5-6× for a single real file)
+- fix(audit): guard `_detect_agent_setup` to real Gradle projects — empty temp dirs in unit tests no longer trigger agent-setup findings
+- fix(audit): `test_audit_project_finds_smells` now uses a separate `AuthScreen.kt` for the data-import assertion (ViewModels are correctly excluded from that check)
 
 ---
 
