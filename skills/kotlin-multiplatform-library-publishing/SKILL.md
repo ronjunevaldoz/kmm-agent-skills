@@ -467,7 +467,20 @@ The release CI should run both publish tasks in the same workflow run when a tag
 
 ---
 
-## Common Mistakes
+## Output Style
+
+When generating publishing configuration or release steps, output:
+1. The complete `build.gradle.kts` block for the affected module (not diffs — consumers need the full context)
+2. The `gradle.properties` fields to add/change
+3. A copy-ready CI workflow snippet for the relevant trigger (push to main / tag push)
+4. A numbered release checklist the developer can tick off before tagging
+
+Never output partial Gradle snippets without the surrounding `mavenPublishing { }` block —
+missing fields cause Maven Central validation failures that are hard to debug.
+
+---
+
+## Common Anti-Patterns
 
 | Mistake | Fix |
 |---|---|
@@ -478,6 +491,19 @@ The release CI should run both publish tasks in the same workflow run when a tag
 | Consumer can't resolve SNAPSHOT | Must add OSSRH snapshot repo: `maven("https://s01.oss.sonatype.org/content/repositories/snapshots")` |
 | `signAllPublications()` fails locally | Set `signing.*` properties in `~/.gradle/gradle.properties`, not in the project |
 | Missing `scm` block in POM | Maven Central validation rejects POMs without SCM — always include it |
+
+---
+
+## Related Skills
+
+| Skill | When to use alongside this skill |
+|---|---|
+| `kotlin-multiplatform-xcframework-spm` | Distributing to iOS consumers via SPM binary target (runs in parallel with Maven publishing) |
+| `kotlin-multiplatform-ci-github-actions` | Automating publish on tag push and SNAPSHOT on main merge |
+| `kotlin-multiplatform-code-quality` | Detekt + ktlint checks to run before publishing |
+| `kotlin-multiplatform-unit-testing` | All targets must pass tests before a stable release |
+| `kotlin-multiplatform-expect-actual` | Platform-specific implementations inside the library |
+| `kotlin-multiplatform-release` | App release pipeline (different from library publishing — covers Play Store / App Store) |
 
 ---
 
