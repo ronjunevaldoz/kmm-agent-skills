@@ -2,6 +2,17 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.28] — 2026-06-29
+
+### Added
+
+- feat(audit): new checklist section 8 — Agent & Consumer Setup (AGENTS.md completeness, .claude/commands/, .claude/skills/, CLAUDE.md, multi-surface coverage)
+- feat(audit): `_detect_agent_setup` in `audit_project.py` — HIGH/MEDIUM findings for missing .claude/ infrastructure
+- feat(audit): `_detect_mvi_placement` — flags MviViewModel defined in a feature module instead of :shared:core
+- feat(audit): `_detect_design_system_wiring` — flags MaterialTheme wrapping, hardcoded `darkTheme=false`, and parallel ULong token files
+
+---
+
 ## [v1.29.27] — 2026-06-29
 
 ### Fixed
