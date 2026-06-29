@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.40.0] — 2026-06-29
+
+### Added
+
+- feat(audit): attach file:line + matched-source evidence to findings
+
+---
+
 ## [v1.39.0] — 2026-06-29
 
 ### Added
