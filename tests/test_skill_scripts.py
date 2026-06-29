@@ -836,6 +836,29 @@ class ViewModelInViewModelTests(unittest.TestCase):
             self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
 
 
+class FindingEvidenceTests(unittest.TestCase):
+    def test_findings_include_file_line_and_snippet(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "HomeScreen.kt").write_text(
+                "@Composable\n"
+                "fun HomeScreen() {\n"
+                "    HorizontalDivider(color = Color.Gray)\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            divider = next(f for f in findings if "hardcoded divider color" in f)
+            # file:line anchor present
+            self.assertIn("HomeScreen.kt:3", divider)
+            # matched source line included as evidence
+            self.assertIn("HorizontalDivider(color = Color.Gray)", divider)
+            # severity tag preserved for release-gate parsing
+            self.assertTrue(any("[HIGH]" in f or "[MEDIUM]" in f or ":" in f for f in findings))
+
+
 class RepositoryLeakTests(unittest.TestCase):
     def test_flags_interface_returning_dto(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

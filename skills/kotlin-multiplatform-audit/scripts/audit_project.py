@@ -32,6 +32,18 @@ PATTERNS = [
     ("dto leak to domain", re.compile(r"import .*\.dto\.|import .*\.entity\.|@SerialName.*class.*UseCase")),
 ]
 
+
+def _at(text: str, pos: int) -> tuple[int, str]:
+    """Return (1-based line number, stripped source line) for a match offset.
+
+    Used to attach verifiable evidence (file:line + the matched line) to findings so a
+    reviewer can confirm a finding before committing to a refactor.
+    """
+    line_no = text.count("\n", 0, pos) + 1
+    lines = text.splitlines()
+    snippet = lines[line_no - 1].strip() if 1 <= line_no <= len(lines) else ""
+    return line_no, snippet
+
 # ── Roadmap detection ─────────────────────────────────────────────────────────
 
 def _has(root: Path, *globs: str) -> bool:
@@ -482,11 +494,13 @@ def _detect_multi_viewmodel_screen(root: Path) -> list[str]:
             continue
         count = len(_MULTI_VM_RE.findall(text))
         if count >= 3:
+            line_no, snippet = _at(text, _MULTI_VM_RE.search(text).start())
             findings.append(
-                f"multi viewmodel screen [MEDIUM]: {path.relative_to(root)} "
+                f"multi viewmodel screen [MEDIUM]: {path.relative_to(root)}:{line_no} "
                 f"— {count} koinViewModel() calls; split each feature into its own screen "
                 f"behind a NavHost (one ViewModel per screen), sharing data via a repository "
-                f"(see MVI skill → feature orchestration decision order)"
+                f"(see MVI skill → feature orchestration decision order)\n"
+                f"    {line_no} | {snippet}"
             )
     return findings
 
@@ -526,11 +540,13 @@ def _detect_viewmodel_as_composable_param(root: Path) -> list[str]:
                 # Skip if this param has a koinViewModel()/viewModel() default
                 if "koinViewModel" in after or "= viewModel" in after:
                     continue
+                line_no, snippet = _at(text, m.start())
                 findings.append(
-                    f"viewmodel as composable param [MEDIUM]: {path.relative_to(root)} "
+                    f"viewmodel as composable param [MEDIUM]: {path.relative_to(root)}:{line_no} "
                     f"— @Composable {m.group(1)}(...) takes '{pm.group(1)}: *ViewModel' as a "
                     f"required param; use 'vm: FooViewModel = koinViewModel()' instead, or split "
-                    f"into separate screens (see MVI skill → feature orchestration decision order)"
+                    f"into separate screens (see MVI skill → feature orchestration decision order)\n"
+                    f"    {line_no} | {snippet}"
                 )
                 break  # one finding per composable
     return findings
@@ -577,32 +593,41 @@ def _detect_viewmodel_in_viewmodel(root: Path) -> list[str]:
 
         vm_name = path.stem
         how: str | None = None
+        pos = 0
 
         # 1) Constructor param typed *ViewModel (precise — scoped to the ctor block)
         for m in _VM_CLASS_RE.finditer(text):
-            if "ViewModel" in m.group("super") and _VM_PARAM_RE.search(m.group("ctor")):
-                vm_name, how = m.group(1), "a constructor param"
-                break
+            if "ViewModel" in m.group("super"):
+                pm = _VM_PARAM_RE.search(m.group("ctor"))
+                if pm:
+                    vm_name, how = m.group(1), "a constructor param"
+                    pos = m.start("ctor") + pm.start()
+                    break
 
         # 2) Property / instantiation / DI-generic anywhere in the VM file
         if how is None:
-            if _VM_PROPERTY_RE.search(text):
-                how = "an injected/declared property"
-            elif _VM_INSTANTIATE_RE.search(text):
-                how = "a directly instantiated property"
-            elif _VM_INJECT_GENERIC_RE.search(text):
-                how = "a DI lookup (inject<…ViewModel>())"
+            for rx, desc in (
+                (_VM_PROPERTY_RE, "an injected/declared property"),
+                (_VM_INSTANTIATE_RE, "a directly instantiated property"),
+                (_VM_INJECT_GENERIC_RE, "a DI lookup (inject<…ViewModel>())"),
+            ):
+                mm = rx.search(text)
+                if mm:
+                    how, pos = desc, mm.start()
+                    break
             if how is not None:
                 cm = re.search(r"\bclass\s+(\w+)", text)
                 if cm:
                     vm_name = cm.group(1)
 
         if how is not None:
+            line_no, snippet = _at(text, pos)
             findings.append(
-                f"viewmodel in viewmodel [HIGH]: {path.relative_to(root)} "
+                f"viewmodel in viewmodel [HIGH]: {path.relative_to(root)}:{line_no} "
                 f"— {vm_name} depends on another ViewModel via {how}; "
                 f"demote it to a State Holder (plain class + injected CoroutineScope) "
-                f"or a use case (see MVI skill → Coordinator ViewModel)"
+                f"or a use case (see MVI skill → Coordinator ViewModel)\n"
+                f"    {line_no} | {snippet}"
             )
     return findings
 
@@ -633,12 +658,15 @@ def _detect_god_composable(root: Path) -> list[str]:
         collect_count = len(_EFFECT_COLLECT_RE.findall(text))
         if le_count >= 5 or collect_count >= 3:
             severity = "HIGH" if (le_count >= 8 or collect_count >= 5) else "MEDIUM"
+            anchor = _LAUNCHED_EFFECT_RE.search(text) or _EFFECT_COLLECT_RE.search(text)
+            line_no, snippet = _at(text, anchor.start())
             findings.append(
-                f"god composable [{severity}]: {path.relative_to(root)} "
+                f"god composable [{severity}]: {path.relative_to(root)}:{line_no} "
                 f"— {le_count} LaunchedEffect blocks, {collect_count} effect.collect calls; "
                 f"split features into separate screens behind a NavHost (sharing data via a "
                 f"repository), or if they must share one screen, move state assembly + effect "
-                f"collection + persistence into viewModelScope (see MVI skill decision order)"
+                f"collection + persistence into viewModelScope (see MVI skill decision order)\n"
+                f"    {line_no} | {snippet}"
             )
     return findings
 
@@ -681,18 +709,25 @@ def _detect_string_navigation(root: Path) -> list[str]:
         except OSError:
             continue
         forms = []
-        if _STRING_COMPOSABLE_RE.search(text):
-            forms.append('composable("…")')
-        if _STRING_START_DEST_RE.search(text):
-            forms.append('startDestination = "…"')
-        if _STRING_NAVIGATE_RE.search(text):
-            forms.append('navigate("…")')
+        anchor = None
+        for rx, lbl in (
+            (_STRING_COMPOSABLE_RE, 'composable("…")'),
+            (_STRING_START_DEST_RE, 'startDestination = "…"'),
+            (_STRING_NAVIGATE_RE, 'navigate("…")'),
+        ):
+            mm = rx.search(text)
+            if mm:
+                forms.append(lbl)
+                if anchor is None:
+                    anchor = mm
         if forms:
+            line_no, snippet = _at(text, anchor.start())
             findings.append(
-                f"string navigation [MEDIUM]: {path.relative_to(root)} "
+                f"string navigation [MEDIUM]: {path.relative_to(root)}:{line_no} "
                 f"— string-based routes ({', '.join(forms)}); switch to @Serializable "
                 f"type-safe routes: composable<Route>, navigate(Route), "
-                f"startDestination = Route (see navigation skill → type-safe routes)"
+                f"startDestination = Route (see navigation skill → type-safe routes)\n"
+                f"    {line_no} | {snippet}"
             )
     return findings
 
@@ -730,11 +765,13 @@ def _detect_repository_leaks_data_type(root: Path) -> list[str]:
             continue
         leak = _DATA_TYPE_TOKEN_RE.search(text)
         if leak:
+            line_no, snippet = _at(text, leak.start())
             findings.append(
-                f"repository leaks data type [MEDIUM]: {path.relative_to(root)} "
+                f"repository leaks data type [MEDIUM]: {path.relative_to(root)}:{line_no} "
                 f"— Repository interface references '{leak.group(0)}'; the interface must "
                 f"speak domain types only. Return domain models (or Result<Domain>) and map "
-                f"DTOs/entities in :data (see repository-pattern skill → Type Mapping)"
+                f"DTOs/entities in :data (see repository-pattern skill → Type Mapping)\n"
+                f"    {line_no} | {snippet}"
             )
     return findings
 
@@ -767,10 +804,12 @@ def _detect_redundant_title(root: Path) -> list[str]:
         has_topbar = _TOPBAR_RE.search(text) and _TOPBAR_SLOT_RE.search(text)
         has_heading = _HEADING_STYLE_RE.search(text)
         if has_topbar and has_heading:
+            line_no, snippet = _at(text, has_heading.start())
             findings.append(
-                f"redundant screen title [MEDIUM]: {path.relative_to(root)} "
+                f"redundant screen title [MEDIUM]: {path.relative_to(root)}:{line_no} "
                 f"— AppTopAppBar in topBar slot AND a heading-style Text in content; "
-                f"the title appears twice — remove the in-body heading"
+                f"the title appears twice — remove the in-body heading\n"
+                f"    {line_no} | {snippet}"
             )
     return findings
 
@@ -1106,8 +1145,12 @@ def audit_project(root: Path) -> list[str]:
                     continue
                 if any(part in path.stem for part in ("Spacing", "spacing", "Token", "token", "Theme", "theme")):
                     continue
-            if pattern.search(text):
-                findings.append(f"{label}: {path.relative_to(root)}")
+            mt = pattern.search(text)
+            if mt:
+                line_no, snippet = _at(text, mt.start())
+                findings.append(
+                    f"{label}: {path.relative_to(root)}:{line_no}\n    {line_no} | {snippet}"
+                )
 
     return findings
 

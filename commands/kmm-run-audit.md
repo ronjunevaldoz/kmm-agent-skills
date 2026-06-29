@@ -13,6 +13,14 @@ Target project: `$ARGUMENTS` (defaults to `.` if empty)
 python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py "${ARGUMENTS:-.}"
 ```
 
+Findings carry verifiable evidence — each shows `file:line` plus the matched source line
+so you can confirm a finding before committing to a refactor:
+
+```
+god composable [HIGH]: composeApp/.../HomeScreen.kt:24 — 11 LaunchedEffect blocks, 7 effect.collect calls; …
+    24 | LaunchedEffect(ttiVm) { ttiVm.effect.collect { … } }
+```
+
 The script detects architectural and design smells:
 
 | Pattern | What it catches |
