@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.35.1] — 2026-06-29
+
+### Fixed
+
+- fix: ViewModel must never take another ViewModel as constructor param
+
+---
+
 ## [v1.35.0] — 2026-06-29
 
 ### Added
