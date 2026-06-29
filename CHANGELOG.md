@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.38.0] — 2026-06-29
+
+### Added
+
+- feat(audit): detect string-based (non-type-safe) navigation
+
+---
+
 ## [v1.37.3] — 2026-06-29
 
 ### Fixed
