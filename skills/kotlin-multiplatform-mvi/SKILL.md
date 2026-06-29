@@ -1136,29 +1136,92 @@ fun OnboardingStep1Screen(navController: NavController) {
 
 ---
 
-### Coordinator ViewModel (orchestrating multiple sub-features)
+### Orchestrating multiple features — decision order
 
-When one screen must combine several feature units — assembling their states,
-relaying their effects, persisting the result — **do not orchestrate this in the
-composable.** A composable that holds 3+ `koinViewModel()` calls, 5+ `LaunchedEffect`
-blocks, or relays effects between ViewModels is a *god composable*: untestable,
-recomposition-bound, and impossible to preview.
+When a screen seems to need several feature units — assembling their states, relaying
+their effects, persisting the result — **do not orchestrate this in the composable.**
+A composable that holds 3+ `koinViewModel()` calls, 5+ `LaunchedEffect` blocks, or
+relays effects between ViewModels is a *god composable*: untestable, recomposition-bound,
+impossible to preview. But the answer is almost never a bigger ViewModel either.
 
-> **A ViewModel must NEVER take another ViewModel as a constructor parameter.**
+Work through these in order. **Stop at the first one that fits — do not skip to a
+coordinator because it feels powerful.**
+
+#### Two hard rules (never violated)
+
+> **Rule 1 — A ViewModel must NEVER take another ViewModel as a constructor parameter.**
 > ViewModels are created by `ViewModelProvider`/factory with their own `viewModelScope`,
 > `SavedStateHandle`, and `CreationExtras` — they are not regular DI graph objects.
 > Nesting them causes lifecycle conflicts (the child's scope isn't owned by the parent),
 > breaks `SavedStateHandle` propagation, and leaks the child past its intended scope.
-> If you find yourself wanting `class FooViewModel(val barVm: BarViewModel)`, the sub-unit
-> should not be a ViewModel — demote it (below).
+> `class FooViewModel(val barVm: BarViewModel)` is always wrong.
 
-There are three correct fixes, in order of preference:
+> **Rule 2 — Features share data through a repository, never through each other.**
+> If feature A needs feature B's output, both talk to a shared repository that is the
+> single source of truth. A ViewModel never reads or writes another ViewModel's state.
 
-**Option A — Demote sub-units to State Holders (best when each has a real state machine)**
+---
 
-A *State Holder* is a plain class — not a `ViewModel` — that receives a `CoroutineScope`.
-The coordinator creates the holders with **its own** `viewModelScope`, so there is a single
-lifecycle owner. State Holders are fully unit-testable with a `TestScope`.
+#### Option 1 (DEFAULT) — Separate screens + NavHost
+
+**If each feature can be its own screen, make it one.** This is the cleanest decomposition
+and the correct default for tool-like features (a "studio" of generators, a settings hub,
+a dashboard of independent panels). There is no coordinator, no combined state, no relays.
+
+```kotlin
+// :app navigation — each feature is a route; the host owns nothing
+NavHost(navController, startDestination = StudioRoute) {
+    composable<StudioRoute>      { StudioScreen(onOpen = { navController.navigate(it) }) }
+    composable<TextToImageRoute> { TextToImageScreen() }   // owns its own ViewModel
+    composable<ShortFilmRoute>   { ShortFilmScreen() }     // owns its own ViewModel
+    // ...
+}
+```
+
+```kotlin
+// Each feature screen owns exactly ONE ViewModel. No feature imports another's VM.
+@Composable
+fun TextToImageScreen(vm: TextToImageViewModel = koinViewModel()) {
+    val state by vm.state.collectAsStateWithLifecycle()
+    LaunchedEffect(vm) { vm.effect.collect { /* nav + toast only */ } }
+    TextToImageContent(state = state, onIntent = vm::onIntent)
+}
+```
+
+**Shared data flows through a repository — the source of truth that decouples features:**
+
+```kotlin
+// :data — every feature observes and writes this; none know about each other
+interface GenerationRepository {
+    val artifacts: Flow<List<Artifact>>
+    suspend fun save(artifact: Artifact)
+}
+
+class TextToImageViewModel(private val repo: GenerationRepository) : MviViewModel<...> {
+    // writes results via repo.save(...) — never touches Studio
+}
+
+class StudioViewModel(private val repo: GenerationRepository) : MviViewModel<...> {
+    // sees every feature's output by observing the repo, not their ViewModels
+    val state = repo.artifacts.map { StudioContract.State(jobs = it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudioContract.State())
+}
+```
+
+This is what replaces the original `LaunchedEffect { studioVm.onIntent(UpdateGenerations(merged)) }`
+relay: the relay was a symptom of a missing repository. With the repo, Studio's job canvas
+shows generations from every feature without Studio knowing any feature exists.
+
+**Use this when:** features are conceptually separate destinations, even if some share data.
+Sharing data is *not* a reason to merge screens — that is what the repository is for.
+
+---
+
+#### Option 2 — One screen, sub-units demoted to State Holders
+
+Only when the product genuinely requires **one screen showing several feature state
+machines at once** (a true split-pane editor, not a tab switcher). Each sub-unit becomes a
+*State Holder* — a plain class, **not** a `ViewModel` — that receives a `CoroutineScope`.
 
 ```kotlin
 // :feature:studio:presenter — plain class, NOT a ViewModel
@@ -1168,83 +1231,59 @@ class TextToImageStateHolder(
 ) {
     private val _state = MutableStateFlow(TextToImageState())
     val state: StateFlow<TextToImageState> = _state.asStateFlow()
-
-    fun onIntent(intent: TextToImageIntent) {
-        scope.launch { /* update _state, call generateImage */ }
-    }
+    fun onIntent(intent: TextToImageIntent) { scope.launch { /* update _state */ } }
 }
-```
 
-```kotlin
 // The coordinator depends on USE CASES (normal DI), never on ViewModels
 class StudioCoordinatorViewModel(
     private val generateImage: GenerateImageUseCase,
-    private val generateVideo: GenerateVideoUseCase,
-    // ...other use cases...
     private val assembler: StudioStateAssembler,
-    private val storage: StudioStorage,
 ) : MviViewModel<StudioContract.State, StudioContract.Intent, StudioContract.Effect>(
     initialState = StudioContract.State(),
 ) {
     // Coordinator owns the holders, created with ITS scope — single lifecycle owner
     private val tti = TextToImageStateHolder(viewModelScope, generateImage)
-    private val img2video = ImageToVideoStateHolder(viewModelScope, generateVideo)
     // ...
 
     val state: StateFlow<StudioContract.State> =
-        combine(tti.state, img2video.state, /* ... */) { tti, video, /* ... */ ->
-            assembler.combine(tti, video, /* ... */)
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudioContract.State())
+        combine(tti.state, /* ... */) { tti, /* ... */ -> assembler.combine(tti, /* ... */) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudioContract.State())
 
-    init {
-        restorePersistedState()    // was LaunchedEffect(Unit)
-        persistOnChanges()         // was the giant-keyed LaunchedEffect
-    }
+    init { restorePersistedState(); persistOnChanges() }
 
-    override suspend fun handleIntent(intent: StudioContract.Intent) {
-        // routeStudioIntent logic lives here — unit-testable, delegates to holders
-    }
+    override suspend fun handleIntent(intent: StudioContract.Intent) { /* delegates to holders */ }
 }
 ```
 
-```kotlin
-// :feature:studio:ui — the ENTIRE screen
-@Composable
-fun HomeScreen(vm: StudioCoordinatorViewModel = koinViewModel()) {
-    val state by vm.state.collectAsStateWithLifecycle()
-    LaunchedEffect(vm) {
-        vm.effect.collect { effect ->
-            when (effect) {
-                is StudioContract.Effect.ShowError -> /* toast */
-                // navigation & toasts ONLY — never VM-to-VM relays
-            }
-        }
-    }
-    ChatContent(state = state, onIntent = vm::onIntent)
-}
-```
+**Use this when:** all sub-features must be visible and interactive simultaneously AND each
+has a real 5+-field state machine. If they don't share a screen → Option 1. If they're
+mostly operations → Option 3.
 
-**Option B — Use cases only (best when sub-units are mostly operations, little state)**
+---
 
-If the sub-"ViewModels" mostly *do work* rather than hold long-lived state, they are use
-cases. Inject them normally; fold their per-type state into the coordinator's single
-`State` as fields. No holders needed.
+#### Option 3 — One screen, sub-units are use cases
 
-**Option C — Don't coordinate (best when sections are visually independent)**
+When sub-units mostly *do work* rather than hold long-lived state, they are use cases. Fold
+their per-type state into the coordinator's single `State` as fields. No holders needed.
 
-If the sub-features are separate tabs or screens, each child composable owns its own
-ViewModel via `koinViewModel()`. There is no coordinator at all — the simplest fix when
-the sections don't share live state.
+**Use this when:** one screen, but the "sub-features" are stateless operations (validate,
+transform, submit) rather than independent state machines.
 
-**Rules:**
-- A ViewModel never receives another ViewModel — demote sub-units to State Holders or use cases
-- State Holders are plain classes that take `scope: CoroutineScope`; the coordinator passes its `viewModelScope`
-- The coordinator depends on **use cases** (regular Koin DI), wired with `viewModelOf(::StudioCoordinatorViewModel)`
-- State assembly uses `combine(...).stateIn(...)` — never `derivedStateOf` in the composable
-- Effect collection lives in the coordinator (`init {}` via `viewModelScope.launch`), never in the screen
-- The screen keeps exactly one `LaunchedEffect(vm)` for the coordinator's own navigation/toast effects
-- Extract state-combination into a pure `StateAssembler` object so precedence rules are
-  unit-tested independently of the ViewModel
+---
+
+### Hardened rules (enforced by the audit)
+
+- **Default to Option 1.** Separate screens + NavHost is the answer unless the product
+  *requires* features on one screen at the same time. "They share data" is not such a reason.
+- A ViewModel **never** receives another ViewModel — `viewmodel in viewmodel` is a HIGH finding.
+- Features share state **only** through a repository — never `vmA` reading `vmB.state`.
+- A screen **never** holds 3+ `koinViewModel()` calls — `multi viewmodel screen` finding.
+- A screen **never** has 5+ `LaunchedEffect` blocks or 3+ `effect.collect` relays — `god composable` finding.
+- State Holders are plain classes taking `scope: CoroutineScope`; the coordinator passes its `viewModelScope`. They are never `ViewModel` subclasses and never call `koinViewModel()`.
+- A coordinator depends on **use cases** (regular Koin DI), wired with `viewModelOf(::StudioCoordinatorViewModel)`.
+- State assembly uses `combine(...).stateIn(...)` — never `derivedStateOf` in the composable.
+- Effect collection lives in the ViewModel (`init {}` via `viewModelScope.launch`), never in the screen — the screen keeps exactly one `LaunchedEffect(vm)` for its own nav/toast effects.
+- Extract state-combination into a pure `StateAssembler` object so precedence rules are unit-tested independently of the ViewModel.
 
 ---
 
@@ -1484,6 +1523,8 @@ If the ViewModel is growing beyond 150–200 lines, apply the decomposition deci
 ## Related Skills
 
 - `kotlin-multiplatform-presenter-module` — simpler ViewModel pattern without `Effect`; use for screens with no one-shot events
+- `kotlin-multiplatform-navigation` — separate-screens-first decomposition (Option 1); route each feature instead of coordinating
+- `kotlin-multiplatform-repository-pattern` — repository as single source of truth; how features share data without referencing each other's ViewModels
 - `kotlin-multiplatform-unit-testing` — `runTest` + Turbine for testing `StateFlow` transitions and `Channel` effects
 - `kotlin-multiplatform-compose-state-container` — when to use `remember` vs ViewModel as the state container
 - `kotlin-multiplatform-preview-driven-development` — `FooContent` stateless composables are the fast-preview target
@@ -1512,6 +1553,7 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 | 2026-06-28 | Add collectAsStateWithLifecycle vs collectAsState rule; LaunchedEffect vs DisposableEffect vs SideEffect decision table; SavedStateHandle + viewModelOf Koin wiring; four new anti-patterns.
 | 2026-06-28 | Add auth gate and back-stack anti-patterns. Two new anti-patterns: storing auth state in MVI State for nav, and Effect.NavigateBack without popUpTo contract. |
 | 2026-06-28 | Add ViewModel size rule, god ViewModel symptoms, use case extraction guide, and ViewModel split patterns. Two new anti-patterns for monolithic ViewModels. |
+| 2026-06-29 | Reworked feature-orchestration guidance into a decision order led by Option 1 (separate screens + NavHost + repository as source of truth) before any coordinator. Two hard rules (no VM-in-VM, share via repository only). Hardened rules section mapped to audit findings. |
 | 2026-06-29 | Coordinator ViewModel section rewritten to State Holder pattern — a ViewModel must never take another ViewModel as a constructor param; demote sub-units to State Holders (plain class + injected scope) or use cases. New anti-pattern + audit detector for VM-in-VM constructor. |
 | 2026-06-29 | Added Coordinator ViewModel section — fixes god composables that orchestrate multiple sub-ViewModels in the UI layer (state assembly, effect relays, persistence in LaunchedEffect). New "god composable" anti-pattern. Detected by audit_project.py. |
 | 2026-06-28 | Added "When NOT to Use MviViewModel" with thin patterns (no-ViewModel, no-Contract). Updated Recommendation First to lead with start-thin principle. Added Nav Args as Initial State, In-flight Cancellation, Typed Errors in State, Shared ViewModel. |
