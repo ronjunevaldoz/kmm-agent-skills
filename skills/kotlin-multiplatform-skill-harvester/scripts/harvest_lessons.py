@@ -65,6 +65,7 @@ KNOWN_SKILLS = {
     "kotlin-multiplatform-unit-testing",
     "kotlin-multiplatform-workmanager",
     "kotlin-multiplatform-xcframework-spm",
+    "kotlin-multiplatform-library-publishing",
     "unknown",
 }
 

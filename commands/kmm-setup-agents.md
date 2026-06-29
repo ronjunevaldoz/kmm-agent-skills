@@ -31,21 +31,53 @@ PROJECT: <project root>
 
 ---
 
-## Step 2 — Discover the module graph
+## Step 2 — Detect project type and discover the module graph
 
-Read `settings.gradle.kts` (or `settings.gradle`) and extract all included modules.
-Group them by feature:
+### 2a — Determine: app or library?
 
+Read `settings.gradle.kts` and all root/module `build.gradle.kts` files.
+
+**Library signals** (if any are present → treat as library project):
+- `com.vanniktech.maven.publish` plugin applied
+- `org.jetbrains.kotlinx.binary-compatibility-validator` plugin applied
+- `maven-publish` plugin applied without `com.android.application` anywhere
+- No module with `com.android.application` or `androidApplication` plugin
+- No `:composeApp`, `:androidapp`, `:app` module that uses the application plugin
+
+**App signals** (default if no library signals detected):
+- `com.android.application` or `androidApplication` plugin present
+- `:composeApp`, `:app`, or `:androidApp` module exists with application plugin
+
+Print:
+```
+Project type: APP | LIBRARY
+```
+
+### 2b — Module graph
+
+Read `settings.gradle.kts` and extract all included modules. Group them:
+
+**For APP projects:**
 ```
 Modules discovered:
-  :app / :androidApp / :desktopApp    — entry points
+  :app / :composeApp / :androidApp    — entry points
   :core:common, :core:network, ...    — core modules
-  :feature:auth:*                     — auth feature layers
-  :feature:home:*                     — home feature layers
+  :feature:auth:*                     — feature layers
   ...
 ```
 
-Also detect which skills are in play by checking `gradle/libs.versions.toml` for:
+**For LIBRARY projects:**
+```
+Modules discovered:
+  :library (or main artifact module)  — published artifact
+  :library-testing                    — test helpers for consumers (if present)
+  :bom                                — Bill of Materials (if present)
+  :sample / :sample:androidApp        — sample app (not published)
+```
+
+### 2c — Detect active skills from `gradle/libs.versions.toml`
+
+**App projects check for:**
 - `koin` → dependency-injection
 - `ktor` → network-layer
 - `sqldelight` → sqldelight-setup
@@ -53,6 +85,13 @@ Also detect which skills are in play by checking `gradle/libs.versions.toml` for
 - `roborazzi` → roborazzi
 - `turbine` → unit-testing
 - navigation libraries → navigation
+
+**Library projects check for:**
+- `vanniktech` or `maven.publish` → library-publishing
+- `binary-compatibility-validator` → library-publishing (apiCheck)
+- `dokka` → library-publishing (Javadoc jars)
+- `roborazzi` or `turbine` → unit-testing
+- `iosX64`, `iosArm64` targets in build files → xcframework-spm
 
 Print the detected skill set.
 
@@ -78,14 +117,20 @@ Proceed based on the answer. Default is `skip` if the user presses Enter.
 
 ## Step 4 — Generate `.claude/AGENTS.md`
 
-Write (or overwrite) `.claude/AGENTS.md` tailored to this project's actual module graph
-and detected skills:
+Write (or overwrite) `.claude/AGENTS.md` tailored to the detected project type,
+module graph, and skill set.
+
+### For APP projects
 
 ```markdown
-# AGENTS.md — <project name from settings.gradle>
+# AGENTS.md — <project name>
 
 This project uses [kmm-agent-skills](https://github.com/ronjunevaldoz/kmm-agent-skills).
 Skills are installed in `.claude/skills/`.
+
+## Project overview
+
+<1–2 sentences describing what the app does, its platforms, and group ID>
 
 ## Skill routing
 
@@ -95,7 +140,7 @@ Skills are installed in `.claude/skills/`.
 | ViewModel / screen state | `kotlin-multiplatform-mvi` |
 | Navigation | `kotlin-multiplatform-navigation` |
 | Dependency injection | `kotlin-multiplatform-dependency-injection` |
-<include only detected skills below>
+<include only skills detected in Step 2c>
 | Auth / login | `kotlin-multiplatform-ktor-auth-service` |
 | Local database | `kotlin-multiplatform-sqldelight-setup` |
 | REST API / network | `kotlin-multiplatform-network-layer` |
@@ -104,27 +149,85 @@ Skills are installed in `.claude/skills/`.
 | Design system | `kotlin-multiplatform-design-system` |
 | Unit tests | `kotlin-multiplatform-unit-testing` |
 | Architecture audit | `kotlin-multiplatform-audit` |
-</detected skills>
+| Harvest consumer lessons | `kotlin-multiplatform-audit` (`--harvest` mode via `/kmm-harvest-lessons`) |
+</end detected skills>
 
-## Feature modules
+## Module graph
 
-<list each :feature:<name> module group>
-| Feature | Layers present |
+<list each module group>
+| Module | Purpose |
 |---|---|
-| auth | :domain :data :presenter :ui |
-| home | :domain :data :presenter :ui |
+| :composeApp | CMP entry point (Android / iOS / Desktop / Web) |
+| :core:common | Shared utilities |
+| :feature:auth | Auth feature (domain / data / presenter / ui) |
 ...
 
 ## Commands installed
 
 See `.claude/commands/kmm-*.md` for available slash commands.
 Key commands:
-- `/kmm-implement-feature <name>` — plan → implement → validate → review a new feature
-- `/kmm-run-audit` — run architecture audit with per-finding remediation
-- `/kmm-verify` — full validation pipeline (tests, audit, design, screenshots)
+- `/kmm-implement-feature <name>` — plan → implement → validate → review
+- `/kmm-run-audit` — architecture audit with per-finding remediation
+- `/kmm-harvest-lessons` — collect good patterns to upstream to skills
+- `/kmm-verify` — full validation pipeline
 - `/kmm-execute-ticket <id>` — implement a GitHub issue end-to-end
 - `/kmm-fix-design` — scan and fix design system violations
-- `/kmm-update-skills` — pull latest skills and re-deploy
+```
+
+### For LIBRARY projects
+
+```markdown
+# AGENTS.md — <library name>
+
+This project uses [kmm-agent-skills](https://github.com/ronjunevaldoz/kmm-agent-skills).
+Skills are installed in `.claude/skills/`.
+
+## Project overview
+
+<1–2 sentences: what the library does, target consumers, Maven coordinates>
+Group ID: <groupId>   Artifact: <artifactId>   Published to: Maven Central | GitHub Packages
+
+## Skill routing
+
+| Topic | Skill |
+|---|---|
+| Publishing to Maven Central | `kotlin-multiplatform-library-publishing` |
+| iOS / SPM distribution | `kotlin-multiplatform-xcframework-spm` |
+| API surface management | `kotlin-multiplatform-library-publishing` (apiCheck / apiDump) |
+| Platform-specific implementations | `kotlin-multiplatform-expect-actual` |
+| Unit / integration tests | `kotlin-multiplatform-unit-testing` |
+| Code quality (detekt, ktlint) | `kotlin-multiplatform-code-quality` |
+| CI automation | `kotlin-multiplatform-ci-github-actions` |
+| Architecture audit | `kotlin-multiplatform-audit` |
+| Harvest consumer lessons | `kotlin-multiplatform-audit` (`--harvest` mode via `/kmm-harvest-lessons`) |
+<add only if detected>
+| Screenshot / visual tests | `kotlin-multiplatform-roborazzi` |
+| BOM / multi-artifact | `kotlin-multiplatform-library-publishing` (Step 4) |
+</end>
+
+## Published artifacts
+
+| Artifact | Module |
+|---|---|
+| <groupId>:<artifactId> | :library |
+| <groupId>:<artifactId>-testing | :library-testing (if present) |
+| <groupId>:<artifactId>-bom | :bom (if present) |
+
+## API surface rules
+
+- Never remove or rename public symbols without a major version bump
+- Run `./gradlew apiDump` after any public API change; commit the `.api` file
+- `./gradlew apiCheck` runs in CI and blocks merge if API diff is uncommitted
+- Mark internal symbols with `@InternalApi` to exclude from the dump
+
+## Commands installed
+
+See `.claude/commands/kmm-*.md` for available slash commands.
+Key commands:
+- `/kmm-run-audit` — architecture audit with per-finding remediation
+- `/kmm-harvest-lessons` — collect patterns to upstream to skills
+- `/kmm-verify` — full validation pipeline (build + test + apiCheck)
+- `/kmm-check-updates` — check for skill updates
 ```
 
 ---

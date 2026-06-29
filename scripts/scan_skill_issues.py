@@ -26,6 +26,7 @@ SKIP_TESTING = {
     "kotlin-multiplatform-audit",                # meta review tool
     "kotlin-multiplatform-ci-github-actions",    # CI YAML config
     "kotlin-multiplatform-xcframework-spm",      # binary distribution
+    "kotlin-multiplatform-library-publishing",   # Maven Central / GitHub Packages / BOM / binary-compat
     "kotlin-multiplatform-code-quality",         # linting/formatting config
     "kotlin-multiplatform-preview-driven-development",  # workflow guide
     "kotlin-multiplatform-expert",               # meta orchestrator

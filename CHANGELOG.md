@@ -2,6 +2,16 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.32] — 2026-06-29
+
+### Added
+
+- feat(skills): new `kotlin-multiplatform-library-publishing` skill — vanniktech plugin setup, Sonatype OSSRH/Central Portal, GitHub Packages, multi-artifact BOM, binary-compatibility-validator (apiCheck/apiDump), GPG signing, SNAPSHOT vs stable channels, release checklist, iOS/SPM cross-reference
+- feat(commands): `/kmm-setup-agents` now detects library vs app project type — library projects get a library-shaped AGENTS.md routing to `library-publishing`, `xcframework-spm`, `expect-actual`, `unit-testing`, `code-quality`, `ci-github-actions`
+- feat(expert): `kotlin-multiplatform-library-publishing` registered in Skill Invocation Map with 20 trigger keywords
+
+---
+
 ## [v1.29.31] — 2026-06-29
 
 ### Added
