@@ -639,6 +639,84 @@ class MultiViewModelScreenTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any("multi viewmodel screen" in f for f in findings))
 
+    def test_flags_non_screen_composable_with_many_vms(self) -> None:
+        # Hardening: a Compose file NOT named *Screen (Dashboard) still counts.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "Dashboard.kt").write_text(
+                "@Composable\n"
+                "fun Dashboard() {\n"
+                "    val a = koinViewModel<AViewModel>()\n"
+                "    val b = koinViewModel<BViewModel>()\n"
+                "    val c = koinViewModel<CViewModel>()\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("multi viewmodel screen" in f for f in findings))
+
+
+class AuditHardeningTests(unittest.TestCase):
+    def test_vm_in_vm_catches_coordinator_without_viewmodel_name(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "StudioCoordinator.kt").write_text(
+                "class StudioCoordinator(\n"
+                "    private val tti: TextToImageViewModel,\n"
+                ") : MviViewModel<S, I, E>(S()) {\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_large_viewmodel_caught_by_content_not_filename(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            body = (
+                "import androidx.lifecycle.viewModelScope\n"
+                "class HomePresenter : BaseViewModel() {\n"
+                + "\n".join(f"    fun op{i}() {{}}" for i in range(200))
+                + "\n}\n"
+            )
+            (d / "HomePresenter.kt").write_text(body, encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel" in f and "HomePresenter" in f for f in findings))
+
+    def test_dto_leak_caught_in_usecase_outside_domain_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "LoginUseCase.kt").write_text(
+                "import com.example.data.dto.UserDto\nclass LoginUseCase {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("dto leak to domain" in f for f in findings))
+
+    def test_data_model_named_file_is_not_treated_as_viewmodel(self) -> None:
+        # Guard against over-broad VM detection: a plain data class must not be flagged.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            body = (
+                "data class UserModel(\n"
+                + "\n".join(f"    val field{i}: String," for i in range(200))
+                + "\n)\n"
+            )
+            (d / "UserModel.kt").write_text(body, encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel" in f and "UserModel" in f for f in findings))
+
 
 class ViewModelInViewModelTests(unittest.TestCase):
     def test_flags_viewmodel_with_viewmodel_param(self) -> None:

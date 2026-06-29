@@ -392,15 +392,40 @@ def _detect_design_system_wiring(root: Path) -> list[str]:
 
 # ── Standard audit ────────────────────────────────────────────────────────────
 
+# A class that extends a ViewModel base (ViewModel, MviViewModel, BaseViewModel, …).
+# Filename-independent: catches *Presenter.kt, coordinators, *VM.kt, etc.
+_VM_CLASS_DECL_RE = re.compile(
+    r"\bclass\s+\w+[^:{]*:\s*[^{]*\bViewModel\b",
+    re.DOTALL,
+)
+
+
+def _is_viewmodel_file(text: str) -> bool:
+    """True if the file defines a ViewModel — by supertype or viewModelScope usage —
+    regardless of filename. Hardens detectors against alternate naming conventions."""
+    return "viewModelScope" in text or bool(_VM_CLASS_DECL_RE.search(text))
+
+
 def _detect_viewmodel_size(root: Path) -> dict:
-    """Return max line count and list of oversized ViewModel files."""
+    """Return max line count and list of oversized ViewModel files.
+
+    Detects ViewModels by content (supertype / viewModelScope) so files that do not
+    follow the *ViewModel.kt naming convention are still measured.
+    """
     large: list[tuple[Path, int]] = []
-    for path in root.rglob("*ViewModel.kt"):
+    seen: set[Path] = set()
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or path in seen:
+            continue
         try:
-            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+            text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
-        count = len(lines)
+        # Filename convention OR content signal
+        if not (path.stem.endswith("ViewModel") or _is_viewmodel_file(text)):
+            continue
+        seen.add(path)
+        count = len(text.splitlines())
         if count >= 150:
             large.append((path, count))
     large.sort(key=lambda x: x[1], reverse=True)
@@ -430,31 +455,34 @@ def _detect_feature_split(root: Path) -> str:
     return "no feature layer split detected"
 
 
-_MULTI_VM_RE = re.compile(r'\bkoinViewModel\s*<')
+_MULTI_VM_RE = re.compile(r'\bkoinViewModel\s*[<(]')
 _LAUNCHED_EFFECT_RE = re.compile(r'\bLaunchedEffect\s*\(')
 _EFFECT_COLLECT_RE = re.compile(r'\.effect\s*\.\s*collect\b')
 
 
 def _detect_multi_viewmodel_screen(root: Path) -> list[str]:
-    """Flag Screen composables that instantiate 3+ ViewModels directly.
+    """Flag composables that instantiate 3+ ViewModels directly.
 
-    Each koinViewModel<>() in a Screen creates tight coupling and makes the
-    screen untestable in isolation.  The fix: move each koinViewModel() into
-    the child composable that actually owns it, or extract a coordinator VM.
+    Each koinViewModel() in one composable creates tight coupling and makes it
+    untestable in isolation. Detected on any Compose file (by content), not just
+    *Screen.kt, so non-convention names (Dashboard, Hub, Home) are still caught.
+    The fix: split each feature into its own screen, sharing data via a repository.
     """
     findings: list[str] = []
-    for path in root.rglob("*Screen.kt"):
+    for path in root.rglob("*.kt"):
         if _is_excluded(path, root):
             continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
+        if not _is_compose_ui_file(text, path):
+            continue
         count = len(_MULTI_VM_RE.findall(text))
         if count >= 3:
             findings.append(
                 f"multi viewmodel screen [MEDIUM]: {path.relative_to(root)} "
-                f"— {count} koinViewModel<> calls; split each feature into its own screen "
+                f"— {count} koinViewModel() calls; split each feature into its own screen "
                 f"behind a NavHost (one ViewModel per screen), sharing data via a repository "
                 f"(see MVI skill → feature orchestration decision order)"
             )
@@ -506,10 +534,11 @@ def _detect_viewmodel_as_composable_param(root: Path) -> list[str]:
     return findings
 
 
-# Matches a class declaration whose constructor has a param typed `*ViewModel`,
-# where the class itself extends a ViewModel base. Captures the constructor block.
+# Matches ANY class declaration with a primary constructor and a supertype list.
+# The supertype is checked for `ViewModel` separately, so this catches coordinators
+# that extend a VM base without a *ViewModel name (e.g. `class StudioCoordinator(...)`).
 _VM_CLASS_RE = re.compile(
-    r"class\s+(\w*ViewModel)\s*(?:@\w+(?:\([^)]*\))?\s*)?\((?P<ctor>.*?)\)\s*:\s*(?P<super>[^{]+)",
+    r"class\s+(\w+)\s*(?:@\w+(?:\([^)]*\))?\s*)?\((?P<ctor>.*?)\)\s*:\s*(?P<super>[^{]+)",
     re.DOTALL,
 )
 _VM_PARAM_RE = re.compile(r":\s*\w*ViewModel\b")
@@ -521,10 +550,13 @@ def _detect_viewmodel_in_viewmodel(root: Path) -> list[str]:
     ViewModels are created by ViewModelProvider/factory with their own viewModelScope,
     SavedStateHandle, and CreationExtras — nesting them breaks lifecycle ownership and
     DI. The fix: demote the injected sub-unit to a State Holder (plain class taking a
-    CoroutineScope) or a use case.
+    CoroutineScope) or a use case. Scans all .kt files so coordinators that don't follow
+    the *ViewModel.kt naming convention are still caught.
     """
     findings: list[str] = []
-    for path in root.rglob("*ViewModel.kt"):
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root):
+            continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
@@ -563,11 +595,12 @@ def _detect_god_composable(root: Path) -> list[str]:
     for path in root.rglob("*.kt"):
         if _is_excluded(path, root):
             continue
-        if not any(part in path.stem for part in ("Screen", "Content", "Page")):
-            continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
+            continue
+        # A screen by name, or any Compose file (catches non-convention composables)
+        if not (any(path.stem.endswith(part) for part in _SCREEN_STEMS) or _is_compose_ui_file(text, path)):
             continue
         le_count = len(_LAUNCHED_EFFECT_RE.findall(text))
         collect_count = len(_EFFECT_COLLECT_RE.findall(text))
@@ -589,6 +622,9 @@ _EXCLUDED_DIRS = {
     "worktrees",  # .claude/worktrees/ — agent scratch copies of the repo
 }
 
+# Stems that signal a top-level screen/page composable, across naming conventions.
+_SCREEN_STEMS = ("Screen", "Content", "Page", "View", "Route")
+
 # ── Redundant title detection ─────────────────────────────────────────────────
 
 # Matches a heading-style text call: AppText/Text with a style that looks like a
@@ -608,7 +644,7 @@ def _detect_redundant_title(root: Path) -> list[str]:
     for path in root.rglob("*.kt"):
         if _is_excluded(path, root):
             continue
-        if not any(part in path.stem for part in ("Screen", "Content", "Page")):
+        if not any(path.stem.endswith(part) for part in _SCREEN_STEMS):
             continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
@@ -649,17 +685,22 @@ def _detect_missing_adaptive_coverage(root: Path) -> list[str]:
         return []
 
     findings: list[str] = []
-    for path in root.rglob("*Screen.kt"):
+    for path in root.rglob("*.kt"):
         if _is_excluded(path, root):
+            continue
+        # Top-level screens by name (Screen/Page/View), regardless of module path
+        if not any(path.stem.endswith(s) for s in ("Screen", "Page", "View")):
             continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
+        if not _is_compose_ui_file(text, path):
+            continue
         if not _WINDOW_SIZE_CLASS_PARAM_RE.search(text):
             findings.append(
                 f"adaptive coverage [LOW]: {path.relative_to(root)} "
-                f"— project uses WindowSizeClass but this Screen has no windowSizeClass param; "
+                f"— project uses WindowSizeClass but this screen has no windowSizeClass param; "
                 f"add windowSizeClass: WindowSizeClass and branch layout per breakpoint"
             )
     return findings
@@ -687,7 +728,7 @@ def _is_compose_ui_file(text: str, path: Path) -> bool:
     """A file is treated as Compose UI if it declares/imports Compose, OR lives in a
     conventional UI path. Content detection makes UI smells (hardcoded colors, spacing,
     dark-theme scatter) fire even when the project does not use a /ui/ module layout."""
-    if "@Composable" in text or "androidx.compose" in text:
+    if "@Composable" in text or "androidx.compose" in text or "koinViewModel" in text:
         return True
     return any(token in path.as_posix() for token in ("/ui/", "/presentation/"))
 
@@ -912,8 +953,15 @@ def audit_project(root: Path) -> list[str]:
             if label == "data import in ui":
                 if not is_compose or path.stem.endswith("ViewModel"):
                     continue
-            if label == "dto leak to domain" and "/domain/" not in path.as_posix():
-                continue
+            if label == "dto leak to domain":
+                # domain by path OR by a domain-layer filename (use case / interactor)
+                is_domain = (
+                    "/domain/" in path.as_posix()
+                    or path.stem.endswith("UseCase")
+                    or path.stem.endswith("Interactor")
+                )
+                if not is_domain:
+                    continue
             if label == "navcontroller in viewmodel" and not path.stem.endswith("ViewModel"):
                 continue
             if label == "magic color literal":
