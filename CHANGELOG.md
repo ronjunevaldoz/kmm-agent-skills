@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.36.1] — 2026-06-29
+
+### Fixed
+
+- fix(audit): detect composable/VM smells regardless of /ui/ package path
+
+---
+
 ## [v1.36.0] — 2026-06-29
 
 ### Added
