@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-28'
+  last-updated: '2026-06-29'
   keywords:
     - MVI
     - Model-View-Intent
@@ -1136,6 +1136,103 @@ fun OnboardingStep1Screen(navController: NavController) {
 
 ---
 
+### Coordinator ViewModel (orchestrating multiple sub-ViewModels)
+
+When one screen must combine several feature ViewModels — assembling their states,
+relaying their effects, persisting the result — **do not orchestrate this in the
+composable.** A composable that holds 3+ `koinViewModel()` calls, 5+ `LaunchedEffect`
+blocks, or relays effects between ViewModels is a *god composable*: untestable,
+recomposition-bound, and impossible to preview.
+
+The fix is a **Coordinator ViewModel** that owns the sub-ViewModels and exposes a
+single `State` / `Intent` / `Effect` contract. The screen shrinks to state + onIntent.
+
+❌ **God composable** — orchestration leaked into the UI layer:
+```kotlin
+@Composable
+fun HomeScreen(studioVm: StudioViewModel, healthVm: ServerHealthViewModel, ...) {
+    val ttiVm = koinViewModel<TextToImageViewModel>(...)
+    val img2imgVm = koinViewModel<ImageToImageViewModel>(...)
+    // ...6 more sub-VMs, 6 state collections...
+
+    val combined by remember { derivedStateOf { Assembler.combine(...) } }
+
+    LaunchedEffect(Unit) { /* restore persisted state */ }
+    LaunchedEffect(health.preset) { /* apply preset */ }
+    LaunchedEffect(/* 16 keys */) { studioVm.persist(combined) }
+    LaunchedEffect(ttiVm) { ttiVm.effect.collect { studioVm.onIntent(...) } }
+    LaunchedEffect(img2imgVm) { img2imgVm.effect.collect { studioVm.onIntent(...) } }
+    // ...4 more effect relays...
+
+    ChatContent(state = combined, onIntent = { routeStudioIntent(...) })
+}
+```
+
+✓ **Coordinator ViewModel** — all orchestration in `viewModelScope`, fully testable:
+```kotlin
+// :feature:studio:presenter — zero Compose dependency
+class StudioCoordinatorViewModel(
+    private val tti: TextToImageViewModel,
+    private val img2img: ImageToImageViewModel,
+    // ...other sub-VMs injected by Koin...
+    private val assembler: StudioStateAssembler,
+    private val storage: StudioStorage,
+) : MviViewModel<StudioContract.State, StudioContract.Intent, StudioContract.Effect>(
+    initialState = StudioContract.State(),
+) {
+    // State assembly — combine() instead of derivedStateOf in a composable
+    val state: StateFlow<StudioContract.State> =
+        combine(tti.state, img2img.state, /* ... */) { tti, img2img, /* ... */ ->
+            assembler.combine(tti, img2img, /* ... */)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudioContract.State())
+
+    init {
+        restorePersistedState()    // was LaunchedEffect(Unit)
+        observeSubVmEffects()      // was 6 LaunchedEffect effect-relay blocks
+        persistOnChanges()         // was the giant-keyed LaunchedEffect
+    }
+
+    private fun observeSubVmEffects() {
+        viewModelScope.launch {
+            tti.effect.collect { handleSubEffect(it) }
+        }
+        // ...one launch per sub-VM, or merge() them...
+    }
+
+    override suspend fun handleIntent(intent: StudioContract.Intent) {
+        // routeStudioIntent logic lives here now — unit-testable
+    }
+}
+```
+
+```kotlin
+// :feature:studio:ui — the ENTIRE screen
+@Composable
+fun HomeScreen(vm: StudioCoordinatorViewModel = koinViewModel()) {
+    val state by vm.state.collectAsStateWithLifecycle()
+    LaunchedEffect(vm) {
+        vm.effect.collect { effect ->
+            when (effect) {
+                is StudioContract.Effect.ShowError -> /* toast */
+                // navigation & toasts ONLY — never VM-to-VM relays
+            }
+        }
+    }
+    ChatContent(state = state, onIntent = vm::onIntent)
+}
+```
+
+**Rules:**
+- The coordinator owns the sub-ViewModels as constructor dependencies (Koin `viewModelOf`)
+- State assembly uses `combine(...).stateIn(...)` — never `derivedStateOf` in the composable
+- Sub-VM effect collection lives in `init {}` via `viewModelScope.launch` — never in the screen
+- Persistence and restore are coordinator methods, not `LaunchedEffect` blocks
+- The screen keeps exactly one `LaunchedEffect(vm)` for the coordinator's own navigation/toast effects
+- Extract the state-combination logic into a pure `StateAssembler` object so the precedence
+  rules are unit-tested independently of the ViewModel
+
+---
+
 ## Multi-Source State and Flow Operators
 
 ### `combine` — merge two or more flows into one State
@@ -1355,6 +1452,7 @@ must stay synchronized — see the Shared ViewModel section above for the patter
 - using `SideEffect` for coroutines — `SideEffect` is synchronous and has no cancel; use `LaunchedEffect` for any suspend work
 - constructing `SavedStateHandle()` manually — always let Koin/AndroidX provide it via `viewModelOf(::ViewModel)` or `viewModel { ViewModel(get(), get()) }`
 - god ViewModel (400–900+ lines) — all screen logic in one place instead of delegating business operations to use cases; extract any `handleIntent` branch that touches two or more repos into a use case
+- god composable — a screen holding 3+ `koinViewModel()` calls, 5+ `LaunchedEffect` blocks, or relaying effects between ViewModels (`subVm.effect.collect { parentVm.onIntent(...) }`); extract a Coordinator ViewModel and move state assembly, effect collection, and persistence into `viewModelScope`
 - direct repository calls in ViewModel for complex orchestration — if the ViewModel `when` branch needs multiple repos or has business rules, it belongs in a use case, not the ViewModel
 - storing auth status as `isAuthenticated: Boolean` in `State` and navigating on state change — use `SessionViewModel` + a `LaunchedEffect` in `AppNavHost` to guard the entire nav graph; MVI screens should not own auth gate logic
 - using `Effect.NavigateBack` without a clear back-stack contract — always pair it with the correct NavHost `popUpTo` rule; bare `popBackStack()` can leave the user on an authenticated screen after logout
@@ -1398,5 +1496,6 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 | 2026-06-28 | Add collectAsStateWithLifecycle vs collectAsState rule; LaunchedEffect vs DisposableEffect vs SideEffect decision table; SavedStateHandle + viewModelOf Koin wiring; four new anti-patterns.
 | 2026-06-28 | Add auth gate and back-stack anti-patterns. Two new anti-patterns: storing auth state in MVI State for nav, and Effect.NavigateBack without popUpTo contract. |
 | 2026-06-28 | Add ViewModel size rule, god ViewModel symptoms, use case extraction guide, and ViewModel split patterns. Two new anti-patterns for monolithic ViewModels. |
+| 2026-06-29 | Added Coordinator ViewModel section — fixes god composables that orchestrate multiple sub-ViewModels in the UI layer (state assembly, effect relays, persistence in LaunchedEffect). New "god composable" anti-pattern. Detected by audit_project.py. |
 | 2026-06-28 | Added "When NOT to Use MviViewModel" with thin patterns (no-ViewModel, no-Contract). Updated Recommendation First to lead with start-thin principle. Added Nav Args as Initial State, In-flight Cancellation, Typed Errors in State, Shared ViewModel. |
 | 2026-06-06 | Initial release. |

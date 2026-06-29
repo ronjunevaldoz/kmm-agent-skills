@@ -596,6 +596,50 @@ class MultiViewModelScreenTests(unittest.TestCase):
             self.assertFalse(any("multi viewmodel screen" in f for f in findings))
 
 
+class GodComposableTests(unittest.TestCase):
+    def test_flags_screen_with_many_launched_effects(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "studio" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            body = "\n".join(f"LaunchedEffect(key{i}) {{ doThing() }}" for i in range(6))
+            (ui_dir / "HomeScreen.kt").write_text(body, encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("god composable" in f for f in findings))
+
+    def test_flags_screen_with_many_effect_collects(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "studio" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            body = "\n".join(f"vm{i}.effect.collect {{ relay() }}" for i in range(3))
+            (ui_dir / "HomeScreen.kt").write_text(body, encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("god composable" in f for f in findings))
+
+    def test_high_severity_for_extreme_orchestration(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "studio" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            body = "\n".join(f"LaunchedEffect(key{i}) {{ x() }}" for i in range(9))
+            (ui_dir / "HomeScreen.kt").write_text(body, encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("god composable [HIGH]" in f for f in findings))
+
+    def test_ignores_screen_with_one_launched_effect(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "LaunchedEffect(vm) { vm.effect.collect { } }",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("god composable" in f for f in findings))
+
+
 class RedundantTitleTests(unittest.TestCase):
     def test_flags_screen_with_topbar_and_heading_text(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

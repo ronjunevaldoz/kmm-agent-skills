@@ -431,6 +431,8 @@ def _detect_feature_split(root: Path) -> str:
 
 
 _MULTI_VM_RE = re.compile(r'\bkoinViewModel\s*<')
+_LAUNCHED_EFFECT_RE = re.compile(r'\bLaunchedEffect\s*\(')
+_EFFECT_COLLECT_RE = re.compile(r'\.effect\s*\.\s*collect\b')
 
 
 def _detect_multi_viewmodel_screen(root: Path) -> list[str]:
@@ -454,6 +456,40 @@ def _detect_multi_viewmodel_screen(root: Path) -> list[str]:
                 f"multi viewmodel screen [MEDIUM]: {path.relative_to(root)} "
                 f"— {count} koinViewModel<> calls; move each into the child composable "
                 f"that owns it, or extract a coordinator ViewModel"
+            )
+    return findings
+
+
+def _detect_god_composable(root: Path) -> list[str]:
+    """Flag Screen/Content composables that orchestrate too much side-effect logic.
+
+    Signals of a 'god composable' — orchestration that belongs in a coordinator
+    ViewModel but leaked into the UI layer:
+      - 5+ LaunchedEffect blocks (effect collection / persistence / restore in UI), OR
+      - 3+ .effect.collect calls (the composable is acting as a VM-to-VM message bus)
+
+    The fix is a coordinator ViewModel: move state assembly, effect collection,
+    and persistence into viewModelScope so the screen shrinks to state + onIntent.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+            continue
+        if not any(part in path.stem for part in ("Screen", "Content", "Page")):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        le_count = len(_LAUNCHED_EFFECT_RE.findall(text))
+        collect_count = len(_EFFECT_COLLECT_RE.findall(text))
+        if le_count >= 5 or collect_count >= 3:
+            severity = "HIGH" if (le_count >= 8 or collect_count >= 5) else "MEDIUM"
+            findings.append(
+                f"god composable [{severity}]: {path.relative_to(root)} "
+                f"— {le_count} LaunchedEffect blocks, {collect_count} effect.collect calls; "
+                f"extract a coordinator ViewModel — move state assembly, effect collection, "
+                f"and persistence into viewModelScope so the screen is just state + onIntent"
             )
     return findings
 
@@ -747,6 +783,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Multi-ViewModel screen ─────────────────────────────────────────────────
     findings.extend(_detect_multi_viewmodel_screen(root))
+
+    # ── God composable (side-effect orchestration in UI) ───────────────────────
+    findings.extend(_detect_god_composable(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))
