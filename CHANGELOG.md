@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.34.0] — 2026-06-29
+
+### Added
+
+- feat: image palette extraction and multi-ViewModel screen detector
+
+---
+
 ## [v1.33.0] — 2026-06-29
 
 ### Added
