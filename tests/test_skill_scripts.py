@@ -596,6 +596,60 @@ class MultiViewModelScreenTests(unittest.TestCase):
             self.assertFalse(any("multi viewmodel screen" in f for f in findings))
 
 
+class ViewModelInViewModelTests(unittest.TestCase):
+    def test_flags_viewmodel_with_viewmodel_param(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "studio" / "presenter" / "src"
+            d.mkdir(parents=True)
+            (d / "StudioCoordinatorViewModel.kt").write_text(
+                "class StudioCoordinatorViewModel(\n"
+                "    private val tti: TextToImageViewModel,\n"
+                "    private val assembler: StudioStateAssembler,\n"
+                ") : MviViewModel<S, I, E>(S()) {\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_ignores_viewmodel_with_usecase_params(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "home" / "presenter" / "src"
+            d.mkdir(parents=True)
+            (d / "HomeViewModel.kt").write_text(
+                "class HomeViewModel(\n"
+                "    private val generateImage: GenerateImageUseCase,\n"
+                "    private val savedStateHandle: SavedStateHandle,\n"
+                ") : MviViewModel<S, I, E>(S()) {\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_ignores_state_holder_with_scope(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "studio" / "presenter" / "src"
+            d.mkdir(parents=True)
+            # A plain state holder is not a *ViewModel.kt file and not a ViewModel class
+            (d / "TextToImageStateHolder.kt").write_text(
+                "class TextToImageStateHolder(\n"
+                "    private val scope: CoroutineScope,\n"
+                "    private val generateImage: GenerateImageUseCase,\n"
+                ") {\n"
+                "    fun onIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
+
+
 class GodComposableTests(unittest.TestCase):
     def test_flags_screen_with_many_launched_effects(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -460,6 +460,48 @@ def _detect_multi_viewmodel_screen(root: Path) -> list[str]:
     return findings
 
 
+# Matches a class declaration whose constructor has a param typed `*ViewModel`,
+# where the class itself extends a ViewModel base. Captures the constructor block.
+_VM_CLASS_RE = re.compile(
+    r"class\s+(\w*ViewModel)\s*(?:@\w+(?:\([^)]*\))?\s*)?\((?P<ctor>.*?)\)\s*:\s*(?P<super>[^{]+)",
+    re.DOTALL,
+)
+_VM_PARAM_RE = re.compile(r":\s*\w*ViewModel\b")
+
+
+def _detect_viewmodel_in_viewmodel(root: Path) -> list[str]:
+    """Flag a ViewModel that takes another ViewModel as a constructor parameter.
+
+    ViewModels are created by ViewModelProvider/factory with their own viewModelScope,
+    SavedStateHandle, and CreationExtras — nesting them breaks lifecycle ownership and
+    DI. The fix: demote the injected sub-unit to a State Holder (plain class taking a
+    CoroutineScope) or a use case.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*ViewModel.kt"):
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for m in _VM_CLASS_RE.finditer(text):
+            ctor = m.group("ctor")
+            sup = m.group("super")
+            # Only when the class actually IS a ViewModel (extends a VM base)
+            if "ViewModel" not in sup:
+                continue
+            # Look for a constructor param typed `*ViewModel`
+            for param_match in _VM_PARAM_RE.finditer(ctor):
+                # avoid matching the class's own SavedStateHandle etc; param is `: XxxViewModel`
+                findings.append(
+                    f"viewmodel in viewmodel [HIGH]: {path.relative_to(root)} "
+                    f"— {m.group(1)} takes another ViewModel as a constructor param; "
+                    f"demote it to a State Holder (plain class + injected CoroutineScope) "
+                    f"or a use case (see MVI skill → Coordinator ViewModel)"
+                )
+                break  # one finding per class is enough
+    return findings
+
+
 def _detect_god_composable(root: Path) -> list[str]:
     """Flag Screen/Content composables that orchestrate too much side-effect logic.
 
@@ -786,6 +828,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── God composable (side-effect orchestration in UI) ───────────────────────
     findings.extend(_detect_god_composable(root))
+
+    # ── ViewModel taking another ViewModel as a constructor param ──────────────
+    findings.extend(_detect_viewmodel_in_viewmodel(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))
