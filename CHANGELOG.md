@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.36.2] — 2026-06-29
+
+### Fixed
+
+- fix(audit): detect color/spacing/dark-theme/layer smells by Compose content, not /ui/ path
+
+---
+
 ## [v1.36.1] — 2026-06-29
 
 ### Fixed
