@@ -2,6 +2,16 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.27] — 2026-06-29
+
+### Fixed
+
+- fix(design-system): AppTheme now defaults to `isSystemInDarkTheme()` on all platforms — Android, iOS, and Desktop follow OS dark mode automatically without passing `darkTheme` explicitly
+- fix(design-system): removed hardcoded `darkTheme = false` from Desktop and iOS Step 7 entry point wiring
+- feat(design-system): added `LocalAppDarkTheme` (`compositionLocalOf<Boolean?>`) for in-app theme override — null=system, true=force dark, false=force light; wired before `AppTheme` call, no signature change needed
+
+---
+
 ## [v1.29.26] — 2026-06-29
 
 ### Added
