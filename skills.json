@@ -1,5 +1,5 @@
 {
-  "version": "1.34.0",
+  "version": "1.35.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1783,7 +1783,7 @@
       "path": "skills/kotlin-multiplatform-mvi",
       "description": "MVI (Model-View-Intent) architecture pattern for Kotlin Multiplatform + Compose Multiplatform. Covers: the Contract pattern (State/Intent/Effect per screen), MviViewModel base class with StateFlow for state and Channel for one-shot effects, atomic state updates, Compose screen/content split, testing ViewModels with Turbine, and the most common MVI pitfalls in KMP. Zero new dependencies \u2014 builds on androidx.lifecycle.ViewModel and kotlinx.coroutines already present in feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-28",
+      "last_updated": "2026-06-29",
       "keywords": [
         "MVI",
         "Model-View-Intent",

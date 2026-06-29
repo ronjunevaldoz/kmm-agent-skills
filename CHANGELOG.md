@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.35.0] — 2026-06-29
+
+### Added
+
+- feat: detect god composables and add Coordinator ViewModel pattern to MVI skill
+
+---
+
 ## [v1.34.0] — 2026-06-29
 
 ### Added
