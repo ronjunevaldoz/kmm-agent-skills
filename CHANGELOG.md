@@ -2,6 +2,17 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.29] — 2026-06-29
+
+### Fixed
+
+- fix(audit): `iter_files` now scans `.kt`/`.kts` only — eliminates false positives from `.md` docs, skill references, and vendored READMEs
+- fix(audit): exclude list expanded with `build/`, `.gradle/`, `.git/`, `vendor/`, `third_party/`, `node_modules/`, `.idea/`, `.kotlin/`, `kotlin-js-store/`, and any directory ending in `.cpp` (e.g. `llama.cpp/`, `stable-diffusion.cpp/` submodules)
+- fix(audit): `data import in ui` pattern now skips `*ViewModel.kt` files — ViewModels legitimately import domain/data interfaces through repositories
+- fix(design-system): added trigger keywords for `LocalAppDarkTheme`, `isSystemInDarkTheme`, `dark mode toggle`, `in-app theme override`, `user theme preference`, `dynamic theme`, `runtime theme switch`
+
+---
+
 ## [v1.29.28] — 2026-06-29
 
 ### Added
