@@ -444,7 +444,7 @@ def _detect_multi_viewmodel_screen(root: Path) -> list[str]:
     """
     findings: list[str] = []
     for path in root.rglob("*Screen.kt"):
-        if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+        if _is_excluded(path, root):
             continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
@@ -483,7 +483,7 @@ def _detect_viewmodel_as_composable_param(root: Path) -> list[str]:
     """
     findings: list[str] = []
     for path in root.rglob("*.kt"):
-        if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+        if _is_excluded(path, root):
             continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
@@ -561,7 +561,7 @@ def _detect_god_composable(root: Path) -> list[str]:
     """
     findings: list[str] = []
     for path in root.rglob("*.kt"):
-        if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+        if _is_excluded(path, root):
             continue
         if not any(part in path.stem for part in ("Screen", "Content", "Page")):
             continue
@@ -606,7 +606,7 @@ def _detect_redundant_title(root: Path) -> list[str]:
     Text in the content body — the title is shown twice visually."""
     findings: list[str] = []
     for path in root.rglob("*.kt"):
-        if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+        if _is_excluded(path, root):
             continue
         if not any(part in path.stem for part in ("Screen", "Content", "Page")):
             continue
@@ -650,7 +650,7 @@ def _detect_missing_adaptive_coverage(root: Path) -> list[str]:
 
     findings: list[str] = []
     for path in root.rglob("*Screen.kt"):
-        if not any(token in path.as_posix() for token in ("/ui/", "/presentation/")):
+        if _is_excluded(path, root):
             continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")

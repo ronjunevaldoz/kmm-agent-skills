@@ -581,10 +581,26 @@ class MultiViewModelScreenTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any("multi viewmodel screen" in f for f in findings))
 
-    def test_ignores_viewmodel_file_outside_ui(self) -> None:
+    def test_flags_screen_regardless_of_package_path(self) -> None:
+        # The detector no longer requires a /ui/ path — a *Screen.kt with 3+ VMs is
+        # flagged wherever it lives (projects don't all use the /ui/ module convention).
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            src_dir = root / "feature" / "studio" / "domain" / "src"
+            src_dir = root / "composeApp" / "src" / "commonMain" / "kotlin" / "home"
+            src_dir.mkdir(parents=True)
+            (src_dir / "StudioScreen.kt").write_text(
+                "val a = koinViewModel<AViewModel>()\n"
+                "val b = koinViewModel<BViewModel>()\n"
+                "val c = koinViewModel<CViewModel>()\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("multi viewmodel screen" in f for f in findings))
+
+    def test_ignores_screen_in_build_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "composeApp" / "build" / "generated"
             src_dir.mkdir(parents=True)
             (src_dir / "StudioScreen.kt").write_text(
                 "val a = koinViewModel<AViewModel>()\n"
@@ -689,6 +705,20 @@ class ViewModelAsComposableParamTests(unittest.TestCase):
             )
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any("viewmodel as composable param" in f for f in findings))
+
+    def test_flags_outside_ui_path(self) -> None:
+        # No /ui/ segment — common when a project does not use the layered module convention.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "composeApp" / "src" / "commonMain" / "kotlin" / "home"
+            d.mkdir(parents=True)
+            (d / "HomeScreen.kt").write_text(
+                "@Composable\n"
+                "fun HomeScreen(studioVm: StudioViewModel) {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel as composable param" in f for f in findings))
 
 
 class GodComposableTests(unittest.TestCase):
