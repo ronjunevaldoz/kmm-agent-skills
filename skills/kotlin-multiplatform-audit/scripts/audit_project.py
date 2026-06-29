@@ -422,6 +422,7 @@ def _detect_feature_split(root: Path) -> str:
 _EXCLUDED_DIRS = {
     "build", ".gradle", ".git", "vendor", "third_party",
     "node_modules", ".idea", ".kotlin", "kotlin-js-store",
+    "worktrees",  # .claude/worktrees/ — agent scratch copies of the repo
 }
 
 

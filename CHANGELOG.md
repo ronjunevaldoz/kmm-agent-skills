@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.29.30] — 2026-06-29
+
+### Fixed
+
+- fix(audit): exclude `worktrees/` directory from `_EXCLUDED_DIRS` — prevents `.claude/worktrees/` agent scratch copies from being scanned, which was causing duplicate findings (same violation reported 5-6× for a single real file)
+
+---
+
 ## [v1.29.29] — 2026-06-29
 
 ### Fixed
