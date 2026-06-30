@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.44.0] — 2026-06-30
+
+### Added
+
+- feat(layout-system): deterministic one-file-per-screen wireframe creator
+
+---
+
 ## [v1.43.0] — 2026-06-30
 
 ### Added
