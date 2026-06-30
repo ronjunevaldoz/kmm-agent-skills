@@ -12,7 +12,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-26'
+  last-updated: '2026-06-30'
   keywords:
     - lessons learned
     - skill feedback
@@ -43,9 +43,34 @@ deviated from skill guidance, or where the skill gave you no guidance at all.
 
 ---
 
+## Creating a Lesson — one file per finding
+
+**Always create lessons with the script** — it writes exactly ONE file per finding to
+`docs/lessons/YYYY-MM-DD-<slug>.md` and never appends to or overwrites an existing file:
+
+```bash
+python3 ~/.claude/skills/kotlin-multiplatform-lessons/scripts/create_lesson.py \
+  --skill kotlin-multiplatform-mvi \
+  --type correction --severity high \
+  --title "Effect replayed on nav back" \
+  --followed "…" --broke "…" --correct "…" --evidence "file:line" --proposed "…"
+```
+
+(From inside kmm-agent-skills, use `skills/kotlin-multiplatform-lessons/scripts/create_lesson.py`.)
+
+**One finding = one invocation = one file.** If you have three findings, run the script
+three times — never hand-write a single file containing multiple lessons, and never append
+a second lesson to an existing file. The harvester reads `docs/lessons/*.md` as one Lesson
+per file; combining them breaks grouping and per-lesson review.
+
+Body fields are optional — omit them and the script inserts a `_TODO_` placeholder to fill in.
+A repeated title gets a numeric suffix so an existing lesson is never overwritten.
+
+---
+
 ## Lesson File Format
 
-Save lessons to `docs/lessons/YYYY-MM-DD-short-slug.md` in the consumer project.
+Each lesson is its own file at `docs/lessons/YYYY-MM-DD-short-slug.md` in the consumer project.
 
 ```markdown
 ---
@@ -247,19 +272,25 @@ If you are unsure whether a finding warrants a lesson: if it took more than one 
 - Using vague titles like `fix` or `update` — the title is the primary search key; make it specific enough to find without reading the body
 - Filing a lesson for a one-off project quirk rather than a repeatable pattern — lessons are only useful if the finding could recur in another project
 - Skipping `evidence` — without a file path or line reference, the lesson cannot be verified or acted on by the harvester
+- Combining multiple findings into one file, or appending a new lesson to an existing file — the harvester reads one Lesson per file, so this breaks grouping and review. Run `create_lesson.py` once per finding instead
 
 ---
 
 ## Testing
 
-Lessons are structured YAML-like markdown files, not code. Validation is structural:
+Lessons are structured markdown files, not code. Validation is structural:
 
-- Required fields present: `title`, `skill`, `what_we_followed`, `what_broke`, `correct_pattern`, `evidence`
-- `skill` value matches a directory name under `skills/` in the skills repo
-- `evidence` contains at least one file path or code excerpt
-- File name follows `YYYY-MM-DD-kebab-case-title.md` convention in `docs/lessons/`
+- Frontmatter has `skill`, `date`, `severity` (high/medium/low), `type`
+  (correction/gap/better-pattern/deprecation/confirmation)
+- Body has the sections: `What we followed`, `What broke / what we discovered`,
+  `Correct pattern`, `Evidence`, `Proposed skill change`
+- `skill` value matches a directory name under `skills/` in the skills repo (or `unknown`)
+- `Evidence` contains at least one file path or code excerpt
+- **Exactly one lesson per file**, named `YYYY-MM-DD-kebab-case-title.md` in `docs/lessons/`
 
-Run `python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .` to catch naming violations.
+Using `create_lesson.py` guarantees the frontmatter, section skeleton, naming, and the
+one-file-per-lesson rule. Run the harvester to confirm a batch parses:
+`python3 ~/.claude/skills/kotlin-multiplatform-skill-harvester/scripts/harvest_lessons.py .`
 
 ---
 
@@ -282,4 +313,5 @@ When writing a lesson, respond with the complete lesson file content — no surr
 
 | Date | Change |
 |---|---|
+| 2026-06-30 | Added create_lesson.py — deterministic one-file-per-finding creator (auto date/slug, never appends or overwrites) + lesson-template.md. Hardened the one-lesson-per-file rule, fixed the Testing section to match the real frontmatter schema, new anti-pattern against combined/appended lesson files. |
 | 2026-06-26 | Initial release — lesson format, field reference, examples, directory convention. |
