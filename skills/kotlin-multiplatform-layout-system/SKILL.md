@@ -15,7 +15,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-27'
+  last-updated: '2026-06-30'
   keywords:
     - layout system
     - wireframe
@@ -78,11 +78,32 @@ docs/layout-system/
 
 ---
 
+## Creating screen files — one file per screen
+
+**Use the script to scaffold each screen** — it writes exactly ONE file per invocation to
+`docs/layout-system/<screen>.md`, bootstraps `_components.md` once, and refuses to overwrite
+an existing screen file (edit those in place):
+
+```bash
+python3 ~/.claude/skills/kotlin-multiplatform-layout-system/scripts/create_wireframe.py \
+  --screen "Inbox" --pattern A
+```
+
+(From inside kmm-agent-skills, use `skills/kotlin-multiplatform-layout-system/scripts/create_wireframe.py`.)
+
+**One screen = one invocation = one file.** Never put two screens in one file and never
+append a screen to another screen's file. The script seeds the correct section skeleton and
+a starting wireframe block for the chosen pattern (A/B/C/D) — you then fill in the component
+table and draw the ASCII wireframe (keep every row the same character width).
+
+---
+
 ## Bootstrap (project has no layout-system yet)
 
 1. Read the project source to identify all existing screens and persistent components.
-2. Create `docs/layout-system/` and `_components.md`.
-3. Create one screen file per major screen.
+2. Run `create_wireframe.py` once per screen — it creates `docs/layout-system/` and
+   `_components.md` on the first call, then one screen file per subsequent call.
+3. Fill in each screen file's component table and ASCII wireframe.
 4. Link to `docs/layout-system/` from `docs/architecture.md` or `README.md`.
 
 ---
@@ -339,6 +360,7 @@ Use Pattern A (3-col) for tablet/desktop, Pattern B (2-col) when the side panel 
 - Using emoji inside the ASCII grid (breaks monospace alignment) — put emoji only in the Legend line
 - Letting `_components.md` drift from the actual Compose component names — it is a living registry, not a snapshot
 - Writing `docs/layout-system/` files that describe the current implementation rather than the intended design; the layout doc should lead the code, not follow it
+- Putting more than one screen in a single file, or appending a screen to another screen's file — run `create_wireframe.py` once per screen so each gets its own file
 
 ---
 
@@ -386,6 +408,7 @@ Keep explanations short. The wireframe is the primary output — do not narrate 
 
 | Date | Change |
 |---|---|
+| 2026-06-30 | Added create_wireframe.py — deterministic one-file-per-screen scaffolder (seeds section skeleton + pattern A/B/C/D block, bootstraps _components.md once, never overwrites). Hardened the one-screen-per-file rule; new anti-pattern against multi-screen files. |
 | 2026-06-27 | Made all templates fully generic — replaced project-specific component names with `<placeholders>`. Added filled example using a neutral messaging app. Reframed purpose as draft/document, not limit. |
 | 2026-06-27 | Fixed ASCII wireframe alignment: removed emoji from grid, moved to Legend line, standardized row widths per template. |
 | 2026-06-27 | Initial release — layout system format, ASCII wireframe spec, component registry, screen file template, bootstrap flow. |
