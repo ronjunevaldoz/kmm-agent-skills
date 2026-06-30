@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.43.0] — 2026-06-30
+
+### Added
+
+- feat(lessons): deterministic per-lesson file creator (one file per finding)
+
+---
+
 ## [v1.42.0] — 2026-06-29
 
 ### Added

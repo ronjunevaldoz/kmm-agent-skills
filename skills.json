@@ -1,5 +1,5 @@
 {
-  "version": "1.42.0",
+  "version": "1.43.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1567,7 +1567,7 @@
       "path": "skills/kotlin-multiplatform-lessons",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-26",
+      "last_updated": "2026-06-30",
       "keywords": [
         "lessons learned",
         "skill feedback",
@@ -1592,7 +1592,9 @@
         "upstream this",
         "feed back to skills"
       ],
-      "scripts": []
+      "scripts": [
+        "create_lesson.py"
+      ]
     },
     {
       "name": "kotlin-multiplatform-library-publishing",
