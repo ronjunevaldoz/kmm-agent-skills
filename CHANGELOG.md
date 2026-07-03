@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.45.3] — 2026-07-04
+
+### Fixed
+
+- fix(design-system): audit against official Compose Styles API docs; fix isEnabled bug
+
+---
+
 ## [v1.45.2] — 2026-07-04
 
 ### Fixed
