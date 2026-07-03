@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.45.2] — 2026-07-04
+
+### Fixed
+
+- fix(release): document + detect platform-native version field derivation (closes #2)
+
+---
+
 ## [v1.45.1] — 2026-07-03
 
 ### Fixed
