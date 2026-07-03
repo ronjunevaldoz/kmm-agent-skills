@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.47.0] — 2026-07-04
+
+### Added
+
+- feat(audit): complete Style API auditing; wire AppAvatar; document coverage honestly
+
+---
+
 ## [v1.46.0] — 2026-07-04
 
 ### Added
