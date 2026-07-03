@@ -1015,6 +1015,73 @@ class RasterInCommonMainTests(unittest.TestCase):
             self.assertFalse(any("raster asset in commonMain" in f for f in findings))
 
 
+class HardcodedVersionCodeTests(unittest.TestCase):
+    def test_flags_literal_version_code(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "androidApp"
+            d.mkdir(parents=True)
+            (d / "build.gradle.kts").write_text(
+                'plugins { id("com.android.application") }\n'
+                "android {\n"
+                "    defaultConfig {\n"
+                '        applicationId = "com.example.app"\n'
+                "        versionCode = 1\n"
+                '        versionName = "1.19.1"\n'
+                "    }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded android versioncode" in f for f in findings))
+
+    def test_ignores_derived_formula(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "androidApp"
+            d.mkdir(parents=True)
+            (d / "build.gradle.kts").write_text(
+                'plugins { id("com.android.application") }\n'
+                "android {\n"
+                "    defaultConfig {\n"
+                '        applicationId = "com.example.app"\n'
+                "        versionCode = major * 1_000_000 + minor * 1_000 + patch\n"
+                "    }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded android versioncode" in f for f in findings))
+
+    def test_ignores_variable_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "androidApp"
+            d.mkdir(parents=True)
+            (d / "build.gradle.kts").write_text(
+                'plugins { id("com.android.application") }\n'
+                "val computedVersionCode = 1_000_002\n"
+                "android {\n"
+                "    defaultConfig {\n"
+                '        applicationId = "com.example.app"\n'
+                "        versionCode = computedVersionCode\n"
+                "    }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded android versioncode" in f for f in findings))
+
+    def test_ignores_non_android_app_module(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "someModule"
+            d.mkdir(parents=True)
+            (d / "build.gradle.kts").write_text("val versionCode = 1\n", encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded android versioncode" in f for f in findings))
+
+
 class LayoutGuardrailTests(unittest.TestCase):
     def test_flags_arbitrary_weight(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

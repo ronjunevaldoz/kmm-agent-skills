@@ -677,6 +677,51 @@ _EXCLUDED_DIRS = {
     "worktrees",  # .claude/worktrees/ — agent scratch copies of the repo
 }
 
+# ── Hardcoded Android versionCode ─────────────────────────────────────────────
+
+# A bare integer literal assignment — nothing else on the value side. A derived
+# expression (major * 1_000_000 + minor * 1_000 + patch, or a variable reference)
+# never matches this because the lookahead requires end-of-line/comment/brace right
+# after the digits, with no trailing operator or identifier.
+_VERSION_CODE_LITERAL_RE = re.compile(
+    r"versionCode\s*=\s*([0-9][0-9_]*)[ \t]*(?=\r?\n|//|\}|$)", re.MULTILINE
+)
+_ANDROID_APP_MARKER_RE = re.compile(r"applicationId\s*=|com\.android\.application")
+
+
+def _detect_hardcoded_android_version_code(root: Path) -> list[str]:
+    """Flag a hardcoded (literal) Android versionCode in an app module.
+
+    versionCode must be strictly increasing across ACCEPTED Play Console uploads. A bare
+    integer literal will not auto-increment on the next release — it must be derived from
+    the single semver source of truth (e.g. major*1_000_000 + minor*1_000 + patch). This
+    is a silent trap: the app builds and runs identically whether versionCode is derived
+    or hardcoded, and the bug only surfaces as a hard Play Console rejection on the
+    SECOND release, by which point several versions may have shipped unnoticed.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.gradle.kts"):
+        if _is_excluded(path, root):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not _ANDROID_APP_MARKER_RE.search(text):
+            continue
+        m = _VERSION_CODE_LITERAL_RE.search(text)
+        if m:
+            line_no, snippet = _at(text, m.start())
+            findings.append(
+                f"hardcoded android versioncode [MEDIUM]: {path.relative_to(root)}:{line_no} "
+                f"— versionCode is a literal integer ({m.group(1)}); Play Console rejects an "
+                f"upload whose versionCode isn't strictly higher than the last accepted one — "
+                f"derive it from the semver source instead, e.g. major*1_000_000 + minor*1_000 "
+                f"+ patch (see release skill → platform-native version fields)\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
 # Stems that signal a top-level screen/page composable, across naming conventions.
 _SCREEN_STEMS = ("Screen", "Content", "Page", "View", "Route")
 
@@ -1426,6 +1471,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Incomplete WindowSizeClass branch coverage ──────────────────────────────
     findings.extend(_detect_breakpoint_branch_missing(root))
+
+    # ── Hardcoded Android versionCode ──────────────────────────────────────────
+    findings.extend(_detect_hardcoded_android_version_code(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))

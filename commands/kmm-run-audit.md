@@ -37,6 +37,7 @@ The script detects architectural and design smells:
 | `hardcoded spacing` | `padding(16.dp)` or `padding(horizontal = 8.dp)` in a UI file instead of `AppTheme.spacing.X` — layout inconsistency |
 | `redundant screen title` | `AppTopAppBar` in topBar slot AND heading-style `AppText` in content — title shown twice |
 | `adaptive coverage` | Screen composable missing `windowSizeClass` param while project uses adaptive layout |
+| `hardcoded android versioncode` | `versionCode = <literal int>` in an Android app module — Play Console rejects an upload whose versionCode isn't strictly higher than the last accepted one; derive it from the semver source instead |
 
 ---
 
@@ -98,6 +99,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `raster asset in commonMain` | `imagevector-generator` | PNG/JPG in `commonMain` resources — icons/flat art should be compiled ImageVectors (`/kmm-vectorize`); photos are exempt under `assets/photos/` |
 | `raw weight literal` | `layout-system`, `adaptive-layout` | `weight(0.37f)`-style arbitrary proportion — use simple fractions (`1f`, `1.5f`, `2f`, `3f`) from the slot-grid contract; regenerate the shell with `generate_slot_scaffold.py` |
 | `breakpoint branch missing` | `adaptive-layout` | A `when(widthSizeClass)` that handles some but not all of Compact/Medium/Expanded with no `else` — the unhandled size falls through silently |
+| `hardcoded android versioncode` | `release` | `versionCode = <literal>` in an Android app module — derive it from the semver source (`major*1_000_000 + minor*1_000 + patch`); a static value passes every check locally and only fails as a hard Play Console rejection on the second upload |
 
 ---
 
