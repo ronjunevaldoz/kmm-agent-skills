@@ -1,5 +1,5 @@
 {
-  "version": "1.47.0",
+  "version": "1.47.1",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -848,7 +848,7 @@
     {
       "name": "kotlin-multiplatform-design-system-extended",
       "path": "skills/kotlin-multiplatform-design-system-extended",
-      "description": "Extends :core:designsystem (from kotlin-multiplatform-design-system) with 27 production-ready components using the Compose Styles API. Covers: Icon, IconButton, Label, Separator, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton, Switch, Slider, Select/Dropdown, Progress (linear + circular), Skeleton, Spinner, Alert, Toast/Snackbar system (ToastHostState + Scaffold slot), Dialog, AlertDialog, Sheet (BottomSheet), Tooltip, Popover, Accordion/Collapsible. All components built on CMP primitives (no Material3). Requires kotlin-multiplatform-design-system skill.",
+      "description": "Extends :core:designsystem (from kotlin-multiplatform-design-system) with 26 production-ready components using the Compose Styles API. Covers: Icon, IconButton, Label, Separator, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton, Switch, Slider, Select/Dropdown, Progress (linear + circular), Skeleton, Spinner, Alert, Toast/Snackbar system (AppToastHostState + Scaffold slot), Dialog, AlertDialog, Sheet (BottomSheet), Tooltip, Popover, Accordion/Collapsible. All components built on CMP primitives (no Material3). \"App\" is a placeholder prefix \u2014 see the base skill's Step 0 for how it is resolved from the project name (scripts/derive_component_prefix.py). Requires kotlin-multiplatform-design-system skill.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-05",
       "keywords": [
@@ -927,7 +927,11 @@
         "show toast",
         "loading state",
         "empty state",
-        "error state"
+        "error state",
+        "circular progress",
+        "progress ring",
+        "determinate progress",
+        "indeterminate progress"
       ],
       "scripts": []
     },

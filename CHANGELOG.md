@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.47.1] — 2026-07-04
+
+### Fixed
+
+- fix(design-system-extended): rename Toast* to AppToast*, add missing AppCircularProgress
+
+---
+
 ## [v1.47.0] — 2026-07-04
 
 ### Added
