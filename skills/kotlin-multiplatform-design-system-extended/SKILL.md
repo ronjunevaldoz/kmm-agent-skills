@@ -110,6 +110,33 @@ and apply the same `@ExperimentalStylesApi` token pattern as the core system.
 - **Stable** — API locked; breaking changes come with a migration note in the Changelog.
 - **Experimental** — API may change between skill versions; review diffs before accepting updates.
 
+### Style API coverage
+
+Not every component should expose a `style: Style` override — see the base skill's
+Component API Placement table. This is the honest per-component status so the audit
+doesn't flag correctly-exempt components as gaps:
+
+| Component | Style API status | Why |
+|---|---|---|
+| `AppIconButton` | ✅ Wired | Interactive leaf control — `rememberUpdatedStyleState` + `styleable` |
+| `AppAvatar` | ✅ Wired | Static leaf control — `style` escape hatch for one-off overrides (e.g. status ring) |
+| `AppIcon`, `AppLabel`, `AppSeparator` | ⚠️ Not yet wired | Simple data+param leaf controls; a `style` escape hatch would still be valid — candidates for a future pass |
+| `AppSpinner` | ✅ Correctly exempt | Infinite rotation animation — Styles API does not support infinite animations (see `references/compose-styles-api-reference.md` §10); uses `rememberInfiniteTransition` instead, as documented in its own docstring |
+| `AppSkeleton`, `AppProgress` | ⚠️ Not yet wired | Same infinite-animation constraint may apply to the shimmer/indeterminate variants — verify per-variant before wiring |
+| `AppCheckbox`, `AppRadioButton`, `AppSwitch` | ⚠️ Not yet wired | Custom Canvas-drawn glyphs (checkmark, dot, thumb) sit outside the Style property set (no arbitrary path-drawing property) — per Styles-vs-Modifiers guidance this is legitimately Modifier/Canvas territory; only the container chrome (background/border color per checked/enabled state) is a real Style candidate, not yet extracted |
+| `AppSlider` | ✅ Correctly exempt | Continuous drag value, not a discrete interaction state — doesn't fit the StyleState model |
+| `AppSelect` | ⚠️ Not yet wired | Leaf control candidate — dropdown chrome (background/border/shape) is stylable |
+| `AppTopAppBar`, `AppNavigationBar`, `AppScaffold`, `AppTabs` | ✅ Correctly exempt | Slot API / app-shell chrome per the base skill's Component API Placement table — caller owns content, shell stays fixed |
+| `AppAlert`, `AppToast` | ⚠️ Not yet wired | Variant-driven leaf controls (info/success/warning/error) — good Style candidates |
+| `AppDialog`, `AppAlertDialog`, `AppSheet`, `AppTooltip`, `AppPopover` | ✅ Correctly exempt | Slot API — overlay chrome, not a themed variant leaf control |
+| `AppAccordion` | ⚠️ Not yet wired | Animation API is still in flux (Experimental tier); revisit once stabilized |
+
+**Reading this table:** ✅ means the current state is correct and should not be flagged.
+⚠️ means a real gap — a future pass should extract the container chrome (background,
+border, shape) into a `Style` value and expose a `style: Style = Style` parameter,
+following the `AppAvatar` pattern above for static components or the base skill's
+`AppButton` pattern (`rememberUpdatedStyleState` + custom state keys) for interactive ones.
+
 ---
 
 ## Step 1: Add styles for new components
@@ -494,22 +521,23 @@ fun AppSeparator(
 ```kotlin
 package GROUP_ID.core.designsystem.components
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.style.MutableStyleState
 import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.MutableStyleState
 import androidx.compose.foundation.style.styleable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import GROUP_ID.core.designsystem.theme.appTheme
+import GROUP_ID.core.designsystem.theme.colors
+import GROUP_ID.core.designsystem.theme.shapes
 
 sealed interface AvatarSize {
     val dp: Dp
@@ -519,12 +547,21 @@ sealed interface AvatarSize {
     data object Xl  : AvatarSize { override val dp = 72.dp }
 }
 
+// Default chrome — background + circular shape. Consumers override via the `style`
+// escape hatch (e.g. a border for an "online" ring) without touching this file.
+private val avatarDefaultStyle = Style {
+    background(colors.secondary)
+    shape(CircleShape)
+}
+
 /**
  * Usage:
  * ```
  * AppAvatar(initials = "RV")
  * AppAvatar(initials = "RV", size = AvatarSize.Lg)
  * AppAvatar(painter = painterResource(Res.drawable.ic_user), contentDescription = "Profile")
+ * // One-off override — e.g. an "online" ring:
+ * AppAvatar(initials = "RV", style = Style { borderWidth(2.dp); borderColor(Color.Green) })
  * ```
  */
 @Composable
@@ -534,17 +571,18 @@ fun AppAvatar(
     painter: Painter? = null,
     contentDescription: String? = null,
     size: AvatarSize = AvatarSize.Md,
+    style: Style = Style,        // ← empty; DO NOT set a default Style here
 ) {
     val theme = appTheme
+    val styleState = remember { MutableStyleState() }   // static — no interaction to track
     Box(
         modifier = modifier
             .size(size.dp)
-            .clip(CircleShape)
-            .background(theme.colors.secondary),
+            .styleable(styleState, avatarDefaultStyle, style),
         contentAlignment = Alignment.Center,
     ) {
         if (painter != null) {
-            androidx.compose.foundation.Image(
+            Image(
                 painter = painter,
                 contentDescription = contentDescription,
                 modifier = Modifier.size(size.dp),
@@ -2732,6 +2770,7 @@ Assume `kotlin-multiplatform-design-system` is already applied. Use the user's v
 
 | Date | Change |
 |---|---|
+| 2026-07-05 | Added "Style API coverage" table classifying all 24 components (wired / correctly slot-API-exempt / correctly exempt due to a real limitation / not-yet-wired) so the audit's Style-compliance detectors don't flag legitimate exemptions as gaps. Wired `AppAvatar` (was importing `Style`/`MutableStyleState`/`styleable` unused — dead code from an unfinished wiring attempt): added a `style: Style = Style` escape hatch and an `avatarDefaultStyle` for its background/shape. |
 | 2026-07-05 | Fixed `AppIconButton`: `styleState.enabled = enabled` used the wrong property name and a non-idiomatic construction — corrected to `rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }` per the official Compose Styles API docs (see base skill's `references/compose-styles-api-reference.md`). |
 | 2026-06-22 | Renamed all `TextStyle.` references → `AppTextStyle.` to align with base skill rename. |
 | 2026-06-06 | Initial release. |

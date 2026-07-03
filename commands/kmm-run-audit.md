@@ -38,6 +38,11 @@ The script detects architectural and design smells:
 | `redundant screen title` | `AppTopAppBar` in topBar slot AND heading-style `AppText` in content — title shown twice |
 | `adaptive coverage` | Screen composable missing `windowSizeClass` param while project uses adaptive layout |
 | `hardcoded android versioncode` | `versionCode = <literal int>` in an Android app module — Play Console rejects an upload whose versionCode isn't strictly higher than the last accepted one; derive it from the semver source instead |
+| `style default with body` | `Style { ... }` set as a parameter default instead of an empty `Style` — official Don't #2 |
+| `style state wrong enabled property` | `.enabled = ` on a StyleState — the real property is `isEnabled` |
+| `style param on screen composable` | A `style: Style` param on a `*Screen`/`*Content`/`*Page` composable — Styles are for components, not screens |
+| `stale compositionlocal in style function` | A `@Composable fun ...Style(): Style` reading `MaterialTheme.*`/`Local*.current` before returning — captured once, goes stale |
+| `missing indication null with style state` | A `pressed{}`/`hovered{}` Style block alongside a `clickable(...)` with no `indication = null` anywhere in the file — doubled ripple + Style effect |
 
 ---
 
@@ -100,6 +105,11 @@ For every finding, load the relevant skill and give a concrete fix:
 | `raw weight literal` | `layout-system`, `adaptive-layout` | `weight(0.37f)`-style arbitrary proportion — use simple fractions (`1f`, `1.5f`, `2f`, `3f`) from the slot-grid contract; regenerate the shell with `generate_slot_scaffold.py` |
 | `breakpoint branch missing` | `adaptive-layout` | A `when(widthSizeClass)` that handles some but not all of Compact/Medium/Expanded with no `else` — the unhandled size falls through silently |
 | `hardcoded android versioncode` | `release` | `versionCode = <literal>` in an Android app module — derive it from the semver source (`major*1_000_000 + minor*1_000 + patch`); a static value passes every check locally and only fails as a hard Play Console rejection on the second upload |
+| `style default with body` | `design-system` | Use an empty `style: Style = Style` default; merge project defaults inside via `defaultStyle then style` in `Modifier.styleable(...)` |
+| `style state wrong enabled property` | `design-system` | Replace `.enabled = ` with `rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }` |
+| `style param on screen composable` | `design-system` | Remove the `style: Style` param from the screen; hoist the styling into a child component instead |
+| `stale compositionlocal in style function` | `design-system` | Read the token via a `StyleScope` extension property inside the `Style { }` lambda, never outside it in a `@Composable`-returning-`Style` function |
+| `missing indication null with style state` | `design-system` | Add `indication = null` to the `clickable(...)` call so the Style animation is the only visual feedback |
 
 ---
 

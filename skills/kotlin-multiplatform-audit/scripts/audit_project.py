@@ -722,6 +722,203 @@ def _detect_hardcoded_android_version_code(root: Path) -> list[str]:
             )
     return findings
 
+
+# ── Compose Styles API compliance ─────────────────────────────────────────────
+# Detectors below check generated/hand-written code against the official Do's/Don'ts
+# and Limitations in references/compose-styles-api-reference.md (design-system skill).
+
+# Don't #2 — a `style: Style = Style { ... }` default WITH A BODY. The sanctioned form
+# is an empty default (`style: Style = Style`); defaults are merged inside the function.
+_STYLE_DEFAULT_WITH_BODY_RE = re.compile(r"style\s*:\s*Style\s*=\s*Style\s*\{")
+
+# Regression guard for the isEnabled bug: `.enabled = ` is not a real StyleState
+# property (the official API uses `isEnabled`). Scoped to a `styleState` receiver name
+# to avoid matching unrelated `.enabled` properties on other types.
+_STYLE_STATE_WRONG_ENABLED_RE = re.compile(r"\b(?:styleState|it)\.enabled\s*=")
+
+# Don't #3 — a `style: Style` parameter on a composable whose name signals a screen/page,
+# not a component. Reuses the same stems the structural detectors already recognize.
+_STYLE_PARAM_ON_SCREEN_RE = re.compile(
+    r"@Composable\s+(?:private\s+|internal\s+|public\s+)?fun\s+(\w+)\s*\([^)]*\bstyle\s*:\s*Style\b"
+)
+
+# Don't #4 — a @Composable function named ...Style(): Style that reads a CompositionLocal
+# (MaterialTheme.* or a Local*.current accessor) and returns a Style built from it. The
+# value is captured once at definition time and goes stale when the theme changes.
+_STYLE_RETURNING_FUN_RE = re.compile(
+    r"@Composable\s+fun\s+\w*[Ss]tyle\s*\([^)]*\)\s*:\s*Style\s*\{(?P<body>.*?)\n\}",
+    re.DOTALL,
+)
+_COMPOSITIONLOCAL_READ_RE = re.compile(r"MaterialTheme\.\w+|\bLocal\w+\.current\b")
+
+# Limitation §5 — pressed{}/hovered{} Style blocks combined with a clickable() that
+# doesn't set indication = null render both the Style animation AND the default ripple.
+_STYLE_PRESSED_OR_HOVERED_RE = re.compile(r"\b(?:pressed|hovered)\s*\{")
+_CLICKABLE_CALL_RE = re.compile(r"\bclickable\s*\(")
+_INDICATION_NULL_RE = re.compile(r"\bindication\s*=\s*null\b")
+
+
+def _detect_style_default_with_body(root: Path) -> list[str]:
+    """Flag `style: Style = Style { ... }` — a default WITH a body.
+
+    The sanctioned pattern is an empty default (`style: Style = Style`) with project
+    defaults merged inside the function via `defaultStyle then style` in
+    `Modifier.styleable(...)`. A default with a body can silently clobber the merge
+    order and makes the "empty by convention" contract ambiguous for callers.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        m = _STYLE_DEFAULT_WITH_BODY_RE.search(text)
+        if m:
+            line_no, snippet = _at(text, m.start())
+            findings.append(
+                f"style default with body [MEDIUM]: {path.relative_to(root)}:{line_no} "
+                f"— 'style: Style = Style {{ ... }}' as a parameter default; use an empty "
+                f"'style: Style = Style' and merge project defaults inside via "
+                f"'defaultStyle then style' in Modifier.styleable(...) "
+                f"(see compose-styles-api-reference.md → Do's #6, Don't #2)\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
+def _detect_style_state_wrong_enabled(root: Path) -> list[str]:
+    """Flag `styleState.enabled = ...` — not a real StyleState property.
+
+    The official API property is `isEnabled`, set via
+    `rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }`. This is a
+    regression guard for the exact bug found and fixed across AppButton/AppChip/
+    AppTextField/AppIconButton during the Compose Styles API doc audit.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        m = _STYLE_STATE_WRONG_ENABLED_RE.search(text)
+        if m:
+            line_no, snippet = _at(text, m.start())
+            findings.append(
+                f"style state wrong enabled property [HIGH]: {path.relative_to(root)}:{line_no} "
+                f"— '.enabled = ' is not a real StyleState property; the API uses 'isEnabled'. "
+                f"Use rememberUpdatedStyleState(interactionSource) {{ it.isEnabled = enabled }} "
+                f"(see compose-styles-api-reference.md § State construction)\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
+def _detect_style_param_on_screen(root: Path) -> list[str]:
+    """Flag a `style: Style` parameter on a screen/page-named composable.
+
+    Styles are designed for components, not layouts or screen-level composables — the
+    official docs call this out explicitly (unclear to callers what a style would do at
+    the layout level).
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for m in _STYLE_PARAM_ON_SCREEN_RE.finditer(text):
+            fn_name = m.group(1)
+            if not any(fn_name.endswith(stem) for stem in _SCREEN_STEMS):
+                continue
+            line_no, snippet = _at(text, m.start())
+            findings.append(
+                f"style param on screen composable [MEDIUM]: {path.relative_to(root)}:{line_no} "
+                f"— @Composable {fn_name}(...) takes a 'style: Style' param; Styles are for "
+                f"components, not screens/layouts — hoist the styling into a child component "
+                f"instead (see compose-styles-api-reference.md → Don't #3)\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
+def _detect_stale_compositionlocal_in_style_function(root: Path) -> list[str]:
+    """Flag a @Composable ...Style(): Style function that reads a CompositionLocal and
+    returns a built Style — the value is captured once at definition time, not at the
+    point the Style is actually consumed, and goes stale when the theme changes.
+
+    The correct pattern is a StyleScope extension property (e.g. `val StyleScope.colors
+    get() = ...`) read INSIDE the `Style { }` lambda, never outside it.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for m in _STYLE_RETURNING_FUN_RE.finditer(text):
+            body = m.group("body")
+            return_style_idx = body.find("return Style")
+            if return_style_idx == -1:
+                continue
+            before_return = body[:return_style_idx]
+            local_match = _COMPOSITIONLOCAL_READ_RE.search(before_return)
+            if not local_match:
+                continue
+            line_no, snippet = _at(text, m.start() + len("@Composable fun "))
+            findings.append(
+                f"stale compositionlocal in style function [HIGH]: {path.relative_to(root)}:{line_no} "
+                f"— a @Composable fun ...Style(): Style reads '{local_match.group(0)}' before "
+                f"returning the Style; the value is captured once at definition time and goes "
+                f"stale when the theme changes. Use a StyleScope extension property read inside "
+                f"the Style {{ }} lambda instead (see compose-styles-api-reference.md → Don't #4)\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
+def _detect_missing_indication_null_with_style_state(root: Path) -> list[str]:
+    """Flag a file with a Style `pressed {}`/`hovered {}` block and a `clickable(...)`
+    call that has no `indication = null` anywhere in the file.
+
+    Without indication = null, the Style-driven visual change AND the platform's default
+    ripple render simultaneously — a visibly doubled effect (official Limitations §5).
+    This is a file-level heuristic; verify the specific clickable() at the flagged line.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not _STYLE_PRESSED_OR_HOVERED_RE.search(text):
+            continue
+        click_match = _CLICKABLE_CALL_RE.search(text)
+        if not click_match:
+            continue
+        if _INDICATION_NULL_RE.search(text):
+            continue
+        line_no, snippet = _at(text, click_match.start())
+        findings.append(
+            f"missing indication null with style state [LOW]: {path.relative_to(root)}:{line_no} "
+            f"— file has a Style pressed{{}}/hovered{{}} block and a clickable(...) with no "
+            f"indication = null anywhere in the file; the Style animation and the default "
+            f"ripple will render simultaneously (see compose-styles-api-reference.md → "
+            f"Limitations §5)\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
 # Stems that signal a top-level screen/page composable, across naming conventions.
 _SCREEN_STEMS = ("Screen", "Content", "Page", "View", "Route")
 
@@ -1474,6 +1671,13 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Hardcoded Android versionCode ──────────────────────────────────────────
     findings.extend(_detect_hardcoded_android_version_code(root))
+
+    # ── Compose Styles API compliance ──────────────────────────────────────────
+    findings.extend(_detect_style_default_with_body(root))
+    findings.extend(_detect_style_state_wrong_enabled(root))
+    findings.extend(_detect_style_param_on_screen(root))
+    findings.extend(_detect_stale_compositionlocal_in_style_function(root))
+    findings.extend(_detect_missing_indication_null_with_style_state(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))

@@ -1019,6 +1019,98 @@ class RasterInCommonMainTests(unittest.TestCase):
             self.assertFalse(any("raster asset in commonMain" in f for f in findings))
 
 
+class StyleApiComplianceTests(unittest.TestCase):
+    def _write(self, root: Path, name: str, content: str) -> None:
+        d = root / "app" / "src" / "commonMain" / "kotlin"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / name).write_text(content, encoding="utf-8")
+
+    def test_flags_style_default_with_body(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Bad.kt",
+                "@Composable\nfun BadButton(style: Style = Style { background(Color.Red) }) {}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("style default with body" in f for f in findings))
+
+    def test_ignores_empty_style_default(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Good.kt", "@Composable\nfun GoodButton(style: Style = Style) {}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("style default with body" in f for f in findings))
+
+    def test_flags_style_state_wrong_enabled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Bad.kt",
+                "fun x() {\n    val styleState = remember { MutableStyleState(i) }\n    styleState.enabled = true\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("style state wrong enabled property" in f for f in findings))
+
+    def test_ignores_correct_is_enabled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Good.kt",
+                "fun x() {\n    val styleState = rememberUpdatedStyleState(i) { it.isEnabled = true }\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("style state wrong enabled property" in f for f in findings))
+
+    def test_flags_style_param_on_screen(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Bad.kt", "@Composable\nfun HomeScreen(style: Style = Style) {}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("style param on screen composable" in f for f in findings))
+
+    def test_ignores_style_param_on_component(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Good.kt", "@Composable\nfun AppButton(style: Style = Style) {}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("style param on screen composable" in f for f in findings))
+
+    def test_flags_stale_compositionlocal_in_style_function(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Bad.kt",
+                "@Composable\n"
+                "fun containerStyle(): Style {\n"
+                "    val background = MaterialTheme.colorScheme.background\n"
+                "    return Style {\n"
+                "        background(background)\n"
+                "    }\n"
+                "}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("stale compositionlocal in style function" in f for f in findings))
+
+    def test_ignores_style_scope_extension_pattern(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Good.kt",
+                "val containerStyle = Style {\n    background(colors.background)\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("stale compositionlocal in style function" in f for f in findings))
+
+    def test_flags_missing_indication_null(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Bad.kt",
+                "val s = Style {\n    pressed { animate { background(Color.Red) } }\n}\n"
+                "fun x() {\n    Modifier.clickable(onClick = {})\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("missing indication null with style state" in f for f in findings))
+
+    def test_ignores_when_indication_null_present(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Good.kt",
+                "val s = Style {\n    pressed { animate { background(Color.Red) } }\n}\n"
+                "fun x() {\n    Modifier.clickable(onClick = {}, indication = null)\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("missing indication null with style state" in f for f in findings))
+
+
 class HardcodedVersionCodeTests(unittest.TestCase):
     def test_flags_literal_version_code(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
