@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.45.0] — 2026-07-03
+
+### Added
+
+- feat: imagevector-generator skill (59th) — raster/SVG → compiled ImageVector pipeline + deterministic layout contracts
+
+---
+
 ## [v1.44.0] — 2026-06-30
 
 ### Added

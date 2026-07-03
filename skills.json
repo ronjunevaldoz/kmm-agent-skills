@@ -1,5 +1,5 @@
 {
-  "version": "1.44.0",
+  "version": "1.45.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1316,6 +1316,50 @@
       "scripts": []
     },
     {
+      "name": "kotlin-multiplatform-imagevector-generator",
+      "path": "skills/kotlin-multiplatform-imagevector-generator",
+      "description": ">-",
+      "license": "Apache-2.0",
+      "last_updated": "2026-07-03",
+      "keywords": [
+        "ImageVector",
+        "vector icons",
+        "raster to vector",
+        "SVG to Compose",
+        "icon generation",
+        "vtracer",
+        "potrace",
+        "vector tracing",
+        "asset pipeline",
+        "logo vector"
+      ],
+      "triggers": [
+        "ImageVector",
+        "vector icon",
+        "convert image",
+        "trace image",
+        "SVG to Compose",
+        "PNG to vector",
+        "icon from image",
+        "logo vector",
+        "vectorize",
+        "raster to vector",
+        "image asset",
+        "icon asset",
+        "compile icon",
+        "vtracer",
+        "potrace",
+        "extract logo",
+        "extract icon",
+        "app icon vector",
+        "icon pipeline",
+        "no PNG icons"
+      ],
+      "scripts": [
+        "convert_image_to_imagevector.py"
+      ]
+    },
+    {
       "name": "kotlin-multiplatform-in-app-purchases",
       "path": "skills/kotlin-multiplatform-in-app-purchases",
       "description": "In-app purchases and subscriptions in KMP \u2014 shared domain model for purchase state, platform implementations via expect/actual, Play Billing (Android) and StoreKit 2 (iOS), entitlement verification, and the MVI integration pattern for gating premium features. Covers: one-time purchases, auto-renewing subscriptions, receipt validation, and restore purchases. Zero server required for basic validation; server-side validation guidance included.",
@@ -1505,7 +1549,7 @@
       "path": "skills/kotlin-multiplatform-layout-system",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-30",
+      "last_updated": "2026-07-03",
       "keywords": [
         "layout system",
         "wireframe",
@@ -1520,7 +1564,8 @@
       ],
       "triggers": [],
       "scripts": [
-        "create_wireframe.py"
+        "create_wireframe.py",
+        "generate_slot_scaffold.py"
       ]
     },
     {
