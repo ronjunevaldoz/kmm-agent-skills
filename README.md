@@ -105,7 +105,7 @@ python3 scripts/release.py auto --dry-run # preview first
 
 ## Skills
 
-58 skills covering the full KMP stack. Load the smallest set that answers the request.
+59 skills covering the full KMP stack. Load the smallest set that answers the request.
 
 ### Foundation
 - [`feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) — 6-layer module structure, build-logic, TOML catalog, Koin
@@ -159,7 +159,8 @@ python3 scripts/release.py auto --dry-run # preview first
 - [`adaptive-layout`](skills/kotlin-multiplatform-adaptive-layout/) — WindowSizeClass, list-detail split
 - [`graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) — Canvas, graphicsLayer
 - [`preview-driven-development`](skills/kotlin-multiplatform-preview-driven-development/) — Desktop-first `@Preview` workflow, PDD cycle
-- [`layout-system`](skills/kotlin-multiplatform-layout-system/) — ASCII wireframe docs per screen
+- [`layout-system`](skills/kotlin-multiplatform-layout-system/) — ASCII wireframe docs per screen + slot-grid layout contracts
+- [`imagevector-generator`](skills/kotlin-multiplatform-imagevector-generator/) — raster/SVG → compiled Kotlin ImageVector; no hand-written paths, no PNG icons
 
 ### Testing & Quality
 - [`unit-testing`](skills/kotlin-multiplatform-unit-testing/) — `runTest`, Turbine, fake-over-mock
@@ -197,6 +198,7 @@ All commands are `kmm-` prefixed so they don't collide with your own `.claude/co
 | `/kmm-verify [path]` | Full pipeline: build, tests, audit, screenshots, design |
 | `/kmm-review-changes` | Review git diff against 6-layer rules and anti-patterns |
 | `/kmm-generate-palette <name=#HEX ...>` | Generate `AppColors.kt` + Compose palette preview from N brand seed colors |
+| `/kmm-vectorize <image>` | Compile a raster/SVG into a Kotlin `ImageVector` — replaces PNG icons and hand-written paths |
 | `/kmm-fix-design [path]` | Scan and fix design system violations |
 | `/kmm-update-design-system [path]` | Pull latest design system components |
 | `/kmm-record-design-baselines [path]` | Record Roborazzi golden PNGs |

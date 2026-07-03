@@ -15,7 +15,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-30'
+  last-updated: '2026-07-03'
   keywords:
     - layout system
     - wireframe
@@ -95,6 +95,40 @@ python3 ~/.claude/skills/kotlin-multiplatform-layout-system/scripts/create_wiref
 append a screen to another screen's file. The script seeds the correct section skeleton and
 a starting wireframe block for the chosen pattern (A/B/C/D) — you then fill in the component
 table and draw the ASCII wireframe (keep every row the same character width).
+
+---
+
+## Slot-Grid Contract → Layout Scaffold
+
+Each generated screen file carries machine-readable frontmatter — the **layout contract**:
+
+```yaml
+---
+screen: inbox
+pattern: A
+slots: [nav, side, main]
+grid: {compact: [main], medium: [nav, main], expanded: [nav, side, main]}
+weights: {nav: fixed, side: 1f, main: 3f}
+---
+```
+
+- `slots` — the named regions of the screen
+- `grid` — which slots render at each `WindowSizeClass` breakpoint (all three required)
+- `weights` — from a **closed set only**: `0.5f, 1f, 1.5f, 2f, 2.5f, 3f, 4f, fixed, overlay`.
+  Arbitrary floats are rejected by the generator and flagged by the audit (`raw weight literal`).
+
+Compile the contract into a Compose shell:
+
+```bash
+python3 ~/.claude/skills/kotlin-multiplatform-layout-system/scripts/generate_slot_scaffold.py \
+  docs/layout-system/inbox.md --group-id com.example.app --output <ui module path>
+```
+
+This emits `<Screen>Layout.kt`: one `when (windowSizeClass.widthSizeClass)` branch per
+breakpoint, each slot a `@Composable () -> Unit` parameter. **You fill slot content only —
+never edit the Row/weight structure.** To change the layout, edit the frontmatter and
+re-run. This removes all layout guessing: the agent selects from the contract's enumerated
+grid instead of judging screen space.
 
 ---
 
@@ -408,6 +442,7 @@ Keep explanations short. The wireframe is the primary output — do not narrate 
 
 | Date | Change |
 |---|---|
+| 2026-07-03 | Slot-grid contracts: create_wireframe.py now emits machine-readable frontmatter (slots/grid/weights per breakpoint); new generate_slot_scaffold.py compiles the contract into a <Screen>Layout.kt shell with slot lambdas — the agent fills content, never structure. Weights restricted to a closed fraction set, enforced by the raw weight literal audit smell. |
 | 2026-06-30 | Added create_wireframe.py — deterministic one-file-per-screen scaffolder (seeds section skeleton + pattern A/B/C/D block, bootstraps _components.md once, never overwrites). Hardened the one-screen-per-file rule; new anti-pattern against multi-screen files. |
 | 2026-06-27 | Made all templates fully generic — replaced project-specific component names with `<placeholders>`. Added filled example using a neutral messaging app. Reframed purpose as draft/document, not limit. |
 | 2026-06-27 | Fixed ASCII wireframe alignment: removed emoji from grid, moved to Legend line, standardized row widths per template. |

@@ -86,9 +86,36 @@ def slugify(name: str) -> str:
     return s.strip("-")[:60] or "screen"
 
 
+# Slot-grid frontmatter per pattern: which named slots exist and which render at each
+# breakpoint. Weights are simple fractions from a closed set — never arbitrary floats.
+PATTERN_GRIDS = {
+    "A": ("[nav, side, main]",
+          "{compact: [main], medium: [nav, main], expanded: [nav, side, main]}",
+          "{nav: fixed, side: 1f, main: 3f}"),
+    "B": ("[nav, main]",
+          "{compact: [main], medium: [nav, main], expanded: [nav, main]}",
+          "{nav: fixed, main: 1f}"),
+    "C": ("[nav, main, sheet]",
+          "{compact: [main, sheet], medium: [nav, main, sheet], expanded: [nav, main, sheet]}",
+          "{nav: fixed, main: 1f, sheet: overlay}"),
+    "D": ("[main]",
+          "{compact: [main], medium: [main], expanded: [main]}",
+          "{main: 1f}"),
+}
+
+
 def render(screen: str, pattern: str) -> str:
     wireframe = PATTERNS[pattern]
+    slots, grid, weights = PATTERN_GRIDS[pattern]
     return f"""\
+---
+screen: {slugify(screen)}
+pattern: {pattern}
+slots: {slots}
+grid: {grid}
+weights: {weights}
+---
+
 # {screen.strip()}
 
 ## Components

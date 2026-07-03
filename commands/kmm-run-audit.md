@@ -94,6 +94,10 @@ For every finding, load the relevant skill and give a concrete fix:
 | `repository leaks data type` | `repository-pattern` | A `*Repository` **interface** references `*Dto` / `*Entity` — the interface must speak domain types only; return domain models and map DTOs/entities in `:data` |
 | `raw component bypass` | `design-system`, `design-system-extended` | A screen uses raw Material components (`Scaffold`, `Button`, `Card`, `TextField`, …) while the project has a design system — use the `App*` wrappers (`AppScaffold`, `AppButton`, …) so tokens stay consistent |
 | `fixed width overflow` | `adaptive-layout` | A fixed `.width(≥360.dp)` / `.size(≥360.dp)` or constraint-ignoring `.requiredWidth(…)` overflows a compact phone — use `fillMaxWidth()`, `weight()`, or `widthIn(max = …)`. For true "compact enough" verification, render at 360×800 via Roborazzi and run `/kmm-audit-screenshots` |
+| `handwritten imagevector` | `imagevector-generator` | An `ImageVector.Builder` with 10+ hand-written path commands and no GENERATED header — hallucinated coordinates produce broken art; re-trace with `convert_image_to_imagevector.py` (`/kmm-vectorize`) |
+| `raster asset in commonMain` | `imagevector-generator` | PNG/JPG in `commonMain` resources — icons/flat art should be compiled ImageVectors (`/kmm-vectorize`); photos are exempt under `assets/photos/` |
+| `raw weight literal` | `layout-system`, `adaptive-layout` | `weight(0.37f)`-style arbitrary proportion — use simple fractions (`1f`, `1.5f`, `2f`, `3f`) from the slot-grid contract; regenerate the shell with `generate_slot_scaffold.py` |
+| `breakpoint branch missing` | `adaptive-layout` | A `when(widthSizeClass)` that handles some but not all of Compact/Medium/Expanded with no `else` — the unhandled size falls through silently |
 
 ---
 

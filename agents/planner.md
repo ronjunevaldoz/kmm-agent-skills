@@ -67,6 +67,7 @@ first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
 | Slot-based UI components | `compose-slot-api`, `design-system-extended` |
 | State container choice (remember vs ViewModel) | `compose-state-container`, `compose-state-hoisting` |
 | Custom graphics, canvas, visual effects | `graphics-modifiers` |
+| Icon/logo assets, SVG or PNG to ImageVector, vectorize | `imagevector-generator`, `design-system` |
 | Adaptive / responsive layouts | `adaptive-layout`, `roborazzi` |
 | Wireframes, screen flows, or layout specs | `designer`, `design-handoff`, `adaptive-layout`, `design-system`, `preview-driven-development`, `roborazzi` |
 | Design system setup or token changes | `design-system` |

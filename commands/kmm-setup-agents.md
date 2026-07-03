@@ -248,6 +248,7 @@ Consumer commands (safe to install):
   kmm-harvest-lessons.md        — collect positive patterns; auto-propose GitHub issues
   kmm-audit-adaptive.md         — adaptive layout coverage + redundant title check
   kmm-generate-palette.md       — generate AppColors + preview from N brand seed colors
+  kmm-vectorize.md              — compile raster/SVG into Kotlin ImageVector (no PNG icons)
   kmm-review-changes.md         — review git diff against architecture rules
   kmm-verify.md                 — full validation pipeline
   kmm-execute-ticket.md         — implement a GitHub issue end-to-end

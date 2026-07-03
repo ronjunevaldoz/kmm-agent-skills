@@ -39,6 +39,7 @@ KNOWN_SKILLS = {
     "kotlin-multiplatform-form-validation",
     "kotlin-multiplatform-graphics-modifiers",
     "kotlin-multiplatform-image-loading",
+    "kotlin-multiplatform-imagevector-generator",
     "kotlin-multiplatform-jni-pro",
     "kotlin-multiplatform-kotlin-rpc",
     "kotlin-multiplatform-ktor-auth-service",
