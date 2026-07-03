@@ -9,7 +9,8 @@ description: >
   shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant,
   ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision),
   and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText)
-  built on BasicXxx CMP primitives.
+  built on BasicXxx CMP primitives. "App" is a placeholder prefix derived from the
+  project's actual name (scripts/derive_component_prefix.py), not a hardcoded literal.
   No Material dependency — fully custom, fully owned.
 license: Apache-2.0
 metadata:
@@ -34,6 +35,11 @@ metadata:
     - rememberUpdatedStyleState
     - StyleStateKey
     - Style vs Modifier
+    - component prefix
+    - COMPONENT_PREFIX
+    - rename App prefix
+    - custom prefix design system
+    - project-based prefix
 ---
 
 ## When to Use This Skill
@@ -56,7 +62,9 @@ screen design, UI look and feel, consistent styling, style guide, branding,
 component library, theming, color palette, visual identity,
 dark mode toggle, in-app theme override, user theme preference, theme settings,
 LocalAppDarkTheme, isSystemInDarkTheme, system dark mode, follow system theme,
-dynamic theme, runtime theme switch, light dark switch, theme preference setting.
+dynamic theme, runtime theme switch, light dark switch, theme preference setting,
+component prefix, custom prefix instead of App, rename App to project name,
+project-specific component names, COMPONENT_PREFIX, derive prefix from project name.
 
 **Freshness rule:** `@ExperimentalStylesApi` is experimental (Android Jetpack Compose
 `1.12.0-alpha03` at last check) and the Styles API changes between releases — Material
@@ -251,7 +259,7 @@ and fill it in. This living document records your token values, component invent
 detekt rule overrides, multi-device preview coverage, and audit log.
 
 The skill reads `docs/design-system.md` when it exists and uses it to:
-- Infer your component prefix (e.g. `Acme` instead of `App`)
+- Read your confirmed component prefix (e.g. `Acme` instead of `App`) — highest precedence in Step 0
 - Confirm your token names before generating code
 - Detect deviations you've documented as intentional
 
@@ -277,7 +285,10 @@ the token values for your brand.
 
 ## Naming Rule
 
-- Keep the `App` prefix for shared design-system primitives only.
+- `App` is a placeholder for the project's actual component prefix — see Step 0 for how
+  to resolve it (docs/design-system.md → user-stated → derived from project name → `App`
+  fallback). Never leave literal `App*` names in a real project without resolving this first.
+- Keep the resolved prefix for shared design-system primitives only.
 - Use plain names for feature-local or page-local components.
 - Do not over-prefix layouts, canvases, or state models.
 - Reserve the prefix for reusable primitives that live in `:core:designsystem`.
@@ -303,6 +314,49 @@ the token values for your brand.
 - Project scaffolded with `kotlin-multiplatform-feature-scaffold`
 - CMP 1.11.1+ (`compose-multiplatform = "1.11.1"` in `libs.versions.toml`)
 - Convention plugin `GROUP_ID.feature.ui` or `GROUP_ID.core` available
+
+---
+
+## Step 0: Determine the component prefix
+
+`App` (as in `AppButton`, `AppTheme`, `AppColors`) is a **placeholder token**, exactly
+like `GROUP_ID` — replace every occurrence with the project's actual prefix before
+writing files. Never generate literal `App*` names for a real project without first
+resolving what the prefix should be.
+
+**Precedence (highest to lowest):**
+
+1. `COMPONENT_PREFIX` already recorded in `docs/design-system.md`, if that file exists — an explicit, previously-confirmed choice always wins
+2. A prefix the user states directly in the request ("call it Acme", "use GB as the prefix")
+3. Derived from the project name via the script below
+4. `App` — only if nothing else yields a usable word (e.g. a placeholder/example project)
+
+**Run the derivation script** (steps 3–4 are deterministic, not a guess):
+
+```bash
+python3 ~/.claude/skills/kotlin-multiplatform-design-system/scripts/derive_component_prefix.py <project_root>
+```
+
+If running from inside kmm-agent-skills:
+```bash
+python3 skills/kotlin-multiplatform-design-system/scripts/derive_component_prefix.py <project_root>
+```
+
+The script reads, in order: `settings.gradle.kts` `rootProject.name` → the Gradle group
+ID's last segment → the project directory name — strips generic noise words (`app`,
+`android`, `ios`, `kmp`, `shared`, `compose`, `project`, `multiplatform`, `mobile`,
+`client`, `core`, `main`), PascalCases what remains, and prints the result plus which
+source it came from. Example: `rootProject.name = "GuildBase"` → prefix `GuildBase` →
+`GuildBaseButton`, `GuildBaseCard`, `GuildBaseTextField`.
+
+**Confirm before generating.** Show the derived prefix and its source, then ask the user
+to confirm or override — a wrong prefix means renaming every generated file later.
+Once confirmed, record it in `docs/design-system.md` (`COMPONENT_PREFIX` field) so future
+sessions read it from step 1 instead of re-deriving.
+
+Every code block in Steps 1–9 below is written with `App` as the placeholder — replace
+it globally with the resolved prefix (`AppButton` → `GuildBaseButton`, `AppTheme` →
+`GuildBaseTheme`, etc.) when writing files for a real project.
 
 ---
 
@@ -2336,8 +2390,9 @@ Customize `config/detekt-design-system.yml`:
 design-system:
   ComponentRegistryRule:
     active: true
-    # Match your project's design system prefix (default: App)
-    componentPrefix: 'App'
+    # Must match the prefix resolved in Step 0 (Acme, GuildBase, ...) — not the literal
+    # word "App" unless that's genuinely what Step 0 resolved to for this project.
+    componentPrefix: 'Acme'
   HardcodedDp:
     active: true
     # To disable dp warnings while keeping color/MaterialTheme errors:
@@ -2391,6 +2446,7 @@ The `references/` directory contains project-facing documents the skill uses at 
 |---|---|---|
 | `references/design-system-template.md` | Living design system doc — tokens, component inventory, detekt overrides, audit log | Copy to `docs/design-system.md` in your project; fill in token values and prefix |
 | `references/compose-styles-api-reference.md` | Extracted ground truth from the 9 official Compose Styles API doc pages (API surface, do's/don'ts, performance benchmarks, limitations) | Audit generated Style code against this before applying `/update-design-system` or reviewing a PR that touches `styles/` or `components/` |
+| `scripts/derive_component_prefix.py` | Deterministically derives the component prefix (`App` placeholder replacement) from the project name | Run in Step 0 before generating any code; see precedence order there |
 
 The skill reads `docs/design-system.md` when it exists in the target project to infer
 the component prefix and token names before generating code. If the file is absent,
@@ -2424,6 +2480,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-05 | Added new Step 0 — "App" is now formalized as a placeholder token (like `GROUP_ID`), resolved via precedence: `docs/design-system.md` COMPONENT_PREFIX -> user-stated -> derived from the project name -> `App` fallback. New `scripts/derive_component_prefix.py` deterministically derives a PascalCase prefix from `settings.gradle.kts` rootProject.name, the Gradle group ID, or the directory name, stripping generic noise words (app, android, ios, kmp, shared, compose, ...). Updated the Naming Rule, `docs/design-system.md` guidance, and the detekt `componentPrefix` example to stop treating `'App'` as a hardcoded literal. |
 | 2026-07-05 | Audited against the 9 official Compose Styles API doc pages; added `references/compose-styles-api-reference.md` as ground truth for future audits. Fixed a real bug found across `AppButton`/`AppChip`/`AppTextField`/Guidelines: `styleState.enabled = enabled` used the wrong property name and a non-idiomatic construction pattern — corrected to `rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }` per the official examples. Added Style inheritance priority order, built-in/custom state facts, and 6 new anti-patterns backed by official Don'ts and Limitations (stale CompositionLocal capture in a `@Composable fun …Style()`, default-with-body style params, business logic in Styles, Style params on layout/screen composables, missing `indication = null` double-ripple, unsupported infinite/shape animation). Expanded Freshness rule with direct links to all 9 pages and the CMP-may-lag-Android caveat. |
 | 2026-06-29 | `AppTheme` default changed from `darkTheme = false` to `isSystemInDarkTheme()` — all platforms now follow system dark mode automatically. Added `LocalAppDarkTheme` composition local (`Boolean?`) for in-app theme override. Removed hardcoded `darkTheme = false` from Desktop/iOS Step 7 wiring. |
 | 2026-06-26 | Added component API placement guidance that maps shell components to slots, guarded regions to restricted scope templates, and leaf controls to data/variant APIs. |

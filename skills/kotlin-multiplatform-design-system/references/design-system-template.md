@@ -8,7 +8,10 @@
 > Placeholders to replace globally before saving:
 > - `PROJECT_NAME` → your project name (e.g. `GuildBase`)
 > - `GROUP_ID` → your Maven group ID (e.g. `com.example.myapp`)
-> - `COMPONENT_PREFIX` → your design system prefix (e.g. `App`, `Acme`, `My`)
+> - `COMPONENT_PREFIX` → your design system prefix (e.g. `App`, `Acme`, `My`). Don't
+>   guess this — run `python3 scripts/derive_component_prefix.py <project_root>` to
+>   derive it deterministically from `rootProject.name` / the group ID / the directory
+>   name (see the base skill's Step 0), then record the confirmed value here.
 
 ---
 
