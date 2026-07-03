@@ -124,6 +124,9 @@ python3 ~/.claude/skills/kotlin-multiplatform-layout-system/scripts/generate_slo
   docs/layout-system/inbox.md --group-id com.example.app --output <ui module path>
 ```
 
+If the script is not at `~/.claude/skills/` (Codex CLI, Gemini CLI, or a repo-relative
+install), use `skills/kotlin-multiplatform-layout-system/scripts/generate_slot_scaffold.py`.
+
 This emits `<Screen>Layout.kt`: one `when (windowSizeClass.widthSizeClass)` branch per
 breakpoint, each slot a `@Composable () -> Unit` parameter. **You fill slot content only —
 never edit the Row/weight structure.** To change the layout, edit the frontmatter and
@@ -442,6 +445,7 @@ Keep explanations short. The wireframe is the primary output — do not narrate 
 
 | Date | Change |
 |---|---|
+| 2026-07-03 | Added a repo-relative fallback path for generate_slot_scaffold.py — `~/.claude/skills/...` only resolves in a Claude Code install; Codex CLI and Gemini CLI installs need the `skills/...` relative path (see INSTALL.md). |
 | 2026-07-03 | Slot-grid contracts: create_wireframe.py now emits machine-readable frontmatter (slots/grid/weights per breakpoint); new generate_slot_scaffold.py compiles the contract into a <Screen>Layout.kt shell with slot lambdas — the agent fills content, never structure. Weights restricted to a closed fraction set, enforced by the raw weight literal audit smell. |
 | 2026-06-30 | Added create_wireframe.py — deterministic one-file-per-screen scaffolder (seeds section skeleton + pattern A/B/C/D block, bootstraps _components.md once, never overwrites). Hardened the one-screen-per-file rule; new anti-pattern against multi-screen files. |
 | 2026-06-27 | Made all templates fully generic — replaced project-specific component names with `<placeholders>`. Added filled example using a neutral messaging app. Reframed purpose as draft/document, not limit. |

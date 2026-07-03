@@ -38,6 +38,14 @@ python3 ~/.claude/skills/kotlin-multiplatform-imagevector-generator/scripts/conv
   --output <ui module>/core/designsystem/icons
 ```
 
+If the script is not at `~/.claude/skills/` (Codex, Gemini CLI, or a repo-relative install),
+use the path relative to wherever the skill was installed, e.g.:
+```bash
+python3 skills/kotlin-multiplatform-imagevector-generator/scripts/convert_image_to_imagevector.py \
+  <input> --name <PascalName> --group-id <group.id> --color-mode <mode> \
+  --output <ui module>/core/designsystem/icons
+```
+
 Read **only the report line** (layers / nodes / viewport / color-mode). Never open the
 generated `.kt` to inspect path data — it is an opaque artifact.
 

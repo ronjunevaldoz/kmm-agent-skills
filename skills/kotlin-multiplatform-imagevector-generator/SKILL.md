@@ -106,6 +106,13 @@ arcs in the authoring tool first.
      logo.svg --name BrandLogo --group-id com.example.app \
      --output composeApp/src/commonMain/kotlin/com/example/app/core/designsystem/icons
    ```
+   If the script is not at `~/.claude/skills/` (Codex CLI, Gemini CLI, or a repo-relative
+   install), use the path relative to wherever this skill was installed:
+   ```bash
+   python3 skills/kotlin-multiplatform-imagevector-generator/scripts/convert_image_to_imagevector.py \
+     logo.svg --name BrandLogo --group-id com.example.app \
+     --output composeApp/src/commonMain/kotlin/com/example/app/core/designsystem/icons
+   ```
 3. Read ONLY the report line (`layers / nodes / viewport / color-mode`).
 4. Wire the reference:
    ```kotlin
@@ -185,4 +192,5 @@ Never print generated path data into the conversation.
 
 | Date | Change |
 |---|---|
+| 2026-07-03 | Added a repo-relative fallback path for the converter script — `~/.claude/skills/...` only resolves in a Claude Code install; Codex CLI and Gemini CLI installs need the `skills/...` relative path (see INSTALL.md). |
 | 2026-07-03 | Initial release — raster/SVG → ImageVector local toolchain (quantize/trace/normalize/codegen), hard rules forbidding hand-written path data, semantic vs literal color modes, node budget, entropy gate, audit enforcement (handwritten imagevector, raster asset in commonMain). |
