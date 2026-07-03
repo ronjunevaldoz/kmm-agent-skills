@@ -11,7 +11,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-22'
+  last-updated: '2026-07-05'
   keywords:
     - design system extended
     - Dialog
@@ -339,8 +339,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.style.MutableStyleState
 import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.rememberUpdatedStyleState
 import androidx.compose.foundation.style.styleable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -374,8 +374,9 @@ fun AppIconButton(
     content: @Composable () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val styleState = remember(interactionSource) { MutableStyleState(interactionSource) }
-    styleState.enabled = enabled
+    val styleState = rememberUpdatedStyleState(interactionSource) {
+        it.isEnabled = enabled
+    }
 
     Box(
         modifier = modifier
@@ -2731,5 +2732,6 @@ Assume `kotlin-multiplatform-design-system` is already applied. Use the user's v
 
 | Date | Change |
 |---|---|
+| 2026-07-05 | Fixed `AppIconButton`: `styleState.enabled = enabled` used the wrong property name and a non-idiomatic construction — corrected to `rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }` per the official Compose Styles API docs (see base skill's `references/compose-styles-api-reference.md`). |
 | 2026-06-22 | Renamed all `TextStyle.` references → `AppTextStyle.` to align with base skill rename. |
 | 2026-06-06 | Initial release. |

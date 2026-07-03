@@ -14,7 +14,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-29'
+  last-updated: '2026-07-05'
   keywords:
     - design system
     - Compose Styles API
@@ -31,6 +31,9 @@ metadata:
     - token system
     - UI components
     - core:designsystem
+    - rememberUpdatedStyleState
+    - StyleStateKey
+    - Style vs Modifier
 ---
 
 ## When to Use This Skill
@@ -55,8 +58,24 @@ dark mode toggle, in-app theme override, user theme preference, theme settings,
 LocalAppDarkTheme, isSystemInDarkTheme, system dark mode, follow system theme,
 dynamic theme, runtime theme switch, light dark switch, theme preference setting.
 
-**Freshness rule:** `@ExperimentalStylesApi` is experimental and the Compose Styles API
-changes between CMP releases — recheck the Compose docs before upgrading.
+**Freshness rule:** `@ExperimentalStylesApi` is experimental (Android Jetpack Compose
+`1.12.0-alpha03` at last check) and the Styles API changes between releases — Material
+Design support for Styles is planned but not yet available. Recheck the official docs
+before upgrading, and note these are Android Jetpack Compose docs; Compose Multiplatform
+(JetBrains) support may lag behind:
+- https://developer.android.com/develop/ui/compose/styles (overview)
+- https://developer.android.com/develop/ui/compose/styles/fundamentals
+- https://developer.android.com/develop/ui/compose/styles/state-animations
+- https://developer.android.com/develop/ui/compose/styles/styles-vs-modifiers
+- https://developer.android.com/develop/ui/compose/styles/theming
+- https://developer.android.com/develop/ui/compose/styles/performance
+- https://developer.android.com/develop/ui/compose/styles/dos-donts
+- https://developer.android.com/develop/ui/compose/styles/examples
+- https://developer.android.com/develop/ui/compose/styles/limitations
+
+A full extracted summary of these pages (API surface, do's/don'ts, benchmarks,
+limitations) lives in `references/compose-styles-api-reference.md` — use it to audit
+generated code against the official guidance without re-fetching every page.
 
 ---
 
@@ -264,12 +283,18 @@ the token values for your brand.
 - Reserve the prefix for reusable primitives that live in `:core:designsystem`.
 
 **Key API facts:**
-- `Style { ... }` — lambda-based style descriptor; runs in Layout/Draw phase (not Composition)
-- `style1 then style2` — merges styles; last-write-wins per property
-- `Modifier.styleable(styleState, defaultStyle, overrideStyle)` — applies styles to a node
-- `MutableStyleState(interactionSource)` — tracks hover/press/focus/disabled states
-- `StyleScope` extensions — the **only** correct way to read `CompositionLocal` values inside a Style
+- `Style { ... }` — lambda-based style descriptor; runs in Layout/Draw phase (not Composition), skipping recomposition entirely for property changes
+- `style1 then style2` — merges styles; properties are **not additive** — last-write-wins per property, same as CSS cascade
+- `Modifier.styleable(styleState, defaultStyle, overrideStyle)` — applies styles to a node; also works directly on layout composables (`Row`, `Column`, `Box`) that have no built-in `style` parameter
+- `rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }` — the sanctioned way to create a `StyleState` that stays current across recomposition; **the property is `isEnabled`, not `enabled`**
+- `MutableStyleState(interactionSource)` — lower-level constructor; prefer `rememberUpdatedStyleState` in components so `isEnabled`/custom state updates are never stale
+- Built-in interaction states: `hovered {}`, `pressed {}`, `focused {}`, `selected {}`, `enabled`/`isEnabled` (query, not typically its own block), `toggled {}` — states can nest (e.g. `hovered { pressed { … } }` for hover+press combined)
+- Custom states: define a `StyleStateKey(default)`, add a `var MutableStyleState.yourState` extension, and a `StyleScope.yourStateBlock {}` extension using `state(key, block, predicate)`
+- `animate { ... }` inside a state block — animates the wrapped properties automatically; `animate(spring(...)) { ... }` or `animate(tween(...)) { ... }` for a custom `AnimationSpec`
+- `StyleScope` extensions — the **only** correct way to read `CompositionLocal` values inside a Style (reading a `CompositionLocal` directly inside a `@Composable fun somethingStyle(): Style { ... }` captures a stale value — see Common Anti-Patterns)
+- Style property inheritance priority (highest to lowest): **direct composable argument** (`AppText(color = ...)`) > **`style` parameter** > **`Modifier.styleable {}` chain** > **parent/inherited typography-color properties**
 - All Styles API classes require `@OptIn(ExperimentalStylesApi::class)`
+- Full official reference: `references/compose-styles-api-reference.md` in this skill
 
 ---
 
@@ -1075,8 +1100,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.style.MutableStyleState
 import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.rememberUpdatedStyleState
 import androidx.compose.foundation.style.styleable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -1110,10 +1135,11 @@ fun AppButton(
     content: @Composable () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val styleState = remember(interactionSource) { MutableStyleState(interactionSource) }
-
-    // Propagate enabled state to StyleState for `disabled {}` blocks
-    styleState.enabled = enabled
+    // rememberUpdatedStyleState keeps isEnabled current across recomposition without
+    // recreating the StyleState — the sanctioned pattern from the official Styles API docs.
+    val styleState = rememberUpdatedStyleState(interactionSource) {
+        it.isEnabled = enabled
+    }
 
     Box(
         modifier = modifier
@@ -1276,8 +1302,8 @@ package GROUP_ID.core.designsystem.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.style.MutableStyleState
 import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.rememberUpdatedStyleState
 import androidx.compose.foundation.style.styleable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -1306,8 +1332,9 @@ fun AppChip(
     style: Style = Style,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val styleState = remember(interactionSource) { MutableStyleState(interactionSource) }
-    styleState.enabled = enabled
+    val styleState = rememberUpdatedStyleState(interactionSource) {
+        it.isEnabled = enabled
+    }
 
     val clickableModifier = if (onClick != null) {
         Modifier.clickable(
@@ -1344,8 +1371,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.style.ExperimentalStylesApi
-import androidx.compose.foundation.style.MutableStyleState
 import androidx.compose.foundation.style.Style
+import androidx.compose.foundation.style.rememberUpdatedStyleState
 import androidx.compose.foundation.style.styleable
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -1389,8 +1416,9 @@ fun AppTextField(
     singleLine: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val styleState = remember(interactionSource) { MutableStyleState(interactionSource) }
-    styleState.enabled = enabled
+    val styleState = rememberUpdatedStyleState(interactionSource) {
+        it.isEnabled = enabled
+    }
 
     val errorStyle = if (isError) Style { borderColor(colors.error) } else Style
 
@@ -2138,7 +2166,7 @@ All of these are already in `compose-multiplatform`. No new catalog entries requ
 - **`@OptIn(ExperimentalStylesApi::class)`** required on every file using the Styles API; add to each component/style file
 - **`indication = null`** on all clickable components — let Style `pressed {}` / `hovered {}` blocks handle visual feedback
 - **Infinite animations** are not supported in Styles — use `rememberInfiniteTransition()` in the component body instead
-- **Disabled state**: set `styleState.enabled = enabled` after creating `MutableStyleState`
+- **Disabled state**: use `rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }` — not `MutableStyleState(interactionSource)` followed by manual mutation, and not `.enabled` (the property is `isEnabled`)
 - **Dark mode**: swap `AppTheme.dark()` vs `AppTheme.light()` at the entry point; all Styles pick up correct tokens automatically via `StyleScope` extensions
 
 ---
@@ -2342,6 +2370,14 @@ not `ComponentRegistryViolation` or `DesignTokenImportBoundary`.
 - defining component variants as boolean parameters (`isOutlined`, `isDanger`) — use a sealed variant class
 - putting design system tokens in `:feature:*` modules — tokens belong in `:core:designsystem` only
 - skipping the `StyleScope` extension layer — leads to token access scattered across composables
+- reading a `CompositionLocal` directly inside a `@Composable fun somethingStyle(): Style { val c = MaterialTheme.colorScheme.background; return Style { background(c) } }` — the value is captured at definition time, not consume time, and goes stale when the theme changes; always read the token via a `StyleScope` extension inside the `Style { }` body instead
+- using `styleState.enabled = enabled` or a raw `MutableStyleState(interactionSource)` + manual mutation — the property is `isEnabled`, and `rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }` is the sanctioned pattern that stays current across recomposition
+- providing a default with a body — `style: Style = Style { background(Color.Red) }` as a parameter default; always declare `style: Style = Style` (empty) and merge project defaults inside via `defaultStyle then style` in `Modifier.styleable(...)`
+- using a Style to hold click handling, gesture detection, or other business logic — Styles are visual-only; behavior belongs on `Modifier.clickable`/gesture modifiers
+- adding a `style: Style` parameter to a screen-level or raw layout composable (`FooContent`, `FooScreen`, a bare `Column`/`Row` used as page structure) — Styles are for components, not layouts; the official docs call this out explicitly as unclear to callers
+- using `pressed {}` / `hovered {}` without `indication = null` on the same `clickable` modifier — both the Style animation and the default ripple render simultaneously, producing a visibly doubled effect
+- animating an unbounded/looping effect (a pulsing loader, a spinner) inside a Style's `animate {}` block — Styles cannot express infinite animations; use `rememberInfiniteTransition()` in the component body instead
+- defining a custom `Shape` inside a Style or animating a shape transition — custom shapes and shape animation are not yet supported by the Styles API (tracked as a future fix, not currently available)
 
 If the design system feels inconsistent, check: (1) are all pages using `AppScaffold` + `AppTopAppBar`? (2) are spacing and colors coming from tokens or from hardcoded literals? (3) is there duplicated chrome (title, actions) in the content body?
 
@@ -2354,6 +2390,7 @@ The `references/` directory contains project-facing documents the skill uses at 
 | File | Purpose | Usage |
 |---|---|---|
 | `references/design-system-template.md` | Living design system doc — tokens, component inventory, detekt overrides, audit log | Copy to `docs/design-system.md` in your project; fill in token values and prefix |
+| `references/compose-styles-api-reference.md` | Extracted ground truth from the 9 official Compose Styles API doc pages (API surface, do's/don'ts, performance benchmarks, limitations) | Audit generated Style code against this before applying `/update-design-system` or reviewing a PR that touches `styles/` or `components/` |
 
 The skill reads `docs/design-system.md` when it exists in the target project to infer
 the component prefix and token names before generating code. If the file is absent,
@@ -2387,6 +2424,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-05 | Audited against the 9 official Compose Styles API doc pages; added `references/compose-styles-api-reference.md` as ground truth for future audits. Fixed a real bug found across `AppButton`/`AppChip`/`AppTextField`/Guidelines: `styleState.enabled = enabled` used the wrong property name and a non-idiomatic construction pattern — corrected to `rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }` per the official examples. Added Style inheritance priority order, built-in/custom state facts, and 6 new anti-patterns backed by official Don'ts and Limitations (stale CompositionLocal capture in a `@Composable fun …Style()`, default-with-body style params, business logic in Styles, Style params on layout/screen composables, missing `indication = null` double-ripple, unsupported infinite/shape animation). Expanded Freshness rule with direct links to all 9 pages and the CMP-may-lag-Android caveat. |
 | 2026-06-29 | `AppTheme` default changed from `darkTheme = false` to `isSystemInDarkTheme()` — all platforms now follow system dark mode automatically. Added `LocalAppDarkTheme` composition local (`Boolean?`) for in-app theme override. Removed hardcoded `darkTheme = false` from Desktop/iOS Step 7 wiring. |
 | 2026-06-26 | Added component API placement guidance that maps shell components to slots, guarded regions to restricted scope templates, and leaf controls to data/variant APIs. |
 | 2026-06-22 | Added `references/design-system-template.md` — project-facing living document covering tokens, component inventory, detekt overrides, multi-device preview coverage, and audit log. Wired copy instructions into Ownership Model section. |
