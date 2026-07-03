@@ -319,17 +319,25 @@ the token values for your brand.
 
 ## Step 0: Determine the component prefix
 
-`App` (as in `AppButton`, `AppTheme`, `AppColors`) is a **placeholder token**, exactly
-like `GROUP_ID` — replace every occurrence with the project's actual prefix before
-writing files. Never generate literal `App*` names for a real project without first
-resolving what the prefix should be.
+> **Hard rule — never violated:** `App` (as in `AppButton`, `AppTheme`, `AppColors`) is a
+> **template placeholder in this SKILL.md**, exactly like `GROUP_ID`. It must never be
+> written to disk literally for a real project. Do not generate a file named
+> `AppButton.kt` containing `class AppButton` for an actual project and leave a mental
+> note to rename it later — resolve the real prefix FIRST (this step), then write every
+> file directly with that name the first time. There is no "rename pass" step because
+> there should be nothing left to rename.
+>
+> The only time literal `App*` is correct output is when the resolved prefix in the
+> precedence below genuinely computes to `App` (rare — only for placeholder/example
+> projects with no real name yet), or when working inside this skills repo itself,
+> where `App` is the documented template convention on purpose.
 
 **Precedence (highest to lowest):**
 
 1. `COMPONENT_PREFIX` already recorded in `docs/design-system.md`, if that file exists — an explicit, previously-confirmed choice always wins
 2. A prefix the user states directly in the request ("call it Acme", "use GB as the prefix")
 3. Derived from the project name via the script below
-4. `App` — only if nothing else yields a usable word (e.g. a placeholder/example project)
+4. `App` — only if nothing else yields a usable word (e.g. a genuine placeholder/example project)
 
 **Run the derivation script** (steps 3–4 are deterministic, not a guess):
 
@@ -350,13 +358,18 @@ source it came from. Example: `rootProject.name = "GuildBase"` → prefix `Guild
 `GuildBaseButton`, `GuildBaseCard`, `GuildBaseTextField`.
 
 **Confirm before generating.** Show the derived prefix and its source, then ask the user
-to confirm or override — a wrong prefix means renaming every generated file later.
+to confirm or override — a wrong prefix means regenerating every file, not a quick rename.
 Once confirmed, record it in `docs/design-system.md` (`COMPONENT_PREFIX` field) so future
-sessions read it from step 1 instead of re-deriving.
+sessions read it from precedence step 1 instead of re-deriving.
 
-Every code block in Steps 1–9 below is written with `App` as the placeholder — replace
-it globally with the resolved prefix (`AppButton` → `GuildBaseButton`, `AppTheme` →
-`GuildBaseTheme`, etc.) when writing files for a real project.
+**Then generate directly with the resolved name.** Every code block in Steps 1–9 below
+shows `App` for template readability — when you actually write a file for a real project,
+substitute the resolved prefix as you write it (`AppButton.kt` → `GuildBaseButton.kt`,
+`class AppTheme` → `class GuildBaseTheme`), in the same pass, not as a follow-up edit.
+The audit enforces this: `design system prefix mismatch` flags any `App*` class/fun/object
+declaration under `core/designsystem` when `docs/design-system.md` records a different
+`COMPONENT_PREFIX` — a real mismatch, not template text, since the audit only scans
+actual `.kt` files in the target project.
 
 ---
 
@@ -2480,6 +2493,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-05 | Hardened Step 0 into a non-negotiable rule: `App` must never be written to disk literally for a real project — generate directly with the resolved prefix in the same pass, no "rename later" step. New audit detector `design system prefix mismatch [HIGH]` catches the case where `docs/design-system.md` records a resolved `COMPONENT_PREFIX` but `App*`-named declarations still exist under `core/designsystem` — verified against 5 scenarios (mismatch, consistent, genuinely-App, no-doc, unfilled-template). |
 | 2026-07-05 | Auditing complete for Style API compliance: `audit_project.py` now has 5 dedicated detectors (`style default with body`, `style state wrong enabled property`, `style param on screen composable`, `stale compositionlocal in style function`, `missing indication null with style state`) enforcing the Do's/Don'ts/Limitations in `references/compose-styles-api-reference.md`. All verified with positive + negative test cases. `design-system-extended` audited component-by-component for actual Style API wiring — see its new "Style API coverage" table; `AppAvatar` fixed (had dead unused Style imports from an unfinished wiring attempt). |
 | 2026-07-05 | Added new Step 0 — "App" is now formalized as a placeholder token (like `GROUP_ID`), resolved via precedence: `docs/design-system.md` COMPONENT_PREFIX -> user-stated -> derived from the project name -> `App` fallback. New `scripts/derive_component_prefix.py` deterministically derives a PascalCase prefix from `settings.gradle.kts` rootProject.name, the Gradle group ID, or the directory name, stripping generic noise words (app, android, ios, kmp, shared, compose, ...). Updated the Naming Rule, `docs/design-system.md` guidance, and the detekt `componentPrefix` example to stop treating `'App'` as a hardcoded literal. |
 | 2026-07-05 | Audited against the 9 official Compose Styles API doc pages; added `references/compose-styles-api-reference.md` as ground truth for future audits. Fixed a real bug found across `AppButton`/`AppChip`/`AppTextField`/Guidelines: `styleState.enabled = enabled` used the wrong property name and a non-idiomatic construction pattern — corrected to `rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }` per the official examples. Added Style inheritance priority order, built-in/custom state facts, and 6 new anti-patterns backed by official Don'ts and Limitations (stale CompositionLocal capture in a `@Composable fun …Style()`, default-with-body style params, business logic in Styles, Style params on layout/screen composables, missing `indication = null` double-ripple, unsupported infinite/shape animation). Expanded Freshness rule with direct links to all 9 pages and the CMP-may-lag-Android caveat. |

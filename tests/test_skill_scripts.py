@@ -1019,6 +1019,62 @@ class RasterInCommonMainTests(unittest.TestCase):
             self.assertFalse(any("raster asset in commonMain" in f for f in findings))
 
 
+class DesignSystemPrefixMismatchTests(unittest.TestCase):
+    def _write_docs(self, root: Path, prefix: str) -> None:
+        d = root / "docs"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "design-system.md").write_text(
+            f"| Field | Value |\n|---|---|\n| Component prefix | {prefix} |\n",
+            encoding="utf-8",
+        )
+
+    def _write_component(self, root: Path, filename: str, fn_name: str) -> None:
+        d = root / "core" / "designsystem" / "components"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / filename).write_text(
+            f"@Composable\nfun {fn_name}(onClick: () -> Unit) {{}}\n", encoding="utf-8"
+        )
+
+    def test_flags_app_named_component_when_prefix_resolved_differently(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_docs(root, "GuildBase")
+            self._write_component(root, "AppButton.kt", "AppButton")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("design system prefix mismatch" in f for f in findings))
+
+    def test_ignores_consistent_resolved_prefix(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_docs(root, "GuildBase")
+            self._write_component(root, "GuildBaseButton.kt", "GuildBaseButton")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("design system prefix mismatch" in f for f in findings))
+
+    def test_ignores_when_prefix_genuinely_app(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_docs(root, "App")
+            self._write_component(root, "AppButton.kt", "AppButton")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("design system prefix mismatch" in f for f in findings))
+
+    def test_ignores_when_no_design_system_doc(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_component(root, "AppButton.kt", "AppButton")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("design system prefix mismatch" in f for f in findings))
+
+    def test_ignores_unfilled_template_placeholder(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_docs(root, "COMPONENT_PREFIX")
+            self._write_component(root, "AppButton.kt", "AppButton")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("design system prefix mismatch" in f for f in findings))
+
+
 class StyleApiComplianceTests(unittest.TestCase):
     def _write(self, root: Path, name: str, content: str) -> None:
         d = root / "app" / "src" / "commonMain" / "kotlin"

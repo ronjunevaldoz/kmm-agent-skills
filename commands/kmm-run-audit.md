@@ -43,6 +43,7 @@ The script detects architectural and design smells:
 | `style param on screen composable` | A `style: Style` param on a `*Screen`/`*Content`/`*Page` composable — Styles are for components, not screens |
 | `stale compositionlocal in style function` | A `@Composable fun ...Style(): Style` reading `MaterialTheme.*`/`Local*.current` before returning — captured once, goes stale |
 | `missing indication null with style state` | A `pressed{}`/`hovered{}` Style block alongside a `clickable(...)` with no `indication = null` anywhere in the file — doubled ripple + Style effect |
+| `design system prefix mismatch` | An `App*`-named declaration under `core/designsystem` while `docs/design-system.md` records a different resolved `COMPONENT_PREFIX` — the resolved prefix wasn't actually used when generating |
 
 ---
 
@@ -110,6 +111,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `style param on screen composable` | `design-system` | Remove the `style: Style` param from the screen; hoist the styling into a child component instead |
 | `stale compositionlocal in style function` | `design-system` | Read the token via a `StyleScope` extension property inside the `Style { }` lambda, never outside it in a `@Composable`-returning-`Style` function |
 | `missing indication null with style state` | `design-system` | Add `indication = null` to the `clickable(...)` call so the Style animation is the only visual feedback |
+| `design system prefix mismatch` | `design-system` | Regenerate the flagged file(s) with the resolved `COMPONENT_PREFIX` directly — don't hand-rename `App*` symbols after the fact |
 
 ---
 

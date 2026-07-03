@@ -919,6 +919,66 @@ def _detect_missing_indication_null_with_style_state(root: Path) -> list[str]:
     return findings
 
 
+# ── Design system prefix mismatch ─────────────────────────────────────────────
+# "App" in the design-system skill is a template placeholder (see Step 0) — real
+# projects must substitute their resolved COMPONENT_PREFIX when generating files, not
+# leave literal App* names on disk. This detector catches the case where a project has
+# already resolved and recorded a different prefix but App*-named declarations still
+# exist under core/designsystem — i.e. the substitution was skipped during generation.
+
+_COMPONENT_PREFIX_ROW_RE = re.compile(r"\|\s*Component prefix\s*\|\s*([A-Za-z][A-Za-z0-9]*)\s*\|")
+_APP_PREFIXED_DECL_RE = re.compile(
+    r"\b(?:class|fun|object|val|data class|sealed interface|enum class)\s+(App[A-Z]\w*)"
+)
+
+
+def _detect_design_system_prefix_mismatch(root: Path) -> list[str]:
+    """Flag literal App*-prefixed declarations under core/designsystem when the project
+    has already resolved and recorded a different COMPONENT_PREFIX in docs/design-system.md.
+
+    Only fires when a resolved prefix is on record and it is not "App" itself — a project
+    that genuinely chose "App" as its prefix is not a mismatch. Scoped to designsystem
+    paths to avoid flagging unrelated App-prefixed identifiers elsewhere in the project.
+    """
+    doc = root / "docs" / "design-system.md"
+    if not doc.exists():
+        return []
+    try:
+        doc_text = doc.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return []
+    m = _COMPONENT_PREFIX_ROW_RE.search(doc_text)
+    if not m:
+        return []
+    resolved_prefix = m.group(1)
+    if resolved_prefix in ("COMPONENT_PREFIX", "App"):
+        return []  # unfilled placeholder, or the project genuinely chose "App"
+
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        if "designsystem" not in path.as_posix().lower():
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        decl_match = _APP_PREFIXED_DECL_RE.search(text)
+        if not decl_match:
+            continue
+        line_no, snippet = _at(text, decl_match.start())
+        findings.append(
+            f"design system prefix mismatch [HIGH]: {path.relative_to(root)}:{line_no} "
+            f"— '{decl_match.group(1)}' uses the literal 'App' placeholder, but "
+            f"docs/design-system.md records COMPONENT_PREFIX '{resolved_prefix}'; generate "
+            f"with the resolved prefix directly instead of leaving App* names to rename "
+            f"later (see design-system skill → Step 0)\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
 # Stems that signal a top-level screen/page composable, across naming conventions.
 _SCREEN_STEMS = ("Screen", "Content", "Page", "View", "Route")
 
@@ -1678,6 +1738,9 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_style_param_on_screen(root))
     findings.extend(_detect_stale_compositionlocal_in_style_function(root))
     findings.extend(_detect_missing_indication_null_with_style_state(root))
+
+    # ── Design system prefix mismatch ──────────────────────────────────────────
+    findings.extend(_detect_design_system_prefix_mismatch(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))
