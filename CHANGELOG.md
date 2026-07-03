@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.46.0] — 2026-07-04
+
+### Added
+
+- feat(design-system): derive component prefix from project name instead of hardcoding App
+
+---
+
 ## [v1.45.3] — 2026-07-04
 
 ### Fixed
