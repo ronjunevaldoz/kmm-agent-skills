@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.47.2] — 2026-07-04
+
+### Fixed
+
+- fix(design-system): generate the real prefix directly, never leave App* to rename later
+
+---
+
 ## [v1.47.1] — 2026-07-04
 
 ### Fixed
