@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.45.1] — 2026-07-03
+
+### Fixed
+
+- fix: add repo-relative fallback paths for Codex/Gemini installs
+
+---
+
 ## [v1.45.0] — 2026-07-03
 
 ### Added
