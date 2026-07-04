@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.48.0] — 2026-07-04
+
+### Added
+
+- feat(audit): detect empty platform-specific source sets
+
+---
+
 ## [v1.47.2] — 2026-07-04
 
 ### Fixed

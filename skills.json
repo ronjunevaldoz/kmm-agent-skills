@@ -1,5 +1,5 @@
 {
-  "version": "1.47.2",
+  "version": "1.48.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1128,7 +1128,7 @@
       "path": "skills/kotlin-multiplatform-feature-scaffold",
       "description": "Scaffolds a production-ready Kotlin Multiplatform (KMP) multi-feature module architecture. Creates a full project by generating from the official Kotlin/kmp-wizard AGP 9 baseline, usually the `all-targets` branch for Android, iOS, Web, Desktop, and Server, or adds a new feature module group (:model/:api/:domain/:data/:presenter/:ui) to an existing KMP project. Uses AGP 9+, build-logic convention plugins, a TOML version catalog (`gradle/libs.versions.toml`), Compose Multiplatform, and Koin 4 (annotated or manual DI).",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-21",
+      "last_updated": "2026-07-05",
       "keywords": [
         "Kotlin Multiplatform",
         "KMP",
