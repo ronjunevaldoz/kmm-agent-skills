@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-21'
+  last-updated: '2026-07-05'
   keywords:
     - Kotlin Multiplatform
     - KMP
@@ -1165,6 +1165,7 @@ After scaffolding, verify in order:
 - using string project references (`:feature:auth:api`) instead of typesafe accessors — breaks refactoring
 - **scaffolding by hand instead of cloning kmp-wizard** — always use `git clone Kotlin/kmp-wizard` as the base; writing build-logic, convention plugins, or settings.gradle.kts from scratch causes broken Gradle included builds, missing platform targets, and cascading precompiled script plugin failures that are very hard to debug
 - using precompiled `.gradle.kts` script plugins for convention plugins in included builds — Gradle 9 does not generate version catalog type-safe accessors for included builds; always use class-based `Plugin<Project>` instead
+- pre-creating empty `src/androidMain/kotlin/`, `src/iosMain/kotlin/`, `src/jvmMain/kotlin/`, etc. directories "just in case" a module might need platform code later — Gradle compiles a target fine with zero files in its source set; an empty platform directory (or one containing only a package-declaration stub) is pure clutter and signals unclear architecture intent. Declare the compile targets in the convention plugin (`androidLibrary {}`, `iosArm64()`, ...) as usual — that's required for per-platform artifacts — but only create the physical source directory and write into it when there is real `expect`/`actual` code to place there
 
 If a module is failing to compile on one target, check whether the convention plugin was applied and the source sets declared correctly.
 
@@ -1187,6 +1188,7 @@ Ask for GROUP_ID and feature name before generating files. Map all paths to the 
 
 | Date | Change |
 |---|---|
+| 2026-07-05 | Added anti-pattern against pre-creating empty platform source directories (`androidMain`, `iosMain`, `jvmMain`, ...) "just in case" — a real recurring smell reported from field experience. New audit detector `empty platform source set [LOW]` in `kotlin-multiplatform-audit` catches directories with zero `.kt` files or files containing only package/import/comments. Declaring the compile target is still required and correct; only the physical directory should be created on-demand, when there's real expect/actual code to write. |
 | 2026-06-21 | **Improved** — App versioning pattern defined: `VERSION_NAME`/`VERSION_CODE` in `gradle.properties` as the single source of truth; `androidApp` convention plugin reads from properties; `BuildKonfig` exposes `APP_VERSION` to `commonMain`; CI bump pattern documented. |
 | 2026-06-21 | **Breaking** — Step 3 rewritten: `git clone Kotlin/kmp-wizard` is now mandatory. Hand-scaffolding `build-logic`, convention plugins, or `settings.gradle.kts` from scratch is no longer supported. |
 | 2026-06-21 | **Breaking** — Step 4 rewritten: convention plugins must be class-based `Plugin<Project>`. Precompiled `.gradle.kts` script plugins in included builds do not generate version catalog accessors in Gradle 9. |

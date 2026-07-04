@@ -979,6 +979,77 @@ def _detect_design_system_prefix_mismatch(root: Path) -> list[str]:
     return findings
 
 
+# ── Empty platform-specific source sets ───────────────────────────────────────
+# KMP convention plugins register android/iOS/JVM/JS targets even for pure-common
+# layers (:model, :api, :domain) because Gradle needs a compiled artifact per target —
+# that's normal and required. The smell is a physical androidMain/iosMain/jvmMain/...
+# *source directory* that was scaffolded on disk with no real content: either zero .kt
+# files, or files containing nothing but a package declaration/imports/comments. An
+# empty source set compiles fine without existing at all — the directory is pure
+# clutter and signals unclear architecture intent ("why does :domain have an iosMain?").
+
+_PLATFORM_MAIN_DIR_RE = re.compile(
+    r"^(?:android|ios(?:Arm64|SimulatorArm64|X64)?|jvm|js|wasmJs|native|desktop|"
+    r"macos|linux|mingw)Main$"
+)
+_KOTLIN_COMMENT_OR_TRIVIAL_RE = re.compile(
+    r"^\s*(?://.*|/\*.*?\*/|package\s+[\w.]+|import\s+[\w.*]+)?\s*$",
+    re.MULTILINE,
+)
+
+
+def _is_trivial_kotlin_file(text: str) -> bool:
+    """True if a .kt file has no real declarations — only package/import/comments/blank
+    lines. A block comment spanning multiple lines is not handled line-by-line here;
+    good enough as a heuristic since real declarations reliably fail this check."""
+    for line in text.splitlines():
+        if not _KOTLIN_COMMENT_OR_TRIVIAL_RE.match(line):
+            return False
+    return True
+
+
+def _detect_empty_platform_sourceset(root: Path) -> list[str]:
+    """Flag a platform source set directory (androidMain/iosMain/jvmMain/...) that was
+    scaffolded on disk but never given real content.
+
+    Gradle does not require the directory to exist or contain files for a target to
+    compile — an empty platform source set is unnecessary in every case. This is a
+    lower-stakes cleanup finding (delete the directory, or add the real expect/actual
+    code if there's a genuine platform need), not an architecture violation.
+    """
+    findings: list[str] = []
+    seen_dirs: set[Path] = set()
+    for kotlin_dir in root.rglob("src/*/kotlin"):
+        sourceset_dir = kotlin_dir.parent
+        if sourceset_dir in seen_dirs:
+            continue
+        seen_dirs.add(sourceset_dir)
+        if not _PLATFORM_MAIN_DIR_RE.match(sourceset_dir.name):
+            continue
+        if _is_excluded(kotlin_dir, root):
+            continue
+        kt_files = [p for p in kotlin_dir.rglob("*.kt") if not _is_excluded(p, root)]
+        if not kt_files:
+            findings.append(
+                f"empty platform source set [LOW]: {kotlin_dir.relative_to(root)} "
+                f"— no .kt files; Gradle compiles this target fine without the directory "
+                f"existing at all. Remove it, or add the real expect/actual code if this "
+                f"module genuinely needs platform-specific logic"
+            )
+            continue
+        non_trivial = [p for p in kt_files if not _is_trivial_kotlin_file(
+            p.read_text(encoding="utf-8", errors="ignore")
+        )]
+        if not non_trivial:
+            findings.append(
+                f"empty platform source set [LOW]: {kotlin_dir.relative_to(root)} "
+                f"— {len(kt_files)} file(s) contain only package/import/comments, no real "
+                f"declarations; remove the directory or implement the platform code it "
+                f"was scaffolded for"
+            )
+    return findings
+
+
 # Stems that signal a top-level screen/page composable, across naming conventions.
 _SCREEN_STEMS = ("Screen", "Content", "Page", "View", "Route")
 
@@ -1741,6 +1812,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Design system prefix mismatch ──────────────────────────────────────────
     findings.extend(_detect_design_system_prefix_mismatch(root))
+
+    # ── Empty platform-specific source sets ────────────────────────────────────
+    findings.extend(_detect_empty_platform_sourceset(root))
 
     # ── Redundant screen title ─────────────────────────────────────────────────
     findings.extend(_detect_redundant_title(root))

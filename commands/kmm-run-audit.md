@@ -44,6 +44,7 @@ The script detects architectural and design smells:
 | `stale compositionlocal in style function` | A `@Composable fun ...Style(): Style` reading `MaterialTheme.*`/`Local*.current` before returning — captured once, goes stale |
 | `missing indication null with style state` | A `pressed{}`/`hovered{}` Style block alongside a `clickable(...)` with no `indication = null` anywhere in the file — doubled ripple + Style effect |
 | `design system prefix mismatch` | An `App*`-named declaration under `core/designsystem` while `docs/design-system.md` records a different resolved `COMPONENT_PREFIX` — the resolved prefix wasn't actually used when generating |
+| `empty platform source set` | An `androidMain`/`iosMain`/`jvmMain`/... source directory with no `.kt` files, or files containing only package/import/comments — dead scaffolding; Gradle compiles fine without it |
 
 ---
 
@@ -112,6 +113,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `stale compositionlocal in style function` | `design-system` | Read the token via a `StyleScope` extension property inside the `Style { }` lambda, never outside it in a `@Composable`-returning-`Style` function |
 | `missing indication null with style state` | `design-system` | Add `indication = null` to the `clickable(...)` call so the Style animation is the only visual feedback |
 | `design system prefix mismatch` | `design-system` | Regenerate the flagged file(s) with the resolved `COMPONENT_PREFIX` directly — don't hand-rename `App*` symbols after the fact |
+| `empty platform source set` | `feature-scaffold` | Delete the empty source directory, or implement the real `expect`/`actual` code if this module genuinely needs platform-specific logic — never scaffold the folder "just in case" |
 
 ---
 

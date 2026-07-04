@@ -1019,6 +1019,46 @@ class RasterInCommonMainTests(unittest.TestCase):
             self.assertFalse(any("raster asset in commonMain" in f for f in findings))
 
 
+class EmptyPlatformSourceSetTests(unittest.TestCase):
+    def test_flags_directory_with_no_kt_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "auth" / "domain" / "src" / "androidMain" / "kotlin" / "com" / "example"
+            d.mkdir(parents=True)
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("empty platform source set" in f for f in findings))
+
+    def test_flags_file_with_only_package_declaration(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "auth" / "domain" / "src" / "iosMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "Stub.kt").write_text("package com.example.feature.auth.domain\n\n// nothing here yet\n",
+                                        encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("empty platform source set" in f for f in findings))
+
+    def test_ignores_common_main(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "auth" / "domain" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "LoginUseCase.kt").write_text("package com.example\nclass LoginUseCase\n", encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("empty platform source set" in f for f in findings))
+
+    def test_ignores_populated_platform_sourceset(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "auth" / "data" / "src" / "androidMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "AndroidHttpEngine.kt").write_text(
+                "package com.example\nactual fun httpEngine() = Android.create()\n", encoding="utf-8"
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("empty platform source set" in f for f in findings))
+
+
 class DesignSystemPrefixMismatchTests(unittest.TestCase):
     def _write_docs(self, root: Path, prefix: str) -> None:
         d = root / "docs"
