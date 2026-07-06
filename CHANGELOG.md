@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.49.0] — 2026-07-07
+
+### Added
+
+- feat(adaptive-layout): document the FlexBox layout container
+
+### Fixed
+
+- fix(ci): install pytest before running the test suite
+
+---
+
 ## [v1.48.0] — 2026-07-04
 
 ### Added

@@ -1,5 +1,5 @@
 {
-  "version": "1.48.0",
+  "version": "1.49.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -58,7 +58,7 @@
       "path": "skills/kotlin-multiplatform-adaptive-layout",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-26",
+      "last_updated": "2026-07-07",
       "keywords": [
         "adaptive layout",
         "WindowSizeClass",
@@ -113,7 +113,23 @@
         "layout redesign",
         "page consistency",
         "uniform layout",
-        "layout patterns"
+        "layout patterns",
+        "FlexBox",
+        "flexbox",
+        "CSS flexbox",
+        "flex container",
+        "flex item",
+        "flex wrap",
+        "flex grow",
+        "flex shrink",
+        "flex basis",
+        "justifyContent",
+        "alignItems",
+        "alignContent",
+        "Modifier.flex",
+        "wrapping row",
+        "wrapping layout",
+        "chip wrap layout"
       ],
       "scripts": []
     },
