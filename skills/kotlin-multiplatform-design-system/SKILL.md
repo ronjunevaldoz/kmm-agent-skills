@@ -15,7 +15,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-05'
+  last-updated: '2026-07-08'
   keywords:
     - design system
     - Compose Styles API
@@ -40,6 +40,12 @@ metadata:
     - rename App prefix
     - custom prefix design system
     - project-based prefix
+    - rememberStyle
+    - StyleVariant
+    - Modifier.composed
+    - stateless variant
+    - context-aware modifier
+    - memoized style
 ---
 
 ## When to Use This Skill
@@ -753,6 +759,73 @@ val StyleScope.spacing: AppSpacing
 > val myStyle = Style { background(colors.primary) }
 > ```
 
+### `theme/RememberStyle.kt` — memoized variant resolution
+
+> **Hard Rule**: Every sealed variant interface (`ButtonVariant`, `BadgeVariant`,
+> `CardVariant`, `ChipVariant`, `TextFieldVariant`, and their `*Size` counterparts)
+> extends the common `StyleVariant` marker below. Variant objects stay flat and
+> stateless — `val style: Style`, no hardcoded/pre-resolved `Color`/`Dp` literals, no
+> mutable state. Resolve a variant to its `Style` at the call site with `rememberStyle()`,
+> never `variant.style then size.style` inlined directly in the modifier chain — that
+> rebuilds the merged descriptor on every recomposition instead of once per variant/size
+> change.
+
+```kotlin
+package GROUP_ID.core.designsystem.theme
+
+import androidx.compose.foundation.style.ExperimentalStylesApi
+import androidx.compose.foundation.style.Style
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+
+@OptIn(ExperimentalStylesApi::class)
+sealed interface StyleVariant {
+    val style: Style
+}
+
+/**
+ * Resolves one or more [StyleVariant]s (variant, size, ...) into a single merged
+ * [Style], memoized on the variants themselves so the `then` chain is rebuilt only
+ * when a variant or size actually changes — not on every recomposition.
+ *
+ * Usage: `val resolved = rememberStyle(variant, size)`
+ */
+@OptIn(ExperimentalStylesApi::class)
+@Composable
+fun rememberStyle(vararg variants: StyleVariant): Style =
+    remember(variants.toList()) {
+        variants.map { it.style }.reduce { acc, style -> acc then style }
+    }
+```
+
+`StyleVariant` is a marker interface, not a base class with defaults — each variant
+object still declares its own `override val style` exactly as in Step 5 below. The only
+change is `sealed interface ButtonVariant : StyleVariant { ... }` instead of
+`sealed interface ButtonVariant { ... }`, so `rememberStyle()` accepts it.
+
+### Custom context-aware modifiers (outside the Style system)
+
+For a one-off `Modifier` extension that needs a theme default but isn't a full variant
+system (a divider color, a shimmer tint, a custom draw effect) — fetch the default
+**inside** the modifier via `Modifier.composed { }`, never as a caller-supplied parameter
+with a hardcoded fallback:
+
+```kotlin
+// ❌ WRONG — forces every call site to know or hardcode the color
+fun Modifier.appDivider(color: Color = Color(0xFFE4E4E7)): Modifier =
+    drawBehind { drawLine(color, ...) }
+
+// ✅ CORRECT — reads the live theme internally; call site stays parameter-free
+fun Modifier.appDivider(): Modifier = composed {
+    val color = AppTheme.LocalAppTheme.current.colors.border
+    drawBehind { drawLine(color, ...) }
+}
+```
+
+Call sites stay clean: `Modifier.appDivider()`, no color threading. Reserve an explicit
+`color: Color?` override parameter only for genuine one-off escape hatches, and default it
+to `null` (resolve internally when unset) — never to a hardcoded literal.
+
 ---
 
 ## Step 5: Variant Systems
@@ -789,8 +862,8 @@ internal val buttonInteractionStyle = Style {
 
 // ── Variant styles ─────────────────────────────────────────────────────────────
 
-sealed interface ButtonVariant {
-    val style: Style
+sealed interface ButtonVariant : StyleVariant {
+    override val style: Style
 
     data object Default : ButtonVariant {
         override val style = Style {
@@ -849,8 +922,8 @@ sealed interface ButtonVariant {
 
 // ── Size styles ────────────────────────────────────────────────────────────────
 
-sealed interface ButtonSize {
-    val style: Style
+sealed interface ButtonSize : StyleVariant {
+    override val style: Style
 
     data object Xs : ButtonSize {
         override val style = Style {
@@ -910,8 +983,8 @@ import GROUP_ID.core.designsystem.theme.colors
 import GROUP_ID.core.designsystem.theme.shapes
 import GROUP_ID.core.designsystem.theme.spacing
 
-sealed interface BadgeVariant {
-    val style: Style
+sealed interface BadgeVariant : StyleVariant {
+    override val style: Style
 
     data object Default : BadgeVariant {
         override val style = Style {
@@ -983,8 +1056,8 @@ import GROUP_ID.core.designsystem.theme.shapes
 import GROUP_ID.core.designsystem.theme.spacing
 import GROUP_ID.core.designsystem.tokens.AppSpacing
 
-sealed interface CardVariant {
-    val style: Style
+sealed interface CardVariant : StyleVariant {
+    override val style: Style
 
     data object Default : CardVariant {
         override val style = Style {
@@ -1045,8 +1118,8 @@ import GROUP_ID.core.designsystem.theme.colors
 import GROUP_ID.core.designsystem.theme.shapes
 import GROUP_ID.core.designsystem.theme.spacing
 
-sealed interface ChipVariant {
-    val style: Style
+sealed interface ChipVariant : StyleVariant {
+    override val style: Style
 
     data object Default : ChipVariant {
         override val style = Style {
@@ -1099,8 +1172,8 @@ import GROUP_ID.core.designsystem.theme.colors
 import GROUP_ID.core.designsystem.theme.shapes
 import GROUP_ID.core.designsystem.theme.spacing
 
-sealed interface TextFieldVariant {
-    val style: Style
+sealed interface TextFieldVariant : StyleVariant {
+    override val style: Style
 
     data object Default : TextFieldVariant {
         override val style = Style {
@@ -1178,6 +1251,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import GROUP_ID.core.designsystem.styles.ButtonSize
 import GROUP_ID.core.designsystem.styles.ButtonVariant
+import GROUP_ID.core.designsystem.theme.rememberStyle
 
 /**
  * shadcn-inspired AppButton.
@@ -1207,6 +1281,9 @@ fun AppButton(
     val styleState = rememberUpdatedStyleState(interactionSource) {
         it.isEnabled = enabled
     }
+    // rememberStyle memoizes the merged descriptor on (variant, size) — rebuilt only
+    // when one of them actually changes, not on every recomposition.
+    val defaultStyle = rememberStyle(variant, size)
 
     Box(
         modifier = modifier
@@ -1217,8 +1294,7 @@ fun AppButton(
                 role = Role.Button,
                 onClick = onClick,
             )
-            // defaultStyle = variant.style then size.style; override via incoming `style`
-            .styleable(styleState, variant.style then size.style, style),
+            .styleable(styleState, defaultStyle, style),
         contentAlignment = Alignment.Center,
     ) {
         Row(
@@ -2429,6 +2505,9 @@ not `ComponentRegistryViolation` or `DesignTokenImportBoundary`.
 ## Common Anti-Patterns
 
 - magic color literals in composables — `Color(0xFF6200EE)` written directly inside a `@Composable` instead of `appTheme.colors.primary`; the audit script flags `Color(0x…)` in any `/ui/` or `/presentation/` file that is not a token definition file
+- inlining `variant.style then size.style` directly in a modifier chain instead of `rememberStyle(variant, size)` — rebuilds the merged descriptor on every recomposition instead of once per variant/size change
+- a `Modifier` extension taking a theme value as a required parameter with a hardcoded literal default (`fun Modifier.appDivider(color: Color = Color(0xFFE4E4E7))`) — resolve it internally via `Modifier.composed { AppTheme.LocalAppTheme.current... }` so call sites stay parameter-free
+- a sealed variant `data object` holding a pre-resolved `Color`/`Dp` value instead of a `Style` descriptor built from `StyleScope` extensions (`colors.primary`, not a captured `Color` literal) — breaks theme switching and light/dark parity
 - hardcoded spacing in composables — `padding(16.dp)` or `padding(horizontal = 8.dp)` written directly instead of `padding(horizontal = appTheme.spacing.lg)`; the audit script flags `.dp` literals inside `padding(…)` calls in UI files
 - accessing `AppTheme.colors`, `AppTheme.spacing`, or `AppTheme.typography` as static properties — these are instance properties; use the `appTheme` `@Composable` accessor or `AppTheme.LocalAppTheme.current` inside a composable
 - title text in content body — a `Text("Screen Title")` composable inside the content column when it should be `AppTopAppBar(title = "Screen Title")`; makes the title scroll away and duplicates chrome
@@ -2493,6 +2572,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-08 | New `StyleVariant` marker interface + `rememberStyle(vararg variants)` composable — memoizes the merged `variant.style then size.style` descriptor on the variants themselves instead of rebuilding it every recomposition. All variant sealed interfaces (`ButtonVariant`, `ButtonSize`, `BadgeVariant`, `CardVariant`, `ChipVariant`, `TextFieldVariant`) now extend it; `AppButton` updated to use `rememberStyle(variant, size)`. Added "Custom context-aware modifiers" guidance: one-off `Modifier` extensions resolve theme defaults internally via `Modifier.composed { }`, never as a caller-supplied parameter with a hardcoded literal default. `CardSize` intentionally excluded — it holds raw `Dp` values, not a `Style` descriptor, so it doesn't fit the `StyleVariant` contract. 3 new anti-patterns. |
 | 2026-07-05 | Hardened Step 0 into a non-negotiable rule: `App` must never be written to disk literally for a real project — generate directly with the resolved prefix in the same pass, no "rename later" step. New audit detector `design system prefix mismatch [HIGH]` catches the case where `docs/design-system.md` records a resolved `COMPONENT_PREFIX` but `App*`-named declarations still exist under `core/designsystem` — verified against 5 scenarios (mismatch, consistent, genuinely-App, no-doc, unfilled-template). |
 | 2026-07-05 | Auditing complete for Style API compliance: `audit_project.py` now has 5 dedicated detectors (`style default with body`, `style state wrong enabled property`, `style param on screen composable`, `stale compositionlocal in style function`, `missing indication null with style state`) enforcing the Do's/Don'ts/Limitations in `references/compose-styles-api-reference.md`. All verified with positive + negative test cases. `design-system-extended` audited component-by-component for actual Style API wiring — see its new "Style API coverage" table; `AppAvatar` fixed (had dead unused Style imports from an unfinished wiring attempt). |
 | 2026-07-05 | Added new Step 0 — "App" is now formalized as a placeholder token (like `GROUP_ID`), resolved via precedence: `docs/design-system.md` COMPONENT_PREFIX -> user-stated -> derived from the project name -> `App` fallback. New `scripts/derive_component_prefix.py` deterministically derives a PascalCase prefix from `settings.gradle.kts` rootProject.name, the Gradle group ID, or the directory name, stripping generic noise words (app, android, ios, kmp, shared, compose, ...). Updated the Naming Rule, `docs/design-system.md` guidance, and the detekt `componentPrefix` example to stop treating `'App'` as a hardcoded literal. |
