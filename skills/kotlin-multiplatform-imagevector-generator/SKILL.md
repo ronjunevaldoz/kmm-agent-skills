@@ -10,7 +10,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-03'
+  last-updated: '2026-07-07'
   keywords:
     - ImageVector
     - vector icons
@@ -56,7 +56,8 @@ icons that should be vectors (photos under `assets/photos/` are exempt).
 **Trigger keywords:** ImageVector, vector icon, convert image, trace image, SVG to
 Compose, PNG to vector, icon from image, logo vector, vectorize, raster to vector,
 image asset, icon asset, compile icon, vtracer, potrace, extract logo, extract icon,
-app icon vector, icon pipeline, no PNG icons.
+app icon vector, icon pipeline, no PNG icons, heroicons, hero icons, outline icon,
+solid icon, mini icon, micro icon, icon set, fetch icon, download icon, remote svg.
 
 **Freshness rule:** vtracer's Python wheel API and Compose's `ImageVector.Builder`
 signatures evolve — recheck both before upgrading the toolchain.
@@ -131,6 +132,33 @@ or `brew install potrace` + `pip install Pillow` (mono fallback).
 
 ---
 
+## Remote SVG Sources (e.g. Heroicons)
+
+The pipeline accepts any well-formed SVG regardless of origin. To use an icon from a
+remote icon set:
+
+1. Fetch the raw SVG to a local file first — never point the converter at a live URL,
+   and never fetch from a rendered icon-browser page (e.g. `heroicons.com` itself is a
+   JS app; it returns HTML, not SVG). Use the raw source repo instead.
+2. Validate the icon name and variant against `references/heroicons-catalog.md` before
+   constructing the URL — it lists the 4 variant keywords (Outline, Solid, Mini, Micro)
+   and the full 324-name catalog, snapshotted from the upstream repo. Don't guess a name;
+   if it's not in the list, re-fetch the live directory listing (command included in that
+   file) rather than hallucinating a plausible-sounding one.
+3. Run the same converter as any other SVG input (Step 2 of the Workflow above) —
+   `--color-mode semantic` is almost always correct since Heroicons ship as single-color
+   `currentColor` strokes/fills.
+
+```bash
+curl -sL "https://raw.githubusercontent.com/tailwindlabs/heroicons/master/optimized/24/outline/bell.svg" \
+  -o /tmp/bell.svg
+python3 skills/kotlin-multiplatform-imagevector-generator/scripts/convert_image_to_imagevector.py \
+  /tmp/bell.svg --name Bell --group-id com.example.app --color-mode semantic \
+  --output composeApp/src/commonMain/kotlin/com/example/app/core/designsystem/icons
+```
+
+---
+
 ## What the Script Refuses (by design)
 
 | Refusal | Why |
@@ -188,9 +216,18 @@ Never print generated path data into the conversation.
 
 ---
 
+## References Directory
+
+| File | Purpose | When to use |
+|---|---|---|
+| `references/heroicons-catalog.md` | The 4 Heroicons variant keywords (Outline/Solid/Mini/Micro) with repo path templates, plus the full 324-name icon catalog snapshot | Validate an icon name + variant before constructing a fetch URL — see "Remote SVG Sources" above |
+
+---
+
 ## Changelog
 
 | Date | Change |
 |---|---|
+| 2026-07-07 | Added a "Remote SVG Sources" workflow for fetching icons from remote sets (e.g. Heroicons) as a local file before conversion — never fetch a live URL directly or scrape a rendered icon-browser page. New `references/heroicons-catalog.md`: the 4 variant keywords (Outline, Solid, Mini, Micro) with repo path templates, and the full 324-name Heroicons catalog snapshot with a re-fetch command for freshness. |
 | 2026-07-03 | Added a repo-relative fallback path for the converter script — `~/.claude/skills/...` only resolves in a Claude Code install; Codex CLI and Gemini CLI installs need the `skills/...` relative path (see INSTALL.md). |
 | 2026-07-03 | Initial release — raster/SVG → ImageVector local toolchain (quantize/trace/normalize/codegen), hard rules forbidding hand-written path data, semantic vs literal color modes, node budget, entropy gate, audit enforcement (handwritten imagevector, raster asset in commonMain). |

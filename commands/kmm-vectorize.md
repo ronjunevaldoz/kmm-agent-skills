@@ -22,6 +22,17 @@ paths manually. The audit flags hand-written builders (`handwritten imagevector 
 - **Photograph** → STOP. Photos stay raster under `assets/photos/`. Tell the user.
 - Full-screen mockup → ask the user to crop the individual asset first (or crop it
   yourself if the bounds are obvious), then convert the crop
+- **Remote icon (e.g. "the Heroicons bell icon, solid mini")** → fetch the raw SVG to a
+  local file first (never point the converter at a live URL, never scrape a rendered
+  icon-browser page like heroicons.com itself). For Heroicons, validate the name and
+  variant against `skills/kotlin-multiplatform-imagevector-generator/references/heroicons-catalog.md`,
+  then:
+  ```bash
+  curl -sL "https://raw.githubusercontent.com/tailwindlabs/heroicons/master/optimized/<size>/<style>/<name>.svg" \
+    -o /tmp/<name>.svg
+  ```
+  where `<size>/<style>` is `24/outline`, `24/solid`, `20/solid` (Mini), or `16/solid` (Micro).
+  Then continue at Step 2 with `/tmp/<name>.svg` as the input.
 
 ## Step 2 — Choose the color mode
 
