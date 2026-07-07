@@ -1,5 +1,5 @@
 {
-  "version": "1.49.0",
+  "version": "1.50.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1355,7 +1355,7 @@
       "path": "skills/kotlin-multiplatform-imagevector-generator",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-03",
+      "last_updated": "2026-07-07",
       "keywords": [
         "ImageVector",
         "vector icons",
@@ -1388,7 +1388,17 @@
         "extract icon",
         "app icon vector",
         "icon pipeline",
-        "no PNG icons"
+        "no PNG icons",
+        "heroicons",
+        "hero icons",
+        "outline icon",
+        "solid icon",
+        "mini icon",
+        "micro icon",
+        "icon set",
+        "fetch icon",
+        "download icon",
+        "remote svg"
       ],
       "scripts": [
         "convert_image_to_imagevector.py"

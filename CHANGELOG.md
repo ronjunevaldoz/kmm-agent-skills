@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.50.0] — 2026-07-07
+
+### Added
+
+- feat(imagevector-generator): support fetching remote Heroicons SVGs
+
+---
+
 ## [v1.49.0] — 2026-07-07
 
 ### Added
