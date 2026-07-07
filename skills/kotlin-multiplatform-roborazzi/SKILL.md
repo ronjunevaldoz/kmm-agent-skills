@@ -2,14 +2,16 @@
 name: kotlin-multiplatform-roborazzi
 description: >
   Complete UI layer testing for KMP: semantic test tags on composables, Compose UI
-  interaction tests (createComposeRule, onNodeWithTag, performClick, assertIsDisplayed),
-  and Roborazzi screenshot tests that capture @Preview composables on JVM/Desktop for
-  visual regression detection. Covers the full stack from testTag conventions to CI golden
-  image diffs. Replaces kotlin-multiplatform-testing-robot for UI regression testing.
+  interaction tests in commonTest (runComposeUiTest, onNodeWithTag, performClick,
+  assertIsDisplayed) that run on every target — JVM, Android instrumented, iOS
+  simulator, Wasm — and Roborazzi screenshot tests that capture @Preview composables
+  on JVM/Desktop for visual regression detection. Covers the full stack from testTag
+  conventions to CI golden image diffs. Replaces kotlin-multiplatform-testing-robot for
+  UI regression testing.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-20'
+  last-updated: '2026-07-07'
   keywords:
     - Roborazzi
     - screenshot test
@@ -25,6 +27,9 @@ metadata:
     - test tag
     - Compose UI test
     - createComposeRule
+    - runComposeUiTest
+    - commonTest UI test
+    - multiplatform UI test
     - onNodeWithTag
     - interaction test
     - semantics
@@ -55,8 +60,9 @@ screenshot testing, visual regression testing, UI coverage, test composable.
 
 **Freshness rule:** Roborazzi is actively developed — the Gradle plugin API and the
 `captureRoboImage` API change between minor versions. Recheck the GitHub releases page before
-pinning a version. The JetBrains Compose UI test dependency (`compose.uiTestJUnit4`) tracks
-the Compose Multiplatform version.
+pinning a version. `runComposeUiTest` (`org.jetbrains.compose.ui:ui-test`) tracks the Compose
+Multiplatform version and is still `@ExperimentalTestApi` — recheck its signature before
+upgrading CMP.
 
 ---
 
@@ -65,16 +71,24 @@ the Compose Multiplatform version.
 Default to this three-layer UI testing stack:
 
 1. **Test tags** on every interactive or assertable node — `Modifier.testTag(FooTestTags.LOGIN_BUTTON)`
-2. **Interaction tests** with `createComposeRule` — verify behaviour (enabled/disabled, text shown, clicks fire)
-3. **Roborazzi screenshot tests** — verify visual output (layout, color, loading/error/empty states)
-   For feature `Content` screens, cover phone, tablet, and desktop sizes, and record both
-   light and dark themes when the screen supports them.
+2. **Interaction tests** in `commonTest` with `runComposeUiTest` — verify behaviour
+   (enabled/disabled, text shown, clicks fire). Required CI gate: `jvmTest`, no emulator
+   needed. Per-platform matrix (`androidDeviceTest`, `iosSimulatorArm64Test`, `wasmJsTest`)
+   is opt-in/nightly — see CI Integration below.
+3. **Roborazzi screenshot tests** in `jvmTest` — verify visual output (layout, color,
+   loading/error/empty states). For feature `Content` screens, cover phone, tablet, and
+   desktop sizes, and record both light and dark themes when the screen supports them.
 
 Why:
 - Test tags make tests stable — `onNodeWithTag` doesn't break when copy changes
-- Interaction tests run on JVM via `jvmTest`, no emulator needed
+- `commonTest` interaction tests catch real platform-specific bugs (text input, focus,
+  gesture handling differ per target) that JVM-only tests structurally cannot
 - Roborazzi goldens catch unintentional visual regressions that logic tests miss
-- All three layers share the same `:ui` module and the same `jvmTest` task
+- Roborazzi has **no multiplatform equivalent** — it's built directly on Robolectric's
+  Android-framework shadow rendering, so screenshot tests stay JVM-only regardless of
+  where interaction tests live
+- Keeping the full device/simulator matrix out of the required PR gate keeps CI fast;
+  emulator/simulator boot time is real cost that shouldn't block every push
 
 ---
 
@@ -124,16 +138,25 @@ kotlin {
     }
 
     sourceSets {
+        commonTest.dependencies {
+            implementation(compose.uiTest)              // runComposeUiTest — commonTest, multiplatform
+            implementation(libs.kotlin.test)
+        }
         jvmTest.dependencies {
-            implementation(compose.uiTestJUnit4)       // Compose UI test rule
-            implementation(libs.roborazzi)
+            implementation(libs.roborazzi)               // Roborazzi is JVM/Robolectric-only
             implementation(libs.roborazzi.compose)
             implementation(libs.roborazzi.junit.rule)
-            implementation(libs.kotlin.test)
         }
     }
 }
 ```
+
+`compose.uiTest` is inherited by every platform test source set (`jvmTest`,
+`androidDeviceTest`, `iosSimulatorArm64Test`, `wasmJsTest`) automatically — declare it once
+in `commonTest`, not per-target. Android instrumented tests additionally need a minimal
+`AndroidManifest.xml` under `src/androidDeviceTest/`; see the official
+[Compose Multiplatform testing guide](https://kotlinlang.org/docs/multiplatform/compose-test.html)
+for the exact setup.
 
 ---
 
@@ -199,26 +222,28 @@ if (state.error != null) {
 
 ---
 
-## Step 2: Compose UI Interaction Tests
+## Step 2: Compose UI Interaction Tests (commonTest)
+
+Interaction tests live in `commonTest` and run per-target via `runComposeUiTest` — the
+same test body executes under `jvmTest` (required CI gate), and optionally under
+`androidDeviceTest`, `iosSimulatorArm64Test`, `wasmJsTest` (opt-in/nightly matrix, see CI
+Integration). No JUnit4 `@get:Rule` — `runComposeUiTest` takes a lambda with a
+`ComposeUiTest` receiver that exposes the same `onNodeWithTag`/`performClick`/assert API.
 
 ```kotlin
-// :feature:auth:ui/src/jvmTest/kotlin/GROUP_ID/feature/auth/ui/AuthContentInteractionTest.kt
+// :feature:auth:ui/src/commonTest/kotlin/GROUP_ID/feature/auth/ui/AuthContentInteractionTest.kt
 package GROUP_ID.feature.auth.ui
 
 import androidx.compose.ui.test.*
-import androidx.compose.ui.test.junit4.createComposeRule
 import GROUP_ID.core.designsystem.theme.AppTheme
 import kotlin.test.Test
-import org.junit.Rule
 
 class AuthContentInteractionTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
-
+    @OptIn(ExperimentalTestApi::class)
     @Test
-    fun loginButton_isDisabled_whenLoading() {
-        composeTestRule.setContent {
+    fun loginButton_isDisabled_whenLoading() = runComposeUiTest {
+        setContent {
             AppTheme {
                 AuthContent(
                     state = AuthContract.State(isLoading = true),
@@ -226,14 +251,13 @@ class AuthContentInteractionTest {
                 )
             }
         }
-        composeTestRule
-            .onNodeWithTag(AuthTestTags.LOGIN_BUTTON)
-            .assertIsNotEnabled()
+        onNodeWithTag(AuthTestTags.LOGIN_BUTTON).assertIsNotEnabled()
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
-    fun errorMessage_isDisplayed_whenErrorInState() {
-        composeTestRule.setContent {
+    fun errorMessage_isDisplayed_whenErrorInState() = runComposeUiTest {
+        setContent {
             AppTheme {
                 AuthContent(
                     state = AuthContract.State(error = "Invalid credentials"),
@@ -241,15 +265,15 @@ class AuthContentInteractionTest {
                 )
             }
         }
-        composeTestRule
-            .onNodeWithTag(AuthTestTags.ERROR_MESSAGE)
+        onNodeWithTag(AuthTestTags.ERROR_MESSAGE)
             .assertIsDisplayed()
             .assertTextContains("Invalid credentials")
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
-    fun loadingIndicator_isDisplayed_whenLoading() {
-        composeTestRule.setContent {
+    fun loadingIndicator_isDisplayed_whenLoading() = runComposeUiTest {
+        setContent {
             AppTheme {
                 AuthContent(
                     state = AuthContract.State(isLoading = true),
@@ -257,15 +281,14 @@ class AuthContentInteractionTest {
                 )
             }
         }
-        composeTestRule
-            .onNodeWithTag(AuthTestTags.LOADING_INDICATOR)
-            .assertIsDisplayed()
+        onNodeWithTag(AuthTestTags.LOADING_INDICATOR).assertIsDisplayed()
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
-    fun loginButton_firesIntent_whenClicked() {
+    fun loginButton_firesIntent_whenClicked() = runComposeUiTest {
         val intents = mutableListOf<AuthContract.Intent>()
-        composeTestRule.setContent {
+        setContent {
             AppTheme {
                 AuthContent(
                     state = AuthContract.State(),
@@ -273,17 +296,16 @@ class AuthContentInteractionTest {
                 )
             }
         }
-        composeTestRule
-            .onNodeWithTag(AuthTestTags.LOGIN_BUTTON)
-            .performClick()
+        onNodeWithTag(AuthTestTags.LOGIN_BUTTON).performClick()
 
         assert(intents.contains(AuthContract.Intent.LoginClicked))
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
-    fun emailField_updatesState_onTextInput() {
+    fun emailField_updatesState_onTextInput() = runComposeUiTest {
         val intents = mutableListOf<AuthContract.Intent>()
-        composeTestRule.setContent {
+        setContent {
             AppTheme {
                 AuthContent(
                     state = AuthContract.State(),
@@ -291,9 +313,7 @@ class AuthContentInteractionTest {
                 )
             }
         }
-        composeTestRule
-            .onNodeWithTag(AuthTestTags.EMAIL_FIELD)
-            .performTextInput("user@example.com")
+        onNodeWithTag(AuthTestTags.EMAIL_FIELD).performTextInput("user@example.com")
 
         assert(
             intents.filterIsInstance<AuthContract.Intent.EmailChanged>()
@@ -303,7 +323,7 @@ class AuthContentInteractionTest {
 }
 ```
 
-**Key APIs:**
+**Key APIs (unchanged from JUnit4 — only the harness differs):**
 
 | API | Use |
 |---|---|
@@ -318,7 +338,10 @@ class AuthContentInteractionTest {
 
 ---
 
-## Step 3: Roborazzi Screenshot Tests
+## Step 3: Roborazzi Screenshot Tests (jvmTest only)
+
+Unlike interaction tests, screenshot tests stay in `jvmTest` — Roborazzi has no
+multiplatform equivalent.
 
 ```kotlin
 // :feature:auth:ui/src/jvmTest/kotlin/GROUP_ID/feature/auth/ui/AuthContentScreenshotTest.kt
@@ -403,10 +426,14 @@ PR review — reviewers see before/after without running tests locally.
 
 ## CI Integration
 
+`jvmTest` is the **required** gate — it runs both the `commonTest` interaction tests
+(via their JVM actualization) and the `jvmTest`-only Roborazzi screenshots in one fast
+step, no emulator or simulator involved.
+
 ```yaml
 # .github/workflows/ci.yml
 test-screenshot:
-  name: Screenshot Tests (JVM)
+  name: UI + Screenshot Tests (JVM)
   runs-on: ubuntu-latest
   needs: lint
   steps:
@@ -435,8 +462,39 @@ test-screenshot:
         retention-days: 7
 ```
 
-The same `jvmTest` task runs both interaction tests and screenshot tests — one CI step
-covers the entire UI layer.
+**Opt-in / nightly matrix** — runs the same `commonTest` interaction tests on real
+platform targets to catch platform-specific rendering/input bugs. Don't add this to the
+required per-PR gate; emulator and simulator boot time is real CI cost.
+
+```yaml
+# .github/workflows/nightly-ui-matrix.yml
+on:
+  schedule:
+    - cron: '0 4 * * *'   # nightly
+  workflow_dispatch: {}    # or manually, per PR label
+
+jobs:
+  ios-simulator:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./gradlew iosSimulatorArm64Test
+
+  android-instrumented:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          script: ./gradlew connectedAndroidTest
+
+  wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./gradlew wasmJsTest
+```
 
 ---
 
@@ -494,6 +552,9 @@ Findings map to reviewer blockers: FAIL-level → `[THEME]` or `[LAYOUT]`; WARNI
 - covering only one device size in a feature screenshot test — preview coverage should span phone, tablet, and desktop
 - putting test tag constants as bare string literals in the test — define them in `object FooTestTags` in `commonMain`
 - using `assertTextContains` for copy that will be localized — use `assertIsDisplayed()` on the tagged node instead
+- trying to move Roborazzi screenshot tests to `commonTest` — Roborazzi has no multiplatform equivalent; it depends directly on Robolectric's Android-framework shadow rendering, so it stays JVM-only regardless of where interaction tests live
+- adding `iosSimulatorArm64Test`/`connectedAndroidTest` to the required per-PR CI gate — emulator/simulator boot time is expensive; keep the full device matrix opt-in or nightly and `jvmTest` as the required fast gate
+- writing new interaction tests with `createComposeRule` + JUnit4 `@get:Rule` in `jvmTest` — use `runComposeUiTest` in `commonTest` instead so the same test body can run per-target
 
 If a screenshot test fails after a Compose upgrade, re-record goldens — font rendering shifts between versions.
 
@@ -514,4 +575,5 @@ When asked about UI testing, test tags, or visual regression for KMP, respond in
 
 | Date | Change |
 |---|---|
+| 2026-07-07 | Moved Compose UI interaction tests from `jvmTest`/`createComposeRule`+JUnit4 to `commonTest`/`runComposeUiTest`, so the same test body runs per-target (JVM, Android instrumented, iOS simulator, Wasm). Roborazzi screenshot tests stay `jvmTest`-only (no multiplatform equivalent — depends on Robolectric shadow rendering). Added an opt-in/nightly CI matrix job alongside the required `jvmTest` gate, updated Gradle setup (`compose.uiTest` in `commonTest.dependencies`), and 3 new anti-patterns. |
 | 2026-06-20 | Initial release. |
