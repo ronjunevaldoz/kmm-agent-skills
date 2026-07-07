@@ -1,5 +1,5 @@
 {
-  "version": "1.51.0",
+  "version": "1.52.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -772,7 +772,7 @@
       "path": "skills/kotlin-multiplatform-design-system",
       "description": "Scaffolds a custom Compose Multiplatform design system in :core:designsystem using the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles, @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates: color/typography/shape/spacing tokens, AppTheme with light/dark support, StyleScope extensions for token access, shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant, ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision), and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText) built on BasicXxx CMP primitives. \"App\" is a placeholder prefix derived from the project's actual name (scripts/derive_component_prefix.py), not a hardcoded literal. No Material dependency \u2014 fully custom, fully owned.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-05",
+      "last_updated": "2026-07-08",
       "keywords": [
         "design system",
         "Compose Styles API",
@@ -796,7 +796,13 @@
         "COMPONENT_PREFIX",
         "rename App prefix",
         "custom prefix design system",
-        "project-based prefix"
+        "project-based prefix",
+        "rememberStyle",
+        "StyleVariant",
+        "Modifier.composed",
+        "stateless variant",
+        "context-aware modifier",
+        "memoized style"
       ],
       "triggers": [
         "design system",

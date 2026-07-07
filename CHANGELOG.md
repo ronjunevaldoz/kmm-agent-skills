@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.52.0] — 2026-07-08
+
+### Added
+
+- feat(design-system): add rememberStyle() and StyleVariant marker interface
+
+---
+
 ## [v1.51.0] — 2026-07-07
 
 ### Added
