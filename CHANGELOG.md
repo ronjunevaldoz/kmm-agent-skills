@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.51.0] — 2026-07-07
+
+### Added
+
+- feat(roborazzi): move interaction tests to commonTest via runComposeUiTest
+
+---
+
 ## [v1.50.0] — 2026-07-07
 
 ### Added

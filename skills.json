@@ -1,5 +1,5 @@
 {
-  "version": "1.50.0",
+  "version": "1.51.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -2520,9 +2520,9 @@
     {
       "name": "kotlin-multiplatform-roborazzi",
       "path": "skills/kotlin-multiplatform-roborazzi",
-      "description": "Complete UI layer testing for KMP: semantic test tags on composables, Compose UI interaction tests (createComposeRule, onNodeWithTag, performClick, assertIsDisplayed), and Roborazzi screenshot tests that capture @Preview composables on JVM/Desktop for visual regression detection. Covers the full stack from testTag conventions to CI golden image diffs. Replaces kotlin-multiplatform-testing-robot for UI regression testing.",
+      "description": "Complete UI layer testing for KMP: semantic test tags on composables, Compose UI interaction tests in commonTest (runComposeUiTest, onNodeWithTag, performClick, assertIsDisplayed) that run on every target \u2014 JVM, Android instrumented, iOS simulator, Wasm \u2014 and Roborazzi screenshot tests that capture @Preview composables on JVM/Desktop for visual regression detection. Covers the full stack from testTag conventions to CI golden image diffs. Replaces kotlin-multiplatform-testing-robot for UI regression testing.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-20",
+      "last_updated": "2026-07-07",
       "keywords": [
         "Roborazzi",
         "screenshot test",
@@ -2538,6 +2538,9 @@
         "test tag",
         "Compose UI test",
         "createComposeRule",
+        "runComposeUiTest",
+        "commonTest UI test",
+        "multiplatform UI test",
         "onNodeWithTag",
         "interaction test",
         "semantics",
