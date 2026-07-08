@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.53.0] — 2026-07-08
+
+### Added
+
+- feat(audit): detect toggle icon swap and bare conditional collapse
+
+---
+
 ## [v1.52.0] — 2026-07-08
 
 ### Added
