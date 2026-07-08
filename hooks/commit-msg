@@ -17,6 +17,15 @@ if echo "$MSG" | grep -qE "^(Merge |Revert |fixup! |squash! )"; then
   exit 0
 fi
 
+# No Co-Authored-By trailer — commits are not attributed to AI coding agents.
+if echo "$MSG" | grep -qiE "^Co-Authored-By:"; then
+  echo "" >&2
+  echo "  ❌  Commit rejected — no Co-Authored-By trailer." >&2
+  echo "  Remove the trailer line and re-commit." >&2
+  echo "" >&2
+  exit 1
+fi
+
 # Conventional Commit pattern
 PATTERN="^(feat|fix|chore|docs|refactor|test|style|perf|build|ci)(\([a-z0-9][a-z0-9 _-]*\))?: .{1,}"
 

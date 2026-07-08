@@ -20,6 +20,16 @@ if echo "$MSG" | grep -qE "^Release v[0-9]+\.[0-9]+\.[0-9]+"; then
   exit 0
 fi
 
+# No Co-Authored-By trailer — this repo does not attribute commits to AI coding agents.
+# See CONTRIBUTING.md → Commit format.
+if echo "$MSG" | grep -qiE "^Co-Authored-By:"; then
+  echo "" >&2
+  echo "  ❌  Commit rejected — no Co-Authored-By trailer in this repo." >&2
+  echo "  Remove the trailer line and re-commit. See CONTRIBUTING.md → Commit format." >&2
+  echo "" >&2
+  exit 1
+fi
+
 # Conventional Commit pattern: type[(scope)]: description (min 1 char description)
 PATTERN="^(feat|fix|chore|docs|refactor|test|style|perf|build|ci)(\([a-z0-9][a-z0-9 _-]*\))?: .{1,}"
 

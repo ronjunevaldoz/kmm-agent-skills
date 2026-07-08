@@ -231,6 +231,10 @@ enforce(scaffold): mandate kmp-wizard clone as only valid project base
 docs: add CONTRIBUTING.md
 ```
 
+**No `Co-Authored-By` trailer.** Commits in this repo — including ones made by an AI
+coding agent — do not carry a `Co-Authored-By: <agent>` trailer. Keep the message to the
+subject line (and body if needed) per the format above, nothing appended below it.
+
 ---
 
 ## Pull request checklist
