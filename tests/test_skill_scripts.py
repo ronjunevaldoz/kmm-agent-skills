@@ -1059,6 +1059,96 @@ class EmptyPlatformSourceSetTests(unittest.TestCase):
             self.assertFalse(any("empty platform source set" in f for f in findings))
 
 
+class ToggleLayoutStabilityTests(unittest.TestCase):
+    def _write(self, root: Path, filename: str, content: str) -> None:
+        d = root / "src" / "commonMain" / "kotlin" / "ui"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / filename).write_text(content, encoding="utf-8")
+
+    def test_flags_icon_swap_between_chevron_pair(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Trigger.kt",
+                "@Composable\nfun Trigger(isExpanded: Boolean) {\n"
+                "    if (isExpanded) {\n"
+                "        Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)\n"
+                "    } else {\n"
+                "        Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null)\n"
+                "    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("toggle icon swap instead of rotation" in f for f in findings))
+
+    def test_ignores_icon_swap_when_graphics_layer_rotation_present(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Trigger.kt",
+                "@Composable\nfun Trigger(isExpanded: Boolean) {\n"
+                "    val rotation by animateFloatAsState(if (isExpanded) 180f else 0f)\n"
+                "    Icon(\n"
+                "        imageVector = Icons.Default.KeyboardArrowDown,\n"
+                "        contentDescription = null,\n"
+                "        modifier = Modifier.graphicsLayer { rotationZ = rotation },\n"
+                "    )\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("toggle icon swap instead of rotation" in f for f in findings))
+
+    def test_ignores_single_icon_with_no_pair(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Trigger.kt",
+                "@Composable\nfun Trigger() {\n"
+                "    Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null)\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("toggle icon swap instead of rotation" in f for f in findings))
+
+    def test_flags_bare_conditional_around_composable_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Collapsible.kt",
+                "@Composable\nfun Collapsible(isExpanded: Boolean) {\n"
+                "    Column {\n        TriggerRow()\n"
+                "        if (isExpanded) {\n            Text(\"content\")\n        }\n    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("bare conditional collapse" in f for f in findings))
+
+    def test_ignores_animated_visibility_wrapped_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Collapsible.kt",
+                "@Composable\nfun Collapsible(isExpanded: Boolean) {\n"
+                "    Column {\n        TriggerRow()\n"
+                "        AnimatedVisibility(visible = isExpanded) {\n            Text(\"content\")\n        }\n    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("bare conditional collapse" in f for f in findings))
+
+    def test_ignores_bare_conditional_without_composable_call(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Toggle.kt",
+                "@Composable\nfun Toggle(isExpanded: Boolean) {\n"
+                "    if (isExpanded) {\n        println(\"expanded\")\n    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("bare conditional collapse" in f for f in findings))
+
+
 class DesignSystemPrefixMismatchTests(unittest.TestCase):
     def _write_docs(self, root: Path, prefix: str) -> None:
         d = root / "docs"

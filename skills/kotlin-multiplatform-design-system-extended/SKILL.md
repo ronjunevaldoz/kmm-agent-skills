@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-05'
+  last-updated: '2026-07-08'
   keywords:
     - design system extended
     - Dialog
@@ -2843,6 +2843,8 @@ fun SettingsPage() {
 - building a custom sheet or dialog without checking `AppBottomSheet` / `AppDialog` first
 - mixing Material3 components with extended design system components — creates token conflicts
 - creating an `AppToastHostState` without wiring it into the `AppScaffold` slot — toasts silently do nothing
+- swapping between two icon composables (`if (isExpanded) IconUp else IconDown`) for a collapsible chevron instead of rotating one icon via `Modifier.graphicsLayer { rotationZ = ... }` — if the two icons' intrinsic sizes differ even slightly, the trigger row remeasures and visibly shifts position on toggle; caught by the audit's `toggle icon swap instead of rotation [MEDIUM]`
+- toggling collapsible content with a bare `if (isExpanded) { ... }` instead of `AnimatedVisibility`/`.animateContentSize()` — the instant layout snap reads as the trigger button itself moving, not just the content appearing; caught by `bare conditional collapse [MEDIUM]`
 
 Check the component list in this skill before building a custom alternative.
 
@@ -2873,6 +2875,7 @@ Assume `kotlin-multiplatform-design-system` is already applied. Use the user's v
 
 | Date | Change |
 |---|---|
+| 2026-07-08 | Added 2 anti-patterns for collapsible/toggle layout stability: icon-swap chevrons (instead of `graphicsLayer { rotationZ }` rotation) and bare `if (isExpanded) { ... }` collapse (instead of `AnimatedVisibility`/`.animateContentSize()`) — both can visibly shift a trigger button's position on toggle. Backed by new `kotlin-multiplatform-audit` detectors `toggle icon swap instead of rotation [MEDIUM]` and `bare conditional collapse [MEDIUM]`; `AppAccordion` already followed the correct pattern and is cited as the reference implementation. |
 | 2026-07-05 | Completeness audit found 3 real gaps: (1) the Toast/Snackbar subsystem (`ToastHost`, `ToastHostState`, `ToastData`, `ToastVariant`, `LocalToastHostState`) never carried the `App` prefix at all — renamed to `AppToastHost`/`AppToastHostState`/`AppToastData`/`AppToastVariant`/`LocalAppToastHostState` and fixed a resulting double-prefix typo in Common Anti-Patterns; (2) the skill promised "Progress (linear + circular)" but only linear existed — added `AppCircularProgress` (determinate ring + indeterminate rotating arc, same infinite-animation constraint as `AppSpinner`) and fixed `AppProgress`'s docstring, which falsely claimed it delegated to `AppSpinner` for the indeterminate case; (3) description claimed "27 components" — corrected to the accurate count (26). Added the `App`-is-a-placeholder cross-reference to Prerequisites and the frontmatter description, matching the base skill's Step 0. |
 | 2026-07-05 | Added "Style API coverage" table classifying all 24 components (wired / correctly slot-API-exempt / correctly exempt due to a real limitation / not-yet-wired) so the audit's Style-compliance detectors don't flag legitimate exemptions as gaps. Wired `AppAvatar` (was importing `Style`/`MutableStyleState`/`styleable` unused — dead code from an unfinished wiring attempt): added a `style: Style = Style` escape hatch and an `avatarDefaultStyle` for its background/shape. |
 | 2026-07-05 | Fixed `AppIconButton`: `styleState.enabled = enabled` used the wrong property name and a non-idiomatic construction — corrected to `rememberUpdatedStyleState(interactionSource) { it.isEnabled = enabled }` per the official Compose Styles API docs (see base skill's `references/compose-styles-api-reference.md`). |

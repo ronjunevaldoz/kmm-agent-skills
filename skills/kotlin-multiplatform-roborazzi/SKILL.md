@@ -11,7 +11,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-07'
+  last-updated: '2026-07-08'
   keywords:
     - Roborazzi
     - screenshot test
@@ -336,6 +336,33 @@ class AuthContentInteractionTest {
 | `assertDoesNotExist()` | Node is not in the composition |
 | `onNodeWithTag(tag, useUnmergedTree = true)` | Target inside a merged semantics tree |
 
+### Layout stability regression test (trigger position on toggle)
+
+A screenshot golden alone won't reliably catch a trigger button shifting a few pixels
+when toggled (collapsible/accordion chevrons, expand/collapse triggers) — diff tools
+often tolerate small deltas. Assert the trigger's bounds directly instead:
+
+```kotlin
+@OptIn(ExperimentalTestApi::class)
+@Test
+fun collapsibleTrigger_positionUnchanged_whenToggled() = runComposeUiTest {
+    setContent {
+        AppTheme { Collapsible(/* ... */) }
+    }
+    val before = onNodeWithTag(CollapsibleTestTags.TRIGGER).fetchSemanticsNode().boundsInRoot
+    onNodeWithTag(CollapsibleTestTags.TRIGGER).performClick()
+    mainClock.advanceTimeBy(250)  // past the toggle animation's tween duration
+    val after = onNodeWithTag(CollapsibleTestTags.TRIGGER).fetchSemanticsNode().boundsInRoot
+
+    assertEquals(before, after)
+}
+```
+
+This is the deterministic version of the two failure modes the `kotlin-multiplatform-audit`
+detectors `toggle icon swap instead of rotation [MEDIUM]` and `bare conditional collapse
+[MEDIUM]` catch statically — write this test alongside any collapsible/accordion trigger,
+not just for components that already broke once.
+
 ---
 
 ## Step 3: Roborazzi Screenshot Tests (jvmTest only)
@@ -542,7 +569,7 @@ Findings map to reviewer blockers: FAIL-level → `[THEME]` or `[LAYOUT]`; WARNI
 
 ## Common Anti-Patterns
 
-- using Playwright, `adb screencap`, `xcrun simctl io`, or `Robot.createScreenCapture` for UI screenshots — use `captureRoboImage` on JVM instead; system capture requires a running device/emulator, produces non-reproducible results, and is flagged by `audit_project.py`
+- using Playwright, computer-use tooling, `adb screencap`, `xcrun simctl io`, or `Robot.createScreenCapture` for UI screenshots — use `captureRoboImage` on JVM instead; manually launching and driving the app requires a running device/emulator, produces non-reproducible results, and produces nothing committable. This applies to "verify this UI change" / "check the screen" requests too, not just when explicitly writing a screenshot test — reach for `runComposeUiTest`/`captureRoboImage` before reaching for a live app or a computer-use tool
 - using `onNodeWithText("Sign in")` instead of `onNodeWithTag` — breaks when copy changes; always use tags
 - tagging the `Screen` composable (with a real ViewModel) — inject fixed state into `Content` instead
 - not committing golden images — CI has nothing to diff against; diffs only work with committed goldens
@@ -575,5 +602,6 @@ When asked about UI testing, test tags, or visual regression for KMP, respond in
 
 | Date | Change |
 |---|---|
+| 2026-07-08 | Added a "Layout stability regression test" pattern — asserting `boundsInRoot()` on a trigger before/after toggle (via `mainClock.advanceTimeBy`) to deterministically catch a collapsible/accordion trigger shifting position on toggle. Cross-links the new `kotlin-multiplatform-audit` detectors `toggle icon swap instead of rotation` and `bare conditional collapse`. |
 | 2026-07-07 | Moved Compose UI interaction tests from `jvmTest`/`createComposeRule`+JUnit4 to `commonTest`/`runComposeUiTest`, so the same test body runs per-target (JVM, Android instrumented, iOS simulator, Wasm). Roborazzi screenshot tests stay `jvmTest`-only (no multiplatform equivalent — depends on Robolectric shadow rendering). Added an opt-in/nightly CI matrix job alongside the required `jvmTest` gate, updated Gradle setup (`compose.uiTest` in `commonTest.dependencies`), and 3 new anti-patterns. |
 | 2026-06-20 | Initial release. |

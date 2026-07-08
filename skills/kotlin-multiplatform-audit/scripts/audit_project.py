@@ -919,6 +919,109 @@ def _detect_missing_indication_null_with_style_state(root: Path) -> list[str]:
     return findings
 
 
+# ── Toggle/collapsible layout stability ────────────────────────────────────────
+# A trigger button (accordion header, collapsible chevron) must never shift position
+# when toggled. The two most common causes: swapping between two differently-sized
+# icon composables instead of rotating one icon, and toggling content with a bare
+# `if` instead of AnimatedVisibility/animateContentSize (an instant layout snap reads
+# as "the button moved"). See kotlin-multiplatform-design-system-extended's AppAccordion
+# for the correct pattern (graphicsLayer { rotationZ } + AnimatedVisibility below a
+# stable trigger row).
+
+_CHEVRON_ICON_PAIRS = [
+    ("KeyboardArrowDown", "KeyboardArrowUp"),
+    ("ChevronDown", "ChevronUp"),
+    ("ExpandMore", "ExpandLess"),
+    ("ArrowDropDown", "ArrowDropUp"),
+]
+_GRAPHICS_ROTATION_RE = re.compile(r"graphicsLayer\s*\{[^}]*rotationZ")
+_MODIFIER_ROTATE_RE = re.compile(r"Modifier\s*\.\s*rotate\s*\(")
+
+
+def _detect_toggle_icon_swap(root: Path) -> list[str]:
+    """Flag a file that references both icons of a known chevron/expand pair
+    (e.g. KeyboardArrowDown + KeyboardArrowUp) with no graphicsLayer { rotationZ }
+    or Modifier.rotate() anywhere in the file.
+
+    Swapping between two icon composables on toggle can change the trigger row's
+    measured bounds if the two icons' intrinsic sizes differ even slightly — shifting
+    the trigger's position in its parent. Rotating a single icon via a draw-phase
+    transform never changes layout bounds, regardless of angle. File-level heuristic —
+    verify the specific icon swap at the flagged line.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if _GRAPHICS_ROTATION_RE.search(text) or _MODIFIER_ROTATE_RE.search(text):
+            continue
+        for down_name, up_name in _CHEVRON_ICON_PAIRS:
+            if down_name in text and up_name in text:
+                match = re.search(re.escape(down_name), text)
+                line_no, snippet = _at(text, match.start())
+                findings.append(
+                    f"toggle icon swap instead of rotation [MEDIUM]: {path.relative_to(root)}:{line_no} "
+                    f"— both {down_name} and {up_name} appear in this file with no "
+                    f"graphicsLayer {{ rotationZ }} / Modifier.rotate() present; swapping between "
+                    f"two icon composables on toggle can shift the trigger's layout bounds if their "
+                    f"intrinsic sizes differ — rotate a single icon instead\n"
+                    f"    {line_no} | {snippet}"
+                )
+                break
+    return findings
+
+
+_BARE_CONDITIONAL_EXPAND_RE = re.compile(
+    r"\bif\s*\(\s*[\w.!]*(?:[Ee]xpand|[Ii]sOpen|[Tt]oggled)\w*\s*\)\s*\{"
+)
+_ANIMATED_VISIBILITY_RE = re.compile(r"\bAnimatedVisibility\s*\(")
+_ANIMATE_CONTENT_SIZE_RE = re.compile(r"\.animateContentSize\s*\(")
+_COMPOSABLE_CALL_IN_BLOCK_RE = re.compile(r"\b[A-Z]\w*\s*\(")
+
+
+def _detect_bare_conditional_collapse(root: Path) -> list[str]:
+    """Flag a bare `if (isExpanded) { ... }` around what looks like composable content
+    (a PascalCase call inside the block) when the file has no AnimatedVisibility or
+    .animateContentSize() anywhere.
+
+    A raw conditional snaps the layout instantly instead of animating it — the
+    instant jump is what reads as "the trigger button moved" even though the trigger
+    itself never changed. File-level heuristic — verify the flagged block actually
+    renders collapsible content, not just a state/log toggle.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if _ANIMATED_VISIBILITY_RE.search(text) or _ANIMATE_CONTENT_SIZE_RE.search(text):
+            continue
+        match = _BARE_CONDITIONAL_EXPAND_RE.search(text)
+        if not match:
+            continue
+        window = text[match.end():match.end() + 400]
+        if not _COMPOSABLE_CALL_IN_BLOCK_RE.search(window):
+            continue
+        line_no, snippet = _at(text, match.start())
+        findings.append(
+            f"bare conditional collapse [MEDIUM]: {path.relative_to(root)}:{line_no} "
+            f"— content is shown/hidden with a raw `if` and no AnimatedVisibility / "
+            f".animateContentSize() anywhere in the file; this snaps the layout instantly "
+            f"and can visibly shift a sibling trigger's position — wrap the conditional "
+            f"content in AnimatedVisibility(expandVertically()/shrinkVertically()) or add "
+            f".animateContentSize() to the containing layout\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
 # ── Design system prefix mismatch ─────────────────────────────────────────────
 # "App" in the design-system skill is a template placeholder (see Step 0) — real
 # projects must substitute their resolved COMPONENT_PREFIX when generating files, not
@@ -1809,6 +1912,10 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_style_param_on_screen(root))
     findings.extend(_detect_stale_compositionlocal_in_style_function(root))
     findings.extend(_detect_missing_indication_null_with_style_state(root))
+
+    # ── Toggle/collapsible layout stability ─────────────────────────────────────
+    findings.extend(_detect_toggle_icon_swap(root))
+    findings.extend(_detect_bare_conditional_collapse(root))
 
     # ── Design system prefix mismatch ──────────────────────────────────────────
     findings.extend(_detect_design_system_prefix_mismatch(root))
