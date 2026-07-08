@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.55.2] — 2026-07-08
+
+### Docs
+
+- docs(code-quality): add Kotlin comment and KDoc conventions
+
+---
+
 ## [v1.55.1] — 2026-07-08
 
 ### Fixed
