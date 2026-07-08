@@ -1,5 +1,5 @@
 {
-  "version": "1.54.0",
+  "version": "1.54.1",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1368,7 +1368,7 @@
       "path": "skills/kotlin-multiplatform-imagevector-generator",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-07",
+      "last_updated": "2026-07-08",
       "keywords": [
         "ImageVector",
         "vector icons",
@@ -1379,7 +1379,10 @@
         "potrace",
         "vector tracing",
         "asset pipeline",
-        "logo vector"
+        "logo vector",
+        "arc to bezier",
+        "arc flattening",
+        "SVG arc command"
       ],
       "triggers": [
         "ImageVector",

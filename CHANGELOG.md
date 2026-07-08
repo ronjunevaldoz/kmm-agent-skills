@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.54.1] — 2026-07-08
+
+### Fixed
+
+- fix(imagevector-generator): flatten SVG arcs instead of rejecting them
+
+---
+
 ## [v1.54.0] — 2026-07-08
 
 ### Added
