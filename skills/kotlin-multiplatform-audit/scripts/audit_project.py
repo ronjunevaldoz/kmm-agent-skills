@@ -1022,6 +1022,49 @@ def _detect_bare_conditional_collapse(root: Path) -> list[str]:
     return findings
 
 
+# ── Focused/selected state animates border width ────────────────────────────────
+# CSS uses `ring` (box-shadow) instead of `border` for focus indicators specifically
+# because box-shadow never participates in the box model. The Compose equivalent isn't
+# a new primitive — animating borderWidth (or borderBottomWidth/etc.) inside a state
+# block re-measures the component on every focus/selection change, which can visibly
+# shift the component or its siblings. Reserve the final width at rest (transparent
+# color if there's no border at rest) and animate borderColor only.
+
+_STATE_BLOCK_BORDER_WIDTH_RE = re.compile(
+    r"\b(?:focused|selected)\s*\{[^}]{0,200}?border\w*Width\s*\("
+)
+
+
+def _detect_focused_state_animates_border_width(root: Path) -> list[str]:
+    """Flag a `focused {}`/`selected {}` Style block that changes a border width
+    property (borderWidth, borderBottomWidth, etc.) instead of only borderColor.
+
+    File-level heuristic (bounded lookahead window) — verify the specific state block
+    at the flagged line actually changes width, not just color.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        match = _STATE_BLOCK_BORDER_WIDTH_RE.search(text)
+        if not match:
+            continue
+        line_no, snippet = _at(text, match.start())
+        findings.append(
+            f"focused state animates border width [MEDIUM]: {path.relative_to(root)}:{line_no} "
+            f"— a focused{{}}/selected{{}} Style block changes a border width property; "
+            f"animating border width re-measures the component on focus/selection and can "
+            f"shift its layout — reserve the final width at rest (borderColor(Color.Transparent) "
+            f"if there's no border at rest) and animate borderColor only\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
 # ── Design system prefix mismatch ─────────────────────────────────────────────
 # "App" in the design-system skill is a template placeholder (see Step 0) — real
 # projects must substitute their resolved COMPONENT_PREFIX when generating files, not
@@ -1916,6 +1959,7 @@ def audit_project(root: Path) -> list[str]:
     # ── Toggle/collapsible layout stability ─────────────────────────────────────
     findings.extend(_detect_toggle_icon_swap(root))
     findings.extend(_detect_bare_conditional_collapse(root))
+    findings.extend(_detect_focused_state_animates_border_width(root))
 
     # ── Design system prefix mismatch ──────────────────────────────────────────
     findings.extend(_detect_design_system_prefix_mismatch(root))

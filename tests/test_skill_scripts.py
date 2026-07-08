@@ -1059,6 +1059,69 @@ class EmptyPlatformSourceSetTests(unittest.TestCase):
             self.assertFalse(any("empty platform source set" in f for f in findings))
 
 
+class FocusedStateBorderWidthTests(unittest.TestCase):
+    def _write(self, root: Path, filename: str, content: str) -> None:
+        d = root / "src" / "commonMain" / "kotlin" / "ui"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / filename).write_text(content, encoding="utf-8")
+
+    def test_flags_focused_block_animating_border_width(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "ButtonStyles.kt",
+                "internal val buttonInteractionStyle = Style {\n"
+                "    focused { animate { borderWidth(2.dp); borderColor(colors.borderFocus) } }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("focused state animates border width" in f for f in findings))
+
+    def test_flags_selected_block_animating_border_bottom_width(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "ChipStyles.kt",
+                "data object Selected : ChipVariant {\n"
+                "    override val style = Style {\n"
+                "        selected { animate { borderBottomWidth(1.dp); borderColor(colors.borderFocus) } }\n"
+                "    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("focused state animates border width" in f for f in findings))
+
+    def test_ignores_focused_block_animating_color_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "ButtonStyles.kt",
+                "internal val buttonInteractionStyle = Style {\n"
+                "    focused { animate { borderColor(colors.borderFocus) } }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("focused state animates border width" in f for f in findings))
+
+    def test_ignores_border_width_outside_state_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "ButtonStyles.kt",
+                "data object Default : ButtonVariant {\n"
+                "    override val style = Style {\n"
+                "        borderWidth(2.dp)\n"
+                "        borderColor(Color.Transparent)\n"
+                "        focused { animate { borderColor(colors.borderFocus) } }\n"
+                "    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("focused state animates border width" in f for f in findings))
+
+
 class ToggleLayoutStabilityTests(unittest.TestCase):
     def _write(self, root: Path, filename: str, content: str) -> None:
         d = root / "src" / "commonMain" / "kotlin" / "ui"

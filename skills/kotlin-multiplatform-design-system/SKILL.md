@@ -289,6 +289,34 @@ the token values for your brand.
 - If typography is unspecified, suggest a font pair and type scale before generating components.
 - Use Atlassian and shadcn as references for neutral-first palettes, crisp hierarchy, and restrained component shapes.
 
+### Ring vs border — never animate `borderWidth`
+
+Don't add a separate "ring" primitive to imitate CSS `box-shadow`-based focus rings — the
+actual problem a `ring` solves in CSS is that `box-shadow` never participates in the box
+model, so it can't jitter content. The Compose fix is a rule, not a new component:
+
+**Never animate `borderWidth` (or `borderBottomWidth`, etc.) in a state block.** Reserve
+the final width at rest — `borderColor(Color.Transparent)` if the variant has no border
+at rest — and animate only `borderColor` on `focused {}`/`selected {}`. The border's
+footprint never changes size, so focusing/selecting a component never re-measures or
+shifts a sibling's position — the same bug class as an unrotated icon swap shifting an
+accordion trigger (see `kotlin-multiplatform-roborazzi`'s "Layout stability regression
+test").
+
+```kotlin
+// ❌ WRONG — width animates from 0 to 2.dp, content shifts under focus
+focused { animate { borderWidth(2.dp); borderColor(colors.borderFocus) } }
+
+// ✅ CORRECT — width reserved (transparent) at rest, only color animates
+data object Default : ButtonVariant {
+    override val style = Style {
+        background(colors.primary)
+        borderWidth(2.dp)
+        borderColor(Color.Transparent)
+    } then buttonInteractionStyle   // buttonInteractionStyle's focused{} only touches borderColor
+}
+```
+
 ## Naming Rule
 
 - `App` is a placeholder for the project's actual component prefix — see Step 0 for how
@@ -844,6 +872,7 @@ package GROUP_ID.core.designsystem.styles
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.style.Style
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -853,11 +882,16 @@ import GROUP_ID.core.designsystem.theme.spacing
 
 // ── Interaction atoms (shared across variants) ────────────────────────────────
 
+// Focus ring is COLOR-only, never width — borderWidth is reserved (transparent) or
+// already present at rest per variant below, so focusing a button never re-measures
+// or shifts its layout. This is the Compose equivalent of a CSS `ring` (box-shadow,
+// outside the box model) instead of an animated `border` (inside the box model,
+// jitters content when its width changes). See Style Rules → Ring vs border.
 internal val buttonInteractionStyle = Style {
     hovered  { animate { alpha(0.90f) } }
     pressed  { animate { alpha(0.80f) } }
     disabled { animate { alpha(0.38f) } }
-    focused  { animate { borderWidth(2.dp); borderColor(colors.borderFocus) } }
+    focused  { animate { borderColor(colors.borderFocus) } }
 }
 
 // ── Variant styles ─────────────────────────────────────────────────────────────
@@ -870,6 +904,10 @@ sealed interface ButtonVariant : StyleVariant {
             background(colors.primary)
             contentColor(colors.onPrimary)
             shape(RoundedCornerShape(shapes.md))
+            // Reserved at rest — invisible until focused{} recolors it. Never animate
+            // this width; only borderColor changes on focus (see buttonInteractionStyle).
+            borderWidth(2.dp)
+            borderColor(Color.Transparent)
         } then buttonInteractionStyle
     }
 
@@ -890,6 +928,8 @@ sealed interface ButtonVariant : StyleVariant {
             background(colors.secondary)
             contentColor(colors.onSecondary)
             shape(RoundedCornerShape(shapes.md))
+            borderWidth(2.dp)
+            borderColor(Color.Transparent)
             hovered { animate { background(colors.secondaryHover) } }
         } then buttonInteractionStyle
     }
@@ -898,6 +938,8 @@ sealed interface ButtonVariant : StyleVariant {
         override val style = Style {
             contentColor(colors.onSurface)
             shape(RoundedCornerShape(shapes.md))
+            borderWidth(2.dp)
+            borderColor(Color.Transparent)
             hovered { animate { background(colors.secondary) } }
             pressed { animate { background(colors.secondary) } }
         } then buttonInteractionStyle
@@ -908,6 +950,8 @@ sealed interface ButtonVariant : StyleVariant {
             background(colors.destructive)
             contentColor(colors.onDestructive)
             shape(RoundedCornerShape(shapes.md))
+            borderWidth(2.dp)
+            borderColor(Color.Transparent)
             hovered { animate { background(colors.destructiveHover) } }
         } then buttonInteractionStyle
     }
@@ -1166,6 +1210,7 @@ package GROUP_ID.core.designsystem.styles
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.style.Style
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import GROUP_ID.core.designsystem.theme.colors
@@ -1184,7 +1229,8 @@ sealed interface TextFieldVariant : StyleVariant {
             shape(RoundedCornerShape(shapes.md))
             padding(horizontal = spacing.md, vertical = spacing.sm)
             fontSize(14.sp)
-            focused { animate { borderWidth(2.dp); borderColor(colors.borderFocus) } }
+            // Width already reserved at rest (1.dp) — focus only recolors it, never resizes.
+            focused { animate { borderColor(colors.borderFocus) } }
             disabled { animate { alpha(0.38f) } }
         }
     }
@@ -1196,7 +1242,10 @@ sealed interface TextFieldVariant : StyleVariant {
             shape(RoundedCornerShape(topStart = shapes.md, topEnd = shapes.md, bottomStart = 0.dp, bottomEnd = 0.dp))
             padding(horizontal = spacing.md, vertical = spacing.sm)
             fontSize(14.sp)
-            focused { animate { borderWidth(2.dp); borderColor(colors.borderFocus) } }
+            // Reserved at rest — invisible until focused{} recolors it (no border by default).
+            borderWidth(2.dp)
+            borderColor(Color.Transparent)
+            focused { animate { borderColor(colors.borderFocus) } }
         }
     }
 
@@ -1205,7 +1254,10 @@ sealed interface TextFieldVariant : StyleVariant {
             contentColor(colors.onSurface)
             padding(horizontal = spacing.xs, vertical = spacing.xs)
             fontSize(14.sp)
-            focused { animate { borderBottomWidth(1.dp); borderColor(colors.borderFocus) } }
+            // Reserved at rest — invisible until focused{} recolors it (no underline by default).
+            borderBottomWidth(1.dp)
+            borderColor(Color.Transparent)
+            focused { animate { borderColor(colors.borderFocus) } }
         }
     }
 }
@@ -2572,6 +2624,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-08 | Fixed a real layout-shift bug found across `ButtonStyles.kt`/`TextFieldStyles.kt`: `focused {}` blocks animated `borderWidth`/`borderBottomWidth` (0→2dp or 1→2dp), re-measuring the component on focus. Fixed by reserving the final border width at rest (`borderColor(Color.Transparent)` where there's no border at rest) and animating only `borderColor`. New "Ring vs border" rule in Style Rules explaining the CSS-ring analogy; new audit detector `focused state animates border width [MEDIUM]`. |
 | 2026-07-08 | New `StyleVariant` marker interface + `rememberStyle(vararg variants)` composable — memoizes the merged `variant.style then size.style` descriptor on the variants themselves instead of rebuilding it every recomposition. All variant sealed interfaces (`ButtonVariant`, `ButtonSize`, `BadgeVariant`, `CardVariant`, `ChipVariant`, `TextFieldVariant`) now extend it; `AppButton` updated to use `rememberStyle(variant, size)`. Added "Custom context-aware modifiers" guidance: one-off `Modifier` extensions resolve theme defaults internally via `Modifier.composed { }`, never as a caller-supplied parameter with a hardcoded literal default. `CardSize` intentionally excluded — it holds raw `Dp` values, not a `Style` descriptor, so it doesn't fit the `StyleVariant` contract. 3 new anti-patterns. |
 | 2026-07-05 | Hardened Step 0 into a non-negotiable rule: `App` must never be written to disk literally for a real project — generate directly with the resolved prefix in the same pass, no "rename later" step. New audit detector `design system prefix mismatch [HIGH]` catches the case where `docs/design-system.md` records a resolved `COMPONENT_PREFIX` but `App*`-named declarations still exist under `core/designsystem` — verified against 5 scenarios (mismatch, consistent, genuinely-App, no-doc, unfilled-template). |
 | 2026-07-05 | Auditing complete for Style API compliance: `audit_project.py` now has 5 dedicated detectors (`style default with body`, `style state wrong enabled property`, `style param on screen composable`, `stale compositionlocal in style function`, `missing indication null with style state`) enforcing the Do's/Don'ts/Limitations in `references/compose-styles-api-reference.md`. All verified with positive + negative test cases. `design-system-extended` audited component-by-component for actual Style API wiring — see its new "Style API coverage" table; `AppAvatar` fixed (had dead unused Style imports from an unfinished wiring attempt). |
