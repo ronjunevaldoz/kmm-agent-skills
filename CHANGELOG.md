@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.55.0] — 2026-07-08
+
+### Added
+
+- feat(imagevector-generator): add --package override flag
+
+---
+
 ## [v1.54.2] — 2026-07-08
 
 ### Fixed
