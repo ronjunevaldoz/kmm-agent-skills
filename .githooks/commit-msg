@@ -31,7 +31,7 @@ if echo "$MSG" | grep -qiE "^Co-Authored-By:"; then
 fi
 
 # Conventional Commit pattern: type[(scope)]: description (min 1 char description)
-PATTERN="^(feat|fix|chore|docs|refactor|test|style|perf|build|ci)(\([a-z0-9][a-z0-9 _-]*\))?: .{1,}"
+PATTERN="^(feat|fix|chore|docs|refactor|refine|enforce|test|style|perf|build|ci)(\([a-z0-9][a-z0-9 _-]*\))?: .{1,}"
 
 FIRST_LINE=$(echo "$MSG" | head -1)
 
@@ -40,7 +40,7 @@ if ! echo "$FIRST_LINE" | grep -qE "$PATTERN"; then
   echo "  ❌  Commit rejected — message does not follow Conventional Commit format." >&2
   echo "" >&2
   echo "  Format:  <type>[optional scope]: <description>" >&2
-  echo "  Types:   feat | fix | chore | docs | refactor | test | style | perf | build | ci" >&2
+  echo "  Types:   feat | fix | chore | docs | refactor | refine | enforce | test | style | perf | build | ci" >&2
   echo "" >&2
   echo "  Examples:" >&2
   echo "    feat(skills): add kotlin-multiplatform-layout-system skill" >&2
