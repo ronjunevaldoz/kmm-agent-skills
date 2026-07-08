@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-18'
+  last-updated: '2026-07-08'
   keywords:
     - Ktlint
     - Detekt
@@ -19,6 +19,11 @@ metadata:
     - Kotlin Multiplatform
     - lint
     - static analysis
+    - KDoc
+    - comments
+    - comment style
+    - documentation convention
+    - kdoc vs comment
 ---
 
 ## When to Use This Skill
@@ -30,7 +35,9 @@ Use when you need to:
 - Configure Detekt architecture rules for the 6-layer module model
 
 **Trigger keywords:** Ktlint, Detekt, code quality, formatting, architecture rules, CI gate,
-static analysis, lint, import check, layer violation, code style.
+static analysis, lint, import check, layer violation, code style, KDoc, comment convention,
+when to use comments, documentation comment, comment style, kdoc vs line comment,
+how to comment kotlin.
 
 **Freshness rule:** Ktlint and Detekt versions change frequently — recheck the latest releases
 before pinning. Detekt architecture rule DSL changes between minor versions.
@@ -223,6 +230,61 @@ libraries:
 
 ---
 
+## Comment & KDoc Conventions
+
+**The rule:** `/** ... */` (KDoc) documents the **public API surface** — what a public
+class/function/property does, its contract, `@param`/`@return`/`@throws`/`@see`. `//` is
+for **internal implementation notes** — the WHY behind a non-obvious piece of code, never
+a restatement of WHAT the code does (well-named code already says that).
+
+| Situation | Use | Notes |
+|---|---|---|
+| Public class/function/property contract | KDoc `/** ... */` | Picked up by Dokka and IDE quick-docs; `//` is invisible to both |
+| Internal WHY note (a workaround, a non-obvious constraint) | `//` | Never document WHAT — that's what good naming is for |
+| A private member needs a comment to explain what it does | Neither — **rename it** | If a private function's behavior isn't obvious from its name, the fix is a better name, not a comment. Detekt's `DocumentationOverPrivateFunction`/`DocumentationOverPrivateProperty` flag this directly |
+| Nested comments | Block comments (`/* */`) nest in Kotlin, unlike Java/C | `/* outer /* inner */ still open */` is valid. KDoc (`/** */`) does **not** nest |
+
+### Real bug this exact mistake caused
+
+A `//` line comment placed inside a function call's argument list consumes everything
+after it on that physical line — including a needed closing `)`/`{`. This shipped in
+`kotlin-multiplatform-imagevector-generator`'s own codegen until a test caught it:
+
+```kotlin
+// ❌ WRONG — the // comments out the rest of the line, including `) {`
+path(fill = SolidColor(Color.Black)  // color-agnostic — tint at the call site) {
+
+// ✅ CORRECT — the call is syntactically complete before the comment starts
+path(fill = SolidColor(Color.Black)) {  // color-agnostic — tint at the call site
+```
+
+### Detekt enforcement
+
+Add to `detekt.yml`:
+
+```yaml
+comments:
+  UndocumentedPublicClass:
+    active: true
+    excludes: ['**/test/**', '**/*Test.kt', '**/*Preview*']
+  UndocumentedPublicFunction:
+    active: true
+    excludes: ['**/test/**', '**/*Test.kt', '**/*Preview*']
+  DocumentationOverPrivateFunction:
+    active: true
+  DocumentationOverPrivateProperty:
+    active: true
+  OutdatedDocumentation:
+    active: true
+```
+
+`UndocumentedPublic*` forces KDoc onto every public declaration; `DocumentationOverPrivate*`
+forces the opposite — no KDoc on private members, since if one is needed the name is the
+real problem. `OutdatedDocumentation` catches KDoc whose `@param`/signature no longer
+matches the actual declaration after a refactor.
+
+---
+
 ## CI Integration
 
 Add to `.github/workflows/ci.yml` lint job:
@@ -276,6 +338,9 @@ lint:
 - using Ktlint without `.editorconfig` — line length defaults to 80; too short for Kotlin
 - running `ktlintFormat` in CI instead of `ktlintCheck` — CI should fail, not silently reformat
 - excluding the `:presenter` module from `NoComposeInPresenter` — the rule only matters if applied to presenter
+- using `//` to document a public API's contract instead of KDoc — Dokka and IDE quick-docs never see a `//` comment
+- adding KDoc to a private member to explain unclear behavior — rename the member instead; flagged by Detekt's `DocumentationOverPrivateFunction`/`DocumentationOverPrivateProperty`
+- placing a `//` comment inside a function call's argument list before its closing `)`/`{` — silently comments out the rest of the line; this exact bug shipped in `kotlin-multiplatform-imagevector-generator`'s own codegen
 
 If Detekt reports false positives, use `@Suppress("RuleName")` at the call site, not a global exclude.
 
@@ -296,4 +361,5 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-08 | Added a "Comment & KDoc Conventions" section — KDoc for public API contracts, `//` for internal WHY notes, private members should be renamed rather than commented (backed by Detekt's `DocumentationOverPrivateFunction`/`DocumentationOverPrivateProperty`), and a real bug example (a `//` comment inside a function call's argument list silently commenting out the rest of the line, which actually shipped in `kotlin-multiplatform-imagevector-generator`'s codegen). New `comments:` Detekt rule block and 3 anti-patterns. |
 | 2026-06-18 | Initial release. |
