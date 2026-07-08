@@ -131,7 +131,13 @@ rather than refusing them.
 
 **Flags:** `--name` (PascalCase property), `--viewport` (default 24 for icons; use the
 art's aspect box for logos), `--colors` (raster quantization, default 6), `--max-nodes`
-(budget, default 400 — the script refuses bloated vectors), `--color-mode semantic|literal`.
+(budget, default 400 — the script refuses bloated vectors), `--color-mode semantic|literal`,
+`--package` (full Kotlin package for the generated file; defaults to
+`<group-id>.core.designsystem.icons` — that default is the
+`kotlin-multiplatform-design-system` skill's own module convention, **not** universal.
+This script must work standalone for any project structure; pass `--package` explicitly
+when the consumer project doesn't use `:core:designsystem`, rather than hand-editing the
+generated file's package line afterward).
 
 **Dependencies:** none for SVG input. Raster input: `pip install vtracer` (preferred)
 or `brew install potrace` + `pip install Pillow` (mono fallback).
@@ -186,6 +192,7 @@ real-world icon sets like Heroicons, which use arcs for every rounded/circular e
 - Using `--color-mode literal` for tintable icons — bakes one theme's color in and breaks dark mode; semantic single-layer + call-site tint adapts for free
 - Reading the generated file body into context to "verify" it — the report line and a Roborazzi golden are the verification; the path data is opaque
 - Tracing a full-screen mockup in one pass — crop the individual asset first; the tracer vectorizes everything it sees
+- Hand-editing the generated file's `package` line because the project doesn't use `:core:designsystem` — pass `--package` and regenerate instead; still a hand-edit of a GENERATED file even though it's "just" the package declaration
 
 ---
 
@@ -237,6 +244,7 @@ Never print generated path data into the conversation.
 
 | Date | Change |
 |---|---|
+| 2026-07-08 | Added a `--package` flag — found via a real consumer-project report that the generated file's package was hardcoded to `<group-id>.core.designsystem.icons` with no override, forcing every project onto the `kotlin-multiplatform-design-system` skill's own module convention even when it doesn't apply. `--package` overrides it explicitly (default unchanged, fully backward compatible); new anti-pattern against hand-editing the package line instead. 2 new tests. |
 | 2026-07-08 | Compared the arc-flattening implementation against picosvg's `arc_to_cubic.py` (itself adapted from FontTools/Blink) and backported 2 precision refinements: (1) a `+0.001` epsilon in the segment-count `ceil()` — without it, floating-point trig roundoff on an arc whose sweep should be an exact 90°-multiple can compute `dtheta` as e.g. `1.5707963267948972` instead of exactly `π/2`, producing one unnecessary extra cubic segment (verified against a real reproduction case, not just a synthetic one); (2) a zero-radius arc (`rx==0`/`ry==0`) now emits a real `lineTo` instead of a cubic whose control points merely sit on the straight line — cheaper against `--max-nodes` for the same visual result. 2 new tests. |
 | 2026-07-08 | **Fixed a real blocker**: arc commands (`A`/`a`) were rejected outright, but ~75% of a 32-icon real-world Heroicons test batch failed for exactly that reason — most icon sets use arcs for every rounded/circular element. Implemented proper arc-to-cubic-Bezier flattening in `parse_path` (standard SVG spec endpoint-to-center parameterization, split into ≤90° sub-segments), including correct handling of packed arc flags (e.g. `"1110"` = large-arc=1, sweep=1, x=10 — a classic gotcha a naive float tokenizer misreads as one number). Verified end-to-end against real Heroicons SVGs (bell, user-circle, envelope, wifi, users) fetched live. Also fixed an unrelated but real codegen bug found in the same pass: the semantic-mode fill comment was embedded inside the `path(fill = ...)` argument list, so `//` commented out the closing `) {` and broke every semantic-mode icon's generated Kotlin syntax. 4 new tests (arc flattening, packed-flag parsing, semicircle endpoint accuracy, fill-comment regression). |
 | 2026-07-07 | Added a "Remote SVG Sources" workflow for fetching icons from remote sets (e.g. Heroicons) as a local file before conversion — never fetch a live URL directly or scrape a rendered icon-browser page. New `references/heroicons-catalog.md`: the 4 variant keywords (Outline, Solid, Mini, Micro) with repo path templates, and the full 324-name Heroicons catalog snapshot with a re-fetch command for freshness. |

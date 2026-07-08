@@ -873,8 +873,20 @@ class ImageVectorConverterTests(unittest.TestCase):
             return imagevector_scripts.convert(
                 src, kw.get("name", "Logo"), kw.get("group_id", "com.example.app"),
                 kw.get("viewport", 24.0), kw.get("color_mode", "literal"),
-                kw.get("colors", 6), kw.get("max_nodes", 400),
+                kw.get("colors", 6), kw.get("max_nodes", 400), kw.get("package"),
             )
+
+    def test_package_defaults_to_design_system_convention(self) -> None:
+        kotlin, _ = self._convert(group_id="com.example.app")
+        self.assertIn("package com.example.app.core.designsystem.icons", kotlin)
+
+    def test_package_override_replaces_default_convention(self) -> None:
+        # Real gap: core.designsystem.icons is the design-system skill's own module
+        # layout, not universal — a project with a different structure needs to
+        # override it without hand-editing the generated file afterward.
+        kotlin, _ = self._convert(group_id="com.example.app", package="com.example.app.icons")
+        self.assertIn("package com.example.app.icons", kotlin)
+        self.assertNotIn("core.designsystem.icons", kotlin)
 
     def test_generates_header_and_property(self) -> None:
         kotlin, report = self._convert()

@@ -45,9 +45,15 @@ Beziers automatically (most icon sets, including Heroicons, use arcs for rounded
 
 ## Step 3 — Run the converter
 
+If the project does **not** use the `kotlin-multiplatform-design-system` skill's
+`:core:designsystem` module layout, pass `--package` explicitly — the default package
+(`<group-id>.core.designsystem.icons`) is that skill's own convention, not universal.
+Never hand-edit the generated file's package line instead.
+
 ```bash
 python3 ~/.claude/skills/kotlin-multiplatform-imagevector-generator/scripts/convert_image_to_imagevector.py \
   <input> --name <PascalName> --group-id <group.id> --color-mode <mode> \
+  [--package <full.kotlin.package>] \
   --output <ui module>/core/designsystem/icons
 ```
 
@@ -56,6 +62,7 @@ use the path relative to wherever the skill was installed, e.g.:
 ```bash
 python3 skills/kotlin-multiplatform-imagevector-generator/scripts/convert_image_to_imagevector.py \
   <input> --name <PascalName> --group-id <group.id> --color-mode <mode> \
+  [--package <full.kotlin.package>] \
   --output <ui module>/core/designsystem/icons
 ```
 

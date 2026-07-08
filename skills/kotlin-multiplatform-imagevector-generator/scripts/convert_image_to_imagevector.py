@@ -426,8 +426,13 @@ def generate_kotlin(
     group_id: str,
     viewport: float,
     color_mode: str,
+    package: Optional[str] = None,
 ) -> str:
-    pkg = f"{group_id}.core.designsystem.icons"
+    # `core.designsystem.icons` is the kotlin-multiplatform-design-system skill's own
+    # module convention, not a universal one — this script must work standalone for
+    # projects that don't use that module layout. `package` overrides it explicitly;
+    # the group-id-derived default only applies when the caller doesn't opt in.
+    pkg = package or f"{group_id}.core.designsystem.icons"
     body_blocks = []
     for cmds, argb in layers:
         if color_mode == "semantic":
@@ -542,6 +547,7 @@ def convert(
     color_mode: str,
     colors: int,
     max_nodes: int,
+    package: Optional[str] = None,
 ) -> tuple[str, dict]:
     """Full conversion. Returns (kotlin_source, report)."""
     if source.suffix.lower() == ".svg":
@@ -580,7 +586,7 @@ def convert(
             merged.extend(cmds)
         layers = [(merged, "0xFF000000")]
 
-    kotlin = generate_kotlin(name, layers, group_id, viewport, color_mode)
+    kotlin = generate_kotlin(name, layers, group_id, viewport, color_mode, package)
     report = {
         "name": name,
         "layers": len(layers),
@@ -597,6 +603,10 @@ def main() -> int:
     p.add_argument("input", type=Path, help="Source image (.svg, .png, .jpg, .jpeg, .webp)")
     p.add_argument("--name", help="Kotlin property name (PascalCase; default: from filename)")
     p.add_argument("--group-id", default="com.example.app", help="Package prefix")
+    p.add_argument("--package", help="Full Kotlin package for the generated file "
+                   "(default: <group-id>.core.designsystem.icons — the design-system "
+                   "skill's module convention. Override this if your project doesn't "
+                   "use that module layout.)")
     p.add_argument("--output", type=Path, help="Output dir (default: core/designsystem/icons/ under CWD)")
     p.add_argument("--viewport", type=float, default=DEFAULT_VIEWPORT,
                    help=f"Canonical square viewport (default {DEFAULT_VIEWPORT:g} for icons)")
@@ -613,7 +623,7 @@ def main() -> int:
     name = pascal(args.name or args.input.stem)
     kotlin, report = convert(
         args.input, name, args.group_id, args.viewport,
-        args.color_mode, args.colors, args.max_nodes,
+        args.color_mode, args.colors, args.max_nodes, args.package,
     )
 
     out_dir = args.output or Path("core/designsystem/icons")
