@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.53.3] — 2026-07-08
+
+### Fixed
+
+- fix(design-system): stop animating border width on focus; fix tooltip blink
+
+---
+
 ## [v1.53.2] — 2026-07-08
 
 ### Fixed

@@ -1,5 +1,5 @@
 {
-  "version": "1.53.2",
+  "version": "1.53.3",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -2245,7 +2245,7 @@
       "path": "skills/kotlin-multiplatform-preview-driven-development",
       "description": "Preview-Driven Development (PDD) workflow for KMP: write Content composables first, iterate on Desktop JVM previews (3-5x faster than Android), cover all states with @PreviewParameterProvider, then promote previews directly to Roborazzi screenshot tests.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-18",
+      "last_updated": "2026-07-08",
       "keywords": [
         "PDD",
         "preview-driven development",
