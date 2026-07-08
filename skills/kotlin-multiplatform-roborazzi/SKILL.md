@@ -56,7 +56,9 @@ createComposeRule, interaction test, compose UI test, semantics node, visual acc
 pixel-perfect, layout test, canvas test, arrangement test, layout regression, 100% accuracy,
 UI layout verification, canvas layout test, visual confirmation, test layout,
 test UI, test screen, UI testing, visual test, test this screen, test the layout,
-screenshot testing, visual regression testing, UI coverage, test composable.
+screenshot testing, visual regression testing, UI coverage, test composable,
+drag test, swipe test, performTouchInput, performMouseInput, test drag,
+test resizable panel, test scrollbar, boundsInRoot, layout stability test.
 
 **Freshness rule:** Roborazzi is actively developed — the Gradle plugin API and the
 `captureRoboImage` API change between minor versions. Recheck the GitHub releases page before
@@ -363,6 +365,60 @@ detectors `toggle icon swap instead of rotation [MEDIUM]` and `bare conditional 
 [MEDIUM]` catch statically — write this test alongside any collapsible/accordion trigger,
 not just for components that already broke once.
 
+### Drag interaction test (resizable panels, custom scrollbar thumbs)
+
+`runComposeUiTest` doesn't have a `Modifier.draggable`-specific assertion — drive the
+gesture with `performTouchInput { swipe(...) }` (or `performMouseInput { press(); moveTo();
+release() }` for Desktop-only pointer drags) and assert on the resulting state, not on
+intermediate frames:
+
+```kotlin
+@OptIn(ExperimentalTestApi::class)
+@Test
+fun resizablePanelGroup_drag_resizesStartPaneWithinBounds() = runComposeUiTest {
+    setContent {
+        AppTheme { AppResizablePanelGroup(start = { StartPane() }, end = { EndPane() }) }
+    }
+    val divider = onNodeWithTag(ResizablePanelTestTags.DIVIDER)
+    val startBoundsBefore = onNodeWithTag(ResizablePanelTestTags.START_PANE)
+        .fetchSemanticsNode().boundsInRoot
+
+    divider.performTouchInput { swipe(start = center, end = center.copy(x = center.x + 100f)) }
+
+    val startBoundsAfter = onNodeWithTag(ResizablePanelTestTags.START_PANE)
+        .fetchSemanticsNode().boundsInRoot
+    assertTrue(startBoundsAfter.width > startBoundsBefore.width)
+}
+```
+
+Test the clamp explicitly, not just "dragging changes something" — swipe far past the
+divider's travel range and assert the pane width stops at `minWeight`/`maxWeight` rather
+than continuing to shrink/grow or overshooting past the container:
+
+```kotlin
+@OptIn(ExperimentalTestApi::class)
+@Test
+fun resizablePanelGroup_drag_clampsToMaxWeight() = runComposeUiTest {
+    setContent {
+        AppTheme {
+            AppResizablePanelGroup(start = { StartPane() }, end = { EndPane() }, maxWeight = 0.85f)
+        }
+    }
+    onNodeWithTag(ResizablePanelTestTags.DIVIDER)
+        .performTouchInput { swipe(start = center, end = center.copy(x = center.x + 5000f)) }
+
+    val rootWidth = onRoot().fetchSemanticsNode().boundsInRoot.width
+    val startWidth = onNodeWithTag(ResizablePanelTestTags.START_PANE).fetchSemanticsNode().boundsInRoot.width
+    assertTrue(startWidth <= rootWidth * 0.85f + 1f)  // +1f tolerance for rounding
+}
+```
+
+The same `performTouchInput { swipe(...) }` pattern applies to a custom scrollbar thumb
+built with `pointerInput` — assert the underlying `ScrollState.value` (or
+`LazyListState.firstVisibleItemIndex`) changed after the drag, not the thumb's own pixel
+position, since the thumb's position is derived from scroll state, not the other way
+around.
+
 ---
 
 ## Step 3: Roborazzi Screenshot Tests (jvmTest only)
@@ -602,6 +658,7 @@ When asked about UI testing, test tags, or visual regression for KMP, respond in
 
 | Date | Change |
 |---|---|
+| 2026-07-08 | Added a "Drag interaction test" pattern — `performTouchInput { swipe(...) }` / `performMouseInput { press(); moveTo(); release() }` for resizable panel dividers and custom scrollbar thumbs, asserting resulting state (pane width, clamp bounds, scroll offset) rather than intermediate frames. |
 | 2026-07-08 | Added a "Layout stability regression test" pattern — asserting `boundsInRoot()` on a trigger before/after toggle (via `mainClock.advanceTimeBy`) to deterministically catch a collapsible/accordion trigger shifting position on toggle. Cross-links the new `kotlin-multiplatform-audit` detectors `toggle icon swap instead of rotation` and `bare conditional collapse`. |
 | 2026-07-07 | Moved Compose UI interaction tests from `jvmTest`/`createComposeRule`+JUnit4 to `commonTest`/`runComposeUiTest`, so the same test body runs per-target (JVM, Android instrumented, iOS simulator, Wasm). Roborazzi screenshot tests stay `jvmTest`-only (no multiplatform equivalent — depends on Robolectric shadow rendering). Added an opt-in/nightly CI matrix job alongside the required `jvmTest` gate, updated Gradle setup (`compose.uiTest` in `commonTest.dependencies`), and 3 new anti-patterns. |
 | 2026-06-20 | Initial release. |

@@ -1,15 +1,16 @@
 ---
 name: kotlin-multiplatform-design-system-extended
 description: >
-  Extends :core:designsystem (from kotlin-multiplatform-design-system) with 26
+  Extends :core:designsystem (from kotlin-multiplatform-design-system) with 28
   production-ready components using the Compose Styles API. Covers: Icon, IconButton,
   Label, Separator, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton,
   Switch, Slider, Select/Dropdown, Progress (linear + circular), Skeleton, Spinner,
   Alert, Toast/Snackbar system (AppToastHostState + Scaffold slot), Dialog, AlertDialog,
-  Sheet (BottomSheet), Tooltip, Popover, Accordion/Collapsible. All components built
-  on CMP primitives (no Material3). "App" is a placeholder prefix — see the base skill's
-  Step 0 for how it is resolved from the project name (scripts/derive_component_prefix.py).
-  Requires kotlin-multiplatform-design-system skill.
+  Sheet (BottomSheet), Tooltip, Popover, Accordion/Collapsible, ScrollArea (Desktop-only
+  scrollbar via expect/actual), ResizablePanelGroup (draggable divider). All components
+  built on CMP primitives (no Material3). "App" is a placeholder prefix — see the base
+  skill's Step 0 for how it is resolved from the project name
+  (scripts/derive_component_prefix.py). Requires kotlin-multiplatform-design-system skill.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
@@ -41,6 +42,13 @@ metadata:
     - Compose Styles API
     - CMP
     - no Material
+    - ScrollArea
+    - Scrollbar
+    - VerticalScrollbar
+    - ResizablePanelGroup
+    - resizable panel
+    - draggable divider
+    - drag to resize
 ---
 
 ## When to Use This Skill
@@ -72,7 +80,7 @@ recheck the Compose docs and apply the same freshness check as `kotlin-multiplat
 Default to **using a pre-built extended component before building a custom one**.
 
 Why:
-- all 27 components are built on CMP primitives with no Material dependency — they are safe to
+- all 28 components are built on CMP primitives with no Material dependency — they are safe to
   use alongside the base design system
 - they follow the same sealed variant pattern as the core components, so the token layer stays consistent
 - building a custom component takes longer and may drift from the design system tokens
@@ -2654,6 +2662,177 @@ fun AppAccordion(
 }
 ```
 
+### `components/AppScrollArea.kt`
+
+**Platform reality check first:** `androidx.compose.foundation.VerticalScrollbar` +
+`rememberScrollbarAdapter` is **Desktop/Web only** — there is no Android/iOS
+implementation in the Compose Multiplatform foundation library as of the CMP version
+this repo targets (`1.11.1`). This is not a guess: a real-world CMP app
+([recstar](https://github.com/sdercolin/recstar)) uses exactly this shape — `desktopMain`
+wires the real `VerticalScrollbar`, `iosMain`'s `actual` is an intentional no-op with the
+comment `// no scrollbar on mobile platforms`. Touch platforms already show a transient
+system scroll indicator during a fling; they don't need (and Compose doesn't provide) a
+persistent draggable thumb.
+
+```kotlin
+// :core:designsystem/src/commonMain/kotlin/GROUP_ID/core/designsystem/components/AppScrollArea.kt
+package GROUP_ID.core.designsystem.components
+
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+expect fun AppVerticalScrollbar(modifier: Modifier = Modifier, scrollState: ScrollState)
+
+@Composable
+expect fun AppVerticalScrollbar(modifier: Modifier = Modifier, lazyListState: LazyListState)
+```
+
+```kotlin
+// :core:designsystem/src/desktopMain/kotlin/GROUP_ID/core/designsystem/components/AppScrollArea.desktop.kt
+package GROUP_ID.core.designsystem.components
+
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+actual fun AppVerticalScrollbar(modifier: Modifier, scrollState: ScrollState) {
+    VerticalScrollbar(modifier = modifier.width(8.dp), adapter = rememberScrollbarAdapter(scrollState))
+}
+
+@Composable
+actual fun AppVerticalScrollbar(modifier: Modifier, lazyListState: LazyListState) {
+    VerticalScrollbar(modifier = modifier.width(8.dp), adapter = rememberScrollbarAdapter(lazyListState))
+}
+```
+
+```kotlin
+// :core:designsystem/src/androidMain + iosMain/.../AppScrollArea.<platform>.kt
+// No visible thumb — touch platforms already show a transient system scroll indicator.
+@Composable
+actual fun AppVerticalScrollbar(modifier: Modifier, scrollState: ScrollState) {}
+
+@Composable
+actual fun AppVerticalScrollbar(modifier: Modifier, lazyListState: LazyListState) {}
+```
+
+**Positioning — the most common real bug:** the scrollbar must be a sibling of the
+scrollable content inside a `Box`, aligned to the trailing edge, with
+`fillMaxHeight()`. A scrollbar placed as a normal member of the same `Column`/`Row` as
+the content (instead of overlaid via `Box`) renders in the wrong place or pushes content
+over:
+
+```kotlin
+@Composable
+fun AppScrollArea(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val scrollState = rememberScrollState()
+    Box(modifier = modifier) {
+        Column(modifier = Modifier.verticalScroll(scrollState)) { content() }
+        AppVerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+            scrollState = scrollState,
+        )
+    }
+}
+```
+
+If a project genuinely needs a draggable thumb on mobile too (rare — confirm this is a
+real requirement, not a reflex port of the web version), build it as a custom
+`pointerInput` + `detectDragGestures` overlay the same way as `AppResizablePanelGroup`
+below, translating drag delta into `scrollState.scrollBy()` — don't wait for a future
+`VerticalScrollbar` multiplatform release; the pattern is straightforward to hand-roll.
+
+### `components/AppResizablePanelGroup.kt`
+
+Drag a divider to resize two adjacent panes. Same `pointerInput` reasoning as `AppSlider`
+(`draggable` only tracks one axis and lacks tap-to-seek) — a resize divider additionally
+needs to clamp the result to a min/max range, which `Modifier.draggable` doesn't give you
+directly either.
+
+```kotlin
+package GROUP_ID.core.designsystem.components
+
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.weight
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
+import GROUP_ID.core.designsystem.theme.colors
+
+/**
+ * Two resizable panes split by a draggable divider.
+ *
+ * Usage:
+ * ```
+ * AppResizablePanelGroup(
+ *     start = { FileTree() },
+ *     end = { Editor() },
+ * )
+ * ```
+ */
+@Composable
+fun AppResizablePanelGroup(
+    start: @Composable () -> Unit,
+    end: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    initialStartWeight: Float = 0.3f,
+    minWeight: Float = 0.15f,
+    maxWeight: Float = 0.85f,
+) {
+    var startWeight by remember { mutableFloatStateOf(initialStartWeight) }
+
+    Row(modifier = modifier.fillMaxSize()) {
+        Box(modifier = Modifier.weight(startWeight)) { start() }
+
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(4.dp)
+                .pointerInput(Unit) {
+                    // Drag delta only, in px — convert to a fraction of this Row's total
+                    // width so the divider tracks the pointer 1:1 regardless of container size.
+                    detectDragGestures { change, dragAmount ->
+                        change.consume()
+                        val deltaFraction = dragAmount.x / size.width
+                        startWeight = (startWeight + deltaFraction).coerceIn(minWeight, maxWeight)
+                    }
+                }
+                .background(colors.border),
+        )
+
+        Box(modifier = Modifier.weight(1f - startWeight)) { end() }
+    }
+}
+```
+
+**Why `dragAmount.x / size.width` and not a fixed dp-per-pixel constant:** the divider's
+own `size.width` is only 4dp — the *Row's* width is what the weight fraction is relative
+to, but `pointerInput`'s `size` refers to the node it's attached to (the divider), not the
+Row. This example intentionally uses the divider's own size as an approximation that
+works when the divider is thin relative to the panes; for exact 1:1 tracking, measure the
+Row's width via `Modifier.onSizeChanged {}` on the `Row` itself and divide by that instead.
+
 ---
 
 ## Step 9: Wire AppScaffold at entry points
@@ -2792,7 +2971,7 @@ fun SettingsPage() {
 
 ## Verification
 
-1. `./gradlew :core:designsystem:compileCommonMainKotlinMetadata` — all 27 components compile
+1. `./gradlew :core:designsystem:compileCommonMainKotlinMetadata` — all 28 components compile
 2. Show/dismiss `AppDialog` — appears centered, scrim dismisses on outside tap
 3. Show `AppSheet` — slides in from bottom, drag handle visible, scrim dismisses
 4. `toastState.show("Test")` — toast appears bottom-center, auto-dismisses after 3s
@@ -2800,8 +2979,10 @@ fun SettingsPage() {
 6. `AppCheckbox` + `AppSwitch` — animated state changes work
 7. `AppAccordion(multiExpand = false)` — only one section open at a time
 8. `AppSelect` — dropdown opens/closes, selected value updates, keyboard accessible
-9. Desktop hover on `AppIconButton` inside `AppTooltip` — tooltip appears above
-10. `./gradlew :desktopApp:run` — all components render correctly on JVM target
+9. Desktop hover on `AppIconButton` inside `AppTooltip` — tooltip appears above, does not blink
+10. `AppResizablePanelGroup` — dragging the divider resizes both panes smoothly, clamped to `minWeight`/`maxWeight`
+11. `AppScrollArea` on Desktop — scrollbar renders aligned to the trailing edge, thumb is draggable and tracks scroll position; on Android/iOS, no visible thumb (expected — not a bug)
+12. `./gradlew :desktopApp:run` — all components render correctly on JVM target
 
 ---
 
@@ -2876,6 +3057,10 @@ fun SettingsPage() {
 - stacking `.animateContentSize()` on the container **and** `AnimatedVisibility` on the same collapsible content — both animate the size change independently at slightly different rates, and the visible symptom is the collapsible content briefly overlapping the sibling below it during the transition. Pick one: `AnimatedVisibility` alone already reflows siblings correctly for expand/shrink; only add `.animateContentSize()` on a container whose size changes for a reason `AnimatedVisibility` doesn't cover (e.g. text reflow, not a mount/unmount)
 - showing a `Popup`-based tooltip the instant `isHovered` flips true, with no delay — `popupContentSize` is `IntSize.Zero` on the Popup's first frame, so the position calculation can briefly land at/near the anchor's own bounds, un-hovering the anchor and hiding the tooltip it just showed — the classic tooltip blink. Debounce with `LaunchedEffect(isHovered) { delay(delayMillis); showTooltip = true }` and set `PopupProperties(focusable = false)` so the popup never steals hover/focus from the anchor — see `AppTooltip`
 - animating `borderWidth`/`borderBottomWidth` in a `focused {}`/`selected {}` Style block instead of only `borderColor` — this is the Compose equivalent of reaching for a CSS `ring` when a plain rule solves it: reserve the final border width at rest (`borderColor(Color.Transparent)` if there's no border at rest) and animate color only, so focusing/selecting never re-measures the component; caught by the audit's `focused state animates border width [MEDIUM]` — see the base skill's Style Rules → "Ring vs border"
+- placing `AppVerticalScrollbar` as a normal member of the same `Column`/`Row` as the scrollable content instead of overlaid in a `Box` with `Modifier.align(Alignment.CenterEnd).fillMaxHeight()` — it renders in the wrong place or pushes the content over instead of overlaying it
+- assuming `VerticalScrollbar`/`rememberScrollbarAdapter` works on Android/iOS — it's Desktop/Web only in Compose Multiplatform's foundation library; wire it through an `expect`/`actual` and no-op on touch platforms rather than shipping a broken call on mobile
+- using `Modifier.draggable` for `AppResizablePanelGroup`'s divider instead of `pointerInput` + `detectDragGestures` — same reasoning as `AppSlider`: `draggable` only tracks one axis and doesn't give you the delta needed to clamp the resulting weight to `minWeight`/`maxWeight`
+- letting a resizable panel's weight drift outside a sane range (a pane collapsing to zero width or swallowing the whole row) — always `.coerceIn(minWeight, maxWeight)` the computed weight, never assign the raw drag delta directly
 
 Check the component list in this skill before building a custom alternative.
 
@@ -2906,6 +3091,7 @@ Assume `kotlin-multiplatform-design-system` is already applied. Use the user's v
 
 | Date | Change |
 |---|---|
+| 2026-07-08 | Added 2 new components (26 → 28), closing gaps found via real shadcn-compose bug reports: `AppScrollArea`/`AppVerticalScrollbar` (expect/actual — Desktop wires the real `VerticalScrollbar`/`rememberScrollbarAdapter`, Android/iOS intentionally no-op since Compose Multiplatform's foundation library has no scrollbar implementation for those targets; verified against a real-world CMP app's identical expect/actual shape) and `AppResizablePanelGroup` (draggable divider via `pointerInput`/`detectDragGestures`, weight clamped to `minWeight`/`maxWeight`). New drag-interaction and scrollbar-positioning anti-patterns; fixed 2 pre-existing stale "27 components" counts left over from an earlier 27→26 correction. |
 | 2026-07-08 | Fixed a real hover-flicker bug in `AppTooltip`: the `Popup` was shown the instant `isHovered` flipped true, with no debounce — `popupContentSize` is `IntSize.Zero` on the Popup's first frame, so the position calculation could briefly land near the anchor's own bounds, un-hovering it and hiding the tooltip it just showed. Fixed with a `delayMillis`-debounced `LaunchedEffect` decoupling `showTooltip` from raw `isHovered`, and `PopupProperties(focusable = false)` so the popup never steals focus/hover from the anchor. Added 3 anti-patterns (double-animation collapsible overlap, tooltip blink, focused-state border width) from real shadcn-compose bug reports. |
 | 2026-07-08 | Added 2 anti-patterns for collapsible/toggle layout stability: icon-swap chevrons (instead of `graphicsLayer { rotationZ }` rotation) and bare `if (isExpanded) { ... }` collapse (instead of `AnimatedVisibility`/`.animateContentSize()`) — both can visibly shift a trigger button's position on toggle. Backed by new `kotlin-multiplatform-audit` detectors `toggle icon swap instead of rotation [MEDIUM]` and `bare conditional collapse [MEDIUM]`; `AppAccordion` already followed the correct pattern and is cited as the reference implementation. |
 | 2026-07-05 | Completeness audit found 3 real gaps: (1) the Toast/Snackbar subsystem (`ToastHost`, `ToastHostState`, `ToastData`, `ToastVariant`, `LocalToastHostState`) never carried the `App` prefix at all — renamed to `AppToastHost`/`AppToastHostState`/`AppToastData`/`AppToastVariant`/`LocalAppToastHostState` and fixed a resulting double-prefix typo in Common Anti-Patterns; (2) the skill promised "Progress (linear + circular)" but only linear existed — added `AppCircularProgress` (determinate ring + indeterminate rotating arc, same infinite-animation constraint as `AppSpinner`) and fixed `AppProgress`'s docstring, which falsely claimed it delegated to `AppSpinner` for the indeterminate case; (3) description claimed "27 components" — corrected to the accurate count (26). Added the `App`-is-a-placeholder cross-reference to Prerequisites and the frontmatter description, matching the base skill's Step 0. |
