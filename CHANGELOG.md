@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.54.0] — 2026-07-08
+
+### Added
+
+- feat(design-system-extended): add ScrollArea and ResizablePanelGroup
+
+---
+
 ## [v1.53.3] — 2026-07-08
 
 ### Fixed

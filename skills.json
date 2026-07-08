@@ -1,5 +1,5 @@
 {
-  "version": "1.53.3",
+  "version": "1.54.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -870,7 +870,7 @@
     {
       "name": "kotlin-multiplatform-design-system-extended",
       "path": "skills/kotlin-multiplatform-design-system-extended",
-      "description": "Extends :core:designsystem (from kotlin-multiplatform-design-system) with 26 production-ready components using the Compose Styles API. Covers: Icon, IconButton, Label, Separator, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton, Switch, Slider, Select/Dropdown, Progress (linear + circular), Skeleton, Spinner, Alert, Toast/Snackbar system (AppToastHostState + Scaffold slot), Dialog, AlertDialog, Sheet (BottomSheet), Tooltip, Popover, Accordion/Collapsible. All components built on CMP primitives (no Material3). \"App\" is a placeholder prefix \u2014 see the base skill's Step 0 for how it is resolved from the project name (scripts/derive_component_prefix.py). Requires kotlin-multiplatform-design-system skill.",
+      "description": "Extends :core:designsystem (from kotlin-multiplatform-design-system) with 28 production-ready components using the Compose Styles API. Covers: Icon, IconButton, Label, Separator, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton, Switch, Slider, Select/Dropdown, Progress (linear + circular), Skeleton, Spinner, Alert, Toast/Snackbar system (AppToastHostState + Scaffold slot), Dialog, AlertDialog, Sheet (BottomSheet), Tooltip, Popover, Accordion/Collapsible, ScrollArea (Desktop-only scrollbar via expect/actual), ResizablePanelGroup (draggable divider). All components built on CMP primitives (no Material3). \"App\" is a placeholder prefix \u2014 see the base skill's Step 0 for how it is resolved from the project name (scripts/derive_component_prefix.py). Requires kotlin-multiplatform-design-system skill.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-08",
       "keywords": [
@@ -899,7 +899,14 @@
         "Icon",
         "Compose Styles API",
         "CMP",
-        "no Material"
+        "no Material",
+        "ScrollArea",
+        "Scrollbar",
+        "VerticalScrollbar",
+        "ResizablePanelGroup",
+        "resizable panel",
+        "draggable divider",
+        "drag to resize"
       ],
       "triggers": [
         "dialog",
@@ -2594,7 +2601,16 @@
         "screenshot testing",
         "visual regression testing",
         "UI coverage",
-        "test composable"
+        "test composable",
+        "drag test",
+        "swipe test",
+        "performTouchInput",
+        "performMouseInput",
+        "test drag",
+        "test resizable panel",
+        "test scrollbar",
+        "boundsInRoot",
+        "layout stability test"
       ],
       "scripts": []
     },
