@@ -938,6 +938,32 @@ class ImageVectorConverterTests(unittest.TestCase):
         self.assertAlmostEqual(curves[-1].args[-2], 10.0, places=3)
         self.assertAlmostEqual(curves[-1].args[-1], 0.0, places=3)
 
+    def test_zero_radius_arc_emits_line_not_curve(self) -> None:
+        # rx=0 (or ry=0) is a degenerate ellipse — a straight line. Emitting a real
+        # lineTo instead of a curveTo whose control points sit on that line is cheaper
+        # against --max-nodes for the same visual result (matches picosvg's approach).
+        cmds = imagevector_scripts.parse_path("M0 0A0 5 0 0 1 10 0")
+        non_move = [c for c in cmds if c.op != "move"]
+        self.assertEqual(len(non_move), 1)
+        self.assertEqual(non_move[0].op, "line")
+        self.assertAlmostEqual(non_move[0].args[0], 10.0, places=3)
+        self.assertAlmostEqual(non_move[0].args[1], 0.0, places=3)
+
+    def test_near_quarter_circle_roundoff_uses_one_segment(self) -> None:
+        # This specific radius/start-angle combination is a verified reproduction of
+        # a real case where the endpoint-to-center parameterization's acos/atan2 chain
+        # computes dtheta as 1.570796326794897 instead of exactly math.pi/2
+        # (1.5707963267948966) — a 90-degree arc, off by ~4e-16. Without the
+        # picosvg-matching epsilon in the segment-count ceil(), that sliver pushes the
+        # arc from 1 segment to 2 unnecessary ones.
+        segments = imagevector_scripts._arc_to_cubics(
+            -7.580376014150292, 0.2294545431208891,
+            7.58384796150766, 7.58384796150766, 0,
+            False, True,
+            -0.2294545431208862, -7.580376014150292,
+        )
+        self.assertEqual(len(segments), 1)
+
     def test_relative_commands_become_absolute(self) -> None:
         rel_svg = '<svg viewBox="0 0 24 24"><path fill="#000" d="m2 2 l4 0 v4 h-4 z"/></svg>'
         kotlin, _ = self._convert(svg=rel_svg)
