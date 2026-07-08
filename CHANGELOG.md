@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.54.2] — 2026-07-08
+
+### Fixed
+
+- fix(imagevector-generator): backport picosvg's arc precision fixes
+
+---
+
 ## [v1.54.1] — 2026-07-08
 
 ### Fixed
