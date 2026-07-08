@@ -10,8 +10,10 @@ replacing pixel assets and hand-written vector paths.
 ## Hard rule
 
 **Never hand-write `ImageVector.Builder` path data.** All coordinates come from the
-script. If it refuses (photo, node budget, arcs), relay the refusal — do not approximate
+script. If it refuses (photo or node budget), relay the refusal — do not approximate
 paths manually. The audit flags hand-written builders (`handwritten imagevector [HIGH]`).
+Arc commands (`A`/`a`) are NOT a refusal reason — the script flattens them into cubic
+Beziers automatically (most icon sets, including Heroicons, use arcs for rounded shapes).
 
 ---
 

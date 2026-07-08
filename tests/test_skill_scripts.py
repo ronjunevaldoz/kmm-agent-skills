@@ -899,14 +899,44 @@ class ImageVectorConverterTests(unittest.TestCase):
         self.assertIn("SolidColor(Color.Black)", kotlin)
         self.assertNotIn("0xFFE67E22", kotlin)
 
+    def test_semantic_mode_fill_call_properly_closed(self) -> None:
+        # Regression: the "color-agnostic" comment was once embedded inside the
+        # path(fill = ...) argument list, so `//` commented out the closing `) {`
+        # and broke every semantic-mode icon's generated Kotlin syntax.
+        kotlin, _ = self._convert(color_mode="semantic")
+        self.assertIn("SolidColor(Color.Black)) {", kotlin)
+        self.assertNotIn("Color.Black)  //", kotlin)
+
     def test_node_budget_refuses_bloat(self) -> None:
         with self.assertRaises(SystemExit):
             self._convert(max_nodes=3)
 
-    def test_arc_command_rejected(self) -> None:
-        arc_svg = '<svg viewBox="0 0 10 10"><path fill="#000" d="M0 0 A5 5 0 0 1 10 10"/></svg>'
-        with self.assertRaises(ValueError):
-            self._convert(svg=arc_svg)
+    def test_arc_command_flattened_to_curves(self) -> None:
+        # Real Heroicons paths are full of arcs (bell, user-circle, clock, etc.) —
+        # these must convert to curveTo(...) calls, not raise.
+        arc_svg = '<svg viewBox="0 0 10 10"><path fill="#000" d="M0 5 A5 5 0 0 1 10 5"/></svg>'
+        kotlin, _ = self._convert(svg=arc_svg)
+        self.assertIn("curveTo(", kotlin)
+        self.assertNotIn("NaN", kotlin)
+
+    def test_arc_semicircle_endpoint_is_accurate(self) -> None:
+        # A semicircle of radius 5 from (0,5) to (10,5) (sweep=1) must end exactly
+        # at the SVG endpoint regardless of how many cubic sub-segments it's split into.
+        cmds = imagevector_scripts.parse_path("M0 5 A5 5 0 0 1 10 5")
+        last = cmds[-1]
+        self.assertEqual(last.op, "curve")
+        self.assertAlmostEqual(last.args[-2], 10.0, places=3)
+        self.assertAlmostEqual(last.args[-1], 5.0, places=3)
+
+    def test_arc_packed_flags_parsed_correctly(self) -> None:
+        # Arc flags are single 0/1 digits that may be packed with no separator before
+        # the next number (e.g. "1110" = large-arc=1, sweep=1, x=10) — a classic SVG
+        # arc-parsing gotcha that a naive float tokenizer misreads as one number "1110".
+        cmds = imagevector_scripts.parse_path("M0 0A5 5 0 1110 0")
+        curves = [c for c in cmds if c.op == "curve"]
+        self.assertTrue(len(curves) >= 1)
+        self.assertAlmostEqual(curves[-1].args[-2], 10.0, places=3)
+        self.assertAlmostEqual(curves[-1].args[-1], 0.0, places=3)
 
     def test_relative_commands_become_absolute(self) -> None:
         rel_svg = '<svg viewBox="0 0 24 24"><path fill="#000" d="m2 2 l4 0 v4 h-4 z"/></svg>'

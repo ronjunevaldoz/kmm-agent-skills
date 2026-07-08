@@ -10,7 +10,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-07'
+  last-updated: '2026-07-08'
   keywords:
     - ImageVector
     - vector icons
@@ -22,6 +22,9 @@ metadata:
     - vector tracing
     - asset pipeline
     - logo vector
+    - arc to bezier
+    - arc flattening
+    - SVG arc command
 ---
 
 ## Hard Rules (never violated)
@@ -90,11 +93,14 @@ SVG ─────────────────────────�
 |---|---|---|
 | ① Quantize | Pillow (median-cut, `--colors N`) | Entropy gate rejects photographs up front |
 | ② Trace | vtracer (preferred, full color) / potrace (fallback, mono) | Detected at runtime; install hint if missing |
-| ③ Normalize | Built-in parser (zero deps) | Absolute coords, S/T reflection, uniform rescale to `--viewport`, `--max-nodes` budget (default 400) |
+| ③ Normalize | Built-in parser (zero deps) | Absolute coords, S/T reflection, arc-to-cubic flattening, uniform rescale to `--viewport`, `--max-nodes` budget (default 400) |
 | ④ Codegen | Built-in template | `ImageVector.Builder` + `by lazy`, GENERATED header, one file per asset |
 
-Arcs (`A`) are rejected — tracers emit only lines and cubics; flatten hand-authored
-arcs in the authoring tool first.
+Arcs (`A`/`a`) are flattened into cubic Beziers automatically — most hand-authored icon
+sets (Heroicons, Feather, Lucide) use arcs for any rounded/circular element, so this is
+not an edge case. `ImageVector.Builder` has no native arc primitive, same reason tracers
+only ever emit cubics; the parser now does the same conversion for hand-authored SVGs
+rather than refusing them.
 
 ---
 
@@ -165,7 +171,10 @@ python3 skills/kotlin-multiplatform-imagevector-generator/scripts/convert_image_
 |---|---|
 | Photographic input (entropy gate) | Tracing photos produces garbage vectors — keep photos as raster under `assets/photos/` |
 | Node budget exceeded (`--max-nodes`) | Bloated vectors hurt binary size and recomposition; simplify the art or reduce `--colors` |
-| Arc commands in SVG | Tracers never emit them; hand-authored arcs must be flattened upstream |
+
+Arc commands (`A`/`a`) are **not** refused — they're flattened into cubic Beziers
+automatically (see The Pipeline above). This used to be a refusal; it broke ~75% of
+real-world icon sets like Heroicons, which use arcs for every rounded/circular element.
 
 ---
 
@@ -185,7 +194,7 @@ python3 skills/kotlin-multiplatform-imagevector-generator/scripts/convert_image_
 The toolchain core (SVG parse → normalize → codegen) is pure Python and covered by
 repo tests (`tests/test_skill_scripts.py`):
 
-- path parser: absolute/relative commands, H/V expansion, S/T control-point reflection, implicit lineto after M, arc rejection
+- path parser: absolute/relative commands, H/V expansion, S/T control-point reflection, implicit lineto after M, arc-to-cubic flattening (including the packed-flag parsing gotcha, e.g. `"1110"` = large-arc=1, sweep=1, x=10)
 - viewport rescale: uniform scale + centering into the canonical square
 - codegen: GENERATED header present, `by lazy` property name, layer count, semantic merge to a single layer
 - budget: node count over `--max-nodes` exits with an error
@@ -201,7 +210,7 @@ When asked to add an icon/logo/vector asset, respond in this order:
 1. Identify the source (SVG provided? raster? needs cropping?)
 2. Run the script — show the command and the report line only
 3. Show the one-line wiring snippet (`Icon(imageVector = …, tint = …)`)
-4. If the script refused (photo, budget, arcs), relay the refusal and the fix — never work around it by writing paths manually
+4. If the script refused (photo or node budget), relay the refusal and the fix — never work around it by writing paths manually
 
 Never print generated path data into the conversation.
 
@@ -228,6 +237,7 @@ Never print generated path data into the conversation.
 
 | Date | Change |
 |---|---|
+| 2026-07-08 | **Fixed a real blocker**: arc commands (`A`/`a`) were rejected outright, but ~75% of a 32-icon real-world Heroicons test batch failed for exactly that reason — most icon sets use arcs for every rounded/circular element. Implemented proper arc-to-cubic-Bezier flattening in `parse_path` (standard SVG spec endpoint-to-center parameterization, split into ≤90° sub-segments), including correct handling of packed arc flags (e.g. `"1110"` = large-arc=1, sweep=1, x=10 — a classic gotcha a naive float tokenizer misreads as one number). Verified end-to-end against real Heroicons SVGs (bell, user-circle, envelope, wifi, users) fetched live. Also fixed an unrelated but real codegen bug found in the same pass: the semantic-mode fill comment was embedded inside the `path(fill = ...)` argument list, so `//` commented out the closing `) {` and broke every semantic-mode icon's generated Kotlin syntax. 4 new tests (arc flattening, packed-flag parsing, semicircle endpoint accuracy, fill-comment regression). |
 | 2026-07-07 | Added a "Remote SVG Sources" workflow for fetching icons from remote sets (e.g. Heroicons) as a local file before conversion — never fetch a live URL directly or scrape a rendered icon-browser page. New `references/heroicons-catalog.md`: the 4 variant keywords (Outline, Solid, Mini, Micro) with repo path templates, and the full 324-name Heroicons catalog snapshot with a re-fetch command for freshness. |
 | 2026-07-03 | Added a repo-relative fallback path for the converter script — `~/.claude/skills/...` only resolves in a Claude Code install; Codex CLI and Gemini CLI installs need the `skills/...` relative path (see INSTALL.md). |
 | 2026-07-03 | Initial release — raster/SVG → ImageVector local toolchain (quantize/trace/normalize/codegen), hard rules forbidding hand-written path data, semantic vs literal color modes, node budget, entropy gate, audit enforcement (handwritten imagevector, raster asset in commonMain). |

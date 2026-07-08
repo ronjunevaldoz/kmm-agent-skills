@@ -60,12 +60,155 @@ def _floats(chunk: str) -> list[float]:
     return [float(m.group(0)) for m in _NUM_RE.finditer(chunk)]
 
 
+def _parse_arc_args(chunk: str) -> list[list[float]]:
+    """Parse the argument chunk of an SVG A/a command into groups of 7 floats
+    (rx, ry, x-axis-rotation, large-arc-flag, sweep-flag, x, y).
+
+    The two flags are always a single 0/1 digit and the SVG grammar allows them to be
+    packed with NO separator before the next token (e.g. "1112" means flag=1, flag=1,
+    x=12) — a well-known gotcha that a generic float-tokenizing regex gets wrong by
+    reading "1112" as one number. Flags are read one character at a time instead.
+    """
+    i = 0
+    n = len(chunk)
+    groups: list[list[float]] = []
+
+    def skip_sep() -> None:
+        nonlocal i
+        while i < n and chunk[i] in " ,\t\r\n":
+            i += 1
+
+    def read_number() -> float:
+        nonlocal i
+        skip_sep()
+        m = _NUM_RE.match(chunk, i)
+        if not m:
+            raise ValueError(f"malformed arc argument at position {i}: {chunk!r}")
+        i = m.end()
+        return float(m.group(0))
+
+    def read_flag() -> float:
+        nonlocal i
+        skip_sep()
+        if i >= n or chunk[i] not in "01":
+            raise ValueError(f"malformed arc flag at position {i}: {chunk!r}")
+        val = float(chunk[i])
+        i += 1
+        return val
+
+    while True:
+        skip_sep()
+        if i >= n:
+            break
+        rx = read_number()
+        ry = read_number()
+        rot = read_number()
+        large_arc = read_flag()
+        sweep = read_flag()
+        x = read_number()
+        y = read_number()
+        groups.append([rx, ry, rot, large_arc, sweep, x, y])
+    return groups
+
+
+def _arc_to_cubics(
+    x1: float, y1: float,
+    rx: float, ry: float, phi_deg: float,
+    large_arc: bool, sweep: bool,
+    x2: float, y2: float,
+) -> list[tuple[float, float, float, float, float, float]]:
+    """Convert one SVG elliptical arc segment to a list of cubic Bezier curves.
+
+    Standard endpoint-to-center parameterization (SVG 1.1 spec Appendix F.6.5), then
+    each arc is split into sub-segments of at most 90 degrees and each sub-segment is
+    approximated with a cubic Bezier using the standard kappa = 4/3*tan(delta/4)
+    construction. Returns absolute (x1c, y1c, x2c, y2c, ex, ey) control-point/endpoint
+    tuples — the same shape `parse_path` already emits for a `C` command.
+    """
+    if x1 == x2 and y1 == y2:
+        return []  # zero-length arc — nothing to draw
+    if rx == 0 or ry == 0:
+        return [(x1, y1, x2, y2, x2, y2)]  # degenerate ellipse — straight line as a trivial cubic
+
+    rx, ry = abs(rx), abs(ry)
+    phi = math.radians(phi_deg % 360)
+    cos_phi, sin_phi = math.cos(phi), math.sin(phi)
+
+    # F.6.5.1 — compute (x1', y1'), the current point in the rotated ellipse frame
+    dx2, dy2 = (x1 - x2) / 2.0, (y1 - y2) / 2.0
+    x1p = cos_phi * dx2 + sin_phi * dy2
+    y1p = -sin_phi * dx2 + cos_phi * dy2
+
+    # F.6.6.1 — correct out-of-range radii
+    lam = (x1p ** 2) / (rx ** 2) + (y1p ** 2) / (ry ** 2)
+    if lam > 1:
+        s = math.sqrt(lam)
+        rx *= s
+        ry *= s
+
+    # F.6.5.2 — compute (cx', cy')
+    rx_sq, ry_sq = rx * rx, ry * ry
+    x1p_sq, y1p_sq = x1p * x1p, y1p * y1p
+    num = rx_sq * ry_sq - rx_sq * y1p_sq - ry_sq * x1p_sq
+    den = rx_sq * y1p_sq + ry_sq * x1p_sq
+    co = math.sqrt(max(num / den, 0.0)) if den != 0 else 0.0
+    if large_arc == sweep:
+        co = -co
+    cxp = co * (rx * y1p / ry)
+    cyp = co * (-ry * x1p / rx)
+
+    # F.6.5.3 — compute (cx, cy) in the original frame
+    cx = cos_phi * cxp - sin_phi * cyp + (x1 + x2) / 2.0
+    cy = sin_phi * cxp + cos_phi * cyp + (y1 + y2) / 2.0
+
+    def _angle(ux: float, uy: float, vx: float, vy: float) -> float:
+        dot = ux * vx + uy * vy
+        length = math.sqrt((ux * ux + uy * uy) * (vx * vx + vy * vy))
+        ang = math.acos(max(-1.0, min(1.0, dot / length))) if length != 0 else 0.0
+        return -ang if (ux * vy - uy * vx) < 0 else ang
+
+    # F.6.5.4 / F.6.5.5 — start angle theta1 and sweep angle delta-theta
+    theta1 = _angle(1.0, 0.0, (x1p - cxp) / rx, (y1p - cyp) / ry)
+    dtheta = _angle((x1p - cxp) / rx, (y1p - cyp) / ry, (-x1p - cxp) / rx, (-y1p - cyp) / ry)
+    if not sweep and dtheta > 0:
+        dtheta -= 2 * math.pi
+    elif sweep and dtheta < 0:
+        dtheta += 2 * math.pi
+
+    # Split into <=90-degree sub-segments so the cubic approximation stays accurate.
+    num_segments = max(1, math.ceil(abs(dtheta) / (math.pi / 2)))
+    delta = dtheta / num_segments
+    kappa = 4.0 / 3.0 * math.tan(delta / 4.0)
+
+    def to_ellipse(px: float, py: float) -> tuple[float, float]:
+        ex = cx + rx * cos_phi * px - ry * sin_phi * py
+        ey = cy + rx * sin_phi * px + ry * cos_phi * py
+        return ex, ey
+
+    segments: list[tuple[float, float, float, float, float, float]] = []
+    theta = theta1
+    for _ in range(num_segments):
+        theta_next = theta + delta
+        cos_t, sin_t = math.cos(theta), math.sin(theta)
+        cos_tn, sin_tn = math.cos(theta_next), math.sin(theta_next)
+
+        c1 = to_ellipse(cos_t - kappa * sin_t, sin_t + kappa * cos_t)
+        c2 = to_ellipse(cos_tn + kappa * sin_tn, sin_tn - kappa * cos_tn)
+        end = to_ellipse(cos_tn, sin_tn)
+        segments.append((c1[0], c1[1], c2[0], c2[1], end[0], end[1]))
+        theta = theta_next
+
+    return segments
+
+
 def parse_path(d: str) -> list[PathCommand]:
     """Parse an SVG `d` string into absolute PathCommands.
 
-    Supports M/m L/l H/h V/v C/c S/s Q/q T/t Z/z. Arcs (A/a) are rejected — tracers
-    (vtracer, potrace) emit only lines and cubics; arcs from hand-authored SVGs must be
-    flattened by the authoring tool first.
+    Supports M/m L/l H/h V/v C/c S/s Q/q T/t Z/z A/a. Arcs (A/a) are flattened into
+    cubic Beziers via `_arc_to_cubics` (the standard SVG spec endpoint-to-center
+    parameterization) so they can be emitted as `curveTo(...)` alongside every other
+    command — ImageVector.Builder has no native arc primitive, same as the tracers'
+    own output, so arcs and cubics both end up on the same code path.
     """
     cmds: list[PathCommand] = []
     cx = cy = 0.0          # current point
@@ -74,15 +217,21 @@ def parse_path(d: str) -> list[PathCommand]:
     pqx = pqy = None       # previous quad control (for T)
 
     for op, chunk in _CMD_RE.findall(d):
-        nums = _floats(chunk)
         rel = op.islower()
         u = op.upper()
 
         if u == "A":
-            raise ValueError(
-                "arc command (A) not supported — flatten arcs to curves in the authoring "
-                "tool, or re-trace the raster (tracers emit cubics only)"
-            )
+            for rx, ry, rot, large_arc, sweep, ex, ey in _parse_arc_args(chunk):
+                x2, y2 = (cx + ex, cy + ey) if rel else (ex, ey)
+                for x1c, y1c, x2c, y2c, ex_abs, ey_abs in _arc_to_cubics(
+                    cx, cy, rx, ry, rot, bool(large_arc), bool(sweep), x2, y2
+                ):
+                    cmds.append(PathCommand("curve", [x1c, y1c, x2c, y2c, ex_abs, ey_abs]))
+                    cx, cy = ex_abs, ey_abs
+            pcx = pcy = pqx = pqy = None
+            continue
+
+        nums = _floats(chunk)
 
         if u == "Z":
             cmds.append(PathCommand("close", []))
@@ -263,12 +412,14 @@ def generate_kotlin(
     body_blocks = []
     for cmds, argb in layers:
         if color_mode == "semantic":
-            fill = "SolidColor(Color.Black)  // color-agnostic — tint at the call site"
+            fill = "SolidColor(Color.Black)"
+            fill_comment = "  // color-agnostic — tint at the call site"
         else:
             fill = f"SolidColor(Color({argb}))"
+            fill_comment = ""
         lines = "\n".join(f"                {_cmd_to_kotlin(c)}" for c in cmds)
         body_blocks.append(
-            f"            path(fill = {fill}) {{\n{lines}\n            }}"
+            f"            path(fill = {fill}) {{{fill_comment}\n{lines}\n            }}"
         )
     paths_kt = "\n".join(body_blocks)
     vp = f"{viewport:g}f"
