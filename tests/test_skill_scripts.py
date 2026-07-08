@@ -961,6 +961,43 @@ class ImageVectorConverterTests(unittest.TestCase):
         self.assertAlmostEqual(non_move[0].args[0], 10.0, places=3)
         self.assertAlmostEqual(non_move[0].args[1], 0.0, places=3)
 
+    def test_stroke_detection_positive(self) -> None:
+        self.assertTrue(imagevector_scripts._svg_uses_strokes(
+            '<svg fill="none" stroke="currentColor"><path d="M0 0 L10 10"/></svg>'
+        ))
+
+    def test_stroke_detection_ignores_none_and_transparent(self) -> None:
+        self.assertFalse(imagevector_scripts._svg_uses_strokes(
+            '<svg><path fill="#000" stroke="none" d="M0 0 L10 10"/></svg>'
+        ))
+        self.assertFalse(imagevector_scripts._svg_uses_strokes(
+            '<svg><path fill="#000" stroke="transparent" d="M0 0 L10 10"/></svg>'
+        ))
+
+    def test_stroke_detection_negative_no_stroke_attr(self) -> None:
+        self.assertFalse(imagevector_scripts._svg_uses_strokes(_SAMPLE_SVG))
+
+    @unittest.skipUnless(
+        importlib.util.find_spec("picosvg") is not None, "picosvg not installed"
+    )
+    def test_stroke_based_svg_converts_via_picosvg(self) -> None:
+        # Real bug: this parser only ever reads `fill` — a stroke-based path's `d` is
+        # a centerline, and filling it directly produces a solid blob with no error,
+        # indistinguishable from a correct conversion. Stroke-only icon sets (Heroicons
+        # Outline, Feather, Lucide, Tabler, Material Symbols Outlined) are common, not
+        # an edge case. picosvg normalizes the stroke into a real filled outline first.
+        stroke_svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" '
+            'stroke-width="1.5" stroke="currentColor">'
+            '<path stroke-linecap="round" stroke-linejoin="round" '
+            'd="M12 6v12m6-6H6"/></svg>'
+        )
+        kotlin, report = self._convert(svg=stroke_svg, color_mode="semantic")
+        self.assertGreater(report["nodes"], 0)
+        self.assertTrue(
+            "curveTo(" in kotlin or "lineTo(" in kotlin or "quadTo(" in kotlin
+        )
+
     def test_near_quarter_circle_roundoff_uses_one_segment(self) -> None:
         # This specific radius/start-angle combination is a verified reproduction of
         # a real case where the endpoint-to-center parameterization's acos/atan2 chain

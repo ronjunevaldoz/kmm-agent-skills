@@ -19,7 +19,12 @@ Beziers automatically (most icon sets, including Heroicons, use arcs for rounded
 
 ## Step 1 — Classify the input
 
-- `.svg` → convert directly (zero dependencies)
+- `.svg`, filled paths (`fill="..."`, no `stroke`) → convert directly (zero dependencies)
+- `.svg`, stroke-based (`fill="none"` + `stroke="..."` — Heroicons **Outline**, Feather,
+  Lucide, Tabler, Material Symbols Outlined all draw icons this way) → the converter
+  auto-detects this and normalizes via picosvg (`pip install picosvg` if not already
+  present). Never skip this — filling a stroke's centerline directly produces a wrong
+  icon with a normal-looking success report, not an error.
 - `.png` / `.jpg` / `.webp` **flat art** (logo, icon, illustration) → trace then convert
 - **Photograph** → STOP. Photos stay raster under `assets/photos/`. Tell the user.
 - Full-screen mockup → ask the user to crop the individual asset first (or crop it

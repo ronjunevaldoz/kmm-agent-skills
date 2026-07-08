@@ -532,6 +532,55 @@ def entropy_gate(image_path: Path) -> None:
         )
 
 
+# ── Stroke-based SVG normalization (picosvg) ───────────────────────────────────
+# This parser only ever reads `fill` — it has no notion of `stroke`/`stroke-width`.
+# A stroke-based path's `d` is a CENTERLINE, not an outline; filling it directly
+# produces a solid blob instead of the intended outline shape. Worse, this failure is
+# silent: it still reports a normal-looking success line (layers/nodes/etc), making a
+# badly wrong icon indistinguishable from a correct one. Stroke-only icon sets are
+# extremely common (Heroicons Outline, Feather, Lucide, Tabler, Material Symbols
+# Outlined — every "outline style" family), so this isn't an edge case to skip; it's
+# refused explicitly unless picosvg is available to normalize the stroke into a real
+# filled outline path first (via Skia's stroke-to-fill geometry — reimplementing
+# correct cap/join/miter handling ourselves would be a serious undertaking).
+
+_STROKE_ATTR_RE = re.compile(r'\bstroke\s*=\s*"([^"]+)"')
+
+
+def _svg_uses_strokes(svg_text: str) -> bool:
+    """True if any `stroke="..."` attribute (on the root `<svg>` or a `<path>`) has a
+    real value — not `none`, not empty, not `transparent` — meaning at least one path
+    is meant to be drawn as an outlined stroke rather than a filled shape.
+    """
+    for m in _STROKE_ATTR_RE.finditer(svg_text):
+        val = m.group(1).strip().lower()
+        if val not in ("none", "", "transparent"):
+            return True
+    return False
+
+
+def _normalize_with_picosvg(svg_text: str) -> str:
+    """Flatten stroke-to-fill (and, as a side effect, groups/transforms/clip-paths/
+    gradients) via picosvg before this script's own flat path parser touches the SVG.
+    Raises ValueError with an install hint if picosvg isn't available — never silently
+    falls back to filling the centerline.
+    """
+    try:
+        from picosvg.svg import SVG  # type: ignore
+    except ImportError:
+        raise ValueError(
+            "this SVG uses stroke-based paths (fill=\"none\" + stroke=\"...\") — common "
+            "in Heroicons Outline, Feather, Lucide, Tabler, and Material Symbols "
+            "Outlined. This converter only fills paths directly; it cannot turn a "
+            "stroke into a correct outline itself (cap/join/miter geometry). Install "
+            "picosvg, which uses Skia to do this correctly, then re-run — no other "
+            "changes needed:\n"
+            "    pip install picosvg"
+        )
+    svg = SVG.fromstring(svg_text).topicosvg()
+    return svg.tostring()
+
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def pascal(name: str) -> str:
@@ -552,6 +601,8 @@ def convert(
     """Full conversion. Returns (kotlin_source, report)."""
     if source.suffix.lower() == ".svg":
         svg_text = source.read_text(encoding="utf-8")
+        if _svg_uses_strokes(svg_text):
+            svg_text = _normalize_with_picosvg(svg_text)
     else:
         entropy_gate(source)
         svg_text = trace_raster_to_svg(source, colors)

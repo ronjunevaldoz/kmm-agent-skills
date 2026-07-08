@@ -25,6 +25,10 @@ metadata:
     - arc to bezier
     - arc flattening
     - SVG arc command
+    - picosvg
+    - stroke to fill
+    - stroke width
+    - outline icon
 ---
 
 ## Hard Rules (never violated)
@@ -86,11 +90,12 @@ colors must not change with the theme.
 
 ```
 PNG/JPG ─► ①quantize (Pillow) ─► ②trace (vtracer|potrace) ─► SVG ─┐
-SVG ────────────────────────────────────────────────────────────┴─► ③normalize ─► ④Kotlin
+SVG ──────────────────────────────► ⓪normalize (picosvg, if needed) ─┴─► ③normalize ─► ④Kotlin
 ```
 
 | Stage | Tool | Notes |
 |---|---|---|
+| ⓪ Pre-normalize | picosvg (optional; only invoked when a stroke is detected) | Flattens `stroke`/`stroke-width` into real filled outline paths via Skia; install hint if missing |
 | ① Quantize | Pillow (median-cut, `--colors N`) | Entropy gate rejects photographs up front |
 | ② Trace | vtracer (preferred, full color) / potrace (fallback, mono) | Detected at runtime; install hint if missing |
 | ③ Normalize | Built-in parser (zero deps) | Absolute coords, S/T reflection, arc-to-cubic flattening, uniform rescale to `--viewport`, `--max-nodes` budget (default 400) |
@@ -101,6 +106,18 @@ sets (Heroicons, Feather, Lucide) use arcs for any rounded/circular element, so 
 not an edge case. `ImageVector.Builder` has no native arc primitive, same reason tracers
 only ever emit cubics; the parser now does the same conversion for hand-authored SVGs
 rather than refusing them.
+
+**Stroke-based SVGs (`fill="none"` + `stroke="..."`) are pre-normalized via picosvg.**
+This parser only ever reads `fill` — a stroke-based path's `d` is a centerline, not an
+outline, and filling it directly produces a solid blob with **no error**, indistinguishable
+from a correct conversion. Stroke-only icon families are common, not an edge case:
+Heroicons Outline, Feather, Lucide, Tabler, and Material Symbols Outlined all draw every
+icon this way. When a `stroke="..."` attribute with a real value is detected anywhere in
+the SVG, the script runs picosvg (`SVG.fromstring(text).topicosvg()`) first — it uses
+Skia to correctly turn the stroke into a filled outline (caps, joins, miters), which
+this script's own flat regex parser has no way to do itself. If picosvg isn't installed,
+the script refuses with an install hint (`pip install picosvg`) rather than silently
+filling the centerline.
 
 ---
 
@@ -139,8 +156,10 @@ This script must work standalone for any project structure; pass `--package` exp
 when the consumer project doesn't use `:core:designsystem`, rather than hand-editing the
 generated file's package line afterward).
 
-**Dependencies:** none for SVG input. Raster input: `pip install vtracer` (preferred)
-or `brew install potrace` + `pip install Pillow` (mono fallback).
+**Dependencies:** none for plain filled SVG input. Raster input: `pip install vtracer`
+(preferred) or `brew install potrace` + `pip install Pillow` (mono fallback). Stroke-based
+SVG input (`fill="none"` + `stroke="..."`): `pip install picosvg` — only required when
+the source actually uses strokes; the script detects this and only asks for it then.
 
 ---
 
@@ -177,6 +196,7 @@ python3 skills/kotlin-multiplatform-imagevector-generator/scripts/convert_image_
 |---|---|
 | Photographic input (entropy gate) | Tracing photos produces garbage vectors — keep photos as raster under `assets/photos/` |
 | Node budget exceeded (`--max-nodes`) | Bloated vectors hurt binary size and recomposition; simplify the art or reduce `--colors` |
+| Stroke-based SVG with picosvg not installed | This parser only reads `fill`; without picosvg it cannot correctly turn a stroke into an outline (cap/join/miter geometry) — refuses with an install hint rather than silently filling the centerline |
 
 Arc commands (`A`/`a`) are **not** refused — they're flattened into cubic Beziers
 automatically (see The Pipeline above). This used to be a refusal; it broke ~75% of
@@ -193,6 +213,8 @@ real-world icon sets like Heroicons, which use arcs for every rounded/circular e
 - Reading the generated file body into context to "verify" it — the report line and a Roborazzi golden are the verification; the path data is opaque
 - Tracing a full-screen mockup in one pass — crop the individual asset first; the tracer vectorizes everything it sees
 - Hand-editing the generated file's `package` line because the project doesn't use `:core:designsystem` — pass `--package` and regenerate instead; still a hand-edit of a GENERATED file even though it's "just" the package declaration
+- Trusting a ✅ success line as proof the icon looks right when the source SVG uses strokes and picosvg wasn't installed at the time — before this fix, this parser filled the stroke's centerline silently, producing a wrong icon with a normal-looking report line. Always sanity-check a first stroke-based conversion visually (Roborazzi golden or preview) rather than assuming the report line alone is sufficient
+- Assuming a filled `<path fill="...">` extracted from an SVG is definitely the intended shape — if the source used `stroke`, check that picosvg actually ran (or was needed at all) rather than trusting the file exists
 
 ---
 
@@ -205,6 +227,7 @@ repo tests (`tests/test_skill_scripts.py`):
 - viewport rescale: uniform scale + centering into the canonical square
 - codegen: GENERATED header present, `by lazy` property name, layer count, semantic merge to a single layer
 - budget: node count over `--max-nodes` exits with an error
+- stroke detection: `stroke="..."` with a real value (not `none`/empty/`transparent`) is caught; a full stroke→picosvg→fill conversion test runs when picosvg is installed (it's in `requirements-dev.txt` so CI exercises the real path, not just the detection heuristic)
 
 Rendering fidelity is verified downstream with Roborazzi: capture the generated icon at
 24/48 dp via `/kmm-record-design-baselines` and review with `/kmm-audit-screenshots`.
@@ -244,6 +267,7 @@ Never print generated path data into the conversation.
 
 | Date | Change |
 |---|---|
+| 2026-07-08 | **Fixed a real, serious defect**: this parser only ever read `fill` — it had zero handling for `stroke`/`stroke-width`, and silently filled a stroke's centerline instead, producing a wrong-looking icon with a completely normal ✅ success report line, indistinguishable from a correct conversion. Stroke-only icon families (Heroicons Outline, Feather, Lucide, Tabler, Material Symbols Outlined) are the norm for "outline style" sets, not an edge case. Fixed by detecting `stroke="..."` with a real value and pre-normalizing via picosvg (`SVG.fromstring(text).topicosvg()`), which uses Skia to correctly convert the stroke into a filled outline (cap/join/miter geometry that would be a serious undertaking to reimplement). If picosvg isn't installed, the script now refuses explicitly with an install hint instead of silently mis-converting. `picosvg` added to `requirements-dev.txt` so CI exercises the real normalization path, not just the detection heuristic. Verified end-to-end against real Heroicons Outline icons. 5 new tests. |
 | 2026-07-08 | Added a `--package` flag — found via a real consumer-project report that the generated file's package was hardcoded to `<group-id>.core.designsystem.icons` with no override, forcing every project onto the `kotlin-multiplatform-design-system` skill's own module convention even when it doesn't apply. `--package` overrides it explicitly (default unchanged, fully backward compatible); new anti-pattern against hand-editing the package line instead. 2 new tests. |
 | 2026-07-08 | Compared the arc-flattening implementation against picosvg's `arc_to_cubic.py` (itself adapted from FontTools/Blink) and backported 2 precision refinements: (1) a `+0.001` epsilon in the segment-count `ceil()` — without it, floating-point trig roundoff on an arc whose sweep should be an exact 90°-multiple can compute `dtheta` as e.g. `1.5707963267948972` instead of exactly `π/2`, producing one unnecessary extra cubic segment (verified against a real reproduction case, not just a synthetic one); (2) a zero-radius arc (`rx==0`/`ry==0`) now emits a real `lineTo` instead of a cubic whose control points merely sit on the straight line — cheaper against `--max-nodes` for the same visual result. 2 new tests. |
 | 2026-07-08 | **Fixed a real blocker**: arc commands (`A`/`a`) were rejected outright, but ~75% of a 32-icon real-world Heroicons test batch failed for exactly that reason — most icon sets use arcs for every rounded/circular element. Implemented proper arc-to-cubic-Bezier flattening in `parse_path` (standard SVG spec endpoint-to-center parameterization, split into ≤90° sub-segments), including correct handling of packed arc flags (e.g. `"1110"` = large-arc=1, sweep=1, x=10 — a classic gotcha a naive float tokenizer misreads as one number). Verified end-to-end against real Heroicons SVGs (bell, user-circle, envelope, wifi, users) fetched live. Also fixed an unrelated but real codegen bug found in the same pass: the semantic-mode fill comment was embedded inside the `path(fill = ...)` argument list, so `//` commented out the closing `) {` and broke every semantic-mode icon's generated Kotlin syntax. 4 new tests (arc flattening, packed-flag parsing, semicircle endpoint accuracy, fill-comment regression). |

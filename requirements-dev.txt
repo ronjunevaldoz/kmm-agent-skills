@@ -1,1 +1,2 @@
 pytest>=9.0
+picosvg>=0.22.0
