@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.53.2] — 2026-07-08
+
+### Fixed
+
+- fix(commits): add missing refine/enforce types to commit-msg hook
+
+---
+
 ## [v1.53.1] — 2026-07-08
 
 ### Chore
