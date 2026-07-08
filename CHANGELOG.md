@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.53.1] — 2026-07-08
+
+### Chore
+
+- chore(commits): reject Co-Authored-By trailer, repo and consumer hooks
+
+---
+
 ## [v1.53.0] — 2026-07-08
 
 ### Added
