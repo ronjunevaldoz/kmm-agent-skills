@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.55.1] — 2026-07-08
+
+### Fixed
+
+- fix(imagevector-generator): detect stroke-only SVGs, normalize via picosvg
+
+---
+
 ## [v1.55.0] — 2026-07-08
 
 ### Added

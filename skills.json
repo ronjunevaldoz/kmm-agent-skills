@@ -1,5 +1,5 @@
 {
-  "version": "1.55.0",
+  "version": "1.55.1",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1382,7 +1382,11 @@
         "logo vector",
         "arc to bezier",
         "arc flattening",
-        "SVG arc command"
+        "SVG arc command",
+        "picosvg",
+        "stroke to fill",
+        "stroke width",
+        "outline icon"
       ],
       "triggers": [
         "ImageVector",
