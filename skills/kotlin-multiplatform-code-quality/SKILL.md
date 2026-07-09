@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-08'
+  last-updated: '2026-07-09'
   keywords:
     - Ktlint
     - Detekt
@@ -258,6 +258,47 @@ path(fill = SolidColor(Color.Black)  // color-agnostic — tint at the call site
 path(fill = SolidColor(Color.Black)) {  // color-agnostic — tint at the call site
 ```
 
+### Code comment vs. development notes
+
+A long WHY comment is a sign the explanation has two different audiences, and both are
+being crammed into one place. Split them:
+
+- **Inline code comment** — stays in the file, kept to whatever's needed to pass one
+  test: **does this line answer a question someone would ask before deleting or
+  "simplifying" this code?** If yes, it survives. If it's mechanism detail, alternatives
+  you already rejected, or exact version numbers that only matter during a future
+  upgrade, it doesn't pass that test — it's not preventing anyone from breaking anything
+  today.
+- **Development notes** — the exhaustive rationale that doesn't pass that test goes in
+  `docs/reference/` (see `kotlin-multiplatform-project-docs-maintainer` — this is exactly
+  the "searchable technical audits, deep references" lane it already defines), with a
+  one-line pointer left in the code comment.
+
+```kotlin
+// ❌ Everything crammed inline — 9 lines to justify one includeBuild() call
+// Not part of the stable module graph above: pinned to a pre-release Compose
+// Multiplatform version (1.12.0-beta01) for androidx.compose.foundation.style's real
+// Style/StyleScope/StyleState API (@ExperimentalFoundationStyleApi, not yet in the
+// 1.11.1 stable line this project otherwise targets) -- see
+// tailwind/style-experimental/build.gradle.kts. A regular `include()` subproject can't
+// do this: the root's `apply false` on org.jetbrains.compose locks that plugin ID to
+// 1.11.1 build-wide, and a subproject requesting a different version of the same
+// plugin ID fails to resolve. `includeBuild` (a real composite build, its own
+// settings.gradle.kts/plugin classpath) is the only way to get genuine version
+// isolation while still consuming tailwind-core's source directly via dependency
+// substitution.
+includeBuild("tailwind/style-experimental")
+
+// ✅ Inline comment answers "why not include()?" and "why a different version?" —
+// the two questions that would make someone try to "clean this up." Everything else
+// (exact API names, dependency-substitution mechanics) moves to docs/reference/.
+// Composite build (not include()): root's apply false on org.jetbrains.compose locks
+// that plugin ID to 1.11.1 build-wide. This module needs 1.12.0-beta01 for an
+// experimental Compose Foundation Style API not available in the stable line.
+// Full rationale: docs/reference/composite-build-style-experimental.md
+includeBuild("tailwind/style-experimental")
+```
+
 ### Detekt enforcement
 
 Add to `detekt.yml`:
@@ -282,6 +323,65 @@ comments:
 forces the opposite — no KDoc on private members, since if one is needed the name is the
 real problem. `OutdatedDocumentation` catches KDoc whose `@param`/signature no longer
 matches the actual declaration after a refactor.
+
+### KDoc tag reference
+
+| Tag | On | Purpose |
+|---|---|---|
+| `@param` | function/constructor | Describes one parameter — required if the name alone doesn't make its role obvious |
+| `@return` | function | What the return value represents (skip for `Unit`) |
+| `@throws` / `@exception` | function | A checked failure mode the caller must handle — not every possible exception, just the ones that are part of the contract |
+| `@see` | any | Cross-reference to a related declaration |
+| `@sample` | function | Points at an actual, compiled function elsewhere as the usage example — see below |
+| `@property` | class (constructor-declared properties) | Documents a primary-constructor `val`/`var` from the class-level KDoc |
+| `@receiver` | extension function | Documents the receiver type's role in the extension |
+| `@constructor` | class | Documents the primary constructor specifically, separate from the class-level summary |
+| `@suppress` | any | Excludes a technically-public declaration from generated docs (e.g. an internal-use-only public API) |
+
+### `@sample` — the correct way to attach an example, not a required one per function
+
+**Don't require an example for every function or every file.** That contradicts the same
+"why not what" principle as comments generally — an example only earns its place when a
+public API's usage genuinely isn't obvious from its signature (a builder, a DSL, a
+function with a non-obvious multi-step call pattern). A plain getter or a one-line
+utility doesn't need one.
+
+When an example is warranted, use `@sample` instead of a raw code block pasted into the
+KDoc — `@sample` references an **actual, compiled function** elsewhere in the codebase
+(typically under `src/*/kotlin/samples/`), so it's type-checked and breaks the build if
+it goes stale. A hand-written code block in a comment can drift from the real API
+silently; `@sample` can't.
+
+```kotlin
+/**
+ * Builds a [Result] pipeline that retries on transient failures.
+ *
+ * @sample GROUP_ID.samples.retryPipelineSample
+ */
+fun <T> retryPipeline(times: Int, block: suspend () -> T): Flow<T> { ... }
+
+// src/commonTest/kotlin/GROUP_ID/samples/RetrySamples.kt (or a dedicated samples source set)
+private fun retryPipelineSample() {
+    retryPipeline(times = 3) { fetchUser() }
+}
+```
+
+Module- and package-level documentation (describing what an entire module or package is
+for, not a single declaration) is a separate Dokka mechanism — a `Module.md`/`Package.md`
+file referenced from the Dokka Gradle config — not a KDoc tag.
+
+### License headers — situational, not a default
+
+Per-file license header comments (an Apache-2.0 boilerplate block at the top of every
+`.kt` file) were standard in the AOSP/Apache-Software-Foundation era and are still real
+practice for **libraries redistributed externally** — Detekt even ships a rule for it,
+`AbsentOrWrongFileLicense` (disabled by default). For a typical **app** codebase, skip
+it: it's redundant with the root `LICENSE` file, and it's a maintenance burden (author/year
+drift) with no legal upside for code that isn't independently redistributed per file.
+
+Add it only when publishing a library — see
+`kotlin-multiplatform-library-publishing`'s "Per-file license headers" for the Detekt
+rule config and license-header template.
 
 ---
 
@@ -328,6 +428,8 @@ lint:
 - `kotlin-multiplatform-clean-architecture` — defines the layer rules that Detekt enforces
 - `kotlin-multiplatform-ci-github-actions` — the CI workflow where these gates run
 - `kotlin-multiplatform-feature-scaffold` — convention plugins are where Ktlint/Detekt are applied
+- `kotlin-multiplatform-project-docs-maintainer` — `docs/reference/` is where development notes go when a code comment's rationale outgrows what belongs inline
+- `kotlin-multiplatform-library-publishing` — per-file license headers, a related but separate comment-placement decision
 
 ---
 
@@ -341,6 +443,7 @@ lint:
 - using `//` to document a public API's contract instead of KDoc — Dokka and IDE quick-docs never see a `//` comment
 - adding KDoc to a private member to explain unclear behavior — rename the member instead; flagged by Detekt's `DocumentationOverPrivateFunction`/`DocumentationOverPrivateProperty`
 - placing a `//` comment inside a function call's argument list before its closing `)`/`{` — silently comments out the rest of the line; this exact bug shipped in `kotlin-multiplatform-imagevector-generator`'s own codegen
+- writing a multi-paragraph inline comment that mixes "why this code exists" with mechanism detail, rejected alternatives, and exact version numbers — split it: the short WHY stays inline, the exhaustive rationale goes in `docs/reference/` with a one-line pointer left in the comment
 
 If Detekt reports false positives, use `@Suppress("RuleName")` at the call site, not a global exclude.
 
@@ -361,5 +464,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-09 | Added a "Code comment vs. development notes" split, from a real 9-line inline comment that crammed a build-topology explanation, rejected alternatives, and exact version numbers into one `includeBuild()` call site. Rule: an inline comment survives only if it answers a question that would make someone break the code by "simplifying" it; the exhaustive rationale moves to `docs/reference/` (per `kotlin-multiplatform-project-docs-maintainer`'s existing convention) with a one-line pointer left in the comment. Before/after example, 1 new anti-pattern, 2 new Related Skills cross-references. |
+| 2026-07-09 | Extended the "Comment & KDoc Conventions" section: a full KDoc tag reference (`@param`/`@return`/`@throws`/`@see`/`@sample`/`@property`/`@receiver`/`@constructor`/`@suppress`), guidance that an example is warranted only for non-obvious public API (never required per function/file — same "why not what" principle), `@sample`'s advantage over a raw code block (references an actual compiled function, can't silently drift stale), and a "License headers" note (situational, not a default — cross-referenced to `kotlin-multiplatform-library-publishing`). |
 | 2026-07-08 | Added a "Comment & KDoc Conventions" section — KDoc for public API contracts, `//` for internal WHY notes, private members should be renamed rather than commented (backed by Detekt's `DocumentationOverPrivateFunction`/`DocumentationOverPrivateProperty`), and a real bug example (a `//` comment inside a function call's argument list silently commenting out the rest of the line, which actually shipped in `kotlin-multiplatform-imagevector-generator`'s codegen). New `comments:` Detekt rule block and 3 anti-patterns. |
 | 2026-06-18 | Initial release. |

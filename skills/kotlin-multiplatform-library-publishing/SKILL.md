@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-29'
+  last-updated: '2026-07-09'
   keywords:
     - maven central
     - maven publish
@@ -39,6 +39,9 @@ metadata:
     - multiplatform library
     - publish to maven
     - open source library
+    - license header
+    - AbsentOrWrongFileLicense
+    - file license
 ---
 
 **Trigger keywords:** publish KMP library, Maven Central, publish library, maven-publish,
@@ -46,7 +49,8 @@ vanniktech, mavenPublishing, OSSRH, Sonatype, GitHub Packages library, BOM, bill
 binary compatibility, apiCheck, apiDump, api dump, kotlinx-binary-compatibility-validator,
 SNAPSHOT library, library release, distribute KMP, KMP library publishing, artifactId, groupId,
 POM metadata, GPG signing library, library consumers, multiplatform library, open source KMP,
-library versioning, staging repository, Central Portal
+library versioning, staging repository, Central Portal, license header, file license header,
+AbsentOrWrongFileLicense, per-file license.
 
 **Freshness rule:** vanniktech plugin releases frequently; check
 [github.com/vanniktech/gradle-maven-publish-plugin/releases](https://github.com/vanniktech/gradle-maven-publish-plugin/releases)
@@ -237,6 +241,43 @@ GROUP=io.github.yourhandle
 POM_ARTIFACT_ID=my-library
 VERSION_NAME=1.0.0-SNAPSHOT
 ```
+
+### Per-file license headers (optional)
+
+The POM `licenses { license { ... } }` block above is the legally required, project-level
+license declaration for Maven Central — that's not optional. A per-file license header
+comment repeated at the top of every `.kt` source file is a **separate, optional** choice,
+worth it for a library specifically because each file may be vendored, copy-pasted, or
+inspected independently of the repo it came from; a project-level `LICENSE` file alone
+doesn't travel with an individual file once it's copied elsewhere. It's not needed for
+app code (see `kotlin-multiplatform-code-quality`'s Comment & KDoc Conventions).
+
+Enforce it with Detekt's `AbsentOrWrongFileLicense` rule (off by default):
+
+```yaml
+# detekt.yml
+comments:
+  AbsentOrWrongFileLicense:
+    active: true
+    licenseTemplateFile: 'license.template.txt'
+```
+
+```
+# license.template.txt
+/*
+ * Copyright 2026 Your Name or Org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+```
+
+Keep the license identifier here consistent with the POM's `licenses { license { name = ... } }`
+block — a per-file header claiming a different license than the POM declares is worse
+than having no per-file header at all.
 
 ---
 
@@ -491,6 +532,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 | Consumer can't resolve SNAPSHOT | Must add OSSRH snapshot repo: `maven("https://s01.oss.sonatype.org/content/repositories/snapshots")` |
 | `signAllPublications()` fails locally | Set `signing.*` properties in `~/.gradle/gradle.properties`, not in the project |
 | Missing `scm` block in POM | Maven Central validation rejects POMs without SCM — always include it |
+| Per-file license header names a different license than the POM's `licenses { license { name = ... } }` | Keep both in sync — a mismatched per-file header is worse than no per-file header at all |
 
 ---
 
@@ -511,4 +553,5 @@ missing fields cause Maven Central validation failures that are hard to debug.
 
 | Date | Change |
 |---|---|
+| 2026-07-09 | Added a "Per-file license headers (optional)" section — Detekt's `AbsentOrWrongFileLicense` rule (off by default) with a license template, and why this is worth it for a library (files get vendored/copy-pasted independently of the repo) but not for app code. New anti-pattern: per-file header must stay consistent with the POM's declared license. |
 | 2026-06-29 | Initial skill — vanniktech plugin, BOM, binary-compat-validator, SNAPSHOT/stable, GPG, GitHub Packages |
