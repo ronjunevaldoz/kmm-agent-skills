@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.57.0] — 2026-07-10
+
+### Added
+
+- feat(skills): add token saver routing and skill
+
+---
+
 ## [v1.56.1] — 2026-07-09
 
 ### Docs
