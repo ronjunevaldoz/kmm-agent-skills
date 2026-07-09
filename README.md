@@ -105,7 +105,7 @@ python3 scripts/release.py auto --dry-run # preview first
 
 ## Skills
 
-59 skills covering the full KMP stack. Load the smallest set that answers the request.
+60 skills covering the full KMP stack. Load the smallest set that answers the request.
 
 ### Foundation
 - [`feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) — 6-layer module structure, build-logic, TOML catalog, Koin
@@ -176,6 +176,7 @@ python3 scripts/release.py auto --dry-run # preview first
 - [`legal-docs`](skills/kotlin-multiplatform-legal-docs/) — privacy policy, terms, GDPR, data-safety labels
 - [`lessons`](skills/kotlin-multiplatform-lessons/) — structured lesson files for pattern mismatches
 - [`skill-harvester`](skills/kotlin-multiplatform-skill-harvester/) — reads lessons, proposes skill amendments
+- [`token-saver`](skills/kotlin-multiplatform-token-saver/) — terse replies, output compression, and smallest-correct-solution checks
 - [`release`](skills/kotlin-multiplatform-release/) — versioning, Maven Central, git-cliff, GitHub Release
 
 ---

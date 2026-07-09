@@ -176,7 +176,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 59 Skills and What They Own
+## The 60 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -536,6 +536,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "wireframes", "screen flows", "layout specs", "design handoff", "component API", "visual direction" | `designer` |
 | "release notes", "consumer release notes", "per-skill changelog", "CHANGELOG.md" | `changelog` |
 | "logging", "logger wrapper", "logger facade", "kotlin-logging", "KotlinLogging", "Kermit", "log level", "crash reporting", "Crashlytics logging" | `kotlin-multiplatform-logging` |
+| "token saver", "token-saver", "token saving", "token reduction", "prompt compression", "context compression", "context headroom", "verbose output", "too much output", "caveman", "ponytail", "headroom", "rtk" | `kotlin-multiplatform-token-saver` |
 | "string.format", "decimalformat", "simpledateformat", "locale formatting", "number formatting", "date formatting", "shared formatter", "kmp formatter" | `kotlin-multiplatform-expect-actual` |
 | "auth", "authentication", "authorization", "JWT", "sessions", "Ktor RPC" | `kotlin-multiplatform-ktor-auth-service` |
 | "MongoDB", "database", "collection", "Flow", "change stream", "server-side Kotlin" | `kotlin-multiplatform-mongodb-database` |
