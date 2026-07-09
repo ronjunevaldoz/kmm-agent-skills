@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-29'
+  last-updated: '2026-07-09'
   keywords:
     - MVI
     - Model-View-Intent
@@ -59,6 +59,11 @@ typed error state, UiError sealed, shared ViewModel, wizard ViewModel, multi-ste
 
 **Freshness rule:** `lifecycle-viewmodel-compose` and CMP lifecycle integration change between
 releases — recheck the AndroidX lifecycle and JetBrains CMP docs before upgrading.
+
+**Koin compatibility note:** when MVI screens use Koin-backed ViewModels, keep the
+`koin-compose-viewmodel` and `androidx.lifecycle.viewmodelCompose` versions aligned with the
+dependency-injection skill. Mismatches can be silent on JVM/Android/iOS and only show up on Wasm
+as `IrLinkageError`; include Wasm in verification whenever either side changes.
 
 ---
 
@@ -760,6 +765,10 @@ val checkoutModule = module {
 Never construct `SavedStateHandle()` yourself — Koin's ViewModelFactory provides it from
 the AndroidX `CreationExtras` bag. See `kotlin-multiplatform-dependency-injection` for
 the full SavedStateHandle + Koin reference.
+
+If you update either `koin-compose-viewmodel` or `androidx.lifecycle.viewmodelCompose`,
+run the Wasm target as part of the verification pass — that is where version drift is most likely
+to surface first.
 
 With **Koin annotated mode** (Koin Compiler Plugin):
 ```kotlin
@@ -1551,6 +1560,7 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 | 2026-06-28 | Add @Stable/@Immutable rule for State types; CoroutineExceptionHandler in MviViewModel base class; rememberUpdatedState section with decision table. Three new anti-patterns.
 | 2026-06-28 | Add multi-source state: combine(), WhileSubscribed(5_000) table, flatMapLatest, snapshotFlow with debounce example. Four new anti-patterns.
 | 2026-06-28 | Add collectAsStateWithLifecycle vs collectAsState rule; LaunchedEffect vs DisposableEffect vs SideEffect decision table; SavedStateHandle + viewModelOf Koin wiring; four new anti-patterns.
+| 2026-07-09 | Added Koin Compose ViewModel / AndroidX lifecycle compatibility note and Wasm verification reminder for MVI screens that use Koin-backed ViewModels. |
 | 2026-06-28 | Add auth gate and back-stack anti-patterns. Two new anti-patterns: storing auth state in MVI State for nav, and Effect.NavigateBack without popUpTo contract. |
 | 2026-06-28 | Add ViewModel size rule, god ViewModel symptoms, use case extraction guide, and ViewModel split patterns. Two new anti-patterns for monolithic ViewModels. |
 | 2026-06-29 | Reworked feature-orchestration guidance into a decision order led by Option 1 (separate screens + NavHost + repository as source of truth) before any coordinator. Two hard rules (no VM-in-VM, share via repository only). Hardened rules section mapped to audit findings. |

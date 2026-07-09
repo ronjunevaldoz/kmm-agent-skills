@@ -8,7 +8,7 @@
 - A path to a sample spec: `samples/todo-app.md`
 
 This command drives the full pipeline end-to-end across 11 steps:
-intake → infer → **plan (MVP + sprints, gated approval)** → scaffold → infrastructure → design system → screen layouts + previews → features → verify → agent setup → summary.
+intake → infer → **plan (compact MVP + delivery slices, gated approval)** → scaffold → infrastructure → design system → screen layouts + previews → features → verify → agent setup → summary.
 Any assumptions made are printed before implementation begins.
 
 ---
@@ -40,6 +40,9 @@ Do not stop — continue regardless.
 
 Then collect the project intake. Ask for the minimum information needed to start a
 consumer project cleanly:
+
+The intake is intentionally short and modal-friendly. If a UI renders it as popup
+questions, ask one field at a time in this order and keep the same defaults.
 
 | Field | Ask | Default if omitted |
 |---|---|---|
@@ -76,7 +79,7 @@ From the description, extract:
 - **Auth** — default: none unless mentioned
 
 ⛔ **No code is written during Steps 1–3.** Planning and implementation are strictly
-separated. The first line of code is written only after the user confirms the plan in Step 3e.
+separated. The first line of code is written only after the user confirms the plan in Step 3c.
 
 Print the raw feature list:
 
@@ -98,11 +101,12 @@ Auth:       none
 
 ---
 
-## Step 3 — Plan: MVP, phases, tasks, sprints
+## Step 3 — Plan: MVP, delivery slices, tasks
 
-This is the gate before any code is written. Always produce a **fully drafted plan with
-recommendations pre-selected** — never present a blank template or ask the user to
-fill things in. The user should only need to say "looks good" or tweak one item.
+This is the gate before any code is written. Always produce one **compact drafted plan**
+with recommendations pre-selected — never present a blank template or split the plan
+into competing roadmap/task/sprint systems. The user should only need to say
+"looks good" or tweak one item.
 
 ### 3a — Draft the MVP scope (always recommend first)
 
@@ -132,111 +136,51 @@ Post-MVP (after first release):
   Say a number to move a feature in or out, or "looks good" to confirm.
 ```
 
-### 3b — Draft the roadmap (always pre-fill milestones)
+### 3b — Draft the delivery slices (roadmap + tasks together)
 
-Always generate concrete milestone names, not placeholders. Use the app type to name
-them meaningfully (e.g. "Alpha — browse products" not "Milestone 1"):
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DRAFT — ROADMAP  (recommended ✦)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✦ Milestone 1 — MVP · "<descriptive name>" (internal alpha)
-    <feature list with [item numbers]>
-
-  Milestone 2 — v1.1 · "<descriptive name>"
-    <feature list with [item numbers]>
-
-  Milestone 3 — v2.0 · "Backlog / TBD"
-    <feature list with [item numbers]>
-
-→ Recommended: ship Milestone 1 to internal testers first.
-  Move items by number, or "looks good" to confirm.
-```
-
-### 3c — Draft the full task list (always pre-filled, numbered)
-
-For every MVP feature, generate the complete task list immediately — never leave blanks.
-Each task gets a unique ID (F = foundation, feature initial + number):
+Always generate concrete slice names, not placeholders. Use the app type to name them
+meaningfully (e.g. "Alpha — browse products" not "Milestone 1"). Keep the whole plan
+in one matrix so the UI can render it cleanly as a popup or wizard.
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DRAFT — TASK LIST
+DRAFT — DELIVERY PLAN  (recommended ✦)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Foundation (always Sprint 1):
-  [F-01] Clone kmp-wizard + configure project name / group ID
-  [F-02] Apply 6-layer clean-arch module structure
-  [F-03] Set up Koin DI (annotated mode)
-  [F-04] Set up Ktlint + Detekt + baseline
-  [F-05] Set up GitHub Actions CI (build + test + lint matrix)
-  [F-06] Generate design system (AppTheme, tokens, AppScaffold)
-  [F-07] Set up type-safe navigation shell + bottom nav (if multiple tabs)
+Slice 1 — Foundation  (~1 week)
+  Outcome: clean build, CI green, design system renders
+  Tasks: [F-01] [F-02] [F-03] [F-04] [F-05] [F-06] [F-07]
 
-<Feature: e.g. Auth>:
-  [A-01] Scaffold :feature:auth:domain / :data / :presenter / :ui
-  [A-02] Define AuthContract (State, Intent, Effect)
-  [A-03] Implement AuthRepository interface + FakeAuthRepository
-  [A-04] Implement AuthRepositoryImpl (Ktor bearer/JWT)
-  [A-05] Implement AuthViewModel (MVI)
-  [A-06] Wire Koin — authModule.kt
-  [A-07] LoginScreen + LoginContent composables
-  [A-08] Add /login route to NavHost, auth guard
-  [A-09] ViewModel unit tests: login success, error, loading
-  [A-10] Roborazzi screenshot tests: empty, loading, error states
+Slice 2 — <First MVP feature>  (~1 week)
+  Outcome: <feature> works end-to-end
+  Tasks: [A-01] [A-02] [A-03] [A-04] [A-05] [A-06] [A-07] [A-08] [A-09] [A-10]
 
-<Feature: next MVP feature — same pattern>:
-  [B-01] … [B-10]
+Slice 3 — <Second MVP feature>  (~1 week)
+  Outcome: <feature> works end-to-end
+  Tasks: [B-01] … [B-10]
+
+Slice N — Polish + QA  (~1 week)
+  Outcome: ready for internal alpha release
+  Tasks: layout wireframes reviewed · accessibility pass · Roborazzi goldens · release build validation
+
+→ Estimated MVP: <N> sprints (~<N> weeks). Move task IDs by slice, or "looks good" to confirm.
 ```
 
-### 3d — Draft the sprint plan (always pre-grouped)
+### 3c — Present the full draft and wait for a single confirmation
 
-Always pre-assign tasks to sprints — never leave sprint assignment to the user.
-Default capacity: 7–10 tasks per sprint. Always end with a Polish sprint.
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DRAFT — SPRINT PLAN  (recommended ✦)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✦ Sprint 1 — Foundation  (~1 week)
-    [F-01] [F-02] [F-03] [F-04] [F-05] [F-06] [F-07]
-    Goal: clean build, CI green, design system renders
-
-✦ Sprint 2 — <First MVP feature>  (~1 week)
-    [A-01] [A-02] [A-03] [A-04] [A-05] [A-06] [A-07] [A-08] [A-09] [A-10]
-    Goal: <feature> works end-to-end, tests green
-
-✦ Sprint 3 — <Second MVP feature>  (~1 week)
-    [B-01] … [B-10]
-    Goal: <feature> works end-to-end
-
-✦ Sprint N — Polish + QA  (~1 week)
-    Layout wireframes reviewed
-    Accessibility pass (contentDescription, touch targets)
-    Roborazzi golden baselines recorded
-    Release build validated (ProGuard, signed APK)
-    Goal: ready for internal alpha release
-
-→ Estimated MVP: <N> sprints (~<N> weeks).
-  Move tasks between sprints by ID, or "looks good" to confirm.
-```
-
-### 3e — Present the full draft and wait for a single confirmation
-
-Print all four sections together as one block, then a **single prompt**:
+Print the MVP scope and delivery plan together as one block, then a **single prompt**:
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 PLAN READY — review and confirm
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[MVP scope above]   [Roadmap above]
-[Task list above]   [Sprint plan above]
+[MVP scope above]   [Delivery plan above]
 
 Options:
   ↩  "looks good" / "yes" / "proceed"  — accept all and start building
-  ✏  "move [X-01] to sprint 3"         — adjust a task's sprint
+  ✏  "move [X-01] to slice 3"          — adjust a task's placement
   ✏  "add <thing> to MVP"              — include a feature
   ✏  "remove [3] from MVP"             — defer a feature
-  ✏  "split sprint 2 into two sprints" — resize capacity
+  ✏  "split slice 2 into two slices"   — resize capacity
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
