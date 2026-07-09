@@ -1065,6 +1065,106 @@ def _detect_focused_state_animates_border_width(root: Path) -> list[str]:
     return findings
 
 
+# ── Combined "one file per X" violations ───────────────────────────────────────
+# Several skills document a hard "one file per X, never combine, never append" rule
+# (kotlin-multiplatform-lessons, kotlin-multiplatform-layout-system,
+# kotlin-multiplatform-sqldelight-setup) enforced only by their scaffolding scripts
+# refusing to overwrite — nothing catches a violation that bypassed the script (a
+# hand-written file, a merge, a copy-paste). These detectors close that gap.
+
+_LESSON_SECTION_RE = re.compile(r"^##\s+What we followed\s*$", re.MULTILINE)
+
+
+def _detect_combined_lesson_file(root: Path) -> list[str]:
+    """Flag a docs/lessons/*.md file containing more than one lesson.
+
+    kotlin-multiplatform-lessons requires exactly one lesson per file — the harvester
+    parses docs/lessons/*.md as one Lesson per file, so a combined file silently breaks
+    grouping and review. `create_lesson.py` enforces this at creation time, but a
+    hand-written or merged file can still violate it; this catches that case.
+    """
+    findings: list[str] = []
+    lessons_dir = root / "docs" / "lessons"
+    if not lessons_dir.is_dir():
+        return findings
+    for path in sorted(lessons_dir.glob("*.md")):
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        count = len(_LESSON_SECTION_RE.findall(text))
+        if count > 1:
+            findings.append(
+                f"combined lesson file [HIGH]: {path.relative_to(root)} — contains "
+                f"{count} lessons ('## What we followed' appears {count} times) in one "
+                f"file; the harvester reads one Lesson per file. Split into separate "
+                f"files via create_lesson.py, one invocation per finding"
+            )
+    return findings
+
+
+_LAYOUT_SCREEN_H1_RE = re.compile(r"^#\s+.+$", re.MULTILINE)
+
+
+def _detect_combined_layout_screen_file(root: Path) -> list[str]:
+    """Flag a docs/layout-system/*.md screen file containing more than one screen.
+
+    kotlin-multiplatform-layout-system requires one file per screen (`_components.md`
+    is the only shared exception). `create_wireframe.py` refuses to overwrite an
+    existing screen file, but a hand-edited file can still merge two screens together;
+    this catches that case via a simple signal — more than one H1 heading in the file.
+    """
+    findings: list[str] = []
+    layout_dir = root / "docs" / "layout-system"
+    if not layout_dir.is_dir():
+        return findings
+    for path in sorted(layout_dir.glob("*.md")):
+        if path.name == "_components.md":
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        count = len(_LAYOUT_SCREEN_H1_RE.findall(text))
+        if count > 1:
+            findings.append(
+                f"combined layout screen file [MEDIUM]: {path.relative_to(root)} — "
+                f"contains {count} top-level (`# `) headings, suggesting more than one "
+                f"screen was written into this file. One screen per file — run "
+                f"create_wireframe.py once per screen instead"
+            )
+    return findings
+
+
+_SQ_CREATE_TABLE_RE = re.compile(r"\bCREATE\s+TABLE\b", re.IGNORECASE)
+
+
+def _detect_combined_sqldelight_table_file(root: Path) -> list[str]:
+    """Flag a `.sq` file defining more than one table.
+
+    kotlin-multiplatform-sqldelight-setup's Common Anti-Patterns table says to keep
+    `.sq` files focused, one file per table — this is a real maintainability rule (query
+    files grow unbounded and become hard to navigate when tables are combined) with no
+    prior enforcement. Migration files and files with a single CREATE TABLE are fine.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.sq"):
+        if _is_excluded(path, root):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        count = len(_SQ_CREATE_TABLE_RE.findall(text))
+        if count > 1:
+            findings.append(
+                f"combined sqldelight table file [MEDIUM]: {path.relative_to(root)} — "
+                f"defines {count} tables (CREATE TABLE appears {count} times) in one "
+                f".sq file; keep .sq files focused, one file per table"
+            )
+    return findings
+
+
 # ── Design system prefix mismatch ─────────────────────────────────────────────
 # "App" in the design-system skill is a template placeholder (see Step 0) — real
 # projects must substitute their resolved COMPONENT_PREFIX when generating files, not
@@ -1960,6 +2060,11 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_toggle_icon_swap(root))
     findings.extend(_detect_bare_conditional_collapse(root))
     findings.extend(_detect_focused_state_animates_border_width(root))
+
+    # ── Combined "one file per X" violations ────────────────────────────────────
+    findings.extend(_detect_combined_lesson_file(root))
+    findings.extend(_detect_combined_layout_screen_file(root))
+    findings.extend(_detect_combined_sqldelight_table_file(root))
 
     # ── Design system prefix mismatch ──────────────────────────────────────────
     findings.extend(_detect_design_system_prefix_mismatch(root))

@@ -46,6 +46,9 @@ The script detects architectural and design smells:
 | `toggle icon swap instead of rotation` | Both icons of a known chevron pair (`KeyboardArrowDown`/`Up`, `ChevronDown`/`Up`, `ExpandMore`/`Less`, `ArrowDropDown`/`Up`) in one file with no `graphicsLayer { rotationZ }`/`Modifier.rotate()` — swapping icon composables on toggle can shift the trigger's own layout bounds if their intrinsic sizes differ |
 | `bare conditional collapse` | Collapsible content shown/hidden with a raw `if (isExpanded) { ... }` and no `AnimatedVisibility`/`.animateContentSize()` anywhere in the file — the instant layout snap reads as the trigger button moving |
 | `focused state animates border width` | A `focused {}`/`selected {}` Style block changes `borderWidth`/`borderBottomWidth` instead of only `borderColor` — re-measures the component on focus/selection; reserve the final width at rest and animate color only |
+| `combined lesson file` | A `docs/lessons/*.md` file contains more than one lesson (`## What we followed` appears more than once) — the harvester reads one Lesson per file; this breaks grouping and review |
+| `combined layout screen file` | A `docs/layout-system/*.md` file (other than `_components.md`) has more than one top-level heading — more than one screen was written into one file |
+| `combined sqldelight table file` | A `.sq` file defines more than one `CREATE TABLE` — keep `.sq` files focused, one file per table |
 | `design system prefix mismatch` | An `App*`-named declaration under `core/designsystem` while `docs/design-system.md` records a different resolved `COMPONENT_PREFIX` — the resolved prefix wasn't actually used when generating |
 | `empty platform source set` | An `androidMain`/`iosMain`/`jvmMain`/... source directory with no `.kt` files, or files containing only package/import/comments — dead scaffolding; Gradle compiles fine without it |
 
@@ -118,6 +121,9 @@ For every finding, load the relevant skill and give a concrete fix:
 | `toggle icon swap instead of rotation` | `design-system-extended` | Use one icon rotated via `Modifier.graphicsLayer { rotationZ = ... }` (driven by `animateFloatAsState`) instead of swapping between two icon composables — see `AppAccordion` |
 | `bare conditional collapse` | `compose-animation` | Wrap the conditional content in `AnimatedVisibility(expandVertically()/shrinkVertically())` or add `.animateContentSize()` to the containing layout |
 | `focused state animates border width` | `design-system` | Reserve the final border width at rest (`borderColor(Color.Transparent)` if none at rest) and animate only `borderColor` on focus/selection |
+| `combined lesson file` | `lessons` | Split into separate files via `create_lesson.py`, one invocation per finding |
+| `combined layout screen file` | `layout-system` | Split into separate files via `create_wireframe.py`, one invocation per screen |
+| `combined sqldelight table file` | `sqldelight-setup` | Split into one `.sq` file per table |
 | `design system prefix mismatch` | `design-system` | Regenerate the flagged file(s) with the resolved `COMPONENT_PREFIX` directly — don't hand-rename `App*` symbols after the fact |
 | `empty platform source set` | `feature-scaffold` | Delete the empty source directory, or implement the real `expect`/`actual` code if this module genuinely needs platform-specific logic — never scaffold the folder "just in case" |
 

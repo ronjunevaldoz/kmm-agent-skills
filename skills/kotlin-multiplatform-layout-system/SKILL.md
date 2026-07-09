@@ -15,7 +15,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-03'
+  last-updated: '2026-07-09'
   keywords:
     - layout system
     - wireframe
@@ -397,7 +397,7 @@ Use Pattern A (3-col) for tablet/desktop, Pattern B (2-col) when the side panel 
 - Using emoji inside the ASCII grid (breaks monospace alignment) — put emoji only in the Legend line
 - Letting `_components.md` drift from the actual Compose component names — it is a living registry, not a snapshot
 - Writing `docs/layout-system/` files that describe the current implementation rather than the intended design; the layout doc should lead the code, not follow it
-- Putting more than one screen in a single file, or appending a screen to another screen's file — run `create_wireframe.py` once per screen so each gets its own file
+- Putting more than one screen in a single file, or appending a screen to another screen's file — run `create_wireframe.py` once per screen so each gets its own file; caught in a consumer project by the audit's `combined layout screen file [MEDIUM]`
 
 ---
 
@@ -412,7 +412,9 @@ This skill produces markdown documentation, not runtime code. The validation equ
 - `_components.md` registry lists every component that appears in any screen file
 - Platform column (`Both` / `Android` / `iOS`) filled for every row
 
-Run `python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .` to catch line-limit and naming violations across the `docs/layout-system/` directory.
+Run `python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .` to catch line-limit and naming violations across the `docs/layout-system/` directory (this repo's own skill-authoring checks).
+
+In a **consumer** project, run `/kmm-run-audit` (`kotlin-multiplatform-audit/scripts/audit_project.py`) — its `combined layout screen file [MEDIUM]` detector flags any `docs/layout-system/*.md` file (other than `_components.md`) with more than one top-level heading, the backstop for a hand-edited file that merged two screens together.
 
 ---
 
@@ -445,6 +447,7 @@ Keep explanations short. The wireframe is the primary output — do not narrate 
 
 | Date | Change |
 |---|---|
+| 2026-07-09 | The one-screen-per-file rule was documented but had no enforcement beyond `create_wireframe.py` refusing to overwrite — a hand-edited file could still merge two screens together silently. New `kotlin-multiplatform-audit` detector `combined layout screen file [MEDIUM]` flags any `docs/layout-system/*.md` file (other than `_components.md`) with more than one top-level heading. |
 | 2026-07-03 | Added a repo-relative fallback path for generate_slot_scaffold.py — `~/.claude/skills/...` only resolves in a Claude Code install; Codex CLI and Gemini CLI installs need the `skills/...` relative path (see INSTALL.md). |
 | 2026-07-03 | Slot-grid contracts: create_wireframe.py now emits machine-readable frontmatter (slots/grid/weights per breakpoint); new generate_slot_scaffold.py compiles the contract into a <Screen>Layout.kt shell with slot lambdas — the agent fills content, never structure. Weights restricted to a closed fraction set, enforced by the raw weight literal audit smell. |
 | 2026-06-30 | Added create_wireframe.py — deterministic one-file-per-screen scaffolder (seeds section skeleton + pattern A/B/C/D block, bootstraps _components.md once, never overwrites). Hardened the one-screen-per-file rule; new anti-pattern against multi-screen files. |

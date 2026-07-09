@@ -12,7 +12,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-30'
+  last-updated: '2026-07-09'
   keywords:
     - lessons learned
     - skill feedback
@@ -272,7 +272,7 @@ If you are unsure whether a finding warrants a lesson: if it took more than one 
 - Using vague titles like `fix` or `update` — the title is the primary search key; make it specific enough to find without reading the body
 - Filing a lesson for a one-off project quirk rather than a repeatable pattern — lessons are only useful if the finding could recur in another project
 - Skipping `evidence` — without a file path or line reference, the lesson cannot be verified or acted on by the harvester
-- Combining multiple findings into one file, or appending a new lesson to an existing file — the harvester reads one Lesson per file, so this breaks grouping and review. Run `create_lesson.py` once per finding instead
+- Combining multiple findings into one file, or appending a new lesson to an existing file — the harvester reads one Lesson per file, so this breaks grouping and review. Run `create_lesson.py` once per finding instead — caught by the audit's `combined lesson file [HIGH]` if it happens anyway (e.g. a hand-written or merged file)
 
 ---
 
@@ -291,6 +291,11 @@ Lessons are structured markdown files, not code. Validation is structural:
 Using `create_lesson.py` guarantees the frontmatter, section skeleton, naming, and the
 one-file-per-lesson rule. Run the harvester to confirm a batch parses:
 `python3 ~/.claude/skills/kotlin-multiplatform-skill-harvester/scripts/harvest_lessons.py .`
+
+`kotlin-multiplatform-audit`'s `combined lesson file [HIGH]` detector is the backstop
+for a lesson file that bypassed the script (hand-written, merged, or copy-pasted) —
+it flags any `docs/lessons/*.md` file containing more than one `## What we followed`
+section. Run `/kmm-run-audit` to catch this on an existing project.
 
 ---
 
@@ -313,5 +318,6 @@ When writing a lesson, respond with the complete lesson file content — no surr
 
 | Date | Change |
 |---|---|
+| 2026-07-09 | The one-lesson-per-file rule was documented but had no enforcement beyond `create_lesson.py` refusing to overwrite — a hand-written or merged file could still violate it silently. New `kotlin-multiplatform-audit` detector `combined lesson file [HIGH]` flags any `docs/lessons/*.md` file with more than one `## What we followed` section. |
 | 2026-06-30 | Added create_lesson.py — deterministic one-file-per-finding creator (auto date/slug, never appends or overwrites) + lesson-template.md. Hardened the one-lesson-per-file rule, fixed the Testing section to match the real frontmatter schema, new anti-pattern against combined/appended lesson files. |
 | 2026-06-26 | Initial release — lesson format, field reference, examples, directory convention. |

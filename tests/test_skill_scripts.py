@@ -1227,6 +1227,99 @@ class FocusedStateBorderWidthTests(unittest.TestCase):
             self.assertFalse(any("focused state animates border width" in f for f in findings))
 
 
+class CombinedOneFilePerXTests(unittest.TestCase):
+    _LESSON_FRONTMATTER = (
+        "---\nskill: kotlin-multiplatform-mvi\ndate: 2026-06-20\n"
+        "severity: high\ntype: correction\n---\n\n"
+    )
+
+    def test_flags_combined_lesson_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "docs" / "lessons"
+            d.mkdir(parents=True)
+            (d / "bad.md").write_text(
+                self._LESSON_FRONTMATTER
+                + "## What we followed\nA\n\n## What broke / what we discovered\nB\n\n"
+                + "## What we followed\nC\n\n## What broke / what we discovered\nD\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("combined lesson file" in f for f in findings))
+
+    def test_ignores_single_lesson_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "docs" / "lessons"
+            d.mkdir(parents=True)
+            (d / "good.md").write_text(
+                self._LESSON_FRONTMATTER
+                + "## What we followed\nA\n\n## What broke / what we discovered\nB\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined lesson file" in f for f in findings))
+
+    def test_flags_combined_layout_screen_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "docs" / "layout-system"
+            d.mkdir(parents=True)
+            (d / "bad-screen.md").write_text(
+                "# Inbox\n\n## Components\n\n# Contacts\n\n## Components\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("combined layout screen file" in f for f in findings))
+
+    def test_ignores_single_screen_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "docs" / "layout-system"
+            d.mkdir(parents=True)
+            (d / "good-screen.md").write_text(
+                "# Inbox\n\n## Components\n\n## Variant A\n\nwireframe here\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined layout screen file" in f for f in findings))
+
+    def test_ignores_components_registry_with_multiple_headings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "docs" / "layout-system"
+            d.mkdir(parents=True)
+            (d / "_components.md").write_text(
+                "# Component Registry\n\n# Another Section\n", encoding="utf-8"
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined layout screen file" in f for f in findings))
+
+    def test_flags_combined_sqldelight_table_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "db"
+            d.mkdir(parents=True)
+            (d / "Combined.sq").write_text(
+                "CREATE TABLE user (\n    id INTEGER PRIMARY KEY\n);\n\n"
+                "CREATE TABLE post (\n    id INTEGER PRIMARY KEY\n);\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("combined sqldelight table file" in f for f in findings))
+
+    def test_ignores_single_table_sq_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "db"
+            d.mkdir(parents=True)
+            (d / "User.sq").write_text(
+                "CREATE TABLE user (\n    id INTEGER PRIMARY KEY\n);\n", encoding="utf-8"
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined sqldelight table file" in f for f in findings))
+
+
 class ToggleLayoutStabilityTests(unittest.TestCase):
     def _write(self, root: Path, filename: str, content: str) -> None:
         d = root / "src" / "commonMain" / "kotlin" / "ui"
