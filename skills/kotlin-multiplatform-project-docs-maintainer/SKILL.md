@@ -91,33 +91,47 @@ Update the diagram whenever a module, boundary, or release flow changes.
 ### Default Docs Topology
 
 If a downstream project does not already have a clear docs layout, use this structure as
-the default:
+the default. Keep the top-level docs visible, then branch active work into purpose-built
+folders:
 
 ```text
 docs/
 ├── tasks.md
-├── tasks/
-│   ├── YYYY-MM-DD-phase-1.md
-│   ├── YYYY-MM-DD-phase-2.md
-│   ├── YYYY-MM-DD-task-log.md
-│   └── archive/
-│       └── YYYY/
 ├── roadmap.md
 ├── architecture.md
 ├── deployment.md
-└── reference/
+├── reference/
+├── mvp/
+│   └── 0-mvp/
+│       ├── 0-mvp.md
+│       └── 0-phase/
+│           ├── 0-phase.md
+│           └── tasks/
+│               ├── 0-task.md
+│               └── 1-task.md
+└── bugs/
+    └── 0-bug.md
 ```
 
 Use it like this:
 - `docs/tasks.md` — single source of truth for current work, active decisions, and links
-  into dated task/phasing notes
-- `docs/tasks/` — dated task and phase records when work history gets too dense for one file
-- `docs/tasks/archive/` — completed task and phase histories that should stay searchable
-  but no longer belong in the active work index
+  into active plan or bug lanes
 - `docs/roadmap.md` — consolidated planning, including integration and project planning
 - `docs/architecture.md` — system design, kept as the stable long-form architecture doc
 - `docs/deployment.md` — consolidated deployment and publishing flow
 - `docs/reference/` — searchable technical audits, model setup notes, and deep references
+- `docs/mvp/` — structured MVP planning records, phase notes, and task breakdowns
+- `docs/bugs/` — active bug threads; start with one file (`0-bug.md`) and add a folder only
+  if the bug lane needs multiple files
+
+Use the active lanes like this:
+- `docs/mvp/0-mvp/0-mvp.md` — the current MVP summary
+- `docs/mvp/0-mvp/0-phase/0-phase.md` — the current phase plan
+- `docs/mvp/0-mvp/0-phase/tasks/0-task.md` and `1-task.md` — individual task notes
+- `docs/bugs/0-bug.md` — the active bug note for a single tracked issue
+
+If the project needs chronological task history as well, keep `docs/tasks/` as the
+archive lane for dated phase notes and pointers, but do not force every active doc there.
 
 ### Fix Maturity Lanes
 
@@ -140,6 +154,10 @@ Rules:
 - treat the layout as agile-friendly: backlog/current work lives in `docs/tasks.md`, execution
   history lives in dated task notes, and stable decisions graduate into architecture/docs
 - put detailed phase history, approvals, and dated execution notes in `docs/tasks/`
+- use `docs/mvp/` for the numbered MVP/phase/task tree when the project wants a visible
+  planning hierarchy instead of flat task notes
+- use `docs/bugs/0-bug.md` for a single active bug thread; only create `docs/bugs/0-bug/`
+  when that bug needs multiple related files
 - when a phase or task is complete, move its dated note into `docs/tasks/archive/` and keep
   a short index line or backlink in `docs/tasks.md`
 - use date-stamped filenames in the archive (`YYYY-MM-DD-...`) so old work remains sortable
@@ -178,6 +196,11 @@ Keep the docs narrow and accurate:
 - prefer one canonical description over repeated paraphrases
 - update examples to match the current repo shape
 - remove references to deleted files, commands, or options
+- if the user asks to "write a doc in docs", classify it first:
+  - durable project guidance → `docs/architecture.md`, `docs/deployment.md`, or `docs/reference/`
+  - current planning / MVP work → `docs/tasks.md` or `docs/mvp/0-mvp/0-phase/`
+  - active bug tracking → `docs/bugs/0-bug.md` (or a `docs/bugs/0-bug/` folder only if the bug lane needs multiple files)
+  - if the path is ambiguous, choose the narrowest durable home and explain the placement
 
 ### 2a) Use the default task template
 

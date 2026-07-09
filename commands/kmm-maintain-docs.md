@@ -20,6 +20,9 @@ If the requested work is consumer release notes or per-skill changelog tables, h
 to `agents/changelog.md` instead.
 If the requested work is a downstream project's README or `docs/reference*` pages,
 hand off to `kotlin-multiplatform-project-docs-maintainer`.
+If the requested work is organizing active planning docs or bug lanes, still use
+`kotlin-multiplatform-project-docs-maintainer` and follow its `docs/mvp/` and
+single-file `docs/bugs/0-bug.md` rule unless the bug lane needs multiple files.
 If the requested work is `SKILL.md` routing, freshness, or skill-map maintenance,
 use `agents/docs-maintainer.md` directly; there is no separate consumer skill for it.
 If the requested work changes the README skill map or architecture diagram, keep the

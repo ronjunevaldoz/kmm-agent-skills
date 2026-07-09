@@ -95,6 +95,32 @@ When more than one skill could apply, rank them instead of enabling everything.
 
 Load the earliest tier that answers the request, then add lower tiers only when the task genuinely needs them.
 
+## Model Routing
+
+Route subagents by work type, not by habit.
+
+Use the strongest available reasoning model for:
+- ambiguous planning
+- complex architecture decisions
+- performance investigations
+- benchmark-topping work
+- root-cause analysis on hard failures
+- final review of claims, numbers, and tradeoffs
+
+Use a cheaper or faster model for:
+- mechanical implementation after the plan is clear
+- repetitive file generation
+- straightforward wiring
+- bulk edits with no design decision
+
+Use a precision-focused strong model for:
+- validation
+- review
+- anything where an incorrect conclusion would be expensive to unwind
+
+If a task is both complex and high-impact, escalate the planning and review stages first;
+keep the implementation stage on the smallest model that can still follow the plan cleanly.
+
 ---
 
 ## Required vs Optional Skills

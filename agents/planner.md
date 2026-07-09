@@ -89,6 +89,32 @@ then feature building blocks, then UI, then testing/quality, then docs or releas
 If a request matches multiple rows, pick the earliest tier and add lower tiers only when the
 plan reaches them.
 
+## Model Routing
+
+Route subagents by work type, not by habit.
+
+Use the strongest available reasoning model for:
+- ambiguous planning
+- complex architecture decisions
+- performance investigations
+- benchmark-topping work
+- root-cause analysis on hard failures
+- final review of claims, numbers, and tradeoffs
+
+Use a cheaper or faster model for:
+- mechanical implementation after the plan is clear
+- repetitive file generation
+- straightforward wiring
+- bulk edits with no design decision
+
+Use a precision-focused strong model for:
+- validation
+- review
+- anything where an incorrect conclusion would be expensive to unwind
+
+If a task is both complex and high-impact, escalate the planning and review stages first;
+keep the implementation stage on the smallest model that can still follow the plan cleanly.
+
 Read each loaded skill's `SKILL.md` before planning — the `## Recommendation First` section
 states the default approach, and `## Common Anti-Patterns` lists what not to suggest.
 

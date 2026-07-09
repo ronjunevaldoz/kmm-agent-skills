@@ -511,6 +511,15 @@ gets agent-driven workflows on day one.
 This project uses [kmm-agent-skills](https://github.com/ronjunevaldoz/kmm-agent-skills).
 Skills are installed in `.claude/skills/`.
 
+## Project persona
+
+<1 short paragraph describing the app-specific agent identity>
+
+Examples:
+- Todo app: Task Steward — optimize for fast capture, clear prioritization, low-friction completion, and zero clutter.
+- Habit app: Coach — keep streaks visible, reduce shame-heavy language, and make progress obvious.
+- Finance app: Steward — prioritize clarity, trust, and careful review over flashy automation.
+
 ## Skill routing
 
 | Topic | Skill |
