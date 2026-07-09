@@ -232,66 +232,37 @@ libraries:
 
 ## Comment & KDoc Conventions
 
-**The rule:** `/** ... */` (KDoc) documents the **public API surface** — what a public
-class/function/property does, its contract, `@param`/`@return`/`@throws`/`@see`. `//` is
-for **internal implementation notes** — the WHY behind a non-obvious piece of code, never
-a restatement of WHAT the code does (well-named code already says that).
+Two comment types, two jobs — never mix them:
 
-| Situation | Use | Notes |
+| | Single-line `//` | Multi-line `/** ... */` (KDoc) |
 |---|---|---|
-| Public class/function/property contract | KDoc `/** ... */` | Picked up by Dokka and IDE quick-docs; `//` is invisible to both |
-| Internal WHY note (a workaround, a non-obvious constraint) | `//` | Never document WHAT — that's what good naming is for |
-| A private member needs a comment to explain what it does | Neither — **rename it** | If a private function's behavior isn't obvious from its name, the fix is a better name, not a comment. Detekt's `DocumentationOverPrivateFunction`/`DocumentationOverPrivateProperty` flag this directly |
-| Nested comments | Block comments (`/* */`) nest in Kotlin, unlike Java/C | `/* outer /* inner */ still open */` is valid. KDoc (`/** */`) does **not** nest |
+| Documents | Internal WHY — a workaround, a non-obvious constraint | Public API contract — `@param`/`@return`/`@throws`/`@sample` |
+| Never used for | Restating WHAT the code does (good naming covers that) | Private members — rename instead (Detekt's `DocumentationOverPrivateFunction`/`Property` flags this) |
+| Visible to | Nobody outside the source file | Dokka + IDE quick-docs |
+| Grows past ~4 lines? | Split: keep the one-sentence WHY inline, move the rest to `docs/reference/` with a pointer comment (see below) | N/A — KDoc doesn't accumulate this way; if a class needs paragraphs, that's what `docs/reference/` is for too |
+| Nests? | N/A | KDoc does **not** nest. Plain block comments (`/* */`) do, unlike Java/C |
 
-### Real bug this exact mistake caused
+### Two real mistakes this caught
 
-A `//` line comment placed inside a function call's argument list consumes everything
-after it on that physical line — including a needed closing `)`/`{`. This shipped in
-`kotlin-multiplatform-imagevector-generator`'s own codegen until a test caught it:
+**A `//` on the same line as code can swallow what follows it** — it runs to end-of-line,
+including a needed closing `)`/`{`. Shipped in `kotlin-multiplatform-imagevector-generator`'s
+own codegen until a test caught it:
 
 ```kotlin
 // ❌ WRONG — the // comments out the rest of the line, including `) {`
-path(fill = SolidColor(Color.Black)  // color-agnostic — tint at the call site) {
+path(fill = SolidColor(Color.Black)  // tint at call site) {
 
 // ✅ CORRECT — the call is syntactically complete before the comment starts
-path(fill = SolidColor(Color.Black)) {  // color-agnostic — tint at the call site
+path(fill = SolidColor(Color.Black)) {  // tint at call site
 ```
 
-### Code comment vs. development notes
-
-A long WHY comment is a sign the explanation has two different audiences, and both are
-being crammed into one place. Split them:
-
-- **Inline code comment** — stays in the file, kept to whatever's needed to pass one
-  test: **does this line answer a question someone would ask before deleting or
-  "simplifying" this code?** If yes, it survives. If it's mechanism detail, alternatives
-  you already rejected, or exact version numbers that only matter during a future
-  upgrade, it doesn't pass that test — it's not preventing anyone from breaking anything
-  today.
-- **Development notes** — the exhaustive rationale that doesn't pass that test goes in
-  `docs/reference/` (see `kotlin-multiplatform-project-docs-maintainer` — this is exactly
-  the "searchable technical audits, deep references" lane it already defines), with a
-  one-line pointer left in the code comment.
+**A `//` block that keeps growing is a sign two audiences got merged into one comment.**
+Keep only the sentence that answers "why would someone break this by simplifying it?" —
+move everything else (mechanism detail, rejected alternatives, exact version numbers) to
+`docs/reference/` (the lane `kotlin-multiplatform-project-docs-maintainer` already
+defines for deep references), with a one-line pointer left behind:
 
 ```kotlin
-// ❌ Everything crammed inline — 9 lines to justify one includeBuild() call
-// Not part of the stable module graph above: pinned to a pre-release Compose
-// Multiplatform version (1.12.0-beta01) for androidx.compose.foundation.style's real
-// Style/StyleScope/StyleState API (@ExperimentalFoundationStyleApi, not yet in the
-// 1.11.1 stable line this project otherwise targets) -- see
-// tailwind/style-experimental/build.gradle.kts. A regular `include()` subproject can't
-// do this: the root's `apply false` on org.jetbrains.compose locks that plugin ID to
-// 1.11.1 build-wide, and a subproject requesting a different version of the same
-// plugin ID fails to resolve. `includeBuild` (a real composite build, its own
-// settings.gradle.kts/plugin classpath) is the only way to get genuine version
-// isolation while still consuming tailwind-core's source directly via dependency
-// substitution.
-includeBuild("tailwind/style-experimental")
-
-// ✅ Inline comment answers "why not include()?" and "why a different version?" —
-// the two questions that would make someone try to "clean this up." Everything else
-// (exact API names, dependency-substitution mechanics) moves to docs/reference/.
 // Composite build (not include()): root's apply false on org.jetbrains.compose locks
 // that plugin ID to 1.11.1 build-wide. This module needs 1.12.0-beta01 for an
 // experimental Compose Foundation Style API not available in the stable line.
@@ -299,9 +270,35 @@ includeBuild("tailwind/style-experimental")
 includeBuild("tailwind/style-experimental")
 ```
 
-### Detekt enforcement
+### KDoc: code definition, params, samples
 
-Add to `detekt.yml`:
+| Tag | Purpose |
+|---|---|
+| `@param` | One parameter's role — skip if the name alone makes it obvious |
+| `@return` | What the return value represents — skip for `Unit` |
+| `@throws` | A failure mode that's part of the contract, not every possible exception |
+| `@see` | Cross-reference to a related declaration |
+| `@sample` | Points at an actual, compiled function elsewhere as the usage example |
+| `@property` / `@receiver` / `@constructor` | Constructor property / extension receiver / primary constructor, documented separately from the class summary |
+| `@suppress` | Hides a technically-public declaration from generated docs |
+
+**An example is warranted only when usage isn't obvious from the signature** (a builder, a
+DSL) — never required per function or per file, same "why not what" rule as `//`. When one
+is warranted, use `@sample`, not a pasted code block: it points at a real compiled
+function, so it's type-checked and can't silently drift stale.
+
+```kotlin
+/**
+ * Builds a [Result] pipeline that retries on transient failures.
+ * @sample GROUP_ID.samples.retryPipelineSample
+ */
+fun <T> retryPipeline(times: Int, block: suspend () -> T): Flow<T> { ... }
+```
+
+Module/package-level docs (describing a whole module, not one declaration) are a separate
+Dokka mechanism — `Module.md`/`Package.md` — not a KDoc tag.
+
+### Detekt enforcement
 
 ```yaml
 comments:
@@ -319,69 +316,17 @@ comments:
     active: true
 ```
 
-`UndocumentedPublic*` forces KDoc onto every public declaration; `DocumentationOverPrivate*`
-forces the opposite — no KDoc on private members, since if one is needed the name is the
-real problem. `OutdatedDocumentation` catches KDoc whose `@param`/signature no longer
-matches the actual declaration after a refactor.
-
-### KDoc tag reference
-
-| Tag | On | Purpose |
-|---|---|---|
-| `@param` | function/constructor | Describes one parameter — required if the name alone doesn't make its role obvious |
-| `@return` | function | What the return value represents (skip for `Unit`) |
-| `@throws` / `@exception` | function | A checked failure mode the caller must handle — not every possible exception, just the ones that are part of the contract |
-| `@see` | any | Cross-reference to a related declaration |
-| `@sample` | function | Points at an actual, compiled function elsewhere as the usage example — see below |
-| `@property` | class (constructor-declared properties) | Documents a primary-constructor `val`/`var` from the class-level KDoc |
-| `@receiver` | extension function | Documents the receiver type's role in the extension |
-| `@constructor` | class | Documents the primary constructor specifically, separate from the class-level summary |
-| `@suppress` | any | Excludes a technically-public declaration from generated docs (e.g. an internal-use-only public API) |
-
-### `@sample` — the correct way to attach an example, not a required one per function
-
-**Don't require an example for every function or every file.** That contradicts the same
-"why not what" principle as comments generally — an example only earns its place when a
-public API's usage genuinely isn't obvious from its signature (a builder, a DSL, a
-function with a non-obvious multi-step call pattern). A plain getter or a one-line
-utility doesn't need one.
-
-When an example is warranted, use `@sample` instead of a raw code block pasted into the
-KDoc — `@sample` references an **actual, compiled function** elsewhere in the codebase
-(typically under `src/*/kotlin/samples/`), so it's type-checked and breaks the build if
-it goes stale. A hand-written code block in a comment can drift from the real API
-silently; `@sample` can't.
-
-```kotlin
-/**
- * Builds a [Result] pipeline that retries on transient failures.
- *
- * @sample GROUP_ID.samples.retryPipelineSample
- */
-fun <T> retryPipeline(times: Int, block: suspend () -> T): Flow<T> { ... }
-
-// src/commonTest/kotlin/GROUP_ID/samples/RetrySamples.kt (or a dedicated samples source set)
-private fun retryPipelineSample() {
-    retryPipeline(times = 3) { fetchUser() }
-}
-```
-
-Module- and package-level documentation (describing what an entire module or package is
-for, not a single declaration) is a separate Dokka mechanism — a `Module.md`/`Package.md`
-file referenced from the Dokka Gradle config — not a KDoc tag.
+`UndocumentedPublic*` requires KDoc on every public declaration; `DocumentationOverPrivate*`
+forbids it on private ones; `OutdatedDocumentation` catches KDoc whose `@param`/signature
+no longer matches the declaration after a refactor.
 
 ### License headers — situational, not a default
 
-Per-file license header comments (an Apache-2.0 boilerplate block at the top of every
-`.kt` file) were standard in the AOSP/Apache-Software-Foundation era and are still real
-practice for **libraries redistributed externally** — Detekt even ships a rule for it,
-`AbsentOrWrongFileLicense` (disabled by default). For a typical **app** codebase, skip
-it: it's redundant with the root `LICENSE` file, and it's a maintenance burden (author/year
-drift) with no legal upside for code that isn't independently redistributed per file.
-
-Add it only when publishing a library — see
-`kotlin-multiplatform-library-publishing`'s "Per-file license headers" for the Detekt
-rule config and license-header template.
+Per-file license headers were standard in the AOSP/Apache-Software-Foundation era and are
+still worth it for **libraries redistributed externally** (Detekt ships
+`AbsentOrWrongFileLicense`, off by default). Skip them for app code — redundant with the
+root `LICENSE` file. See `kotlin-multiplatform-library-publishing`'s "Per-file license
+headers" for the rule config and template.
 
 ---
 
@@ -464,6 +409,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-09 | Restructured "Comment & KDoc Conventions" around an explicit single-line (`//`) vs multi-line (KDoc `/** */`) split — a single decision table up front instead of scattered prose, so the rule is unambiguous for any agent to follow. Trimmed ~55 net lines (7 subsections → 5) while keeping every rule, both real-bug examples, the KDoc tag table, and the license-header note. |
 | 2026-07-09 | Added a "Code comment vs. development notes" split, from a real 9-line inline comment that crammed a build-topology explanation, rejected alternatives, and exact version numbers into one `includeBuild()` call site. Rule: an inline comment survives only if it answers a question that would make someone break the code by "simplifying" it; the exhaustive rationale moves to `docs/reference/` (per `kotlin-multiplatform-project-docs-maintainer`'s existing convention) with a one-line pointer left in the comment. Before/after example, 1 new anti-pattern, 2 new Related Skills cross-references. |
 | 2026-07-09 | Extended the "Comment & KDoc Conventions" section: a full KDoc tag reference (`@param`/`@return`/`@throws`/`@see`/`@sample`/`@property`/`@receiver`/`@constructor`/`@suppress`), guidance that an example is warranted only for non-obvious public API (never required per function/file — same "why not what" principle), `@sample`'s advantage over a raw code block (references an actual compiled function, can't silently drift stale), and a "License headers" note (situational, not a default — cross-referenced to `kotlin-multiplatform-library-publishing`). |
 | 2026-07-08 | Added a "Comment & KDoc Conventions" section — KDoc for public API contracts, `//` for internal WHY notes, private members should be renamed rather than commented (backed by Detekt's `DocumentationOverPrivateFunction`/`DocumentationOverPrivateProperty`), and a real bug example (a `//` comment inside a function call's argument list silently commenting out the rest of the line, which actually shipped in `kotlin-multiplatform-imagevector-generator`'s codegen). New `comments:` Detekt rule block and 3 anti-patterns. |
