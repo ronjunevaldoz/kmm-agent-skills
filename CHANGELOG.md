@@ -2,6 +2,15 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.55.3] — 2026-07-09
+
+### Docs
+
+- docs(code-quality): add KDoc tag reference, license headers, comment/notes split
+- docs(shared-resources): add px/dp density-bucket conversion reference
+
+---
+
 ## [v1.55.2] — 2026-07-08
 
 ### Docs

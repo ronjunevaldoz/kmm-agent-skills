@@ -1,5 +1,5 @@
 {
-  "version": "1.55.2",
+  "version": "1.55.3",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -387,7 +387,7 @@
       "path": "skills/kotlin-multiplatform-code-quality",
       "description": "Sets up Ktlint (formatting) and Detekt (code smells + architecture rules) for a KMP project. Both run as CI gates. Ktlint is near-zero config. Detekt architecture rules enforce the 6-layer module boundary contract from kotlin-multiplatform-clean-architecture.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-08",
+      "last_updated": "2026-07-09",
       "keywords": [
         "Ktlint",
         "Detekt",
@@ -1725,7 +1725,7 @@
       "path": "skills/kotlin-multiplatform-library-publishing",
       "description": "Publish a Kotlin Multiplatform library to Maven Central, GitHub Packages, or both. Covers: vanniktech maven-publish plugin setup, POM metadata, Sonatype OSSRH staging, multi-artifact BOM, kotlinx-binary-compatibility-validator API tracking, SNAPSHOT vs stable channels, and a release checklist. Pairs with kotlin-multiplatform-xcframework-spm for iOS/SPM distribution.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-29",
+      "last_updated": "2026-07-09",
       "keywords": [
         "maven central",
         "maven publish",
@@ -1754,7 +1754,10 @@
         "library consumers",
         "multiplatform library",
         "publish to maven",
-        "open source library"
+        "open source library",
+        "license header",
+        "AbsentOrWrongFileLicense",
+        "file license"
       ],
       "triggers": [
         "publish KMP library",
@@ -1786,7 +1789,11 @@
         "open source KMP",
         "library versioning",
         "staging repository",
-        "Central Portal"
+        "Central Portal",
+        "license header",
+        "file license header",
+        "AbsentOrWrongFileLicense",
+        "per-file license"
       ],
       "scripts": []
     },
@@ -2638,7 +2645,7 @@
       "path": "skills/kotlin-multiplatform-shared-resources",
       "description": "Sets up Compose Multiplatform Resources (compose-resources) for sharing strings, plurals, images, fonts, and raw files across all KMP targets (Android, iOS, Desktop, Web). Covers: resource directory structure, string localization, plurals, image assets, custom fonts, accessing resources from Composables and non-Composable code, and resource module setup. Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-25",
+      "last_updated": "2026-07-08",
       "keywords": [
         "Compose Resources",
         "KMP resources",
@@ -2648,7 +2655,17 @@
         "images",
         "Kotlin Multiplatform",
         "Compose Multiplatform",
-        "plurals"
+        "plurals",
+        "px to dp",
+        "dp to px",
+        "density bucket",
+        "mdpi",
+        "hdpi",
+        "xhdpi",
+        "xxhdpi",
+        "xxxhdpi",
+        "density scale factor",
+        "density-independent pixels"
       ],
       "triggers": [
         "shared resources",
