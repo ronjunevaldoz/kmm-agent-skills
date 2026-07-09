@@ -189,6 +189,26 @@ bash kmm-agent-skills/scripts/update-consumer-skills.sh \
   --setup-agents
 ```
 
+### Keeping local assistants in sync on this Mac
+
+If you use Claude, Codex, or Gemini on this Mac and want all three to read the same
+released skill set, run:
+
+```bash
+bash kmm-agent-skills/scripts/sync-local-assistant-skills.sh
+```
+
+This updates:
+
+- `~/.claude/skills`
+- `~/.codex/skills`
+- `~/.gemini/skills`
+
+It does not copy slash commands.
+
+If you also want to refresh the local Claude / Codex / Gemini installs on this Mac,
+run the repo-maintenance command `/kmm-sync-local-skills` from the kmm-agent-skills repo.
+
 ---
 
 ## OpenAI Codex CLI

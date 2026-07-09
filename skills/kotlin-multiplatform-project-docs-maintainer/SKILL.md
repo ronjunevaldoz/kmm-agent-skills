@@ -277,6 +277,7 @@ Use this validation matrix for project docs:
 | `docs/reference*` updates | Links resolve and match the code or configuration it documents |
 | Onboarding docs change | The setup steps match the current project workflow |
 | Release/setup docs change | Version numbers, paths, and commands reflect the current repo |
+| Benchmark or performance comparison tables | Write the canonical table in `docs/reference/benchmark-matrix.md` (or the nearest durable `docs/reference/` page), and keep task-note summaries short with a link back |
 
 ## Doc Classification and Hygiene
 

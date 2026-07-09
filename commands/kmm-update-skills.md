@@ -59,6 +59,10 @@ bash .claude/skills/scripts/update-consumer-skills.sh \
 
 Only run this step if the user explicitly asks to update commands.
 
+## Related
+
+If you want to refresh the local assistant bundles on this Mac too, use `/kmm-sync-local-skills`.
+
 ---
 
 ## Step 4 — Report to user

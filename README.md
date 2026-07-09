@@ -220,6 +220,7 @@ All commands are `kmm-` prefixed so they don't collide with your own `.claude/co
 | `/kmm-maintain-docs [scope]` | Reconcile repo docs and routing text |
 | `/kmm-release-notes` | Draft release notes for a version bump |
 | `/kmm-setup-hooks` | Install git hooks for architecture hygiene |
+| `/kmm-sync-local-skills` | Sync this repo release into local Claude / Codex / Gemini skill bundles on this Mac |
 
 ---
 
