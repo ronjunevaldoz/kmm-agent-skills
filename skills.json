@@ -1,5 +1,5 @@
 {
-  "version": "1.55.3",
+  "version": "1.56.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1626,7 +1626,7 @@
       "path": "skills/kotlin-multiplatform-layout-system",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-03",
+      "last_updated": "2026-07-09",
       "keywords": [
         "layout system",
         "wireframe",
@@ -1691,7 +1691,7 @@
       "path": "skills/kotlin-multiplatform-lessons",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-30",
+      "last_updated": "2026-07-09",
       "keywords": [
         "lessons learned",
         "skill feedback",
@@ -2734,7 +2734,7 @@
       "path": "skills/kotlin-multiplatform-sqldelight-setup",
       "description": "Sets up SQLDelight 2 in a Kotlin Multiplatform project. Covers: Gradle plugin configuration, schema (.sq) files, migrations, type adapters, platform-specific drivers via expect/actual (Android, iOS, Desktop/JVM, Web/JS), coroutines Flow queries, and Koin wiring inside :core:database. Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-07-09",
       "keywords": [
         "SQLDelight 2",
         "KMP database",

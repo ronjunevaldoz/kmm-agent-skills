@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.56.0] — 2026-07-09
+
+### Added
+
+- feat(audit): enforce one-file-per-X rules with 3 new detectors
+
+### Other
+
+- refactor(code-quality): simplify comment conventions; wire into reviewer
+
+---
+
 ## [v1.55.3] — 2026-07-09
 
 ### Docs
