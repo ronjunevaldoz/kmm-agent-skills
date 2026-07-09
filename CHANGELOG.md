@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.57.2] — 2026-07-10
+
+### Docs
+
+- docs: add local skill sync and benchmark guidance
+
+---
+
 ## [v1.57.1] — 2026-07-10
 
 ### Docs
