@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.56.1] — 2026-07-09
+
+### Docs
+
+- docs: refine kmm project bootstrap and guidance
+
+---
+
 ## [v1.56.0] — 2026-07-09
 
 ### Added

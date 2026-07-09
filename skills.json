@@ -1,5 +1,5 @@
 {
-  "version": "1.56.0",
+  "version": "1.56.1",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -737,7 +737,7 @@
       "path": "skills/kotlin-multiplatform-dependency-injection",
       "description": "KMP dependency injection with Koin \u2014 recommend manual modules first, then annotated mode when less wiring is preferred. Covers app/feature scope boundaries, constructor injection, module organization, platform startup, test overrides, and the anti-patterns that hide architecture problems behind DI. Use this when deciding how to wire KMP dependencies instead of repeating Koin setup across other skills.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-13",
+      "last_updated": "2026-07-09",
       "keywords": [
         "dependency injection",
         "DI",
@@ -1169,7 +1169,7 @@
       "path": "skills/kotlin-multiplatform-feature-scaffold",
       "description": "Scaffolds a production-ready Kotlin Multiplatform (KMP) multi-feature module architecture. Creates a full project by generating from the official Kotlin/kmp-wizard AGP 9 baseline, usually the `all-targets` branch for Android, iOS, Web, Desktop, and Server, or adds a new feature module group (:model/:api/:domain/:data/:presenter/:ui) to an existing KMP project. Uses AGP 9+, build-logic convention plugins, a TOML version catalog (`gradle/libs.versions.toml`), Compose Multiplatform, and Koin 4 (annotated or manual DI).",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-05",
+      "last_updated": "2026-07-09",
       "keywords": [
         "Kotlin Multiplatform",
         "KMP",
@@ -1916,7 +1916,7 @@
       "path": "skills/kotlin-multiplatform-mvi",
       "description": "MVI (Model-View-Intent) architecture pattern for Kotlin Multiplatform + Compose Multiplatform. Covers: the Contract pattern (State/Intent/Effect per screen), MviViewModel base class with StateFlow for state and Channel for one-shot effects, atomic state updates, Compose screen/content split, testing ViewModels with Turbine, and the most common MVI pitfalls in KMP. Zero new dependencies \u2014 builds on androidx.lifecycle.ViewModel and kotlinx.coroutines already present in feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-29",
+      "last_updated": "2026-07-09",
       "keywords": [
         "MVI",
         "Model-View-Intent",
