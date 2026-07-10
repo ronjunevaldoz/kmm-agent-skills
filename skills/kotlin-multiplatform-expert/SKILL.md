@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-25'
+  last-updated: '2026-07-10'
   keywords:
     - KMP expert
     - orchestrator
@@ -509,6 +509,39 @@ Composable screen                → lives in :feature:x:ui/
 The rule: data flows **inward** through mappers. DTOs and entities never cross the `:data`
 boundary. Domain types (in `:model`) are the lingua franca across `:api`, `:domain`, and `:presenter`.
 
+### "Improve the performance of X" — where do I even look?
+
+There is no single performance skill — routing depends entirely on what X names.
+Never guess at a target; if X is unnamed or app-wide ("the app feels slow"), ask the
+user to narrow it to one of the branches below before picking a skill.
+
+```
+What is X?
+├── A specific composable re-rendering too often / UI feels janky?
+│   → kotlin-multiplatform-compose-state-container (wrong container, e.g. ViewModel
+│     for ephemeral state) or kotlin-multiplatform-compose-state-hoisting (state
+│     buried too deep, forcing a wide recomposition scope)
+├── Custom drawing (Canvas, graphicsLayer, drawBehind) is slow?
+│   → kotlin-multiplatform-graphics-modifiers
+├── A JNI/native bridge call?
+│   → kotlin-multiplatform-jni-pro (minimize boundary crossings, batch marshalling,
+│     GPU sync tips already in the skill)
+├── Database queries?
+│   → kotlin-multiplatform-sqldelight-setup (indices, Flow query batching)
+├── Network calls / sync?
+│   → kotlin-multiplatform-network-layer or kotlin-multiplatform-offline-first
+│     (cache-first, avoid redundant refresh)
+├── App startup time or binary/APK size?
+│   → kotlin-multiplatform-proguard-r8
+├── A specific function/class flagged as complex (long, many params, deep nesting)?
+│   → kotlin-multiplatform-code-quality (Detekt `complexity:` rules — LongMethod,
+│     CyclomaticComplexMethod, LongParameterList)
+└── Unnamed / whole-app / "it feels slow"?
+    → STOP — do not pick a skill on a guess. Ask which of the above the user means,
+      or profile first (Android Studio Profiler / Instruments) to get a concrete
+      target, then re-route through this tree.
+```
+
 ### "How do I handle audit findings?"
 
 ```
@@ -722,6 +755,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
+| 2026-07-10 | Added a "Improve the performance of X" decision tree — there was no routing path for performance requests at all (only a model-routing hint, not a skill-routing rule), a real gap found by testing what happens with a generic "improve performance of X" request. Routes by naming what X is (Compose recomposition, JNI bridge, database, network, startup/size, code complexity) and explicitly stops rather than guessing when X is unnamed or whole-app. |
 | 2026-06-24 | Refined routing precedence for repo docs, downstream docs, changelogs, and navigation/deep-link collisions. |
 | 2026-06-24 | Added architecture-diagram / library-docs / app-docs routing keywords for `kotlin-multiplatform-project-docs-maintainer`. |
 | 2026-06-24 | Added explicit release routing keywords (`release project`, `cut release`, `ship version`) so project release requests route to `kotlin-multiplatform-release`. |
