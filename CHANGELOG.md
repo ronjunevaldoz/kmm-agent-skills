@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.58.0] — 2026-07-10
+
+### Added
+
+- feat(expert): add performance request routing decision tree
+
+### Docs
+
+- docs(known-issues): re-investigate KI-007, correct to reflect reality
+
+---
+
 ## [v1.57.3] — 2026-07-10
 
 ### Docs
