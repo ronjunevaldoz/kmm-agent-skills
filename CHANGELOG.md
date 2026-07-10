@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.59.1] — 2026-07-10
+
+### Docs
+
+- docs(code-quality): document comment conventions by architectural level
+
+---
+
 ## [v1.59.0] — 2026-07-10
 
 ### Added
