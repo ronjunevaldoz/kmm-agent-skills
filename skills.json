@@ -1,5 +1,5 @@
 {
-  "version": "1.59.1",
+  "version": "1.60.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -174,7 +174,7 @@
       "path": "skills/kotlin-multiplatform-audit",
       "description": "KMP project audit skill for reviewing an existing Kotlin Multiplatform codebase. Use this skill to inspect architecture, module boundaries, state handling, repository and network layering, Compose patterns, expect/actual usage, shared resources, design system usage, test coverage, platform readiness, and the skills repo itself. Produces findings, risk levels, and a fix sequence instead of implementation code. Pair with kotlin-multiplatform-expert to route any follow-up work to the right domain skills.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-25",
+      "last_updated": "2026-07-10",
       "keywords": [
         "KMP audit",
         "project audit",

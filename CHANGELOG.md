@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.60.0] — 2026-07-10
+
+### Added
+
+- feat(audit): add what-comment detector and /kmm-clean-comments command
+
+---
+
 ## [v1.59.1] — 2026-07-10
 
 ### Docs
