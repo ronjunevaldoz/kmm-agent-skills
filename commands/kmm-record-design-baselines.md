@@ -81,6 +81,11 @@ cp -R feature/auth/ui/build/outputs/roborazzi/ \
 
 ---
 
+If any screenshot test also calls `captureBoundsSnapshot(...)` (see
+`kotlin-multiplatform-roborazzi`'s "Bounds Sidecar" step), the `.bounds.json` files land
+in the same `snapshots/` output directory as the PNGs and are picked up by the same
+`cp -R`/`git add` below — no separate step needed.
+
 ## Step 3 — Commit baselines
 
 ```bash

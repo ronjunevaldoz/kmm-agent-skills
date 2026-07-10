@@ -90,6 +90,24 @@ If no PNG files are found: print `No screenshots found at <resolved path>` and s
 
 ---
 
+## Step 2b — Check bounds sidecars before touching vision
+
+If any screenshot has a matching `.bounds.json` (written by `captureBoundsSnapshot`, see
+`kotlin-multiplatform-roborazzi`'s "Bounds Sidecar" step), check for position/size drift
+with `git diff` **before** reading the PNG with vision — this is exact, not an estimate:
+
+```bash
+git diff --unified=0 -- "<resolved-output-dir>"/*.bounds.json
+```
+
+For any file with a diff, report the exact delta directly from the diff output (e.g.
+`LOGIN_BUTTON.top: 120.0 → 128.0`) and skip asking vision to judge that node's position —
+there's nothing to estimate when the exact number is already in the diff. Only fall
+through to the Step 3 vision checks below for screenshots with no `.bounds.json`, or for
+concerns a sidecar can't cover (color, contrast, dark mode parity, TopAppBar structure).
+
+---
+
 ## Step 3 — For each screenshot (or pair), run a visual design audit
 
 Read each image using vision and check all of the following. Flag each issue
@@ -117,6 +135,10 @@ with the screenshot filename and a short description.
 - [ ] Content has consistent outer padding — elements don't touch the screen edge
 - [ ] List items have consistent internal padding between icon, label, and trailing action
 - [ ] No obvious alignment breaks — elements that should be flush are flush
+
+These are qualitative judgment calls for screens with no `.bounds.json` sidecar. When a
+sidecar exists, Step 2b already reported any exact position/size drift — don't re-estimate
+a number vision already gave you precisely.
 
 ### Typography
 - [ ] Body text is readable — not too small (visually under ~12sp equivalent)
@@ -179,6 +201,9 @@ For each WARNING or FAIL, give a concrete fix tied to the design-system skill:
   Use `FAIL` only for clearly broken states (invisible text, completely wrong dark mode, absent TopAppBar).
 - This audit is a supplement to, not a replacement for, Roborazzi golden image diffs.
   Diffs catch regressions; this audit checks that the golden itself is correct.
+- For exact position/size regressions, `.bounds.json` sidecars (Step 2b) are the source
+  of truth, not this audit's vision pass — a sidecar diff gives an exact pixel delta,
+  vision only gives an estimate. See `kotlin-multiplatform-roborazzi`'s "Bounds Sidecar" step.
 - If the screenshots directory contains `_compare.png` or `_actual.png` files (diff artifacts),
   those indicate a failing `jvmTest` run — resolve the test failure before running this audit.
 - Run this after `./gradlew recordRoborazziJvm` on a new screen, or after a design-system token update.

@@ -11,7 +11,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-08'
+  last-updated: '2026-07-10'
   keywords:
     - Roborazzi
     - screenshot test
@@ -39,6 +39,11 @@ metadata:
     - arrangement test
     - pixel-perfect
     - layout regression
+    - bounds sidecar
+    - position regression
+    - boundsInRoot
+    - fetchSemanticsNode
+    - exact position diff
 ---
 
 ## When to Use This Skill
@@ -489,6 +494,96 @@ shape once, light and dark).
 
 ---
 
+## Step 3b: Bounds Sidecar (exact position/size regression — no vision needed)
+
+A pixel diff on the golden PNG tells you *that* something changed, not *what*. Asking an
+agent to read the diff image and estimate "did this move 8px or 12px?" from a screenshot
+is unreliable — vision models aren't precise at exact pixel numbers. The fix isn't a
+smarter image comparison; it's to stop deriving position/size from pixels at all.
+
+`onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot` (already used in the layout
+stability regression pattern above) gives exact position and size straight from the
+semantics tree. Write it to a small JSON file next to the golden PNG, and a position/size
+regression becomes a normal `git diff` line on a committed text file — exact numbers, zero
+noise for nodes that didn't move, no image analysis required:
+
+```kotlin
+// :core:testing/src/jvmTest/kotlin/GROUP_ID/core/testing/BoundsSnapshot.kt
+package GROUP_ID.core.testing
+
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.onNodeWithTag
+import java.io.File
+
+/**
+ * Writes exact position/size for [tags] to a JSON sidecar next to the Roborazzi golden PNG
+ * of the same name — a position/size regression then shows up as a plain git diff on the
+ * sidecar instead of something a reviewer has to eyeball from two screenshots.
+ * @receiver Must be called from inside `runDesktopComposeUiTest`, after `setContent` —
+ * bounds are read from the live semantics tree at the point of the call.
+ */
+@OptIn(ExperimentalTestApi::class)
+fun SemanticsNodeInteractionsProvider.captureBoundsSnapshot(
+    fileName: String,
+    vararg tags: String,
+    outputDir: File = File("src/jvmTest/snapshots"),
+) {
+    val bounds = tags.associateWith { tag -> onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot }
+    val json = bounds.entries.sortedBy { it.key }.joinToString(",\n", prefix = "{\n", postfix = "\n}") { (tag, r) ->
+        "  \"$tag\": {\"left\": ${r.left}, \"top\": ${r.top}, \"width\": ${r.width}, \"height\": ${r.height}}"
+    }
+    outputDir.mkdirs()
+    File(outputDir, fileName).writeText(json + "\n")
+}
+```
+
+Call it in the same test that records the golden, using the real multiplatform-JVM
+`captureRoboImage` entry point (`onRoot().captureRoboImage(...)` inside
+`runDesktopComposeUiTest`, not the plain content-lambda form) so both come from the same
+composition pass:
+
+```kotlin
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.runDesktopComposeUiTest
+import com.github.takahirom.roborazzi.captureRoboImage
+import GROUP_ID.core.testing.captureBoundsSnapshot
+import kotlin.test.Test
+
+class AuthContentScreenshotTest {
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun authContent_default() = runDesktopComposeUiTest {
+        setContent {
+            AppTheme {
+                AuthContent(state = AuthContract.State(), onIntent = {})
+            }
+        }
+        onRoot().captureRoboImage("auth_content_default.png")
+        captureBoundsSnapshot(
+            "auth_content_default.bounds.json",
+            AuthTestTags.EMAIL_FIELD, AuthTestTags.PASSWORD_FIELD, AuthTestTags.LOGIN_BUTTON,
+        )
+    }
+}
+```
+
+This writes `auth_content_default.bounds.json` next to `auth_content_default.png` in
+`src/jvmTest/snapshots/` — commit both. On a PR, `git diff` on the `.bounds.json` file
+shows the exact change (`"top": 120.0` → `"top": 128.0`), with nothing printed for tags
+that didn't move.
+
+**What this does not replace:** border width and corner radius are not screenshot
+problems — they're literal values in `ButtonStyles.kt`/`CardStyles.kt`
+(`RoundedCornerShape(appTheme.shapes.md)`, `borderWidth(1.dp)`). A regression there is
+already a normal code diff on the Style file, partly caught statically by
+`scan_design_violations.py`. Don't add pixel-based border/corner-radius detection — it
+would be strictly less precise than the value that's already sitting in source.
+
+---
+
 ## Recording and Verifying Goldens
 
 ```bash
@@ -502,7 +597,9 @@ shape once, light and dark).
 ./gradlew jvmTest
 ```
 
-Commit the `snapshots/` directory to git. PRs that change UI produce image diffs in the
+Commit the `snapshots/` directory to git — this includes any `.bounds.json` sidecars
+written by `captureBoundsSnapshot`, since they live alongside the PNGs in the same
+directory. PRs that change UI produce image diffs *and* exact position/size diffs in the
 PR review — reviewers see before/after without running tests locally.
 
 ---
@@ -587,6 +684,7 @@ jobs:
 - `kotlin-multiplatform-presenter-module` — Screen/Content split that makes `Content` injectable with fixed state
 - `kotlin-multiplatform-unit-testing` — Roborazzi covers `:ui`; use `runTest` + Turbine for `:presenter` and `:domain`
 - `kotlin-multiplatform-ci-github-actions` — where the CI screenshot job is wired
+- `kotlin-multiplatform-design-system` — owns the `Style`/token source that border-width and corner-radius regressions are diffed against directly, instead of re-deriving them from a screenshot
 
 ---
 
@@ -603,6 +701,10 @@ are design-system-compliant — not just pixel-stable. The audit uses Claude vis
 | Spacing | Content has outer padding; list items have consistent internal padding |
 | Typography | Body readable; headings distinct; text truncates with ellipsis |
 | Contrast | Text on colored backgrounds is readable; disabled states are visually distinct |
+
+Position and size regressions are checked separately, and exactly — `/kmm-audit-screenshots`
+diffs any `.bounds.json` sidecar (see "Step 3b: Bounds Sidecar" above) before touching
+vision at all, since a sidecar diff is an exact number and vision is an estimate.
 
 Running the audit:
 ```bash
@@ -638,6 +740,8 @@ Findings map to reviewer blockers: FAIL-level → `[THEME]` or `[LAYOUT]`; WARNI
 - trying to move Roborazzi screenshot tests to `commonTest` — Roborazzi has no multiplatform equivalent; it depends directly on Robolectric's Android-framework shadow rendering, so it stays JVM-only regardless of where interaction tests live
 - adding `iosSimulatorArm64Test`/`connectedAndroidTest` to the required per-PR CI gate — emulator/simulator boot time is expensive; keep the full device matrix opt-in or nightly and `jvmTest` as the required fast gate
 - writing new interaction tests with `createComposeRule` + JUnit4 `@get:Rule` in `jvmTest` — use `runComposeUiTest` in `commonTest` instead so the same test body can run per-target
+- asking Claude vision to estimate an exact position/size delta from two screenshots — vision isn't precise at exact pixel numbers; capture `.bounds.json` via `captureBoundsSnapshot` instead and diff the text file
+- writing a pixel-based border-width or corner-radius detector — those values already exist exactly in the `Style` source (`ButtonStyles.kt`/`CardStyles.kt`); a regression there is a normal code diff, not something to re-derive from an image
 
 If a screenshot test fails after a Compose upgrade, re-record goldens — font rendering shifts between versions.
 
@@ -658,6 +762,7 @@ When asked about UI testing, test tags, or visual regression for KMP, respond in
 
 | Date | Change |
 |---|---|
+| 2026-07-10 | Added "Step 3b: Bounds Sidecar" — `captureBoundsSnapshot()` writes exact `fetchSemanticsNode().boundsInRoot` position/size to a `.bounds.json` file next to each golden PNG, so a position/size regression is a plain `git diff` on committed text instead of something an agent has to estimate from a pixel diff image. Proven with a standalone JSON-diff test (exact delta surfaced, zero noise for unchanged nodes) before writing this into the skill. Verified the real multiplatform-JVM `captureRoboImage` entry point (`onRoot().captureRoboImage(...)` inside `runDesktopComposeUiTest`) against Roborazzi's own `sample-compose-desktop-jvm` test, since it differs from the plain content-lambda form. Wired into `/kmm-record-design-baselines` (sidecars ride along in the existing `snapshots/` copy step) and `/kmm-audit-screenshots` (new Step 2b checks sidecar diffs before falling through to vision). Explicitly out of scope: pixel-based border-width/corner-radius detection — those values already exist exactly in `Style` source, so a regression there is a normal code diff. 2 new anti-patterns, 1 new Related Skills cross-reference. |
 | 2026-07-08 | Added a "Drag interaction test" pattern — `performTouchInput { swipe(...) }` / `performMouseInput { press(); moveTo(); release() }` for resizable panel dividers and custom scrollbar thumbs, asserting resulting state (pane width, clamp bounds, scroll offset) rather than intermediate frames. |
 | 2026-07-08 | Added a "Layout stability regression test" pattern — asserting `boundsInRoot()` on a trigger before/after toggle (via `mainClock.advanceTimeBy`) to deterministically catch a collapsible/accordion trigger shifting position on toggle. Cross-links the new `kotlin-multiplatform-audit` detectors `toggle icon swap instead of rotation` and `bare conditional collapse`. |
 | 2026-07-07 | Moved Compose UI interaction tests from `jvmTest`/`createComposeRule`+JUnit4 to `commonTest`/`runComposeUiTest`, so the same test body runs per-target (JVM, Android instrumented, iOS simulator, Wasm). Roborazzi screenshot tests stay `jvmTest`-only (no multiplatform equivalent — depends on Robolectric shadow rendering). Added an opt-in/nightly CI matrix job alongside the required `jvmTest` gate, updated Gradle setup (`compose.uiTest` in `commonTest.dependencies`), and 3 new anti-patterns. |
