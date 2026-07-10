@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-09'
+  last-updated: '2026-07-10'
   keywords:
     - token saver
     - prompt compression
@@ -47,6 +47,13 @@ Default to the narrowest non-setup option:
 
 If Headroom is not configured, keep it optional and continue with Ponytail, Caveman,
 or RTK instead.
+
+RTK itself has two install phases with different authorization needs — the binary
+install (`brew install rtk`) is safe to run directly, but the hook wiring
+(`rtk init -g`, which patches global `settings.json`/`CLAUDE.md`) needs specific
+confirmation of the exact diff, not a repeat of an earlier general go-ahead. See
+`references/token-saving-tools.md` for the verified details — this was hit in
+practice, not a hypothetical.
 
 ## Tool Choice
 
@@ -86,6 +93,9 @@ Validate this skill with short prompt-routing checks, not heavy integration scaf
 - using a verbose reply when a shorter one preserves the same facts
 - enabling every compressor at once
 - treating Ponytail as a replacement for architecture judgment
+- running `rtk init -g --auto-patch` on a generic "go ahead" — global config patches need confirmation of the specific diff, not a repeat of an earlier general approval; show `--dry-run` output first or have the user run it themselves interactively
+- assuming the RTK hook is active immediately after `rtk init -g` — it only applies to Bash commands in sessions started after install completes, not the current one
+- expecting `rtk gain` to show data right after install — it stays empty until the hook has actually processed commands in a fresh session; use `rtk discover` for a retroactive estimate instead
 
 ## Related Skills
 
@@ -111,4 +121,5 @@ See [token-saving-tools.md](references/token-saving-tools.md) for tool-by-tool s
 
 | Date | Change |
 |---|---|
+| 2026-07-10 | Documented RTK's real two-phase install, verified in practice: `brew install rtk` is safe to run directly, but `rtk init -g` (global hook wiring) got blocked by the auto-mode classifier on a generic "go ahead" — needs specific confirmation of the exact `--dry-run` diff instead. Also documented that the hook doesn't apply retroactively (needs a fresh session) and the `rtk gain`/`rtk discover` tracking commands. 3 new anti-patterns. |
 | 2026-07-09 | Initial release — token-saving routing for Ponytail, Caveman, RTK, and optional Headroom. |
