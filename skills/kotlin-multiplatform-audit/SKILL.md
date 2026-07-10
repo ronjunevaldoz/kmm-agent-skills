@@ -11,7 +11,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-25'
+  last-updated: '2026-07-10'
   keywords:
     - KMP audit
     - project audit
@@ -338,6 +338,7 @@ python3 ../kmm-agent-skills/skills/kotlin-multiplatform-audit/scripts/governance
 - `kotlin-multiplatform-roborazzi` — replacement for `manual screen capture` findings
 - `kotlin-multiplatform-design-system` — replacement for `magic color literal` and `hardcoded spacing` findings
 - `kotlin-multiplatform-jni-pro` — owns every native/JNI finding (3rd-party C++ immutability, opaque-handle cleanup, C-shim wrapping); hand off section 6 findings here
+- `kotlin-multiplatform-code-quality` — owns the comment/KDoc convention `what-comment in control flow` findings are checked against; `/kmm-clean-comments` applies the fix
 
 ---
 
@@ -359,6 +360,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-07-10 | Added `_detect_what_comment_in_control_flow` — a regex heuristic flagging `//` comments that narrate WHAT a loop/conditional does (action-verb opener, no WHY-marker) instead of WHY, per `kotlin-multiplatform-code-quality`'s "By architectural level" rule. LOW severity (heuristic, human review). New `/kmm-clean-comments` command applies the fix across all four documentation levels (class/function/extension/inline), not just this detector's inline-block slice. |
 | 2026-06-29 | Added section 8 (Agent & Consumer Setup) to audit checklist. Added three new detectors to `audit_project.py`: `_detect_agent_setup` (missing AGENTS.md, commands, skills, CLAUDE.md, single-surface AGENTS.md in multi-surface project), `_detect_mvi_placement` (MviViewModel in feature module instead of shared/core), `_detect_design_system_wiring` (MaterialTheme wrapping, hardcoded darkTheme=false, parallel ULong token files). |
 | 2026-06-24 | Added a skills-version pin guard to governance: `.kmm-skills` must exist and must point at a release tag, not `main` or another mutable ref. |
 | 2026-06-23 | Added "Governance & CI Enforcement" section: governance_check.py, reusable workflow, .kmm-skills version file, threshold guide. |

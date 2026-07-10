@@ -1224,6 +1224,68 @@ def _detect_raw_http_bypass(root: Path) -> list[str]:
     return findings
 
 
+# ── WHAT-comment inside a loop or conditional ───────────────────────────────────
+# kotlin-multiplatform-code-quality's inline-block rule: a // comment inside a loop or
+# conditional should explain WHY, never WHAT — a WHAT comment is a sign the block should
+# be extracted into a named function/variable instead. Heuristic (regex, not AST): flags
+# a // comment starting with an action verb (Loop/Check/Calculate/...) attached to a
+# for/while/if/when on the same or next line, unless a WHY-marker (workaround/hack/
+# because/...) is present. False positives are possible — LOW severity, human review.
+
+_WHAT_COMMENT_VERB_RE = re.compile(
+    r"^(?:loop\s+through|iterate|check\s+if|skip\s+if|calculate|compute|build|create|"
+    r"parse|convert|filter|sort|validate|update|increment|decrement|set|get|"
+    r"return\s+early\s+if)\b",
+    re.IGNORECASE,
+)
+_WHY_MARKER_RE = re.compile(
+    r"\b(?:workaround|hack|why|because|bug|note:|fixme|todo)\b", re.IGNORECASE
+)
+_CONTROL_FLOW_KEYWORD_RE = re.compile(r"\b(?:for|while|if|when)\s*\(")
+
+
+def _detect_what_comment_in_control_flow(root: Path) -> list[str]:
+    """Flag // comments that narrate WHAT a loop/conditional does instead of WHY.
+
+    Heuristic only — matches a // comment starting with an action verb, attached to a
+    for/while/if/when on the same or next line, with no WHY-marker present. Intended as
+    a nudge for human review (or /clean-comments), not an auto-fix.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        for i, line in enumerate(lines):
+            idx = line.find("//")
+            if idx == -1:
+                continue
+            comment_text = line[idx + 2 :].strip()
+            if not _WHAT_COMMENT_VERB_RE.match(comment_text):
+                continue
+            if _WHY_MARKER_RE.search(comment_text):
+                continue
+            code_part = line[:idx]
+            next_line = lines[i + 1] if i + 1 < len(lines) else ""
+            if not (
+                _CONTROL_FLOW_KEYWORD_RE.search(code_part)
+                or _CONTROL_FLOW_KEYWORD_RE.match(next_line.strip())
+            ):
+                continue
+            findings.append(
+                f"what-comment in control flow [LOW]: {path.relative_to(root)}:{i + 1} "
+                f"— this // comment narrates what the block does; per "
+                f"kotlin-multiplatform-code-quality's inline-block rule, extract a named "
+                f"function/variable instead so the code reads as its own explanation, or "
+                f"keep the comment only if it's actually explaining a non-obvious why\n"
+                f"    {i + 1} | {line.strip()}"
+            )
+    return findings
+
+
 # ── Design system prefix mismatch ─────────────────────────────────────────────
 # "App" in the design-system skill is a template placeholder (see Step 0) — real
 # projects must substitute their resolved COMPONENT_PREFIX when generating files, not
@@ -2127,6 +2189,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Raw HTTP bypassing an established Ktor client ───────────────────────────
     findings.extend(_detect_raw_http_bypass(root))
+
+    # ── WHAT-comment inside a loop or conditional ────────────────────────────────
+    findings.extend(_detect_what_comment_in_control_flow(root))
 
     # ── Design system prefix mismatch ──────────────────────────────────────────
     findings.extend(_detect_design_system_prefix_mismatch(root))

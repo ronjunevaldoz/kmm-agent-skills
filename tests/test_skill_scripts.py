@@ -1391,6 +1391,64 @@ class RawHttpBypassTests(unittest.TestCase):
             self.assertFalse(any("raw http bypasses established ktor client" in f for f in findings))
 
 
+class WhatCommentInControlFlowTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_what_comment_before_loop(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "src/commonMain/kotlin/Sample.kt",
+                "fun positive(items: List<Int>) {\n"
+                "    // Loop through items and print each one\n"
+                "    for (item in items) {\n"
+                "        println(item)\n"
+                "    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("what-comment in control flow" in f for f in findings))
+
+    def test_flags_what_comment_on_same_line_as_conditional(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "src/commonMain/kotlin/Sample.kt",
+                "fun sameLine(items: List<Int>) {\n"
+                "    if (items.isEmpty()) return // Check if items is empty\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("what-comment in control flow" in f for f in findings))
+
+    def test_ignores_why_comment_with_workaround_marker(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "src/commonMain/kotlin/Sample.kt",
+                "fun negative(items: List<Int>) {\n"
+                "    for (item in items) {\n"
+                "        // Skip zero-cost items (workaround for issue #42 pricing div-by-zero)\n"
+                "        if (item == 0) continue\n"
+                "    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("what-comment in control flow" in f for f in findings))
+
+    def test_ignores_comment_not_attached_to_control_flow(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "src/commonMain/kotlin/Sample.kt",
+                "fun helper() {\n"
+                "    // Build the cache key from user id and locale\n"
+                "    val key = \"$userId:$locale\"\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("what-comment in control flow" in f for f in findings))
+
+
 class ToggleLayoutStabilityTests(unittest.TestCase):
     def _write(self, root: Path, filename: str, content: str) -> None:
         d = root / "src" / "commonMain" / "kotlin" / "ui"
