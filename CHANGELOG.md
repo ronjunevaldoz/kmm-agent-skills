@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.61.0] — 2026-07-10
+
+### Added
+
+- feat(roborazzi): add bounds sidecar for exact position/size regression
+
+---
+
 ## [v1.60.0] — 2026-07-10
 
 ### Added
