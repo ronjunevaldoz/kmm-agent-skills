@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.59.0] — 2026-07-10
+
+### Added
+
+- feat(skills): add benchmark skill, fix Ktor client-reuse bug, cross-reference tailwind-compose
+
+---
+
 ## [v1.58.0] — 2026-07-10
 
 ### Added

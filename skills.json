@@ -1,5 +1,5 @@
 {
-  "version": "1.58.0",
+  "version": "1.59.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -233,6 +233,39 @@
         "draft_issue.py",
         "governance_check.py"
       ]
+    },
+    {
+      "name": "kotlin-multiplatform-benchmark",
+      "path": "skills/kotlin-multiplatform-benchmark",
+      "description": "Sets up kotlinx-benchmark for Kotlin Multiplatform performance measurement. Covers: Gradle plugin + allopen wiring, a separate benchmark source set (never mixed into commonMain/commonTest), @State/@Benchmark/@Setup/@TearDown conventions, per-target registration (JVM/Native/JS/Wasm), running benchmarks, and reading JSON/CSV output. Use this whenever a performance claim needs a real number instead of a guess \u2014 this is the \"profile first\" step the kotlin-multiplatform-expert performance decision tree routes to when a request is unnamed or needs a concrete target before further routing.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-07-10",
+      "keywords": [
+        "kotlinx-benchmark",
+        "benchmark",
+        "microbenchmark",
+        "performance measurement",
+        "JMH",
+        "allopen",
+        "Benchmark annotation",
+        "profile performance",
+        "performance number"
+      ],
+      "triggers": [
+        "benchmark",
+        "microbenchmark",
+        "kotlinx-benchmark",
+        "performance number",
+        "measure performance",
+        "profile this",
+        "@Benchmark",
+        "JMH",
+        "is this faster",
+        "compare performance",
+        "performance regression",
+        "benchmark baseline"
+      ],
+      "scripts": []
     },
     {
       "name": "kotlin-multiplatform-biometric-auth",
@@ -784,7 +817,7 @@
       "path": "skills/kotlin-multiplatform-design-system",
       "description": "Scaffolds a custom Compose Multiplatform design system in :core:designsystem using the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles, @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates: color/typography/shape/spacing tokens, AppTheme with light/dark support, StyleScope extensions for token access, shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant, ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision), and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText) built on BasicXxx CMP primitives. \"App\" is a placeholder prefix derived from the project's actual name (scripts/derive_component_prefix.py), not a hardcoded literal. No Material dependency \u2014 fully custom, fully owned.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-08",
+      "last_updated": "2026-07-10",
       "keywords": [
         "design system",
         "Compose Styles API",
@@ -2053,7 +2086,7 @@
       "path": "skills/kotlin-multiplatform-network-layer",
       "description": "Scaffolds a production-ready Ktor 3 network layer inside :core:network for a Kotlin Multiplatform project. Covers: platform engines (OkHttp/Darwin/CIO/Js) for Android, iOS, Desktop (JVM), and Web (JS + WasmJs), ContentNegotiation, Bearer auth with automatic token refresh (race-condition-safe), structured error mapping to a NetworkResult<T> sealed type, request/response logging, and Koin wiring. Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-07-10",
       "keywords": [
         "Ktor 3",
         "KMP networking",
