@@ -1165,6 +1165,65 @@ def _detect_combined_sqldelight_table_file(root: Path) -> list[str]:
     return findings
 
 
+# ── Raw HTTP bypassing an established Ktor client ──────────────────────────────
+# Real bug: kotlin-multiplatform-network-layer only checked for a module literally
+# named :core:network. A new server module or feature under a different name found no
+# match, and an agent defaulted to a hand-written raw HTTP call instead of reusing the
+# project's actual (differently-named) Ktor client. This detector catches the result —
+# raw platform HTTP APIs alongside an established NetworkResult<T>/safeRequest pattern —
+# regardless of what the network module is actually called.
+
+_ESTABLISHED_NETWORK_LAYER_RE = re.compile(r"\bNetworkResult<|\bsafeRequest\b")
+_RAW_HTTP_API_RE = re.compile(
+    r"\bHttpURLConnection\b|\.openConnection\(\)|\bNSURLSession\b|\bURLSession\.shared\b"
+)
+
+
+def _detect_raw_http_bypass(root: Path) -> list[str]:
+    """Flag raw platform HTTP APIs (HttpURLConnection, NSURLSession, etc.) used
+    anywhere in a project that already has an established Ktor client — detected by
+    content (NetworkResult<T> / safeRequest), not by a fixed module path or name.
+
+    Only fires when an established client signal exists elsewhere in the project;
+    a project with no Ktor client at all is out of scope for this detector.
+    """
+    findings: list[str] = []
+    has_established_client = False
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if _ESTABLISHED_NETWORK_LAYER_RE.search(text):
+            has_established_client = True
+            break
+    if not has_established_client:
+        return findings
+
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        match = _RAW_HTTP_API_RE.search(text)
+        if not match:
+            continue
+        line_no, snippet = _at(text, match.start())
+        findings.append(
+            f"raw http bypasses established ktor client [HIGH]: {path.relative_to(root)}:{line_no} "
+            f"— this project already has an established Ktor client (NetworkResult<T>/"
+            f"safeRequest found elsewhere) but this file uses a raw platform HTTP API "
+            f"instead of reusing it. If this is a new server module or feature with a "
+            f"different name, extend the existing client — never bypass it with a raw call\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
 # ── Design system prefix mismatch ─────────────────────────────────────────────
 # "App" in the design-system skill is a template placeholder (see Step 0) — real
 # projects must substitute their resolved COMPONENT_PREFIX when generating files, not
@@ -2065,6 +2124,9 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_combined_lesson_file(root))
     findings.extend(_detect_combined_layout_screen_file(root))
     findings.extend(_detect_combined_sqldelight_table_file(root))
+
+    # ── Raw HTTP bypassing an established Ktor client ───────────────────────────
+    findings.extend(_detect_raw_http_bypass(root))
 
     # ── Design system prefix mismatch ──────────────────────────────────────────
     findings.extend(_detect_design_system_prefix_mismatch(root))

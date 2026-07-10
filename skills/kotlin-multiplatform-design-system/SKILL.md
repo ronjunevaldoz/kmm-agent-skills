@@ -15,7 +15,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-08'
+  last-updated: '2026-07-10'
   keywords:
     - design system
     - Compose Styles API
@@ -239,6 +239,15 @@ This gives full brand control without forking a library.
 **Why not a published library?** The Compose Styles API (`@ExperimentalStylesApi`) changes
 between CMP releases. A published library would break every downstream project on CMP upgrades.
 The scaffold approach keeps each project on its own upgrade schedule.
+
+**Utility-class layer:** [`tailwind-compose`](https://github.com/ronjunevaldoz/tailwind-compose)
+is a stable-API-only (no `@ExperimentalStylesApi`), Maven Central-published library providing
+Tailwind-style utility modifiers (spacing, layout, color, typography) for Compose Multiplatform.
+Because it depends on nothing experimental, it's safe to add as a real dependency alongside the
+generated `tokens/`/`components/` layers above — use it for one-off utility styling in screen
+code where writing a full token+style pair would be overkill, not as a replacement for
+`components/`. Component libraries that depend on the experimental Styles API (e.g.
+`shadcn-compose`) are not yet recommended here — see the Changelog entry below.
 
 Use `/update-design-system` to compare your project's components against the latest skill
 version and selectively apply fixes. The comparison is powered by
@@ -2624,6 +2633,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-10 | Evaluated deprecating this skill (and `design-system-extended`) in favor of the user's own published `shadcn-compose`/`heroicons-compose`/`tailwind-compose` libraries — decided **not yet**: `shadcn-compose` is still `-SNAPSHOT` (not on Maven Central) and depends on the same experimental `@ExperimentalStylesApi` this skill's Ownership Model explicitly avoids by staying scaffold-based; `heroicons-compose` only has the Outline variant built vs. this repo's 4-variant coverage. `tailwind-compose`, however, is stable-API-only and already published — added a cross-reference for it in Ownership Model as a complementary utility-class layer, not a replacement. |
 | 2026-07-08 | Fixed a real layout-shift bug found across `ButtonStyles.kt`/`TextFieldStyles.kt`: `focused {}` blocks animated `borderWidth`/`borderBottomWidth` (0→2dp or 1→2dp), re-measuring the component on focus. Fixed by reserving the final border width at rest (`borderColor(Color.Transparent)` where there's no border at rest) and animating only `borderColor`. New "Ring vs border" rule in Style Rules explaining the CSS-ring analogy; new audit detector `focused state animates border width [MEDIUM]`. |
 | 2026-07-08 | New `StyleVariant` marker interface + `rememberStyle(vararg variants)` composable — memoizes the merged `variant.style then size.style` descriptor on the variants themselves instead of rebuilding it every recomposition. All variant sealed interfaces (`ButtonVariant`, `ButtonSize`, `BadgeVariant`, `CardVariant`, `ChipVariant`, `TextFieldVariant`) now extend it; `AppButton` updated to use `rememberStyle(variant, size)`. Added "Custom context-aware modifiers" guidance: one-off `Modifier` extensions resolve theme defaults internally via `Modifier.composed { }`, never as a caller-supplied parameter with a hardcoded literal default. `CardSize` intentionally excluded — it holds raw `Dp` values, not a `Style` descriptor, so it doesn't fit the `StyleVariant` contract. 3 new anti-patterns. |
 | 2026-07-05 | Hardened Step 0 into a non-negotiable rule: `App` must never be written to disk literally for a real project — generate directly with the resolved prefix in the same pass, no "rename later" step. New audit detector `design system prefix mismatch [HIGH]` catches the case where `docs/design-system.md` records a resolved `COMPONENT_PREFIX` but `App*`-named declarations still exist under `core/designsystem` — verified against 5 scenarios (mismatch, consistent, genuinely-App, no-doc, unfilled-template). |

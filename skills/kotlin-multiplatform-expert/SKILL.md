@@ -166,7 +166,7 @@ Pull in only when a feature explicitly needs it.
 - `offline-first` — only when the user names "offline-first", "background sync", or "conflict resolution". For plain caching or a local source of truth, use `repository-pattern` + `sqldelight-setup` instead. Offline-first layers `SyncManager` + `WorkManager`/`BGTaskScheduler` on top, which is overkill unless explicitly wanted.
 
 ### Meta (tooling, not app code)
-`expert` (routing), `audit` (review), `kotlin-multiplatform-jni-pro` (native bridge), `docs-maintainer`, `changelog`
+`expert` (routing), `audit` (review), `kotlin-multiplatform-jni-pro` (native bridge), `docs-maintainer`, `changelog`, `benchmark` (invoked on-demand for a specific performance claim — never scaffolded speculatively)
 
 ---
 
@@ -202,7 +202,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 60 Skills and What They Own
+## The 61 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -289,6 +289,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-code-quality` | Ktlint (formatting) + Detekt (architecture rules), CI gates |
 | `kotlin-multiplatform-accessibility` | Semantic roles, `contentDescription`, `mergeDescendants`, touch targets, traversal order, Roborazzi a11y snapshots |
 | `kotlin-multiplatform-compose-animation` | `AnimatedVisibility`, `animateContentSize`, `Crossfade`, `AnimatedContent`, `animateXAsState`, shared elements, reduced motion |
+| `kotlin-multiplatform-benchmark` | `kotlinx-benchmark` setup, `@State`/`@Benchmark` conventions, per-target registration, `docs/reference/benchmark-matrix.md` result placement |
 
 ---
 
@@ -459,6 +460,20 @@ Full survival matrix: see `kotlin-multiplatform-compose-state-container`.
 
 ### "Which transport for a backend call?"
 
+Before following the tree below, check by **content**, not by module name, whether a
+Ktor client already exists anywhere in the project — a new server module or feature
+with a different name is still the same transport concern. Real bug this fixed: an
+agent found no module literally named `:core:network` and defaulted to a raw HTTP call
+instead of the project's actual (differently-named) client:
+
+```bash
+grep -rl "HttpClient(\|safeRequest\|NetworkResult<" */src --include="*.kt"
+```
+
+If that finds matches, reuse whatever module they're in — never scaffold a second client
+or write a raw platform HTTP call because the path didn't match an assumed name. See
+`kotlin-multiplatform-network-layer`'s Step 0 for the full detection procedure.
+
 ```
 grep -r "RemoteService\|@Rpc\|withRpc\|KtorRPCClient\|rpcClient\|\.rpc(" */src --include="*.kt" -l
 
@@ -536,9 +551,12 @@ What is X?
 ├── A specific function/class flagged as complex (long, many params, deep nesting)?
 │   → kotlin-multiplatform-code-quality (Detekt `complexity:` rules — LongMethod,
 │     CyclomaticComplexMethod, LongParameterList)
+├── Need a real number, not a guess (comparing two implementations, confirming a fix)?
+│   → kotlin-multiplatform-benchmark
 └── Unnamed / whole-app / "it feels slow"?
     → STOP — do not pick a skill on a guess. Ask which of the above the user means,
-      or profile first (Android Studio Profiler / Instruments) to get a concrete
+      or profile first (Android Studio Profiler / Instruments, or
+      kotlin-multiplatform-benchmark for a specific function/class) to get a concrete
       target, then re-route through this tree.
 ```
 
@@ -630,6 +648,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "screenshot test", "Roborazzi", "golden image", "visual regression", "CI diff" | `kotlin-multiplatform-roborazzi` |
 | "test canvas layout", "canvas screenshot", "layout regression test", "visual accuracy", "pixel-perfect test", "arrangement test", "test node placement", "UI layout verification", "100% accuracy test" | `kotlin-multiplatform-roborazzi` |
 | "Ktlint", "Detekt", "code quality", "formatting", "architecture rules", "CI gate" | `kotlin-multiplatform-code-quality` |
+| "benchmark", "microbenchmark", "kotlinx-benchmark", "performance number", "measure performance", "profile this", "@Benchmark", "JMH", "is this faster", "compare performance", "performance regression" | `kotlin-multiplatform-benchmark` |
 | "analytics", "event tracking", "track event", "Firebase Analytics", "screen tracking", "AnalyticsTracker", "event schema", "amplitude KMP", "mixpanel KMP" | `kotlin-multiplatform-analytics` |
 | "form validation", "field validation", "required field", "email validation", "inline error", "submit disabled", "async validation", "FieldState", "ValidationResult" | `kotlin-multiplatform-form-validation` |
 | "image loading", "Coil", "Coil 3", "AsyncImage", "network image", "image placeholder", "circular image", "avatar image", "image cache", "disk cache" | `kotlin-multiplatform-image-loading` |
@@ -755,7 +774,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
-| 2026-07-10 | Added a "Improve the performance of X" decision tree — there was no routing path for performance requests at all (only a model-routing hint, not a skill-routing rule), a real gap found by testing what happens with a generic "improve performance of X" request. Routes by naming what X is (Compose recomposition, JNI bridge, database, network, startup/size, code complexity) and explicitly stops rather than guessing when X is unnamed or whole-app. |
+| 2026-07-10 | Two real gaps closed: (1) added a "Improve the performance of X" decision tree — there was no routing path for performance requests at all (only a model-routing hint, not a skill-routing rule); routes by naming what X is and explicitly stops rather than guessing when X is unnamed or whole-app; added `kotlin-multiplatform-benchmark` (61st skill) as its "get a real number" branch. (2) Broadened "Which transport for a backend call?" to check for an existing Ktor client by content (`HttpClient(`/`safeRequest`/`NetworkResult<`) before the kRPC-specific grep — the prior version only checked kRPC symbols, so a project with a plain (differently-named) Ktor client and no kRPC could still fall through to a raw HTTP call; cross-referenced to `kotlin-multiplatform-network-layer`'s new Step 0. |
 | 2026-06-24 | Refined routing precedence for repo docs, downstream docs, changelogs, and navigation/deep-link collisions. |
 | 2026-06-24 | Added architecture-diagram / library-docs / app-docs routing keywords for `kotlin-multiplatform-project-docs-maintainer`. |
 | 2026-06-24 | Added explicit release routing keywords (`release project`, `cut release`, `ship version`) so project release requests route to `kotlin-multiplatform-release`. |

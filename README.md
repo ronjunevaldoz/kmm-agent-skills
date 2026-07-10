@@ -167,6 +167,7 @@ python3 scripts/release.py auto --dry-run # preview first
 - [`roborazzi`](skills/kotlin-multiplatform-roborazzi/) — screenshot tests from `@Preview` on JVM
 - [`code-quality`](skills/kotlin-multiplatform-code-quality/) — Ktlint + Detekt, CI gates
 - [`accessibility`](skills/kotlin-multiplatform-accessibility/) — semantic roles, contentDescription, WCAG
+- [`benchmark`](skills/kotlin-multiplatform-benchmark/) — kotlinx-benchmark setup, @Benchmark conventions, per-target registration
 
 ### Meta
 - [`expert`](skills/kotlin-multiplatform-expert/) — skill routing and build order

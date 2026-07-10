@@ -1340,6 +1340,57 @@ class CombinedOneFilePerXTests(unittest.TestCase):
             self.assertFalse(any("combined sqldelight table file" in f for f in findings))
 
 
+class RawHttpBypassTests(unittest.TestCase):
+    _NETWORK_RESULT_KT = (
+        "sealed interface NetworkResult<T>\nsuspend fun safeRequest() {}\n"
+    )
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_raw_http_when_established_client_exists(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/commonMain/kotlin/NetworkResult.kt",
+                self._NETWORK_RESULT_KT,
+            )
+            self._write(
+                root, "feature/newserver/src/commonMain/kotlin/RawClient.kt",
+                "import java.net.HttpURLConnection\nimport java.net.URL\n"
+                "fun fetchFromNewServer() {\n"
+                "    val conn = URL(\"http://newserver\").openConnection() as HttpURLConnection\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("raw http bypasses established ktor client" in f for f in findings))
+
+    def test_ignores_raw_http_with_no_established_client(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/newserver/src/commonMain/kotlin/RawClient.kt",
+                "import java.net.HttpURLConnection\nfun fetch() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("raw http bypasses established ktor client" in f for f in findings))
+
+    def test_ignores_correct_reuse_of_established_client(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/commonMain/kotlin/NetworkResult.kt",
+                self._NETWORK_RESULT_KT,
+            )
+            self._write(
+                root, "feature/newserver/src/commonMain/kotlin/GoodClient.kt",
+                "suspend fun fetchFromNewServer(): NetworkResult<String> = safeRequest()\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("raw http bypasses established ktor client" in f for f in findings))
+
+
 class ToggleLayoutStabilityTests(unittest.TestCase):
     def _write(self, root: Path, filename: str, content: str) -> None:
         d = root / "src" / "commonMain" / "kotlin" / "ui"

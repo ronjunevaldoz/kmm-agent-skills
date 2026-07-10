@@ -49,6 +49,7 @@ The script detects architectural and design smells:
 | `combined lesson file` | A `docs/lessons/*.md` file contains more than one lesson (`## What we followed` appears more than once) — the harvester reads one Lesson per file; this breaks grouping and review |
 | `combined layout screen file` | A `docs/layout-system/*.md` file (other than `_components.md`) has more than one top-level heading — more than one screen was written into one file |
 | `combined sqldelight table file` | A `.sq` file defines more than one `CREATE TABLE` — keep `.sq` files focused, one file per table |
+| `raw http bypasses established ktor client` | A raw platform HTTP API (`HttpURLConnection`, `NSURLSession`, etc.) is used somewhere in a project that already has an established Ktor client (`NetworkResult<T>`/`safeRequest` found elsewhere) — detected by content, not a fixed module name |
 | `design system prefix mismatch` | An `App*`-named declaration under `core/designsystem` while `docs/design-system.md` records a different resolved `COMPONENT_PREFIX` — the resolved prefix wasn't actually used when generating |
 | `empty platform source set` | An `androidMain`/`iosMain`/`jvmMain`/... source directory with no `.kt` files, or files containing only package/import/comments — dead scaffolding; Gradle compiles fine without it |
 
@@ -124,6 +125,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `combined lesson file` | `lessons` | Split into separate files via `create_lesson.py`, one invocation per finding |
 | `combined layout screen file` | `layout-system` | Split into separate files via `create_wireframe.py`, one invocation per screen |
 | `combined sqldelight table file` | `sqldelight-setup` | Split into one `.sq` file per table |
+| `raw http bypasses established ktor client` | `network-layer` | Find the existing client by content (`grep -rl "HttpClient(\|safeRequest\|NetworkResult<"`), reuse it instead of the raw call — see Step 0 |
 | `design system prefix mismatch` | `design-system` | Regenerate the flagged file(s) with the resolved `COMPONENT_PREFIX` directly — don't hand-rename `App*` symbols after the fact |
 | `empty platform source set` | `feature-scaffold` | Delete the empty source directory, or implement the real `expect`/`actual` code if this module genuinely needs platform-specific logic — never scaffold the folder "just in case" |
 
