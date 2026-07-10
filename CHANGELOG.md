@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.57.3] — 2026-07-10
+
+### Docs
+
+- docs(token-saver): document RTK's real two-phase install
+
+---
+
 ## [v1.57.2] — 2026-07-10
 
 ### Docs
