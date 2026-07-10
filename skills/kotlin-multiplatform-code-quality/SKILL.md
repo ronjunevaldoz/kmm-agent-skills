@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-09'
+  last-updated: '2026-07-10'
   keywords:
     - Ktlint
     - Detekt
@@ -24,6 +24,8 @@ metadata:
     - comment style
     - documentation convention
     - kdoc vs comment
+    - extension function documentation
+    - documentation by architectural level
 ---
 
 ## When to Use This Skill
@@ -242,6 +244,27 @@ Two comment types, two jobs — never mix them:
 | Grows past ~4 lines? | Split: keep the one-sentence WHY inline, move the rest to `docs/reference/` with a pointer comment (see below) | N/A — KDoc doesn't accumulate this way; if a class needs paragraphs, that's what `docs/reference/` is for too |
 | Nests? | N/A | KDoc does **not** nest. Plain block comments (`/* */`) do, unlike Java/C |
 
+### By architectural level
+
+The table above sorts by comment *type*; this sorts by *where in the code* it lives —
+use both together when reviewing or refactoring documentation.
+
+| Level | Rule |
+|---|---|
+| Classes & interfaces | KDoc states the class's responsibility and architectural role only. Skip trivial openers ("Represents a X") — say what it owns and why it exists as a separate type, not what its name already tells you. |
+| Functions & methods | KDoc only for complex public members, using the tag table below. Document inputs, outputs, and edge cases — never mechanics. `UndocumentedPublicFunction` requires *something*, so trivial one-liners (a getter, a pure delegate) get a single sentence, not a full `@param` breakdown. |
+| Extension functions | State the receiver scope and calling context — *when* to reach for this extension, not just what it returns. Use `@receiver` for any precondition the receiver must satisfy (e.g. "must be called from inside an active `viewModelScope`"). This is the one KDoc case where "when to use it" outranks "what it does," because the same signature can exist as a member on an unrelated type. |
+| Inline blocks (loops, conditionals) | No `//` that explains WHAT a block does — extract a named function or variable so the code reads as its own explanation. Keep `//` only for a non-obvious workaround or a business-logic WHY. |
+
+```kotlin
+/**
+ * Retries [block] with exponential backoff, but only while this scope's job is active.
+ * @receiver Must be a scope tied to a UI lifecycle (e.g. `viewModelScope`) — cancels
+ * in-flight retries when the receiver is cancelled instead of leaking a delay loop.
+ */
+suspend fun <T> CoroutineScope.retryWhileActive(times: Int, block: suspend () -> T): T { ... }
+```
+
 ### Two real mistakes this caught
 
 **A `//` on the same line as code can swallow what follows it** — it runs to end-of-line,
@@ -389,6 +412,7 @@ lint:
 - adding KDoc to a private member to explain unclear behavior — rename the member instead; flagged by Detekt's `DocumentationOverPrivateFunction`/`DocumentationOverPrivateProperty`
 - placing a `//` comment inside a function call's argument list before its closing `)`/`{` — silently comments out the rest of the line; this exact bug shipped in `kotlin-multiplatform-imagevector-generator`'s own codegen
 - writing a multi-paragraph inline comment that mixes "why this code exists" with mechanism detail, rejected alternatives, and exact version numbers — split it: the short WHY stays inline, the exhaustive rationale goes in `docs/reference/` with a one-line pointer left in the comment
+- documenting an extension function's return value without stating the receiver scope or precondition it assumes — callers can't tell when it's safe to call versus when to reach for the member function instead
 
 If Detekt reports false positives, use `@Suppress("RuleName")` at the call site, not a global exclude.
 
@@ -409,6 +433,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-10 | Added "By architectural level" — a second cut through the same rules organized by Classes/Functions/Extension functions/Inline blocks instead of by comment type, closing a real gap: extension functions had no documentation guidance at all beyond a passing `@receiver` mention. New rule: extension KDoc must state receiver scope/precondition, since "when to use it" outranks "what it does" for a function that could otherwise be mistaken for a member. 1 new anti-pattern, 1 new example. |
 | 2026-07-09 | Restructured "Comment & KDoc Conventions" around an explicit single-line (`//`) vs multi-line (KDoc `/** */`) split — a single decision table up front instead of scattered prose, so the rule is unambiguous for any agent to follow. Trimmed ~55 net lines (7 subsections → 5) while keeping every rule, both real-bug examples, the KDoc tag table, and the license-header note. |
 | 2026-07-09 | Added a "Code comment vs. development notes" split, from a real 9-line inline comment that crammed a build-topology explanation, rejected alternatives, and exact version numbers into one `includeBuild()` call site. Rule: an inline comment survives only if it answers a question that would make someone break the code by "simplifying" it; the exhaustive rationale moves to `docs/reference/` (per `kotlin-multiplatform-project-docs-maintainer`'s existing convention) with a one-line pointer left in the comment. Before/after example, 1 new anti-pattern, 2 new Related Skills cross-references. |
 | 2026-07-09 | Extended the "Comment & KDoc Conventions" section: a full KDoc tag reference (`@param`/`@return`/`@throws`/`@see`/`@sample`/`@property`/`@receiver`/`@constructor`/`@suppress`), guidance that an example is warranted only for non-obvious public API (never required per function/file — same "why not what" principle), `@sample`'s advantage over a raw code block (references an actual compiled function, can't silently drift stale), and a "License headers" note (situational, not a default — cross-referenced to `kotlin-multiplatform-library-publishing`). |
