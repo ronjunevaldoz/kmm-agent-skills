@@ -4360,6 +4360,52 @@ fun LoginContent(
         self.assertIn("file", parsed[0])
 
 
+class ScanDesignViolationsDeployedSkillsExclusionTests(unittest.TestCase):
+    """The same false-positive class found in kotlin-multiplatform-audit's
+    audit_project.py (deployed skill reference/template content scanned as if it were
+    the consumer's own source) also existed here: _SKIP_DIR_FRAGMENTS only knew about
+    designsystem/design_system/theme, so a real project with skills deployed to
+    .claude/skills/ would get a hardcoded_color violation from this skill's own
+    detekt-rules/src/test/kotlin/.../HardcodedColorRuleTest.kt (which legitimately
+    contains a Color(0x...) literal to test the rule against). Worse than the
+    read-only audit case since /fix-design uses this scanner to auto-fix violations.
+    """
+
+    def test_ignores_deployed_skill_detekt_rule_test_fixture(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = (
+                root / ".claude" / "skills" / "kotlin-multiplatform-design-system"
+                / "detekt-rules" / "src" / "test" / "kotlin"
+            )
+            d.mkdir(parents=True)
+            (d / "HardcodedColorRuleTest.kt").write_text(
+                "class HardcodedColorRuleTest {\n    val bad = Color(0xFFAABBCC)\n}\n",
+                encoding="utf-8",
+            )
+            findings = scan_design_violations_scripts.scan(root)
+            self.assertEqual(findings, [])
+
+    def test_still_flags_real_project_code_alongside_deployed_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = (
+                root / ".claude" / "skills" / "kotlin-multiplatform-design-system"
+                / "detekt-rules" / "src" / "test" / "kotlin"
+            )
+            d.mkdir(parents=True)
+            (d / "HardcodedColorRuleTest.kt").write_text(
+                "val bad = Color(0xFFAABBCC)\n", encoding="utf-8"
+            )
+            real = root / "app" / "shared" / "src" / "commonMain" / "kotlin"
+            real.mkdir(parents=True)
+            (real / "App.kt").write_text("val Ink = Color(0xFFE9EDF7)\n", encoding="utf-8")
+
+            findings = scan_design_violations_scripts.scan(root)
+            self.assertFalse(any(".claude" in f["file"] for f in findings))
+            self.assertTrue(any("App.kt" in f["file"] for f in findings))
+
+
 class LayoutConsistencyTests(unittest.TestCase):
     """Tests for scan_layout_consistency() in scan_design_violations.py."""
 

@@ -15,7 +15,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-10'
+  last-updated: '2026-07-11'
   keywords:
     - design system
     - Compose Styles API
@@ -2633,6 +2633,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-11 | Fixed the same false-positive class found and fixed in `kotlin-multiplatform-audit`'s `audit_project.py`: `scan_design_violations.py`'s `_SKIP_DIR_FRAGMENTS` only knew about `designsystem`/`design_system`/`theme`, so a project with skills deployed to `.claude/skills/` would get a `hardcoded_color` violation from this skill's own `detekt-rules/src/test/kotlin/.../HardcodedColorRuleTest.kt` (a legitimate test fixture, not real app code). Worse than the read-only audit case since `/fix-design` uses this scanner to auto-fix violations — could have rewritten deployed skill reference files. Added the same build/VCS/vendor/deployed-skills exclusion set `audit_project.py` uses. Reproduced the exact false positive before fixing; 2 new regression tests confirm it's gone while real project violations alongside deployed skills still fire. |
 | 2026-07-10 | Evaluated deprecating this skill (and `design-system-extended`) in favor of the user's own published `shadcn-compose`/`heroicons-compose`/`tailwind-compose` libraries — decided **not yet**: `shadcn-compose` is still `-SNAPSHOT` (not on Maven Central) and depends on the same experimental `@ExperimentalStylesApi` this skill's Ownership Model explicitly avoids by staying scaffold-based; `heroicons-compose` only has the Outline variant built vs. this repo's 4-variant coverage. `tailwind-compose`, however, is stable-API-only and already published — added a cross-reference for it in Ownership Model as a complementary utility-class layer, not a replacement. |
 | 2026-07-08 | Fixed a real layout-shift bug found across `ButtonStyles.kt`/`TextFieldStyles.kt`: `focused {}` blocks animated `borderWidth`/`borderBottomWidth` (0→2dp or 1→2dp), re-measuring the component on focus. Fixed by reserving the final border width at rest (`borderColor(Color.Transparent)` where there's no border at rest) and animating only `borderColor`. New "Ring vs border" rule in Style Rules explaining the CSS-ring analogy; new audit detector `focused state animates border width [MEDIUM]`. |
 | 2026-07-08 | New `StyleVariant` marker interface + `rememberStyle(vararg variants)` composable — memoizes the merged `variant.style then size.style` descriptor on the variants themselves instead of rebuilding it every recomposition. All variant sealed interfaces (`ButtonVariant`, `ButtonSize`, `BadgeVariant`, `CardVariant`, `ChipVariant`, `TextFieldVariant`) now extend it; `AppButton` updated to use `rememberStyle(variant, size)`. Added "Custom context-aware modifiers" guidance: one-off `Modifier` extensions resolve theme defaults internally via `Modifier.composed { }`, never as a caller-supplied parameter with a hardcoded literal default. `CardSize` intentionally excluded — it holds raw `Dp` values, not a `Style` descriptor, so it doesn't fit the `StyleVariant` contract. 3 new anti-patterns. |

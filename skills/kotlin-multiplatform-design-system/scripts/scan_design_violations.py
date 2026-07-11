@@ -100,7 +100,18 @@ _SKIP_NAME_SUFFIXES = (
     "Colors.kt", "Typography.kt", "Spacing.kt", "Shapes.kt",
     "ScreenshotTest.kt",
 )
-_SKIP_DIR_FRAGMENTS = {"designsystem", "design_system", "theme"}
+_SKIP_DIR_FRAGMENTS = {
+    "designsystem", "design_system", "theme",
+    # Build artifacts, VCS internals, and vendored code — never the consumer's own source.
+    "build", ".gradle", ".git", "vendor", "third_party", "node_modules",
+    ".idea", ".kotlin", "kotlin-js-store",
+    # Deployed agent skills bundles — this collection's own reference/template/test
+    # code (e.g. detekt-rules/src/test/kotlin/.../HardcodedColorRuleTest.kt legitimately
+    # contains a Color(0x...) literal to test the rule against), not the consumer's
+    # real app code. Matches the same set kotlin-multiplatform-audit's audit_project.py
+    # excludes for the identical reason.
+    ".claude", ".codex", ".cursor", ".continue", "copilot",
+}
 
 
 def _should_skip(path: Path) -> bool:
