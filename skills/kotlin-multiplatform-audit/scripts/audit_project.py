@@ -47,17 +47,21 @@ def _at(text: str, pos: int) -> tuple[int, str]:
 # ── Roadmap detection ─────────────────────────────────────────────────────────
 
 def _has(root: Path, *globs: str) -> bool:
-    return any(root.rglob(g) for g in globs)
+    return any(
+        not _is_excluded(p, root) for g in globs for p in root.rglob(g)
+    )
 
 
 def _count_files(root: Path, *globs: str) -> int:
-    return sum(1 for g in globs for _ in root.rglob(g))
+    return sum(1 for g in globs for p in root.rglob(g) if not _is_excluded(p, root))
 
 
 def _read_all(root: Path, *globs: str) -> str:
     parts = []
     for g in globs:
         for p in root.rglob(g):
+            if _is_excluded(p, root):
+                continue
             try:
                 parts.append(p.read_text(encoding="utf-8", errors="ignore"))
             except OSError:
@@ -346,6 +350,8 @@ def _detect_agent_setup(root: Path) -> list[str]:
 def _detect_mvi_placement(root: Path) -> list[str]:
     findings: list[str] = []
     for path in root.rglob("MviViewModel.kt"):
+        if _is_excluded(path, root):
+            continue
         rel = path.relative_to(root).as_posix()
         # Flag if it's inside a feature module, not in shared/core
         if any(seg in rel for seg in ("feature", "studio", "app")) and not any(
@@ -366,6 +372,8 @@ def _detect_design_system_wiring(root: Path) -> list[str]:
 
     token_files: list[Path] = []
     for path in root.rglob("*Tokens.kt"):
+        if _is_excluded(path, root):
+            continue
         try:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
@@ -381,6 +389,8 @@ def _detect_design_system_wiring(root: Path) -> list[str]:
         )
 
     for path in root.rglob("*.kt"):
+        if _is_excluded(path, root):
+            continue
         if not any(part in path.stem for part in ("Theme", "theme")):
             continue
         try:
@@ -675,6 +685,14 @@ _EXCLUDED_DIRS = {
     "build", ".gradle", ".git", "vendor", "third_party",
     "node_modules", ".idea", ".kotlin", "kotlin-js-store",
     "worktrees",  # .claude/worktrees/ — agent scratch copies of the repo
+    # Deployed agent skills bundles (kmm-agent-skills' own reference templates,
+    # example code, and scripts) — not the consumer project's source. Scanning these
+    # produces false positives from the skill collection's own scaffold templates
+    # (e.g. kotlin-multiplatform-feature-scaffold's templates/androidApp/build.gradle.kts
+    # legitimately has a literal versionCode = 1 placeholder, meant to be filled in
+    # during real scaffolding, not a hardcoded value in a real app). Matches the same
+    # agent-dir candidates update-consumer-skills.sh already recognizes.
+    ".claude", ".codex", ".cursor", ".continue", "copilot",
 }
 
 # ── Hardcoded Android versionCode ─────────────────────────────────────────────

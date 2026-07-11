@@ -1818,6 +1818,161 @@ class HardcodedVersionCodeTests(unittest.TestCase):
             self.assertFalse(any("hardcoded android versioncode" in f for f in findings))
 
 
+class HasAndCountFilesAlwaysTrueRegressionTests(unittest.TestCase):
+    """A severe pre-existing bug found during a full self-audit: _has() tested
+    `any(root.rglob(g) for g in globs)` — each item any() saw was a whole generator
+    object (from the nested generator expression), and generator objects are always
+    truthy regardless of whether they yield anything. _has() therefore returned True
+    for every project regardless of whether the file actually existed, silently
+    disabling _detect_detekt's HIGH-priority "no Detekt gates" adoption-plan trigger
+    and the version-catalog/tests detectors for every project ever audited. No prior
+    test caught this because none exercised the genuinely-missing case.
+    """
+
+    def test_has_returns_false_when_nothing_matches(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "app").mkdir()
+            (root / "app" / "App.kt").write_text("fun main() {}", encoding="utf-8")
+            self.assertFalse(audit_scripts._has(root, "detekt.yml", "detekt.yaml"))
+
+    def test_has_returns_true_when_something_matches(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "detekt.yml").write_text("", encoding="utf-8")
+            self.assertTrue(audit_scripts._has(root, "detekt.yml", "detekt.yaml"))
+
+    def test_count_files_returns_zero_when_nothing_matches(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "app").mkdir()
+            (root / "app" / "App.kt").write_text("fun main() {}", encoding="utf-8")
+            self.assertEqual(audit_scripts._count_files(root, "*Test.kt", "*Spec.kt"), 0)
+
+    def test_detect_detekt_reports_missing_for_a_clean_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "app").mkdir()
+            (root / "app" / "App.kt").write_text("fun main() {}", encoding="utf-8")
+            self.assertEqual(audit_scripts._detect_detekt(root), "missing")
+
+    def test_detect_version_catalog_reports_missing_for_a_clean_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "app").mkdir()
+            (root / "app" / "App.kt").write_text("fun main() {}", encoding="utf-8")
+            self.assertEqual(audit_scripts._detect_version_catalog(root), "missing")
+
+    def test_detect_tests_reports_none_for_a_clean_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "app").mkdir()
+            (root / "app" / "App.kt").write_text("fun main() {}", encoding="utf-8")
+            self.assertEqual(audit_scripts._detect_tests(root), "none")
+
+    def test_has_ignores_a_deployed_skill_template_libs_versions_toml(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / ".claude" / "skills" / "kotlin-multiplatform-feature-scaffold" / "templates" / "gradle"
+            d.mkdir(parents=True)
+            (d / "libs.versions.toml").write_text('[versions]\nkotlin = "2.4.0"\n', encoding="utf-8")
+            self.assertEqual(audit_scripts._detect_version_catalog(root), "missing")
+
+    def test_count_files_ignores_a_deployed_skill_test_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = (
+                root / ".claude" / "skills" / "kotlin-multiplatform-design-system"
+                / "detekt-rules" / "src" / "test" / "kotlin"
+            )
+            d.mkdir(parents=True)
+            (d / "ComponentRegistryRuleTest.kt").write_text("class ComponentRegistryRuleTest", encoding="utf-8")
+            self.assertEqual(audit_scripts._detect_tests(root), "none")
+
+
+class DeployedSkillsBundleExclusionTests(unittest.TestCase):
+    """A real bug: a consumer project with skills deployed to .claude/skills/ got a
+    'hardcoded android versioncode' false positive from kotlin-multiplatform-feature-scaffold's
+    own templates/androidApp/build.gradle.kts (versionCode = 1 is a legitimate scaffold
+    placeholder, not the user's real app config). _EXCLUDED_DIRS now excludes deployed
+    agent skills bundle directories entirely.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_ignores_scaffold_template_under_claude_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                ".claude/skills/kotlin-multiplatform-feature-scaffold/templates/androidApp/build.gradle.kts",
+                'plugins { id("com.android.application") }\n'
+                "android {\n    defaultConfig {\n"
+                '        applicationId = "com.example.app"\n'
+                "        versionCode = 1\n    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded android versioncode" in f for f in findings))
+
+    def test_still_flags_real_project_code_alongside_deployed_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                ".claude/skills/kotlin-multiplatform-feature-scaffold/templates/androidApp/build.gradle.kts",
+                "android {\n    defaultConfig {\n        versionCode = 1\n    }\n}\n",
+            )
+            self._write(
+                root,
+                "app/shared/src/commonMain/kotlin/App.kt",
+                "val Ink = androidx.compose.ui.graphics.Color(0xFFE9EDF7)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded android versioncode" in f for f in findings))
+            self.assertTrue(any("magic color literal" in f for f in findings))
+
+    def test_ignores_content_under_codex_and_cursor_and_continue_skills(self) -> None:
+        for agent_dir in (".codex", ".cursor", ".continue"):
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                self._write(
+                    root,
+                    f"{agent_dir}/skills/kotlin-multiplatform-feature-scaffold/templates/androidApp/build.gradle.kts",
+                    "android {\n    defaultConfig {\n        versionCode = 1\n    }\n}\n",
+                )
+                findings = audit_scripts.audit_project(root)
+                self.assertFalse(
+                    any("hardcoded android versioncode" in f for f in findings),
+                    f"false positive under {agent_dir}/skills/",
+                )
+
+    def test_mvi_placement_ignores_deployed_skill_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                ".claude/skills/kotlin-multiplatform-mvi/templates/MviViewModel.kt",
+                "abstract class MviViewModel<State, Intent, Effect>",
+            )
+            findings = audit_scripts._detect_mvi_placement(root)
+            self.assertEqual(findings, [])
+
+    def test_design_system_wiring_ignores_deployed_skill_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                ".claude/skills/kotlin-multiplatform-design-system/templates/AppTheme.kt",
+                "@Composable\nfun AppTheme(content: @Composable () -> Unit) {\n"
+                "    MaterialTheme(content = content)\n}\n",
+            )
+            findings = audit_scripts._detect_design_system_wiring(root)
+            self.assertEqual(findings, [])
+
+
 class LayoutGuardrailTests(unittest.TestCase):
     def test_flags_arbitrary_weight(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
