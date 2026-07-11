@@ -27,19 +27,20 @@ What it does (in order):
     1.  Verify git working tree is clean
     2.  Run audit_skills_repo.py — must be zero findings
     3.  Run scan_skill_issues.py — must report zero issues
-    4.  Run validate_skill_map.py — README, expert map, and planner must match
-    5.  Run validate_keyword_routing.py — every skill must have routing coverage
-    6.  Run pytest — must be 100% passing
-    7.  Bump version in skills.json (semver base version, no pre-release suffix)
-    8.  Regenerate all skill entries in skills.json from SKILL.md frontmatter
-    9.  Update shipped skill count in PLAN.md
-    10. Prepend new section to CHANGELOG.md (auto-generated from git log)
-    11. Stage skills.json, PLAN.md, CHANGELOG.md
-    12. Create a release commit: "Release vX.Y.Z" or "Release vX.Y.Z-rc.N"
-    13. Create an annotated git tag vX.Y.Z or vX.Y.Z-rc.N
-    14. --rc: create pre-release GitHub Release
+    4.  Run scan_command_shell_portability.py — commands/*.md must have no known-fragile find predicates
+    5.  Run validate_skill_map.py — README, expert map, and planner must match
+    6.  Run validate_keyword_routing.py — every skill must have routing coverage
+    7.  Run pytest — must be 100% passing
+    8.  Bump version in skills.json (semver base version, no pre-release suffix)
+    9.  Regenerate all skill entries in skills.json from SKILL.md frontmatter
+    10. Update shipped skill count in PLAN.md
+    11. Prepend new section to CHANGELOG.md (auto-generated from git log)
+    12. Stage skills.json, PLAN.md, CHANGELOG.md
+    13. Create a release commit: "Release vX.Y.Z" or "Release vX.Y.Z-rc.N"
+    14. Create an annotated git tag vX.Y.Z or vX.Y.Z-rc.N
+    15. --rc: create pre-release GitHub Release
         stable: create full GitHub Release
-    15. Print push instructions — does NOT push automatically
+    16. Print push instructions — does NOT push automatically
 
 Agents: run this script exactly as shown above. Do not push to remote
 without explicit user confirmation. Never run `git tag` manually.
@@ -61,6 +62,7 @@ CHANGELOG_MD = REPO_ROOT / "CHANGELOG.md"
 SKILLS_DIR = REPO_ROOT / "skills"
 AUDIT_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_skills_repo.py"
 SCAN_ISSUES_SCRIPT = REPO_ROOT / "scripts" / "scan_skill_issues.py"
+SCAN_COMMAND_SHELL_PORTABILITY_SCRIPT = REPO_ROOT / "scripts" / "scan_command_shell_portability.py"
 VALIDATE_SKILL_MAP_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_skill_map.py"
 VALIDATE_KEYWORD_ROUTING_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_keyword_routing.py"
 CHECK_COMPAT_MATRIX_SCRIPT = REPO_ROOT / "scripts" / "check_compat_matrix.py"
@@ -122,6 +124,17 @@ def run_scan_skill_issues() -> None:
     ok("Skill issue scan clean — zero issues")
 
 
+def run_command_shell_portability_scan() -> None:
+    result = run(["python3", str(SCAN_COMMAND_SHELL_PORTABILITY_SCRIPT)], check=False)
+    if result.returncode != 0:
+        fail(
+            "scan_command_shell_portability.py found issues. Fix them before releasing.\n"
+            + result.stdout
+            + result.stderr
+        )
+    ok("Command shell portability scan clean")
+
+
 def run_skill_map_validation() -> None:
     result = run(
         ["python3", str(VALIDATE_SKILL_MAP_SCRIPT), "--repo-root", str(REPO_ROOT)],
@@ -176,6 +189,7 @@ def run_compat_matrix_check() -> None:
 def run_release_validation() -> None:
     run_audit()
     run_scan_skill_issues()
+    run_command_shell_portability_scan()
     run_skill_map_validation()
     run_keyword_routing_validation()
     run_compat_matrix_check()

@@ -76,10 +76,7 @@ If multiple modules use Roborazzi (monorepo), resolve each independently and aud
 ## Step 2 — Find screenshots
 
 ```bash
-find "<resolved-output-dir>" -name "*.png" \
-  -not -name "*_compare.png" \
-  -not -name "*_actual.png" \
-  | sort
+find "<resolved-output-dir>" -name "*.png" | grep -v -e "_compare\.png$" -e "_actual\.png$" | sort
 ```
 
 Group files into pairs where possible:
