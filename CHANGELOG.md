@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.62.2] — 2026-07-11
+
+### Fixed
+
+- fix(audit): fix _has() always-True bug, extend exclusion to all detectors
+
+---
+
 ## [v1.62.1] — 2026-07-11
 
 ### Fixed
