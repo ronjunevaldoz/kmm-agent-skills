@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.64.0] — 2026-07-11
+
+### Added
+
+- feat(skills): add kotlin-multiplatform-shadcn-compose consumption skill
+
+---
+
 ## [v1.63.0] — 2026-07-11
 
 ### Added
