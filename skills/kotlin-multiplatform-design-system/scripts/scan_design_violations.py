@@ -324,6 +324,27 @@ def scan_file(path: Path) -> list[dict]:
     return _scan_patterns(path, lines) + _scan_nested_containers(path, lines)
 
 
+# Maps the majority layout pattern found in a ui/ dir to a shadcn-compose component
+# that would give every screen the same pattern out of the box. Suggested as an option
+# alongside the "consolidate to one pattern yourself" fix — never a silent recommendation
+# to add the dependency; the risk note is always attached.
+_SHADCN_LAYOUT_SUGGESTION = {
+    "tabbed": "ShadcnTabs",
+    "card": "ShadcnCard",
+    "flat": "ShadcnItem/ShadcnItemGroup",
+}
+
+
+def _shadcn_pattern_note(majority: str) -> str:
+    component = _SHADCN_LAYOUT_SUGGESTION.get(majority, "ShadcnCard")
+    return (
+        f" Alternatively, {component} (shadcn-compose) gives every screen in this dir "
+        f"the same pattern out of the box — see kotlin-multiplatform-shadcn-compose "
+        f"before adding it; it's a real dependency with an experimental-API risk, not a "
+        f"free consolidation."
+    )
+
+
 def _classify_layout(content: str) -> str:
     """Return the dominant layout pattern for a *Content.kt file."""
     if _TABBED_RE.search(content):
@@ -372,6 +393,7 @@ def scan_layout_consistency(project_root: Path) -> list[dict]:
                         f"{ui_dir.name}/ (majority: '{majority}'). "
                         "All *Content.kt files in the same feature ui/ dir should use "
                         "the same top-level pattern (flat / card / tabbed)."
+                        + _shadcn_pattern_note(majority)
                     ),
                 })
 

@@ -4458,6 +4458,18 @@ class LayoutConsistencyTests(unittest.TestCase):
         types = [f["type"] for f in findings]
         self.assertIn("layout_inconsistency", types)
 
+    def test_mixed_layout_suggests_matching_shadcn_pattern_with_risk_note(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            ui = self._make_ui_dir(tmp)
+            self._write_content(ui, "OverviewContent.kt", "fun OverviewContent() { Column { TabRow() } }")
+            self._write_content(ui, "SecondContent.kt", "fun SecondContent() { Column { TabRow() } }")
+            self._write_content(ui, "ListContent.kt", "fun ListContent() { Column { } }")
+            findings = scan_design_violations_scripts.scan_layout_consistency(Path(tmp))
+        messages = " ".join(f["message"] for f in findings if f["type"] == "layout_inconsistency")
+        self.assertIn("ShadcnTabs", messages)
+        self.assertIn("kotlin-multiplatform-shadcn-compose", messages)
+        self.assertIn("experimental-API risk", messages)
+
     def test_single_content_file_not_flagged(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             ui = self._make_ui_dir(tmp)

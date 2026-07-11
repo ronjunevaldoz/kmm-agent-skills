@@ -204,6 +204,7 @@ All commands are `kmm-` prefixed so they don't collide with your own `.claude/co
 | `/kmm-generate-palette <name=#HEX ...>` | Generate `AppColors.kt` + Compose palette preview from N brand seed colors |
 | `/kmm-vectorize <image>` | Compile a raster/SVG into a Kotlin `ImageVector` — replaces PNG icons and hand-written paths |
 | `/kmm-fix-design [path]` | Scan and fix design system violations |
+| `/kmm-migrate-to-shadcn [path]` | Migrate a project from the owned design-system to shadcn-compose, file-by-file with confirmation |
 | `/kmm-clean-comments [path]` | Refactor documentation by architectural level (class/function/extension/inline) |
 | `/kmm-update-design-system [path]` | Pull latest design system components |
 | `/kmm-record-design-baselines [path]` | Record Roborazzi golden PNGs |

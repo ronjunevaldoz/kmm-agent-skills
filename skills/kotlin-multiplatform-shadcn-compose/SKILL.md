@@ -36,12 +36,21 @@ Use only when:
 **Never combine with `kotlin-multiplatform-design-system`.** They are alternative component
 sources for the same layer — pick one.
 
-**Do not suggest this skill unprompted.** `kotlin-multiplatform-design-system`'s Ownership
-Model exists specifically to avoid the risk this library accepts (a hard dependency on
-`@OptIn(ExperimentalFoundationStyleApi::class)`, an actual Jetpack Compose Foundation
-experimental annotation the Compose team can change or remove in any release). Route here
-only when the user has explicitly chosen it, ideally via the warning-gated flow in
-`/kmm-new-project` Step 6a.
+**Actually adding this dependency requires explicit user choice** — via `/kmm-new-project`
+Step 6a, `/kmm-migrate-to-shadcn`, or an equivalent direct confirmation. Never add it
+silently.
+
+**Mentioning a specific `Shadcn*` component as an option is fine, even in a project that
+doesn't use this library yet** — for example, a layout-quality finding (mixed flat/card/
+tabbed patterns across screens, per `scan_design_violations.py`'s `layout_inconsistency`
+check) may suggest the matching component (`ShadcnTabs`, `ShadcnItem`/`ShadcnItemGroup`,
+etc.) as one option alongside consolidating to the project's existing pattern manually.
+**Every such suggestion must state the experimental-API risk inline, in the same
+message** — never a bare "use ShadcnTabs" with the risk left for the user to discover
+later. `kotlin-multiplatform-design-system`'s Ownership Model exists specifically to avoid
+this risk (a hard dependency on `@OptIn(ExperimentalFoundationStyleApi::class)`, an actual
+Jetpack Compose Foundation experimental annotation the Compose team can change or remove in
+any release) — a suggestion that omits it isn't a complete recommendation.
 
 **Trigger keywords:** shadcn-compose, ShadcnButton, ShadcnTheme, ShadcnCard, shadcn ui
 kotlin, shadcn compose multiplatform, ExperimentalFoundationStyleApi, shadcn kmp.
@@ -150,6 +159,57 @@ fun App() {
 preset's own ring) if the project needs a different corner radius or focus-ring style than
 the chosen preset ships.
 
+### Picking a preset by app vibe
+
+`ShadcnStylePreset` isn't a cosmetic label — each value carries a real, documented
+personality (shape, spacing, animation timing, icon weight), verified against
+`ShadcnStylePreset.kt`'s own KDoc:
+
+| Preset | Documented personality | Fits |
+|---|---|---|
+| `Vega` | "Clean, neutral, and familiar" — balanced default | General-purpose, e-commerce, finance |
+| `Nova` | "Reduced padding and margins," snappy, ultra-tight | Productivity tools, dense utility apps |
+| `Maia` | "Rounded, with generous spacing," fluid and bouncy | Social, community, consumer/playful apps |
+| `Lyra` | "Boxy and sharp. For mono fonts," blueprint aesthetic | Developer tools, technical/admin apps |
+| `Mira` | "Made for compact interfaces," tightest timings | Dense dashboards, data-heavy screens |
+| `Luma` | "Fluid, luminous, and soft," slow elegant fades | Wellness, travel, lifestyle, premium feel |
+| `Sera` | "Editorial and typographic" | Content/reading apps, education |
+| `Rhea` | Luma's softness, Nova's compactness | Soft aesthetic that still needs density |
+
+`ShadcnBaseColor` (`Neutral`, `Stone`, `Zinc`, `Mauve`, `Olive`, `Mist`, `Taupe`) is the
+neutral gray family for background/foreground/border — `Neutral` is a safe default;
+`Stone` (warm) and `Zinc` (cool) are the two with an unambiguous undertone, useful when
+the app's existing palette leans warm or cool. `ShadcnAccent` has 18 real named colors
+(`Amber`, `Blue`, `Cyan`, `Emerald`, `Fuchsia`, `Green`, `Indigo`, `Lime`, `Orange`,
+`Pink`, `Purple`, `Red`, `Rose`, `Sky`, `Teal`, `Violet`, `Yellow`, plus `Base` for no
+override) — pick whichever matches the project's already-chosen brand accent by name.
+
+`/kmm-new-project` Step 6a-ii runs this exact inference automatically from the project's
+app type, using the same app-type category as the color-palette draft, and confirms the
+choice with the user before generating — don't skip that confirmation when adding this
+library outside the new-project flow either; always present the inferred preset/base
+color/accent as a recommendation, not a silent default.
+
+### Suggesting a component for a layout-quality problem
+
+When an audit finds a genuine layout smell, the matching component below is worth
+mentioning as one option — regardless of whether the project uses shadcn-compose yet —
+**as long as the experimental-API risk is stated in the same message**:
+
+| Layout smell (existing detector) | Suggested component |
+|---|---|
+| Mixed flat/card/tabbed patterns across screens (`scan_design_violations.py`'s `layout_inconsistency`, majority `tabbed`) | `ShadcnTabs` |
+| Same, majority `card` | `ShadcnCard` (consistent header/content/footer slots) |
+| Same, majority `flat` | `ShadcnItem`/`ShadcnItemGroup` |
+| Ad-hoc empty states with no consistent pattern | `ShadcnEmpty` |
+| Ad-hoc multi-pane/split layouts | `ShadcnResizablePanelGroup` |
+| Ad-hoc data grids | `ShadcnTable` |
+
+This is a suggestion, not an instruction — the fix that doesn't add a new dependency
+(consolidating to the project's own existing pattern) is still valid and often the
+right call for a project not otherwise considering shadcn-compose. Present both options
+when a layout-quality finding fires; don't default to only the shadcn-compose one.
+
 ---
 
 ## Step 3: Using components
@@ -200,6 +260,8 @@ UI; nothing shadcn-compose-specific changes that workflow.
 - pinning a version from `search.maven.org` — it lagged the real Maven Central publish by over a day when verified; check `repo1.maven.org` or the README directly
 - assuming heroicons-compose integration exists — this library explicitly has "no icon-library dependency"; every component draws from its own tokens
 - treating this as a stable, slow-moving dependency — 3 releases shipped in 3 days during this skill's own research; recheck before every use, not just once
+- suggesting a `Shadcn*` component for a layout-quality finding without stating the experimental-API risk in the same message — a suggestion that omits it isn't complete, even if it's "just an option"
+- suggesting a `Shadcn*` component as the *only* fix for a layout-quality finding — the no-new-dependency fix (consolidate to the project's existing pattern) is still valid and should be presented alongside it, not replaced by it
 
 ---
 
@@ -220,6 +282,7 @@ When asked to add or use shadcn-compose, respond in this order:
 - `kotlin-multiplatform-design-system` — the default, owned-scaffold alternative this skill exists to be compared against; see its Ownership Model note for the full risk tradeoff
 - `kotlin-multiplatform-feature-scaffold` — project must be scaffolded first
 - `kotlin-multiplatform-roborazzi` — screenshot-test screens built with these components the same as any other Compose UI
+- `/kmm-migrate-to-shadcn` — the file-by-file migration path from an existing `kotlin-multiplatform-design-system` project to this library, with the full `App*`→`Shadcn*` mapping table
 
 ---
 
@@ -227,4 +290,4 @@ When asked to add or use shadcn-compose, respond in this order:
 
 | Date | Change |
 |---|---|
-| 2026-07-11 | Initial release — Maven Central setup, `ShadcnTheme` wrapper (verified against real source), component usage (verified against real KDoc examples), and the experimental-API risk this skill exists specifically to disclose rather than hide. Gated to explicit user choice via `/kmm-new-project` Step 6a, never suggested unprompted. |
+| 2026-07-11 | Initial release — Maven Central setup, `ShadcnTheme` wrapper (verified against real source), component usage (verified against real KDoc examples), and the experimental-API risk this skill exists specifically to disclose rather than hide. Gated to explicit user choice via `/kmm-new-project` Step 6a, never suggested unprompted. Added "Picking a preset by app vibe" — full `ShadcnStylePreset`/`ShadcnBaseColor`/`ShadcnAccent` reference (verified against their own KDoc/source), and wired `/kmm-new-project` Step 6a-ii to auto-infer a preset/base color/accent recommendation from the same app-type category as the color-palette draft, always confirmed before generating, never a silent default. Added `/kmm-migrate-to-shadcn` — a full `App*`→`Shadcn*` migration command for existing design-system projects, with an honest mapping table (verified against the real component catalog, not assumed 1:1 parity) flagging the components with no direct equivalent (`AppScaffold`, `AppTopAppBar`, `AppNavigationBar`, `AppIcon`, `AppIconButton`) for explicit user decision rather than a guessed replacement. Wired `scan_design_violations.py`'s `layout_inconsistency` finding to suggest a matching `Shadcn*` component (`ShadcnTabs`/`ShadcnCard`/`ShadcnItem`) as an option regardless of whether the project uses shadcn-compose yet — every such suggestion states the experimental-API risk inline, and is presented alongside (never instead of) the no-new-dependency fix. |

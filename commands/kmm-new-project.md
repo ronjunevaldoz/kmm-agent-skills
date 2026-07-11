@@ -331,6 +331,60 @@ release may break it with no fix available except an upstream shadcn-compose rel
 [yes / switch to [13] owned scaffold instead]
 ```
 
+### 6a-ii — Draft a ShadcnTheme recommendation (only if [14] was confirmed)
+
+shadcn-compose's `ShadcnTheme(preset, baseColor, accent, ...)` takes real, named enum
+values, not raw hex — infer a recommendation from the same app type used for the color
+palette above, using shadcn-compose's actual documented preset personalities (verified
+against `ShadcnStylePreset.kt`'s own KDoc, not invented) and the same accent family
+already named in the color palette table:
+
+| App type | Preset (documented personality) | Base color | Accent |
+|---|---|---|---|
+| E-commerce / retail | `Vega` — "clean, neutral, and familiar" | `Neutral` | `Indigo` |
+| Finance / banking | `Vega` — "clean, neutral, and familiar" | `Zinc` (cool gray) | `Blue` |
+| Health / fitness | `Maia` — "rounded, generous spacing," fluid/bouncy | `Neutral` | `Green` |
+| Social / community | `Maia` — "rounded, generous spacing," fluid/bouncy | `Neutral` | `Purple` |
+| Productivity / tools | `Nova` — "reduced padding and margins," snappy | `Zinc` (cool gray) | `Blue` |
+| Food / restaurant | `Luma` — "fluid, luminous, and soft" | `Stone` (warm gray) | `Orange` |
+| Education | `Sera` — "editorial and typographic" | `Neutral` | `Blue` |
+| Travel | `Luma` — "fluid, luminous, and soft" | `Neutral` | `Sky` |
+
+Present as a numbered draft, same pattern as 6a:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DRAFT — SHADCN THEME  (recommended ✦)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Preset (pick one):
+  [18] ✦ Vega — "Clean, neutral, and familiar" (recommended for <app type>)
+  [19]   Nova — "Reduced padding and margins," snappy and compact
+  [20]   Maia — "Rounded, with generous spacing," fluid and bouncy
+  [21]   Lyra — "Boxy and sharp. For mono fonts," blueprint/technical
+  [22]   Mira — "Made for compact interfaces," tightest and minimal
+  [23]   Luma — "Fluid, luminous, and soft," slow elegant fades
+  [24]   Sera — "Editorial and typographic"
+  [25]   Rhea — Luma's softness, Nova's compactness
+
+Base color (pick one):
+  [26] ✦ Neutral — true gray (recommended default)
+  [27]   Stone — warm gray
+  [28]   Zinc — cool gray
+  [29]   Mauve / Olive / Mist / Taupe — see the catalog app for a live preview of each
+
+Accent (pick one, matches shadcn-compose's real named accents):
+  [30] ✦ <Accent> — (recommended for <app type>, matches the color palette drafted above)
+  [31]   Pick a different accent — Amber/Blue/Cyan/Emerald/Fuchsia/Green/Indigo/Lime/
+                  Orange/Pink/Purple/Red/Rose/Sky/Teal/Violet/Yellow
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+→ Recommended: [18][26][30]. Say a number to swap, or "looks good" to proceed.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Do not add the dependency or wire `ShadcnTheme` until this draft is confirmed** — same
+rule as the token draft in 6a.
+
 ### 6b — Generate the design system using confirmed tokens
 
 **If [13] (default) was chosen:**
@@ -354,6 +408,19 @@ per-target artifact for each registered platform), the required
 `@OptIn(ExperimentalFoundationStyleApi::class)`, and the `ShadcnTheme` wrapper. Do not also
 load `kotlin-multiplatform-design-system` — the two are alternative component sources,
 never combined in the same project.
+
+Wire `ShadcnTheme` at the app root using the preset/baseColor/accent confirmed in 6a-ii:
+
+```kotlin
+ShadcnTheme(
+    preset = ShadcnStylePreset.<confirmed preset>,
+    baseColor = ShadcnBaseColor.<confirmed base color>,
+    accent = ShadcnAccent.<confirmed accent>,
+    isDark = isSystemInDarkTheme(),
+) {
+    // app content
+}
+```
 
 **If [16] (heroicons-compose) was chosen:**
 
