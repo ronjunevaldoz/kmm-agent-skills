@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.61.1] — 2026-07-11
+
+### Fixed
+
+- fix(commands): replace fragile find -not predicate, add portability scanner
+
+---
+
 ## [v1.61.0] — 2026-07-10
 
 ### Added
