@@ -49,6 +49,7 @@ first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
 | Consumer release notes or per-skill changelogs | `changelog` |
 | Release, versioning, or Maven Central publishing | `release`, `ci-github-actions`, `xcframework-spm` |
 | KMP library publishing / Maven Central / GitHub Packages / BOM / apiCheck | `library-publishing`, `xcframework-spm`, `ci-github-actions` |
+| GitHub Pages developer guide / docs site / MkDocs / Dokka HTML API reference | `docs-site`, `library-publishing`, `project-docs-maintainer` |
 | Legal docs (privacy policy, terms, GDPR, data safety) | `legal-docs`, `flavor-environment`, `datastore` |
 | ProGuard / R8 / obfuscation / release build crashes / keep rules | `proguard-r8` |
 | In-app purchases / subscriptions / Play Billing / StoreKit / paywall | `in-app-purchases`, `mvi`, `dependency-injection` |

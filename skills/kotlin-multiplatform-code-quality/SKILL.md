@@ -399,6 +399,7 @@ lint:
 - `kotlin-multiplatform-project-docs-maintainer` — `docs/reference/` is where development notes go when a code comment's rationale outgrows what belongs inline
 - `kotlin-multiplatform-library-publishing` — per-file license headers, a related but separate comment-placement decision
 - `kotlin-multiplatform-audit` — `_detect_what_comment_in_control_flow` checks the "Inline blocks" rule below automatically; `/kmm-clean-comments` applies the fix across all four documentation levels
+- `kotlin-multiplatform-docs-site` — applies this skill's `@sample` principle (a real, compiled reference beats a pasted block that can drift stale) to public developer-guide code examples via snippet extraction
 
 ---
 

@@ -122,6 +122,7 @@ python3 scripts/release.py auto --dry-run # preview first
 - [`datastore`](skills/kotlin-multiplatform-datastore/) — Preferences DataStore + Proto DataStore
 - [`xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) — XCFramework and SPM export
 - [`library-publishing`](skills/kotlin-multiplatform-library-publishing/) — Maven Central, GitHub Packages, BOM, binary-compat-validator, GPG signing
+- [`docs-site`](skills/kotlin-multiplatform-docs-site/) — GitHub Pages developer guide, MkDocs Material, Dokka HTML API reference, compiler-verified code examples
 - [`mongodb-database`](skills/kotlin-multiplatform-mongodb-database/) — MongoDB coroutine driver and repositories
 - [`kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) — Kotlin RPC boundaries and scaffolding
 - [`jni-pro`](skills/kotlin-multiplatform-jni-pro/) — JVM JNI bridge to native C/C++

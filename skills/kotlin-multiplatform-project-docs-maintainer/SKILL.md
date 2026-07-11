@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-27'
+  last-updated: '2026-07-11'
   references:
     - references/docs-hygiene.md
   keywords:
@@ -29,6 +29,11 @@ metadata:
     - project documentation
     - repo docs
     - docs sync
+    - libraries catalog
+    - testing coverage doc
+    - docs/libraries.md
+    - docs/testing.md
+    - docs/demos.md
 ---
 
 ## When to Use This Skill
@@ -100,6 +105,8 @@ docs/
 ├── roadmap.md
 ├── architecture.md
 ├── deployment.md
+├── libraries.md
+├── testing.md
 ├── reference/
 ├── mvp/
 │   └── 0-mvp/
@@ -119,10 +126,22 @@ Use it like this:
 - `docs/roadmap.md` — consolidated planning, including integration and project planning
 - `docs/architecture.md` — system design, kept as the stable long-form architecture doc
 - `docs/deployment.md` — consolidated deployment and publishing flow
+- `docs/libraries.md` — catalog of every library this project publishes: name, Maven
+  coordinate, current version, publish status (stable/SNAPSHOT), link to its README.
+  Cross-referenced from `kotlin-multiplatform-library-publishing`'s release checklist so
+  a release has somewhere durable to point to, instead of nowhere
+- `docs/testing.md` — overview/index of test coverage: which modules have unit tests vs.
+  Roborazzi screenshot coverage, where goldens live, how to run the full suite locally.
+  Doesn't duplicate `kotlin-multiplatform-unit-testing`/`kotlin-multiplatform-roborazzi`'s
+  content — answers "what's actually covered" at a glance, the same relationship
+  `deployment.md` already has to the CI/release skills
 - `docs/reference/` — searchable technical audits, model setup notes, and deep references
 - `docs/mvp/` — structured MVP planning records, phase notes, and task breakdowns
 - `docs/bugs/` — active bug threads; start with one file (`0-bug.md`) and add a folder only
   if the bug lane needs multiple files
+- `docs/demos.md` — **conditional, not default.** Only add this if the project has a
+  runnable demo/sample/catalog app module. A project with no demo module should not have
+  this file at all — don't scaffold a demos page (or a demo module) just to have one
 
 Use the active lanes like this:
 - `docs/mvp/0-mvp/0-mvp.md` — the current MVP summary
@@ -278,6 +297,9 @@ Use this validation matrix for project docs:
 | Onboarding docs change | The setup steps match the current project workflow |
 | Release/setup docs change | Version numbers, paths, and commands reflect the current repo |
 | Benchmark or performance comparison tables | Write the canonical table in `docs/reference/benchmark-matrix.md` (or the nearest durable `docs/reference/` page), and keep task-note summaries short with a link back |
+| `docs/libraries.md` updates | Every listed Maven coordinate/version matches what's actually published (cross-check `gradle.properties`/`libs.versions.toml`, not just what the page claims) |
+| `docs/testing.md` updates | Every module claimed to have coverage actually has test files under it — don't list a module as covered because it should be |
+| `docs/demos.md` present | A real demo/sample/catalog module exists at the path the page references — this file should not exist at all if there's no demo module |
 
 ## Doc Classification and Hygiene
 
@@ -298,12 +320,17 @@ Read `references/docs-hygiene.md` before any clean-up task. It covers:
 - Updating one doc page and forgetting the linked reference page that explains it.
 - Copying code snippets that no longer compile or run.
 - Mixing consumer release-note content into general project docs.
+- Scaffolding `docs/demos.md` (or a demo module) when the project has no runnable demo app — this page is conditional, not part of the default topology.
+- Reusing this skill's internal `docs/` folder as the source for a public GitHub Pages developer guide — see `kotlin-multiplatform-docs-site`, which uses a separate `website/` folder specifically to avoid leaking task notes/roadmap to a public site.
 
 ## Related Skills
 
 - `kotlin-multiplatform-audit` — catches doc drift when the docs repo or consumer project needs a health check.
 - `kotlin-multiplatform-release` — use when project docs need to explain versioning or publishing flow.
 - `kotlin-multiplatform-legal-docs` — use when the docs are specifically about privacy, terms, or compliance.
+- `kotlin-multiplatform-library-publishing` — owns the Maven Central pipeline `docs/libraries.md` catalogs; its release checklist should point here.
+- `kotlin-multiplatform-unit-testing` / `kotlin-multiplatform-roborazzi` — own the actual test coverage `docs/testing.md` indexes; this page doesn't duplicate their content.
+- `kotlin-multiplatform-docs-site` — the public, GitHub-Pages-deployed developer guide for a published library; a separate concern from this skill's internal `docs/` — never share the same source folder.
 
 ## Output Style
 
@@ -319,6 +346,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-07-11 | Added `docs/libraries.md` (Maven coordinate/version/publish-status catalog, cross-referenced from `library-publishing`) and `docs/testing.md` (test coverage index, cross-referenced from `unit-testing`/`roborazzi`) to the default topology — closing a real gap where "libraries" only had architecture-diagram guidance and "tests"/"demos" had nothing. `docs/demos.md` added as explicitly **conditional**, not default — only when a real demo module exists. Cross-referenced the new `kotlin-multiplatform-docs-site` skill (public GitHub Pages developer guide) and drew an explicit boundary: never share this skill's internal `docs/` folder as that site's source. 2 new anti-patterns, 3 new validation-matrix rows. |
 | 2026-06-27 | Extracted classification + hygiene into references/docs-hygiene.md. Added: docs/ root vs reference/ placement rule, clean-up sequence, consolidation rule, naming convention (kebab-case), non-doc file detection. Slimmed SKILL.md to a pointer. |
 | 2026-06-27 | Added cleanup-intent trigger keywords: clean docs, tidy docs, docs cleanup, update docs, fix docs, stale docs, docs are wrong. |
 | 2026-06-24 | Added fix maturity lanes for dev, beta, and stable fixes, plus a task template section for tracking them in `docs/tasks.md`. |

@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-10'
+  last-updated: '2026-07-11'
   keywords:
     - KMP expert
     - orchestrator
@@ -166,7 +166,7 @@ Pull in only when a feature explicitly needs it.
 - `offline-first` — only when the user names "offline-first", "background sync", or "conflict resolution". For plain caching or a local source of truth, use `repository-pattern` + `sqldelight-setup` instead. Offline-first layers `SyncManager` + `WorkManager`/`BGTaskScheduler` on top, which is overkill unless explicitly wanted.
 
 ### Meta (tooling, not app code)
-`expert` (routing), `audit` (review), `kotlin-multiplatform-jni-pro` (native bridge), `docs-maintainer`, `changelog`, `benchmark` (invoked on-demand for a specific performance claim — never scaffolded speculatively)
+`expert` (routing), `audit` (review), `kotlin-multiplatform-jni-pro` (native bridge), `docs-maintainer`, `changelog`, `benchmark` (invoked on-demand for a specific performance claim — never scaffolded speculatively), `docs-site` (public developer guide — library-only, gated on real surface area, never scaffolded for an app or a trivial library)
 
 ---
 
@@ -202,7 +202,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 61 Skills and What They Own
+## The 62 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -240,6 +240,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-datastore` | Preferences DataStore + Proto DataStore, expect/actual factory, Koin wiring, SharedPreferences migration |
 | `kotlin-multiplatform-xcframework-spm` | XCFramework build, SPM binary target, Xcode integration |
 | `kotlin-multiplatform-library-publishing` | Maven Central publishing (vanniktech plugin), GitHub Packages, BOM, binary-compatibility-validator, SNAPSHOT vs stable channels, GPG signing, release checklist |
+| `kotlin-multiplatform-docs-site` | GitHub Pages developer guide for a published library — MkDocs Material, Dokka HTML API reference, compiler-verified snippet extraction, release-tag-triggered CI deploy |
 | `kotlin-multiplatform-logging` | logger wrapper, kotlin-logging or Kermit, log levels, logger factory, crash breadcrumb bridge, Koin wiring |
 
 ### Layer 3 — Platform Patterns
@@ -626,6 +627,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "XCFramework", "Swift Package Manager", "SPM", "iOS binary" | `kotlin-multiplatform-xcframework-spm` |
 | "ImageVector", "vector icon", "vectorize", "SVG to Compose", "PNG to vector", "trace image", "icon from image", "logo vector", "raster to vector", "vtracer", "potrace", "convert image to icon", "compile icon", "app icon vector", "no PNG icons", "icon pipeline", "extract logo", "extract icon" | `kotlin-multiplatform-imagevector-generator` |
 | "publish KMP library", "Maven Central library", "KMP library publishing", "vanniktech maven publish", "mavenPublishing", "OSSRH", "Sonatype staging", "GitHub Packages library", "binary compatibility", "apiCheck", "apiDump", "api dump", "BOM library", "bill of materials", "distribute KMP library", "library consumers", "artifactId", "groupId", "POM metadata", "GPG signing library", "SNAPSHOT library", "library release checklist" | `kotlin-multiplatform-library-publishing` |
+| "GitHub Pages", "developer guide", "docs site", "MkDocs", "MkDocs Material", "Dokka HTML", "API reference site", "documentation website", "gh-deploy", "publish developer docs", "library documentation site" | `kotlin-multiplatform-docs-site` |
 | "expect actual", "platform-specific", "@ObjCName", "iOS interop" | `kotlin-multiplatform-expect-actual` |
 | "repository", "data layer", "offline-first", "cache", "single source of truth" | `kotlin-multiplatform-repository-pattern` |
 | "navigation", "screen routing", "NavHost", "deep links", "web routing", "browser fragment", "hash navigation" | `kotlin-multiplatform-navigation` |
@@ -774,6 +776,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
+| 2026-07-11 | Added `kotlin-multiplatform-docs-site` (62nd skill) — public GitHub Pages developer guide for a published library (MkDocs Material + Dokka HTML + compiler-verified snippet extraction), explicitly gated to library projects with real surface area, never apps or trivial libraries. Added to the Meta list and Skill Invocation Map. |
 | 2026-07-10 | Two real gaps closed: (1) added a "Improve the performance of X" decision tree — there was no routing path for performance requests at all (only a model-routing hint, not a skill-routing rule); routes by naming what X is and explicitly stops rather than guessing when X is unnamed or whole-app; added `kotlin-multiplatform-benchmark` (61st skill) as its "get a real number" branch. (2) Broadened "Which transport for a backend call?" to check for an existing Ktor client by content (`HttpClient(`/`safeRequest`/`NetworkResult<`) before the kRPC-specific grep — the prior version only checked kRPC symbols, so a project with a plain (differently-named) Ktor client and no kRPC could still fall through to a raw HTTP call; cross-referenced to `kotlin-multiplatform-network-layer`'s new Step 0. |
 | 2026-06-24 | Refined routing precedence for repo docs, downstream docs, changelogs, and navigation/deep-link collisions. |
 | 2026-06-24 | Added architecture-diagram / library-docs / app-docs routing keywords for `kotlin-multiplatform-project-docs-maintainer`. |

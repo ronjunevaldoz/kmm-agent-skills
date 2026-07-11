@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-09'
+  last-updated: '2026-07-11'
   keywords:
     - maven central
     - maven publish
@@ -546,6 +546,8 @@ missing fields cause Maven Central validation failures that are hard to debug.
 | `kotlin-multiplatform-unit-testing` | All targets must pass tests before a stable release |
 | `kotlin-multiplatform-expect-actual` | Platform-specific implementations inside the library |
 | `kotlin-multiplatform-release` | App release pipeline (different from library publishing — covers Play Store / App Store) |
+| `kotlin-multiplatform-project-docs-maintainer` | `docs/libraries.md` catalogs every published coordinate/version — point the release checklist there |
+| `kotlin-multiplatform-docs-site` | Public GitHub Pages developer guide + Dokka HTML API reference; reuses this skill's Dokka setup for the separate HTML output, not the Javadoc jar |
 
 ---
 
@@ -553,5 +555,6 @@ missing fields cause Maven Central validation failures that are hard to debug.
 
 | Date | Change |
 |---|---|
+| 2026-07-11 | Cross-referenced two new skills: `kotlin-multiplatform-project-docs-maintainer`'s new `docs/libraries.md` catalog page (release checklist should point there instead of nowhere), and `kotlin-multiplatform-docs-site` (public GitHub Pages developer guide, reuses this skill's Dokka setup for a separate HTML output, distinct from the Javadoc jar). |
 | 2026-07-09 | Added a "Per-file license headers (optional)" section — Detekt's `AbsentOrWrongFileLicense` rule (off by default) with a license template, and why this is worth it for a library (files get vendored/copy-pasted independently of the repo) but not for app code. New anti-pattern: per-file header must stay consistent with the POM's declared license. |
 | 2026-06-29 | Initial skill — vanniktech plugin, BOM, binary-compat-validator, SNAPSHOT/stable, GPG, GitHub Packages |
