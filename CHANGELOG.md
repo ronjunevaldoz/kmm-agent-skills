@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.62.0] — 2026-07-11
+
+### Added
+
+- feat(skills): add docs-site skill, libraries/testing pages to docs-maintainer
+
+---
+
 ## [v1.61.1] — 2026-07-11
 
 ### Fixed
