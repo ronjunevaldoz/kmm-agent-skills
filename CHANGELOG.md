@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.63.0] — 2026-07-11
+
+### Added
+
+- feat(new-project): offer shadcn-compose/heroicons-compose/tailwind-compose in setup
+
+---
+
 ## [v1.62.3] — 2026-07-11
 
 ### Fixed
