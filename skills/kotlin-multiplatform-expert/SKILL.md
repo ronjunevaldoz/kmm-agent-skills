@@ -202,7 +202,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 62 Skills and What They Own
+## The 63 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -274,6 +274,7 @@ versions when the local repo can be checked directly.
 |---|---|
 | `kotlin-multiplatform-design-system` | Tokens (colors, typography, shapes, spacing), dark mode, 6 core components, no Material dependency |
 | `kotlin-multiplatform-design-system-extended` | 27 additional components: Dialog, Sheet, Toast, Tabs, TopAppBar, Checkbox, etc. |
+| `kotlin-multiplatform-shadcn-compose` | Published-library alternative to `design-system` — Maven Central setup, `ShadcnTheme`, 70+ components. Gated to explicit user choice (`/kmm-new-project` Step 6a); never suggested unprompted — carries a real experimental-API dependency risk |
 | `kotlin-multiplatform-adaptive-layout` | WindowSizeClass, Compact/Medium/Expanded breakpoints, list-detail split, adaptive navigation, cross-session pattern consistency |
 | `kotlin-multiplatform-compose-slot-api` | `@Composable () -> Unit` slots, scoped slots, CompositionLocal, component API shape |
 | `kotlin-multiplatform-compose-state-hoisting` | Hoist-until-shared rule, controlled components, stateless vs stateful composables |
@@ -641,6 +642,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "visual audit", "audit screenshots", "check visual consistency", "design visual check", "cross-screen consistency", "spacing rhythm", "color contrast audit", "vision audit design" | `/kmm-audit-design-visual` |
 | "adaptive layout", "WindowSizeClass", "tablet layout", "desktop layout", "mobile layout", "phone layout", "list detail", "detail split", "split screen", "navigation rail", "Compact Medium Expanded", "responsive UI", "master detail", "multi-pane", "different layout phone tablet", "different layout phone desktop", "screen size breakpoint", "pane layout", "layout per screen size", "layout phone desktop" | `kotlin-multiplatform-adaptive-layout` |
 | "dialog", "bottom sheet", "toast", "tabs", "TopAppBar", "Checkbox" | `kotlin-multiplatform-design-system-extended` |
+| "shadcn-compose", "ShadcnButton", "ShadcnTheme", "ShadcnCard", "shadcn ui kotlin", "shadcn compose multiplatform", "ExperimentalFoundationStyleApi", "shadcn kmp" | `kotlin-multiplatform-shadcn-compose` |
 | "slot API", "content lambda", "composable parameter", "scoped slot" | `kotlin-multiplatform-compose-slot-api` |
 | "state hoisting", "hoist state", "controlled component", "where does state go" | `kotlin-multiplatform-compose-state-hoisting` |
 | "remember vs ViewModel", "rememberSaveable", "state survival", "config change" | `kotlin-multiplatform-compose-state-container` |

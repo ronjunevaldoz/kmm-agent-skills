@@ -73,6 +73,7 @@ first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
 | Wireframes, screen flows, or layout specs | `designer`, `design-handoff`, `adaptive-layout`, `design-system`, `preview-driven-development`, `roborazzi` |
 | Design system setup or token changes | `design-system` |
 | Design system component library | `design-system-extended`, `design-system` |
+| shadcn-compose, ShadcnButton, ShadcnTheme, published shadcn-inspired component library | `shadcn-compose`, `design-system` |
 | UI/UX design or component API shaping | `designer`, `design-system`, `design-system-extended`, `compose-slot-api`, `compose-state-hoisting`, `accessibility`, `preview-driven-development`, `roborazzi` |
 | Paging / paginated lists | `paging`, `repository-pattern` |
 | Kotlin RPC (full-stack Kotlin backend) | `kotlin-rpc`, `network-layer` |

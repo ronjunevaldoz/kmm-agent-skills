@@ -348,11 +348,12 @@ If the inferred plan has more than 3 screens, also load
 
 **If [14] (shadcn-compose) was chosen and confirmed:**
 
-Add the Maven dependency instead of generating owned code:
-`io.github.ronjunevaldoz:shadcn-compose` (plus the per-target artifact for each
-registered platform — `-android`, `-iosarm64`, `-iossimulatorarm64`, `-js`, `-jvm`,
-`-wasm-js`). Do not also load `kotlin-multiplatform-design-system` — the two are
-alternative component sources, never combined in the same project.
+Load `kotlin-multiplatform-shadcn-compose` instead of `kotlin-multiplatform-design-system`
+— it covers the Maven dependency (`io.github.ronjunevaldoz:shadcn-compose` plus the
+per-target artifact for each registered platform), the required
+`@OptIn(ExperimentalFoundationStyleApi::class)`, and the `ShadcnTheme` wrapper. Do not also
+load `kotlin-multiplatform-design-system` — the two are alternative component sources,
+never combined in the same project.
 
 **If [16] (heroicons-compose) was chosen:**
 

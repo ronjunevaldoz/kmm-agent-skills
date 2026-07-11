@@ -153,6 +153,7 @@ python3 scripts/release.py auto --dry-run # preview first
 ### UI System
 - [`design-system`](skills/kotlin-multiplatform-design-system/) — tokens and core components
 - [`design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) — bottom sheet, dialog, snackbar, skeleton
+- [`shadcn-compose`](skills/kotlin-multiplatform-shadcn-compose/) — published library alternative to `design-system` — 70+ components, real experimental-API dependency risk
 - [`compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) — hoisting rules, `@Stable`, `@Immutable`
 - [`compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) — `remember` vs `ViewModel`, `rememberUpdatedState`
 - [`compose-animation`](skills/kotlin-multiplatform-compose-animation/) — AnimatedVisibility, Crossfade, shared elements
