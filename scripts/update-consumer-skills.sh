@@ -10,7 +10,10 @@
 #   bash path/to/kmm-agent-skills/scripts/update-consumer-skills.sh
 #
 # Options:
-#   --source PATH        Path to kmm-agent-skills clone (auto-detected if omitted)
+#   --source PATH        Path to kmm-agent-skills clone (auto-detected if omitted).
+#                         Auto-detect checks $KMM_AGENT_SKILLS_SOURCE first — set it
+#                         once in your shell profile so every consumer project on this
+#                         machine finds the clone without re-prompting.
 #   --agent-dir PATH     Destination skills directory (auto-detected if omitted)
 #   --commands-dir PATH  Destination for slash commands (default: .claude/commands)
 #   --install-commands   List available commands and prompt to install each one
@@ -43,7 +46,9 @@ if [[ -z "$SKILLS_SOURCE" ]]; then
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   CANDIDATE="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-  if [[ -f "$CANDIDATE/skills.json" ]]; then
+  if [[ -n "${KMM_AGENT_SKILLS_SOURCE:-}" && -f "$KMM_AGENT_SKILLS_SOURCE/skills.json" ]]; then
+    SKILLS_SOURCE="$KMM_AGENT_SKILLS_SOURCE"
+  elif [[ -f "$CANDIDATE/skills.json" ]]; then
     SKILLS_SOURCE="$CANDIDATE"
   elif [[ -f "skills/skills.json" ]]; then
     SKILLS_SOURCE="$(cd skills && pwd)"
@@ -54,7 +59,9 @@ if [[ -z "$SKILLS_SOURCE" ]]; then
   else
     echo "" >&2
     echo "  ❌  Could not find kmm-agent-skills." >&2
-    echo "  Pass --source PATH to specify the clone location." >&2
+    echo "  Pass --source PATH, or set \$KMM_AGENT_SKILLS_SOURCE once in your shell" >&2
+    echo "  profile so every consumer project auto-detects it:" >&2
+    echo "    export KMM_AGENT_SKILLS_SOURCE=/path/to/your/kmm-agent-skills" >&2
     echo "" >&2
     exit 1
   fi
