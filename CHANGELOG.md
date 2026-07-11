@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.65.0] — 2026-07-11
+
+### Added
+
+- feat(shadcn-compose): add migration command and layout-quality suggestions
+
+---
+
 ## [v1.64.0] — 2026-07-11
 
 ### Added

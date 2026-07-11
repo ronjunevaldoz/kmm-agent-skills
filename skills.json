@@ -1,5 +1,5 @@
 {
-  "version": "1.64.0",
+  "version": "1.65.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1909,7 +1909,7 @@
       "path": "skills/kotlin-multiplatform-migration",
       "description": "Incremental adoption guide for teams moving an existing Android or KMP project toward the kmm-agent-skills architecture. Covers assessment of current state, prioritized skill adoption order, migration paths from MVVM+LiveData to MVI, monolith to multi-module, and how to migrate without breaking a live app. Use this skill when a project already exists and the team wants to adopt KMP skills one feature or one layer at a time.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-28",
+      "last_updated": "2026-07-11",
       "keywords": [
         "migration",
         "incremental adoption",
