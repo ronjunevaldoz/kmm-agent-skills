@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.62.1] — 2026-07-11
+
+### Fixed
+
+- fix(scripts): check KMM_AGENT_SKILLS_SOURCE before guessing a clone path
+
+---
+
 ## [v1.62.0] — 2026-07-11
 
 ### Added
