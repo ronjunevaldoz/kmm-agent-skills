@@ -247,7 +247,11 @@ Because it depends on nothing experimental, it's safe to add as a real dependenc
 generated `tokens/`/`components/` layers above — use it for one-off utility styling in screen
 code where writing a full token+style pair would be overkill, not as a replacement for
 `components/`. Component libraries that depend on the experimental Styles API (e.g.
-`shadcn-compose`) are not yet recommended here — see the Changelog entry below.
+[`shadcn-compose`](https://github.com/ronjunevaldoz/shadcn-compose), published to Maven
+Central as of `0.2.1`) are still not recommended here — publication doesn't remove the
+risk this skill is scaffold-based specifically to avoid: a real dependency on
+`@ExperimentalFoundationStyleApi` still breaks on the next CMP release that changes that
+API. See the Changelog entry below.
 
 Use `/update-design-system` to compare your project's components against the latest skill
 version and selectively apply fixes. The comparison is powered by
@@ -2633,6 +2637,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-11 | Corrected the 2026-07-10 deprecation-evaluation entry below: verified directly against Maven Central's repository (not just the README) that `shadcn-compose` published `0.2.1`, so "still `-SNAPSHOT`, not on Maven Central" is no longer true. The conclusion is unchanged for a different reason — publication doesn't remove the risk this skill is scaffold-based to avoid: `shadcn-compose` still depends on the experimental `@ExperimentalFoundationStyleApi`, so a real dependency on it still breaks on the next CMP release that changes that API. Updated the Ownership Model note accordingly. |
 | 2026-07-11 | Fixed the same false-positive class found and fixed in `kotlin-multiplatform-audit`'s `audit_project.py`: `scan_design_violations.py`'s `_SKIP_DIR_FRAGMENTS` only knew about `designsystem`/`design_system`/`theme`, so a project with skills deployed to `.claude/skills/` would get a `hardcoded_color` violation from this skill's own `detekt-rules/src/test/kotlin/.../HardcodedColorRuleTest.kt` (a legitimate test fixture, not real app code). Worse than the read-only audit case since `/fix-design` uses this scanner to auto-fix violations — could have rewritten deployed skill reference files. Added the same build/VCS/vendor/deployed-skills exclusion set `audit_project.py` uses. Reproduced the exact false positive before fixing; 2 new regression tests confirm it's gone while real project violations alongside deployed skills still fire. |
 | 2026-07-10 | Evaluated deprecating this skill (and `design-system-extended`) in favor of the user's own published `shadcn-compose`/`heroicons-compose`/`tailwind-compose` libraries — decided **not yet**: `shadcn-compose` is still `-SNAPSHOT` (not on Maven Central) and depends on the same experimental `@ExperimentalStylesApi` this skill's Ownership Model explicitly avoids by staying scaffold-based; `heroicons-compose` only has the Outline variant built vs. this repo's 4-variant coverage. `tailwind-compose`, however, is stable-API-only and already published — added a cross-reference for it in Ownership Model as a complementary utility-class layer, not a replacement. |
 | 2026-07-08 | Fixed a real layout-shift bug found across `ButtonStyles.kt`/`TextFieldStyles.kt`: `focused {}` blocks animated `borderWidth`/`borderBottomWidth` (0→2dp or 1→2dp), re-measuring the component on focus. Fixed by reserving the final border width at rest (`borderColor(Color.Transparent)` where there's no border at rest) and animating only `borderColor`. New "Ring vs border" rule in Style Rules explaining the CSS-ring analogy; new audit detector `focused state animates border width [MEDIUM]`. |

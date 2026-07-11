@@ -294,14 +294,46 @@ Corner radius:
   [11]   Small (4dp)  — compact / dense UI
   [12]   Large (16dp) — playful / expressive
 
+Component library (pick one):
+  [13] ✦ Generated & owned (kotlin-multiplatform-design-system)  — no external
+                  dependency, full control, safe across CMP upgrades (recommended default)
+  [14]   shadcn-compose (published library, io.github.ronjunevaldoz:shadcn-compose)
+                  — 70+ components, faster start
+                  ⚠️  WARNING: depends on the experimental @ExperimentalFoundationStyleApi.
+                  A future CMP release that changes this API breaks the dependency with no
+                  fix available except waiting for a new shadcn-compose release — the owned
+                  scaffold in [13] exists specifically to avoid this risk. Only pick [14] if
+                  you've weighed that tradeoff and still want the faster start.
+
+Icons (pick one):
+  [15] ✦ Generate on demand (kotlin-multiplatform-imagevector-generator) — no dependency,
+                  exact icons only, deterministic toolchain
+  [16]   heroicons-compose (published library) — faster start; Outline variant only today
+                  (Solid/Mini/Micro not yet built)
+
+Utility styling (optional, combines with either component library choice):
+  [17]   tailwind-compose (published library) — stable-API utility modifiers
+                  (spacing/layout/color/typography), zero experimental-API risk
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-→ Recommended: [1][4][7][10]. Say a number to swap, or "looks good" to proceed.
+→ Recommended: [1][4][7][10][13][15]. Say a number to swap, or "looks good" to proceed.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 **Do not generate any design system code until the user confirms this draft.**
 
+If the user picks [14] (shadcn-compose), get an explicit second confirmation before
+proceeding — this is a real, hard-to-reverse dependency risk, not a stylistic default:
+
+```
+Confirm: add shadcn-compose as a real Gradle dependency, accepting that a future CMP
+release may break it with no fix available except an upstream shadcn-compose release?
+[yes / switch to [13] owned scaffold instead]
+```
+
 ### 6b — Generate the design system using confirmed tokens
+
+**If [13] (default) was chosen:**
 
 Load `kotlin-multiplatform-design-system`. Generate using the confirmed choices:
 - `AppColors` — light and dark color schemes with the confirmed palette
@@ -313,6 +345,26 @@ Load `kotlin-multiplatform-design-system`. Generate using the confirmed choices:
 
 If the inferred plan has more than 3 screens, also load
 `kotlin-multiplatform-design-system-extended` for Dialog, Sheet, Toast, Tabs.
+
+**If [14] (shadcn-compose) was chosen and confirmed:**
+
+Add the Maven dependency instead of generating owned code:
+`io.github.ronjunevaldoz:shadcn-compose` (plus the per-target artifact for each
+registered platform — `-android`, `-iosarm64`, `-iossimulatorarm64`, `-js`, `-jvm`,
+`-wasm-js`). Do not also load `kotlin-multiplatform-design-system` — the two are
+alternative component sources, never combined in the same project.
+
+**If [16] (heroicons-compose) was chosen:**
+
+Add the Maven dependency `io.github.ronjunevaldoz:heroicons-outline` instead of loading
+`kotlin-multiplatform-imagevector-generator`. Note the Outline-only limitation to the
+user if the plan's screens reference icon styles beyond outline.
+
+**If [17] (tailwind-compose) was chosen:**
+
+Add the Maven dependency `io.github.ronjunevaldoz:tailwind-compose` alongside whichever
+component library choice was made in [13]/[14] — this is a utility-modifier layer, not a
+component source, so it combines with either.
 
 ---
 
@@ -535,7 +587,7 @@ Examples:
 | Key-value settings | `datastore` |
 | Screenshot tests | `roborazzi` |
 | ProGuard / release build | `proguard-r8` |
-| Design system | `design-system` |
+| Design system | `design-system` (or `shadcn-compose`/`tailwind-compose`/`heroicons-compose` if chosen in Step 6a) |
 | Unit tests | `unit-testing` |
 | Architecture audit | `audit` |
 
