@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.62.3] — 2026-07-11
+
+### Fixed
+
+- fix(design-system): exclude deployed skill bundles from scan_design_violations.py
+
+---
+
 ## [v1.62.2] — 2026-07-11
 
 ### Fixed
