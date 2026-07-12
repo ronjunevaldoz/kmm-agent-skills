@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.66.0] — 2026-07-12
+
+### Added
+
+- feat(clean-architecture): add composition-over-inheritance rule and detector
+
+---
+
 ## [v1.65.0] — 2026-07-11
 
 ### Added

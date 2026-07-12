@@ -1,5 +1,5 @@
 {
-  "version": "1.65.0",
+  "version": "1.66.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -356,7 +356,7 @@
       "path": "skills/kotlin-multiplatform-clean-architecture",
       "description": "Defines the 6-layer clean architecture contract for KMP feature modules: :model / :api / :domain / :data / :presenter / :ui. Covers layer dependency rules, :model vs :api split, internal visibility enforcement, and Detekt architecture fitness functions that make violations fail the build.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-28",
+      "last_updated": "2026-07-11",
       "keywords": [
         "clean architecture",
         "Kotlin Multiplatform",
@@ -411,7 +411,13 @@
         "cross-feature navigation",
         "navigate to another feature",
         "AppNavigator",
-        "feature dependency"
+        "feature dependency",
+        "composition over inheritance",
+        "abstract class in commonMain",
+        "extensible base class",
+        "UnnecessaryAbstractClass",
+        "interface over abstract class",
+        "avoid over-abstraction"
       ],
       "scripts": []
     },
