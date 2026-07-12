@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.71.0] — 2026-07-13
+
+### Added
+
+- feat(token-saver): add install scripts for Ponytail, Caveman-adjacent Headroom, and RTK
+
+---
+
 ## [v1.70.0] — 2026-07-12
 
 ### Added
