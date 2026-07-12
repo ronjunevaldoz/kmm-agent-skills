@@ -136,7 +136,7 @@ Report the issue URL after creation.
 ## Step 6 — Update KNOWN_ISSUES.md (optional)
 
 If the issue warrants tracking locally (HIGH severity, pipeline regression, or the user
-asks), add it to `KNOWN_ISSUES.md` under `## Open Issues`:
+asks), add it to `KNOWN_ISSUES.md` under `## Open`:
 
 ```markdown
 ### KI-NNN — <title>

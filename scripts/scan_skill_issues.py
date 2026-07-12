@@ -176,7 +176,7 @@ def read_open_known_issues() -> list[str]:
     open_issues = []
     in_open = False
     for line in text.splitlines():
-        if "## Open Issues" in line:
+        if line.strip() == "## Open":
             in_open = True
         elif line.startswith("## ") and in_open:
             break

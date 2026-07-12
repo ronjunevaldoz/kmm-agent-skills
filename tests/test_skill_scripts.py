@@ -3379,6 +3379,50 @@ class ScanSkillIssuesTests(unittest.TestCase):
         self.assertEqual(rc, 0)
 
 
+class ReadOpenKnownIssuesTests(unittest.TestCase):
+    """read_open_known_issues() looked for the literal heading '## Open Issues', but
+    KNOWN_ISSUES.md's real heading is '## Open' — the mismatch meant this function
+    silently returned [] regardless of what was actually under that section, for as
+    long as the mismatch existed. No prior test caught it because none exercised a
+    real '## Open' heading with actual entries under it.
+    """
+
+    def _run(self, root: Path, content: str) -> list[str]:
+        (root / "KNOWN_ISSUES.md").write_text(content, encoding="utf-8")
+        old_ki = scan_skill_issues_scripts.KNOWN_ISSUES_FILE
+        scan_skill_issues_scripts.KNOWN_ISSUES_FILE = root / "KNOWN_ISSUES.md"
+        try:
+            return scan_skill_issues_scripts.read_open_known_issues()
+        finally:
+            scan_skill_issues_scripts.KNOWN_ISSUES_FILE = old_ki
+
+    def test_finds_entry_under_real_open_heading(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result = self._run(
+                root,
+                "## Open\n\n### KI-007 — Something genuinely open\n\n"
+                "**Status:** Open\n\n---\n\n## Resolved\n\n### KI-R01 — Fixed thing\n",
+            )
+        self.assertEqual(result, ["KI-007 — Something genuinely open"])
+
+    def test_stops_at_the_next_heading(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result = self._run(
+                root,
+                "## Open\n\n### KI-001 — Open one\n\n---\n\n"
+                "## Resolved\n\n### KI-R99 — Should not be counted as open\n",
+            )
+        self.assertEqual(result, ["KI-001 — Open one"])
+
+    def test_empty_when_open_section_has_no_entries(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result = self._run(root, "## Open\n\nNothing currently open.\n\n## Resolved\n")
+        self.assertEqual(result, [])
+
+
 class CheckUpdatesTests(unittest.TestCase):
     def test_read_version_valid_json(self) -> None:
         result = check_updates_scripts.read_version('{"version": "1.7.0"}')

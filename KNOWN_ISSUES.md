@@ -7,59 +7,48 @@ Resolved issues stay here for reference — they explain *why* a rule exists.
 
 ## Open
 
-### KI-001 — `pipeline-context.json` is never auto-populated
+### KI-007 — External skill trigger isolation is unverifiable in general (not just inaccessible)
 
-**Status:** Resolved — see KI-R07 below
+**Status:** Open — re-investigated 2026-07-10, found to be structurally unresolvable, not
+just blocked on repo access as originally filed.
 
----
+**Symptom:** The cross-skill audit (v1.21.6) identified four external skills referenced
+in `skills/kotlin-multiplatform-jni-pro/SKILL.md` — `cpp-pro`, `kotlin-specialist`, `compose-expert`,
+and `android-cli`. Re-checked 2026-07-10: **only `cpp-pro` and `kotlin-specialist` are
+still referenced** (see `SKILL.md`'s Related Skills); `compose-expert` and `android-cli`
+no longer appear anywhere in the repo, so the original 4-skill list is stale.
 
-### KI-002 — Hooks require manual installation; not enforced
+For the two that remain, local copies were briefly available on the machine that filed
+this issue and confirmed generic naming collisions across the ecosystem: a GitHub code
+search for `cpp-pro SKILL.md` and `kotlin-specialist SKILL.md` returns dozens of
+**unrelated skill collections** (`paperclipai/companies`, `diegosouzapw/awesome-omni-skills`,
+`aldefy/compose-skill`, etc.) each shipping their own version of a skill with that name.
+There is no single canonical `cpp-pro` or `kotlin-specialist` to audit — the actual
+trigger vocabulary a user gets depends entirely on which collection they installed from.
+This makes the original "Fix" (read the four repos, compare triggers) impossible in
+principle, not just impractical: there's nothing singular to read.
 
-**Status:** Resolved — see KI-R08 below
+**Mitigation already in place:** `kotlin-multiplatform-jni-pro`'s Related Skills section
+already disambiguates the one overlap that's plausible in practice — `cpp-pro`'s generic
+"C++ performance/algorithm work" scope vs. `wrapper.cpp` files that JNI-pro also owns:
+> `/cpp-pro` *(external skill)* — algorithm-level C++ work inside `*-wrapper.cpp`; pair
+> when the task involves changing native processing code rather than bridge wiring
 
----
+This only helps if both skills are loaded together and the agent actually reads
+`jni-pro`'s pairing note — it doesn't prevent a differently-scoped `cpp-pro` install from
+firing alone on an ambiguous request without ever consulting `jni-pro`.
 
-### KI-003 — Adaptive layout not adopted retroactively in existing projects
+**Workaround:** `routing_rules.json`'s `hard_boundaries` and `intent_routes` remain the
+authoritative JNI trigger set for *this* repo — that part is unaffected. When integrating
+`cpp-pro` or `kotlin-specialist` from any source, inspect **whatever copy is actually
+installed locally** at the time (`~/.claude/skills/<name>/SKILL.md` if present) — there is
+no fixed upstream reference to check instead.
 
-**Status:** Resolved — see KI-R09 below
-
----
-
-### KI-004 — `hardcoded spacing` audit pattern can false-positive on `padding(0.dp)`
-
-**Status:** Resolved — see KI-R06 below
-
----
-
-### KI-005 — `krpc_established` flag round-trip has no automated test
-
-**Status:** Resolved — see KI-R12 below
-
-**Symptom:** The implementer sets `krpc_established: true` in `pipeline-context.json`
-after confirming kRPC is active; the reviewer reads it to skip the grep. The wiring
-is correct, but no unit test verifies the round-trip. A refactor dropping the read
-in the reviewer would silently regress — every session would re-run the grep.
-
-**Workaround:** Manually verify `.claude/pipeline-context.json` contains
-`"krpc_established": true` after an implementer session on a kRPC project.
-
-**Fix:** Add a `PipelineContextFlagTests` class to `tests/test_skill_scripts.py`.
-
----
-
-### KI-006 — Hook scripts lack unit tests
-
-**Status:** Resolved — see KI-R13 below
-
-**Symptom:** `validate-architecture.sh` and `check-skill-freshness.sh` are shell scripts
-that wrap `audit_project.py` and `check_updates.py`. The Python scripts have 43 tests,
-but the shell plumbing — exit code forwarding, argument passing, `STAGED_KT` filter — is
-untested. A shell syntax error would go undetected until a developer runs a commit.
-
-**Workaround:** Manually run each hook after any change to confirm it executes.
-
-**Fix:** Add a `HookScriptTests` class using `subprocess.run` to test each hook's
-exit code against known inputs (clean dir, dirty dir, no `.kt` files staged).
+**Fix:** Not resolvable in general, since it depends on a naming collision in the wider
+skill ecosystem this repo doesn't control. The practical mitigation is the disambiguation
+note already in `jni-pro`'s Related Skills section; closing this further would mean
+renaming the external references to something less generic (not currently planned) or
+accepting the residual risk as documented here.
 
 ---
 
@@ -290,51 +279,6 @@ but agents enforce it before a commit is ever attempted.
 - Vision verification step reads light+dark PNGs with Claude vision and checks: brand color on primary actions, spacing consistency, no nested-card double-shadow, dark mode background, typography hierarchy
 - Added routing keywords to expert Skill Invocation Map
 - Added 22 tests for `scan_design_violations.py` (total: 120 tests passing)
-
----
-
-### KI-007 — External skill trigger isolation is unverifiable in general (not just inaccessible)
-
-**Status:** Open — re-investigated 2026-07-10, found to be structurally unresolvable, not
-just blocked on repo access as originally filed.
-
-**Symptom:** The cross-skill audit (v1.21.6) identified four external skills referenced
-in `skills/kotlin-multiplatform-jni-pro/SKILL.md` — `cpp-pro`, `kotlin-specialist`, `compose-expert`,
-and `android-cli`. Re-checked 2026-07-10: **only `cpp-pro` and `kotlin-specialist` are
-still referenced** (see `SKILL.md`'s Related Skills); `compose-expert` and `android-cli`
-no longer appear anywhere in the repo, so the original 4-skill list is stale.
-
-For the two that remain, local copies were briefly available on the machine that filed
-this issue and confirmed generic naming collisions across the ecosystem: a GitHub code
-search for `cpp-pro SKILL.md` and `kotlin-specialist SKILL.md` returns dozens of
-**unrelated skill collections** (`paperclipai/companies`, `diegosouzapw/awesome-omni-skills`,
-`aldefy/compose-skill`, etc.) each shipping their own version of a skill with that name.
-There is no single canonical `cpp-pro` or `kotlin-specialist` to audit — the actual
-trigger vocabulary a user gets depends entirely on which collection they installed from.
-This makes the original "Fix" (read the four repos, compare triggers) impossible in
-principle, not just impractical: there's nothing singular to read.
-
-**Mitigation already in place:** `kotlin-multiplatform-jni-pro`'s Related Skills section
-already disambiguates the one overlap that's plausible in practice — `cpp-pro`'s generic
-"C++ performance/algorithm work" scope vs. `wrapper.cpp` files that JNI-pro also owns:
-> `/cpp-pro` *(external skill)* — algorithm-level C++ work inside `*-wrapper.cpp`; pair
-> when the task involves changing native processing code rather than bridge wiring
-
-This only helps if both skills are loaded together and the agent actually reads
-`jni-pro`'s pairing note — it doesn't prevent a differently-scoped `cpp-pro` install from
-firing alone on an ambiguous request without ever consulting `jni-pro`.
-
-**Workaround:** `routing_rules.json`'s `hard_boundaries` and `intent_routes` remain the
-authoritative JNI trigger set for *this* repo — that part is unaffected. When integrating
-`cpp-pro` or `kotlin-specialist` from any source, inspect **whatever copy is actually
-installed locally** at the time (`~/.claude/skills/<name>/SKILL.md` if present) — there is
-no fixed upstream reference to check instead.
-
-**Fix:** Not resolvable in general, since it depends on a naming collision in the wider
-skill ecosystem this repo doesn't control. The practical mitigation is the disambiguation
-note already in `jni-pro`'s Related Skills section; closing this further would mean
-renaming the external references to something less generic (not currently planned) or
-accepting the residual risk as documented here.
 
 ---
 

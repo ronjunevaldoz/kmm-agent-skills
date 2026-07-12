@@ -125,7 +125,7 @@ What next?
 
 For each issue not already in KNOWN_ISSUES.md:
 - Assign the next `KI-NNN` ID
-- Add it under `## Open Issues` in the standard format
+- Add it under `## Open` in the standard format
 - Commit: `docs: add <N> quality gaps from /summarize-issues scan`
 
 ### Option d — Create GitHub issues for HIGH gaps
