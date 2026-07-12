@@ -52,6 +52,8 @@ The script detects architectural and design smells:
 | `raw http bypasses established ktor client` | A raw platform HTTP API (`HttpURLConnection`, `NSURLSession`, etc.) is used somewhere in a project that already has an established Ktor client (`NetworkResult<T>`/`safeRequest` found elsewhere) — detected by content, not a fixed module name |
 | `what-comment in control flow` | A `//` comment narrates WHAT a loop/conditional does (starts with an action verb like Loop/Check/Calculate, no WHY-marker present) instead of explaining WHY — heuristic, LOW severity, flags for human review or `/clean-comments` |
 | `extensible abstract class in commonMain` | A public `abstract class` in `commonMain` with only abstract members, forcing every consumer to subclass it — replace with an interface consumers implement and inject |
+| `module layer-order violation` | A module's `build.gradle.kts` declares a wrong-direction `projects.*` dependency (e.g. `:ui` directly on `:data`, skipping `:presenter`) — declared at the Gradle level, can exist before any file imports the forbidden package |
+| `cross-feature module dependency` | A feature module's `build.gradle.kts` depends directly on another feature's module instead of going through a `:core:api` contract |
 | `design system prefix mismatch` | An `App*`-named declaration under `core/designsystem` while `docs/design-system.md` records a different resolved `COMPONENT_PREFIX` — the resolved prefix wasn't actually used when generating |
 | `empty platform source set` | An `androidMain`/`iosMain`/`jvmMain`/... source directory with no `.kt` files, or files containing only package/import/comments — dead scaffolding; Gradle compiles fine without it |
 
@@ -130,6 +132,8 @@ For every finding, load the relevant skill and give a concrete fix:
 | `raw http bypasses established ktor client` | `network-layer` | Find the existing client by content (`grep -rl "HttpClient(\|safeRequest\|NetworkResult<"`), reuse it instead of the raw call — see Step 0 |
 | `what-comment in control flow` | `code-quality` | Run `/clean-comments` on the flagged file — extracts a named function/variable so the code reads as its own explanation, or keeps the comment only if it's genuinely a WHY |
 | `extensible abstract class in commonMain` | `clean-architecture` | Replace the abstract class with an interface, and wire the consumer's implementation through Koin (`dependency-injection`) instead of inheritance — see Composition Over Inheritance |
+| `module layer-order violation` | `clean-architecture` | Remove the wrong-direction `implementation(projects.*)` line and route the dependency through the correct layer order instead |
+| `cross-feature module dependency` | `clean-architecture` | Extract a `:core:api` contract the other feature implements, instead of depending on its module directly |
 | `design system prefix mismatch` | `design-system` | Regenerate the flagged file(s) with the resolved `COMPONENT_PREFIX` directly — don't hand-rename `App*` symbols after the fact |
 | `empty platform source set` | `feature-scaffold` | Delete the empty source directory, or implement the real `expect`/`actual` code if this module genuinely needs platform-specific logic — never scaffold the folder "just in case" |
 

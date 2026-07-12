@@ -1371,6 +1371,82 @@ def _detect_extensible_abstract_class_in_common(root: Path) -> list[str]:
     return findings
 
 
+# ── Module layer-order violation ────────────────────────────────────────────────
+# A module can declare a wrong-direction Gradle dependency (e.g. :ui directly on :data,
+# skipping :presenter) without that ever forming a literal cycle — Gradle happily builds
+# it, so nothing catches it there. The existing Detekt import-boundary rules only check
+# file-level imports (does a .kt file literally import *.data.*), which can miss a
+# module-level violation declared in build.gradle.kts before any file uses it yet. This
+# detector parses the real Gradle module graph directly, independent of Detekt.
+
+_LAYER_ORDER = ("model", "api", "domain", "data", "presenter", "ui")
+_ALLOWED_DEPS = {
+    "model": set(),
+    "api": {"model"},
+    "domain": {"api", "model"},
+    "data": {"api", "model"},
+    "presenter": {"domain", "api", "model"},
+    "ui": {"presenter"},
+}
+_PROJECT_DEP_RE = re.compile(
+    r"\b(?:implementation|api)\s*\(\s*projects\.([\w.]+)\s*\)"
+)
+_MODULE_PATH_RE = re.compile(r"^feature[\\/](\w+)[\\/](\w+)$")
+
+
+def _module_key_from_gradle_ref(ref: str) -> str:
+    """Convert a projects.feature.auth.domain reference to feature/auth/domain."""
+    return ref.replace(".", "/")
+
+
+def _detect_module_layer_violation(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("build.gradle.kts"):
+        if _is_excluded(path, root):
+            continue
+        module_dir = path.parent.relative_to(root).as_posix()
+        source_match = _MODULE_PATH_RE.match(module_dir)
+        if not source_match:
+            continue
+        source_feature, source_layer = source_match.groups()
+        if source_layer not in _LAYER_ORDER:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for match in _PROJECT_DEP_RE.finditer(text):
+            target_key = _module_key_from_gradle_ref(match.group(1))
+            target_match = _MODULE_PATH_RE.match(target_key)
+            if not target_match:
+                continue  # core/* or another non-6-layer module — out of scope
+            target_feature, target_layer = target_match.groups()
+            if target_layer not in _LAYER_ORDER:
+                continue
+            line_no, snippet = _at(text, match.start())
+            if target_feature != source_feature:
+                findings.append(
+                    f"cross-feature module dependency [HIGH]: {path.relative_to(root)}:"
+                    f"{line_no} — {source_feature}/{source_layer} depends directly on "
+                    f"{target_feature}/{target_layer}; cross-feature calls should go "
+                    f"through a :core:api contract, not a direct feature-to-feature "
+                    f"module dependency\n    {line_no} | {snippet}"
+                )
+                continue
+            if target_layer not in _ALLOWED_DEPS.get(source_layer, set()):
+                findings.append(
+                    f"module layer-order violation [HIGH]: {path.relative_to(root)}:"
+                    f"{line_no} — {source_feature}/{source_layer} depends directly on "
+                    f"{source_feature}/{target_layer}, violating the 6-layer contract "
+                    f"(:model ← :api ← :domain ← :data, :domain ← "
+                    f":presenter ← :ui). Declared at the Gradle module level — this "
+                    f"can exist before any file even imports the forbidden package, so "
+                    f"file-level Detekt import rules alone won't catch it\n"
+                    f"    {line_no} | {snippet}"
+                )
+    return findings
+
+
 # ── Design system prefix mismatch ─────────────────────────────────────────────
 # "App" in the design-system skill is a template placeholder (see Step 0) — real
 # projects must substitute their resolved COMPONENT_PREFIX when generating files, not
@@ -2280,6 +2356,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Extensible abstract class in commonMain ─────────────────────────────────
     findings.extend(_detect_extensible_abstract_class_in_common(root))
+
+    # ── Module layer-order violation ────────────────────────────────────────────
+    findings.extend(_detect_module_layer_violation(root))
 
     # ── Design system prefix mismatch ──────────────────────────────────────────
     findings.extend(_detect_design_system_prefix_mismatch(root))

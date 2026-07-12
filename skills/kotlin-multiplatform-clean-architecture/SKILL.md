@@ -539,14 +539,25 @@ Run these checks in CI to detect architecture drift:
 # 1. Verify :presenter has no Compose dep in any feature module
 grep -r "compose" feature/*/presenter/build.gradle.kts && echo "VIOLATION" || echo "OK"
 
-# 2. Verify :ui does not depend on :data or :domain
-grep -r "projects\.feature\.\w*\.\(data\|domain\)" feature/*/ui/build.gradle.kts && echo "VIOLATION" || echo "OK"
-
-# 3. Detekt with architecture rules
+# 2. Detekt with architecture rules
 ./gradlew detekt
+
+# 3. Full module-graph check, all layer pairs + cross-feature deps (see below)
+python3 kotlin-multiplatform-audit/scripts/audit_project.py .
 ```
 
 Wire these as CI gates via `kotlin-multiplatform-ci-github-actions`.
+
+**Why a single grep for ":ui depends on :data or :domain" isn't enough:** that only
+covers one layer pair. `kotlin-multiplatform-audit`'s `_detect_module_layer_violation`
+parses every module's `build.gradle.kts` for `projects.*` references and checks the
+*entire* layer order (`:model ← :api ← :domain ← :data`, `:domain ← :presenter ← :ui`)
+plus cross-feature dependencies, catching the violation the moment the wrong
+`implementation(projects.*)` line is added — before any file even imports the forbidden
+package, which is earlier than a file-level Detekt import rule can react. A literal
+circular dependency between two modules can't happen silently (Gradle itself refuses to
+build a real cycle), so this checks wrong-*direction* one-way dependencies instead,
+which Gradle allows fine and nothing else catches.
 
 ---
 
@@ -557,7 +568,7 @@ Wire these as CI gates via `kotlin-multiplatform-ci-github-actions`.
 - `kotlin-multiplatform-unit-testing` — JVM-based ViewModel tests enabled by the `:presenter`/`:ui` split
 - `kotlin-multiplatform-code-quality` — Ktlint + Detekt setup; Detekt's `UnnecessaryAbstractClass` rule is the mechanical enforcement for Composition Over Inheritance
 - `kotlin-multiplatform-dependency-injection` — Koin wiring for interface + injection, the replacement for inheritance-based extension points
-- `kotlin-multiplatform-audit` — `_detect_extensible_abstract_class_in_common` catches the same shape independent of whether Detekt is configured
+- `kotlin-multiplatform-audit` — `_detect_extensible_abstract_class_in_common` and `_detect_module_layer_violation` are the mechanical enforcement for this skill's Composition Over Inheritance and layer-order rules, independent of whether Detekt is configured
 
 ---
 
@@ -597,6 +608,7 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
+| 2026-07-11 | Added a "Module layer-order violation" fitness function: `kotlin-multiplatform-audit`'s new `_detect_module_layer_violation` parses every module's `build.gradle.kts` for `projects.*` references and checks the full layer order plus cross-feature dependencies, generalizing the single ad-hoc `:ui`-vs-`:data`/`:domain` grep this section used to show. A literal circular dependency can't happen silently (Gradle refuses to build a real cycle) — the real, previously-uncaught gap is a wrong-*direction* one-way dependency declared at the Gradle level before any file imports the forbidden package, which file-level Detekt rules can't see yet. Verified against 5 synthetic cases (3 violation types, a valid full graph, and a core-module dependency correctly ignored) before shipping. |
 | 2026-07-11 | Added "Composition Over Inheritance in commonMain" — a real, recurring anti-pattern where an agent creates a public `abstract class` in `commonMain` (e.g. a `GenericGameApplication`) with only abstract members, forcing every consumer to subclass it. Not scoped to any domain name — the smell is the shape, not the name. Wired to Detekt's real `UnnecessaryAbstractClass` rule (added to `kotlin-multiplatform-code-quality`'s base `detekt.yml`) and a new project-independent backstop detector in `kotlin-multiplatform-audit` (`_detect_extensible_abstract_class_in_common`), verified against positive/negative/scope-boundary test cases before shipping. 2 new anti-patterns. |
 | 2026-06-28 | Fixed AppNavigator Koin binding: use NavControllerHolder singleton pattern so AppNavigatorImpl can be a Koin single{} while NavController is set by AppNavHost via DisposableEffect. |
 | 2026-06-28 | Added "Layer Weight" section with ViewModel/use-case/data decision tables and thin feature pattern. Updated Recommendation First to lead with start-thin principle. Added: core vs feature split, use case pattern, mapper pattern, typed domain errors, cross-feature navigation. |

@@ -1520,6 +1520,83 @@ class ExtensibleAbstractClassInCommonTests(unittest.TestCase):
             self.assertFalse(any("extensible abstract class in commonMain" in f for f in findings))
 
 
+class ModuleLayerViolationTests(unittest.TestCase):
+    """A module can declare a wrong-direction Gradle dependency (e.g. :ui directly on
+    :data, skipping :presenter) without ever forming a literal cycle — Gradle happily
+    builds it, and the existing Detekt import-boundary rules only check file-level
+    imports, which can miss a violation declared in build.gradle.kts before any file
+    uses it. This detector parses the real Gradle module graph directly.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_ui_depending_directly_on_data(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/build.gradle.kts",
+                "dependencies {\n    implementation(projects.feature.auth.data)\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("module layer-order violation" in f for f in findings))
+
+    def test_flags_data_depending_on_domain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/data/build.gradle.kts",
+                "dependencies {\n    implementation(projects.feature.auth.domain)\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("module layer-order violation" in f for f in findings))
+
+    def test_flags_cross_feature_module_dependency(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/domain/build.gradle.kts",
+                "dependencies {\n    implementation(projects.feature.payments.api)\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("cross-feature module dependency" in f for f in findings))
+
+    def test_ignores_correctly_layered_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            layers = {
+                "model": "",
+                "api": "implementation(projects.feature.auth.model)",
+                "domain": "implementation(projects.feature.auth.api)",
+                "data": "implementation(projects.feature.auth.api)\n    implementation(projects.core.network)",
+                "presenter": "implementation(projects.feature.auth.domain)",
+                "ui": "implementation(projects.feature.auth.presenter)",
+            }
+            for layer, dep in layers.items():
+                self._write(
+                    root, f"feature/auth/{layer}/build.gradle.kts",
+                    f"dependencies {{\n    {dep}\n}}\n",
+                )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("module layer-order violation" in f for f in findings))
+            self.assertFalse(any("cross-feature module dependency" in f for f in findings))
+
+    def test_ignores_core_module_dependency(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/data/build.gradle.kts",
+                "dependencies {\n    implementation(projects.feature.auth.api)\n"
+                "    implementation(projects.core.network)\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertEqual(
+                [f for f in findings if "layer-order" in f or "cross-feature module" in f], []
+            )
+
+
 class CommandShellPortabilityTests(unittest.TestCase):
     """A find ... -not ... predicate in commands/kmm-audit-screenshots.md broke under
     a real user's RTK proxy hook (2026-07-10) — this scanner catches that pattern
