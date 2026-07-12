@@ -6,6 +6,12 @@
 Works from **any project** — you do not need the skills repo checked out locally.
 Requires `gh` CLI authenticated (`gh auth status`).
 
+**This command can also be triggered proactively**, not just on explicit request:
+`kotlin-multiplatform-lessons` drafts an issue using this command's Step 4 template
+whenever it captures a `severity: high`, `type: correction` lesson (a genuine skill bug,
+not just a gap) — the same confirmation gate below still applies before anything is
+actually filed.
+
 Issue description: **$ARGUMENTS** (or nothing — will collect interactively)
 
 ---

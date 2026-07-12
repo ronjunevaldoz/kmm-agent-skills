@@ -12,7 +12,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-09'
+  last-updated: '2026-07-12'
   keywords:
     - lessons learned
     - skill feedback
@@ -23,6 +23,9 @@ metadata:
     - pattern discovery
     - correction
     - skill gap
+    - auto file github issue
+    - proactive issue draft
+    - report skill bug automatically
 ---
 
 ## When to Use This Skill
@@ -39,7 +42,9 @@ skill was wrong, skill gap, better pattern, correction, docs/lessons,
 what we should have done, upstream this, feed back to skills.
 
 **Trigger automatically (no user prompt needed):** after any fix where you
-deviated from skill guidance, or where the skill gave you no guidance at all.
+deviated from skill guidance, or where the skill gave you no guidance at all. For a
+`high`-severity `correction` (a genuine skill bug), also proactively draft a GitHub
+issue alongside the lesson — see "Proactively Offering to File a GitHub Issue" below.
 
 ---
 
@@ -237,6 +242,30 @@ a cross-skill note in kotlin-multiplatform-offline-first under "Known Gaps".
 
 ---
 
+## Proactively Offering to File a GitHub Issue
+
+Writing the lesson file is not the end of the workflow for a genuine bug. **When the
+lesson is `severity: high` and `type: correction`** — the skill's guidance was wrong and
+it actually broke something — don't just write the file and stop. In the same turn,
+also draft a GitHub issue for `ronjunevaldoz/kmm-agent-skills` using
+`/report-skill-issue`'s Step 4 template (populated from the same `followed`/`broke`/
+`correct`/`evidence` content you just used for the lesson), show the user the full
+draft, and ask whether to submit it — the same confirmation gate that command already
+uses. Don't wait for the user to separately remember to run `/report-skill-issue`
+themselves; the lesson and the issue draft come from the same discovery, so drafting
+both is barely more work than drafting one.
+
+**Filing the issue itself still requires the user's explicit "yes."** This only makes
+the *suggestion and draft* proactive — creating a GitHub issue is a real, visible action
+on someone else's repo, not something to submit silently even when the bug is obvious.
+
+For `gap`, `better-pattern`, `deprecation`, or `confirmation` lessons, or `correction`
+lessons below `high` severity, the local lesson file is enough — those are fine to batch
+into a later harvest via `kotlin-multiplatform-skill-harvester` rather than filing
+immediately.
+
+---
+
 ## Directory Convention
 
 ```
@@ -273,6 +302,8 @@ If you are unsure whether a finding warrants a lesson: if it took more than one 
 - Filing a lesson for a one-off project quirk rather than a repeatable pattern — lessons are only useful if the finding could recur in another project
 - Skipping `evidence` — without a file path or line reference, the lesson cannot be verified or acted on by the harvester
 - Combining multiple findings into one file, or appending a new lesson to an existing file — the harvester reads one Lesson per file, so this breaks grouping and review. Run `create_lesson.py` once per finding instead — caught by the audit's `combined lesson file [HIGH]` if it happens anyway (e.g. a hand-written or merged file)
+- Writing a `high`/`correction` lesson and stopping there — waiting for the user to remember `/report-skill-issue` themselves means a real bug sits unreported indefinitely; draft the issue in the same turn and offer to submit it
+- Actually filing the GitHub issue without the user's explicit "yes" — the draft can be proactive, the submission cannot be
 
 ---
 
@@ -311,6 +342,7 @@ When writing a lesson, respond with the complete lesson file content — no surr
   across projects) and proposes amendments to the source skills
 - `kotlin-multiplatform-audit` — runs after lessons accumulate to check whether
   the proposed amendments have been applied upstream
+- `/kmm-report-skill-issue` — the draft template and submission flow this skill reuses when a `high`/`correction` lesson warrants filing immediately instead of waiting for a harvest
 
 ---
 
@@ -318,6 +350,7 @@ When writing a lesson, respond with the complete lesson file content — no surr
 
 | Date | Change |
 |---|---|
+| 2026-07-12 | Added "Proactively Offering to File a GitHub Issue" — previously, filing a GitHub issue for a skill bug required the user to separately remember `/report-skill-issue`, even after this skill had just proactively written a lesson describing the exact same bug. Now a `severity: high`, `type: correction` lesson also drafts the issue in the same turn, reusing `/report-skill-issue`'s Step 4 template — actually submitting it still requires the user's explicit confirmation, unchanged. Cross-referenced both ways with `/kmm-report-skill-issue`. 2 new anti-patterns. |
 | 2026-07-09 | The one-lesson-per-file rule was documented but had no enforcement beyond `create_lesson.py` refusing to overwrite — a hand-written or merged file could still violate it silently. New `kotlin-multiplatform-audit` detector `combined lesson file [HIGH]` flags any `docs/lessons/*.md` file with more than one `## What we followed` section. |
 | 2026-06-30 | Added create_lesson.py — deterministic one-file-per-finding creator (auto date/slug, never appends or overwrites) + lesson-template.md. Hardened the one-lesson-per-file rule, fixed the Testing section to match the real frontmatter schema, new anti-pattern against combined/appended lesson files. |
 | 2026-06-26 | Initial release — lesson format, field reference, examples, directory convention. |
