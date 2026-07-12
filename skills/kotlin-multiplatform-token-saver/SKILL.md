@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-12'
+  last-updated: '2026-07-13'
   keywords:
     - token saver
     - prompt compression
@@ -74,15 +74,37 @@ Pick the narrowest tool that solves the problem — and check what's actually in
 before recommending one, rather than assuming all four are equally available:
 
 - **Ponytail**: review/planning guardrail for "do we need this at all?" and
-  "what is the smallest correct thing?" — real Claude Code plugin, install via
-  `/plugin marketplace add`, user-run
+  "what is the smallest correct thing?" — real Claude Code plugin. Check
+  `claude plugin list` first: `scope: project` + `enabled: false` means it's only
+  active in one specific project, not "any project." Install (or re-install) at user
+  scope with `claude plugin install ponytail@ponytail` (default scope is `user`) — a
+  real, non-interactive CLI equivalent of `/plugin install`, wrapped idempotently in
+  `scripts/install-ponytail.sh`. Still the user's call to run, not an agent's to run
+  unprompted — it's a persistent, global config change.
 - **Caveman**: make the model speak tersely without losing accuracy — real tool, but
-  installs via `curl | bash` from an unverified source; recommend it, don't install it
+  installs via `curl | bash` from an unverified source; recommend it, don't install it.
+  Registers as a Claude Code plugin once installed — check
+  `~/.claude/plugins/installed_plugins.json` for `caveman@caveman` rather than
+  `which caveman` (it has no standalone CLI). Not active by default even when
+  installed — needs `/caveman [level]` per session or `/caveman-init` for a
+  persistent per-repo rule, both user-run. **Deliberately has no `install-*.sh`
+  script**, unlike the other three tools — its install is `curl | bash` from an
+  unverified personal account, so the point is that the user reviews and runs it
+  themselves; wrapping it in a script would undercut that.
 - **RTK**: compress command output before it reaches the model — the one most likely to
-  already be installed; check with `rtk --version` before assuming it needs setup
+  already be installed; check with `rtk --version` before assuming it needs setup.
+  `scripts/install-rtk.sh` handles Phase 1 only (`brew install rtk`, safe to run
+  directly) and then runs `rtk init -g --dry-run` to preview the Phase 2 hook-wiring
+  diff — it never applies Phase 2 itself; the user runs `rtk init -g` after reviewing
+  the preview.
 - **Headroom**: compress tool output, logs, files, and RAG chunks when the host is
   already set up — needs a running local proxy and the user's own API keys; heaviest
-  setup of the four, never something to "just enable"
+  setup of the four, never something to "just enable". Check `pip3 show headroom-ai`
+  before assuming it's absent — found genuinely already installed (v0.30.0) on this
+  machine during this skill's own verification. `scripts/install-headroom.sh` wraps
+  only the `pip install "headroom-ai[all]"` step, idempotently — it never collects API
+  keys or starts the proxy; both are printed as next steps for the user to do
+  themselves.
 
 ## Default Rules
 
@@ -117,6 +139,9 @@ Validate this skill with short prompt-routing checks, not heavy integration scaf
 - running Caveman's `curl | bash` installer directly instead of telling the user to run it themselves — executing a remote script from an unverified source is a real risk, not a hypothetical one, regardless of what the script claims to do
 - entering the user's LLM provider API key into Headroom's config on their behalf — never handle credentials for the user, even for a token-saving tool
 - presenting all four tools as equally available defaults without checking what's actually installed first (`rtk --version`, checking for a Ponytail/Caveman/Headroom install) — recommending an uninstalled tool as if it's ready to use wastes the user's time chasing a setup step that was never mentioned
+- assuming a plugin found in `claude plugin list` is available everywhere without checking its `scope` — `scope: project` + `enabled: false` means it's only active in the one project it was installed from, not "any project"
+- running `scripts/install-ponytail.sh` (or any plugin install) automatically instead of having the user run it — it's a persistent, global change to their Claude Code environment
+- assuming Headroom is absent without checking `pip3 show headroom-ai` first — it was found genuinely already installed once, and `scripts/install-headroom.sh` skips the install step entirely when that's true rather than re-installing
 
 ## Related Skills
 
@@ -142,6 +167,9 @@ See [token-saving-tools.md](references/token-saving-tools.md) for tool-by-tool s
 
 | Date | Change |
 |---|---|
+| 2026-07-13 | Added `scripts/install-rtk.sh` — Phase 1 (`brew install rtk`) runs directly, then previews Phase 2 via `rtk init -g --dry-run` without applying it, matching the existing two-phase authorization rule. Also ran the previously-blocked `scripts/install-ponytail.sh` after the user gave specific confirmation naming that exact script: verified `ponytail@ponytail` is now installed at `scope: user`, `enabled: true` (was previously only `scope: project`, disabled, for one project). |
+| 2026-07-13 | Added `scripts/install-headroom.sh`, scoped deliberately to the `pip install "headroom-ai[all]"` step only — idempotent (`pip show headroom-ai` first), never collects API keys or starts the local proxy, both left as printed next-steps for the user. Also discovered Headroom was already genuinely installed on this machine (`pip3 show headroom-ai` → v0.30.0), contradicting an earlier claim in this same skill that none of the three optional tools were present — a reminder to verify real install state before documenting it. |
+| 2026-07-13 | Documented Caveman's real post-install state, verified in practice: the user ran the installer themselves and it genuinely registered as a Claude Code plugin (`caveman@caveman` in `~/.claude/plugins/installed_plugins.json`), not a standalone CLI — `which caveman` correctly finds nothing. It is not active by default even once installed; needs `/caveman [level]` per session or `/caveman-init` (which itself runs another `curl \| node -` internally — expected, since it's the already-reviewed plugin's own mechanism invoked by the user, not an agent fetching an unreviewed script). Also discovered Ponytail was already installed on this machine, but scoped to a single project and disabled (`claude plugin list` showed `scope: project`, `enabled: false`) — not "available in any project" as its earlier documentation implied. Verified `claude plugin marketplace add`/`claude plugin install` are real, non-interactive CLI equivalents of the `/plugin` slash commands (`claude --help` genuinely lists `plugin` as a subcommand), and added `scripts/install-ponytail.sh` wrapping both idempotently at user scope — still user-run, not automatic. |
 | 2026-07-12 | Corrected the framing that all four tools are equally-available defaults: verified each tool's real install method rather than assuming. RTK — `brew install`, low risk, likely already installed (check `rtk --version` first). Ponytail — real Claude Code plugin via `/plugin marketplace add`, low risk, user-run. Caveman — `curl \| bash` from an unverified source, elevated risk; recommend it, never run the installer yourself. Headroom — local proxy + user's own API keys + first-run model download, heaviest setup of the four, never enter credentials on the user's behalf. 3 new anti-patterns. |
 | 2026-07-10 | Documented RTK's real two-phase install, verified in practice: `brew install rtk` is safe to run directly, but `rtk init -g` (global hook wiring) got blocked by the auto-mode classifier on a generic "go ahead" — needs specific confirmation of the exact `--dry-run` diff instead. Also documented that the hook doesn't apply retroactively (needs a fresh session) and the `rtk gain`/`rtk discover` tracking commands. 3 new anti-patterns. |
 | 2026-07-09 | Initial release — token-saving routing for Ponytail, Caveman, RTK, and optional Headroom. |

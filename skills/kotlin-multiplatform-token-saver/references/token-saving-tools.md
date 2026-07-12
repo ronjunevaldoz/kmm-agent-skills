@@ -11,6 +11,22 @@ kind of setup it needs.
   marketplace — `/plugin marketplace add DietrichGebert/ponytail`, then
   `/plugin install ponytail@ponytail`. Both are slash commands the user runs
   interactively; an agent cannot invoke them on the user's behalf.
+- **Real, non-interactive CLI equivalent exists** (`claude --help` lists `plugin` as a
+  real subcommand — verified, not a workaround): `claude plugin marketplace add
+  DietrichGebert/ponytail` then `claude plugin install ponytail@ponytail`. Default scope
+  is `user` (available in every project); pass `--scope project` only if that's actually
+  wanted. A real installed-plugins check on this machine found `ponytail@ponytail`
+  present but scoped to a single project and disabled — installing at user scope with
+  no `--scope` flag is the fix for "available in any project," not a separate step per
+  project.
+- `scripts/install-ponytail.sh` in this skill wraps both steps, idempotently — skips the
+  marketplace step if already registered, skips the install if a user-scope enabled copy
+  already exists. Still a persistent, global config change — the user runs it, not an
+  agent unprompted. Run once the user gave specific confirmation naming this exact
+  script: verified `ponytail@ponytail` now shows `scope: user`, `enabled: true`
+  (`claude plugin list --json`) in addition to the original project-scoped, disabled
+  entry — both installs coexist; the user-scope one is what makes it available in
+  every project.
 - No extra host setup required once installed.
 
 Source: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)
@@ -24,6 +40,19 @@ Source: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)
   GitHub account, no package-manager verification. Recommend Caveman when it fits the
   task; do not run this installer yourself — tell the user to review and run it in
   their own terminal instead.
+- **Once installed, it registers as a real Claude Code plugin** (`caveman@caveman`,
+  verify with `cat ~/.claude/plugins/installed_plugins.json | grep caveman`) with its
+  own slash commands — not a standalone CLI (`which caveman` finds nothing; that's
+  expected, not a broken install).
+- **Not active by default after install.** Two activation modes, both user-run (an
+  agent cannot invoke slash commands on the user's behalf):
+  - `/caveman [lite|full|ultra|wenyan]` — session-level, terse responses at the chosen
+    intensity, until the session ends.
+  - `/caveman-init [--dry-run|--force] [--only <agent>]` — writes a persistent, always-on
+    activation rule into the current repo for every IDE agent (Cursor, Windsurf, Cline,
+    Copilot, `AGENTS.md`). This command itself runs another `curl | node -` step
+    internally — expected, since it's the already-installed, reviewed plugin's own
+    documented mechanism invoked by the user, not an agent fetching an unreviewed script.
 
 Source: [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)
 
@@ -40,6 +69,10 @@ Source: [rtk-ai/rtk](https://github.com/rtk-ai/rtk)
 brew install rtk        # verified working; local package install, no config changes
 rtk --version && rtk gain   # sanity check
 ```
+
+`scripts/install-rtk.sh` in this skill wraps Phase 1 and then runs
+`rtk init -g --dry-run` to print the Phase 2 preview below — it never applies Phase 2,
+matching the authorization split documented next.
 
 **Phase 2 — global hook wiring: requires specific, not generic, confirmation.**
 `rtk init -g` patches `~/.claude/settings.json` (installs a PreToolUse hook rewriting
@@ -76,6 +109,16 @@ after install in the same session: output was unfiltered, exactly as expected.
   between the agent and the LLM provider, requires the user's own provider API keys,
   and downloads a model from HuggingFace on first run. Never enter API keys into it on
   the user's behalf.
+- `scripts/install-headroom.sh` in this skill wraps the pip install step only —
+  idempotent (`pip show headroom-ai` first, skips if already present) — and
+  deliberately stops there. It does not collect API keys or start the proxy; both are
+  printed as next steps for the user to do themselves. The package install itself
+  (`pip install`) is a normal package-manager action safe to run directly, unlike the
+  credential/proxy-start steps.
+- Check before assuming it's absent: `pip3 show headroom-ai` (or `pip show`) — found
+  genuinely already installed on one machine during this skill's own verification,
+  contradicting an earlier assumption that none of the three optional tools were
+  present.
 - Keep this optional until the setup exists; do not block a task on it.
 
 Source: [headroomlabs-ai/headroom](https://github.com/headroomlabs-ai/headroom)
