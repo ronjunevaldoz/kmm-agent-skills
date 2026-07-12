@@ -7,7 +7,11 @@ kind of setup it needs.
 
 - Use for overengineering checks, YAGNI pressure, and "smallest correct solution" reviews.
 - Best when the task is code, architecture, or refactor guidance.
-- No extra host setup required once the skill/plugin is installed.
+- **Install (verified real, low risk):** goes through Claude Code's own plugin
+  marketplace — `/plugin marketplace add DietrichGebert/ponytail`, then
+  `/plugin install ponytail@ponytail`. Both are slash commands the user runs
+  interactively; an agent cannot invoke them on the user's behalf.
+- No extra host setup required once installed.
 
 Source: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)
 
@@ -15,7 +19,11 @@ Source: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)
 
 - Use when the agent is too verbose and should answer in fewer words.
 - Best for response shaping, plan summaries, and tight implementation notes.
-- No special runtime setup beyond the skill install.
+- **Install (verified, elevated risk):** `curl -fsSL .../install.sh | bash` (macOS/Linux)
+  or the PowerShell equivalent — executes a remote script directly from a personal
+  GitHub account, no package-manager verification. Recommend Caveman when it fits the
+  task; do not run this installer yourself — tell the user to review and run it in
+  their own terminal instead.
 
 Source: [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)
 
@@ -63,6 +71,11 @@ after install in the same session: output was unfiltered, exactly as expected.
 
 - Use when tool output, logs, files, or RAG chunks need compression before LLM context.
 - Best for heavy tool sessions where the host already supports Headroom.
+- **Install (verified, heaviest setup of the four):** `pip install "headroom-ai[all]"`.
+  Not a quick toggle — it runs as a local proxy (`headroom proxy --port 8787`) sitting
+  between the agent and the LLM provider, requires the user's own provider API keys,
+  and downloads a model from HuggingFace on first run. Never enter API keys into it on
+  the user's behalf.
 - Keep this optional until the setup exists; do not block a task on it.
 
 Source: [headroomlabs-ai/headroom](https://github.com/headroomlabs-ai/headroom)

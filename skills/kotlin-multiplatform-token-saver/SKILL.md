@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-10'
+  last-updated: '2026-07-12'
   keywords:
     - token saver
     - prompt compression
@@ -39,14 +39,27 @@ too much output, terse, caveman, ponytail, headroom, rtk, smallest correct solut
 
 ## Recommendation First
 
-Default to the narrowest non-setup option:
-1. Ponytail for overengineering and YAGNI pressure.
-2. Caveman for terser replies.
-3. RTK for noisy shell output.
-4. Headroom only if the host already has it configured.
+These four are not equally available by default — verified against each tool's real
+install method, not assumed:
 
-If Headroom is not configured, keep it optional and continue with Ponytail, Caveman,
-or RTK instead.
+1. **RTK** — real risk profile: low. Installs via `brew install rtk` (an official
+   Homebrew bottle). Once installed and its hook wired, it runs automatically; nothing
+   further to enable per-session.
+2. **Ponytail** — real risk profile: low. Installs through Claude Code's own plugin
+   marketplace (`/plugin marketplace add DietrichGebert/ponytail`, then
+   `/plugin install ponytail@ponytail`) — these are slash commands the *user* runs
+   interactively; an agent cannot invoke them on the user's behalf.
+3. **Caveman** — real risk profile: elevated. Its documented install is
+   `curl -fsSL .../install.sh | bash` (or the PowerShell equivalent) — executing a
+   remote script directly from a personal GitHub account, with no package-manager
+   verification step. Do not run this yourself; if the user wants it, they run the
+   installer themselves after reviewing it.
+4. **Headroom** — real risk profile: heaviest setup, not risk per se. It's a local
+   proxy server (`headroom proxy --port 8787`) sitting between the agent and the LLM
+   provider, requires the user's own provider API keys, and downloads a model from
+   HuggingFace on first run. Never enter API keys into it on the user's behalf — that's
+   a hard rule regardless of tool. Keep this optional until the user has set it up
+   themselves; do not block a task on it.
 
 RTK itself has two install phases with different authorization needs — the binary
 install (`brew install rtk`) is safe to run directly, but the hook wiring
@@ -57,14 +70,19 @@ practice, not a hypothetical.
 
 ## Tool Choice
 
-Pick the narrowest tool that solves the problem:
+Pick the narrowest tool that solves the problem — and check what's actually installed
+before recommending one, rather than assuming all four are equally available:
 
 - **Ponytail**: review/planning guardrail for "do we need this at all?" and
-  "what is the smallest correct thing?"
-- **Caveman**: make the model speak tersely without losing accuracy
-- **RTK**: compress command output before it reaches the model
+  "what is the smallest correct thing?" — real Claude Code plugin, install via
+  `/plugin marketplace add`, user-run
+- **Caveman**: make the model speak tersely without losing accuracy — real tool, but
+  installs via `curl | bash` from an unverified source; recommend it, don't install it
+- **RTK**: compress command output before it reaches the model — the one most likely to
+  already be installed; check with `rtk --version` before assuming it needs setup
 - **Headroom**: compress tool output, logs, files, and RAG chunks when the host is
-  already set up
+  already set up — needs a running local proxy and the user's own API keys; heaviest
+  setup of the four, never something to "just enable"
 
 ## Default Rules
 
@@ -96,6 +114,9 @@ Validate this skill with short prompt-routing checks, not heavy integration scaf
 - running `rtk init -g --auto-patch` on a generic "go ahead" — global config patches need confirmation of the specific diff, not a repeat of an earlier general approval; show `--dry-run` output first or have the user run it themselves interactively
 - assuming the RTK hook is active immediately after `rtk init -g` — it only applies to Bash commands in sessions started after install completes, not the current one
 - expecting `rtk gain` to show data right after install — it stays empty until the hook has actually processed commands in a fresh session; use `rtk discover` for a retroactive estimate instead
+- running Caveman's `curl | bash` installer directly instead of telling the user to run it themselves — executing a remote script from an unverified source is a real risk, not a hypothetical one, regardless of what the script claims to do
+- entering the user's LLM provider API key into Headroom's config on their behalf — never handle credentials for the user, even for a token-saving tool
+- presenting all four tools as equally available defaults without checking what's actually installed first (`rtk --version`, checking for a Ponytail/Caveman/Headroom install) — recommending an uninstalled tool as if it's ready to use wastes the user's time chasing a setup step that was never mentioned
 
 ## Related Skills
 
@@ -121,5 +142,6 @@ See [token-saving-tools.md](references/token-saving-tools.md) for tool-by-tool s
 
 | Date | Change |
 |---|---|
+| 2026-07-12 | Corrected the framing that all four tools are equally-available defaults: verified each tool's real install method rather than assuming. RTK — `brew install`, low risk, likely already installed (check `rtk --version` first). Ponytail — real Claude Code plugin via `/plugin marketplace add`, low risk, user-run. Caveman — `curl \| bash` from an unverified source, elevated risk; recommend it, never run the installer yourself. Headroom — local proxy + user's own API keys + first-run model download, heaviest setup of the four, never enter credentials on the user's behalf. 3 new anti-patterns. |
 | 2026-07-10 | Documented RTK's real two-phase install, verified in practice: `brew install rtk` is safe to run directly, but `rtk init -g` (global hook wiring) got blocked by the auto-mode classifier on a generic "go ahead" — needs specific confirmation of the exact `--dry-run` diff instead. Also documented that the hook doesn't apply retroactively (needs a fresh session) and the `rtk gain`/`rtk discover` tracking commands. 3 new anti-patterns. |
 | 2026-07-09 | Initial release — token-saving routing for Ponytail, Caveman, RTK, and optional Headroom. |
