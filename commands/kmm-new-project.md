@@ -225,6 +225,44 @@ Load `kotlin-multiplatform-clean-architecture`. Generate the 6-layer module stru
 
 After each foundation step: run `validate_module_graph.py` and confirm zero errors before proceeding.
 
+**F-03: Draft wireframes and architecture diagram (required, before design system or feature work)**
+
+Design must exist before code — draft both now, using the confirmed screen list from
+Step 3, and confirm with the user before proceeding to Step 5. Do not defer this to
+after design system or feature implementation.
+
+*Architecture diagram* (`kotlin-multiplatform-project-docs-maintainer`'s Architecture
+Diagram Rule): a short diagram showing the project's major modules, layers, and
+runtime flow — feature modules, shared core layers, entry points. Print it as a
+text/ASCII block for confirmation now; it lands in the README or `docs/architecture.md`
+once Step 10 generates the rest of the project docs.
+
+*Per-screen wireframes* (`kotlin-multiplatform-layout-system`): for every screen in the
+confirmed MVP + post-MVP feature list, generate a file in
+`docs/layout-system/<feature>/<ScreenName>.md` containing:
+- **Component table** — every visible element, its type, and the design-system component it maps to
+- **ASCII wireframe** — structural layout showing slot positions, spacing zones, and scroll regions
+- **State variants** — one wireframe per meaningful state (loading, empty, error, filled)
+
+Example for a product list screen:
+```
+docs/layout-system/
+  products/
+    ProductListScreen.md   — list, loading, empty state variants
+    ProductDetailScreen.md — hero image, details, CTA button
+  auth/
+    LoginScreen.md         — form fields, submit, forgot password link
+  orders/
+    OrderHistoryScreen.md  — grouped list, empty state
+  _components.md           — shared component registry (AppButton, AppTextField, etc.)
+```
+
+Present the architecture diagram and all wireframes together, then a single
+confirmation prompt (same pattern as Step 3c) before continuing to Step 5. Wireframes
+are a living spec, not a frozen constraint — they get updated as the design evolves,
+but they must exist before design tokens or feature code are written, not retrofitted
+after.
+
 ---
 
 ## Step 5 — Core infrastructure (if needed)
@@ -436,35 +474,11 @@ component source, so it combines with either.
 
 ---
 
-## Step 7 — Screen layouts and design
+## Step 7 — Design previews
 
-Before writing any composable, generate layout docs and wireframes for every screen in
-the inferred plan. Design must be agreed on before implementation starts — changing
-layout after code is written wastes time.
-
-**7a — ASCII wireframes (layout-system)**
-
-Load `kotlin-multiplatform-layout-system`. For each screen in the inferred feature set,
-generate a file in `docs/layout-system/<feature>/<ScreenName>.md` containing:
-
-- **Component table** — every visible element, its type, and the design-system component it maps to
-- **ASCII wireframe** — structural layout showing slot positions, spacing zones, and scroll regions
-- **State variants** — one wireframe per meaningful state (loading, empty, error, filled)
-
-Example for a product list screen:
-```
-docs/layout-system/
-  products/
-    ProductListScreen.md   — list, loading, empty state variants
-    ProductDetailScreen.md — hero image, details, CTA button
-  auth/
-    LoginScreen.md         — form fields, submit, forgot password link
-  orders/
-    OrderHistoryScreen.md  — grouped list, empty state
-  _components.md           — shared component registry (AppButton, AppTextField, etc.)
-```
-
-**7b — Design previews (preview-driven-development)**
+Wireframes were already drafted in Step 4's F-03, before design system or feature work
+— this step turns those confirmed wireframes into compilable preview stubs, still
+before real implementation.
 
 Load `kotlin-multiplatform-preview-driven-development`. For each screen, generate stub
 `Content` composables with `@Preview` annotations covering all state variants — before
@@ -727,7 +741,7 @@ docs/
     001-mvi-pattern.md
     002-sqldelight-vs-room.md   (if SQLDelight was chosen)
     003-koin-di.md
-  layout-system/      — already written by Step 7 (screen wireframes per feature)
+  layout-system/      — already written by Step 4's F-03 (screen wireframes per feature)
 ```
 
 `docs/architecture.md` contents:
