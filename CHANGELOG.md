@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.71.1] — 2026-07-13
+
+### Fixed
+
+- fix(token-saver): document Headroom's missing settings.json routing step
+
+---
+
 ## [v1.71.0] — 2026-07-13
 
 ### Added
