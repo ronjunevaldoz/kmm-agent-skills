@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.69.0] — 2026-07-12
+
+### Added
+
+- feat(new-project): require wireframes + architecture diagram before code
+
+---
+
 ## [v1.68.0] — 2026-07-12
 
 ### Added
