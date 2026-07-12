@@ -56,10 +56,14 @@ install method, not assumed:
    installer themselves after reviewing it.
 4. **Headroom** — real risk profile: heaviest setup, not risk per se. It's a local
    proxy server (`headroom proxy --port 8787`) sitting between the agent and the LLM
-   provider, requires the user's own provider API keys, and downloads a model from
-   HuggingFace on first run. Never enter API keys into it on the user's behalf — that's
-   a hard rule regardless of tool. Keep this optional until the user has set it up
-   themselves; do not block a task on it.
+   provider, requires a model backend (a real provider API key, or a local model like
+   Ollama), and downloads a model from HuggingFace on first run. Package install and
+   proxy start are not enough by themselves — Claude Code's own traffic only routes
+   through it once `~/.claude/settings.json` has an `env` block pointing
+   `ANTHROPIC_BASE_URL` at the proxy, a global settings change in the same class as
+   RTK's hook wiring: the user edits it themselves. Never enter API keys into it on the
+   user's behalf — that's a hard rule regardless of tool. Keep this optional until the
+   user has set it up themselves; do not block a task on it.
 
 RTK itself has two install phases with different authorization needs — the binary
 install (`brew install rtk`) is safe to run directly, but the hook wiring
@@ -98,13 +102,17 @@ before recommending one, rather than assuming all four are equally available:
   diff — it never applies Phase 2 itself; the user runs `rtk init -g` after reviewing
   the preview.
 - **Headroom**: compress tool output, logs, files, and RAG chunks when the host is
-  already set up — needs a running local proxy and the user's own API keys; heaviest
-  setup of the four, never something to "just enable". Check `pip3 show headroom-ai`
-  before assuming it's absent — found genuinely already installed (v0.30.0) on this
-  machine during this skill's own verification. `scripts/install-headroom.sh` wraps
-  only the `pip install "headroom-ai[all]"` step, idempotently — it never collects API
-  keys or starts the proxy; both are printed as next steps for the user to do
-  themselves.
+  already set up — needs a running local proxy, a model backend, and
+  `~/.claude/settings.json` wired to route through it; heaviest setup of the four,
+  never something to "just enable". Check `pip3 show headroom-ai` before assuming it's
+  absent — found genuinely already installed (v0.30.0) on this machine during this
+  skill's own verification. `scripts/install-headroom.sh` wraps only the
+  `pip install "headroom-ai[all]"` step, idempotently — it never collects API keys,
+  starts the proxy, or touches `settings.json`; all three are printed as next steps
+  for the user to do themselves. Package install + running proxy alone still don't
+  route anything — that only happens once `settings.json`'s `env` block points
+  `ANTHROPIC_BASE_URL` at the proxy (verified against a real, working setup;
+  see `references/token-saving-tools.md`).
 
 ## Default Rules
 
@@ -142,6 +150,8 @@ Validate this skill with short prompt-routing checks, not heavy integration scaf
 - assuming a plugin found in `claude plugin list` is available everywhere without checking its `scope` — `scope: project` + `enabled: false` means it's only active in the one project it was installed from, not "any project"
 - running `scripts/install-ponytail.sh` (or any plugin install) automatically instead of having the user run it — it's a persistent, global change to their Claude Code environment
 - assuming Headroom is absent without checking `pip3 show headroom-ai` first — it was found genuinely already installed once, and `scripts/install-headroom.sh` skips the install step entirely when that's true rather than re-installing
+- telling the user Headroom is "set up" once the package is installed and the proxy is running — nothing actually routes through it until `~/.claude/settings.json`'s `env` block points `ANTHROPIC_BASE_URL` at the proxy, a step this skill originally missed entirely
+- assuming Headroom always needs a paid provider API key — a real observed setup routed it to a local Ollama model instead, with `ANTHROPIC_AUTH_TOKEN` set to a placeholder, not a real credential
 
 ## Related Skills
 
@@ -167,6 +177,7 @@ See [token-saving-tools.md](references/token-saving-tools.md) for tool-by-tool s
 
 | Date | Change |
 |---|---|
+| 2026-07-13 | Fixed a real gap: this skill never documented that Headroom needs `~/.claude/settings.json`'s `env` block wired with `ANTHROPIC_BASE_URL` pointed at the local proxy — package install and a running proxy alone route nothing. Verified against a real, working setup (found by the user) that also showed the backend doesn't have to be a paid provider key; it can point at a local model (observed: Ollama). Updated `scripts/install-headroom.sh`'s printed next-steps, `references/token-saving-tools.md`, and 2 new anti-patterns. This settings.json wiring is treated the same as RTK's hook wiring — the user edits it, not this skill's script. |
 | 2026-07-13 | Added `scripts/install-rtk.sh` — Phase 1 (`brew install rtk`) runs directly, then previews Phase 2 via `rtk init -g --dry-run` without applying it, matching the existing two-phase authorization rule. Also ran the previously-blocked `scripts/install-ponytail.sh` after the user gave specific confirmation naming that exact script: verified `ponytail@ponytail` is now installed at `scope: user`, `enabled: true` (was previously only `scope: project`, disabled, for one project). |
 | 2026-07-13 | Added `scripts/install-headroom.sh`, scoped deliberately to the `pip install "headroom-ai[all]"` step only — idempotent (`pip show headroom-ai` first), never collects API keys or starts the local proxy, both left as printed next-steps for the user. Also discovered Headroom was already genuinely installed on this machine (`pip3 show headroom-ai` → v0.30.0), contradicting an earlier claim in this same skill that none of the three optional tools were present — a reminder to verify real install state before documenting it. |
 | 2026-07-13 | Documented Caveman's real post-install state, verified in practice: the user ran the installer themselves and it genuinely registered as a Claude Code plugin (`caveman@caveman` in `~/.claude/plugins/installed_plugins.json`), not a standalone CLI — `which caveman` correctly finds nothing. It is not active by default even once installed; needs `/caveman [level]` per session or `/caveman-init` (which itself runs another `curl \| node -` internally — expected, since it's the already-reviewed plugin's own mechanism invoked by the user, not an agent fetching an unreviewed script). Also discovered Ponytail was already installed on this machine, but scoped to a single project and disabled (`claude plugin list` showed `scope: project`, `enabled: false`) — not "available in any project" as its earlier documentation implied. Verified `claude plugin marketplace add`/`claude plugin install` are real, non-interactive CLI equivalents of the `/plugin` slash commands (`claude --help` genuinely lists `plugin` as a subcommand), and added `scripts/install-ponytail.sh` wrapping both idempotently at user scope — still user-run, not automatic. |

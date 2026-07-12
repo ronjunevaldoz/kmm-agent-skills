@@ -36,18 +36,27 @@ fi
 
 cat <<'EOF'
 
-Headroom is installed but not configured or running — two things left, both yours to
+Headroom is installed but not configured or running — three things left, all yours to
 do, not this script's:
 
-  1. Set your own LLM provider API key(s) as environment variables (never paste them
-     into a script or a file that could get committed):
-       export ANTHROPIC_API_KEY="..."   # or whichever provider you actually use
-
-  2. Start the local proxy only when you're ready to use it — this script does not
+  1. Start the local proxy only when you're ready to use it — this script does not
      start it automatically:
        headroom proxy --port 8787
+     First run also downloads the Kompress-v2-base model from HuggingFace — expect a
+     delay on that first invocation.
 
-Nothing routes through Headroom until you start that proxy yourself. First run also
-downloads the Kompress-v2-base model from HuggingFace — expect a delay on that first
-`headroom proxy` invocation.
+  2. Point it at a real (or local) model backend — your own LLM provider API key, or
+     a local model like Ollama. Never paste a real key into a script or committed file.
+
+  3. Route Claude Code's own traffic through the proxy: add an `env` block to
+     ~/.claude/settings.json with ANTHROPIC_BASE_URL pointed at the proxy, e.g.:
+       "env": {
+         "ANTHROPIC_BASE_URL": "http://localhost:8787",
+         "ANTHROPIC_AUTH_TOKEN": "...",   // provider key, or a placeholder for a local backend
+         "ANTHROPIC_API_KEY": ""
+       }
+     This is a global settings.json change, same class as RTK's hook wiring — edit it
+     yourself; this script does not touch settings.json.
+
+Nothing routes through Headroom until all three of the above are done.
 EOF

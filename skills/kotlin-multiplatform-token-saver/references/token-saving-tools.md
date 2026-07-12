@@ -120,5 +120,22 @@ after install in the same session: output was unfiltered, exactly as expected.
   contradicting an earlier assumption that none of the three optional tools were
   present.
 - Keep this optional until the setup exists; do not block a task on it.
+- **The step this doc originally missed: routing Claude Code's own traffic through the
+  proxy.** Installing the package and starting `headroom proxy --port 8787` isn't
+  enough by itself — Claude Code needs an `env` block in `~/.claude/settings.json`
+  pointing `ANTHROPIC_BASE_URL` at the proxy (verified against a real, working setup):
+  ```json
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://localhost:8787",
+    "ANTHROPIC_AUTH_TOKEN": "...",
+    "ANTHROPIC_API_KEY": ""
+  }
+  ```
+  This is the same class of change as RTK's `rtk init -g` hook wiring — a global,
+  persistent `settings.json` patch. It needs the user's own edit and specific
+  confirmation of the diff, not something `install-headroom.sh` does silently.
+- The backend behind the proxy doesn't have to be a paid cloud provider — a real setup
+  observed `ANTHROPIC_AUTH_TOKEN` set to a placeholder value routing to a local Ollama
+  model, not a real provider API key. Don't assume Headroom always needs a paid key.
 
 Source: [headroomlabs-ai/headroom](https://github.com/headroomlabs-ai/headroom)
