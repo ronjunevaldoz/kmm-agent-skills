@@ -176,6 +176,10 @@ dependencies {
 build:
   maxIssues: 0
 
+style:
+  UnnecessaryAbstractClass:
+    active: true
+
 complexity:
   LongMethod:
     active: true
@@ -216,6 +220,12 @@ libraries:
       forbidden:
         - '*.domain.*'
 ```
+
+`UnnecessaryAbstractClass` matters more in KMM than in a single-platform codebase: an
+abstract class with only abstract members in `commonMain` forces every consumer into an
+inheritance chain, which is exactly the pattern `kotlin-multiplatform-clean-architecture`'s
+"Composition Over Inheritance" section explains how to avoid — see that section for the
+full rationale and fix.
 
 ### Usage
 

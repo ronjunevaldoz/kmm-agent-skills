@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-28'
+  last-updated: '2026-07-11'
   keywords:
     - clean architecture
     - Kotlin Multiplatform
@@ -39,7 +39,9 @@ architecture design, content design, code organization, module design, project s
 layer design, data architecture, content strategy, code structure,
 core module, feature module, core vs feature, shared module, use case pattern,
 mapper pattern, DTO mapper, domain error, typed error, sealed error, DomainError,
-cross-feature navigation, navigate to another feature, AppNavigator, feature dependency.
+cross-feature navigation, navigate to another feature, AppNavigator, feature dependency,
+composition over inheritance, abstract class in commonMain, extensible base class,
+UnnecessaryAbstractClass, interface over abstract class, avoid over-abstraction.
 
 **Freshness rule:** Detekt rule set API changes between minor versions — recheck the
 `ArchitectureRule` DSL when upgrading Detekt.
@@ -93,6 +95,67 @@ Detekt rules second (catches import-level violations within a valid dep graph).
 | `:data` | `RepositoryImpl`, DTOs, mappers, data sources | UI state, ViewModels |
 | `:presenter` | `ViewModel`, MVI `UiState`, `UiIntent` sealed classes | Compose imports, UI framework |
 | `:ui` | `@Composable` screens, `@Preview` functions | Business logic, direct repo/use-case calls |
+
+---
+
+## Composition Over Inheritance in commonMain
+
+**commonMain APIs should be called or composed, not extended.** This is a distinct rule
+from the layer contract above — it applies within any single layer, to how a class
+exposes itself to the code that uses it.
+
+A recurring, real anti-pattern: an agent asked to make something "reusable" or "shared"
+reaches for a public `abstract class` in `commonMain` with abstract members a consumer
+must override — importing an Android/Spring-style inheritance instinct
+(`Application`, `@Component` base classes) into a context where it actively works
+against KMM's advantage. The base class now dictates *how* every consumer must structure
+their app around it, and a CMP upgrade or a second consumer with different needs can't
+easily deviate from the inheritance chain the shared code imposed.
+
+This isn't specific to any one domain — the same shape shows up as a game engine's
+`GenericGameApplication`, a network layer's `BaseApiClient`, a plugin system's
+`AbstractPlugin`. The smell is the shape (`abstract class`, only abstract members, in
+`commonMain`), not the name:
+
+```kotlin
+// ❌ Forces every consumer into this exact inheritance chain — commonMain shouldn't
+// assume how the consumer structures their own app.
+abstract class GenericGameApplication {
+    abstract fun onInitialize()
+    abstract fun onConfigure(): AppConfig
+}
+
+// ✓ Consumer implements and injects this — same flexibility, no inheritance chain,
+// no assumption about the consumer's own class hierarchy.
+interface GameLifecycle {
+    fun onInitialize()
+    fun onConfigure(): AppConfig
+}
+
+fun bootstrap(lifecycle: GameLifecycle) {
+    lifecycle.onInitialize()
+    val config = lifecycle.onConfigure()
+    // ...
+}
+```
+
+Wire `lifecycle` through Koin (already this collection's default DI, see
+`kotlin-multiplatform-dependency-injection`) the same way any other dependency is
+injected — nothing about "the consumer must implement a contract" requires inheritance.
+
+**Mechanical detector:** Detekt's real `UnnecessaryAbstractClass` rule (wired in
+`kotlin-multiplatform-code-quality`) flags exactly this shape — "abstract class with only
+abstract members should be an interface instead" — for any project with Detekt already
+configured. `kotlin-multiplatform-audit`'s `_detect_extensible_abstract_class_in_common`
+is a project-independent backstop for the same signal, scoped specifically to
+`commonMain` (an abstract class with only abstract members in a platform source set —
+`androidMain`, `iosMain` — is often a genuine platform requirement, not this smell).
+
+**When an abstract class in commonMain is fine:** it has at least one concrete member —
+a real template-method pattern with genuinely shared logic (e.g., `BaseRepository`'s
+`cachedFetch()` calling an abstract `fetch()`) is not this anti-pattern. The rule targets
+*pure* templates with nothing shared at all — those provide zero benefit over an
+interface and only cost the consumer their inheritance slot.
 
 ---
 
@@ -492,7 +555,9 @@ Wire these as CI gates via `kotlin-multiplatform-ci-github-actions`.
 - `kotlin-multiplatform-feature-scaffold` — creates the 6-layer module structure this skill governs
 - `kotlin-multiplatform-presenter-module` — `:presenter` layer in depth: MVI contracts, ViewModel, Koin wiring
 - `kotlin-multiplatform-unit-testing` — JVM-based ViewModel tests enabled by the `:presenter`/`:ui` split
-- `kotlin-multiplatform-code-quality` — Ktlint + Detekt setup; Detekt is the enforcement mechanism here
+- `kotlin-multiplatform-code-quality` — Ktlint + Detekt setup; Detekt's `UnnecessaryAbstractClass` rule is the mechanical enforcement for Composition Over Inheritance
+- `kotlin-multiplatform-dependency-injection` — Koin wiring for interface + injection, the replacement for inheritance-based extension points
+- `kotlin-multiplatform-audit` — `_detect_extensible_abstract_class_in_common` catches the same shape independent of whether Detekt is configured
 
 ---
 
@@ -510,6 +575,8 @@ Wire these as CI gates via `kotlin-multiplatform-ci-github-actions`.
 - putting cross-feature shared types in a feature `:model` — shared types belong in `:core:model`
 - binding `AppNavigatorImpl` as a Koin `single {}` — it holds a `NavController` which is only available after `rememberNavController()` inside the `AppNavHost` composable; create it with `remember(navController)` there instead
 - passing `NavController` through a `NavGraphBuilder` extension — extensions receive lambdas or `AppNavigator`, never `NavController` directly
+- a public `abstract class` in `commonMain` with only abstract members, requiring every consumer to subclass it — replace with an interface consumers implement and inject; see Composition Over Inheritance above
+- reaching for inheritance to make something "reusable" or "shared" by default — interface + Koin injection gives the same swap-per-consumer flexibility without dictating the consumer's own class hierarchy
 
 If a layer violation is hard to fix, it usually means a type belongs one layer lower (closer to `:model`).
 
@@ -530,6 +597,7 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
+| 2026-07-11 | Added "Composition Over Inheritance in commonMain" — a real, recurring anti-pattern where an agent creates a public `abstract class` in `commonMain` (e.g. a `GenericGameApplication`) with only abstract members, forcing every consumer to subclass it. Not scoped to any domain name — the smell is the shape, not the name. Wired to Detekt's real `UnnecessaryAbstractClass` rule (added to `kotlin-multiplatform-code-quality`'s base `detekt.yml`) and a new project-independent backstop detector in `kotlin-multiplatform-audit` (`_detect_extensible_abstract_class_in_common`), verified against positive/negative/scope-boundary test cases before shipping. 2 new anti-patterns. |
 | 2026-06-28 | Fixed AppNavigator Koin binding: use NavControllerHolder singleton pattern so AppNavigatorImpl can be a Koin single{} while NavController is set by AppNavHost via DisposableEffect. |
 | 2026-06-28 | Added "Layer Weight" section with ViewModel/use-case/data decision tables and thin feature pattern. Updated Recommendation First to lead with start-thin principle. Added: core vs feature split, use case pattern, mapper pattern, typed domain errors, cross-feature navigation. |
 | 2026-06-18 | Initial release. |

@@ -1453,6 +1453,73 @@ class WhatCommentInControlFlowTests(unittest.TestCase):
             self.assertFalse(any("what-comment in control flow" in f for f in findings))
 
 
+class ExtensibleAbstractClassInCommonTests(unittest.TestCase):
+    """A real, recurring bug pattern: an agent creates a public abstract class in
+    commonMain (e.g. a 'GenericGameApplication') with only abstract members, forcing
+    every consumer to subclass it — importing an Android/Spring-style inheritance
+    instinct into a context where interface + injection preserves the same flexibility
+    without dictating the consumer's app structure. Not scoped to any domain name; the
+    smell is the shape (abstract class, only abstract members, in commonMain).
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_pure_template_abstract_class_in_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/game/src/commonMain/kotlin/GenericGameApplication.kt",
+                "abstract class GenericGameApplication {\n"
+                "    abstract fun onInitialize()\n"
+                "    abstract fun onConfigure(): AppConfig\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("extensible abstract class in commonMain" in f for f in findings))
+
+    def test_ignores_abstract_class_with_a_concrete_member(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/data/src/commonMain/kotlin/BaseRepository.kt",
+                "abstract class BaseRepository {\n"
+                "    abstract fun fetch(): String\n"
+                "    fun cachedFetch(): String {\n"
+                "        return fetch()\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("extensible abstract class in commonMain" in f for f in findings))
+
+    def test_ignores_abstract_class_with_no_abstract_members(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/utils/src/commonMain/kotlin/Utils.kt",
+                "abstract class Utils {\n"
+                "    fun helper() { println(1) }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("extensible abstract class in commonMain" in f for f in findings))
+
+    def test_ignores_same_shape_outside_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "app/androidApp/src/androidMain/kotlin/BaseActivity.kt",
+                "abstract class BaseActivity {\n"
+                "    abstract fun onCreateContent()\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("extensible abstract class in commonMain" in f for f in findings))
+
+
 class CommandShellPortabilityTests(unittest.TestCase):
     """A find ... -not ... predicate in commands/kmm-audit-screenshots.md broke under
     a real user's RTK proxy hook (2026-07-10) — this scanner catches that pattern

@@ -1304,6 +1304,73 @@ def _detect_what_comment_in_control_flow(root: Path) -> list[str]:
     return findings
 
 
+# ── Extensible abstract class in commonMain ─────────────────────────────────────
+# commonMain APIs should be called or composed, not extended. An abstract class with
+# only abstract members (no concrete implementation at all) forces every consumer into
+# an inheritance chain the commonMain code itself dictates — the same shape Detekt's real
+# UnnecessaryAbstractClass rule already flags ("should be an interface instead"), scoped
+# here specifically to commonMain since that's where KMM's sharing advantage is lost by
+# reaching for inheritance instead of interface + injection. Not scoped to any domain
+# name (games, network clients, plugin systems, ...) — the smell is the shape, not the
+# name. Deliberately excludes abstract classes with at least one concrete member (a real
+# template-method pattern with genuinely shared logic is not this smell).
+
+_ABSTRACT_CLASS_RE = re.compile(r"\babstract\s+class\s+(\w+)\b[^{]*\{")
+_CONCRETE_FUN_BODY_RE = re.compile(r"\bfun\s+\w+\s*\([^)]*\)[^{;]*\{")
+_CONCRETE_PROPERTY_RE = re.compile(r"\b(?:val|var)\s+\w+[^=\n]*=")
+_ABSTRACT_MEMBER_RE = re.compile(r"\babstract\s+(?:fun|val|var)\b")
+
+
+def _is_commonmain_path(path: Path) -> bool:
+    return "commonmain" in path.as_posix().lower()
+
+
+def _detect_extensible_abstract_class_in_common(root: Path) -> list[str]:
+    """Flag a public abstract class in commonMain with only abstract members — the
+    exact shape Detekt's real UnnecessaryAbstractClass rule flags as "should be an
+    interface instead," scoped here to commonMain specifically.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        if not _is_commonmain_path(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for match in _ABSTRACT_CLASS_RE.finditer(text):
+            class_name = match.group(1)
+            body_start = match.end()
+            depth = 1
+            i = body_start
+            while i < len(text) and depth > 0:
+                if text[i] == "{":
+                    depth += 1
+                elif text[i] == "}":
+                    depth -= 1
+                i += 1
+            body = text[body_start : i - 1]
+            has_abstract_member = bool(_ABSTRACT_MEMBER_RE.search(body))
+            has_concrete_member = bool(_CONCRETE_FUN_BODY_RE.search(body)) or bool(
+                _CONCRETE_PROPERTY_RE.search(body)
+            )
+            if has_abstract_member and not has_concrete_member:
+                line_no, snippet = _at(text, match.start())
+                findings.append(
+                    f"extensible abstract class in commonMain [MEDIUM]: "
+                    f"{path.relative_to(root)}:{line_no} — `{class_name}` has only "
+                    f"abstract members, forcing every consumer to subclass it. "
+                    f"commonMain APIs should be called/composed, not extended — replace "
+                    f"with an interface consumers implement and inject (see "
+                    f"kotlin-multiplatform-clean-architecture's Composition Over "
+                    f"Inheritance section)\n"
+                    f"    {line_no} | {snippet}"
+                )
+    return findings
+
+
 # ── Design system prefix mismatch ─────────────────────────────────────────────
 # "App" in the design-system skill is a template placeholder (see Step 0) — real
 # projects must substitute their resolved COMPONENT_PREFIX when generating files, not
@@ -2210,6 +2277,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── WHAT-comment inside a loop or conditional ────────────────────────────────
     findings.extend(_detect_what_comment_in_control_flow(root))
+
+    # ── Extensible abstract class in commonMain ─────────────────────────────────
+    findings.extend(_detect_extensible_abstract_class_in_common(root))
 
     # ── Design system prefix mismatch ──────────────────────────────────────────
     findings.extend(_detect_design_system_prefix_mismatch(root))
