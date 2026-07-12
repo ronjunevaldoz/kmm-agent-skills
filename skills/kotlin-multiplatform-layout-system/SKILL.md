@@ -11,11 +11,12 @@ description: >-
   Trigger keywords: layout system, screen layout, wireframe, layout spec, layout docs,
   draft screen, add screen layout, document layout, layout-system, component layout,
   screen wireframe, layout diagram, screen structure, layout missing, no layout docs,
-  create layout, update layout, design screen, sketch layout, plan screen.
+  create layout, update layout, design screen, sketch layout, plan screen, html wireframe,
+  html to compose, implement wireframe, html mockup to jetpack compose.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-09'
+  last-updated: '2026-07-12'
   keywords:
     - layout system
     - wireframe
@@ -27,6 +28,10 @@ metadata:
     - screen structure
     - layout draft
     - layout diagram
+    - html wireframe
+    - html to compose
+    - implement wireframe
+    - html mockup to jetpack compose
 ---
 
 ## Purpose
@@ -291,6 +296,54 @@ For login, onboarding, splash, or any screen where no nav chrome is visible.
 
 ---
 
+## Translating an External HTML/CSS Wireframe
+
+Some projects arrive with a wireframe already drafted as a real HTML/CSS file (e.g.
+`design/wireframes/*.html` — a self-contained interactive prototype with inline styles
+and vanilla JS), rather than starting from a blank screen. Translate it into this
+skill's standard output (`docs/layout-system/<feature>/<ScreenName>.md`) — do not
+invent a second, parallel wireframe format for HTML sources. The downstream pipeline
+(`kotlin-multiplatform-preview-driven-development` generating preview stubs, then real
+implementation) stays exactly the same either way.
+
+### Structural mapping
+
+| HTML/CSS construct | Compose equivalent |
+|---|---|
+| `display: flex; flex-direction: column` | `Column` |
+| `display: flex` (row, default) | `Row` |
+| `display: grid; grid-template-columns: repeat(N, ...)` | `Row` with `.weight(1f)` per cell (small fixed N), or `LazyVerticalGrid` (large/scrolling N) |
+| A `<div>` acting as a card/section container | The project's actual card component (`AppCard` / `ShadcnCard`) — not a raw `Box` with manual background+shape |
+| `<button>` | `AppButton` / `ShadcnButton` — infer variant from styling (filled+colored → primary/default, bordered+transparent → outline, no border+transparent → ghost) |
+| `<input type="text">` | `AppTextField` / `ShadcnTextField` (single-line) |
+| `<textarea>` | **Verify which of these two shapes the project's system actually uses — they differ.** `AppTextField` (design-system) genuinely has `singleLine: Boolean = true`, so `AppTextField(singleLine = false, ...)` is correct there. `ShadcnTextField` (shadcn-compose) has **no such parameter** — the real multi-line component is the separate `ShadcnTextarea`. Assuming either shape without checking is the confirmed, real bug that motivated this row; see `kotlin-multiplatform-shadcn-compose`'s Step 3 |
+| `<select>` | `AppSelect` / `ShadcnSelect` |
+| `<input type="checkbox">` | `AppCheckbox` / `ShadcnCheckbox` — verified `ShadcnCheckbox(checked, onCheckedChange, modifier, indeterminate, enabled, style)`, no `label` parameter — pair with a separate `ShadcnLabel`/text, don't assume one is built in |
+| `<input type="radio">` (a group) | `AppRadioButton`-group / `ShadcnRadioGroup { ... }` wrapping individual `ShadcnRadioButton(selected, onClick, ...)` — verified shadcn-compose has **no monolithic "options list" API** here; it mirrors shadcn/ui's `RadioGroup`+`RadioGroupItem` split, so the caller lays out each row (radio + label) manually |
+| `<input type="range">` | `AppSlider` / `ShadcnSlider(value, onValueChange, modifier, valueRange, enabled, style)` — verified `valueRange` is a `ClosedFloatingPointRange<Float>`, default `0f..1f` |
+| `<table>` | `AppTable`/no direct design-system equivalent yet, or verified `ShadcnTable { ShadcnTableHeaderRow { ShadcnTableHeadCell(...) }; ShadcnTableRow { ShadcnTableCell(...) } }` — rows are plain `Row`s (cells receive `RowScope`), so per-column `Modifier.weight` works the same as any other `Row` |
+| A JS-driven modal/`<dialog>` | `AppDialog` / verified `ShadcnDialog(visible, onDismissRequest, modifier, showCloseButton, dismissOnClickOutside, closeIcon, content)` with `ShadcnDialogHeader`/`ShadcnDialogTitle`/`ShadcnDialogDescription`/`ShadcnDialogFooter` slot composables — not a single flat parameter list |
+| `<input type="file">` | No shadcn-compose equivalent found in the catalog — this needs a platform file-picker integration (`kotlin-multiplatform-permissions` for the runtime permission, plus a platform-specific picker), not a `Shadcn*` component at all |
+| Tab-strip built from styled `<button>`s with a JS "active" class toggle | The project's actual tab component (verify its real name and signature — do not assume it matches the HTML's implied shape) |
+| Icon webfont classes (Tabler, Font Awesome, Material Icons, etc.) | **Not a direct mapping.** Resolve separately via `kotlin-multiplatform-imagevector-generator` (trace the real glyph) or a Compose icon library that ships the same icon set — never assume a matching Compose icon exists automatically just because the wireframe references one |
+| CSS custom properties (`--surface-1`, `--text-primary`, `--fill-brand`, etc.) | Map by **role**, not by literal hex value, to the project's actual design tokens (`AppTheme.colors.*` / `ShadcnTheme.current.colors.*`). A wireframe's exact hex codes are a starting reference for choosing the nearest token — hardcoding them directly is exactly what `hardcoded_color`/`magic color literal` findings catch |
+| JS-driven view switching (`.view.active` show/hide via `classList`) | Compose state (`remember { mutableStateOf(...) }` + a `when` over the current view) if views are peers within one screen, or real navigation if they are genuinely separate destinations |
+| CSS `:hover`/`.active` pseudo-states | Compose `interactionSource`/`collectIsHoveredAsState` — translate the *intent* (this element has a distinct pressed/active look), not the literal CSS mechanism |
+
+### The rule that matters most here
+
+**Never assume a Compose component parameter exists because the HTML wireframe implies
+certain behavior.** A `<textarea>` implies "multi-line text input" — that intent is
+correct, but the *real* component that provides it must be verified, not guessed by
+analogy to HTML attributes or to Jetpack Compose's own `TextField` API shape. This is
+the same discipline `kotlin-multiplatform-shadcn-compose` requires for any component
+call: fetch or read the real signature before writing the call, every time, for every
+component — HTML-sourced wireframes don't get a shortcut. For a shadcn-compose project,
+`kotlin-multiplatform-shadcn-compose/scripts/fetch_component_signature.py <ComponentName>`
+does this lookup in one command.
+
+---
+
 ## Filled Example
 
 The templates above filled in for a generic messaging app (3 screens shown):
@@ -398,6 +451,8 @@ Use Pattern A (3-col) for tablet/desktop, Pattern B (2-col) when the side panel 
 - Letting `_components.md` drift from the actual Compose component names — it is a living registry, not a snapshot
 - Writing `docs/layout-system/` files that describe the current implementation rather than the intended design; the layout doc should lead the code, not follow it
 - Putting more than one screen in a single file, or appending a screen to another screen's file — run `create_wireframe.py` once per screen so each gets its own file; caught in a consumer project by the audit's `combined layout screen file [MEDIUM]`
+- Assuming a Compose component's parameters by analogy to the source HTML/CSS wireframe's attributes, or to Jetpack Compose's own API shape — verify the real signature for the project's actual component system every time; see "Translating an External HTML/CSS Wireframe"
+- Inventing a second, parallel wireframe format for HTML-sourced designs instead of translating into this skill's standard `docs/layout-system/*.md` output
 
 ---
 
@@ -440,6 +495,11 @@ Keep explanations short. The wireframe is the primary output — do not narrate 
   by the components listed in `_components.md`.
 - `kotlin-multiplatform-project-docs-maintainer` — Keeps `docs/` healthy. Layout-system
   files follow the same kebab-case and line-limit hygiene rules.
+- `kotlin-multiplatform-shadcn-compose` — owns the verify-real-signature discipline this
+  skill's HTML-translation section applies; its Step 3 has the confirmed real bug that
+  motivated the rule.
+- `kotlin-multiplatform-imagevector-generator` — resolves icons referenced by an HTML
+  wireframe's icon webfont classes; never assumed to map 1:1 automatically.
 
 ---
 
@@ -447,6 +507,7 @@ Keep explanations short. The wireframe is the primary output — do not narrate 
 
 | Date | Change |
 |---|---|
+| 2026-07-12 | Added "Translating an External HTML/CSS Wireframe" — a real consumer project had an HTML wireframe implemented incorrectly (`ShadcnTextField` given a hallucinated `singleLine` parameter instead of using the real, dedicated `ShadcnTextarea` component). New structural mapping table (flex/grid → Row/Column, `<textarea>` → verify the project's actual multi-line shape, icon webfont classes → resolve via imagevector-generator, never assumed 1:1), and a hard rule: never assume a Compose component's parameters by analogy to the source HTML or to Compose's own API shape. Translates into this skill's existing `docs/layout-system/*.md` format — no parallel format for HTML sources. Expanded the mapping table with 6 more verified constructs (checkbox, radio group, range slider, table, modal dialog, file input — the last one has no shadcn-compose equivalent at all, confirmed rather than assumed) using `kotlin-multiplatform-shadcn-compose`'s new `fetch_component_signature.py`. 2 new anti-patterns. |
 | 2026-07-09 | The one-screen-per-file rule was documented but had no enforcement beyond `create_wireframe.py` refusing to overwrite — a hand-edited file could still merge two screens together silently. New `kotlin-multiplatform-audit` detector `combined layout screen file [MEDIUM]` flags any `docs/layout-system/*.md` file (other than `_components.md`) with more than one top-level heading. |
 | 2026-07-03 | Added a repo-relative fallback path for generate_slot_scaffold.py — `~/.claude/skills/...` only resolves in a Claude Code install; Codex CLI and Gemini CLI installs need the `skills/...` relative path (see INSTALL.md). |
 | 2026-07-03 | Slot-grid contracts: create_wireframe.py now emits machine-readable frontmatter (slots/grid/weights per breakpoint); new generate_slot_scaffold.py compiles the contract into a <Screen>Layout.kt shell with slot lambdas — the agent fills content, never structure. Weights restricted to a closed fraction set, enforced by the raw weight literal audit smell. |

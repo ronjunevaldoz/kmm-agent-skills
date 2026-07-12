@@ -329,7 +329,7 @@ def scan_file(path: Path) -> list[dict]:
 # alongside the "consolidate to one pattern yourself" fix — never a silent recommendation
 # to add the dependency; the risk note is always attached.
 _SHADCN_LAYOUT_SUGGESTION = {
-    "tabbed": "ShadcnTabs",
+    "tabbed": "ShadcnTabsList",
     "card": "ShadcnCard",
     "flat": "ShadcnItem/ShadcnItemGroup",
 }

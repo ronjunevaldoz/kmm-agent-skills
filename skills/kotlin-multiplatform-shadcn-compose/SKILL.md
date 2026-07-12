@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-11'
+  last-updated: '2026-07-12'
   keywords:
     - shadcn-compose
     - ShadcnButton
@@ -43,10 +43,10 @@ silently.
 **Mentioning a specific `Shadcn*` component as an option is fine, even in a project that
 doesn't use this library yet** — for example, a layout-quality finding (mixed flat/card/
 tabbed patterns across screens, per `scan_design_violations.py`'s `layout_inconsistency`
-check) may suggest the matching component (`ShadcnTabs`, `ShadcnItem`/`ShadcnItemGroup`,
+check) may suggest the matching component (`ShadcnTabsList`, `ShadcnItem`/`ShadcnItemGroup`,
 etc.) as one option alongside consolidating to the project's existing pattern manually.
 **Every such suggestion must state the experimental-API risk inline, in the same
-message** — never a bare "use ShadcnTabs" with the risk left for the user to discover
+message** — never a bare "use ShadcnTabsList" with the risk left for the user to discover
 later. `kotlin-multiplatform-design-system`'s Ownership Model exists specifically to avoid
 this risk (a hard dependency on `@OptIn(ExperimentalFoundationStyleApi::class)`, an actual
 Jetpack Compose Foundation experimental annotation the Compose team can change or remove in
@@ -198,7 +198,7 @@ mentioning as one option — regardless of whether the project uses shadcn-compo
 
 | Layout smell (existing detector) | Suggested component |
 |---|---|
-| Mixed flat/card/tabbed patterns across screens (`scan_design_violations.py`'s `layout_inconsistency`, majority `tabbed`) | `ShadcnTabs` |
+| Mixed flat/card/tabbed patterns across screens (`scan_design_violations.py`'s `layout_inconsistency`, majority `tabbed`) | `ShadcnTabsList` |
 | Same, majority `card` | `ShadcnCard` (consistent header/content/footer slots) |
 | Same, majority `flat` | `ShadcnItem`/`ShadcnItemGroup` |
 | Ad-hoc empty states with no consistent pattern | `ShadcnEmpty` |
@@ -214,32 +214,93 @@ when a layout-quality finding fires; don't default to only the shadcn-compose on
 
 ## Step 3: Using components
 
-Verified against the library's own KDoc usage examples, not invented:
+### The one rule that matters more than any example below
+
+**Never call a `Shadcn*` component with a parameter you haven't verified exists on its
+real signature.** Do not assume a parameter exists by analogy to Jetpack Compose's own
+`TextField`/Material components, to HTML/CSS attributes, or to another `Shadcn*`
+component's shape — every component here has its own specific, independently-designed
+API. Two confirmed, real examples of what guessing produces, found by fetching the
+actual source rather than trusting a table like the one below:
+
+- `ShadcnTextField` has **no `singleLine` parameter** — a real project's implementation
+  used `singleLine = false` (a real Compose `TextField`/`BasicTextField` parameter,
+  assumed to carry over) and it would not compile. The real multi-line component is the
+  separate `ShadcnTextarea` (see below) — not a parameter toggle on `ShadcnTextField`.
+- The component commonly assumed to be `ShadcnTabs` is actually named **`ShadcnTabsList`**
+  — this skill's own component table said `ShadcnTabs` until this was checked against
+  the real source.
+
+Before writing a call to any component **not** shown with a verified signature below,
+fetch the real one first — one command, no need to remember the file path or grep
+pattern by hand:
+```bash
+python3 skills/kotlin-multiplatform-shadcn-compose/scripts/fetch_component_signature.py <ComponentName>
+```
+It handles the two cases that break a naive lookup: a component living in a
+differently-named file (checks the obvious filename first, then searches every
+component file), and nested parens in a default value (uses a balanced-paren scan, not
+a single-level regex, so the signature isn't truncated early). Or, if the project
+already resolves the dependency, read it directly from the Gradle cache / IDE-decompiled
+sources. Never skip this to save a lookup — a wrong guess costs more time than the
+lookup would have.
+
+### Verified signatures (checked against real source, 2026-07-12)
 
 ```kotlin
 ShadcnButton(onClick = {}) { ShadcnText("Click me") }
 ShadcnButton(onClick = {}, variant = ButtonVariant.Outline, size = ButtonSize.Sm) { ShadcnText("Outline") }
 ShadcnButton(onClick = {}, variant = ButtonVariant.Destructive) { ShadcnText("Delete") }
+// ButtonVariant: Default | Outline | Secondary | Ghost | Destructive | Link — 6 variants, 5 sizes
+
+ShadcnTextField(value = text, onValueChange = { text = it }, placeholder = "Email")
+// value, onValueChange, modifier, enabled, label, placeholder, leadingIcon, trailingIcon,
+// isError, supportingText, variant, style, keyboardOptions, keyboardActions, visualTransformation
+// NO singleLine parameter — this is a single-line-only field by design.
+
+ShadcnTextarea(value = prompt, onValueChange = { prompt = it }, placeholder = "Describe the scene")
+// value, onValueChange, modifier, enabled, label, placeholder, isError, supportingText,
+// variant, style, keyboardOptions, keyboardActions — the multi-line equivalent of
+// ShadcnTextField above; wraps it internally. Use this for an HTML wireframe's <textarea>,
+// never ShadcnTextField with a guessed multi-line parameter.
+
+ShadcnSelect(value = selected, options = listOf("A", "B"), onValueChange = { selected = it }, label = { it })
+// fun <T> ShadcnSelect(value: T?, options: List<T>, onValueChange: (T) -> Unit, modifier,
+// label: (T) -> String = { it.toString() }, placeholder: String, variant, style, icon)
+
+ShadcnCard(header = { ShadcnCardHeader(title = "Title") }) { ShadcnText("Body content") }
+// fun ShadcnCard(modifier, variant, size, style, header: (@Composable () -> Unit)?,
+// footer: (@Composable () -> Unit)?, content: @Composable ColumnScope.() -> Unit)
+// Slot-based — header/footer are optional composable slots, not string parameters.
+// ShadcnCardHeader(title, description, action, modifier) is a separate helper composable.
+
+ShadcnCheckbox(checked = isChecked, onCheckedChange = { isChecked = it })
+// checked, onCheckedChange: ((Boolean) -> Unit)?, modifier, indeterminate, enabled, style
+
+ShadcnSwitch(checked = isOn, onCheckedChange = { isOn = it })
+// checked, onCheckedChange: ((Boolean) -> Unit)?, modifier, enabled, style
+
+ShadcnAvatar { ShadcnAvatarFallback("JD") }
+// fun ShadcnAvatar(modifier, size: ShadcnAvatarSize, content: @Composable BoxScope.() -> Unit)
+// Slot-based, with separate companion composables: ShadcnAvatarFallback(text, modifier),
+// ShadcnAvatarBadge(modifier), ShadcnAvatarGroup(modifier) { content }.
+
+ShadcnTabsList(items = tabItems, selected = selectedId, onSelectedChange = { selectedId = it })
+// NOT "ShadcnTabs" — items: List<ShadcnTabItem>, selected: String, onSelectedChange: (String) -> Unit, modifier
 ```
 
-`ButtonVariant`: `Default | Outline | Secondary | Ghost | Destructive | Link` — 6 variants,
-5 sizes. See the
+See the
 [component catalog](https://github.com/ronjunevaldoz/shadcn-compose/blob/main/docs/components.md)
 for the full 70+ component list; each entry links to a live usage page in the library's own
-catalog app (`app/shared/.../catalog/docs/*Doc.kt`).
-
-Common components by category:
-
-| Category | Examples |
-|---|---|
-| Core primitives | `ShadcnButton`, `ShadcnCard`, `ShadcnBadge`, `ShadcnChip`, `ShadcnTextField`, `ShadcnText` |
-| Forms | `ShadcnCheckbox`, `ShadcnRadioGroup`, `ShadcnSwitch`, `ShadcnSlider`, `ShadcnField`/`ShadcnFieldGroup` |
-| Overlays | `ShadcnDialog`, `ShadcnAlertDialog`, `ShadcnSheet`, `ShadcnDrawer`, `ShadcnPopover`, `ShadcnTooltip` |
-| Feedback | `ShadcnAlert`, `ShadcnProgress`, `ShadcnSkeleton`, `ShadcnToast`/`ShadcnToaster` |
-| Disclosure | `ShadcnCollapsible`, `ShadcnAccordion`, `ShadcnTabs`, `ShadcnBreadcrumb` |
+catalog app (`app/shared/.../catalog/docs/*Doc.kt`) — treat that catalog app as the
+authoritative usage reference for anything not verified above, not a guess from the name
+alone.
 
 No icon-library dependency exists — every component draws from this library's own tokens,
-not `heroicons-compose` or any other icon package.
+not `heroicons-compose` or any other icon package. An icon needed in a screen built with
+these components must come from a separate source (`kotlin-multiplatform-imagevector-generator`
+or a third-party Compose icon library) — this is a real gap to plan for, not an oversight
+to work around with a guessed API.
 
 ---
 
@@ -262,6 +323,8 @@ UI; nothing shadcn-compose-specific changes that workflow.
 - treating this as a stable, slow-moving dependency — 3 releases shipped in 3 days during this skill's own research; recheck before every use, not just once
 - suggesting a `Shadcn*` component for a layout-quality finding without stating the experimental-API risk in the same message — a suggestion that omits it isn't complete, even if it's "just an option"
 - suggesting a `Shadcn*` component as the *only* fix for a layout-quality finding — the no-new-dependency fix (consolidate to the project's existing pattern) is still valid and should be presented alongside it, not replaced by it
+- assuming a component's parameter exists by analogy to Jetpack Compose's own Material components (e.g. `singleLine` on a text field) — every `Shadcn*` component has its own independently-designed API; a real project's implementation used a hallucinated `singleLine` parameter on `ShadcnTextField` that doesn't exist
+- guessing a component's top-level name from a pattern (e.g. assuming "ShadcnTabs" because `ShadcnButton`/`ShadcnCard` follow that shape) instead of checking the real source — the real name is `ShadcnTabsList`, found only by verifying, not by pattern-matching against other components in the same family
 
 ---
 
@@ -290,4 +353,5 @@ When asked to add or use shadcn-compose, respond in this order:
 
 | Date | Change |
 |---|---|
+| 2026-07-12 | Fixed two real bugs found in a consumer project's implementation, both from this skill's own incomplete verification: `ShadcnTextField` was called with a hallucinated `singleLine` parameter (doesn't exist — real multi-line component is the separate `ShadcnTextarea`), and this skill's own component table said `ShadcnTabs` when the real name is `ShadcnTabsList` (also wrong in `scan_design_violations.py`'s layout-quality suggestion, now fixed with a regression test). Rewrote Step 3 with 9 signatures verified directly against real source (Button, TextField, Textarea, Select, Card+CardHeader, Checkbox, Switch, Avatar+companions, TabsList) and a mandatory rule: never call a component with a parameter not verified against its real signature, with the fetch command to do that verification. Added `scripts/fetch_component_signature.py` — turns that verification from a manual GitHub lookup into one command; handles a component living in a differently-named file (checks the obvious filename first, then searches every component file) and nested parens in a default value (balanced-paren scan, not a single-level regex). Verified 6 more signatures with it (Checkbox, RadioGroup/RadioButton, Slider, Table, Dialog) to expand `kotlin-multiplatform-layout-system`'s HTML mapping table. 2 new anti-patterns, 3 new script regression tests. |
 | 2026-07-11 | Initial release — Maven Central setup, `ShadcnTheme` wrapper (verified against real source), component usage (verified against real KDoc examples), and the experimental-API risk this skill exists specifically to disclose rather than hide. Gated to explicit user choice via `/kmm-new-project` Step 6a, never suggested unprompted. Added "Picking a preset by app vibe" — full `ShadcnStylePreset`/`ShadcnBaseColor`/`ShadcnAccent` reference (verified against their own KDoc/source), and wired `/kmm-new-project` Step 6a-ii to auto-infer a preset/base color/accent recommendation from the same app-type category as the color-palette draft, always confirmed before generating, never a silent default. Added `/kmm-migrate-to-shadcn` — a full `App*`→`Shadcn*` migration command for existing design-system projects, with an honest mapping table (verified against the real component catalog, not assumed 1:1 parity) flagging the components with no direct equivalent (`AppScaffold`, `AppTopAppBar`, `AppNavigationBar`, `AppIcon`, `AppIconButton`) for explicit user decision rather than a guessed replacement. Wired `scan_design_violations.py`'s `layout_inconsistency` finding to suggest a matching `Shadcn*` component (`ShadcnTabs`/`ShadcnCard`/`ShadcnItem`) as an option regardless of whether the project uses shadcn-compose yet — every such suggestion states the experimental-API risk inline, and is presented alongside (never instead of) the no-new-dependency fix. |
