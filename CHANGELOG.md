@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.68.0] — 2026-07-12
+
+### Added
+
+- feat(lessons): proactively draft a GitHub issue for high-severity bugs
+
+### Fixed
+
+- fix(known-issues): fix stale Open Issues heading match, clean up KNOWN_ISSUES.md
+
+---
+
 ## [v1.67.0] — 2026-07-12
 
 ### Added

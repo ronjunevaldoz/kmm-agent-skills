@@ -1,5 +1,5 @@
 {
-  "version": "1.67.0",
+  "version": "1.68.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1769,7 +1769,7 @@
       "path": "skills/kotlin-multiplatform-lessons",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-09",
+      "last_updated": "2026-07-12",
       "keywords": [
         "lessons learned",
         "skill feedback",
@@ -1779,7 +1779,10 @@
         "docs/lessons",
         "pattern discovery",
         "correction",
-        "skill gap"
+        "skill gap",
+        "auto file github issue",
+        "proactive issue draft",
+        "report skill bug automatically"
       ],
       "triggers": [
         "write a lesson",
