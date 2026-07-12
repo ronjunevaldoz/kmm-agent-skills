@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.66.1] — 2026-07-12
+
+### Docs
+
+- docs(token-saver): correct install-risk framing for all four tools
+
+---
+
 ## [v1.66.0] — 2026-07-12
 
 ### Added
