@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.70.0] — 2026-07-12
+
+### Added
+
+- feat(shadcn-compose): add signature-fetch script, fix two real bugs
+
+---
+
 ## [v1.69.0] — 2026-07-12
 
 ### Added

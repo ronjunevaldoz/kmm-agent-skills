@@ -1,5 +1,5 @@
 {
-  "version": "1.69.0",
+  "version": "1.70.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1704,7 +1704,7 @@
       "path": "skills/kotlin-multiplatform-layout-system",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-09",
+      "last_updated": "2026-07-12",
       "keywords": [
         "layout system",
         "wireframe",
@@ -1715,7 +1715,11 @@
         "docs layout-system",
         "screen structure",
         "layout draft",
-        "layout diagram"
+        "layout diagram",
+        "html wireframe",
+        "html to compose",
+        "implement wireframe",
+        "html mockup to jetpack compose"
       ],
       "triggers": [],
       "scripts": [
@@ -2736,7 +2740,7 @@
       "path": "skills/kotlin-multiplatform-shadcn-compose",
       "description": "Consumes the published shadcn-compose library (io.github.ronjunevaldoz:shadcn-compose) \u2014 a shadcn/ui-inspired Compose Multiplatform component library with 70+ components. Covers Maven Central setup, the required @OptIn(ExperimentalFoundationStyleApi::class), the ShadcnTheme wrapper and its preset/baseColor/accent/isDark/baseRadius/ring parameters, and real component usage (ShadcnButton, ShadcnCard, etc.) verified against the library's own source. Alternative to kotlin-multiplatform-design-system's generated/owned approach \u2014 not both in the same project. Carries a real risk this skill exists specifically to disclose: a hard dependency on the experimental Compose Foundation Styles API that can break on any CMP upgrade, with no fix available except an upstream shadcn-compose release.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-11",
+      "last_updated": "2026-07-12",
       "keywords": [
         "shadcn-compose",
         "ShadcnButton",
@@ -2757,7 +2761,9 @@
         "ExperimentalFoundationStyleApi",
         "shadcn kmp"
       ],
-      "scripts": []
+      "scripts": [
+        "fetch_component_signature.py"
+      ]
     },
     {
       "name": "kotlin-multiplatform-shared-resources",
