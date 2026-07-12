@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.67.0] — 2026-07-12
+
+### Added
+
+- feat(audit): add module layer-order and cross-feature dependency detector
+
+---
+
 ## [v1.66.1] — 2026-07-12
 
 ### Docs
