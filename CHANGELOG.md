@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.78.0] — 2026-07-14
+
+### Added
+
+- feat(expert): add source-of-truth rule for project-specific commands/agents/skills
+
+---
+
 ## [v1.77.1] — 2026-07-14
 
 ### Other
