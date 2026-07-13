@@ -1325,6 +1325,46 @@ def _is_commonmain_path(path: Path) -> bool:
     return "commonmain" in path.as_posix().lower()
 
 
+_HARDCODED_URL_RE = re.compile(
+    r'^\s*(?:public\s+)?(?:const\s+)?val\s+\w+\s*(?::\s*String)?\s*=\s*"(https?://[^"]+)"',
+    re.MULTILINE,
+)
+
+
+def _detect_hardcoded_base_url(root: Path) -> list[str]:
+    """Flag a literal http(s):// URL assigned to a val/const val in commonMain source.
+
+    A library-first module must be configurable per environment (dev/staging/prod) —
+    see kotlin-multiplatform-flavor-environment's BuildKonfig + AppConfig pattern. A
+    URL baked in as a string literal builds and runs fine today, then becomes tech
+    debt the moment a second environment (or a library consumer) needs a different
+    endpoint — silent until that day, unlike a compile error.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        if not _is_commonmain_path(path):
+            continue
+        if "buildkonfig" in path.name.lower():
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for m in _HARDCODED_URL_RE.finditer(text):
+            line_no, snippet = _at(text, m.start())
+            findings.append(
+                f"hardcoded base URL [MEDIUM]: {path.relative_to(root)}:{line_no} "
+                f"— literal URL assigned directly instead of routed through "
+                f"BuildKonfig/AppConfig; breaks the moment a second environment or a "
+                f"library consumer needs a different endpoint (see "
+                f"kotlin-multiplatform-flavor-environment)\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
 def _detect_extensible_abstract_class_in_common(root: Path) -> list[str]:
     """Flag a public abstract class in commonMain with only abstract members — the
     exact shape Detekt's real UnnecessaryAbstractClass rule flags as "should be an
@@ -2359,6 +2399,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Module layer-order violation ────────────────────────────────────────────
     findings.extend(_detect_module_layer_violation(root))
+
+    # ── Hardcoded base URL (library-first / configurability) ───────────────────
+    findings.extend(_detect_hardcoded_base_url(root))
 
     # ── Design system prefix mismatch ──────────────────────────────────────────
     findings.extend(_detect_design_system_prefix_mismatch(root))

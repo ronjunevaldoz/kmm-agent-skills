@@ -5155,5 +5155,57 @@ class HarvestProjectTests(unittest.TestCase):
             self.assertIn("lessons", parsed)
 
 
+class HardcodedBaseUrlTests(unittest.TestCase):
+    """Library-first requires configurability — a base URL baked in as a string
+    literal builds and runs fine today, then becomes tech debt the moment a second
+    environment or a library consumer needs a different endpoint.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_hardcoded_https_url_in_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/commonMain/kotlin/ApiConfig.kt",
+                'val BASE_URL = "https://api.example.com/v1"\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded base URL" in f for f in findings))
+
+    def test_ignores_url_routed_through_buildkonfig(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/commonMain/kotlin/ApiConfig.kt",
+                'val BASE_URL = BuildKonfig.API_BASE_URL\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded base URL" in f for f in findings))
+
+    def test_ignores_hardcoded_url_outside_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/androidMain/kotlin/ApiConfig.kt",
+                'val BASE_URL = "https://api.example.com/v1"\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded base URL" in f for f in findings))
+
+    def test_ignores_hardcoded_url_in_test_source(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/commonTest/kotlin/ApiConfigTest.kt",
+                'val BASE_URL = "https://api.example.com/v1"\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded base URL" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()
