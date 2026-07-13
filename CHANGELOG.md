@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.77.1] — 2026-07-14
+
+### Other
+
+- refactor(tests): split test_skill_scripts.py into per-script test files
+
+---
+
 ## [v1.77.0] — 2026-07-14
 
 ### Added
