@@ -399,6 +399,64 @@ to work around with a guessed API.
 
 ---
 
+## Step 4: Composing a real screen from multiple components
+
+Knowing one component's signature isn't the same as knowing how several fit together into
+a good screen. Worked example — a settings-style list of rows inside a card, every symbol
+below individually verified against real source (`fetch_component_signature.py`), not
+copied wholesale from the library's own KDoc usage examples:
+
+```kotlin
+@OptIn(ExperimentalFoundationStyleApi::class)
+@Composable
+fun AccountSettingsCard(members: List<Member>, onView: (Member) -> Unit) {
+    ShadcnCard(
+        header = { ShadcnCardHeader(title = "Team members", description = "${members.size} people") },
+    ) {
+        ShadcnItemGroup {
+            members.forEach { member ->
+                ShadcnItem(variant = ShadcnItemVariant.Outline) {
+                    ShadcnAvatar { ShadcnAvatarFallback(member.initials) }
+                    Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                        ShadcnItemTitle(member.name)
+                        ShadcnItemDescription(member.email)
+                    }
+                    ShadcnButton(onClick = { onView(member) }) { ShadcnText("View") }
+                }
+            }
+        }
+    }
+}
+```
+
+What's real here and why it's shaped this way:
+- `ShadcnCard`'s `content` lambda is `ColumnScope` — `ShadcnItemGroup` drops straight in,
+  no wrapper needed.
+- `ShadcnItemGroup` **already paints a hairline separator between each `ShadcnItem`** —
+  confirmed in its own KDoc ("Vertically stacks a list of ShadcnItems with a hairline
+  separator between each"). Adding a manual `ShadcnSeparator()` between items double-draws
+  the divider. `ShadcnSeparator` is for dividing unrelated sections, not rows inside a group
+  — that's already handled.
+- `ShadcnItem`'s `content` lambda is `RowScope`, not a set of named slots — a `Row`/`Column`
+  and plain `Modifier.weight()` inside it is the normal way to lay out avatar/text/action,
+  the same as composing any other `RowScope` content.
+
+**A real trap this example exists to name**: `ShadcnItem`'s own KDoc usage example shows
+`ShadcnItemMedia { }`, `ShadcnItemContent { }`, and `ShadcnItemActions { }` as if they were
+real slot composables. Checked against the actual file
+(`ShadcnItem.kt`) — **none of the three exist anywhere in the repo.** Only
+`ShadcnItem`, `ShadcnItemGroup`, `ShadcnItemTitle`, `ShadcnItemDescription`, and
+`ShadcnItemSeparator` are real functions. Even the library's own official KDoc example is
+not a substitute for `fetch_component_signature.py` — this is the concrete case proving why.
+
+For a split view (list + detail), the same discipline applies: wrap the two panes in
+`ShadcnResizablePanelGroup` (verified in the Component Keyword Matrix's Layout & structure
+row) rather than a bare `Row` with manual weights — it gets a draggable divider and clamped
+min/max weights for free, matching what `kotlin-multiplatform-layout-system`'s Pattern A
+wireframe expects for a nav+side+main layout.
+
+---
+
 ## Testing
 
 No tests to write for the library itself — it's an external dependency, and its own CI
@@ -417,6 +475,8 @@ UI; nothing shadcn-compose-specific changes that workflow.
 - assuming heroicons-compose integration exists — this library explicitly has "no icon-library dependency"; every component draws from its own tokens
 - treating this as a stable, slow-moving dependency — 3 releases shipped in 3 days during this skill's own research; recheck before every use, not just once
 - suggesting a `Shadcn*` component for a layout-quality finding without stating the experimental-API risk in the same message — a suggestion that omits it isn't complete, even if it's "just an option"
+- copying a component's own official KDoc usage example verbatim — `ShadcnItem`'s KDoc shows `ShadcnItemMedia`/`ShadcnItemContent`/`ShadcnItemActions` as if real; none exist anywhere in the repo (confirmed by searching the actual file). Verify every individual symbol with `fetch_component_signature.py`, even ones shown in the library's own documentation
+- manually adding `ShadcnSeparator()` between `ShadcnItem`s inside a `ShadcnItemGroup` — the group already paints a hairline separator between each item; a manual one double-draws it
 - suggesting a `Shadcn*` component as the *only* fix for a layout-quality finding — the no-new-dependency fix (consolidate to the project's existing pattern) is still valid and should be presented alongside it, not replaced by it
 - assuming a component's parameter exists by analogy to Jetpack Compose's own Material components (e.g. `singleLine` on a text field) — every `Shadcn*` component has its own independently-designed API; a real project's implementation used a hallucinated `singleLine` parameter on `ShadcnTextField` that doesn't exist
 - guessing a component's top-level name from a pattern (e.g. assuming "ShadcnTabs" because `ShadcnButton`/`ShadcnCard` follow that shape) instead of checking the real source — the real name is `ShadcnTabsList`, found only by verifying, not by pattern-matching against other components in the same family
@@ -448,6 +508,7 @@ When asked to add or use shadcn-compose, respond in this order:
 
 | Date | Change |
 |---|---|
+| 2026-07-13 | Added Step 4: a worked multi-component composition example (settings-list-in-a-card, using `ShadcnCard`/`ShadcnItemGroup`/`ShadcnItem`/`ShadcnAvatar`/`ShadcnButton` together) — closes a real gap where the skill only taught single-component verification and per-element HTML mapping, never how to assemble components into a good screen. Found and documented a real trap in the process: `ShadcnItem`'s own official KDoc usage example references `ShadcnItemMedia`/`ShadcnItemContent`/`ShadcnItemActions` as if they were real slot composables — none exist anywhere in the repo (confirmed by searching the actual source, not just the doc comment). Also documented that `ShadcnItemGroup` auto-separates its items, so a manual `ShadcnSeparator` between them double-draws. 2 new anti-patterns. |
 | 2026-07-13 | Rechecked the real README and Maven Central directly (not `search.maven.org`): latest published version is `0.2.3`, not `0.2.1` — updated the Gradle version pin. Component count grew 62 → 64: found 2 new real components via a live file-list diff (`ShadcnIcon` — tinted icon renderer resolving `LocalShadcnContentColor`; `ShadcnStepper`/`ShadcnStepperStep` — multi-step progress indicator, presentational only, same pattern as `ShadcnTabs`/`ShadcnAccordion`). Added both to the Component Keyword Matrix and frontmatter keywords. |
 | 2026-07-13 | Fixed a real keyword-routing gap: trigger keywords only named 2 of the library's 62 real components (`ShadcnButton`, `ShadcnCard`) — a prompt naming any other real component (e.g. "how do I use ShadcnDialog") wouldn't route here. Added a full Component Keyword Matrix, grouped by category (form inputs, overlays, feedback, navigation, data display, layout, text, chat, theming), built from the live component file list (`scripts/fetch_component_signature.py`'s `_list_component_files()`, not guessed) plus a follow-up check for composables nested inside a differently-named file (`ShadcnRadioGroup` in `ShadcnRadioButton.kt`, `ShadcnAvatarBadge`/`Fallback`/`Group` in `ShadcnAvatar.kt`, `ShadcnItemGroup`/`Description`/`Title`/`Separator` in `ShadcnItem.kt`). All 62 top-level component names added to frontmatter keywords. |
 | 2026-07-12 | Fixed two real bugs found in a consumer project's implementation, both from this skill's own incomplete verification: `ShadcnTextField` was called with a hallucinated `singleLine` parameter (doesn't exist — real multi-line component is the separate `ShadcnTextarea`), and this skill's own component table said `ShadcnTabs` when the real name is `ShadcnTabsList` (also wrong in `scan_design_violations.py`'s layout-quality suggestion, now fixed with a regression test). Rewrote Step 3 with 9 signatures verified directly against real source (Button, TextField, Textarea, Select, Card+CardHeader, Checkbox, Switch, Avatar+companions, TabsList) and a mandatory rule: never call a component with a parameter not verified against its real signature, with the fetch command to do that verification. Added `scripts/fetch_component_signature.py` — turns that verification from a manual GitHub lookup into one command; handles a component living in a differently-named file (checks the obvious filename first, then searches every component file) and nested parens in a default value (balanced-paren scan, not a single-level regex). Verified 6 more signatures with it (Checkbox, RadioGroup/RadioButton, Slider, Table, Dialog) to expand `kotlin-multiplatform-layout-system`'s HTML mapping table. 2 new anti-patterns, 3 new script regression tests. |
