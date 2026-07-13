@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.76.1] — 2026-07-13
+
+### Docs
+
+- docs(shadcn-compose): add Shadcn Studio as a layout-pattern lookup reference
+
+---
+
 ## [v1.76.0] — 2026-07-13
 
 ### Added
