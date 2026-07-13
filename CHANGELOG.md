@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.77.0] — 2026-07-14
+
+### Added
+
+- feat(design-system): require UI interaction tests alongside preview/screenshot coverage
+
+---
+
 ## [v1.76.1] — 2026-07-13
 
 ### Docs

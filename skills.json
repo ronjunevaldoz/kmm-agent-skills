@@ -1,5 +1,5 @@
 {
-  "version": "1.76.1",
+  "version": "1.77.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -356,7 +356,7 @@
       "path": "skills/kotlin-multiplatform-clean-architecture",
       "description": "Defines the 6-layer clean architecture contract for KMP feature modules: :model / :api / :domain / :data / :presenter / :ui. Covers layer dependency rules, :model vs :api split, internal visibility enforcement, and Detekt architecture fitness functions that make violations fail the build.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-11",
+      "last_updated": "2026-07-13",
       "keywords": [
         "clean architecture",
         "Kotlin Multiplatform",
@@ -825,7 +825,7 @@
       "path": "skills/kotlin-multiplatform-design-system",
       "description": "Scaffolds a custom Compose Multiplatform design system in :core:designsystem using the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles, @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates: color/typography/shape/spacing tokens, AppTheme with light/dark support, StyleScope extensions for token access, shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant, ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision), and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText) built on BasicXxx CMP primitives. \"App\" is a placeholder prefix derived from the project's actual name (scripts/derive_component_prefix.py), not a hardcoded literal. No Material dependency \u2014 fully custom, fully owned.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-11",
+      "last_updated": "2026-07-13",
       "keywords": [
         "design system",
         "Compose Styles API",
