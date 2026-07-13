@@ -1,5 +1,5 @@
 {
-  "version": "1.74.0",
+  "version": "1.75.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -2602,7 +2602,7 @@
       "path": "skills/kotlin-multiplatform-repository-pattern",
       "description": "Repository pattern in Kotlin Multiplatform \u2014 the data layer between domain logic and storage/network. Covers: repository interface in :feature:x:api, implementation in :feature:x:data, single source of truth via SQLDelight Flow, the three fetch strategies (network-first, cache-first, offline-first), NetworkResult-to-domain mapping at the repository boundary, optimistic updates, and the common mistakes of leaking network types into domain and skipping local cache. Requires kotlin-multiplatform-network-layer and kotlin-multiplatform-sqldelight-setup.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-07-13",
       "keywords": [
         "repository pattern",
         "data layer",
@@ -2618,7 +2618,10 @@
         "KMP",
         "clean architecture",
         "data source",
-        "local cache"
+        "local cache",
+        "in-memory repository",
+        "no backend yet",
+        "backend not ready"
       ],
       "triggers": [
         "repository pattern",
@@ -2640,7 +2643,11 @@
         "data consistency",
         "data sync",
         "fetch strategy",
-        "content duplication"
+        "content duplication",
+        "in-memory repository",
+        "no backend yet",
+        "backend not ready",
+        "mock repository"
       ],
       "scripts": []
     },

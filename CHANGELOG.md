@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.75.0] — 2026-07-13
+
+### Added
+
+- feat(repository-pattern): add in-memory repository rule for no-backend-yet bring-up
+
+---
+
 ## [v1.74.0] — 2026-07-13
 
 ### Added
