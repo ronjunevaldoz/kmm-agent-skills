@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.76.0] — 2026-07-13
+
+### Added
+
+- feat(shadcn-compose): add worked multi-component composition example
+
+---
+
 ## [v1.75.1] — 2026-07-13
 
 ### Fixed
