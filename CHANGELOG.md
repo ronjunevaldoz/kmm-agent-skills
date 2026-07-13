@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.73.0] — 2026-07-13
+
+### Added
+
+- feat: add tmp-clone installer for local assistant skill sync
+
+---
+
 ## [v1.72.0] — 2026-07-13
 
 ### Added
