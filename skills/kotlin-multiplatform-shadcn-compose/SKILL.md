@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-12'
+  last-updated: '2026-07-13'
   keywords:
     - shadcn-compose
     - ShadcnButton
@@ -23,6 +23,68 @@ metadata:
     - ExperimentalFoundationStyleApi
     - shadcn kmp
     - shadcn compose multiplatform
+    - ShadcnAccordion
+    - ShadcnAlert
+    - ShadcnAlertDialog
+    - ShadcnAspectRatio
+    - ShadcnAttachment
+    - ShadcnAvatar
+    - ShadcnBadge
+    - ShadcnBreadcrumb
+    - ShadcnBubble
+    - ShadcnButtonGroup
+    - ShadcnCalendar
+    - ShadcnCarousel
+    - ShadcnChart
+    - ShadcnCheckbox
+    - ShadcnChip
+    - ShadcnCollapsible
+    - ShadcnCombobox
+    - ShadcnCommand
+    - ShadcnContextMenu
+    - ShadcnDialog
+    - ShadcnDrawer
+    - ShadcnDropdownMenu
+    - ShadcnEmojiText
+    - ShadcnEmpty
+    - ShadcnField
+    - ShadcnGroupCorners
+    - ShadcnHoverCard
+    - ShadcnInputGroup
+    - ShadcnInputOTP
+    - ShadcnItem
+    - ShadcnKbd
+    - ShadcnLabel
+    - ShadcnMarker
+    - ShadcnMenubar
+    - ShadcnMessage
+    - ShadcnNavigationMenu
+    - ShadcnPagination
+    - ShadcnPopover
+    - ShadcnProgress
+    - ShadcnRadioButton
+    - ShadcnRadioGroup
+    - ShadcnResizable
+    - ShadcnResizablePanelGroup
+    - ShadcnScrollArea
+    - ShadcnSelect
+    - ShadcnSeparator
+    - ShadcnSheet
+    - ShadcnSidebar
+    - ShadcnSkeleton
+    - ShadcnSlider
+    - ShadcnSpinner
+    - ShadcnSwitch
+    - ShadcnTable
+    - ShadcnTabs
+    - ShadcnTabsList
+    - ShadcnText
+    - ShadcnTextField
+    - ShadcnTextarea
+    - ShadcnToast
+    - ShadcnToggle
+    - ShadcnToggleGroup
+    - ShadcnTooltip
 ---
 
 ## When to Use This Skill
@@ -53,7 +115,9 @@ Jetpack Compose Foundation experimental annotation the Compose team can change o
 any release) — a suggestion that omits it isn't a complete recommendation.
 
 **Trigger keywords:** shadcn-compose, ShadcnButton, ShadcnTheme, ShadcnCard, shadcn ui
-kotlin, shadcn compose multiplatform, ExperimentalFoundationStyleApi, shadcn kmp.
+kotlin, shadcn compose multiplatform, ExperimentalFoundationStyleApi, shadcn kmp. Plus
+every individual `Shadcn*` component name — see the Component Keyword Matrix below for
+the full list (62 real components, verified against the library's own repo).
 
 **Freshness rule:** this library is young and moves fast — three releases (`0.1.0` →
 `0.2.0` → `0.2.1`) shipped within 3 days of each other during this skill's own research.
@@ -61,6 +125,34 @@ Recheck [the README](https://github.com/ronjunevaldoz/shadcn-compose#readme) and
 [Maven Central's actual repository](https://repo1.maven.org/maven2/io/github/ronjunevaldoz/shadcn-compose/)
 directly — not `search.maven.org`, which lagged the real publish by over a day when
 verified — before pinning a version.
+
+## Component Keyword Matrix
+
+Every real component in the library (62 files, verified live against the repo via
+`scripts/fetch_component_signature.py`'s `_list_component_files()` — not guessed),
+grouped by category, so a prompt naming any one of them routes here instead of only
+the handful this skill used to list as trigger keywords (`ShadcnButton`/`ShadcnCard`
+only, previously — a real routing gap this table exists to close).
+
+| Category | Components |
+|---|---|
+| Form inputs | `ShadcnTextField`, `ShadcnTextarea`, `ShadcnCheckbox`, `ShadcnRadioButton`, `ShadcnRadioGroup` (in `ShadcnRadioButton.kt`), `ShadcnSwitch`, `ShadcnSlider`, `ShadcnSelect`, `ShadcnCombobox`, `ShadcnInputOTP`, `ShadcnInputGroup`, `ShadcnField`, `ShadcnToggle`, `ShadcnToggleGroup`, `ShadcnCalendar` |
+| Buttons & actions | `ShadcnButton`, `ShadcnButtonGroup`, `ShadcnGroupCorners` |
+| Overlays | `ShadcnDialog`, `ShadcnAlertDialog`, `ShadcnSheet`, `ShadcnDrawer`, `ShadcnPopover`, `ShadcnHoverCard`, `ShadcnTooltip`, `ShadcnDropdownMenu`, `ShadcnContextMenu`, `ShadcnCommand` |
+| Feedback & status | `ShadcnAlert`, `ShadcnToast`, `ShadcnProgress`, `ShadcnSkeleton`, `ShadcnSpinner`, `ShadcnEmpty`, `ShadcnBadge`, `ShadcnMarker`, `ShadcnChip` |
+| Navigation | `ShadcnTabs`, `ShadcnTabsList` (in `ShadcnTabs.kt`), `ShadcnBreadcrumb`, `ShadcnPagination`, `ShadcnNavigationMenu`, `ShadcnMenubar`, `ShadcnSidebar` |
+| Data display | `ShadcnCard`, `ShadcnCardHeader` (in `ShadcnCard.kt`), `ShadcnTable`, `ShadcnAvatar`, `ShadcnAvatarBadge`/`ShadcnAvatarFallback`/`ShadcnAvatarGroup` (in `ShadcnAvatar.kt`), `ShadcnChart`, `ShadcnKbd`, `ShadcnAspectRatio` |
+| Layout & structure | `ShadcnItem`, `ShadcnItemGroup`/`ShadcnItemDescription`/`ShadcnItemTitle`/`ShadcnItemSeparator` (in `ShadcnItem.kt`), `ShadcnSeparator`, `ShadcnResizable`, `ShadcnResizablePanelGroup`, `ShadcnScrollArea`, `ShadcnCollapsible`, `ShadcnAccordion`, `ShadcnCarousel` |
+| Text & content | `ShadcnText`, `ShadcnLabel`, `ShadcnEmojiText` |
+| Chat / messaging | `ShadcnMessage`, `ShadcnMessageScroller`, `ShadcnBubble`, `ShadcnAttachment` |
+| Theming (not widgets) | `ShadcnTheme`, `ShadcnStylePreset`, `ShadcnBaseColor`, `ShadcnAccent` (all under `tokens/`, not `components/`) |
+
+Component name and real file path are not always the same — several names above are
+composables nested inside a differently-named file (`ShadcnTabsList` in `ShadcnTabs.kt`,
+`ShadcnRadioGroup` in `ShadcnRadioButton.kt`, etc — each noted above). Always confirm the
+real signature with `scripts/fetch_component_signature.py <ComponentName>` before using
+one — this table is for routing/discovery, not a substitute for the verify-before-use
+rule in Step 3.
 
 ---
 
@@ -353,5 +445,6 @@ When asked to add or use shadcn-compose, respond in this order:
 
 | Date | Change |
 |---|---|
+| 2026-07-13 | Fixed a real keyword-routing gap: trigger keywords only named 2 of the library's 62 real components (`ShadcnButton`, `ShadcnCard`) — a prompt naming any other real component (e.g. "how do I use ShadcnDialog") wouldn't route here. Added a full Component Keyword Matrix, grouped by category (form inputs, overlays, feedback, navigation, data display, layout, text, chat, theming), built from the live component file list (`scripts/fetch_component_signature.py`'s `_list_component_files()`, not guessed) plus a follow-up check for composables nested inside a differently-named file (`ShadcnRadioGroup` in `ShadcnRadioButton.kt`, `ShadcnAvatarBadge`/`Fallback`/`Group` in `ShadcnAvatar.kt`, `ShadcnItemGroup`/`Description`/`Title`/`Separator` in `ShadcnItem.kt`). All 62 top-level component names added to frontmatter keywords. |
 | 2026-07-12 | Fixed two real bugs found in a consumer project's implementation, both from this skill's own incomplete verification: `ShadcnTextField` was called with a hallucinated `singleLine` parameter (doesn't exist — real multi-line component is the separate `ShadcnTextarea`), and this skill's own component table said `ShadcnTabs` when the real name is `ShadcnTabsList` (also wrong in `scan_design_violations.py`'s layout-quality suggestion, now fixed with a regression test). Rewrote Step 3 with 9 signatures verified directly against real source (Button, TextField, Textarea, Select, Card+CardHeader, Checkbox, Switch, Avatar+companions, TabsList) and a mandatory rule: never call a component with a parameter not verified against its real signature, with the fetch command to do that verification. Added `scripts/fetch_component_signature.py` — turns that verification from a manual GitHub lookup into one command; handles a component living in a differently-named file (checks the obvious filename first, then searches every component file) and nested parens in a default value (balanced-paren scan, not a single-level regex). Verified 6 more signatures with it (Checkbox, RadioGroup/RadioButton, Slider, Table, Dialog) to expand `kotlin-multiplatform-layout-system`'s HTML mapping table. 2 new anti-patterns, 3 new script regression tests. |
 | 2026-07-11 | Initial release — Maven Central setup, `ShadcnTheme` wrapper (verified against real source), component usage (verified against real KDoc examples), and the experimental-API risk this skill exists specifically to disclose rather than hide. Gated to explicit user choice via `/kmm-new-project` Step 6a, never suggested unprompted. Added "Picking a preset by app vibe" — full `ShadcnStylePreset`/`ShadcnBaseColor`/`ShadcnAccent` reference (verified against their own KDoc/source), and wired `/kmm-new-project` Step 6a-ii to auto-infer a preset/base color/accent recommendation from the same app-type category as the color-palette draft, always confirmed before generating, never a silent default. Added `/kmm-migrate-to-shadcn` — a full `App*`→`Shadcn*` migration command for existing design-system projects, with an honest mapping table (verified against the real component catalog, not assumed 1:1 parity) flagging the components with no direct equivalent (`AppScaffold`, `AppTopAppBar`, `AppNavigationBar`, `AppIcon`, `AppIconButton`) for explicit user decision rather than a guessed replacement. Wired `scan_design_violations.py`'s `layout_inconsistency` finding to suggest a matching `Shadcn*` component (`ShadcnTabs`/`ShadcnCard`/`ShadcnItem`) as an option regardless of whether the project uses shadcn-compose yet — every such suggestion states the experimental-API risk inline, and is presented alongside (never instead of) the no-new-dependency fix. |
