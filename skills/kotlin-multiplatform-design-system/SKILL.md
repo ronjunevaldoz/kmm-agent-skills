@@ -22,7 +22,6 @@ metadata:
     - AppTheme
     - custom theme
     - design tokens
-    - shadcn
     - ButtonVariant
     - Kotlin Multiplatform
     - Compose Multiplatform
@@ -59,7 +58,7 @@ Use this skill when the user asks to:
 - Wire AppTheme, tokens, or custom Composables into `:core:designsystem`
 
 **Trigger keywords:** design system, custom theme, AppTheme, design tokens,
-ButtonVariant, shadcn KMP, Compose Styles, ExperimentalStylesApi, custom components,
+ButtonVariant, Compose Styles, ExperimentalStylesApi, custom components,
 unstyled components, dark mode tokens, color scheme, no Material,
 typography system, spacing tokens, custom button style, Material3 alternative,
 app theme setup, brand colors, design token system, custom typography,
@@ -2639,6 +2638,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-13 | Fixed a real keyword-routing collision with `kotlin-multiplatform-shadcn-compose`: this skill's own trigger keywords included bare `shadcn` (frontmatter) and `shadcn KMP` (body) — the exact same phrase `shadcn-compose` uses as its own trigger keyword, despite the two being documented mutually-exclusive alternatives (`/kmm-new-project` loads one instead of the other). Removed both from this skill; `design system`/`AppTheme`/`ButtonVariant`/etc already route unambiguously without them. Root cause: `validate_keyword_routing.py` only checked that every skill appears in the expert's invocation map, never checked for keyword overlap between skills — added collision detection to catch this class of bug going forward. |
 | 2026-07-11 | Corrected the 2026-07-10 deprecation-evaluation entry below: verified directly against Maven Central's repository (not just the README) that `shadcn-compose` published `0.2.1`, so "still `-SNAPSHOT`, not on Maven Central" is no longer true. The conclusion is unchanged for a different reason — publication doesn't remove the risk this skill is scaffold-based to avoid: `shadcn-compose` still depends on the experimental `@ExperimentalFoundationStyleApi`, so a real dependency on it still breaks on the next CMP release that changes that API. Updated the Ownership Model note accordingly, and added a new dedicated `kotlin-multiplatform-shadcn-compose` skill for consuming the library when a user explicitly chooses it — cross-referenced both ways. Also added `/kmm-migrate-to-shadcn` for projects that decide to fully switch, cross-referenced here too. |
 | 2026-07-11 | Fixed the same false-positive class found and fixed in `kotlin-multiplatform-audit`'s `audit_project.py`: `scan_design_violations.py`'s `_SKIP_DIR_FRAGMENTS` only knew about `designsystem`/`design_system`/`theme`, so a project with skills deployed to `.claude/skills/` would get a `hardcoded_color` violation from this skill's own `detekt-rules/src/test/kotlin/.../HardcodedColorRuleTest.kt` (a legitimate test fixture, not real app code). Worse than the read-only audit case since `/fix-design` uses this scanner to auto-fix violations — could have rewritten deployed skill reference files. Added the same build/VCS/vendor/deployed-skills exclusion set `audit_project.py` uses. Reproduced the exact false positive before fixing; 2 new regression tests confirm it's gone while real project violations alongside deployed skills still fire. |
 | 2026-07-10 | Evaluated deprecating this skill (and `design-system-extended`) in favor of the user's own published `shadcn-compose`/`heroicons-compose`/`tailwind-compose` libraries — decided **not yet**: `shadcn-compose` is still `-SNAPSHOT` (not on Maven Central) and depends on the same experimental `@ExperimentalStylesApi` this skill's Ownership Model explicitly avoids by staying scaffold-based; `heroicons-compose` only has the Outline variant built vs. this repo's 4-variant coverage. `tailwind-compose`, however, is stable-API-only and already published — added a cross-reference for it in Ownership Model as a complementary utility-class layer, not a replacement. |

@@ -3818,6 +3818,53 @@ class ValidateKeywordRoutingTests(unittest.TestCase):
         result = keyword_routing_scripts.main(["--repo-root", str(REPO_ROOT)])
         self.assertEqual(result, 0)
 
+    def _write_skill(self, root: Path, name: str, body: str) -> None:
+        d = root / "skills" / name
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "SKILL.md").write_text(body, encoding="utf-8")
+
+    def test_flags_keyword_shared_with_documented_alternative(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._make_repo(
+                tmp,
+                ["kotlin-multiplatform-a", "kotlin-multiplatform-b", "kotlin-multiplatform-expert"],
+                "| keyword-a | `kotlin-multiplatform-a` |\n"
+                "| keyword-b | `kotlin-multiplatform-b` |\n",
+            )
+            self._write_skill(
+                root, "kotlin-multiplatform-a",
+                "---\ndescription: >\n  Some skill.\n---\n\n"
+                "**Trigger keywords:** widget, shared thing\n",
+            )
+            self._write_skill(
+                root, "kotlin-multiplatform-b",
+                "---\ndescription: >\n  Alternative to `kotlin-multiplatform-a` — not both in the same project.\n---\n\n"
+                "**Trigger keywords:** gadget, shared thing\n",
+            )
+            errors = keyword_routing_scripts.validate_keyword_routing(root)
+            self.assertTrue(any("shared thing" in e for e in errors))
+
+    def test_ignores_shared_keyword_between_non_alternative_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._make_repo(
+                tmp,
+                ["kotlin-multiplatform-a", "kotlin-multiplatform-b", "kotlin-multiplatform-expert"],
+                "| keyword-a | `kotlin-multiplatform-a` |\n"
+                "| keyword-b | `kotlin-multiplatform-b` |\n",
+            )
+            self._write_skill(
+                root, "kotlin-multiplatform-a",
+                "---\ndescription: >\n  Some skill, no alternative relationship.\n---\n\n"
+                "**Trigger keywords:** widget, shared thing\n",
+            )
+            self._write_skill(
+                root, "kotlin-multiplatform-b",
+                "---\ndescription: >\n  A companion skill, complements kotlin-multiplatform-a.\n---\n\n"
+                "**Trigger keywords:** gadget, shared thing\n",
+            )
+            errors = keyword_routing_scripts.validate_keyword_routing(root)
+            self.assertFalse(any("collision" in e for e in errors))
+
 
 generate_release_notes_scripts = load_module(
     "generate_release_notes",
