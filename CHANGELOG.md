@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.79.0] — 2026-07-14
+
+### Added
+
+- feat(audit): add project-owned skill standards detector, fix expert doc nesting
+
+---
+
 ## [v1.78.0] — 2026-07-14
 
 ### Added
