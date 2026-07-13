@@ -2169,5 +2169,92 @@ class HardcodedBaseUrlTests(unittest.TestCase):
             self.assertFalse(any("hardcoded base URL" in f for f in findings))
 
 
+class ProjectSkillStandardsTests(unittest.TestCase):
+    """A project-owned skill at <project root>/skills/<skill-name>/ should meet the
+    real skill anatomy (verified against anthropic-skills:skill-creator's own
+    documented convention): SKILL.md required, opening YAML frontmatter with name
+    and description, body under ~500 lines unless a references/ dir exists.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_skill_folder_missing_skill_md(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "skills" / "my-skill").mkdir(parents=True)
+            (root / "skills" / "my-skill" / "notes.md").write_text("stub", encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("project skill missing SKILL.md" in f for f in findings))
+
+    def test_flags_missing_frontmatter(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "skills/my-skill/SKILL.md", "# My Skill\n\nNo frontmatter here.\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("project skill missing frontmatter" in f for f in findings))
+
+    def test_flags_frontmatter_missing_name(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "skills/my-skill/SKILL.md",
+                "---\ndescription: Does a thing.\n---\n\nBody text.\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("frontmatter missing name" in f for f in findings))
+
+    def test_flags_frontmatter_missing_description(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "skills/my-skill/SKILL.md",
+                "---\nname: my-skill\n---\n\nBody text.\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("frontmatter missing description" in f for f in findings))
+
+    def test_flags_body_over_500_lines_without_references_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            body = "\n".join(f"line {i}" for i in range(600))
+            self._write(
+                root, "skills/my-skill/SKILL.md",
+                f"---\nname: my-skill\ndescription: Does a thing.\n---\n\n{body}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("exceeds 500-line guideline" in f for f in findings))
+
+    def test_ignores_long_body_with_references_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            body = "\n".join(f"line {i}" for i in range(600))
+            self._write(
+                root, "skills/my-skill/SKILL.md",
+                f"---\nname: my-skill\ndescription: Does a thing.\n---\n\n{body}\n",
+            )
+            (root / "skills" / "my-skill" / "references").mkdir(parents=True)
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("exceeds 500-line guideline" in f for f in findings))
+
+    def test_compliant_skill_has_no_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "skills/my-skill/SKILL.md",
+                "---\nname: my-skill\ndescription: Does a thing.\n---\n\nShort body.\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any(f.startswith("project skill") for f in findings))
+
+    def test_no_skills_dir_returns_no_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any(f.startswith("project skill") for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()

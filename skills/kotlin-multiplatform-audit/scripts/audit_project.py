@@ -1494,6 +1494,86 @@ def _detect_module_layer_violation(root: Path) -> list[str]:
 # already resolved and recorded a different prefix but App*-named declarations still
 # exist under core/designsystem — i.e. the substitution was skipped during generation.
 
+_FRONTMATTER_RE = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)
+_FRONTMATTER_NAME_RE = re.compile(r"^name:\s*\S", re.MULTILINE)
+_FRONTMATTER_DESCRIPTION_RE = re.compile(r"^description:\s*\S", re.MULTILINE)
+_SKILL_MD_MAX_LINES = 500
+
+
+def _detect_project_skill_standards(root: Path) -> list[str]:
+    """Flag a project-owned skill at <project root>/skills/<skill-name>/ that doesn't
+    meet the real, official skill anatomy (verified against anthropic-skills:skill-creator's
+    own documented convention, not assumed):
+
+      - skills/<name>/SKILL.md must exist (a skill folder with none is undiscoverable)
+      - SKILL.md must open with YAML frontmatter (--- ... ---)
+      - frontmatter must have both name: and description: — these are the primary
+        triggering mechanism; a skill missing either can't be found or won't trigger
+      - SKILL.md body should stay under ~500 lines unless it points to a references/
+        subdirectory for progressive disclosure (skill-creator's own stated guideline)
+
+    Scoped to the project's own top-level skills/ directory only — not this collection's
+    deployed .claude/skills/ copies, and not this repo's own skills/ when auditing itself.
+    """
+    findings: list[str] = []
+    skills_dir = root / "skills"
+    if not skills_dir.is_dir():
+        return findings
+
+    for skill_dir in sorted(p for p in skills_dir.iterdir() if p.is_dir()):
+        if _is_excluded(skill_dir, root):
+            continue
+        rel_dir = skill_dir.relative_to(root)
+        skill_md = skill_dir / "SKILL.md"
+
+        if not skill_md.is_file():
+            findings.append(
+                f"project skill missing SKILL.md [HIGH]: {rel_dir} — a skill folder "
+                f"needs SKILL.md to be discoverable at all (see anthropic-skills:skill-creator's "
+                f"skill anatomy)"
+            )
+            continue
+
+        try:
+            text = skill_md.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+
+        rel = skill_md.relative_to(root)
+        fm_match = _FRONTMATTER_RE.match(text)
+        if not fm_match:
+            findings.append(
+                f"project skill missing frontmatter [HIGH]: {rel} — SKILL.md must open "
+                f"with a --- ... --- YAML frontmatter block containing name and description"
+            )
+            continue
+
+        frontmatter = fm_match.group(1)
+        if not _FRONTMATTER_NAME_RE.search(frontmatter):
+            findings.append(
+                f"project skill frontmatter missing name [HIGH]: {rel} — name is the "
+                f"skill identifier; without it the skill can't be reliably referenced"
+            )
+        if not _FRONTMATTER_DESCRIPTION_RE.search(frontmatter):
+            findings.append(
+                f"project skill frontmatter missing description [HIGH]: {rel} — "
+                f"description is the primary triggering mechanism; a skill without one "
+                f"won't reliably trigger for the tasks it's meant to handle"
+            )
+
+        body = text[fm_match.end():]
+        body_lines = body.count("\n") + 1
+        if body_lines > _SKILL_MD_MAX_LINES and not (skill_dir / "references").is_dir():
+            findings.append(
+                f"project skill exceeds 500-line guideline [MEDIUM]: {rel} — body is "
+                f"~{body_lines} lines with no references/ subdirectory; skill-creator's "
+                f"own guideline is to add a references/ layer with clear pointers once "
+                f"approaching this size, not to let SKILL.md itself keep growing"
+            )
+
+    return findings
+
+
 _COMPONENT_PREFIX_ROW_RE = re.compile(r"\|\s*Component prefix\s*\|\s*([A-Za-z][A-Za-z0-9]*)\s*\|")
 _APP_PREFIXED_DECL_RE = re.compile(
     r"\b(?:class|fun|object|val|data class|sealed interface|enum class)\s+(App[A-Z]\w*)"
@@ -2405,6 +2485,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Design system prefix mismatch ──────────────────────────────────────────
     findings.extend(_detect_design_system_prefix_mismatch(root))
+
+    # ── Project-owned skill standards (skills/<name>/SKILL.md anatomy) ─────────
+    findings.extend(_detect_project_skill_standards(root))
 
     # ── Empty platform-specific source sets ────────────────────────────────────
     findings.extend(_detect_empty_platform_sourceset(root))

@@ -735,20 +735,29 @@ same benefits: the source is versioned alongside the app's own code (not buried 
 runtime-only directory), reviewable in a normal PR diff, and portable if the project
 ever needs to regenerate or move its `.claude/` setup.
 
-Layout:
+Layout — flat, `<name>` is the artifact's own name, never the app/project name:
 ```
 <project root>/
-├── agents/<name>.md         ← source
-├── commands/<name>.md       ← source
-├── skills/<name>/SKILL.md   ← source (name = the project's own app/feature name,
-│                                not a kmm-agent-skills name — this is project-owned)
-├── hooks/<name>.sh          ← source
+├── agents/<agent-name>.md         ← source
+├── commands/<command-name>.md     ← source
+├── skills/<skill-name>/SKILL.md   ← source
+├── hooks/<hook-name>.sh           ← source
 └── .claude/
-    ├── agents/<name>.md     ← deployed copy
-    ├── commands/<name>.md   ← deployed copy
-    ├── skills/<name>/       ← deployed copy
-    └── hooks/               ← wired via settings.json, not copied
+    ├── agents/<agent-name>.md     ← deployed copy
+    ├── commands/<command-name>.md ← deployed copy
+    ├── skills/<skill-name>/       ← deployed copy
+    └── hooks/                     ← wired via settings.json, not copied
 ```
+
+**Never nest a project artifact under an app/project-name folder** (e.g.
+`skills/<app-name>/<skill-name>/`). Verified against the real, official skill
+anatomy (`anthropic-skills:skill-creator`'s own documented convention): a skill's
+folder is named after what the skill *does*, flat under `skills/` — this is also how
+`.claude/skills/` is actually scanned. If a project-owned skill's name might collide
+with one of this collection's 63, resolve it by giving the project-owned skill a more
+specific name (e.g. `awaken-ecs-conventions`, not `ecs`) — not by nesting it under an
+app-name folder, which isn't a real convention Claude Code (or this collection)
+recognizes.
 
 Deploy the copy after every edit to the source — a stale `.claude/` copy that's drifted
 from its project-owned source is worse than no source at all, since it looks authoritative
@@ -759,6 +768,12 @@ the project has many artifacts to keep in sync.
 agent definitions (`ecs-dev`, `game-framework-dev`) authored directly into
 `.claude/agents/` with no project-owned source anywhere — meaning the only copy of that
 authoring work lived in a directory this rule now treats as deploy-only.
+
+**Audited automatically**: `kotlin-multiplatform-audit`'s `_detect_project_skill_standards`
+checks every `skills/<name>/` folder it finds against the real skill anatomy — SKILL.md
+present, opening YAML frontmatter with `name`/`description`, body under ~500 lines unless
+a `references/` subdirectory exists. Run it any time a project skill is added or edited,
+not just once at creation.
 
 ## Recommendation Format
 
@@ -821,7 +836,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
-| 2026-07-14 | Added "Project-Specific Commands/Agents/Skills — Source of Truth": a real gap found while reviewing a consumer project (a KMP game engine) whose two custom agent definitions were authored directly into `.claude/agents/` with no project-owned source anywhere. Documents mirroring this repo's own layout (`agents/`, `commands/`, `skills/`, `hooks/` at the project root as canonical source, `.claude/` as the deployed copy) for any project-specific artifact that isn't from `kmm-agent-skills` itself. Cross-referenced from `/kmm-setup-agents`, which only deploys this collection's own skills/commands, not project-owned ones. |
+| 2026-07-14 | Added "Project-Specific Commands/Agents/Skills — Source of Truth": a real gap found while reviewing a consumer project (a KMP game engine) whose two custom agent definitions were authored directly into `.claude/agents/` with no project-owned source anywhere. Documents mirroring this repo's own layout (`agents/`, `commands/`, `skills/`, `hooks/` at the project root as canonical source, `.claude/` as the deployed copy) for any project-specific artifact that isn't from `kmm-agent-skills` itself. Cross-referenced from `/kmm-setup-agents`, which only deploys this collection's own skills/commands, not project-owned ones. Corrected same-day: the layout initially nested a skill under an app-name folder (`skills/<app-name>/<skill-name>/`) — verified against `anthropic-skills:skill-creator`'s real, official skill anatomy that this isn't a recognized convention; skills are flat, named after what they do. Fixed to `skills/<skill-name>/`, with name-collision guidance (rename the skill, don't nest it) instead. |
 | 2026-07-11 | Added an invocation-map row routing "composition over inheritance"/"abstract class in commonMain"/"agent over-abstracting" to `kotlin-multiplatform-clean-architecture`'s new Composition Over Inheritance section — a real, recurring anti-pattern where an agent creates a public abstract class in commonMain requiring consumer inheritance. |
 | 2026-07-11 | Added `kotlin-multiplatform-docs-site` (62nd skill) — public GitHub Pages developer guide for a published library (MkDocs Material + Dokka HTML + compiler-verified snippet extraction), explicitly gated to library projects with real surface area, never apps or trivial libraries. Added to the Meta list and Skill Invocation Map. |
 | 2026-07-10 | Two real gaps closed: (1) added a "Improve the performance of X" decision tree — there was no routing path for performance requests at all (only a model-routing hint, not a skill-routing rule); routes by naming what X is and explicitly stops rather than guessing when X is unnamed or whole-app; added `kotlin-multiplatform-benchmark` (61st skill) as its "get a real number" branch. (2) Broadened "Which transport for a backend call?" to check for an existing Ktor client by content (`HttpClient(`/`safeRequest`/`NetworkResult<`) before the kRPC-specific grep — the prior version only checked kRPC symbols, so a project with a plain (differently-named) Ktor client and no kRPC could still fall through to a raw HTTP call; cross-referenced to `kotlin-multiplatform-network-layer`'s new Step 0. |
