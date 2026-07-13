@@ -1,0 +1,385 @@
+from __future__ import annotations
+
+import json
+import subprocess
+import tempfile
+import unittest
+from pathlib import Path
+from unittest import mock
+
+from _helpers import REPO_ROOT, load_module
+
+audit_repo_scripts = load_module(
+    "audit_skills_repo",
+    REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_skills_repo.py",
+)
+
+class AuditSkillsRepoTests(unittest.TestCase):
+    def test_audit_skills_repo_flags_missing_freshness_and_markers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            skill_dir = root / "skills" / "example-skill"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: example-skill\ndescription: Ktor example\n---\n\n## When to Use This Skill\n\nUses ktor client code.\n",
+                encoding="utf-8",
+            )
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("missing freshness guidance" in finding for finding in findings))
+
+    def test_audit_skills_repo_flags_missing_all_targets_branch_guidance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            scaffold_dir = root / "skills" / "kotlin-multiplatform-feature-scaffold"
+            scaffold_dir.mkdir(parents=True)
+            (scaffold_dir / "SKILL.md").write_text(
+                "---\nname: kotlin-multiplatform-feature-scaffold\ndescription: scaffold\n---\n\n## When to Use This Skill\n\nall-frontends-shared\n",
+                encoding="utf-8",
+            )
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("missing all-targets branch guidance" in finding for finding in findings))
+
+    def test_audit_skills_repo_flags_missing_build_logic_toml_guidance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            scaffold_dir = root / "skills" / "kotlin-multiplatform-feature-scaffold"
+            scaffold_dir.mkdir(parents=True)
+            (scaffold_dir / "SKILL.md").write_text(
+                "---\nname: kotlin-multiplatform-feature-scaffold\ndescription: scaffold\n---\n\n## When to Use This Skill\n\nbuild-logic only\n",
+                encoding="utf-8",
+            )
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("missing build-logic and libs.versions.toml guidance" in finding for finding in findings))
+
+
+    def test_audit_skills_repo_flags_all_missing_required_markers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            skill_dir = root / "skills" / "example-skill"
+            skill_dir.mkdir(parents=True)
+            # SKILL.md with none of the 4 required markers
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: example-skill\ndescription: example\n---\n\nSome content.\n",
+                encoding="utf-8",
+            )
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            marker_finding = next((f for f in findings if "missing markers" in f), None)
+
+            self.assertIsNotNone(marker_finding, "expected a 'missing markers' finding")
+            self.assertIn("## When to Use This Skill", marker_finding)
+            self.assertIn("Trigger keywords:", marker_finding)
+            self.assertIn("metadata:", marker_finding)
+            self.assertIn("last-updated:", marker_finding)
+
+    def test_audit_skills_repo_no_marker_finding_when_all_present(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            skill_dir = root / "skills" / "example-skill"
+            skill_dir.mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: example-skill\ndescription: example\nmetadata:\n  last-updated: '2026-06-18'\n---\n\n"
+                "## When to Use This Skill\n\n**Trigger keywords:** example.\n\n## Changelog\n\n| Date | Change |\n|---|---|\n| 2026-06-18 | Initial release. |\n",
+                encoding="utf-8",
+            )
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+
+            self.assertFalse(any("missing markers" in f for f in findings))
+
+
+    # ── Design-system content checks ────────────────────────────────────────────
+
+    def _make_ds_skill(self, root: Path, name: str, content: str) -> None:
+        skill_dir = root / "skills" / name
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text(content, encoding="utf-8")
+
+    _DS_GOOD_CONTENT = (
+        "## When to Use This Skill\n\n**Trigger keywords:** design system.\n\nmetadata:\n"
+        "  last-updated: '2026-06-22'\n\n"
+        "OptIn(ExperimentalStylesApi\n"
+        "fun AppButton(\nfun AppBadge(\nfun AppCard(\nfun AppChip(\nfun AppTextField(\nfun AppText(\n"
+        "## Component Previews\n\n### `previews/AppButtonPreview.kt`\n```kotlin\n// preview\n```\n\n"
+        "## Changelog\n\n| Date | Change |\n|---|---|\n| 2026-06-22 | v1. |\n"
+    )
+
+    def test_ds_flags_missing_component(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            # AppTextField omitted
+            content = self._DS_GOOD_CONTENT.replace("fun AppTextField(\n", "")
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("fun AppTextField" in f for f in findings))
+
+    def test_ds_flags_textstyle_collision(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            content = self._DS_GOOD_CONTENT + "enum class TextStyle {\n  BodyMedium\n}\n"
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("enum class TextStyle" in f for f in findings))
+
+    def test_ds_flags_missing_optins(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            content = self._DS_GOOD_CONTENT.replace("OptIn(ExperimentalStylesApi\n", "ExperimentalStylesApi\n")
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("ExperimentalStylesApi" in f and "@OptIn" in f for f in findings))
+
+    def test_ds_flags_static_apptheme_access(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            content = self._DS_GOOD_CONTENT + "padding(AppTheme.spacing.lg)\n"
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("AppTheme" in f and "static" in f for f in findings))
+
+    def test_ds_flags_hardcoded_dp_in_override(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            content = self._DS_GOOD_CONTENT + "override val contentPadding = 24.dp\n"
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("override val" in f and "N.dp" in f for f in findings))
+
+    def test_ds_exempts_component_dimension_dp(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            # `override val dp = 24.dp` is an IconSize/AvatarSize enum — exempt
+            content = self._DS_GOOD_CONTENT + "override val dp = 24.dp\n"
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertFalse(any("override val" in f and "N.dp" in f for f in findings))
+
+    def test_ds_clean_passes_all_checks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", self._DS_GOOD_CONTENT)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            ds_findings = [f for f in findings if "design-system" in f]
+            self.assertEqual([], ds_findings)
+
+    def test_ds_flags_missing_component_previews(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            content = self._DS_GOOD_CONTENT.replace(
+                "## Component Previews\n\n### `previews/AppButtonPreview.kt`\n```kotlin\n// preview\n```\n\n",
+                "",
+            )
+            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("Component Previews" in f for f in findings))
+
+    # ── Detekt rules module structure ────────────────────────────────────────────
+
+    def test_detekt_rules_directory_exists(self) -> None:
+        """detekt-rules/ directory must exist in the design-system skill."""
+        detekt_dir = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "detekt-rules"
+        )
+        self.assertTrue(detekt_dir.is_dir(), "detekt-rules/ directory missing")
+
+    def test_detekt_rules_contains_all_rule_files(self) -> None:
+        rules_dir = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "GROUP_ID" / "designsystem" / "detekt"
+        )
+        expected = [
+            "DesignSystemRuleSetProvider.kt",
+            "HardcodedColorRule.kt",
+            "HardcodedDpRule.kt",
+            "MaterialThemeUsageRule.kt",
+            "DirectTextStyleRule.kt",
+            "NestedContainerRule.kt",
+            "ComponentRegistryRule.kt",
+            "ImportBoundaryRule.kt",
+            "RedundantScreenTitleRule.kt",
+            "HardcodedGridColumnsRule.kt",
+        ]
+        for fname in expected:
+            self.assertTrue((rules_dir / fname).exists(), f"Missing rule file: {fname}")
+
+    def test_detekt_rules_build_gradle_exists(self) -> None:
+        build_file = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "build.gradle.kts"
+        )
+        self.assertTrue(build_file.exists())
+        content = build_file.read_text()
+        self.assertIn("detekt-api", content)
+
+    def test_detekt_rules_config_exists(self) -> None:
+        config_file = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "config" / "detekt-design-system.yml"
+        )
+        self.assertTrue(config_file.exists())
+        content = config_file.read_text()
+        for rule in ("HardcodedColor", "HardcodedDp", "MaterialThemeUsage",
+                     "DirectTextStyle", "NestedContainer",
+                     "ComponentRegistryRule", "ImportBoundaryRule",
+                     "RedundantScreenTitleRule", "HardcodedGridColumnsRule"):
+            self.assertIn(rule, content, f"Config missing rule: {rule}")
+
+    def test_detekt_rules_service_loader_file_exists(self) -> None:
+        svc_file = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "resources"
+            / "META-INF" / "services"
+            / "io.gitlab.arturbosch.detekt.api.RuleSetProvider"
+        )
+        self.assertTrue(svc_file.exists())
+        self.assertIn("DesignSystemRuleSetProvider", svc_file.read_text())
+
+    def test_detekt_rule_set_provider_has_all_9_rules(self) -> None:
+        provider_kt = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "GROUP_ID" / "designsystem" / "detekt"
+            / "DesignSystemRuleSetProvider.kt"
+        )
+        content = provider_kt.read_text()
+        for rule in ("HardcodedColorRule", "HardcodedDpRule", "MaterialThemeUsageRule",
+                     "DirectTextStyleRule", "NestedContainerRule",
+                     "ComponentRegistryRule", "ImportBoundaryRule",
+                     "RedundantScreenTitleRule", "HardcodedGridColumnsRule"):
+            self.assertIn(rule, content, f"RuleSetProvider missing: {rule}")
+
+    def test_redundant_screen_title_rule_exists(self) -> None:
+        rule_kt = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "GROUP_ID" / "designsystem" / "detekt"
+            / "RedundantScreenTitleRule.kt"
+        )
+        content = rule_kt.read_text()
+        self.assertIn("RedundantScreenTitle", content)
+        self.assertIn("KtTreeVisitorVoid", content)
+        self.assertIn("AppTopAppBar", content)
+
+    def test_hardcoded_grid_columns_rule_exists(self) -> None:
+        rule_kt = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "GROUP_ID" / "designsystem" / "detekt"
+            / "HardcodedGridColumnsRule.kt"
+        )
+        content = rule_kt.read_text()
+        self.assertIn("HardcodedGridColumns", content)
+        self.assertIn("GridCells", content)
+        self.assertIn("Adaptive", content)
+
+    def test_component_registry_rule_uses_configurable_prefix(self) -> None:
+        rule_kt = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "GROUP_ID" / "designsystem" / "detekt"
+            / "ComponentRegistryRule.kt"
+        )
+        content = rule_kt.read_text()
+        self.assertIn("componentPrefix", content)
+        self.assertIn("valueOrDefault", content)
+
+    def test_import_boundary_rule_scoped_to_feature_ui(self) -> None:
+        rule_kt = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "detekt-rules" / "src" / "main" / "kotlin"
+            / "GROUP_ID" / "designsystem" / "detekt"
+            / "ImportBoundaryRule.kt"
+        )
+        content = rule_kt.read_text()
+        self.assertIn("/feature/", content)
+        self.assertIn("/ui/", content)
+
+    # ── New commands exist ────────────────────────────────────────────────────────
+
+    def test_design_system_template_exists(self) -> None:
+        template = (
+            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            / "references" / "design-system-template.md"
+        )
+        self.assertTrue(template.exists(), "design-system-template.md missing from references/")
+        content = template.read_text()
+        for section in ("PROJECT_NAME", "GROUP_ID", "COMPONENT_PREFIX",
+                        "Color palette", "Typography", "Spacing scale",
+                        "Component Inventory", "Ownership Model",
+                        "Detekt Rules", "Multi-Device Preview", "Design Audit Log"):
+            self.assertIn(section, content, f"Template missing section: {section}")
+
+    def test_record_design_baselines_command_exists(self) -> None:
+        cmd = REPO_ROOT / "commands" / "kmm-record-design-baselines.md"
+        self.assertTrue(cmd.exists())
+        content = cmd.read_text()
+        self.assertIn("roborazzi.record=true", content)
+        self.assertIn("roborazzi.verify=true", content)
+
+    def test_audit_design_visual_command_exists(self) -> None:
+        cmd = REPO_ROOT / "commands" / "kmm-audit-design-visual.md"
+        self.assertTrue(cmd.exists())
+        content = cmd.read_text()
+        self.assertIn("snapshots", content)
+        self.assertIn("vision", content.lower())
+
+    def test_fix_design_references_detekt_as_primary(self) -> None:
+        cmd = REPO_ROOT / "commands" / "kmm-fix-design.md"
+        content = cmd.read_text()
+        self.assertIn("detekt", content)
+        self.assertIn("detekt-design-system.yml", content)
+
+    # ── Naming conventions ───────────────────────────────────────────────────────
+
+    def test_naming_flags_uppercase_file_in_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            cmd_dir = root / "commands"
+            cmd_dir.mkdir()
+            (cmd_dir / "NewFeature.md").write_text("# cmd\n", encoding="utf-8")
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("naming" in f and "NewFeature.md" in f for f in findings))
+
+    def test_naming_flags_lowercase_root_doc(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            (root / "changelog.md").write_text("# log\n", encoding="utf-8")
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("naming" in f and "changelog.md" in f for f in findings))
+
+    def test_naming_clean_on_correct_conventions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            (root / "PLAN.md").write_text("# plan\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            cmd_dir = root / "commands"
+            cmd_dir.mkdir()
+            (cmd_dir / "new-feature.md").write_text("# cmd\n", encoding="utf-8")
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertFalse(any("naming" in f for f in findings))
+
+
+if __name__ == "__main__":
+    unittest.main()

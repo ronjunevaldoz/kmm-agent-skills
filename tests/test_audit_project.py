@@ -1,0 +1,2173 @@
+from __future__ import annotations
+
+import json
+import subprocess
+import tempfile
+import unittest
+from pathlib import Path
+from unittest import mock
+
+from _helpers import REPO_ROOT, load_module
+
+audit_scripts = load_module(
+    "audit_project",
+    REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_project.py",
+)
+
+class AuditProjectTests(unittest.TestCase):
+    def test_audit_project_finds_smells(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "auth" / "ui"
+            ui_dir.mkdir(parents=True)
+            # ViewModel file — triggers state/sharedflow checks but NOT data-import (by design)
+            (ui_dir / "AuthViewModel.kt").write_text(
+                """
+                _state.value = _state.value.copy(isLoading = true)
+                val flow = MutableSharedFlow<Int>(replay = 1)
+                """.strip(),
+                encoding="utf-8",
+            )
+            # Non-ViewModel UI file — triggers data import check
+            (ui_dir / "AuthScreen.kt").write_text(
+                "import foo.bar.data.SecretRepo",
+                encoding="utf-8",
+            )
+
+            findings = audit_scripts.audit_project(root)
+
+            self.assertTrue(any("state copy race" in finding for finding in findings))
+            self.assertTrue(any("sharedflow replay effect" in finding for finding in findings))
+            self.assertTrue(any("data import in ui" in finding for finding in findings))
+
+    def test_audit_project_finds_network_result_in_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "auth" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "AuthScreen.kt").write_text(
+                "val result: NetworkResult<User> = viewModel.state",
+                encoding="utf-8",
+            )
+
+            findings = audit_scripts.audit_project(root)
+
+            self.assertTrue(any("network result in ui" in finding for finding in findings))
+
+    def test_audit_project_ignores_network_result_outside_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data_dir = root / "feature" / "auth" / "data"
+            data_dir.mkdir(parents=True)
+            (data_dir / "AuthRemoteDataSource.kt").write_text(
+                "suspend fun login(): NetworkResult<User>",
+                encoding="utf-8",
+            )
+
+            findings = audit_scripts.audit_project(root)
+
+            self.assertFalse(any("network result in ui" in finding for finding in findings))
+
+    def test_audit_project_finds_adb_screencap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "androidApp" / "src"
+            src_dir.mkdir(parents=True)
+            (src_dir / "ScreenshotHelper.kt").write_text(
+                'Runtime.getRuntime().exec("adb screencap /sdcard/screen.png")',
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("manual screen capture" in f for f in findings))
+
+    def test_audit_project_finds_playwright(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "androidApp" / "src"
+            src_dir.mkdir(parents=True)
+            (src_dir / "UITest.kt").write_text(
+                "import com.microsoft.playwright.Page",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("manual screen capture" in f for f in findings))
+
+    def test_audit_project_finds_xcrun_simctl(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "iosApp" / "src"
+            src_dir.mkdir(parents=True)
+            (src_dir / "CaptureHelper.kt").write_text(
+                'exec("xcrun simctl io booted screenshot screen.png")',
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("manual screen capture" in f for f in findings))
+
+    def test_audit_project_finds_magic_color_in_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "auth" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "AuthScreen.kt").write_text(
+                "Box(modifier = Modifier.background(Color(0xFF6200EE)))",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("magic color literal" in f for f in findings))
+
+    def test_audit_project_ignores_magic_color_in_token_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "core" / "designsystem" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "AppColors.kt").write_text(
+                "val primary = Color(0xFF6200EE)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("magic color literal" in f for f in findings))
+
+    def test_audit_project_ignores_magic_color_outside_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            data_dir = root / "feature" / "auth" / "data"
+            data_dir.mkdir(parents=True)
+            (data_dir / "AuthMapper.kt").write_text(
+                "val highlight = Color(0xFFFF0000)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("magic color literal" in f for f in findings))
+
+    def test_audit_project_finds_system_dark_theme_in_composable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "val isDark = isSystemInDarkTheme()\n"
+                "val bg = if (isDark) Color.Black else Color.White",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("system dark theme scatter" in f for f in findings))
+
+    def test_audit_project_finds_hardcoded_spacing_in_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeContent.kt").write_text(
+                "Column(modifier = Modifier.padding(16.dp)) { }",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded spacing" in f for f in findings))
+
+    def test_audit_project_finds_hardcoded_spacing_horizontal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeContent.kt").write_text(
+                "Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) { }",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded spacing" in f for f in findings))
+
+    def test_audit_project_ignores_spacing_token_usage(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeContent.kt").write_text(
+                "Column(modifier = Modifier.padding(horizontal = AppTheme.spacing.lg)) { }",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded spacing" in f for f in findings))
+
+    def test_audit_project_ignores_zero_dp_padding(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeContent.kt").write_text(
+                "Column(modifier = Modifier.padding(0.dp)) { }",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded spacing" in f for f in findings))
+
+    def test_audit_project_ignores_hardcoded_spacing_outside_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            comp_dir = root / "core" / "designsystem" / "components"
+            comp_dir.mkdir(parents=True)
+            (comp_dir / "AppTopAppBar.kt").write_text(
+                ".padding(horizontal = 4.dp)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded spacing" in f for f in findings))
+
+    def test_audit_project_ignores_system_dark_theme_in_app_theme(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "app" / "src"
+            src_dir.mkdir(parents=True)
+            (src_dir / "AppTheme.kt").write_text(
+                "AppTheme(darkTheme = isSystemInDarkTheme()) { content() }",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("system dark theme scatter" in f for f in findings))
+
+    def test_audit_project_finds_named_color_in_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "Modifier.border(1.dp, Color.Gray)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("named color in ui" in f for f in findings))
+
+    def test_audit_project_ignores_named_color_in_token_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "core" / "designsystem" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "AppColors.kt").write_text(
+                "val gray = Color.Gray",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("named color in ui" in f for f in findings))
+
+    def test_audit_project_ignores_named_color_outside_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "feature" / "home" / "domain" / "src"
+            src_dir.mkdir(parents=True)
+            (src_dir / "HomeUseCase.kt").write_text(
+                "val color = Color.Black",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("named color in ui" in f for f in findings))
+
+    def test_audit_project_finds_hardcoded_divider_color(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeContent.kt").write_text(
+                "HorizontalDivider(color = Color.LightGray)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded divider color" in f for f in findings))
+
+    def test_audit_project_ignores_token_divider(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeContent.kt").write_text(
+                "HorizontalDivider(color = AppTheme.colors.outline)",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded divider color" in f for f in findings))
+
+    def test_audit_project_finds_color_in_composable_outside_ui_path(self) -> None:
+        # No /ui/ segment, but the file declares @Composable — content detection catches it.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "composeApp" / "src" / "commonMain" / "kotlin" / "home"
+            d.mkdir(parents=True)
+            (d / "HomeScreen.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\n"
+                "fun HomeScreen() { Modifier.border(1.dp, Color.Gray) }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("named color in ui" in f for f in findings))
+
+    def test_audit_project_ignores_color_in_non_compose_outside_ui(self) -> None:
+        # No /ui/ path AND no Compose content — stays skipped (avoids flagging plain constants).
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "core" / "util" / "src"
+            d.mkdir(parents=True)
+            (d / "Constants.kt").write_text(
+                "val brandHex = Color.Gray\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("named color in ui" in f for f in findings))
+
+
+class MultiViewModelScreenTests(unittest.TestCase):
+    def test_flags_screen_with_three_or_more_viewmodels(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "studio" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "StudioScreen.kt").write_text(
+                "val ttiVm = koinViewModel<TextToImageViewModel>()\n"
+                "val img2imgVm = koinViewModel<ImageToImageViewModel>()\n"
+                "val videoVm = koinViewModel<VideoViewModel>()\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("multi viewmodel screen" in f for f in findings))
+
+    def test_ignores_screen_with_two_viewmodels(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "val vm = koinViewModel<HomeViewModel>()\n"
+                "val sharedVm = koinViewModel<SharedViewModel>()\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("multi viewmodel screen" in f for f in findings))
+
+    def test_flags_screen_regardless_of_package_path(self) -> None:
+        # The detector no longer requires a /ui/ path — a *Screen.kt with 3+ VMs is
+        # flagged wherever it lives (projects don't all use the /ui/ module convention).
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "composeApp" / "src" / "commonMain" / "kotlin" / "home"
+            src_dir.mkdir(parents=True)
+            (src_dir / "StudioScreen.kt").write_text(
+                "val a = koinViewModel<AViewModel>()\n"
+                "val b = koinViewModel<BViewModel>()\n"
+                "val c = koinViewModel<CViewModel>()\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("multi viewmodel screen" in f for f in findings))
+
+    def test_ignores_screen_in_build_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            src_dir = root / "composeApp" / "build" / "generated"
+            src_dir.mkdir(parents=True)
+            (src_dir / "StudioScreen.kt").write_text(
+                "val a = koinViewModel<AViewModel>()\n"
+                "val b = koinViewModel<BViewModel>()\n"
+                "val c = koinViewModel<CViewModel>()\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("multi viewmodel screen" in f for f in findings))
+
+    def test_flags_non_screen_composable_with_many_vms(self) -> None:
+        # Hardening: a Compose file NOT named *Screen (Dashboard) still counts.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "Dashboard.kt").write_text(
+                "@Composable\n"
+                "fun Dashboard() {\n"
+                "    val a = koinViewModel<AViewModel>()\n"
+                "    val b = koinViewModel<BViewModel>()\n"
+                "    val c = koinViewModel<CViewModel>()\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("multi viewmodel screen" in f for f in findings))
+
+
+class AuditHardeningTests(unittest.TestCase):
+    def test_vm_in_vm_catches_coordinator_without_viewmodel_name(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "StudioCoordinator.kt").write_text(
+                "class StudioCoordinator(\n"
+                "    private val tti: TextToImageViewModel,\n"
+                ") : MviViewModel<S, I, E>(S()) {\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_large_viewmodel_caught_by_content_not_filename(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            body = (
+                "import androidx.lifecycle.viewModelScope\n"
+                "class HomePresenter : BaseViewModel() {\n"
+                + "\n".join(f"    fun op{i}() {{}}" for i in range(200))
+                + "\n}\n"
+            )
+            (d / "HomePresenter.kt").write_text(body, encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel" in f and "HomePresenter" in f for f in findings))
+
+    def test_dto_leak_caught_in_usecase_outside_domain_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "LoginUseCase.kt").write_text(
+                "import com.example.data.dto.UserDto\nclass LoginUseCase {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("dto leak to domain" in f for f in findings))
+
+    def test_data_model_named_file_is_not_treated_as_viewmodel(self) -> None:
+        # Guard against over-broad VM detection: a plain data class must not be flagged.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            body = (
+                "data class UserModel(\n"
+                + "\n".join(f"    val field{i}: String," for i in range(200))
+                + "\n)\n"
+            )
+            (d / "UserModel.kt").write_text(body, encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel" in f and "UserModel" in f for f in findings))
+
+
+class ViewModelInViewModelTests(unittest.TestCase):
+    def test_flags_viewmodel_with_viewmodel_param(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "studio" / "presenter" / "src"
+            d.mkdir(parents=True)
+            (d / "StudioCoordinatorViewModel.kt").write_text(
+                "class StudioCoordinatorViewModel(\n"
+                "    private val tti: TextToImageViewModel,\n"
+                "    private val assembler: StudioStateAssembler,\n"
+                ") : MviViewModel<S, I, E>(S()) {\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_ignores_viewmodel_with_usecase_params(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "home" / "presenter" / "src"
+            d.mkdir(parents=True)
+            (d / "HomeViewModel.kt").write_text(
+                "class HomeViewModel(\n"
+                "    private val generateImage: GenerateImageUseCase,\n"
+                "    private val savedStateHandle: SavedStateHandle,\n"
+                ") : MviViewModel<S, I, E>(S()) {\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_ignores_state_holder_with_scope(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "studio" / "presenter" / "src"
+            d.mkdir(parents=True)
+            # A plain state holder is not a *ViewModel.kt file and not a ViewModel class
+            (d / "TextToImageStateHolder.kt").write_text(
+                "class TextToImageStateHolder(\n"
+                "    private val scope: CoroutineScope,\n"
+                "    private val generateImage: GenerateImageUseCase,\n"
+                ") {\n"
+                "    fun onIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_flags_viewmodel_held_as_injected_property(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "PropCoordinator.kt").write_text(
+                "class PropCoordinator : MviViewModel<S, I, E>(S()) {\n"
+                "    private val editor: EditorViewModel by inject()\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_flags_viewmodel_instantiated_internally(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "InstCoordinator.kt").write_text(
+                "class InstCoordinator : MviViewModel<S, I, E>(S()) {\n"
+                "    private val editor = EditorViewModel()\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_flags_viewmodel_via_di_generic(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "GenericCoordinator.kt").write_text(
+                "class GenericCoordinator : MviViewModel<S, I, E>(S()) {\n"
+                "    private val editor by inject<EditorViewModel>()\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_ignores_coordinator_holding_state_holder(self) -> None:
+        # The valid Option-2 coordinator holds State Holders + use cases — must NOT flag.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "DashboardCoordinatorViewModel.kt").write_text(
+                "class DashboardCoordinatorViewModel(\n"
+                "    private val saveItem: SaveItemUseCase,\n"
+                "    private val assembler: DashboardStateAssembler,\n"
+                ") : MviViewModel<S, I, E>(S()) {\n"
+                "    private val editor = EditorStateHolder(viewModelScope, saveItem)\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
+
+
+class HandwrittenImageVectorTests(unittest.TestCase):
+    def _builder(self, cmds: int, header: bool = False) -> str:
+        lines = "\n".join(f"        lineTo({i}f, {i}f)" for i in range(cmds))
+        head = "// GENERATED by convert_image_to_imagevector — do not edit\n" if header else ""
+        return (f"{head}val V = ImageVector.Builder(name=\"V\").apply {{\n"
+                f"    path {{\n        moveTo(0f, 0f)\n{lines}\n    }}\n}}.build()\n")
+
+    def test_flags_handwritten_builder(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "BadIcon.kt").write_text(self._builder(15), encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("handwritten imagevector" in f for f in findings))
+
+    def test_ignores_generated_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "GenIcon.kt").write_text(self._builder(15, header=True), encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("handwritten imagevector" in f for f in findings))
+
+    def test_ignores_tiny_builder(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "TinyIcon.kt").write_text(self._builder(3), encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("handwritten imagevector" in f for f in findings))
+
+
+class RasterInCommonMainTests(unittest.TestCase):
+    def test_flags_png_in_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "composeApp" / "src" / "commonMain" / "composeResources" / "drawable"
+            d.mkdir(parents=True)
+            (d / "ic_search.png").write_bytes(b"\x89PNG")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("raster asset in commonMain" in f for f in findings))
+
+    def test_photos_dir_exempt(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "composeApp" / "src" / "commonMain" / "composeResources" / "photos"
+            d.mkdir(parents=True)
+            (d / "hero.jpg").write_bytes(b"\xff\xd8")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("raster asset in commonMain" in f for f in findings))
+
+    def test_outside_commonmain_ignored(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "composeApp" / "src" / "androidMain" / "res" / "drawable"
+            d.mkdir(parents=True)
+            (d / "splash.png").write_bytes(b"\x89PNG")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("raster asset in commonMain" in f for f in findings))
+
+
+class EmptyPlatformSourceSetTests(unittest.TestCase):
+    def test_flags_directory_with_no_kt_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "auth" / "domain" / "src" / "androidMain" / "kotlin" / "com" / "example"
+            d.mkdir(parents=True)
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("empty platform source set" in f for f in findings))
+
+    def test_flags_file_with_only_package_declaration(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "auth" / "domain" / "src" / "iosMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "Stub.kt").write_text("package com.example.feature.auth.domain\n\n// nothing here yet\n",
+                                        encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("empty platform source set" in f for f in findings))
+
+    def test_ignores_common_main(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "auth" / "domain" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "LoginUseCase.kt").write_text("package com.example\nclass LoginUseCase\n", encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("empty platform source set" in f for f in findings))
+
+    def test_ignores_populated_platform_sourceset(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "auth" / "data" / "src" / "androidMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "AndroidHttpEngine.kt").write_text(
+                "package com.example\nactual fun httpEngine() = Android.create()\n", encoding="utf-8"
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("empty platform source set" in f for f in findings))
+
+
+class FocusedStateBorderWidthTests(unittest.TestCase):
+    def _write(self, root: Path, filename: str, content: str) -> None:
+        d = root / "src" / "commonMain" / "kotlin" / "ui"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / filename).write_text(content, encoding="utf-8")
+
+    def test_flags_focused_block_animating_border_width(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "ButtonStyles.kt",
+                "internal val buttonInteractionStyle = Style {\n"
+                "    focused { animate { borderWidth(2.dp); borderColor(colors.borderFocus) } }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("focused state animates border width" in f for f in findings))
+
+    def test_flags_selected_block_animating_border_bottom_width(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "ChipStyles.kt",
+                "data object Selected : ChipVariant {\n"
+                "    override val style = Style {\n"
+                "        selected { animate { borderBottomWidth(1.dp); borderColor(colors.borderFocus) } }\n"
+                "    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("focused state animates border width" in f for f in findings))
+
+    def test_ignores_focused_block_animating_color_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "ButtonStyles.kt",
+                "internal val buttonInteractionStyle = Style {\n"
+                "    focused { animate { borderColor(colors.borderFocus) } }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("focused state animates border width" in f for f in findings))
+
+    def test_ignores_border_width_outside_state_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "ButtonStyles.kt",
+                "data object Default : ButtonVariant {\n"
+                "    override val style = Style {\n"
+                "        borderWidth(2.dp)\n"
+                "        borderColor(Color.Transparent)\n"
+                "        focused { animate { borderColor(colors.borderFocus) } }\n"
+                "    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("focused state animates border width" in f for f in findings))
+
+
+class CombinedOneFilePerXTests(unittest.TestCase):
+    _LESSON_FRONTMATTER = (
+        "---\nskill: kotlin-multiplatform-mvi\ndate: 2026-06-20\n"
+        "severity: high\ntype: correction\n---\n\n"
+    )
+
+    def test_flags_combined_lesson_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "docs" / "lessons"
+            d.mkdir(parents=True)
+            (d / "bad.md").write_text(
+                self._LESSON_FRONTMATTER
+                + "## What we followed\nA\n\n## What broke / what we discovered\nB\n\n"
+                + "## What we followed\nC\n\n## What broke / what we discovered\nD\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("combined lesson file" in f for f in findings))
+
+    def test_ignores_single_lesson_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "docs" / "lessons"
+            d.mkdir(parents=True)
+            (d / "good.md").write_text(
+                self._LESSON_FRONTMATTER
+                + "## What we followed\nA\n\n## What broke / what we discovered\nB\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined lesson file" in f for f in findings))
+
+    def test_flags_combined_layout_screen_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "docs" / "layout-system"
+            d.mkdir(parents=True)
+            (d / "bad-screen.md").write_text(
+                "# Inbox\n\n## Components\n\n# Contacts\n\n## Components\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("combined layout screen file" in f for f in findings))
+
+    def test_ignores_single_screen_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "docs" / "layout-system"
+            d.mkdir(parents=True)
+            (d / "good-screen.md").write_text(
+                "# Inbox\n\n## Components\n\n## Variant A\n\nwireframe here\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined layout screen file" in f for f in findings))
+
+    def test_ignores_components_registry_with_multiple_headings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "docs" / "layout-system"
+            d.mkdir(parents=True)
+            (d / "_components.md").write_text(
+                "# Component Registry\n\n# Another Section\n", encoding="utf-8"
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined layout screen file" in f for f in findings))
+
+    def test_flags_combined_sqldelight_table_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "db"
+            d.mkdir(parents=True)
+            (d / "Combined.sq").write_text(
+                "CREATE TABLE user (\n    id INTEGER PRIMARY KEY\n);\n\n"
+                "CREATE TABLE post (\n    id INTEGER PRIMARY KEY\n);\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("combined sqldelight table file" in f for f in findings))
+
+    def test_ignores_single_table_sq_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "db"
+            d.mkdir(parents=True)
+            (d / "User.sq").write_text(
+                "CREATE TABLE user (\n    id INTEGER PRIMARY KEY\n);\n", encoding="utf-8"
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined sqldelight table file" in f for f in findings))
+
+
+class RawHttpBypassTests(unittest.TestCase):
+    _NETWORK_RESULT_KT = (
+        "sealed interface NetworkResult<T>\nsuspend fun safeRequest() {}\n"
+    )
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_raw_http_when_established_client_exists(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/commonMain/kotlin/NetworkResult.kt",
+                self._NETWORK_RESULT_KT,
+            )
+            self._write(
+                root, "feature/newserver/src/commonMain/kotlin/RawClient.kt",
+                "import java.net.HttpURLConnection\nimport java.net.URL\n"
+                "fun fetchFromNewServer() {\n"
+                "    val conn = URL(\"http://newserver\").openConnection() as HttpURLConnection\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("raw http bypasses established ktor client" in f for f in findings))
+
+    def test_ignores_raw_http_with_no_established_client(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/newserver/src/commonMain/kotlin/RawClient.kt",
+                "import java.net.HttpURLConnection\nfun fetch() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("raw http bypasses established ktor client" in f for f in findings))
+
+    def test_ignores_correct_reuse_of_established_client(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/commonMain/kotlin/NetworkResult.kt",
+                self._NETWORK_RESULT_KT,
+            )
+            self._write(
+                root, "feature/newserver/src/commonMain/kotlin/GoodClient.kt",
+                "suspend fun fetchFromNewServer(): NetworkResult<String> = safeRequest()\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("raw http bypasses established ktor client" in f for f in findings))
+
+
+class WhatCommentInControlFlowTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_what_comment_before_loop(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "src/commonMain/kotlin/Sample.kt",
+                "fun positive(items: List<Int>) {\n"
+                "    // Loop through items and print each one\n"
+                "    for (item in items) {\n"
+                "        println(item)\n"
+                "    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("what-comment in control flow" in f for f in findings))
+
+    def test_flags_what_comment_on_same_line_as_conditional(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "src/commonMain/kotlin/Sample.kt",
+                "fun sameLine(items: List<Int>) {\n"
+                "    if (items.isEmpty()) return // Check if items is empty\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("what-comment in control flow" in f for f in findings))
+
+    def test_ignores_why_comment_with_workaround_marker(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "src/commonMain/kotlin/Sample.kt",
+                "fun negative(items: List<Int>) {\n"
+                "    for (item in items) {\n"
+                "        // Skip zero-cost items (workaround for issue #42 pricing div-by-zero)\n"
+                "        if (item == 0) continue\n"
+                "    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("what-comment in control flow" in f for f in findings))
+
+    def test_ignores_comment_not_attached_to_control_flow(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "src/commonMain/kotlin/Sample.kt",
+                "fun helper() {\n"
+                "    // Build the cache key from user id and locale\n"
+                "    val key = \"$userId:$locale\"\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("what-comment in control flow" in f for f in findings))
+
+
+class ExtensibleAbstractClassInCommonTests(unittest.TestCase):
+    """A real, recurring bug pattern: an agent creates a public abstract class in
+    commonMain (e.g. a 'GenericGameApplication') with only abstract members, forcing
+    every consumer to subclass it — importing an Android/Spring-style inheritance
+    instinct into a context where interface + injection preserves the same flexibility
+    without dictating the consumer's app structure. Not scoped to any domain name; the
+    smell is the shape (abstract class, only abstract members, in commonMain).
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_pure_template_abstract_class_in_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/game/src/commonMain/kotlin/GenericGameApplication.kt",
+                "abstract class GenericGameApplication {\n"
+                "    abstract fun onInitialize()\n"
+                "    abstract fun onConfigure(): AppConfig\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("extensible abstract class in commonMain" in f for f in findings))
+
+    def test_ignores_abstract_class_with_a_concrete_member(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/data/src/commonMain/kotlin/BaseRepository.kt",
+                "abstract class BaseRepository {\n"
+                "    abstract fun fetch(): String\n"
+                "    fun cachedFetch(): String {\n"
+                "        return fetch()\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("extensible abstract class in commonMain" in f for f in findings))
+
+    def test_ignores_abstract_class_with_no_abstract_members(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/utils/src/commonMain/kotlin/Utils.kt",
+                "abstract class Utils {\n"
+                "    fun helper() { println(1) }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("extensible abstract class in commonMain" in f for f in findings))
+
+    def test_ignores_same_shape_outside_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "app/androidApp/src/androidMain/kotlin/BaseActivity.kt",
+                "abstract class BaseActivity {\n"
+                "    abstract fun onCreateContent()\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("extensible abstract class in commonMain" in f for f in findings))
+
+
+class ModuleLayerViolationTests(unittest.TestCase):
+    """A module can declare a wrong-direction Gradle dependency (e.g. :ui directly on
+    :data, skipping :presenter) without ever forming a literal cycle — Gradle happily
+    builds it, and the existing Detekt import-boundary rules only check file-level
+    imports, which can miss a violation declared in build.gradle.kts before any file
+    uses it. This detector parses the real Gradle module graph directly.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_ui_depending_directly_on_data(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/build.gradle.kts",
+                "dependencies {\n    implementation(projects.feature.auth.data)\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("module layer-order violation" in f for f in findings))
+
+    def test_flags_data_depending_on_domain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/data/build.gradle.kts",
+                "dependencies {\n    implementation(projects.feature.auth.domain)\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("module layer-order violation" in f for f in findings))
+
+    def test_flags_cross_feature_module_dependency(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/domain/build.gradle.kts",
+                "dependencies {\n    implementation(projects.feature.payments.api)\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("cross-feature module dependency" in f for f in findings))
+
+    def test_ignores_correctly_layered_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            layers = {
+                "model": "",
+                "api": "implementation(projects.feature.auth.model)",
+                "domain": "implementation(projects.feature.auth.api)",
+                "data": "implementation(projects.feature.auth.api)\n    implementation(projects.core.network)",
+                "presenter": "implementation(projects.feature.auth.domain)",
+                "ui": "implementation(projects.feature.auth.presenter)",
+            }
+            for layer, dep in layers.items():
+                self._write(
+                    root, f"feature/auth/{layer}/build.gradle.kts",
+                    f"dependencies {{\n    {dep}\n}}\n",
+                )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("module layer-order violation" in f for f in findings))
+            self.assertFalse(any("cross-feature module dependency" in f for f in findings))
+
+    def test_ignores_core_module_dependency(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/data/build.gradle.kts",
+                "dependencies {\n    implementation(projects.feature.auth.api)\n"
+                "    implementation(projects.core.network)\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertEqual(
+                [f for f in findings if "layer-order" in f or "cross-feature module" in f], []
+            )
+
+
+class ToggleLayoutStabilityTests(unittest.TestCase):
+    def _write(self, root: Path, filename: str, content: str) -> None:
+        d = root / "src" / "commonMain" / "kotlin" / "ui"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / filename).write_text(content, encoding="utf-8")
+
+    def test_flags_icon_swap_between_chevron_pair(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Trigger.kt",
+                "@Composable\nfun Trigger(isExpanded: Boolean) {\n"
+                "    if (isExpanded) {\n"
+                "        Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)\n"
+                "    } else {\n"
+                "        Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null)\n"
+                "    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("toggle icon swap instead of rotation" in f for f in findings))
+
+    def test_ignores_icon_swap_when_graphics_layer_rotation_present(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Trigger.kt",
+                "@Composable\nfun Trigger(isExpanded: Boolean) {\n"
+                "    val rotation by animateFloatAsState(if (isExpanded) 180f else 0f)\n"
+                "    Icon(\n"
+                "        imageVector = Icons.Default.KeyboardArrowDown,\n"
+                "        contentDescription = null,\n"
+                "        modifier = Modifier.graphicsLayer { rotationZ = rotation },\n"
+                "    )\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("toggle icon swap instead of rotation" in f for f in findings))
+
+    def test_ignores_single_icon_with_no_pair(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Trigger.kt",
+                "@Composable\nfun Trigger() {\n"
+                "    Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null)\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("toggle icon swap instead of rotation" in f for f in findings))
+
+    def test_flags_bare_conditional_around_composable_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Collapsible.kt",
+                "@Composable\nfun Collapsible(isExpanded: Boolean) {\n"
+                "    Column {\n        TriggerRow()\n"
+                "        if (isExpanded) {\n            Text(\"content\")\n        }\n    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("bare conditional collapse" in f for f in findings))
+
+    def test_ignores_animated_visibility_wrapped_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Collapsible.kt",
+                "@Composable\nfun Collapsible(isExpanded: Boolean) {\n"
+                "    Column {\n        TriggerRow()\n"
+                "        AnimatedVisibility(visible = isExpanded) {\n            Text(\"content\")\n        }\n    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("bare conditional collapse" in f for f in findings))
+
+    def test_ignores_bare_conditional_without_composable_call(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                "Toggle.kt",
+                "@Composable\nfun Toggle(isExpanded: Boolean) {\n"
+                "    if (isExpanded) {\n        println(\"expanded\")\n    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("bare conditional collapse" in f for f in findings))
+
+
+class DesignSystemPrefixMismatchTests(unittest.TestCase):
+    def _write_docs(self, root: Path, prefix: str) -> None:
+        d = root / "docs"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "design-system.md").write_text(
+            f"| Field | Value |\n|---|---|\n| Component prefix | {prefix} |\n",
+            encoding="utf-8",
+        )
+
+    def _write_component(self, root: Path, filename: str, fn_name: str) -> None:
+        d = root / "core" / "designsystem" / "components"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / filename).write_text(
+            f"@Composable\nfun {fn_name}(onClick: () -> Unit) {{}}\n", encoding="utf-8"
+        )
+
+    def test_flags_app_named_component_when_prefix_resolved_differently(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_docs(root, "GuildBase")
+            self._write_component(root, "AppButton.kt", "AppButton")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("design system prefix mismatch" in f for f in findings))
+
+    def test_ignores_consistent_resolved_prefix(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_docs(root, "GuildBase")
+            self._write_component(root, "GuildBaseButton.kt", "GuildBaseButton")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("design system prefix mismatch" in f for f in findings))
+
+    def test_ignores_when_prefix_genuinely_app(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_docs(root, "App")
+            self._write_component(root, "AppButton.kt", "AppButton")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("design system prefix mismatch" in f for f in findings))
+
+    def test_ignores_when_no_design_system_doc(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_component(root, "AppButton.kt", "AppButton")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("design system prefix mismatch" in f for f in findings))
+
+    def test_ignores_unfilled_template_placeholder(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_docs(root, "COMPONENT_PREFIX")
+            self._write_component(root, "AppButton.kt", "AppButton")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("design system prefix mismatch" in f for f in findings))
+
+
+class StyleApiComplianceTests(unittest.TestCase):
+    def _write(self, root: Path, name: str, content: str) -> None:
+        d = root / "app" / "src" / "commonMain" / "kotlin"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / name).write_text(content, encoding="utf-8")
+
+    def test_flags_style_default_with_body(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Bad.kt",
+                "@Composable\nfun BadButton(style: Style = Style { background(Color.Red) }) {}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("style default with body" in f for f in findings))
+
+    def test_ignores_empty_style_default(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Good.kt", "@Composable\nfun GoodButton(style: Style = Style) {}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("style default with body" in f for f in findings))
+
+    def test_flags_style_state_wrong_enabled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Bad.kt",
+                "fun x() {\n    val styleState = remember { MutableStyleState(i) }\n    styleState.enabled = true\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("style state wrong enabled property" in f for f in findings))
+
+    def test_ignores_correct_is_enabled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Good.kt",
+                "fun x() {\n    val styleState = rememberUpdatedStyleState(i) { it.isEnabled = true }\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("style state wrong enabled property" in f for f in findings))
+
+    def test_flags_style_param_on_screen(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Bad.kt", "@Composable\nfun HomeScreen(style: Style = Style) {}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("style param on screen composable" in f for f in findings))
+
+    def test_ignores_style_param_on_component(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Good.kt", "@Composable\nfun AppButton(style: Style = Style) {}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("style param on screen composable" in f for f in findings))
+
+    def test_flags_stale_compositionlocal_in_style_function(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Bad.kt",
+                "@Composable\n"
+                "fun containerStyle(): Style {\n"
+                "    val background = MaterialTheme.colorScheme.background\n"
+                "    return Style {\n"
+                "        background(background)\n"
+                "    }\n"
+                "}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("stale compositionlocal in style function" in f for f in findings))
+
+    def test_ignores_style_scope_extension_pattern(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Good.kt",
+                "val containerStyle = Style {\n    background(colors.background)\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("stale compositionlocal in style function" in f for f in findings))
+
+    def test_flags_missing_indication_null(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Bad.kt",
+                "val s = Style {\n    pressed { animate { background(Color.Red) } }\n}\n"
+                "fun x() {\n    Modifier.clickable(onClick = {})\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("missing indication null with style state" in f for f in findings))
+
+    def test_ignores_when_indication_null_present(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "Good.kt",
+                "val s = Style {\n    pressed { animate { background(Color.Red) } }\n}\n"
+                "fun x() {\n    Modifier.clickable(onClick = {}, indication = null)\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("missing indication null with style state" in f for f in findings))
+
+
+class HardcodedVersionCodeTests(unittest.TestCase):
+    def test_flags_literal_version_code(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "androidApp"
+            d.mkdir(parents=True)
+            (d / "build.gradle.kts").write_text(
+                'plugins { id("com.android.application") }\n'
+                "android {\n"
+                "    defaultConfig {\n"
+                '        applicationId = "com.example.app"\n'
+                "        versionCode = 1\n"
+                '        versionName = "1.19.1"\n'
+                "    }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded android versioncode" in f for f in findings))
+
+    def test_ignores_derived_formula(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "androidApp"
+            d.mkdir(parents=True)
+            (d / "build.gradle.kts").write_text(
+                'plugins { id("com.android.application") }\n'
+                "android {\n"
+                "    defaultConfig {\n"
+                '        applicationId = "com.example.app"\n'
+                "        versionCode = major * 1_000_000 + minor * 1_000 + patch\n"
+                "    }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded android versioncode" in f for f in findings))
+
+    def test_ignores_variable_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "androidApp"
+            d.mkdir(parents=True)
+            (d / "build.gradle.kts").write_text(
+                'plugins { id("com.android.application") }\n'
+                "val computedVersionCode = 1_000_002\n"
+                "android {\n"
+                "    defaultConfig {\n"
+                '        applicationId = "com.example.app"\n'
+                "        versionCode = computedVersionCode\n"
+                "    }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded android versioncode" in f for f in findings))
+
+    def test_ignores_non_android_app_module(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "someModule"
+            d.mkdir(parents=True)
+            (d / "build.gradle.kts").write_text("val versionCode = 1\n", encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded android versioncode" in f for f in findings))
+
+
+class HasAndCountFilesAlwaysTrueRegressionTests(unittest.TestCase):
+    """A severe pre-existing bug found during a full self-audit: _has() tested
+    `any(root.rglob(g) for g in globs)` — each item any() saw was a whole generator
+    object (from the nested generator expression), and generator objects are always
+    truthy regardless of whether they yield anything. _has() therefore returned True
+    for every project regardless of whether the file actually existed, silently
+    disabling _detect_detekt's HIGH-priority "no Detekt gates" adoption-plan trigger
+    and the version-catalog/tests detectors for every project ever audited. No prior
+    test caught this because none exercised the genuinely-missing case.
+    """
+
+    def test_has_returns_false_when_nothing_matches(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "app").mkdir()
+            (root / "app" / "App.kt").write_text("fun main() {}", encoding="utf-8")
+            self.assertFalse(audit_scripts._has(root, "detekt.yml", "detekt.yaml"))
+
+    def test_has_returns_true_when_something_matches(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "detekt.yml").write_text("", encoding="utf-8")
+            self.assertTrue(audit_scripts._has(root, "detekt.yml", "detekt.yaml"))
+
+    def test_count_files_returns_zero_when_nothing_matches(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "app").mkdir()
+            (root / "app" / "App.kt").write_text("fun main() {}", encoding="utf-8")
+            self.assertEqual(audit_scripts._count_files(root, "*Test.kt", "*Spec.kt"), 0)
+
+    def test_detect_detekt_reports_missing_for_a_clean_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "app").mkdir()
+            (root / "app" / "App.kt").write_text("fun main() {}", encoding="utf-8")
+            self.assertEqual(audit_scripts._detect_detekt(root), "missing")
+
+    def test_detect_version_catalog_reports_missing_for_a_clean_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "app").mkdir()
+            (root / "app" / "App.kt").write_text("fun main() {}", encoding="utf-8")
+            self.assertEqual(audit_scripts._detect_version_catalog(root), "missing")
+
+    def test_detect_tests_reports_none_for_a_clean_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "app").mkdir()
+            (root / "app" / "App.kt").write_text("fun main() {}", encoding="utf-8")
+            self.assertEqual(audit_scripts._detect_tests(root), "none")
+
+    def test_has_ignores_a_deployed_skill_template_libs_versions_toml(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / ".claude" / "skills" / "kotlin-multiplatform-feature-scaffold" / "templates" / "gradle"
+            d.mkdir(parents=True)
+            (d / "libs.versions.toml").write_text('[versions]\nkotlin = "2.4.0"\n', encoding="utf-8")
+            self.assertEqual(audit_scripts._detect_version_catalog(root), "missing")
+
+    def test_count_files_ignores_a_deployed_skill_test_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = (
+                root / ".claude" / "skills" / "kotlin-multiplatform-design-system"
+                / "detekt-rules" / "src" / "test" / "kotlin"
+            )
+            d.mkdir(parents=True)
+            (d / "ComponentRegistryRuleTest.kt").write_text("class ComponentRegistryRuleTest", encoding="utf-8")
+            self.assertEqual(audit_scripts._detect_tests(root), "none")
+
+
+class DeployedSkillsBundleExclusionTests(unittest.TestCase):
+    """A real bug: a consumer project with skills deployed to .claude/skills/ got a
+    'hardcoded android versioncode' false positive from kotlin-multiplatform-feature-scaffold's
+    own templates/androidApp/build.gradle.kts (versionCode = 1 is a legitimate scaffold
+    placeholder, not the user's real app config). _EXCLUDED_DIRS now excludes deployed
+    agent skills bundle directories entirely.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_ignores_scaffold_template_under_claude_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                ".claude/skills/kotlin-multiplatform-feature-scaffold/templates/androidApp/build.gradle.kts",
+                'plugins { id("com.android.application") }\n'
+                "android {\n    defaultConfig {\n"
+                '        applicationId = "com.example.app"\n'
+                "        versionCode = 1\n    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded android versioncode" in f for f in findings))
+
+    def test_still_flags_real_project_code_alongside_deployed_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                ".claude/skills/kotlin-multiplatform-feature-scaffold/templates/androidApp/build.gradle.kts",
+                "android {\n    defaultConfig {\n        versionCode = 1\n    }\n}\n",
+            )
+            self._write(
+                root,
+                "app/shared/src/commonMain/kotlin/App.kt",
+                "val Ink = androidx.compose.ui.graphics.Color(0xFFE9EDF7)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded android versioncode" in f for f in findings))
+            self.assertTrue(any("magic color literal" in f for f in findings))
+
+    def test_ignores_content_under_codex_and_cursor_and_continue_skills(self) -> None:
+        for agent_dir in (".codex", ".cursor", ".continue"):
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                self._write(
+                    root,
+                    f"{agent_dir}/skills/kotlin-multiplatform-feature-scaffold/templates/androidApp/build.gradle.kts",
+                    "android {\n    defaultConfig {\n        versionCode = 1\n    }\n}\n",
+                )
+                findings = audit_scripts.audit_project(root)
+                self.assertFalse(
+                    any("hardcoded android versioncode" in f for f in findings),
+                    f"false positive under {agent_dir}/skills/",
+                )
+
+    def test_mvi_placement_ignores_deployed_skill_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                ".claude/skills/kotlin-multiplatform-mvi/templates/MviViewModel.kt",
+                "abstract class MviViewModel<State, Intent, Effect>",
+            )
+            findings = audit_scripts._detect_mvi_placement(root)
+            self.assertEqual(findings, [])
+
+    def test_design_system_wiring_ignores_deployed_skill_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root,
+                ".claude/skills/kotlin-multiplatform-design-system/templates/AppTheme.kt",
+                "@Composable\nfun AppTheme(content: @Composable () -> Unit) {\n"
+                "    MaterialTheme(content = content)\n}\n",
+            )
+            findings = audit_scripts._detect_design_system_wiring(root)
+            self.assertEqual(findings, [])
+
+
+class LayoutGuardrailTests(unittest.TestCase):
+    def test_flags_arbitrary_weight(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "S.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable fun S() { Box(Modifier.weight(0.37f)) }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("raw weight literal" in f for f in findings))
+
+    def test_ignores_simple_fractions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "S.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable fun S() { Row { Box(Modifier.weight(1f)); Box(Modifier.weight(1.5f)) } }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("raw weight literal" in f for f in findings))
+
+    def test_flags_partial_breakpoint_coverage(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "P.kt").write_text(
+                "fun p(w: WindowSizeClass) { when (w.widthSizeClass) { WindowWidthSizeClass.Compact -> a() } }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("breakpoint branch missing" in f for f in findings))
+
+    def test_full_coverage_and_else_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "F.kt").write_text(
+                "fun f(w: WindowSizeClass) { when (w.widthSizeClass) {\n"
+                "    WindowWidthSizeClass.Compact -> a()\n"
+                "    WindowWidthSizeClass.Medium -> b()\n"
+                "    WindowWidthSizeClass.Expanded -> c()\n"
+                "} }\n",
+                encoding="utf-8",
+            )
+            (d / "E.kt").write_text(
+                "fun e(w: WindowSizeClass) { when (w.widthSizeClass) {\n"
+                "    WindowWidthSizeClass.Compact -> a()\n"
+                "    else -> b()\n"
+                "} }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("breakpoint branch missing" in f for f in findings))
+
+
+class FixedWidthOverflowTests(unittest.TestCase):
+    def test_flags_large_fixed_width(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "S.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun S() { Box(Modifier.width(400.dp)) }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("fixed width overflow" in f for f in findings))
+
+    def test_flags_required_width(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "S.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun S() { Card(Modifier.requiredWidth(300.dp)) }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("fixed width overflow" in f for f in findings))
+
+    def test_ignores_small_and_responsive_widths(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "S.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun S() { Box(Modifier.width(48.dp).fillMaxWidth()) }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("fixed width overflow" in f for f in findings))
+
+
+class RawComponentBypassTests(unittest.TestCase):
+    def _ds_marker(self, d: Path) -> None:
+        # A file that establishes the project HAS a design system.
+        (d / "AppButton.kt").write_text(
+            "import androidx.compose.runtime.Composable\n"
+            "@Composable\nfun AppButton(onClick: () -> Unit) { BasicText(\"x\") }\n",
+            encoding="utf-8",
+        )
+
+    def test_flags_raw_components_when_design_system_present(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            self._ds_marker(d)
+            (d / "HomeScreen.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\n"
+                "fun HomeScreen() {\n"
+                "    Scaffold {\n"
+                "        Button(onClick = {}) { Text(\"Save\") }\n"
+                "        Card { Text(\"hi\") }\n"
+                "    }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("raw component bypass" in f for f in findings))
+
+    def test_ignores_app_wrapper_definition_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            self._ds_marker(d)
+            # AppCard.kt defines a wrapper and legitimately uses a raw Card internally
+            (d / "AppCard.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun AppCard(content: @Composable () -> Unit) { Card { content() } }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("AppCard.kt" in f and "raw component bypass" in f for f in findings))
+
+    def test_ignores_screen_using_app_components(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            self._ds_marker(d)
+            (d / "GoodScreen.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun GoodScreen() { AppScaffold { AppButton(onClick = {}) {} } }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("GoodScreen.kt" in f and "raw component bypass" in f for f in findings))
+
+    def test_ignores_project_without_design_system(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            # No App* / AppTheme anywhere — raw Material is the project's choice.
+            (d / "HomeScreen.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun HomeScreen() { Scaffold { Button(onClick = {}) {} } }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("raw component bypass" in f for f in findings))
+
+
+class FindingEvidenceTests(unittest.TestCase):
+    def test_findings_include_file_line_and_snippet(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "HomeScreen.kt").write_text(
+                "@Composable\n"
+                "fun HomeScreen() {\n"
+                "    HorizontalDivider(color = Color.Gray)\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            divider = next(f for f in findings if "hardcoded divider color" in f)
+            # file:line anchor present
+            self.assertIn("HomeScreen.kt:3", divider)
+            # matched source line included as evidence
+            self.assertIn("HorizontalDivider(color = Color.Gray)", divider)
+            # severity tag preserved for release-gate parsing
+            self.assertTrue(any("[HIGH]" in f or "[MEDIUM]" in f or ":" in f for f in findings))
+
+
+class RepositoryLeakTests(unittest.TestCase):
+    def test_flags_interface_returning_dto(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "user" / "api" / "src"
+            d.mkdir(parents=True)
+            (d / "UserRepository.kt").write_text(
+                "interface UserRepository {\n"
+                "    suspend fun getUser(id: String): UserDto\n"
+                "    fun observeUsers(): Flow<List<UserEntity>>\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("repository leaks data type" in f for f in findings))
+
+    def test_ignores_interface_with_domain_types(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "product" / "api" / "src"
+            d.mkdir(parents=True)
+            (d / "ProductRepository.kt").write_text(
+                "interface ProductRepository {\n"
+                "    suspend fun getProduct(id: String): Product\n"
+                "    fun observeProducts(): Flow<List<Product>>\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("repository leaks data type" in f for f in findings))
+
+    def test_ignores_repository_impl_using_dto_internally(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "product" / "data" / "src"
+            d.mkdir(parents=True)
+            (d / "ProductRepositoryImpl.kt").write_text(
+                "class ProductRepositoryImpl(private val api: ProductApi) : ProductRepository {\n"
+                "    override suspend fun getProduct(id: String): Product {\n"
+                "        val dto: ProductDto = api.fetch(id)\n"
+                "        return dto.toDomain()\n"
+                "    }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("repository leaks data type" in f for f in findings))
+
+    def test_flags_entity_import_in_domain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "user" / "domain" / "src"
+            d.mkdir(parents=True)
+            (d / "GetUser.kt").write_text(
+                "import com.example.data.entity.UserEntity\nclass GetUser {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("dto leak to domain" in f for f in findings))
+
+
+class StringNavigationTests(unittest.TestCase):
+    def test_flags_string_routes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "AppNavHost.kt").write_text(
+                'NavHost(navController, startDestination = "home") {\n'
+                '    composable("home") { HomeScreen() }\n'
+                '    composable(route = "detail/{id}") { DetailScreen() }\n'
+                '}\n'
+                'fun go() { navController.navigate("home") }\n',
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("string navigation" in f for f in findings))
+
+    def test_ignores_type_safe_routes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "AppNavHost.kt").write_text(
+                'NavHost(navController, startDestination = HomeRoute) {\n'
+                '    composable<HomeRoute> { HomeScreen() }\n'
+                '    composable<DetailRoute> { DetailScreen() }\n'
+                '}\n'
+                'fun go() { navController.navigate(HomeRoute) }\n',
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("string navigation" in f for f in findings))
+
+    def test_ignores_deep_link_uri_navigation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "DeepLink.kt").write_text(
+                'fun open() { navController.navigate("myapp://detail/42") }\n',
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("string navigation" in f for f in findings))
+
+
+class ViewModelAsComposableParamTests(unittest.TestCase):
+    def test_flags_composable_with_required_viewmodel_param(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "home" / "ui" / "src"
+            d.mkdir(parents=True)
+            (d / "HomeScreen.kt").write_text(
+                "@Composable\n"
+                "fun HomeScreen(studioVm: StudioViewModel, healthVm: HealthViewModel) {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel as composable param" in f for f in findings))
+
+    def test_ignores_defaulted_koinviewmodel_param(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "home" / "ui" / "src"
+            d.mkdir(parents=True)
+            (d / "HomeScreen.kt").write_text(
+                "@Composable\n"
+                "fun HomeScreen(vm: HomeViewModel = koinViewModel()) {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel as composable param" in f for f in findings))
+
+    def test_ignores_content_composable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "feature" / "home" / "ui" / "src"
+            d.mkdir(parents=True)
+            (d / "HomeContent.kt").write_text(
+                "@Composable\n"
+                "fun HomeContent(state: FooState, onIntent: (FooIntent) -> Unit) {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel as composable param" in f for f in findings))
+
+    def test_flags_outside_ui_path(self) -> None:
+        # No /ui/ segment — common when a project does not use the layered module convention.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "composeApp" / "src" / "commonMain" / "kotlin" / "home"
+            d.mkdir(parents=True)
+            (d / "HomeScreen.kt").write_text(
+                "@Composable\n"
+                "fun HomeScreen(studioVm: StudioViewModel) {}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel as composable param" in f for f in findings))
+
+
+class GodComposableTests(unittest.TestCase):
+    def test_flags_screen_with_many_launched_effects(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "studio" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            body = "\n".join(f"LaunchedEffect(key{i}) {{ doThing() }}" for i in range(6))
+            (ui_dir / "HomeScreen.kt").write_text(body, encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("god composable" in f for f in findings))
+
+    def test_flags_screen_with_many_effect_collects(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "studio" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            body = "\n".join(f"vm{i}.effect.collect {{ relay() }}" for i in range(3))
+            (ui_dir / "HomeScreen.kt").write_text(body, encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("god composable" in f for f in findings))
+
+    def test_high_severity_for_extreme_orchestration(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "studio" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            body = "\n".join(f"LaunchedEffect(key{i}) {{ x() }}" for i in range(9))
+            (ui_dir / "HomeScreen.kt").write_text(body, encoding="utf-8")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("god composable [HIGH]" in f for f in findings))
+
+    def test_ignores_screen_with_one_launched_effect(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "LaunchedEffect(vm) { vm.effect.collect { } }",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("god composable" in f for f in findings))
+
+
+class RedundantTitleTests(unittest.TestCase):
+    def test_flags_screen_with_topbar_and_heading_text(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "fun HomeScreen() {\n"
+                "  AppScaffold(topBar = { AppTopAppBar(title = \"Home\") }) {\n"
+                "    AppText(\"Home\", style = AppTextStyle.HeadlineLarge)\n"
+                "  }\n"
+                "}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("redundant screen title" in f for f in findings))
+
+    def test_ignores_screen_with_only_topbar(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "fun HomeScreen() {\n"
+                "  AppScaffold(topBar = { AppTopAppBar(title = \"Home\") }) {\n"
+                "    AppText(\"Welcome back\", style = AppTextStyle.BodyLarge)\n"
+                "  }\n"
+                "}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("redundant screen title" in f for f in findings))
+
+    def test_ignores_non_screen_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeViewModel.kt").write_text(
+                "fun HomeViewModel() {\n"
+                "  AppScaffold(topBar = { AppTopAppBar(title = \"Home\") }) {\n"
+                "    AppText(\"Home\", style = AppTextStyle.H1)\n"
+                "  }\n"
+                "}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("redundant screen title" in f for f in findings))
+
+
+class AdaptiveCoverageTests(unittest.TestCase):
+    def test_flags_screen_missing_windowsizeclass_when_project_uses_it(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            # One file that uses WindowSizeClass (triggers the check)
+            (ui_dir / "AppRoot.kt").write_text(
+                "val wsc: WindowSizeClass = calculateWindowSizeClass()",
+                encoding="utf-8",
+            )
+            # Screen that doesn't receive it
+            (ui_dir / "HomeScreen.kt").write_text(
+                "fun HomeScreen(onBack: () -> Unit) {}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("adaptive coverage" in f for f in findings))
+
+    def test_ignores_project_without_windowsizeclass(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "HomeScreen.kt").write_text(
+                "fun HomeScreen(onBack: () -> Unit) {}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("adaptive coverage" in f for f in findings))
+
+    def test_ignores_screen_that_has_windowsizeclass_param(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ui_dir = root / "feature" / "home" / "ui" / "src"
+            ui_dir.mkdir(parents=True)
+            (ui_dir / "AppRoot.kt").write_text(
+                "val wsc: WindowSizeClass = calculateWindowSizeClass()",
+                encoding="utf-8",
+            )
+            (ui_dir / "HomeScreen.kt").write_text(
+                "fun HomeScreen(windowSizeClass: WindowSizeClass, onBack: () -> Unit) {}",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("adaptive coverage" in f for f in findings))
+
+
+class HarvestProjectTests(unittest.TestCase):
+    """Tests for --harvest mode and _detect_positive_patterns."""
+
+    def test_harvest_returns_findings_and_lessons_keys(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result = audit_scripts.harvest_project(root)
+            self.assertIn("project", result)
+            self.assertIn("findings", result)
+            self.assertIn("lessons", result)
+            self.assertIsInstance(result["findings"], list)
+            self.assertIsInstance(result["lessons"], list)
+
+    def test_harvest_detects_local_app_dark_theme_pattern(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "AppTheme.kt").write_text(
+                "val LocalAppDarkTheme = compositionLocalOf<Boolean?> { null }\n"
+                "fun isDark(): Boolean = LocalAppDarkTheme.current ?: isSystemInDarkTheme()\n",
+                encoding="utf-8",
+            )
+            lessons = audit_scripts._detect_positive_patterns(root)
+            patterns = [l["pattern"] for l in lessons]
+            self.assertTrue(
+                any("LocalAppDarkTheme" in p for p in patterns),
+                f"Expected LocalAppDarkTheme lesson, got: {patterns}",
+            )
+
+    def test_harvest_detects_undo_window_pattern(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "FooViewModel.kt").write_text(
+                "private const val UNDO_WINDOW_MS = 4500L\n"
+                "private var undoJob: Job? = null\n",
+                encoding="utf-8",
+            )
+            lessons = audit_scripts._detect_positive_patterns(root)
+            patterns = [l["pattern"] for l in lessons]
+            self.assertTrue(
+                any("undo" in p.lower() for p in patterns),
+                f"Expected undo-window lesson, got: {patterns}",
+            )
+
+    def test_harvest_detects_build_logic_pattern(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            build_logic = root / "build-logic" / "convention"
+            build_logic.mkdir(parents=True)
+            (build_logic / "build.gradle.kts").write_text("plugins { `kotlin-dsl` }", encoding="utf-8")
+            lessons = audit_scripts._detect_positive_patterns(root)
+            patterns = [l["pattern"] for l in lessons]
+            self.assertTrue(
+                any("build-logic" in p.lower() for p in patterns),
+                f"Expected build-logic lesson, got: {patterns}",
+            )
+
+    def test_harvest_cli_outputs_json(self) -> None:
+        import subprocess, json as _json
+        with tempfile.TemporaryDirectory() as tmp:
+            audit_script = REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_project.py"
+            result = subprocess.run(
+                ["python3", str(audit_script), "--harvest", tmp],
+                capture_output=True,
+                text=True,
+            )
+            self.assertIn(result.returncode, (0, 1), "harvest should exit 0 or 1 only")
+            parsed = _json.loads(result.stdout)
+            self.assertIn("findings", parsed)
+            self.assertIn("lessons", parsed)
+
+
+class HardcodedBaseUrlTests(unittest.TestCase):
+    """Library-first requires configurability — a base URL baked in as a string
+    literal builds and runs fine today, then becomes tech debt the moment a second
+    environment or a library consumer needs a different endpoint.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_hardcoded_https_url_in_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/commonMain/kotlin/ApiConfig.kt",
+                'val BASE_URL = "https://api.example.com/v1"\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded base URL" in f for f in findings))
+
+    def test_ignores_url_routed_through_buildkonfig(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/commonMain/kotlin/ApiConfig.kt",
+                'val BASE_URL = BuildKonfig.API_BASE_URL\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded base URL" in f for f in findings))
+
+    def test_ignores_hardcoded_url_outside_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/androidMain/kotlin/ApiConfig.kt",
+                'val BASE_URL = "https://api.example.com/v1"\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded base URL" in f for f in findings))
+
+    def test_ignores_hardcoded_url_in_test_source(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/src/commonTest/kotlin/ApiConfigTest.kt",
+                'val BASE_URL = "https://api.example.com/v1"\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded base URL" in f for f in findings))
+
+
+if __name__ == "__main__":
+    unittest.main()
