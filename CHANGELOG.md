@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.74.0] — 2026-07-13
+
+### Added
+
+- feat(shadcn-compose): add full component keyword matrix
+
+---
+
 ## [v1.73.1] — 2026-07-13
 
 ### Fixed
