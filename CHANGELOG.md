@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.75.1] — 2026-07-13
+
+### Fixed
+
+- fix(shadcn-compose): recheck README/Maven Central, add 2 new components
+
+---
+
 ## [v1.75.0] — 2026-07-13
 
 ### Added

@@ -1,5 +1,5 @@
 {
-  "version": "1.75.0",
+  "version": "1.75.1",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -2782,6 +2782,7 @@
         "ShadcnField",
         "ShadcnGroupCorners",
         "ShadcnHoverCard",
+        "ShadcnIcon",
         "ShadcnInputGroup",
         "ShadcnInputOTP",
         "ShadcnItem",
@@ -2806,6 +2807,7 @@
         "ShadcnSkeleton",
         "ShadcnSlider",
         "ShadcnSpinner",
+        "ShadcnStepper",
         "ShadcnSwitch",
         "ShadcnTable",
         "ShadcnTabs",
@@ -2826,7 +2828,7 @@
         "shadcn ui kotlin",
         "shadcn compose multiplatform",
         "ExperimentalFoundationStyleApi",
-        "shadcn kmp. Plus every individual `Shadcn*` component name \u2014 see the Component Keyword Matrix below for the full list (62 real components",
+        "shadcn kmp. Plus every individual `Shadcn*` component name \u2014 see the Component Keyword Matrix below for the full list (64 real components as of shadcn-compose 0.2.3",
         "verified against the library's own repo)"
       ],
       "scripts": [
