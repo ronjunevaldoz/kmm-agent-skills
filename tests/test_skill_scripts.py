@@ -4470,6 +4470,7 @@ fun LoginContent(
         self.assertIn("preview_coverage", types)
         self.assertTrue(any("Missing preview stub" in f["message"] for f in findings))
         self.assertTrue(any("Missing Roborazzi screenshot test" in f["message"] for f in findings))
+        self.assertTrue(any("Missing UI interaction test" in f["message"] for f in findings))
 
     def test_preview_coverage_accepts_multi_device_preview_and_roborazzi(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -4478,8 +4479,27 @@ fun LoginContent(
             common = base / "commonMain" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui"
             previews = common / "previews"
             tests = base / "jvmTest" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui" / "previews"
+            common_test = base / "commonTest" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui"
             previews.mkdir(parents=True, exist_ok=True)
             tests.mkdir(parents=True, exist_ok=True)
+            common_test.mkdir(parents=True, exist_ok=True)
+            (common_test / "LoginContentTest.kt").write_text(
+                """package com.example.feature.auth.ui
+
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.runComposeUiTest
+import kotlin.test.Test
+
+class LoginContentTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun loginContent_displays() = runComposeUiTest {
+        setContent { LoginContent(state = LoginUiState(), onIntent = {}) }
+    }
+}
+""",
+                encoding="utf-8",
+            )
 
             (common / "LoginContent.kt").write_text(
                 """package com.example.feature.auth.ui
@@ -4607,6 +4627,7 @@ fun LoginContent(
             self.assertTrue(any(path.endswith("LoginContentPreview.kt") for path in created))
             self.assertTrue(any(path.endswith("LoginContentScreenshotTest.kt") for path in created))
             self.assertTrue(any(path.endswith("MultiDevicePreview.kt") for path in created))
+            self.assertTrue(any(path.endswith("LoginContentTest.kt") for path in created))
 
     def test_clean_file_returns_empty(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -4851,6 +4872,25 @@ annotation class MultiDevicePreview
 """,
             encoding="utf-8"
         )
+        common_test = root / "feature" / "auth" / "ui" / "src" / "commonTest" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui"
+        common_test.mkdir(parents=True, exist_ok=True)
+        (common_test / "LoginContentTest.kt").write_text(
+            """package com.example.feature.auth.ui
+
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.runComposeUiTest
+import kotlin.test.Test
+
+class LoginContentTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun loginContent_displays() = runComposeUiTest {
+        setContent { LoginContent() }
+    }
+}
+""",
+            encoding="utf-8"
+        )
         jvm_previews = root / "feature" / "auth" / "ui" / "src" / "jvmTest" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui" / "previews"
         jvm_previews.mkdir(parents=True, exist_ok=True)
         (jvm_previews / "LoginContentScreenshotTest.kt").write_text(
@@ -4965,6 +5005,25 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview(name = "Tablet", widthDp = 673, heightDp = 841)
 @Preview(name = "Desktop", widthDp = 1280, heightDp = 800)
 annotation class MultiDevicePreview
+""",
+                encoding="utf-8",
+            )
+            common_test = root / "feature" / "auth" / "ui" / "src" / "commonTest" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui"
+            common_test.mkdir(parents=True, exist_ok=True)
+            (common_test / "ProfileContentTest.kt").write_text(
+                """package com.example.feature.auth.ui
+
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.runComposeUiTest
+import kotlin.test.Test
+
+class ProfileContentTest {
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun profileContent_displays() = runComposeUiTest {
+        setContent { ProfileContent() }
+    }
+}
 """,
                 encoding="utf-8",
             )

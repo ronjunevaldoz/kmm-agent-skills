@@ -15,7 +15,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-11'
+  last-updated: '2026-07-13'
   keywords:
     - design system
     - Compose Styles API
@@ -263,8 +263,10 @@ nested containers, component reimplementations, direct token imports) and fix th
 file-by-file with per-file
 confirmation. Primary scanner: `detekt-rules/` (PSI-based); fallback: `scripts/scan_design_violations.py`.
 The fallback scanner also flags missing preview stubs, missing multi-device preview coverage,
-and missing Roborazzi screenshot tests for feature `*Content.kt` files so preview drift gets
-caught with the rest of the design cleanup.
+missing Roborazzi screenshot tests, and missing commonTest UI interaction tests (`runComposeUiTest`)
+for feature `*Content.kt` files — all four required, no exceptions — so coverage gaps get
+caught with the rest of the design cleanup. `scripts/scaffold_preview_coverage.py` generates
+all four missing files at once.
 
 Use `/record-design-baselines` after fixing to record new Roborazzi golden PNGs.
 Use `/audit-design-visual` to run a vision pass over the goldens and catch spacing,
@@ -2638,6 +2640,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-13 | Made UI test coverage strict for feature `*Content.kt` screens: `scan_design_violations.py`'s `preview_coverage` check now also flags a missing commonTest interaction test (`runComposeUiTest`), alongside the existing preview-stub/multi-device/Roborazzi checks — all four required, no exceptions. `scaffold_preview_coverage.py` generates all four now, not three. (First attempt built a redundant, weaker duplicate of this in `kotlin-multiplatform-audit`'s `audit_project.py` without checking this scanner already existed — reverted that and added only the genuinely missing piece here instead.) |
 | 2026-07-13 | Fixed a real keyword-routing collision with `kotlin-multiplatform-shadcn-compose`: this skill's own trigger keywords included bare `shadcn` (frontmatter) and `shadcn KMP` (body) — the exact same phrase `shadcn-compose` uses as its own trigger keyword, despite the two being documented mutually-exclusive alternatives (`/kmm-new-project` loads one instead of the other). Removed both from this skill; `design system`/`AppTheme`/`ButtonVariant`/etc already route unambiguously without them. Root cause: `validate_keyword_routing.py` only checked that every skill appears in the expert's invocation map, never checked for keyword overlap between skills — added collision detection to catch this class of bug going forward. |
 | 2026-07-11 | Corrected the 2026-07-10 deprecation-evaluation entry below: verified directly against Maven Central's repository (not just the README) that `shadcn-compose` published `0.2.1`, so "still `-SNAPSHOT`, not on Maven Central" is no longer true. The conclusion is unchanged for a different reason — publication doesn't remove the risk this skill is scaffold-based to avoid: `shadcn-compose` still depends on the experimental `@ExperimentalFoundationStyleApi`, so a real dependency on it still breaks on the next CMP release that changes that API. Updated the Ownership Model note accordingly, and added a new dedicated `kotlin-multiplatform-shadcn-compose` skill for consuming the library when a user explicitly chooses it — cross-referenced both ways. Also added `/kmm-migrate-to-shadcn` for projects that decide to fully switch, cross-referenced here too. |
 | 2026-07-11 | Fixed the same false-positive class found and fixed in `kotlin-multiplatform-audit`'s `audit_project.py`: `scan_design_violations.py`'s `_SKIP_DIR_FRAGMENTS` only knew about `designsystem`/`design_system`/`theme`, so a project with skills deployed to `.claude/skills/` would get a `hardcoded_color` violation from this skill's own `detekt-rules/src/test/kotlin/.../HardcodedColorRuleTest.kt` (a legitimate test fixture, not real app code). Worse than the read-only audit case since `/fix-design` uses this scanner to auto-fix violations — could have rewritten deployed skill reference files. Added the same build/VCS/vendor/deployed-skills exclusion set `audit_project.py` uses. Reproduced the exact false positive before fixing; 2 new regression tests confirm it's gone while real project violations alongside deployed skills still fire. |

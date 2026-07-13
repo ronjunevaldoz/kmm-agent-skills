@@ -11,7 +11,9 @@ Detects:
   direct_textstyle     TextStyle(...) construction — use AppTextStyle enum
   nested_container     Card { Card { or Surface { Surface { — redundant nesting
   layout_inconsistency Mixed flat/card/tabbed patterns across *Content.kt files in the same feature ui/ dir
-  preview_coverage     Missing preview stub, multi-device preview coverage, or Roborazzi screenshot test
+  preview_coverage     Missing preview stub, multi-device preview coverage, Roborazzi
+                       screenshot test, or a commonTest UI interaction test — for
+                       *Content.kt files only
 
 Usage:
   python3 scan_design_violations.py <project_root>
@@ -217,6 +219,18 @@ def _screenshot_test_for_content(content_file: Path) -> Path | None:
     return None
 
 
+def _interaction_test_for_content(content_file: Path) -> Path | None:
+    test_name = f"{content_file.stem}Test.kt"
+    base = Path(
+        content_file.as_posix().replace("/src/commonMain/kotlin/", "/src/commonTest/kotlin/")
+    )
+    candidates = (base.with_name(test_name), base.parent / "previews" / test_name)
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+
 def _looks_like_feature_content(path: Path) -> bool:
     parts = path.parts
     return "feature" in parts and "ui" in parts and path.name.endswith("Content.kt")
@@ -310,6 +324,32 @@ def _scan_preview_coverage(project_root: Path) -> list[dict]:
                         "line": 1,
                         "code": screenshot_file.name,
                         "message": "Roborazzi screenshot test must capture both light and dark variants.",
+                    })
+
+            interaction_test_file = _interaction_test_for_content(source_file)
+            if interaction_test_file is None:
+                findings.append({
+                    "type": "preview_coverage",
+                    "severity": "error",
+                    "file": str(source_file),
+                    "line": 1,
+                    "code": source_file.name,
+                    "message": (
+                        f"Missing UI interaction test for {source_file.name}. "
+                        f"Create {source_file.stem}Test.kt under src/commonTest/kotlin/ "
+                        f"using runComposeUiTest."
+                    ),
+                })
+            else:
+                interaction_text = interaction_test_file.read_text(encoding="utf-8", errors="replace")
+                if "runComposeUiTest" not in interaction_text:
+                    findings.append({
+                        "type": "preview_coverage",
+                        "severity": "error",
+                        "file": str(interaction_test_file),
+                        "line": 1,
+                        "code": interaction_test_file.name,
+                        "message": "UI interaction test must use runComposeUiTest (commonTest, not JUnit4 createComposeRule).",
                     })
 
     return findings

@@ -227,6 +227,34 @@ class {content_name}ScreenshotTest {{
 """
 
 
+def _interaction_test_file_source(package_name: str, content_name: str, call_args: list[str], group_id: str) -> str:
+    args = ",\n            ".join(call_args)
+    if args:
+        args = f"\n            {args},\n        "
+    lower = re.sub(r"(?<!^)(?=[A-Z])", "_", content_name.removesuffix("Content")).lower()
+    return f"""package {package_name}
+
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.runComposeUiTest
+import {group_id}.core.designsystem.theme.AppTheme
+import kotlin.test.Test
+
+class {content_name}Test {{
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun {lower}_displays() = runComposeUiTest {{
+        setContent {{
+            AppTheme {{
+                {content_name}({args})
+            }}
+        }}
+        // TODO: assert on real nodes once test tags exist for this screen.
+    }}
+}}
+"""
+
+
 def scaffold_preview_coverage(project_root: Path, dry_run: bool = False) -> list[str]:
     created: list[str] = []
 
@@ -272,6 +300,15 @@ def scaffold_preview_coverage(project_root: Path, dry_run: bool = False) -> list
             if not dry_run:
                 test_path.write_text(source, encoding="utf-8")
             created.append(str(test_path))
+
+        interaction_test_dir = content_file.as_posix().replace("/src/commonMain/kotlin/", "/src/commonTest/kotlin/")
+        interaction_test_path = Path(interaction_test_dir).parent / f"{content_file.stem}Test.kt"
+        _ensure_dir(interaction_test_path.parent)
+        if not interaction_test_path.exists():
+            source = _interaction_test_file_source(package_name, content_name, call_args, group_id)
+            if not dry_run:
+                interaction_test_path.write_text(source, encoding="utf-8")
+            created.append(str(interaction_test_path))
 
     return created
 

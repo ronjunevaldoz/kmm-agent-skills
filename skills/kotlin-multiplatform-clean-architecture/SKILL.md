@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-11'
+  last-updated: '2026-07-13'
   keywords:
     - clean architecture
     - Kotlin Multiplatform
@@ -281,6 +281,15 @@ class LoginUseCase(
 - Use cases depend on **interfaces** from `:api`, never on `:data` implementations.
 - Use cases may call other use cases from `:core:domain` — never from sibling `:feature` domains.
 - DI annotation (`@Single`, etc.) goes on the `:domain` module's Koin module, not on the use case class.
+
+**No "skip it if trivial" exception, even for a 1:1 pass-through use case that adds zero
+logic over calling the repository directly.** The reason isn't "more structure is always
+better" — it's enforceability: "a ViewModel only ever depends on `:domain`, never `:api`/
+`:data` directly" is a bright-line, grep-able rule an audit script can check mechanically.
+"...unless the use case would be trivial" turns that into a human judgment call per
+call site, which a script can't verify and two reviewers can disagree on. The cost of
+wrapping a trivial pass-through today is one small class; the cost of a boundary rule
+that's sometimes true is losing the ability to check it automatically at all.
 
 ---
 
@@ -608,6 +617,7 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
+| 2026-07-13 | Added a note explaining why the Use Case Pattern has no "skip it if trivial" exception, even for a 1:1 pass-through with zero added logic: the boundary rule ("ViewModel only ever depends on `:domain`") is bright-line and mechanically checkable; a judgment-call exception isn't. The cost tradeoff (small future refactor if skipped vs. paying ceremony cost today if always wrapped) is real but secondary to the enforceability argument in this repo specifically. |
 | 2026-07-11 | Added a "Module layer-order violation" fitness function: `kotlin-multiplatform-audit`'s new `_detect_module_layer_violation` parses every module's `build.gradle.kts` for `projects.*` references and checks the full layer order plus cross-feature dependencies, generalizing the single ad-hoc `:ui`-vs-`:data`/`:domain` grep this section used to show. A literal circular dependency can't happen silently (Gradle refuses to build a real cycle) — the real, previously-uncaught gap is a wrong-*direction* one-way dependency declared at the Gradle level before any file imports the forbidden package, which file-level Detekt rules can't see yet. Verified against 5 synthetic cases (3 violation types, a valid full graph, and a core-module dependency correctly ignored) before shipping. |
 | 2026-07-11 | Added "Composition Over Inheritance in commonMain" — a real, recurring anti-pattern where an agent creates a public `abstract class` in `commonMain` (e.g. a `GenericGameApplication`) with only abstract members, forcing every consumer to subclass it. Not scoped to any domain name — the smell is the shape, not the name. Wired to Detekt's real `UnnecessaryAbstractClass` rule (added to `kotlin-multiplatform-code-quality`'s base `detekt.yml`) and a new project-independent backstop detector in `kotlin-multiplatform-audit` (`_detect_extensible_abstract_class_in_common`), verified against positive/negative/scope-boundary test cases before shipping. 2 new anti-patterns. |
 | 2026-06-28 | Fixed AppNavigator Koin binding: use NavControllerHolder singleton pattern so AppNavigatorImpl can be a Koin single{} while NavController is set by AppNavHost via DisposableEffect. |
