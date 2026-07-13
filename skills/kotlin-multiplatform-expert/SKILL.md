@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-11'
+  last-updated: '2026-07-14'
   keywords:
     - KMP expert
     - orchestrator
@@ -61,7 +61,8 @@ across module build files when creating or updating KMM projects.
 
 **Trigger keywords:** where do I start KMP, full KMP setup, new KMP feature, which skill,
 skill order, KMP architecture decision, KMM expert, KMP project plan, which pattern KMP,
-KMP checklist, review my KMP project.
+KMP checklist, review my KMP project, custom agent for project, custom command for project,
+project-specific agent, project-specific command, project-specific skill.
 
 **Freshness rule:** recheck the Skill Invocation Map and dependency graph entries whenever
 a new skill is added or removed — the routing table and skill count must stay in sync with
@@ -718,6 +719,47 @@ Use this when the user asks to audit or extend an existing project:
 skill by its full name: `kotlin-multiplatform-<topic>`. Never suggest a bare topic name
 without the `kotlin-multiplatform-` prefix. Then route to `/kmm-new-skill kotlin-multiplatform-<topic>`.
 
+## Project-Specific Commands/Agents/Skills — Source of Truth
+
+When a user asks for a custom command, agent, skill, or hook for **their own project**
+(not one of this collection's own), or an agent decides one is needed — author it at a
+project-owned source location first, then deploy a copy into `.claude/` for Claude Code
+to actually discover it. Never author directly into `.claude/agents/*.md`,
+`.claude/commands/*.md`, or `.claude/skills/*/` as the only copy.
+
+**The model to mirror is this very repo**: `kmm-agent-skills` itself keeps `agents/`,
+`commands/`, `skills/`, `hooks/` at the repo root as the canonical source, and
+`scripts/sync-local-assistant-skills.sh`/`/kmm-setup-agents` deploy copies into
+`.claude/`. A consumer project doing the same for its *own* custom artifacts gets the
+same benefits: the source is versioned alongside the app's own code (not buried in a
+runtime-only directory), reviewable in a normal PR diff, and portable if the project
+ever needs to regenerate or move its `.claude/` setup.
+
+Layout:
+```
+<project root>/
+├── agents/<name>.md         ← source
+├── commands/<name>.md       ← source
+├── skills/<name>/SKILL.md   ← source (name = the project's own app/feature name,
+│                                not a kmm-agent-skills name — this is project-owned)
+├── hooks/<name>.sh          ← source
+└── .claude/
+    ├── agents/<name>.md     ← deployed copy
+    ├── commands/<name>.md   ← deployed copy
+    ├── skills/<name>/       ← deployed copy
+    └── hooks/               ← wired via settings.json, not copied
+```
+
+Deploy the copy after every edit to the source — a stale `.claude/` copy that's drifted
+from its project-owned source is worse than no source at all, since it looks authoritative
+but silently isn't. Simple `cp`/`rsync` is enough; no need for a dedicated script unless
+the project has many artifacts to keep in sync.
+
+**Real gap this closes**: a review of a real KMP game-engine project found two custom
+agent definitions (`ecs-dev`, `game-framework-dev`) authored directly into
+`.claude/agents/` with no project-owned source anywhere — meaning the only copy of that
+authoring work lived in a directory this rule now treats as deploy-only.
+
 ## Recommendation Format
 
 When recommending an approach, always present it in this order:
@@ -779,6 +821,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
+| 2026-07-14 | Added "Project-Specific Commands/Agents/Skills — Source of Truth": a real gap found while reviewing a consumer project (a KMP game engine) whose two custom agent definitions were authored directly into `.claude/agents/` with no project-owned source anywhere. Documents mirroring this repo's own layout (`agents/`, `commands/`, `skills/`, `hooks/` at the project root as canonical source, `.claude/` as the deployed copy) for any project-specific artifact that isn't from `kmm-agent-skills` itself. Cross-referenced from `/kmm-setup-agents`, which only deploys this collection's own skills/commands, not project-owned ones. |
 | 2026-07-11 | Added an invocation-map row routing "composition over inheritance"/"abstract class in commonMain"/"agent over-abstracting" to `kotlin-multiplatform-clean-architecture`'s new Composition Over Inheritance section — a real, recurring anti-pattern where an agent creates a public abstract class in commonMain requiring consumer inheritance. |
 | 2026-07-11 | Added `kotlin-multiplatform-docs-site` (62nd skill) — public GitHub Pages developer guide for a published library (MkDocs Material + Dokka HTML + compiler-verified snippet extraction), explicitly gated to library projects with real surface area, never apps or trivial libraries. Added to the Meta list and Skill Invocation Map. |
 | 2026-07-10 | Two real gaps closed: (1) added a "Improve the performance of X" decision tree — there was no routing path for performance requests at all (only a model-routing hint, not a skill-routing rule); routes by naming what X is and explicitly stops rather than guessing when X is unnamed or whole-app; added `kotlin-multiplatform-benchmark` (61st skill) as its "get a real number" branch. (2) Broadened "Which transport for a backend call?" to check for an existing Ktor client by content (`HttpClient(`/`safeRequest`/`NetworkResult<`) before the kRPC-specific grep — the prior version only checked kRPC symbols, so a project with a plain (differently-named) Ktor client and no kRPC could still fall through to a raw HTTP call; cross-referenced to `kotlin-multiplatform-network-layer`'s new Step 0. |

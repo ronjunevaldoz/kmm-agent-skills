@@ -12,6 +12,14 @@ Use this when:
 
 Do NOT use this for brand-new projects — `/kmm-new-project` handles agent setup as part of scaffold.
 
+This command deploys **this collection's own** skills/commands into `.claude/`. For a
+project's **own custom** command, agent, skill, or hook — one that doesn't come from
+`kmm-agent-skills` — see `kotlin-multiplatform-expert`'s "Project-Specific
+Commands/Agents/Skills — Source of Truth" section: author it at
+`<project root>/agents/`, `commands/`, `skills/<name>/`, or `hooks/` first, then deploy a
+copy into `.claude/`. Never author a project-specific artifact directly into `.claude/`
+as its only copy.
+
 ---
 
 ## Step 1 — Locate and validate the project
