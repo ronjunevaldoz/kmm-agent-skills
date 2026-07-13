@@ -455,6 +455,23 @@ row) rather than a bare `Row` with manual weights — it gets a draggable divide
 min/max weights for free, matching what `kotlin-multiplatform-layout-system`'s Pattern A
 wireframe expects for a nav+side+main layout.
 
+### Layout-pattern lookup when nothing here covers the shape needed
+
+[Shadcn Studio](https://shadcnstudio.com/) — **not the official shadcn/ui project, and not
+this library.** Verified directly (2026-07-13): a third-party, independently-run paid
+catalog ($99–$849 one-time) of 800+ UI blocks and 20+ page templates built on real
+shadcn/ui, explicitly "not affiliated with shadcn/ui." Useful here for exactly one thing —
+seeing how a layout *shape* (a dashboard, a pricing table, a settings page) is typically
+structured — never as a source to copy code from.
+
+**Why code can't be copied from it directly**: its output is React/JSX + Tailwind, not
+Kotlin/Compose. Treat any block from it exactly like an HTML/CSS wireframe — run it through
+`kotlin-multiplatform-layout-system`'s "Translating an External HTML/CSS Wireframe" mapping
+table, then verify every resulting `Shadcn*` component name with
+`fetch_component_signature.py` before using it, the same discipline Step 3/Step 4 already
+require for this library's own components. A block behind the paid tier is not accessible
+without payment — don't assume free access to a specific block by name.
+
 ---
 
 ## Testing
@@ -501,6 +518,7 @@ When asked to add or use shadcn-compose, respond in this order:
 - `kotlin-multiplatform-feature-scaffold` — project must be scaffolded first
 - `kotlin-multiplatform-roborazzi` — screenshot-test screens built with these components the same as any other Compose UI
 - `/kmm-migrate-to-shadcn` — the file-by-file migration path from an existing `kotlin-multiplatform-design-system` project to this library, with the full `App*`→`Shadcn*` mapping table
+- `kotlin-multiplatform-layout-system` — required translation step for any layout pulled from Shadcn Studio or any other HTML/React source; never copy code from an external site directly
 
 ---
 
@@ -508,6 +526,7 @@ When asked to add or use shadcn-compose, respond in this order:
 
 | Date | Change |
 |---|---|
+| 2026-07-13 | Added a layout-pattern lookup reference (Shadcn Studio, shadcnstudio.com) for when no wireframe template or component here covers the needed shape — verified directly it's a third-party paid catalog, explicitly not affiliated with shadcn/ui or this library. Labeled clearly as a shape reference only: its output is React/JSX, not Kotlin/Compose, so any block from it must go through `kotlin-multiplatform-layout-system`'s HTML-translation table plus `fetch_component_signature.py` verification, never copied directly. |
 | 2026-07-13 | Added Step 4: a worked multi-component composition example (settings-list-in-a-card, using `ShadcnCard`/`ShadcnItemGroup`/`ShadcnItem`/`ShadcnAvatar`/`ShadcnButton` together) — closes a real gap where the skill only taught single-component verification and per-element HTML mapping, never how to assemble components into a good screen. Found and documented a real trap in the process: `ShadcnItem`'s own official KDoc usage example references `ShadcnItemMedia`/`ShadcnItemContent`/`ShadcnItemActions` as if they were real slot composables — none exist anywhere in the repo (confirmed by searching the actual source, not just the doc comment). Also documented that `ShadcnItemGroup` auto-separates its items, so a manual `ShadcnSeparator` between them double-draws. 2 new anti-patterns. |
 | 2026-07-13 | Rechecked the real README and Maven Central directly (not `search.maven.org`): latest published version is `0.2.3`, not `0.2.1` — updated the Gradle version pin. Component count grew 62 → 64: found 2 new real components via a live file-list diff (`ShadcnIcon` — tinted icon renderer resolving `LocalShadcnContentColor`; `ShadcnStepper`/`ShadcnStepperStep` — multi-step progress indicator, presentational only, same pattern as `ShadcnTabs`/`ShadcnAccordion`). Added both to the Component Keyword Matrix and frontmatter keywords. |
 | 2026-07-13 | Fixed a real keyword-routing gap: trigger keywords only named 2 of the library's 62 real components (`ShadcnButton`, `ShadcnCard`) — a prompt naming any other real component (e.g. "how do I use ShadcnDialog") wouldn't route here. Added a full Component Keyword Matrix, grouped by category (form inputs, overlays, feedback, navigation, data display, layout, text, chat, theming), built from the live component file list (`scripts/fetch_component_signature.py`'s `_list_component_files()`, not guessed) plus a follow-up check for composables nested inside a differently-named file (`ShadcnRadioGroup` in `ShadcnRadioButton.kt`, `ShadcnAvatarBadge`/`Fallback`/`Group` in `ShadcnAvatar.kt`, `ShadcnItemGroup`/`Description`/`Title`/`Separator` in `ShadcnItem.kt`). All 62 top-level component names added to frontmatter keywords. |
