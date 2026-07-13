@@ -543,7 +543,12 @@ For each task in the sprint:
    - `:model` — data classes, sealed results
    - `:api` — repository interface
    - `:domain` — use cases
-   - `:data` — repository impl, mappers, SQLDelight/network calls
+   - `:data` — repository impl, mappers, SQLDelight/network calls. If the real backend
+     isn't ready yet for this task, generate an `InMemory<Feature>Repository` instead
+     (see `kotlin-multiplatform-repository-pattern`'s "In-memory repository (no backend
+     yet)" section) — same interface, swapped in behind one Koin binding, so the app
+     runs and demos end to end without blocking on the API. Never name it `Mock*`/`Fake*`
+     — those names mean test-only-safe-to-delete, and this one runs the real app.
    - `:presenter` — MVI ViewModel, UiState, UiEffect, Channel
    - `:ui` — `Screen` (wired ViewModel) + `Content` (pure, previewable)
 2. **Wire DI** — add bindings to the feature's Koin module.

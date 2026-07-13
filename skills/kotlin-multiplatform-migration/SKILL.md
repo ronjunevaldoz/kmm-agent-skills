@@ -145,7 +145,7 @@ Adopt skills in this order. Each builds on the previous.
 | Skill | When to apply |
 |---|---|
 | `kotlin-multiplatform-network-layer` | When migrating from Retrofit/Volley to Ktor |
-| `kotlin-multiplatform-repository-pattern` | When splitting data access from ViewModels |
+| `kotlin-multiplatform-repository-pattern` | When splitting data access from ViewModels. If a feature being migrated has no real backend yet (a common mid-migration state — old screen ripped out, new one not API-ready), wire an `InMemory<Feature>Repository` behind the same interface first ("In-memory repository (no backend yet)" section) rather than blocking the migration on backend work. |
 | `kotlin-multiplatform-dependency-injection` | When migrating from Hilt/manual DI to Koin 4 |
 | `kotlin-multiplatform-sqldelight-setup` | When migrating from Room to SQLDelight |
 
