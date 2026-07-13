@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.73.1] — 2026-07-13
+
+### Fixed
+
+- fix(routing): remove shadcn keyword collision, detect it in the validator
+
+---
+
 ## [v1.73.0] — 2026-07-13
 
 ### Added

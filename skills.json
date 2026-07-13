@@ -1,5 +1,5 @@
 {
-  "version": "1.73.0",
+  "version": "1.73.1",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -832,7 +832,6 @@
         "AppTheme",
         "custom theme",
         "design tokens",
-        "shadcn",
         "ButtonVariant",
         "Kotlin Multiplatform",
         "Compose Multiplatform",
@@ -863,7 +862,6 @@
         "AppTheme",
         "design tokens",
         "ButtonVariant",
-        "shadcn KMP",
         "Compose Styles",
         "ExperimentalStylesApi",
         "custom components",
