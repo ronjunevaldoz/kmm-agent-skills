@@ -2,6 +2,15 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.80.0] — 2026-07-14
+
+### Added
+
+- feat(code-quality): enforce and refine the comment/KDoc conventions
+- feat(ci-github-actions): add local dry-run via act, document free-tier minutes
+
+---
+
 ## [v1.79.0] — 2026-07-14
 
 ### Added

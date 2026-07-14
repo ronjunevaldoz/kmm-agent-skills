@@ -1,5 +1,5 @@
 {
-  "version": "1.79.0",
+  "version": "1.80.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -312,7 +312,7 @@
       "path": "skills/kotlin-multiplatform-ci-github-actions",
       "description": "Sets up GitHub Actions CI for a Kotlin Multiplatform (KMP) project. Produces two workflow files: ci.yml (lint, Android tests, iOS tests, Desktop JVM tests, Web JS + WasmJs tests, Gradle cache) and release.yml (XCFramework build + upload artifact). All target platforms are covered. Assumes AGP 9+ and the project structure from kotlin-multiplatform-feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-07-14",
       "keywords": [
         "GitHub Actions",
         "CI/CD",
@@ -347,7 +347,13 @@
         "merge checks",
         "branch protection",
         "automated release",
-        "deploy workflow"
+        "deploy workflow",
+        "CI is red",
+        "CI failing",
+        "GitHub Actions minutes",
+        "free tier CI",
+        "run CI locally",
+        "act local runner"
       ],
       "scripts": []
     },
@@ -426,7 +432,7 @@
       "path": "skills/kotlin-multiplatform-code-quality",
       "description": "Sets up Ktlint (formatting) and Detekt (code smells + architecture rules) for a KMP project. Both run as CI gates. Ktlint is near-zero config. Detekt architecture rules enforce the 6-layer module boundary contract from kotlin-multiplatform-clean-architecture.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-10",
+      "last_updated": "2026-07-14",
       "keywords": [
         "Ktlint",
         "Detekt",
