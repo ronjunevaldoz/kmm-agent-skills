@@ -2256,5 +2256,70 @@ class ProjectSkillStandardsTests(unittest.TestCase):
             self.assertFalse(any(f.startswith("project skill") for f in findings))
 
 
+class LongStackedCommentBlockTests(unittest.TestCase):
+    """kotlin-multiplatform-code-quality's own rule says a // block growing past ~4
+    lines should split off to docs/reference/ — documented but never mechanically
+    checked anywhere until this detector. Verified against a real false-positive
+    risk: a license/copyright header at the top of a file is also a long stacked //
+    block, but isn't the same problem this rule targets.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_five_line_comment_block_with_no_pointer(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/x/src/commonMain/kotlin/Foo.kt",
+                "fun a() {}\n\n"
+                "// line one\n// line two\n// line three\n// line four\n// line five\n"
+                "fun b() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("long stacked comment block" in f for f in findings))
+
+    def test_ignores_block_with_docs_reference_pointer(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/x/src/commonMain/kotlin/Foo.kt",
+                "fun a() {}\n\n"
+                "// line one\n// line two\n// line three\n// line four\n"
+                "// Full rationale: docs/reference/foo.md\n"
+                "fun b() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("long stacked comment block" in f for f in findings))
+
+    def test_ignores_short_comment_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/x/src/commonMain/kotlin/Foo.kt",
+                "fun a() {}\n\n// line one\n// line two\nfun b() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("long stacked comment block" in f for f in findings))
+
+    def test_ignores_leading_license_header(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/x/src/commonMain/kotlin/Foo.kt",
+                "// Copyright (c) Example Corp\n"
+                "// Licensed under the Apache License, Version 2.0\n"
+                "// you may not use this file except in compliance with the License.\n"
+                "// You may obtain a copy of the License at\n"
+                "// http://www.apache.org/licenses/LICENSE-2.0\n"
+                "package com.example.x\n\n"
+                "fun a() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("long stacked comment block" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()

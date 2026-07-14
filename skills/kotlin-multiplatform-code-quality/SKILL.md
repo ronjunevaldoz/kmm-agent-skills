@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-10'
+  last-updated: '2026-07-14'
   keywords:
     - Ktlint
     - Detekt
@@ -244,6 +244,20 @@ full rationale and fix.
 
 ## Comment & KDoc Conventions
 
+### Whether to write a comment at all
+
+Ask in this order — stop at the first "yes":
+
+1. **Does removing it lose zero information?** (the code/naming already says it) — don't
+   write it. This is the single most common comment mistake: narrating WHAT instead of
+   explaining WHY.
+2. **Is it a public API contract another module or consumer relies on** (parameters,
+   return value, thrown errors, a receiver precondition)? — KDoc `/** */`.
+3. **Is it a non-obvious WHY** — a workaround, a constraint from outside this file, a
+   reason simplifying this would break something? — single-line `//`.
+4. Otherwise — don't write it. A comment that answers neither "what's the contract"
+   nor "why is this not the obvious way" isn't pulling its weight.
+
 Two comment types, two jobs — never mix them:
 
 | | Single-line `//` | Multi-line `/** ... */` (KDoc) |
@@ -251,8 +265,42 @@ Two comment types, two jobs — never mix them:
 | Documents | Internal WHY — a workaround, a non-obvious constraint | Public API contract — `@param`/`@return`/`@throws`/`@sample` |
 | Never used for | Restating WHAT the code does (good naming covers that) | Private members — rename instead (Detekt's `DocumentationOverPrivateFunction`/`Property` flags this) |
 | Visible to | Nobody outside the source file | Dokka + IDE quick-docs |
-| Grows past ~4 lines? | Split: keep the one-sentence WHY inline, move the rest to `docs/reference/` with a pointer comment (see below) | N/A — KDoc doesn't accumulate this way; if a class needs paragraphs, that's what `docs/reference/` is for too |
+| Grows past ~4 lines? | Split: keep the one-sentence WHY inline, move the rest to `docs/reference/` with a pointer comment (see below) — mechanically checked by `kotlin-multiplatform-audit`'s `_detect_long_stacked_comment_block` (5+ consecutive `//` lines, no `docs/reference/` pointer, not a leading license header) | N/A — KDoc doesn't accumulate this way; if a class needs paragraphs, that's what `docs/reference/` is for too |
 | Nests? | N/A | KDoc does **not** nest. Plain block comments (`/* */`) do, unlike Java/C |
+
+### Formatting
+
+Verified against Kotlin's own official coding conventions (kotlinlang.org), not invented:
+
+- **`//`**: exactly one space after the slashes — `// like this`, not `//like this`.
+- **KDoc, short**: a single line is fine when the whole comment fits — `/** This is a short documentation comment. */`. Don't force a one-sentence KDoc onto three lines for symmetry.
+- **KDoc, long**: opening `/**` alone on its own line, every following line starts with a single space then `*`, closing `*/` alone on its own line:
+  ```kotlin
+  /**
+   * This is a documentation comment
+   * on multiple lines.
+   */
+  ```
+- **`@param`/`@return`**: the official guidance is to *avoid* these tags generally —
+  weave the parameter/return description into the main text instead, with `[paramName]`
+  links wherever it's mentioned, and use `@param`/`@return` only when the description is
+  long enough that it doesn't fit the flow of the prose. This repo's own tag table below
+  lists them as available tags, not as the default shape every KDoc should take.
+- **KDoc supports Markdown** — verified against kotlinlang.org, not assumed. Inline markup
+  inside `/** */` is regular Markdown (bold/italic, lists, links), plus a KDoc-specific
+  shorthand for linking to another declaration:
+  ```kotlin
+  /**
+   * Wraps [HttpClient] with retry logic. Use [retryPipeline] instead of calling this
+   * directly — see [this][GROUP_ID.core.network.NetworkResult] for the result shape.
+   *
+   * - Retries transient failures up to `times`
+   * - Never retries a 4xx response
+   */
+  ```
+  `[declaration]` resolves the same way a reference inside the documented element would —
+  no full qualification needed if it's already imported in the file. A fenced code block
+  (` ``` `) works too, for a short usage snippet that doesn't warrant a full `@sample`.
 
 ### By architectural level
 
@@ -307,8 +355,8 @@ includeBuild("tailwind/style-experimental")
 
 | Tag | Purpose |
 |---|---|
-| `@param` | One parameter's role — skip if the name alone makes it obvious |
-| `@return` | What the return value represents — skip for `Unit` |
+| `@param` | Official guidance: avoid — describe the parameter inline in the main text with a `[name]` link instead. Reach for `@param` only when that description is too long to weave into the flow |
+| `@return` | Same as `@param` — inline by default, tag only for a lengthy description. Skip entirely for `Unit` |
 | `@throws` | A failure mode that's part of the contract, not every possible exception |
 | `@see` | Cross-reference to a related declaration |
 | `@sample` | Points at an actual, compiled function elsewhere as the usage example |
@@ -445,6 +493,8 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-14 | Two additions to Comment & KDoc Conventions: (1) "Whether to write a comment at all" — a 4-step decision order that was previously scattered across prose rather than stated as one procedure. (2) "Formatting" — real, verified rules from Kotlin's own official coding conventions (kotlinlang.org): one space after `//`, KDoc's `/**`-alone-then-`*`-prefixed-lines-then-`*/`-alone shape for long comments vs single-line `/** ... */` for short ones, and the official guidance to *avoid* `@param`/`@return` in favor of inline prose — which contradicted this skill's own tag table until now (fixed both rows to state the real guidance instead of presenting the tags as the default shape). |
+| 2026-07-14 | Real gap closed: the "grows past ~4 lines, split to docs/reference/" rule was documented but never mechanically checked anywhere — a user reported still seeing long stacked `//` blocks in their project after this skill shipped. Added `kotlin-multiplatform-audit`'s `_detect_long_stacked_comment_block` (5+ consecutive `//` lines, no `docs/reference/` pointer) and cross-referenced it inline in the Comment & KDoc Conventions table. Excludes a leading license/copyright header (consistent with this skill's own existing license-header note) — verified against a real false-positive case before shipping. |
 | 2026-07-10 | Added "By architectural level" — a second cut through the same rules organized by Classes/Functions/Extension functions/Inline blocks instead of by comment type, closing a real gap: extension functions had no documentation guidance at all beyond a passing `@receiver` mention. New rule: extension KDoc must state receiver scope/precondition, since "when to use it" outranks "what it does" for a function that could otherwise be mistaken for a member. 1 new anti-pattern, 1 new example. Wired into automation: `kotlin-multiplatform-audit` gained a `what-comment in control flow` heuristic detector for the inline-block rule, and a new `/kmm-clean-comments` command applies the fix across all four levels (the convention was previously knowledge-only — nothing scanned or refactored comments automatically). |
 | 2026-07-09 | Restructured "Comment & KDoc Conventions" around an explicit single-line (`//`) vs multi-line (KDoc `/** */`) split — a single decision table up front instead of scattered prose, so the rule is unambiguous for any agent to follow. Trimmed ~55 net lines (7 subsections → 5) while keeping every rule, both real-bug examples, the KDoc tag table, and the license-header note. |
 | 2026-07-09 | Added a "Code comment vs. development notes" split, from a real 9-line inline comment that crammed a build-topology explanation, rejected alternatives, and exact version numbers into one `includeBuild()` call site. Rule: an inline comment survives only if it answers a question that would make someone break the code by "simplifying" it; the exhaustive rationale moves to `docs/reference/` (per `kotlin-multiplatform-project-docs-maintainer`'s existing convention) with a one-line pointer left in the comment. Before/after example, 1 new anti-pattern, 2 new Related Skills cross-references. |

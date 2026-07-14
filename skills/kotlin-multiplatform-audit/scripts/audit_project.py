@@ -1304,6 +1304,68 @@ def _detect_what_comment_in_control_flow(root: Path) -> list[str]:
     return findings
 
 
+# ── Long stacked // comment block, no docs/reference pointer ────────────────────
+# kotlin-multiplatform-code-quality's Comment & KDoc Conventions table says a // block
+# that "grows past ~4 lines" should be split: keep a one-sentence WHY inline, move the
+# rest to docs/reference/ with a pointer comment. That rule was documented but never
+# mechanically checked anywhere — a real, confirmed gap (no Detekt rule, no audit
+# detector), found when a user reported still seeing long stacked // blocks in their
+# project after this skill shipped.
+
+_COMMENT_LINE_RE = re.compile(r"^\s*//")
+_DOCS_REFERENCE_POINTER_RE = re.compile(r"docs/reference/")
+_LONG_COMMENT_BLOCK_MIN_LINES = 5
+
+
+def _detect_long_stacked_comment_block(root: Path) -> list[str]:
+    """Flag a run of 5+ consecutive // comment lines with no docs/reference/ pointer —
+    the exact shape kotlin-multiplatform-code-quality's own rule says to split, made
+    mechanically checkable instead of relying on human review to remember the rule.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+
+        block_start: int | None = None
+        block_lines: list[str] = []
+
+        def flush(end_index: int) -> None:
+            nonlocal block_start, block_lines
+            if block_start is not None and len(block_lines) >= _LONG_COMMENT_BLOCK_MIN_LINES:
+                # A comment block that's the very first thing in the file (only blank
+                # lines before it, if any) is a license/copyright header, not the
+                # inline-WHY-comment-grew-too-long problem this rule targets — skip it.
+                is_file_header = all(not lines[j].strip() for j in range(block_start))
+                joined = "\n".join(block_lines)
+                if not is_file_header and not _DOCS_REFERENCE_POINTER_RE.search(joined):
+                    findings.append(
+                        f"long stacked comment block [LOW]: {path.relative_to(root)}:{block_start + 1} "
+                        f"— {len(block_lines)} consecutive // lines with no docs/reference/ "
+                        f"pointer; per kotlin-multiplatform-code-quality's Comment & KDoc "
+                        f"Conventions, keep the one-sentence WHY inline and move the rest to "
+                        f"docs/reference/ with a pointer comment\n"
+                        f"    {block_start + 1} | {block_lines[0].strip()}"
+                    )
+            block_start = None
+            block_lines = []
+
+        for i, line in enumerate(lines):
+            if _COMMENT_LINE_RE.match(line):
+                if block_start is None:
+                    block_start = i
+                block_lines.append(line)
+            else:
+                flush(i)
+        flush(len(lines))
+
+    return findings
+
+
 # ── Extensible abstract class in commonMain ─────────────────────────────────────
 # commonMain APIs should be called or composed, not extended. An abstract class with
 # only abstract members (no concrete implementation at all) forces every consumer into
@@ -2473,6 +2535,7 @@ def audit_project(root: Path) -> list[str]:
 
     # ── WHAT-comment inside a loop or conditional ────────────────────────────────
     findings.extend(_detect_what_comment_in_control_flow(root))
+    findings.extend(_detect_long_stacked_comment_block(root))
 
     # ── Extensible abstract class in commonMain ─────────────────────────────────
     findings.extend(_detect_extensible_abstract_class_in_common(root))
