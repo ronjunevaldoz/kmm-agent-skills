@@ -2,6 +2,19 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.81.0] — 2026-07-15
+
+### Added
+
+- feat(skills): sync consumer project-owned custom skills
+- feat(scaffold): complete claude consumer scaffold
+
+### Docs
+
+- docs(scaffold): clarify rules overlay boundary
+
+---
+
 ## [v1.80.0] — 2026-07-14
 
 ### Added
