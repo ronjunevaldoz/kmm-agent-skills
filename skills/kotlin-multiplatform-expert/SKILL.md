@@ -755,10 +755,12 @@ flags there, and refer maintainers to `docs/reference/ai-collaboration.md` for t
 project's canonical collaboration rules. Do not turn `CLAUDE.md` into the only copy of
 the project's agent policy.
 
-`rules/` exists for project-specific rule snippets or assistant overlays that should stay
-project-owned even if only one assistant consumes them today. `docs/reference/ai-collaboration.md`
-is the shared explanation of how `agents/`, `rules/`, `hooks/`, `commands/`, `skills/`,
-and `.claude/` relate to each other.
+`rules/` exists for optional project-specific rule snippets or assistant overlays that
+should stay project-owned even if only one assistant consumes them today. Do **not**
+copy the same policy text from `docs/reference/ai-collaboration.md` into `rules/`.
+Keep the explanation canonical in `docs/reference/ai-collaboration.md`; use `rules/`
+only when the project genuinely needs short assistant-facing overlays in addition to
+that canonical doc.
 
 If a project has no custom artifacts yet, still scaffold these folders with placeholder
 README files. Empty-but-present source locations make future additions land in the

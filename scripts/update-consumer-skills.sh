@@ -257,8 +257,8 @@ EOF
         cat > "$readme" <<'EOF'
 # rules/
 
-Project-specific assistant rules or overlays live here.
-Document the shared policy in `docs/reference/ai-collaboration.md`; keep runtime copies separate.
+Optional project-specific assistant rules or overlays live here.
+Do not duplicate the canonical policy from `docs/reference/ai-collaboration.md`; keep this folder for short assistant-facing overlays only.
 EOF
         ;;
       "hooks/README.md")
@@ -302,7 +302,7 @@ EOF
 ## Canonical project-owned sources
 
 - `agents/` — project-specific agent personas
-- `rules/` — project-specific assistant rules or overlays
+- `rules/` — optional project-specific assistant overlays only
 - `hooks/` — hook script source
 - `commands/` — slash command source
 - `skills/` — project-owned skills
@@ -313,6 +313,11 @@ EOF
 - `.claude/AGENTS.md` is the deployed routing/context copy
 - `.claude/settings.json` owns runtime permissions and hook wiring
 - `.claude/commands/` and `.claude/skills/` are deployed copies, not the only source
+
+## Duplication rule
+
+Keep the collaboration policy canonical in this file.
+Use `rules/` only for small assistant-facing overlays; do not mirror this whole document there.
 
 ## Maintenance rule
 
@@ -390,7 +395,7 @@ AGENTS_EOF
 ### Canonical project-owned agent sources
 - docs/reference/ai-collaboration.md
 - agents/
-- rules/
+- rules/     (optional overlays only)
 - hooks/
 - commands/
 - skills/

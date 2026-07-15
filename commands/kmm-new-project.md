@@ -657,6 +657,8 @@ CLAUDE.md
 
 `docs/reference/ai-collaboration.md` should explain:
 - project-specific artifacts live in `agents/`, `rules/`, `hooks/`, `commands/`, `skills/`
+- `docs/reference/ai-collaboration.md` is the canonical explanation of that layout
+- `rules/` is optional for assistant-specific overlays and must not duplicate the canonical policy doc
 - `.claude/AGENTS.md` is the deployed routing/context copy for Claude
 - `.claude/settings.json` owns runtime permissions and hook wiring
 - any project-owned agent artifact must be re-deployed into `.claude/` after edits
@@ -676,7 +678,7 @@ CLAUDE.md
 ### Canonical project-owned agent sources
 - docs/reference/ai-collaboration.md
 - agents/
-- rules/
+- rules/     (optional overlays only)
 - hooks/
 - commands/
 - skills/
