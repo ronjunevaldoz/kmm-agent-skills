@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.82.0] — 2026-07-16
+
+### Added
+
+- feat(docs): add cross-agent collaboration templates
+
+---
+
 ## [v1.81.0] — 2026-07-15
 
 ### Added
