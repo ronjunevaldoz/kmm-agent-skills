@@ -12,13 +12,13 @@ Use this when:
 
 Do NOT use this for brand-new projects — `/kmm-new-project` handles agent setup as part of scaffold.
 
-This command deploys **this collection's own** skills/commands into `.claude/`. For a
-project's **own custom** command, agent, skill, or hook — one that doesn't come from
-`kmm-agent-skills` — see `kotlin-multiplatform-expert`'s "Project-Specific
-Commands/Agents/Skills — Source of Truth" section: author it at
-`<project root>/agents/`, `commands/`, `skills/<name>/`, or `hooks/` first, then deploy a
-copy into `.claude/`. Never author a project-specific artifact directly into `.claude/`
-as its only copy.
+This command deploys **this collection's own** skills/commands into `.claude/`, and it
+also scaffolds the project-owned source locations Claude teams should keep in Git:
+`agents/`, `rules/`, `hooks/`, `commands/`, `skills/`, `docs/reference/ai-collaboration.md`,
+and a thin `CLAUDE.md`. For a project's **own custom** command, agent, skill, or hook —
+one that doesn't come from `kmm-agent-skills` — author it in those project-owned
+locations first, then deploy a copy into `.claude/`. Never author a project-specific
+artifact directly into `.claude/` as its only copy.
 
 ---
 
@@ -249,7 +249,34 @@ Key commands:
 
 ---
 
-## Step 5 — Install consumer commands
+## Step 5 — Scaffold project-owned source locations
+
+Create these project-owned paths if they do not exist yet:
+
+```
+agents/README.md
+rules/README.md
+hooks/README.md
+commands/README.md
+skills/README.md
+docs/reference/ai-collaboration.md
+```
+
+Each README should say what belongs there and that `.claude/` is the deployed runtime
+copy, not the only source of truth.
+
+`docs/reference/ai-collaboration.md` should explain:
+- `CLAUDE.md` is a thin bootstrap that points to `.claude/AGENTS.md`
+- project-specific artifacts live in `agents/`, `rules/`, `hooks/`, `commands/`, `skills/`
+- `.claude/settings.json` owns runtime permissions and hook wiring
+- any edit to a project-owned artifact must be re-deployed into `.claude/`
+
+If any of these files already exist, print their current contents and skip unless the
+user explicitly asks to overwrite them.
+
+---
+
+## Step 6 — Install consumer commands
 
 Locate the `kmm-agent-skills` clone. Check in order:
 1. `$ARGUMENTS/../kmm-agent-skills`
@@ -288,7 +315,7 @@ show a one-line diff summary and ask `[update/skip]` before overwriting.
 
 ---
 
-## Step 6 — Deploy skills
+## Step 7 — Deploy skills
 
 If `.claude/skills/` does not exist, create it and copy all skills from the
 `kmm-agent-skills/skills/` directory.
@@ -298,10 +325,11 @@ to sync changed skills without prompting for each file (skills are passive docs)
 
 ---
 
-## Step 7 — Write `CLAUDE.md`
+## Step 8 — Write `CLAUDE.md`
 
 If `CLAUDE.md` does not exist in the project root, create a minimal one that tells
-Claude Code where the skills live and which conventions to follow:
+Claude Code where the skills live and where the canonical project-owned agent policy
+is maintained:
 
 ```markdown
 ### Claude Code Project Profile
@@ -312,6 +340,14 @@ Claude Code where the skills live and which conventions to follow:
 ### Default flags
 --compact
 --verbose=false
+
+### Canonical project-owned agent sources
+- docs/reference/ai-collaboration.md
+- agents/
+- rules/
+- hooks/
+- commands/
+- skills/
 
 ### Ignore generated and vendor directories
 --ignore="**/build/**"
@@ -324,7 +360,7 @@ If `CLAUDE.md` already exists, print its contents and skip — do not overwrite.
 
 ---
 
-## Step 8 — Write `.claude/settings.json`
+## Step 9 — Write `.claude/settings.json`
 
 If `.claude/settings.json` does not exist, create it with a Bash allowlist for
 common read-only and build operations:
@@ -349,7 +385,7 @@ If it already exists, print the current permissions and skip — do not overwrit
 
 ---
 
-## Step 9 — Summary
+## Step 10 — Summary
 
 ```
 AGENT SETUP COMPLETE
@@ -359,11 +395,13 @@ Features:  <N> detected (<list>)
 Skills:    <N> deployed → .claude/skills/
 
 Generated:
-  ✅ CLAUDE.md                   — project profile (--system-prompt-file, --compact, ignores)
-  ✅ .claude/AGENTS.md           — skill routing tailored to this project
-  ✅ .claude/commands/           — <N> consumer commands installed
-  ✅ .claude/skills/             — <N> skills deployed
-  ✅ .claude/settings.json       — Bash allowlist
+  ✅ agents/ rules/ hooks/ commands/ skills/   — project-owned source scaffold
+  ✅ docs/reference/ai-collaboration.md        — canonical cross-agent policy
+  ✅ CLAUDE.md                                 — thin bootstrap into `.claude/AGENTS.md`
+  ✅ .claude/AGENTS.md                         — skill routing tailored to this project
+  ✅ .claude/commands/                         — <N> consumer commands installed
+  ✅ .claude/skills/                           — <N> skills deployed
+  ✅ .claude/settings.json                     — Bash allowlist + hook wiring home
 
 Detected skill set:
   <list of skills matched from libs.versions.toml>
@@ -384,3 +422,6 @@ Try it now:
 - Skills are passive docs — re-running always syncs them safely.
 - Commands are only overwritten with explicit `[update]` confirmation.
 - `settings.json` is never overwritten — add permissions manually if needed.
+- Keep project-owned artifacts in the root scaffold even if they only contain README
+  placeholders today; that empty scaffold prevents future edits from drifting straight
+  into `.claude/`.

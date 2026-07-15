@@ -727,27 +727,42 @@ project-owned source location first, then deploy a copy into `.claude/` for Clau
 to actually discover it. Never author directly into `.claude/agents/*.md`,
 `.claude/commands/*.md`, or `.claude/skills/*/` as the only copy.
 
-**The model to mirror is this very repo**: `kmm-agent-skills` itself keeps `agents/`,
-`commands/`, `skills/`, `hooks/` at the repo root as the canonical source, and
-`scripts/sync-local-assistant-skills.sh`/`/kmm-setup-agents` deploy copies into
-`.claude/`. A consumer project doing the same for its *own* custom artifacts gets the
-same benefits: the source is versioned alongside the app's own code (not buried in a
-runtime-only directory), reviewable in a normal PR diff, and portable if the project
-ever needs to regenerate or move its `.claude/` setup.
+**The model to mirror is this very repo**: `kmm-agent-skills` itself keeps project-owned
+agent assets at the repo root, with runtime copies generated separately. A consumer
+project should do the same for its *own* custom artifacts so the source stays versioned
+next to the app code, reviewable in a normal PR diff, and portable if the project ever
+needs to regenerate or move its `.claude/` setup.
 
 Layout — flat, `<name>` is the artifact's own name, never the app/project name:
 ```
 <project root>/
-├── agents/<agent-name>.md         ← source
-├── commands/<command-name>.md     ← source
-├── skills/<skill-name>/SKILL.md   ← source
-├── hooks/<hook-name>.sh           ← source
+├── agents/<agent-name>.md               ← source
+├── rules/<rule-name>.md                 ← source
+├── commands/<command-name>.md           ← source
+├── skills/<skill-name>/SKILL.md         ← source
+├── hooks/<hook-name>.sh                 ← source
+├── docs/reference/ai-collaboration.md   ← canonical cross-agent policy
+├── CLAUDE.md                            ← thin Claude bootstrap only
 └── .claude/
-    ├── agents/<agent-name>.md     ← deployed copy
-    ├── commands/<command-name>.md ← deployed copy
-    ├── skills/<skill-name>/       ← deployed copy
-    └── hooks/                     ← wired via settings.json, not copied
+    ├── AGENTS.md                        ← deployed routing/context
+    ├── commands/<command-name>.md       ← deployed copy
+    ├── skills/<skill-name>/             ← deployed copy
+    └── settings.json                    ← permissions + hook wiring
 ```
+
+`CLAUDE.md` should stay thin: point Claude at `.claude/AGENTS.md`, keep the default
+flags there, and refer maintainers to `docs/reference/ai-collaboration.md` for the
+project's canonical collaboration rules. Do not turn `CLAUDE.md` into the only copy of
+the project's agent policy.
+
+`rules/` exists for project-specific rule snippets or assistant overlays that should stay
+project-owned even if only one assistant consumes them today. `docs/reference/ai-collaboration.md`
+is the shared explanation of how `agents/`, `rules/`, `hooks/`, `commands/`, `skills/`,
+and `.claude/` relate to each other.
+
+If a project has no custom artifacts yet, still scaffold these folders with placeholder
+README files. Empty-but-present source locations make future additions land in the
+right place instead of drifting straight into `.claude/`.
 
 **Never nest a project artifact under an app/project-name folder** (e.g.
 `skills/<app-name>/<skill-name>/`). Verified against the real, official skill
@@ -836,6 +851,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
+| 2026-07-15 | Expanded the project-owned scaffold contract for Claude consumers: `rules/` and `docs/reference/ai-collaboration.md` are now part of the canonical source layout, and `CLAUDE.md` is explicitly treated as a thin bootstrap rather than the only copy of project policy. This keeps project-specific agent guidance at the repo root while `.claude/` remains the deployed runtime layer. |
 | 2026-07-14 | Added "Project-Specific Commands/Agents/Skills — Source of Truth": a real gap found while reviewing a consumer project (a KMP game engine) whose two custom agent definitions were authored directly into `.claude/agents/` with no project-owned source anywhere. Documents mirroring this repo's own layout (`agents/`, `commands/`, `skills/`, `hooks/` at the project root as canonical source, `.claude/` as the deployed copy) for any project-specific artifact that isn't from `kmm-agent-skills` itself. Cross-referenced from `/kmm-setup-agents`, which only deploys this collection's own skills/commands, not project-owned ones. Corrected same-day: the layout initially nested a skill under an app-name folder (`skills/<app-name>/<skill-name>/`) — verified against `anthropic-skills:skill-creator`'s real, official skill anatomy that this isn't a recognized convention; skills are flat, named after what they do. Fixed to `skills/<skill-name>/`, with name-collision guidance (rename the skill, don't nest it) instead. |
 | 2026-07-11 | Added an invocation-map row routing "composition over inheritance"/"abstract class in commonMain"/"agent over-abstracting" to `kotlin-multiplatform-clean-architecture`'s new Composition Over Inheritance section — a real, recurring anti-pattern where an agent creates a public abstract class in commonMain requiring consumer inheritance. |
 | 2026-07-11 | Added `kotlin-multiplatform-docs-site` (62nd skill) — public GitHub Pages developer guide for a published library (MkDocs Material + Dokka HTML + compiler-verified snippet extraction), explicitly gated to library projects with real surface area, never apps or trivial libraries. Added to the Meta list and Skill Invocation Map. |

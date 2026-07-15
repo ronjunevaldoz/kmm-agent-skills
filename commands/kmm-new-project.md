@@ -639,8 +639,54 @@ Fix any blockers. Do not mark the project complete until `/kmm-verify` reports `
 
 ## Step 10 — Generate agent setup
 
-After verify passes, generate a `.claude/` directory in the scaffolded project so the team
-gets agent-driven workflows on day one.
+After verify passes, generate both the project-owned Claude scaffold and the deployed
+`.claude/` runtime so the team gets agent-driven workflows on day one without burying
+all agent authoring inside runtime-only files.
+
+**Write the project-owned source scaffold** first:
+
+```
+agents/README.md
+rules/README.md
+hooks/README.md
+commands/README.md
+skills/README.md
+docs/reference/ai-collaboration.md
+CLAUDE.md
+```
+
+`docs/reference/ai-collaboration.md` should explain:
+- project-specific artifacts live in `agents/`, `rules/`, `hooks/`, `commands/`, `skills/`
+- `.claude/AGENTS.md` is the deployed routing/context copy for Claude
+- `.claude/settings.json` owns runtime permissions and hook wiring
+- any project-owned agent artifact must be re-deployed into `.claude/` after edits
+
+`CLAUDE.md` should stay thin and only bootstrap Claude into the generated runtime:
+
+```markdown
+### Claude Code Project Profile
+
+### Load skills context on initialization
+--system-prompt-file=".claude/AGENTS.md"
+
+### Default flags
+--compact
+--verbose=false
+
+### Canonical project-owned agent sources
+- docs/reference/ai-collaboration.md
+- agents/
+- rules/
+- hooks/
+- commands/
+- skills/
+
+### Ignore generated and vendor directories
+--ignore="**/build/**"
+--ignore="**/.gradle/**"
+--ignore="**/vendor/**"
+--ignore="**/third_party/**"
+```
 
 **Write `.claude/AGENTS.md`** — tailored to this project's actual modules and stack:
 
@@ -866,10 +912,13 @@ Docs:
   docs/layout-system/              — ASCII wireframes per screen
 
 Agent setup:
-  .claude/AGENTS.md                — skill routing + feature module table
-  .claude/commands/kmm-*.md        — <N> slash commands installed
-  .claude/pipeline-context.json    — project context for the planner agent
-  .claude/settings.json            — Bash allowlist
+  agents/ rules/ hooks/ commands/ skills/ — project-owned source scaffold
+  docs/reference/ai-collaboration.md      — canonical cross-agent policy
+  CLAUDE.md                               — thin bootstrap into `.claude/AGENTS.md`
+  .claude/AGENTS.md                       — skill routing + feature module table
+  .claude/commands/kmm-*.md               — <N> slash commands installed
+  .claude/pipeline-context.json           — project context for the planner agent
+  .claude/settings.json                   — Bash allowlist + hook wiring home
 
 Verify:     PASS
 Skills used: <list>

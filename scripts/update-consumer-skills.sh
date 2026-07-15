@@ -219,9 +219,108 @@ fi
 if $SETUP_AGENTS; then
   CLAUDE_DIR="$(dirname "$AGENT_DIR")"
   AGENTS_MD="$CLAUDE_DIR/AGENTS.md"
+  ROOT_CLAUDE_MD="CLAUDE.md"
+  AI_COLLAB_DOC="docs/reference/ai-collaboration.md"
+  SOURCE_READMES=(
+    "agents/README.md"
+    "rules/README.md"
+    "hooks/README.md"
+    "commands/README.md"
+    "skills/README.md"
+  )
 
   echo ""
   echo "Setting up agent configuration…"
+
+  for readme in "${SOURCE_READMES[@]}"; do
+    if [[ -f "$readme" ]]; then
+      echo "  ✓  $readme already exists"
+      continue
+    fi
+
+    if $DRY_RUN; then
+      echo "  [dry-run] would create $readme"
+      continue
+    fi
+
+    mkdir -p "$(dirname "$readme")"
+    case "$readme" in
+      "agents/README.md")
+        cat > "$readme" <<'EOF'
+# agents/
+
+Project-specific agent personas live here as the canonical source.
+Deploy copies into `.claude/` after edits; do not keep `.claude/` as the only copy.
+EOF
+        ;;
+      "rules/README.md")
+        cat > "$readme" <<'EOF'
+# rules/
+
+Project-specific assistant rules or overlays live here.
+Document the shared policy in `docs/reference/ai-collaboration.md`; keep runtime copies separate.
+EOF
+        ;;
+      "hooks/README.md")
+        cat > "$readme" <<'EOF'
+# hooks/
+
+Project-owned hook scripts live here.
+Wire them through `.claude/settings.json`; do not author the only copy inside runtime config.
+EOF
+        ;;
+      "commands/README.md")
+        cat > "$readme" <<'EOF'
+# commands/
+
+Project-specific slash command sources live here.
+Deploy copies into `.claude/commands/` after edits.
+EOF
+        ;;
+      "skills/README.md")
+        cat > "$readme" <<'EOF'
+# skills/
+
+Project-specific skills live flat under `skills/<skill-name>/`.
+Keep `SKILL.md` as the canonical source and deploy copies into `.claude/skills/`.
+EOF
+        ;;
+    esac
+    echo "  ✅  $readme created"
+  done
+
+  if [[ -f "$AI_COLLAB_DOC" ]]; then
+    echo "  ✓  $AI_COLLAB_DOC already exists"
+  else
+    if $DRY_RUN; then
+      echo "  [dry-run] would create $AI_COLLAB_DOC"
+    else
+      mkdir -p "$(dirname "$AI_COLLAB_DOC")"
+      cat > "$AI_COLLAB_DOC" <<'EOF'
+# AI Collaboration
+
+## Canonical project-owned sources
+
+- `agents/` — project-specific agent personas
+- `rules/` — project-specific assistant rules or overlays
+- `hooks/` — hook script source
+- `commands/` — slash command source
+- `skills/` — project-owned skills
+
+## Claude runtime
+
+- `CLAUDE.md` stays thin and boots Claude into `.claude/AGENTS.md`
+- `.claude/AGENTS.md` is the deployed routing/context copy
+- `.claude/settings.json` owns runtime permissions and hook wiring
+- `.claude/commands/` and `.claude/skills/` are deployed copies, not the only source
+
+## Maintenance rule
+
+Edit project-owned artifacts first, then re-deploy the changed copy into `.claude/`.
+EOF
+      echo "  ✅  $AI_COLLAB_DOC created"
+    fi
+  fi
 
   if [[ -f "$AGENTS_MD" ]]; then
     echo "  ⚠️  $AGENTS_MD already exists — skipping (run /kmm-setup-agents to regenerate)."
@@ -269,6 +368,67 @@ Key commands:
 AGENTS_EOF
       echo "  ✅  $AGENTS_MD generated"
       echo "  ℹ️   Run /kmm-setup-agents for a version tailored to your module graph"
+    fi
+  fi
+
+  if [[ -f "$ROOT_CLAUDE_MD" ]]; then
+    echo "  ✓  $ROOT_CLAUDE_MD already exists"
+  else
+    if $DRY_RUN; then
+      echo "  [dry-run] would write $ROOT_CLAUDE_MD"
+    else
+      cat > "$ROOT_CLAUDE_MD" <<'EOF'
+### Claude Code Project Profile
+
+### Load skills context on initialization
+--system-prompt-file=".claude/AGENTS.md"
+
+### Default flags
+--compact
+--verbose=false
+
+### Canonical project-owned agent sources
+- docs/reference/ai-collaboration.md
+- agents/
+- rules/
+- hooks/
+- commands/
+- skills/
+
+### Ignore generated and vendor directories
+--ignore="**/build/**"
+--ignore="**/.gradle/**"
+--ignore="**/vendor/**"
+--ignore="**/third_party/**"
+EOF
+      echo "  ✅  $ROOT_CLAUDE_MD generated"
+    fi
+  fi
+
+  SETTINGS_JSON="$CLAUDE_DIR/settings.json"
+  if [[ -f "$SETTINGS_JSON" ]]; then
+    echo "  ✓  $SETTINGS_JSON already exists"
+  else
+    if $DRY_RUN; then
+      echo "  [dry-run] would write $SETTINGS_JSON"
+    else
+      mkdir -p "$CLAUDE_DIR"
+      cat > "$SETTINGS_JSON" <<'EOF'
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew *)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(python3 .claude/skills/kotlin-multiplatform-audit/scripts/*)",
+      "Bash(find . -name *.kt*)",
+      "Bash(grep *)"
+    ]
+  }
+}
+EOF
+      echo "  ✅  $SETTINGS_JSON generated"
     fi
   fi
 fi

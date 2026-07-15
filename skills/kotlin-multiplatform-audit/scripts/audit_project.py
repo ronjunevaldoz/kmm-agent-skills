@@ -326,6 +326,23 @@ def _detect_agent_setup(root: Path) -> list[str]:
     if not skills_dir.exists() or not any(skills_dir.iterdir()):
         findings.append("agent-setup [MEDIUM]: .claude/skills/ missing or empty — skills not deployed")
 
+    has_claude_setup = (root / "CLAUDE.md").exists() or claude.exists()
+    source_layout = {
+        "agents/": root / "agents",
+        "rules/": root / "rules",
+        "hooks/": root / "hooks",
+        "commands/": root / "commands",
+        "skills/": root / "skills",
+        "docs/reference/ai-collaboration.md": root / "docs" / "reference" / "ai-collaboration.md",
+    }
+    missing_source_layout = [label for label, path in source_layout.items() if not path.exists()]
+    if has_claude_setup and missing_source_layout:
+        findings.append(
+            "agent-setup [MEDIUM]: project-owned agent scaffold incomplete — missing "
+            + ", ".join(missing_source_layout)
+            + "; keep project-specific agent sources at the repo root and `.claude/` as the deployed runtime"
+        )
+
     # Multi-surface project: AGENTS.md exists but only mentions one surface
     agents_md = claude / "AGENTS.md"
     if agents_md.exists():
@@ -2439,15 +2456,29 @@ def _detect_positive_patterns(root: Path) -> list[dict]:
     # ── Agent setup ───────────────────────────────────────────────────────────
 
     claude = root / ".claude"
-    if (claude / "AGENTS.md").exists() and (claude / "commands").exists() and (root / "CLAUDE.md").exists():
+    source_layout = [
+        root / "agents",
+        root / "rules",
+        root / "hooks",
+        root / "commands",
+        root / "skills",
+        root / "docs" / "reference" / "ai-collaboration.md",
+    ]
+    if (
+        (claude / "AGENTS.md").exists()
+        and (claude / "commands").exists()
+        and (claude / "skills").exists()
+        and (root / "CLAUDE.md").exists()
+        and all(path.exists() for path in source_layout)
+    ):
         lessons.append({
             "skill": "kotlin-multiplatform-audit",
-            "pattern": "Full agent setup (CLAUDE.md + AGENTS.md + commands)",
+            "pattern": "Full Claude scaffold (project-owned sources + deployed runtime)",
             "description": (
-                "Consumer has all three agent setup artifacts in place. "
+                "Consumer keeps both the project-owned source scaffold and the deployed Claude runtime in sync. "
                 "This project is a good reference for what the /kmm-setup-agents command should produce."
             ),
-            "evidence": "ls CLAUDE.md .claude/AGENTS.md .claude/commands/",
+            "evidence": "ls CLAUDE.md agents/ rules/ hooks/ commands/ skills/ docs/reference/ai-collaboration.md .claude/AGENTS.md .claude/commands/ .claude/skills/",
         })
 
     return lessons

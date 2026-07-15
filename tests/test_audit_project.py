@@ -237,6 +237,45 @@ class AuditProjectTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertTrue(any("named color in ui" in f for f in findings))
 
+    def test_flags_incomplete_project_owned_agent_scaffold_when_claude_setup_exists(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "settings.gradle.kts").write_text('rootProject.name = "Demo"\n', encoding="utf-8")
+            (root / "CLAUDE.md").write_text("--system-prompt-file=.claude/AGENTS.md\n", encoding="utf-8")
+            claude = root / ".claude"
+            (claude / "commands").mkdir(parents=True)
+            (claude / "skills" / "demo").mkdir(parents=True)
+            (claude / "AGENTS.md").write_text("# AGENTS\n", encoding="utf-8")
+            (claude / "commands" / "kmm-run-audit.md").write_text("# cmd\n", encoding="utf-8")
+
+            findings = audit_scripts.audit_project(root)
+
+            self.assertTrue(
+                any("project-owned agent scaffold incomplete" in f for f in findings),
+                findings,
+            )
+
+    def test_ignores_complete_project_owned_agent_scaffold(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "settings.gradle.kts").write_text('rootProject.name = "Demo"\n', encoding="utf-8")
+            (root / "CLAUDE.md").write_text("--system-prompt-file=.claude/AGENTS.md\n", encoding="utf-8")
+            for rel in ("agents", "rules", "hooks", "commands", "skills", "docs/reference"):
+                (root / rel).mkdir(parents=True, exist_ok=True)
+            (root / "docs" / "reference" / "ai-collaboration.md").write_text("# AI Collaboration\n", encoding="utf-8")
+            claude = root / ".claude"
+            (claude / "commands").mkdir(parents=True)
+            (claude / "skills" / "demo").mkdir(parents=True)
+            (claude / "AGENTS.md").write_text("# AGENTS\n", encoding="utf-8")
+            (claude / "commands" / "kmm-run-audit.md").write_text("# cmd\n", encoding="utf-8")
+
+            findings = audit_scripts.audit_project(root)
+
+            self.assertFalse(
+                any("project-owned agent scaffold incomplete" in f for f in findings),
+                findings,
+            )
+
     def test_audit_project_ignores_named_color_in_token_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -2115,6 +2154,26 @@ class HarvestProjectTests(unittest.TestCase):
             parsed = _json.loads(result.stdout)
             self.assertIn("findings", parsed)
             self.assertIn("lessons", parsed)
+
+    def test_harvest_detects_full_claude_scaffold_pattern(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "CLAUDE.md").write_text("--system-prompt-file=.claude/AGENTS.md\n", encoding="utf-8")
+            for rel in ("agents", "rules", "hooks", "commands", "skills", "docs/reference"):
+                (root / rel).mkdir(parents=True, exist_ok=True)
+            (root / "docs" / "reference" / "ai-collaboration.md").write_text("# AI Collaboration\n", encoding="utf-8")
+            claude = root / ".claude"
+            (claude / "commands").mkdir(parents=True)
+            (claude / "skills" / "demo").mkdir(parents=True)
+            (claude / "AGENTS.md").write_text("# AGENTS\n", encoding="utf-8")
+
+            lessons = audit_scripts._detect_positive_patterns(root)
+            patterns = [lesson["pattern"] for lesson in lessons]
+
+            self.assertTrue(
+                any("Full Claude scaffold" in pattern for pattern in patterns),
+                patterns,
+            )
 
 
 class HardcodedBaseUrlTests(unittest.TestCase):

@@ -50,6 +50,19 @@ class DocsScopeBoundaryTests(unittest.TestCase):
         self.assertIn("benchmark or performance comparison tables", docs)
         self.assertIn("docs/reference/benchmark-matrix.md", docs)
 
+    def test_claude_scaffold_contract_is_documented_as_project_owned_plus_runtime(self) -> None:
+        normalize = lambda text: " ".join(text.lower().replace("`", "").split())
+
+        expert = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "SKILL.md").read_text(encoding="utf-8"))
+        setup_agents = normalize((REPO_ROOT / "commands" / "kmm-setup-agents.md").read_text(encoding="utf-8"))
+        new_project = normalize((REPO_ROOT / "commands" / "kmm-new-project.md").read_text(encoding="utf-8"))
+
+        for text in (expert, setup_agents, new_project):
+            self.assertIn("rules/", text)
+            self.assertIn("docs/reference/ai-collaboration.md", text)
+            self.assertIn("claude.md", text)
+            self.assertIn("project-owned", text)
+
 
 class CommonFirstSharedCodeTests(unittest.TestCase):
     def test_common_first_formatting_rule_is_explicit(self) -> None:
