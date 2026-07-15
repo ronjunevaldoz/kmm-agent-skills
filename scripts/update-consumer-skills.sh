@@ -265,6 +265,7 @@ if $SETUP_AGENTS; then
   AGENTS_MD="$CLAUDE_DIR/AGENTS.md"
   ROOT_CLAUDE_MD="CLAUDE.md"
   AI_COLLAB_DOC="docs/reference/ai-collaboration.md"
+  AGENT_CATALOG_DOC="docs/reference/agent-catalog.md"
   SOURCE_READMES=(
     "agents/README.md"
     "rules/README.md"
@@ -368,6 +369,11 @@ EOF
 - `commands/` — slash command source
 - `skills/` — project-owned skills
 
+## Docs vs skills
+
+- `docs/*` answers "how is this project designed?"
+- `skills/*` answers "how should an agent work in this repo?"
+
 ## Claude runtime
 
 - `CLAUDE.md` stays thin and boots Claude into `.claude/AGENTS.md`
@@ -385,6 +391,31 @@ Use `rules/` only for small assistant-facing overlays; do not mirror this whole 
 Edit project-owned artifacts first, then re-deploy the changed copy into `.claude/`.
 EOF
       echo "  ✅  $AI_COLLAB_DOC created"
+    fi
+  fi
+
+  if [[ -f "$AGENT_CATALOG_DOC" ]]; then
+    echo "  ✓  $AGENT_CATALOG_DOC already exists"
+  else
+    if $DRY_RUN; then
+      echo "  [dry-run] would create $AGENT_CATALOG_DOC"
+    else
+      mkdir -p "$(dirname "$AGENT_CATALOG_DOC")"
+      cat > "$AGENT_CATALOG_DOC" <<'EOF'
+# Agent Catalog
+
+Use provider-neutral model tiers:
+
+- `flagship-coding`
+- `balanced-coding`
+- `fast-utility`
+- `precision-review`
+
+Keep provider-specific model mapping in this one canonical doc, not in every agent file.
+
+Thin entrypoints like `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` should point here instead of hardcoding stale provider model names.
+EOF
+      echo "  ✅  $AGENT_CATALOG_DOC created"
     fi
   fi
 
@@ -455,6 +486,7 @@ AGENTS_EOF
 
 ### Canonical project-owned agent sources
 - docs/reference/ai-collaboration.md
+- docs/reference/agent-catalog.md
 - agents/
 - rules/     (optional overlays only)
 - hooks/

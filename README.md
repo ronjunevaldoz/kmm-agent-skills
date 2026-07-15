@@ -38,6 +38,17 @@ and feature modules it finds.
 Writes: `.claude/AGENTS.md` (tailored skill routing), `CLAUDE.md` (CLI flags), all consumer
 commands (`kmm-*.md`), deployed skills, and a `settings.json` Bash allowlist.
 
+### Cross-agent repo policy
+
+Downstream repos should keep canonical collaboration policy in:
+
+- [`docs/reference/ai-collaboration.md`](docs/reference/ai-collaboration.md)
+- [`docs/reference/agent-catalog.md`](docs/reference/agent-catalog.md)
+
+Use `docs/*` for stable project design and ownership rules, and `skills/*` for
+repo-local agent execution guidance. Keep `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`
+thin and pointer-based instead of turning them into the only source of truth.
+
 ### Audit an existing project
 
 ```

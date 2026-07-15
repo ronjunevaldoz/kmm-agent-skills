@@ -260,6 +260,7 @@ hooks/README.md
 commands/README.md
 skills/README.md
 docs/reference/ai-collaboration.md
+docs/reference/agent-catalog.md
 ```
 
 Each README should say what belongs there and that `.claude/` is the deployed runtime
@@ -272,8 +273,14 @@ correct frontmatter shape from day one.
 - project-specific artifacts live in `agents/`, `rules/`, `hooks/`, `commands/`, `skills/`
 - `docs/reference/ai-collaboration.md` is the canonical explanation of that layout
 - `rules/` is optional for assistant-specific overlays and must not duplicate the canonical policy doc
+- `docs/*` owns stable project design; `skills/*` owns repo-local execution guidance
 - `.claude/settings.json` owns runtime permissions and hook wiring
 - any edit to a project-owned artifact must be re-deployed into `.claude/`
+
+`docs/reference/agent-catalog.md` should explain:
+- provider-neutral model tiers such as `flagship-coding`, `balanced-coding`, `fast-utility`, `precision-review`
+- provider-specific model mapping belongs in one canonical doc, not in every agent file
+- `AGENTS.md` / `CLAUDE.md` / `GEMINI.md` should point back to this catalog instead of hardcoding stale model names
 
 If any of these files already exist, print their current contents and skip unless the
 user explicitly asks to overwrite them.
@@ -349,6 +356,7 @@ is maintained:
 
 ### Canonical project-owned agent sources
 - docs/reference/ai-collaboration.md
+- docs/reference/agent-catalog.md
 - agents/
 - rules/     (optional overlays only)
 - hooks/

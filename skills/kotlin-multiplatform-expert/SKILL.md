@@ -742,7 +742,10 @@ Layout — flat, `<name>` is the artifact's own name, never the app/project name
 ├── skills/<skill-name>/SKILL.md         ← source
 ├── hooks/<hook-name>.sh                 ← source
 ├── docs/reference/ai-collaboration.md   ← canonical cross-agent policy
-├── CLAUDE.md                            ← thin Claude bootstrap only
+├── docs/reference/agent-catalog.md      ← canonical model-tier mapping
+├── AGENTS.md                            ← optional thin bootstrap
+├── CLAUDE.md                            ← optional thin bootstrap
+├── GEMINI.md                            ← optional thin bootstrap
 └── .claude/
     ├── AGENTS.md                        ← deployed routing/context
     ├── commands/<command-name>.md       ← deployed copy
@@ -750,10 +753,11 @@ Layout — flat, `<name>` is the artifact's own name, never the app/project name
     └── settings.json                    ← permissions + hook wiring
 ```
 
-`CLAUDE.md` should stay thin: point Claude at `.claude/AGENTS.md`, keep the default
-flags there, and refer maintainers to `docs/reference/ai-collaboration.md` for the
-project's canonical collaboration rules. Do not turn `CLAUDE.md` into the only copy of
-the project's agent policy.
+Thin entrypoints (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`) should point to the canonical
+docs, keep only startup-critical guardrails, and avoid becoming the only copy of
+project policy. `docs/reference/agent-catalog.md` owns provider-neutral model tiers and
+provider-specific mappings. Do not hardcode stale provider model names across every
+agent file when one canonical catalog can carry that mapping.
 
 `rules/` exists for optional project-specific rule snippets or assistant overlays that
 should stay project-owned even if only one assistant consumes them today. Do **not**
@@ -761,6 +765,14 @@ copy the same policy text from `docs/reference/ai-collaboration.md` into `rules/
 Keep the explanation canonical in `docs/reference/ai-collaboration.md`; use `rules/`
 only when the project genuinely needs short assistant-facing overlays in addition to
 that canonical doc.
+
+Use this split consistently:
+
+- `docs/*` answers "how is this project designed?"
+- `skills/*` answers "how should an agent work in this repo?"
+
+If a repo-local skill starts retelling architecture docs, stop and move the stable
+design guidance back into `docs/*`.
 
 If a project has no custom artifacts yet, still scaffold these folders with placeholder
 README files. Empty-but-present source locations make future additions land in the

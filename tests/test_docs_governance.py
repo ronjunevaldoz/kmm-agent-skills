@@ -63,6 +63,22 @@ class DocsScopeBoundaryTests(unittest.TestCase):
             self.assertIn("claude.md", text)
             self.assertIn("project-owned", text)
 
+    def test_cross_agent_reference_docs_cover_docs_vs_skills_and_model_tiers(self) -> None:
+        ai = (REPO_ROOT / "docs" / "reference" / "ai-collaboration.md").read_text(encoding="utf-8").lower()
+        catalog = (REPO_ROOT / "docs" / "reference" / "agent-catalog.md").read_text(encoding="utf-8").lower()
+
+        self.assertIn("how is this project designed?", ai)
+        self.assertIn("how should an agent work in this repo?", ai)
+        self.assertIn("agents.md", ai)
+        self.assertIn("claude.md", ai)
+        self.assertIn("gemini.md", ai)
+
+        self.assertIn("flagship-coding", catalog)
+        self.assertIn("balanced-coding", catalog)
+        self.assertIn("fast-utility", catalog)
+        self.assertIn("precision-review", catalog)
+        self.assertIn("provider-specific model mapping", catalog)
+
 
 class CommonFirstSharedCodeTests(unittest.TestCase):
     def test_common_first_formatting_rule_is_explicit(self) -> None:

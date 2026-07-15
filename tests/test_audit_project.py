@@ -263,6 +263,7 @@ class AuditProjectTests(unittest.TestCase):
             for rel in ("agents", "rules", "hooks", "commands", "skills", "docs/reference"):
                 (root / rel).mkdir(parents=True, exist_ok=True)
             (root / "docs" / "reference" / "ai-collaboration.md").write_text("# AI Collaboration\n", encoding="utf-8")
+            (root / "docs" / "reference" / "agent-catalog.md").write_text("# Agent Catalog\n", encoding="utf-8")
             claude = root / ".claude"
             (claude / "commands").mkdir(parents=True)
             (claude / "skills" / "demo").mkdir(parents=True)
@@ -2162,6 +2163,7 @@ class HarvestProjectTests(unittest.TestCase):
             for rel in ("agents", "rules", "hooks", "commands", "skills", "docs/reference"):
                 (root / rel).mkdir(parents=True, exist_ok=True)
             (root / "docs" / "reference" / "ai-collaboration.md").write_text("# AI Collaboration\n", encoding="utf-8")
+            (root / "docs" / "reference" / "agent-catalog.md").write_text("# Agent Catalog\n", encoding="utf-8")
             claude = root / ".claude"
             (claude / "commands").mkdir(parents=True)
             (claude / "skills" / "demo").mkdir(parents=True)

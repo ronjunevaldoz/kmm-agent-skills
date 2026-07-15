@@ -334,6 +334,7 @@ def _detect_agent_setup(root: Path) -> list[str]:
         "commands/": root / "commands",
         "skills/": root / "skills",
         "docs/reference/ai-collaboration.md": root / "docs" / "reference" / "ai-collaboration.md",
+        "docs/reference/agent-catalog.md": root / "docs" / "reference" / "agent-catalog.md",
     }
     missing_source_layout = [label for label, path in source_layout.items() if not path.exists()]
     if has_claude_setup and missing_source_layout:
@@ -2521,6 +2522,7 @@ def _detect_positive_patterns(root: Path) -> list[dict]:
         root / "commands",
         root / "skills",
         root / "docs" / "reference" / "ai-collaboration.md",
+        root / "docs" / "reference" / "agent-catalog.md",
     ]
     if (
         (claude / "AGENTS.md").exists()
@@ -2536,7 +2538,7 @@ def _detect_positive_patterns(root: Path) -> list[dict]:
                 "Consumer keeps both the project-owned source scaffold and the deployed Claude runtime in sync. "
                 "This project is a good reference for what the /kmm-setup-agents command should produce."
             ),
-            "evidence": "ls CLAUDE.md agents/ rules/ hooks/ commands/ skills/ docs/reference/ai-collaboration.md .claude/AGENTS.md .claude/commands/ .claude/skills/",
+            "evidence": "ls CLAUDE.md agents/ rules/ hooks/ commands/ skills/ docs/reference/ai-collaboration.md docs/reference/agent-catalog.md .claude/AGENTS.md .claude/commands/ .claude/skills/",
         })
 
     return lessons

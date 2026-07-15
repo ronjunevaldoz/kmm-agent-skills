@@ -60,6 +60,7 @@ class UpdateConsumerSkillsScriptTests(unittest.TestCase):
             self.assertTrue((project / ".claude" / "settings.json").is_file())
             self.assertTrue((project / "CLAUDE.md").is_file())
             self.assertTrue((project / "docs" / "reference" / "ai-collaboration.md").is_file())
+            self.assertTrue((project / "docs" / "reference" / "agent-catalog.md").is_file())
             self.assertTrue((project / "agents" / "README.md").is_file())
             self.assertTrue((project / "rules" / "README.md").is_file())
             self.assertTrue((project / "hooks" / "README.md").is_file())
