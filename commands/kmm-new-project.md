@@ -663,6 +663,10 @@ CLAUDE.md
 - `.claude/settings.json` owns runtime permissions and hook wiring
 - any project-owned agent artifact must be re-deployed into `.claude/` after edits
 
+`skills/README.md` should include a minimal `skills/<name>/SKILL.md` starter template
+with YAML frontmatter (`name`, `description`) and a note that project-owned custom
+skills are synced into `.claude/skills/<name>/`.
+
 `CLAUDE.md` should stay thin and only bootstrap Claude into the generated runtime:
 
 ```markdown
@@ -849,6 +853,10 @@ Commands to copy (these are safe for consumer projects):
 Do NOT copy repo-internal commands (`kmm-new-skill.md`, `kmm-modify-skill.md`,
 `kmm-maintain-docs.md`, `kmm-release-notes.md`, `kmm-setup-hooks.md`) —
 those are for maintaining this skills repo, not consumer projects.
+
+**Deploy skills into `.claude/skills/`** in two passes:
+- first copy the shared `kmm-agent-skills/skills/` bundle
+- then sync any project-owned custom skills from `skills/<name>/` into `.claude/skills/<name>/`
 
 **Write `.claude/pipeline-context.json`** — seed the project planner with initial context:
 

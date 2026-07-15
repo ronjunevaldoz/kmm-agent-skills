@@ -263,7 +263,9 @@ docs/reference/ai-collaboration.md
 ```
 
 Each README should say what belongs there and that `.claude/` is the deployed runtime
-copy, not the only source of truth.
+copy, not the only source of truth. `skills/README.md` should include a minimal
+`skills/<name>/SKILL.md` starter template so the first project-owned custom skill has a
+correct frontmatter shape from day one.
 
 `docs/reference/ai-collaboration.md` should explain:
 - `CLAUDE.md` is a thin bootstrap that points to `.claude/AGENTS.md`
@@ -324,6 +326,8 @@ If `.claude/skills/` does not exist, create it and copy all skills from the
 
 If `.claude/skills/` already exists, run the equivalent of `update-consumer-skills.sh`
 to sync changed skills without prompting for each file (skills are passive docs).
+That sync includes both the shared `kmm-agent-skills` bundle and any project-owned
+custom skills under `skills/<name>/`.
 
 ---
 

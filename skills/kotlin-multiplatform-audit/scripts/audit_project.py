@@ -1653,6 +1653,64 @@ def _detect_project_skill_standards(root: Path) -> list[str]:
     return findings
 
 
+def _detect_project_skill_deployment_drift(root: Path) -> list[str]:
+    """Flag project-owned skills under ./skills/ that were never deployed or drifted
+    from their deployed `.claude/skills/` copies.
+
+    Project-owned custom skills are authored at the repo root and then copied into the
+    assistant runtime directory. If the deployed copy is missing or stale, Claude loads
+    behavior that no longer matches the source of truth.
+    """
+    findings: list[str] = []
+    skills_dir = root / "skills"
+    deployed_skills_dir = root / ".claude" / "skills"
+    if not skills_dir.is_dir():
+        return findings
+
+    for skill_dir in sorted(p for p in skills_dir.iterdir() if p.is_dir()):
+        if _is_excluded(skill_dir, root):
+            continue
+        source_skill_md = skill_dir / "SKILL.md"
+        if not source_skill_md.is_file():
+            continue
+
+        deployed_dir = deployed_skills_dir / skill_dir.name
+        deployed_skill_md = deployed_dir / "SKILL.md"
+        rel = skill_dir.relative_to(root).as_posix()
+        if not deployed_skill_md.is_file():
+            findings.append(
+                f"project skill not deployed [MEDIUM]: {rel} — deploy it to "
+                f".claude/skills/{skill_dir.name}/ so Claude loads the project-owned copy"
+            )
+            continue
+
+        source_files: dict[str, str] = {}
+        deployed_files: dict[str, str] = {}
+        for path in skill_dir.rglob("*"):
+            if path.is_file():
+                source_files[path.relative_to(skill_dir).as_posix()] = path.read_text(encoding="utf-8", errors="ignore")
+        for path in deployed_dir.rglob("*"):
+            if path.is_file():
+                deployed_files[path.relative_to(deployed_dir).as_posix()] = path.read_text(encoding="utf-8", errors="ignore")
+
+        if set(source_files) != set(deployed_files):
+            findings.append(
+                f"project skill deployment drift [MEDIUM]: {rel} — deployed file set in "
+                f".claude/skills/{skill_dir.name}/ does not match the project-owned source"
+            )
+            continue
+
+        for rel_file, source_text in source_files.items():
+            if deployed_files.get(rel_file) != source_text:
+                findings.append(
+                    f"project skill deployment drift [MEDIUM]: {rel}/{rel_file} — "
+                    f"deployed copy under .claude/skills/{skill_dir.name}/ is stale"
+                )
+                break
+
+    return findings
+
+
 _COMPONENT_PREFIX_ROW_RE = re.compile(r"\|\s*Component prefix\s*\|\s*([A-Za-z][A-Za-z0-9]*)\s*\|")
 _APP_PREFIXED_DECL_RE = re.compile(
     r"\b(?:class|fun|object|val|data class|sealed interface|enum class)\s+(App[A-Z]\w*)"
@@ -2582,6 +2640,7 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Project-owned skill standards (skills/<name>/SKILL.md anatomy) ─────────
     findings.extend(_detect_project_skill_standards(root))
+    findings.extend(_detect_project_skill_deployment_drift(root))
 
     # ── Empty platform-specific source sets ────────────────────────────────────
     findings.extend(_detect_empty_platform_sourceset(root))

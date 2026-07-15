@@ -152,6 +152,7 @@ the user and the other skills what to do next.
 - **`.claude/commands/` missing or empty** → MEDIUM — consumer commands (`/kmm-run-audit`, `/kmm-implement-feature`, `/kmm-verify`) not installed
 - **`.claude/skills/` missing or empty** → MEDIUM — skills not deployed; trigger keywords won't activate skill content
 - **Project-owned Claude scaffold incomplete** → MEDIUM — if a project already has `CLAUDE.md`/`.claude/`, it should also keep `agents/`, `rules/`, `hooks/`, `commands/`, `skills/`, and `docs/reference/ai-collaboration.md` in the repo root so project-specific agent work is versioned outside runtime-only files
+- **Project-owned custom skill not deployed or stale** → MEDIUM — every `skills/<name>/SKILL.md` must be copied into `.claude/skills/<name>/` after edits; missing or drifted deployed copies mean Claude loads outdated behavior
 - **`AGENTS.md` covers only one surface of a multi-surface project** → MEDIUM — e.g., engine-only AGENTS.md in a project that also has Studio/UI modules; the active development surface has no routing
 - **`MviViewModel` base class defined in a feature module** → MEDIUM — should live in `:shared:core` or `:core:mvi` so future features can extend it without cross-feature imports
 - **Theme composable wraps `MaterialTheme`** → MEDIUM — blocks custom token ownership and `StyleScope` integration; use `CompositionLocalProvider` with `AppTheme` instead

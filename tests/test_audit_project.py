@@ -2301,10 +2301,9 @@ class ProjectSkillStandardsTests(unittest.TestCase):
     def test_compliant_skill_has_no_findings(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            self._write(
-                root, "skills/my-skill/SKILL.md",
-                "---\nname: my-skill\ndescription: Does a thing.\n---\n\nShort body.\n",
-            )
+            skill_text = "---\nname: my-skill\ndescription: Does a thing.\n---\n\nShort body.\n"
+            self._write(root, "skills/my-skill/SKILL.md", skill_text)
+            self._write(root, ".claude/skills/my-skill/SKILL.md", skill_text)
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any(f.startswith("project skill") for f in findings))
 
@@ -2313,6 +2312,42 @@ class ProjectSkillStandardsTests(unittest.TestCase):
             root = Path(tmp)
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any(f.startswith("project skill") for f in findings))
+
+    def test_flags_project_skill_missing_deployed_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "skills/my-skill/SKILL.md",
+                "---\nname: my-skill\ndescription: Does a thing.\n---\n\nShort body.\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("project skill not deployed" in f for f in findings))
+
+    def test_flags_project_skill_deployment_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "skills/my-skill/SKILL.md",
+                "---\nname: my-skill\ndescription: Source copy.\n---\n\nSource body.\n",
+            )
+            self._write(
+                root, ".claude/skills/my-skill/SKILL.md",
+                "---\nname: my-skill\ndescription: Deployed copy.\n---\n\nOld body.\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("project skill deployment drift" in f for f in findings))
+
+    def test_ignores_project_skill_when_deployed_copy_matches(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            skill_text = "---\nname: my-skill\ndescription: Does a thing.\n---\n\nShort body.\n"
+            self._write(root, "skills/my-skill/SKILL.md", skill_text)
+            self._write(root, ".claude/skills/my-skill/SKILL.md", skill_text)
+            self._write(root, "skills/my-skill/references/usage.md", "# usage\n")
+            self._write(root, ".claude/skills/my-skill/references/usage.md", "# usage\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("project skill not deployed" in f for f in findings))
+            self.assertFalse(any("project skill deployment drift" in f for f in findings))
 
 
 class LongStackedCommentBlockTests(unittest.TestCase):

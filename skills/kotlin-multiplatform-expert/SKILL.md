@@ -779,7 +779,9 @@ recognizes.
 Deploy the copy after every edit to the source — a stale `.claude/` copy that's drifted
 from its project-owned source is worse than no source at all, since it looks authoritative
 but silently isn't. Simple `cp`/`rsync` is enough; no need for a dedicated script unless
-the project has many artifacts to keep in sync.
+the project has many artifacts to keep in sync. If the project uses
+`update-consumer-skills.sh`, that sync path should copy project-owned custom skills from
+`skills/<name>/` into `.claude/skills/<name>/` as part of the normal refresh.
 
 **Real gap this closes**: a review of a real KMP game-engine project found two custom
 agent definitions (`ecs-dev`, `game-framework-dev`) authored directly into
@@ -789,8 +791,9 @@ authoring work lived in a directory this rule now treats as deploy-only.
 **Audited automatically**: `kotlin-multiplatform-audit`'s `_detect_project_skill_standards`
 checks every `skills/<name>/` folder it finds against the real skill anatomy — SKILL.md
 present, opening YAML frontmatter with `name`/`description`, body under ~500 lines unless
-a `references/` subdirectory exists. Run it any time a project skill is added or edited,
-not just once at creation.
+a `references/` subdirectory exists. It also checks that the deployed `.claude/skills/`
+copy exists and is not stale. Run it any time a project skill is added or edited, not
+just once at creation.
 
 ## Recommendation Format
 

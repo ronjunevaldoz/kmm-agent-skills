@@ -109,24 +109,26 @@ fi
 # ── Pull latest ───────────────────────────────────────────────────────────────
 
 echo "Checking for updates…"
+REMOTE_OK=true
 git -C "$SKILLS_SOURCE" fetch origin main --quiet 2>/dev/null || {
-  echo "  ⚠️  Could not reach remote — running with local skills (v$OLD_VERSION)"
-  exit 0
+  echo "  ⚠️  Could not reach remote — continuing with local skills (v$OLD_VERSION)"
+  REMOTE_OK=false
 }
 
-BEHIND=$(git -C "$SKILLS_SOURCE" rev-list HEAD..origin/main --count 2>/dev/null || echo "0")
+BEHIND="0"
+if $REMOTE_OK; then
+  BEHIND=$(git -C "$SKILLS_SOURCE" rev-list HEAD..origin/main --count 2>/dev/null || echo "0")
+fi
 
 if [[ "$BEHIND" == "0" ]]; then
   echo "  ✅  Already up to date (v$OLD_VERSION)"
-  echo ""
-  exit 0
-fi
-
-if $DRY_RUN; then
-  echo "  [dry-run] would pull $BEHIND commit(s) from origin/main"
 else
-  git -C "$SKILLS_SOURCE" pull origin main --ff-only --quiet
-  echo "  ✅  Pulled $BEHIND commit(s) from origin/main"
+  if $DRY_RUN; then
+    echo "  [dry-run] would pull $BEHIND commit(s) from origin/main"
+  else
+    git -C "$SKILLS_SOURCE" pull origin main --ff-only --quiet
+    echo "  ✅  Pulled $BEHIND commit(s) from origin/main"
+  fi
 fi
 
 NEW_VERSION="?"
@@ -141,7 +143,7 @@ echo ""
 
 # ── Deploy skills (auto — passive reference docs) ─────────────────────────────
 
-echo "Deploying skills to $AGENT_DIR…"
+echo "Deploying skills to ${AGENT_DIR}…"
 
 if $DRY_RUN; then
   CHANGED=$(git -C "$SKILLS_SOURCE" diff "HEAD@{1}..HEAD" --name-only -- skills/ 2>/dev/null | wc -l | tr -d ' ')
@@ -149,6 +151,48 @@ if $DRY_RUN; then
 else
   cp -r "$SKILLS_SOURCE/skills/"* "$AGENT_DIR/"
   echo "  ✅  Skills deployed"
+fi
+
+# ── Deploy project-owned custom skills (auto — source of truth at ./skills) ──
+
+echo ""
+echo "Syncing project-owned custom skills…"
+
+CUSTOM_SKILLS_COUNT=0
+if [[ -d "skills" ]]; then
+  for skill_dir in skills/*; do
+    [[ -d "$skill_dir" ]] || continue
+    skill_name="$(basename "$skill_dir")"
+    [[ "$skill_name" == "README.md" ]] && continue
+    [[ -f "$skill_dir/SKILL.md" ]] || continue
+    CUSTOM_SKILLS_COUNT=$((CUSTOM_SKILLS_COUNT + 1))
+
+    if [[ -d "$SKILLS_SOURCE/skills/$skill_name" ]]; then
+      echo "  ❌  project-owned skill '$skill_name' collides with a bundled kmm-agent-skills skill."
+      echo "      Rename the project-owned skill (for example, make it app-specific) and run again."
+      exit 1
+    fi
+
+    target="$AGENT_DIR/$skill_name"
+    if $DRY_RUN; then
+      echo "  [dry-run] would sync $skill_dir/ → $target/"
+      continue
+    fi
+
+    mkdir -p "$target"
+    if command -v rsync >/dev/null 2>&1; then
+      rsync -a --delete "$skill_dir/" "$target/"
+    else
+      rm -rf "$target"
+      mkdir -p "$AGENT_DIR"
+      cp -R "$skill_dir" "$AGENT_DIR/"
+    fi
+    echo "  ✅  project skill synced: $skill_name"
+  done
+fi
+
+if [[ "$CUSTOM_SKILLS_COUNT" == "0" ]]; then
+  echo "  ℹ️   No project-owned custom skills found under ./skills/"
 fi
 
 # ── Changelog excerpt ─────────────────────────────────────────────────────────
@@ -283,6 +327,23 @@ EOF
 
 Project-specific skills live flat under `skills/<skill-name>/`.
 Keep `SKILL.md` as the canonical source and deploy copies into `.claude/skills/`.
+
+Minimal starter:
+
+```md
+skills/my-project-skill/SKILL.md
+---
+name: my-project-skill
+description: Short trigger-oriented description of what this skill handles.
+---
+
+## When to Use This Skill
+- Use this for project-specific work only.
+
+## Rules
+- Keep this skill project-owned.
+- Re-deploy after edits so `.claude/skills/my-project-skill/` stays in sync.
+```
 EOF
         ;;
     esac
