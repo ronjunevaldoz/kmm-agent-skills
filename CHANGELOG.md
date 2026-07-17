@@ -2,6 +2,18 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.85.0] — 2026-07-18
+
+### Added
+
+- feat(agents): add QA engineer, fix stale test_skill_scripts.py references
+
+### Fixed
+
+- fix(layout-system): use box-drawing chars for wireframe borders
+
+---
+
 ## [v1.84.0] — 2026-07-17
 
 ### Added

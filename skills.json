@@ -1,5 +1,5 @@
 {
-  "version": "1.84.0",
+  "version": "1.85.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1713,7 +1713,7 @@
       "path": "skills/kotlin-multiplatform-layout-system",
       "description": ">-",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-12",
+      "last_updated": "2026-07-17",
       "keywords": [
         "layout system",
         "wireframe",
