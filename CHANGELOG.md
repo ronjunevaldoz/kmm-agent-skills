@@ -2,6 +2,19 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.83.0] — 2026-07-17
+
+### Added
+
+- feat(docs): fill real model tier mapping, add Codex/Gemini scaffold generation
+- feat(audit): detect mixed ShadcnTheme/AppTheme usage, enforce never-combine rule
+
+### Fixed
+
+- fix(docs): split provider capability matrix into its own file
+
+---
+
 ## [v1.82.0] — 2026-07-16
 
 ### Added
