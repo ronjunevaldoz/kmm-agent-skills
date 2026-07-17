@@ -16,7 +16,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-12'
+  last-updated: '2026-07-17'
   keywords:
     - layout system
     - wireframe
@@ -177,10 +177,24 @@ Update this file when a component's dimensions, visibility, or behavior changes.
   alignment. Use short `[label]` placeholders inside the grid. Map labels to emoji
   in a **Legend** line directly below the wireframe.
 - Active nav item: append `*` to the label — e.g. `[nav-1]*`.
-- Borders: `+` at corners/intersections, `-` horizontal, `|` vertical. ASCII only.
+- **Borders: Unicode box-drawing characters, not plain ASCII `+`/`-`/`|`.** Plain ASCII
+  renders visibly uneven in most monospace fonts at junctions; box-drawing characters
+  are purpose-built single-width glyphs (verified: East Asian Width property `Na`/`N`,
+  same width class as ASCII, unlike double-width emoji) that render cleanly in every
+  modern markdown viewer. Exact character per position:
+  | Position | Character | Position | Character |
+  |---|---|---|---|
+  | Horizontal line | `─` | Vertical line | `│` |
+  | Top-left corner | `┌` | Top-right corner | `┐` |
+  | Bottom-left corner | `└` | Bottom-right corner | `┘` |
+  | T-junction (opens right) | `├` | T-junction (opens left) | `┤` |
+  | T-junction (opens down) | `┬` | T-junction (opens up) | `┴` |
+  | Full cross | `┼` | | |
+
+  A hyphen inside a label (`[nav-1]`) is plain text, not a border — never convert it.
 - All rows in a wireframe must be the **same character width**.
-- Sub-region breaks (action rows, input areas): use `|---|` only on the column being
-  split. Other columns keep `|   |` on the same row.
+- Sub-region breaks (action rows, input areas): use `│───│` only on the column being
+  split. Other columns keep `│   │` on the same row.
 - Column widths are fixed per wireframe. Pick widths that reflect real proportions,
   then hold them across every row in that wireframe.
 - **Scrollable regions:** add `[scroll]` to the right side of the first content row
@@ -200,7 +214,7 @@ Choose widths based on the project's actual layout proportions:
 | Main content area   | remainder          | Always `flex 1`                    |
 | Full-width canvas   | all remaining      | When secondary panel is hidden     |
 
-Total row width (including all `|` and `-` borders) must be the same for every row.
+Total row width (including all `│` and `─` borders) must be the same for every row.
 
 ---
 
@@ -212,20 +226,20 @@ project's real component name, size, label, or content.
 ### Pattern A — narrow nav + secondary panel + main area
 
 ```
-+----------+------------------+----------------------------------------------+
-| <Nav>    | <Side Panel>     | <Main Area>                                  |
-| <N> dp   | <N> dp           | flex 1                                       |
-+----------+------------------+----------------------------------------------+
-|          |                  |                                              |
-| [nav-1]* | <item>           | <primary content>                            |
-| [nav-2]  | <item>           | <primary content>                            |
-| [nav-3]  | <item>           |                                              |
-|          |                  |                                              |
-|          |                  |----------------------------------------------|
-| [nav-4]  |                  | <action row>                                 |
-| [nav-5]  |                  |----------------------------------------------|
-|          |                  | <input area>                                 |
-+----------+------------------+----------------------------------------------+
+┌──────────┬──────────────────┬──────────────────────────────────────────────┐
+│ <Nav>    │ <Side Panel>     │ <Main Area>                                  │
+│ <N> dp   │ <N> dp           │ flex 1                                       │
+├──────────┼──────────────────┼──────────────────────────────────────────────┤
+│          │                  │                                              │
+│ [nav-1]* │ <item>           │ <primary content>                            │
+│ [nav-2]  │ <item>           │ <primary content>                            │
+│ [nav-3]  │ <item>           │                                              │
+│          │                  │                                              │
+│          │                  │──────────────────────────────────────────────│
+│ [nav-4]  │                  │ <action row>                                 │
+│ [nav-5]  │                  │──────────────────────────────────────────────│
+│          │                  │ <input area>                                 │
+└──────────┴──────────────────┴──────────────────────────────────────────────┘
 Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>
         [nav-4] = <name>  [nav-5] = <name>  * = active
 ```
@@ -233,22 +247,22 @@ Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>
 ### Pattern B — narrow nav + main area (secondary panel hidden)
 
 ```
-+----------+------------------------------------------------------------+
-| <Nav>    | <Main Area>                                                |
-| <N> dp   | flex 1  (<Side Panel> not rendered)                        |
-+----------+------------------------------------------------------------+
-|          |                                                            |
-| [nav-1]  | [tab] <Tab A>  [tab] <Tab B>  [tab] <Tab C>                |
-|          +------------------------------------------------------------+
-| [nav-2]* |                                                            |
-|          |  +--------+  +--------+  +--------+  +--------+            |
-|          |  |        |  |        |  |        |  |        |            |
-|          |  +--------+  +--------+  +--------+  +--------+            |
-|          |  <label>      <label>      <label>     <label>             |
-|          |                                                            |
-| [nav-3]  |                                                            |
-| [nav-4]  |                                                            |
-+----------+------------------------------------------------------------+
+┌──────────┬────────────────────────────────────────────────────────────┐
+│ <Nav>    │ <Main Area>                                                │
+│ <N> dp   │ flex 1  (<Side Panel> not rendered)                        │
+├──────────┼────────────────────────────────────────────────────────────┤
+│          │                                                            │
+│ [nav-1]  │ [tab] <Tab A>  [tab] <Tab B>  [tab] <Tab C>                │
+│          ├────────────────────────────────────────────────────────────┤
+│ [nav-2]* │                                                            │
+│          │  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐            │
+│          │  │        │  │        │  │        │  │        │            │
+│          │  └────────┘  └────────┘  └────────┘  └────────┘            │
+│          │  <label>      <label>      <label>     <label>             │
+│          │                                                            │
+│ [nav-3]  │                                                            │
+│ [nav-4]  │                                                            │
+└──────────┴────────────────────────────────────────────────────────────┘
 Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>
         [nav-4] = <name>  * = active
 ```
@@ -256,19 +270,19 @@ Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>
 ### Pattern C — modal / sheet overlay
 
 ```
-+----------+------------------------------------------------------------+
-| <Nav>    | [canvas stays in place — no swap]                          |
-| <N> dp   |                                                            |
-+----------+------------------------------------------------------------+
-|          |                                                            |
-| [nav-1]  |     +--------------------------------------------------+   |
-|          |     | <Sheet title>                                  X |   |
-| [nav-2]  |     | ------------------------------------------------ |   |
-|          |     | <content line>                                   |   |
-| [nav-3]* |     | <content line>                                   |   |
-| [nav-4]  |     | <content line>                                   |   |
-|          |     +--------------------------------------------------+   |
-+----------+------------------------------------------------------------+
+┌──────────┬────────────────────────────────────────────────────────────┐
+│ <Nav>    │ [canvas stays in place — no swap]                          │
+│ <N> dp   │                                                            │
+├──────────┼────────────────────────────────────────────────────────────┤
+│          │                                                            │
+│ [nav-1]  │     ┌──────────────────────────────────────────────────┐   │
+│          │     │ <Sheet title>                                  X │   │
+│ [nav-2]  │     │ ──────────────────────────────────────────────── │   │
+│          │     │ <content line>                                   │   │
+│ [nav-3]* │     │ <content line>                                   │   │
+│ [nav-4]  │     │ <content line>                                   │   │
+│          │     └──────────────────────────────────────────────────┘   │
+└──────────┴────────────────────────────────────────────────────────────┘
 Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>
         [nav-4] = <name>  * = active
 ```
@@ -278,20 +292,20 @@ Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>
 For login, onboarding, splash, or any screen where no nav chrome is visible.
 
 ```
-+------------------------------------------------------------------------+
-| <Screen Title>                                                         |
-| full width                                                             |
-+------------------------------------------------------------------------+
-|                                                                        |
-|  <header / hero content>                                               |
-|                                                                        |
-|  <content row>                                       [scroll]          |
-|  <content row>                                                         |
-|  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~   |
-|                                                                        |
-|  [ <Primary action>                                                  ] |
-|  <secondary action>                                                    |
-+------------------------------------------------------------------------+
+┌────────────────────────────────────────────────────────────────────────┐
+│ <Screen Title>                                                         │
+│ full width                                                             │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  <header / hero content>                                               │
+│                                                                        │
+│  <content row>                                       [scroll]          │
+│  <content row>                                                         │
+│  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~   │
+│                                                                        │
+│  [ <Primary action>                                                  ] │
+│  <secondary action>                                                    │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -507,6 +521,7 @@ Keep explanations short. The wireframe is the primary output — do not narrate 
 
 | Date | Change |
 |---|---|
+| 2026-07-17 | Switched wireframe borders from plain ASCII (`+`/`-`/`|`) to Unicode box-drawing characters (`┌┐└┘├┤┬┴┼─│`) — plain ASCII renders visibly uneven at junctions in most monospace fonts; box-drawing glyphs are purpose-built single-width characters (verified: same East Asian Width class as ASCII, unlike double-width emoji) that render cleanly everywhere. Converted all 4 templates in this file and in `create_wireframe.py`'s `PATTERNS` dict programmatically (a hand-converted first attempt corrupted label hyphens like `[nav-1]` into `[nav─1]` — caught before shipping, fixed by only converting `-` adjacent to another border character). Also found and fixed a real, pre-existing bug this surfaced: `create_wireframe.py`'s Pattern D `full width` line was 1 character shorter than every other row, violating this skill's own same-width rule. |
 | 2026-07-12 | Added "Translating an External HTML/CSS Wireframe" — a real consumer project had an HTML wireframe implemented incorrectly (`ShadcnTextField` given a hallucinated `singleLine` parameter instead of using the real, dedicated `ShadcnTextarea` component). New structural mapping table (flex/grid → Row/Column, `<textarea>` → verify the project's actual multi-line shape, icon webfont classes → resolve via imagevector-generator, never assumed 1:1), and a hard rule: never assume a Compose component's parameters by analogy to the source HTML or to Compose's own API shape. Translates into this skill's existing `docs/layout-system/*.md` format — no parallel format for HTML sources. Expanded the mapping table with 6 more verified constructs (checkbox, radio group, range slider, table, modal dialog, file input — the last one has no shadcn-compose equivalent at all, confirmed rather than assumed) using `kotlin-multiplatform-shadcn-compose`'s new `fetch_component_signature.py`. 2 new anti-patterns. |
 | 2026-07-09 | The one-screen-per-file rule was documented but had no enforcement beyond `create_wireframe.py` refusing to overwrite — a hand-edited file could still merge two screens together silently. New `kotlin-multiplatform-audit` detector `combined layout screen file [MEDIUM]` flags any `docs/layout-system/*.md` file (other than `_components.md`) with more than one top-level heading. |
 | 2026-07-03 | Added a repo-relative fallback path for generate_slot_scaffold.py — `~/.claude/skills/...` only resolves in a Claude Code install; Codex CLI and Gemini CLI installs need the `skills/...` relative path (see INSTALL.md). |
