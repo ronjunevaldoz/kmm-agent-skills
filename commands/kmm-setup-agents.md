@@ -326,6 +326,52 @@ show a one-line diff summary and ask `[update/skip]` before overwriting.
 
 ---
 
+## Step 6a — Deploy to Codex and Gemini (ask first, project-scoped only)
+
+Ask the user: "Also deploy this project's agents/commands to Codex CLI and/or Gemini
+CLI? [codex/gemini/both/skip]" — never deploy silently, this is a persistent addition
+to the project's own repo, not just this machine's home directory.
+
+**Real, verified capability per provider — do not assume symmetry** (see
+`docs/reference/ai-collaboration.md`'s Per-Provider Capability Matrix):
+- Codex CLI: subagents only (`.codex/agents/*.toml`), no custom-commands mechanism
+- Gemini CLI: commands only (`.gemini/commands/*.toml`), no confirmed subagent mechanism
+
+If the user chose `codex` or `both`, for each file in `agents/*.md` (this project's
+own project-owned agent sources — not `kmm-agent-skills`' own `agents/` directory,
+which are internal to that repo, not deployable), translate to
+`.codex/agents/<name>.toml`:
+
+```toml
+name = "<from the .md frontmatter's name field>"
+description = "<from the .md frontmatter's description field>"
+developer_instructions = """
+<the .md file's body, verbatim>
+"""
+```
+
+Only include `model` if the source frontmatter's `model:` value is a real, verified
+Codex model id — check `docs/reference/agent-catalog.md`'s Mapping Rule table for the
+current one rather than guessing; omit the field entirely if unverified.
+
+If the user chose `gemini` or `both`, for each file in `commands/*.md` (this
+project's own project-owned command sources), translate to
+`.gemini/commands/<name>.toml`:
+
+```toml
+description = "<one-line summary — the command file's first heading/description line>"
+prompt = """
+<the .md file's body, with every $ARGUMENTS occurrence rewritten to {{args}}>
+"""
+```
+
+**Tell the user explicitly, in the same message, that translated content may
+reference Claude-specific tool names or conventions (Read/Edit/Bash/Skill) that don't
+map cleanly to Codex/Gemini's own tool surface — review the generated TOML before
+relying on it, this isn't a guaranteed verbatim port.**
+
+---
+
 ## Step 7 — Deploy skills
 
 If `.claude/skills/` does not exist, create it and copy all skills from the
@@ -416,6 +462,8 @@ Generated:
   ✅ .claude/commands/                         — <N> consumer commands installed
   ✅ .claude/skills/                           — <N> skills deployed
   ✅ .claude/settings.json                     — Bash allowlist + hook wiring home
+  <if deployed> .codex/agents/                 — <N> subagents translated to TOML
+  <if deployed> .gemini/commands/              — <N> commands translated to TOML
 
 Detected skill set:
   <list of skills matched from libs.versions.toml>

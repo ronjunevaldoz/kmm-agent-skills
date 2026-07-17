@@ -22,30 +22,55 @@ These names are intentionally provider-neutral.
 Keep the mapping from capability tier -> concrete provider model in one canonical doc,
 not in every agent file.
 
-For example, maintain a table like:
+Anthropic column below is filled with real, currently-valid values — this repo's own
+agent files (and `awaken`'s) use exactly these short aliases in `model:`, verified, not
+guessed. OpenAI and Google columns are deliberately left for you to fill in yourself,
+checked directly against each provider's own current docs immediately before use — an
+attempt to verify them here returned model names that didn't match either provider's
+real naming convention (almost certainly a stale or fabricated summary), so this doc
+does not propagate an unverified guess into something you'd copy into a real config.
 
-| Tier | OpenAI | Anthropic | Google |
+| Tier | OpenAI (verify before filling) | Anthropic | Google (verify before filling) |
 |---|---|---|---|
-| `flagship-coding` | current recommended flagship coding model | current recommended flagship coding model | current recommended flagship coding model |
-| `balanced-coding` | current recommended balanced coding model | current recommended balanced coding model | current recommended balanced coding model |
-| `fast-utility` | current recommended fast utility model | current recommended fast utility model | current recommended fast utility model |
-| `precision-review` | current recommended review model | current recommended review model | current recommended review model |
+| `flagship-coding` | — | `opus` | — |
+| `balanced-coding` | — | `sonnet` | — |
+| `fast-utility` | — | `haiku` | — |
+| `precision-review` | — | `opus` | — |
 
 Update the concrete names when provider guidance changes. The tier names stay stable.
+Never fill a `—` with a guess — check https://platform.openai.com/docs/models and
+https://ai.google.dev/gemini-api/docs/models directly, since model names change often
+enough that anything written here today could already be stale.
 
 ## Agent File Rule
 
-Repo-local agent files should:
+**A real agent file's `model:` frontmatter field must be a real, resolvable model id
+(e.g. `sonnet`, `opus`) — never a tier name literally.** Claude Code (and other
+providers) has no concept of `balanced-coding`; writing it into a real
+`.claude/agents/*.md` file leaves that agent with an unresolvable model and it will
+fail to load or fall back unpredictably.
 
-- reference one of the canonical tiers
-- describe why that tier fits the role
-- avoid hardcoding a provider model unless the project truly depends on one runner
+Tier names exist for *this catalog document* — reasoning about and discussing agent
+roles at a provider-neutral level, and for the mapping table above that resolves a tier
+to the real id per provider. When you actually write or generate a repo-local agent
+file:
 
-Example:
+1. Decide the tier the role needs (using this catalog's descriptions)
+2. Look up that tier's real model id for the target provider in the Mapping Rule table
+3. Write the **real id** into the agent file's `model:` field — not the tier name
 
 ```yaml
+# ❌ WRONG — Claude Code doesn't resolve tier names
 model: balanced-coding
+
+# ✅ CORRECT — real id, looked up from the tier via the Mapping Rule table
+model: sonnet
 ```
+
+Repo-local agent files should still document *which tier* they map to — as a comment
+or in the catalog entry (see Suggested Catalog Fields below) — so the mapping stays
+traceable when provider guidance changes, but the frontmatter itself is always the
+real id.
 
 ## Suggested Catalog Fields
 

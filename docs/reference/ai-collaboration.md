@@ -45,12 +45,39 @@ Do not let `skills/*` grow into duplicated architecture docs.
 ├── AGENTS.md        # optional Codex/OpenAI-facing bootstrap
 ├── CLAUDE.md        # optional Claude-facing bootstrap
 ├── GEMINI.md        # optional Gemini-facing bootstrap
-└── .claude/
-    ├── AGENTS.md
-    ├── commands/
-    ├── skills/
-    └── settings.json
+├── .claude/
+│   ├── AGENTS.md
+│   ├── commands/
+│   ├── skills/
+│   └── settings.json
+├── .codex/
+│   ├── agents/      # *.toml — subagents; Codex has no custom-commands mechanism
+│   └── skills/       # global only (~/.codex/skills) as of this writing, not project-local
+└── .gemini/
+    ├── commands/    # *.toml — custom commands; no confirmed subagent mechanism
+    └── skills/       # global only (~/.gemini/skills) as of this writing, not project-local
 ```
+
+## Per-Provider Capability Matrix
+
+Verified against each provider's own docs — **do not assume symmetry between providers**;
+each supports a different subset, in a different file format:
+
+| Capability | Claude Code | Codex CLI | Gemini CLI |
+|---|---|---|---|
+| Custom commands | ✅ `.claude/commands/*.md` (Markdown) | ❌ not supported — only built-in slash commands | ✅ `.gemini/commands/*.toml` (TOML, `prompt`/`description` fields) |
+| Custom subagents | ✅ `.claude/agents/*.md` (Markdown frontmatter) | ✅ `.codex/agents/*.toml` (TOML — `name`/`description`/`developer_instructions` required) | ❌ not found in current docs |
+| Skills | ✅ `.claude/skills/<name>/SKILL.md` | ✅ `~/.codex/skills` (global only, confirmed) | ✅ `~/.gemini/skills` (global only, confirmed) |
+| Bootstrap file | `CLAUDE.md` | `AGENTS.md` | `GEMINI.md` |
+
+`agents/*.md` and `commands/*.md` at the project root stay the single canonical
+source, authored once in Claude's format. Deploying to Codex/Gemini means
+**translating**, not copying: an agent's Markdown frontmatter (`name`, `description`) +
+body becomes a `.codex/agents/<name>.toml` file (`developer_instructions` = the body);
+a command's Markdown becomes a `.gemini/commands/<name>.toml` file (`prompt` = the
+body, with `$ARGUMENTS` rewritten to Gemini's own `{{args}}` placeholder). Translated
+content may reference Claude-specific tool names or conventions that don't map
+cleanly — review the translated output, don't assume a verbatim dump works.
 
 ## Thin Entrypoints
 

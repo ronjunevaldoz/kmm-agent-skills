@@ -862,6 +862,17 @@ Do NOT copy repo-internal commands (`kmm-new-skill.md`, `kmm-modify-skill.md`,
 `kmm-maintain-docs.md`, `kmm-release-notes.md`, `kmm-setup-hooks.md`) —
 those are for maintaining this skills repo, not consumer projects.
 
+**Ask the user**: "Also deploy this project's agents/commands to Codex CLI and/or
+Gemini CLI? [codex/gemini/both/skip]" — never silently. Real, verified capability per
+provider (see `docs/reference/ai-collaboration.md`'s Per-Provider Capability Matrix):
+Codex CLI has subagents only (`.codex/agents/*.toml`, no custom-commands mechanism);
+Gemini CLI has commands only (`.gemini/commands/*.toml`, no confirmed subagent
+mechanism). If chosen, translate `agents/*.md`/`commands/*.md` (this project's own
+project-owned sources, written in Step 5's scaffold) into the target TOML shape —
+see `/kmm-setup-agents`'s Step 6a for the exact field mapping. Tell the user
+explicitly that translated content may reference Claude-specific tool names that
+don't map cleanly — review before relying on it.
+
 **Deploy skills into `.claude/skills/`** in two passes:
 - first copy the shared `kmm-agent-skills/skills/` bundle
 - then sync any project-owned custom skills from `skills/<name>/` into `.claude/skills/<name>/`
@@ -937,6 +948,8 @@ Agent setup:
   .claude/commands/kmm-*.md               — <N> slash commands installed
   .claude/pipeline-context.json           — project context for the planner agent
   .claude/settings.json                   — Bash allowlist + hook wiring home
+  <if deployed> .codex/agents/            — <N> subagents translated to TOML
+  <if deployed> .gemini/commands/         — <N> commands translated to TOML
 
 Verify:     PASS
 Skills used: <list>
