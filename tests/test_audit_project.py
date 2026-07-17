@@ -2476,5 +2476,131 @@ class MixedDesignSystemUsageTests(unittest.TestCase):
             self.assertFalse(any("mixed component library usage" in f for f in findings))
 
 
+class AgentFileStandardsTests(unittest.TestCase):
+    """No detector existed for the standards of project-owned agent files themselves
+    (agents/*.md, .codex/agents/*.toml) — only whether setup artifacts exist at all.
+    Also catches the exact real bug found in docs/reference/agent-catalog.md this same
+    session: a tier name written into model: instead of a real, resolvable model id.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_agent_md_missing_frontmatter(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "agents/reviewer.md", "# Reviewer\n\nNo frontmatter.\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("project agent missing frontmatter" in f for f in findings))
+
+    def test_flags_agent_md_missing_name(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "agents/reviewer.md",
+                "---\ndescription: Reviews code.\n---\n\nBody.\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("frontmatter missing name" in f for f in findings))
+
+    def test_flags_agent_md_missing_description(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "agents/reviewer.md",
+                "---\nname: reviewer\n---\n\nBody.\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("frontmatter missing description" in f for f in findings))
+
+    def test_flags_tier_name_used_as_model(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "agents/reviewer.md",
+                "---\nname: reviewer\ndescription: Reviews code.\n"
+                "model: balanced-coding\n---\n\nBody.\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("project agent uses tier name as model" in f for f in findings))
+
+    def test_ignores_real_model_id(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "agents/reviewer.md",
+                "---\nname: reviewer\ndescription: Reviews code.\n"
+                "model: sonnet\n---\n\nBody.\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("project agent uses tier name as model" in f for f in findings))
+
+    def test_compliant_agent_md_has_no_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            content = "---\nname: reviewer\ndescription: Reviews code.\n---\n\nBody.\n"
+            self._write(root, "agents/reviewer.md", content)
+            self._write(root, ".claude/agents/reviewer.md", content)
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any(f.startswith("project agent") for f in findings))
+
+    def test_flags_codex_toml_missing_required_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, ".codex/agents/reviewer.toml",
+                'name = "reviewer"\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("codex agent missing required field" in f for f in findings))
+
+    def test_ignores_compliant_codex_toml(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, ".codex/agents/reviewer.toml",
+                'name = "reviewer"\n'
+                'description = "Reviews code."\n'
+                'developer_instructions = """\nReview the diff.\n"""\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("codex agent missing required field" in f for f in findings))
+
+    def test_flags_agent_not_deployed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "agents/reviewer.md",
+                "---\nname: reviewer\ndescription: Reviews code.\n---\n\nBody.\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("project agent not deployed" in f for f in findings))
+
+    def test_flags_agent_deployment_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "agents/reviewer.md",
+                "---\nname: reviewer\ndescription: Reviews code.\n---\n\nBody.\n",
+            )
+            self._write(
+                root, ".claude/agents/reviewer.md",
+                "---\nname: reviewer\ndescription: Reviews code.\n---\n\nStale body.\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("project agent deployment drift" in f for f in findings))
+
+    def test_ignores_synced_agent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            content = "---\nname: reviewer\ndescription: Reviews code.\n---\n\nBody.\n"
+            self._write(root, "agents/reviewer.md", content)
+            self._write(root, ".claude/agents/reviewer.md", content)
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any(f.startswith("project agent") for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()

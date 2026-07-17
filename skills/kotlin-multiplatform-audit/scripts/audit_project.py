@@ -1712,6 +1712,126 @@ def _detect_project_skill_deployment_drift(root: Path) -> list[str]:
     return findings
 
 
+# ── Project-owned agent file standards + deployment drift ───────────────────────
+# Mirrors _detect_project_skill_standards/_detect_project_skill_deployment_drift for
+# agents/*.md (Claude-style source) and .codex/agents/*.toml (Codex's real, verified
+# format — name/description/developer_instructions required, per Codex's own docs).
+# Also catches the exact real bug found and fixed in docs/reference/agent-catalog.md
+# this same session: a tier name (flagship-coding/balanced-coding/fast-utility/
+# precision-review) written into `model:` instead of a real, resolvable model id —
+# Claude Code has no concept of a tier name and the agent's model won't resolve.
+
+_TIER_NAME_LITERALS = {"flagship-coding", "balanced-coding", "fast-utility", "precision-review"}
+_AGENT_MODEL_FIELD_RE = re.compile(r"^model:\s*['\"]?([\w.-]+)['\"]?\s*$", re.MULTILINE)
+_TOML_KEY_RE = {
+    "name": re.compile(r'^\s*name\s*=\s*["\'].+["\']', re.MULTILINE),
+    "description": re.compile(r'^\s*description\s*=\s*["\'].+["\']', re.MULTILINE),
+    "developer_instructions": re.compile(r'^\s*developer_instructions\s*=', re.MULTILINE),
+}
+
+
+def _detect_agent_file_standards(root: Path) -> list[str]:
+    """Flag a project-owned agent file (agents/*.md or .codex/agents/*.toml) that
+    doesn't meet its real, verified format requirements, or a tier-name literal
+    written into a Markdown agent's model: field instead of a real model id.
+    """
+    findings: list[str] = []
+
+    agents_dir = root / "agents"
+    if agents_dir.is_dir():
+        for agent_md in sorted(agents_dir.glob("*.md")):
+            if _is_excluded(agent_md, root):
+                continue
+            try:
+                text = agent_md.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
+                continue
+            rel = agent_md.relative_to(root)
+            fm_match = _FRONTMATTER_RE.match(text)
+            if not fm_match:
+                findings.append(
+                    f"project agent missing frontmatter [HIGH]: {rel} — agent files "
+                    f"need a --- ... --- YAML frontmatter block with name and description"
+                )
+                continue
+            frontmatter = fm_match.group(1)
+            if not _FRONTMATTER_NAME_RE.search(frontmatter):
+                findings.append(
+                    f"project agent frontmatter missing name [HIGH]: {rel}"
+                )
+            if not _FRONTMATTER_DESCRIPTION_RE.search(frontmatter):
+                findings.append(
+                    f"project agent frontmatter missing description [HIGH]: {rel}"
+                )
+            model_match = _AGENT_MODEL_FIELD_RE.search(frontmatter)
+            if model_match and model_match.group(1) in _TIER_NAME_LITERALS:
+                findings.append(
+                    f"project agent uses tier name as model [HIGH]: {rel} — "
+                    f"model: {model_match.group(1)} is a provider-neutral tier name, "
+                    f"not a real model id; look up the real id for this tier in "
+                    f"docs/reference/agent-catalog.md's Mapping Rule table (see "
+                    f"kotlin-multiplatform-expert's Project-Specific Commands/Agents/"
+                    f"Skills section)"
+                )
+
+    codex_agents_dir = root / ".codex" / "agents"
+    if codex_agents_dir.is_dir():
+        # .codex is normally in _EXCLUDED_DIRS (avoids scanning deployed skill bundle
+        # templates as if they were real project code) — that exclusion doesn't apply
+        # here since .codex/agents/*.toml is exactly this detector's real target.
+        for agent_toml in sorted(codex_agents_dir.glob("*.toml")):
+            try:
+                text = agent_toml.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
+                continue
+            rel = agent_toml.relative_to(root)
+            missing = [key for key, pattern in _TOML_KEY_RE.items() if not pattern.search(text)]
+            if missing:
+                findings.append(
+                    f"codex agent missing required field(s) [HIGH]: {rel} — "
+                    f"{', '.join(missing)}; Codex CLI requires name, description, and "
+                    f"developer_instructions on every subagent TOML file"
+                )
+
+    return findings
+
+
+def _detect_agent_deployment_drift(root: Path) -> list[str]:
+    """Flag a project-owned agents/*.md file that was never deployed to
+    .claude/agents/, or has drifted from its deployed copy — same pattern as
+    _detect_project_skill_deployment_drift.
+    """
+    findings: list[str] = []
+    agents_dir = root / "agents"
+    deployed_dir = root / ".claude" / "agents"
+    if not agents_dir.is_dir():
+        return findings
+
+    for agent_md in sorted(agents_dir.glob("*.md")):
+        if _is_excluded(agent_md, root):
+            continue
+        deployed_md = deployed_dir / agent_md.name
+        rel = agent_md.relative_to(root).as_posix()
+        if not deployed_md.is_file():
+            findings.append(
+                f"project agent not deployed [MEDIUM]: {rel} — deploy it to "
+                f".claude/agents/{agent_md.name} so Claude loads the project-owned copy"
+            )
+            continue
+        try:
+            source_text = agent_md.read_text(encoding="utf-8", errors="ignore")
+            deployed_text = deployed_md.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if source_text != deployed_text:
+            findings.append(
+                f"project agent deployment drift [MEDIUM]: {rel} — deployed copy "
+                f"under .claude/agents/{agent_md.name} is stale"
+            )
+
+    return findings
+
+
 # ── Mixed component library: ShadcnTheme + AppTheme both in real use ────────────
 # kotlin-multiplatform-shadcn-compose's SKILL.md says "Never combine with
 # kotlin-multiplatform-design-system" — documented but never mechanically checked
@@ -2612,6 +2732,10 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Agent & consumer setup ─────────────────────────────────────────────────
     findings.extend(_detect_agent_setup(root))
+
+    # ── Project-owned agent file standards + deployment drift ──────────────────
+    findings.extend(_detect_agent_file_standards(root))
+    findings.extend(_detect_agent_deployment_drift(root))
 
     # ── MVI base class placement ───────────────────────────────────────────────
     findings.extend(_detect_mvi_placement(root))
