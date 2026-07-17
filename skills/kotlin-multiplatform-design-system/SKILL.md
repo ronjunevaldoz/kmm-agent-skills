@@ -15,7 +15,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-13'
+  last-updated: '2026-07-17'
   keywords:
     - design system
     - Compose Styles API
@@ -56,6 +56,12 @@ Use this skill when the user asks to:
 - Create reusable UI components with a variant system (like shadcn)
 - Add dark mode support via custom tokens
 - Wire AppTheme, tokens, or custom Composables into `:core:designsystem`
+
+**If a project already calls `ShadcnTheme(...)` in real source, it's already on
+`kotlin-multiplatform-shadcn-compose` — don't suggest `App*`/`AppTheme` for it.** Same
+rule as that skill's own "never combine" note, stated here too since either skill can be
+the one consulted first. `kotlin-multiplatform-audit`'s
+`_detect_mixed_design_system_usage` flags a project calling both theme wrappers.
 
 **Trigger keywords:** design system, custom theme, AppTheme, design tokens,
 ButtonVariant, Compose Styles, ExperimentalStylesApi, custom components,
@@ -2640,6 +2646,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-17 | Added explicit "if `ShadcnTheme` is already in use, don't suggest `App*`/`AppTheme`" guidance, mirroring `kotlin-multiplatform-shadcn-compose`'s own "never combine" note (either skill can be the one consulted first). Backed by `kotlin-multiplatform-audit`'s new `_detect_mixed_design_system_usage`, which flags a project calling both theme wrappers — considered retiring this skill in favor of shadcn-compose instead, but design-system stays the documented default (shadcn-compose explicitly defers to it unless explicitly chosen), so the detection+ignore rule solves the actual mixing problem without that much larger, disruptive change. |
 | 2026-07-13 | Made UI test coverage strict for feature `*Content.kt` screens: `scan_design_violations.py`'s `preview_coverage` check now also flags a missing commonTest interaction test (`runComposeUiTest`), alongside the existing preview-stub/multi-device/Roborazzi checks — all four required, no exceptions. `scaffold_preview_coverage.py` generates all four now, not three. (First attempt built a redundant, weaker duplicate of this in `kotlin-multiplatform-audit`'s `audit_project.py` without checking this scanner already existed — reverted that and added only the genuinely missing piece here instead.) |
 | 2026-07-13 | Fixed a real keyword-routing collision with `kotlin-multiplatform-shadcn-compose`: this skill's own trigger keywords included bare `shadcn` (frontmatter) and `shadcn KMP` (body) — the exact same phrase `shadcn-compose` uses as its own trigger keyword, despite the two being documented mutually-exclusive alternatives (`/kmm-new-project` loads one instead of the other). Removed both from this skill; `design system`/`AppTheme`/`ButtonVariant`/etc already route unambiguously without them. Root cause: `validate_keyword_routing.py` only checked that every skill appears in the expert's invocation map, never checked for keyword overlap between skills — added collision detection to catch this class of bug going forward. |
 | 2026-07-11 | Corrected the 2026-07-10 deprecation-evaluation entry below: verified directly against Maven Central's repository (not just the README) that `shadcn-compose` published `0.2.1`, so "still `-SNAPSHOT`, not on Maven Central" is no longer true. The conclusion is unchanged for a different reason — publication doesn't remove the risk this skill is scaffold-based to avoid: `shadcn-compose` still depends on the experimental `@ExperimentalFoundationStyleApi`, so a real dependency on it still breaks on the next CMP release that changes that API. Updated the Ownership Model note accordingly, and added a new dedicated `kotlin-multiplatform-shadcn-compose` skill for consuming the library when a user explicitly chooses it — cross-referenced both ways. Also added `/kmm-migrate-to-shadcn` for projects that decide to fully switch, cross-referenced here too. |

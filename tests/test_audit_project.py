@@ -2417,5 +2417,64 @@ class LongStackedCommentBlockTests(unittest.TestCase):
             self.assertFalse(any("long stacked comment block" in f for f in findings))
 
 
+class MixedDesignSystemUsageTests(unittest.TestCase):
+    """kotlin-multiplatform-shadcn-compose says "Never combine with
+    kotlin-multiplatform-design-system" - documented but never mechanically checked.
+    Scoped to both theme wrappers coexisting (ShadcnTheme(/AppTheme() rather than
+    individual App*-prefixed component names, to avoid a false positive on an
+    unrelated real identifier like AppConfig(...) or AppDatabase(...).
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_both_theme_wrappers_used(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/a/src/commonMain/kotlin/A.kt",
+                "@Composable\nfun A() { ShadcnTheme { } }\n",
+            )
+            self._write(
+                root, "feature/b/src/commonMain/kotlin/B.kt",
+                "@Composable\nfun B() { AppTheme { } }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("mixed component library usage" in f for f in findings))
+
+    def test_ignores_shadcn_theme_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/a/src/commonMain/kotlin/A.kt",
+                "@Composable\nfun A() { ShadcnTheme { } }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("mixed component library usage" in f for f in findings))
+
+    def test_ignores_app_theme_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/a/src/commonMain/kotlin/A.kt",
+                "@Composable\nfun A() { AppTheme { } }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("mixed component library usage" in f for f in findings))
+
+    def test_ignores_unrelated_app_prefixed_calls(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/a/src/commonMain/kotlin/A.kt",
+                "@Composable\nfun A() {\n    ShadcnTheme { }\n"
+                "    val config = AppConfig()\n    val db = AppDatabase()\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("mixed component library usage" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()

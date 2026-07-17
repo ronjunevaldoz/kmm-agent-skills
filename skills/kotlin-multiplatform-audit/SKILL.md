@@ -11,7 +11,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-14'
+  last-updated: '2026-07-17'
   keywords:
     - KMP audit
     - project audit
@@ -362,6 +362,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-07-17 | Added `_detect_mixed_design_system_usage` — flags a project calling both `ShadcnTheme(...)` and `AppTheme(...)` in real source, mechanically enforcing the "never combine `kotlin-multiplatform-shadcn-compose` and `kotlin-multiplatform-design-system`" rule that was documented but never checked. Scoped to the two theme wrappers rather than individual `App*` component names, to avoid a false positive on an unrelated real identifier (`AppConfig(...)`, `AppDatabase(...)`). Caught a real bug before shipping: the first regex only matched a parenthesized call (`AppTheme(`), missing the common parenthesis-free trailing-lambda call (`AppTheme { ... }`) both wrappers support since every other param is defaulted. 4 new regression tests. |
 | 2026-07-15 | Expanded agent-setup auditing to cover the full Claude scaffold contract, not just runtime files: project-owned `agents/`, `rules/`, `hooks/`, `commands/`, `skills/`, plus `docs/reference/ai-collaboration.md`, are now part of the expected consumer setup whenever Claude bootstrap files exist. |
 | 2026-07-14 | Added `_detect_long_stacked_comment_block` — flags 5+ consecutive `//` lines with no `docs/reference/` pointer, mechanically enforcing `kotlin-multiplatform-code-quality`'s "grows past ~4 lines, split to docs/reference/" rule, which was documented but never checked anywhere. Real gap surfaced by a user report of still seeing long stacked `//` blocks after the skill shipped — traced to the rule existing only in prose, no Detekt config, no audit detector. Excludes a leading license/copyright header (checked all-blank-before-block, not just line 0) to avoid a real false-positive on a common Kotlin file convention. 4 new regression tests. |
 | 2026-07-14 | Added `_detect_project_skill_standards` — checks every project-owned `skills/<name>/` folder against the real skill anatomy (verified against `anthropic-skills:skill-creator`'s own documented convention, not assumed): SKILL.md must exist, must open with `---`-delimited YAML frontmatter containing `name` and `description`, and the body should stay under ~500 lines unless a `references/` subdirectory exists for progressive disclosure. Cross-referenced from `kotlin-multiplatform-expert`'s "Project-Specific Commands/Agents/Skills — Source of Truth" section. Scoped to a consumer project's own top-level `skills/`, never this repo's own — confirmed the reusable `kmm-audit.yml` GitHub Actions workflow this feeds is `workflow_call`-only, invoked by consumer projects auditing their own root, never by this repo against itself. 8 new regression tests. |

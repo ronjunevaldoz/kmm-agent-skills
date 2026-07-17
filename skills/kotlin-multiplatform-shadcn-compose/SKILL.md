@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-13'
+  last-updated: '2026-07-17'
   keywords:
     - shadcn-compose
     - ShadcnButton
@@ -99,6 +99,16 @@ Use only when:
 
 **Never combine with `kotlin-multiplatform-design-system`.** They are alternative component
 sources for the same layer — pick one.
+
+**If a project already calls `ShadcnTheme(...)` in real source, treat shadcn-compose as
+that project's established system — stop suggesting `App*`/`AppTheme` design-system
+patterns for it, even in passing.** Check before recommending: a real `ShadcnTheme(` (or
+trailing-lambda `ShadcnTheme {`) call site anywhere in the project's source means the
+choice was already made; re-litigating it per-suggestion just reintroduces the mixing
+this section already forbids. `kotlin-multiplatform-audit`'s
+`_detect_mixed_design_system_usage` makes this mechanically checkable — it flags a
+project that calls both `ShadcnTheme(...)` and `AppTheme(...)`, which means either a
+migration was left half-finished or a suggestion slipped through this rule.
 
 **Actually adding this dependency requires explicit user choice** — via `/kmm-new-project`
 Step 6a, `/kmm-migrate-to-shadcn`, or an equivalent direct confirmation. Never add it
@@ -526,6 +536,7 @@ When asked to add or use shadcn-compose, respond in this order:
 
 | Date | Change |
 |---|---|
+| 2026-07-17 | Added explicit "if `ShadcnTheme` is already in use, stop suggesting `App*`/`AppTheme`" guidance, mirrored in `kotlin-multiplatform-design-system`'s own doc. The "never combine" rule existed but was never mechanically checked — added `kotlin-multiplatform-audit`'s `_detect_mixed_design_system_usage`, scoped to both theme wrappers coexisting (not individual `App*` component names, which risked a false positive on unrelated real identifiers like `AppConfig(...)`). Caught and fixed a real bug in my own first draft: the regex only matched `ShadcnTheme(`/`AppTheme(` with parens, missing the common parenthesis-free trailing-lambda call shape (`AppTheme { ... }`) both functions support since every other param is defaulted. 4 new regression tests. |
 | 2026-07-13 | Added a layout-pattern lookup reference (Shadcn Studio, shadcnstudio.com) for when no wireframe template or component here covers the needed shape — verified directly it's a third-party paid catalog, explicitly not affiliated with shadcn/ui or this library. Labeled clearly as a shape reference only: its output is React/JSX, not Kotlin/Compose, so any block from it must go through `kotlin-multiplatform-layout-system`'s HTML-translation table plus `fetch_component_signature.py` verification, never copied directly. |
 | 2026-07-13 | Added Step 4: a worked multi-component composition example (settings-list-in-a-card, using `ShadcnCard`/`ShadcnItemGroup`/`ShadcnItem`/`ShadcnAvatar`/`ShadcnButton` together) — closes a real gap where the skill only taught single-component verification and per-element HTML mapping, never how to assemble components into a good screen. Found and documented a real trap in the process: `ShadcnItem`'s own official KDoc usage example references `ShadcnItemMedia`/`ShadcnItemContent`/`ShadcnItemActions` as if they were real slot composables — none exist anywhere in the repo (confirmed by searching the actual source, not just the doc comment). Also documented that `ShadcnItemGroup` auto-separates its items, so a manual `ShadcnSeparator` between them double-draws. 2 new anti-patterns. |
 | 2026-07-13 | Rechecked the real README and Maven Central directly (not `search.maven.org`): latest published version is `0.2.3`, not `0.2.1` — updated the Gradle version pin. Component count grew 62 → 64: found 2 new real components via a live file-list diff (`ShadcnIcon` — tinted icon renderer resolving `LocalShadcnContentColor`; `ShadcnStepper`/`ShadcnStepperStep` — multi-step progress indicator, presentational only, same pattern as `ShadcnTabs`/`ShadcnAccordion`). Added both to the Component Keyword Matrix and frontmatter keywords. |

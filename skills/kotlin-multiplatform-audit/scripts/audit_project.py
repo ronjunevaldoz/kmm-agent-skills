@@ -1712,6 +1712,60 @@ def _detect_project_skill_deployment_drift(root: Path) -> list[str]:
     return findings
 
 
+# ── Mixed component library: ShadcnTheme + AppTheme both in real use ────────────
+# kotlin-multiplatform-shadcn-compose's SKILL.md says "Never combine with
+# kotlin-multiplatform-design-system" — documented but never mechanically checked
+# anywhere. Scoped to the two theme wrappers (ShadcnTheme/AppTheme call sites) rather than
+# individual App*-prefixed component names: a generic `App[A-Z]\w*(` call-site pattern
+# would false-positive on unrelated real identifiers (AppConfig(...), AppDatabase(...),
+# etc.) that have nothing to do with either design system. The theme wrapper is the one
+# call every screen in a project realistically makes, making it the highest-confidence,
+# lowest-false-positive signal that both systems are genuinely wired into the same
+# project rather than just mentioned in passing (e.g. a comment, a migration doc).
+
+# Both theme wrappers' last param is a trailing content lambda with every other param
+# defaulted, so real usage is commonly a parenthesis-free trailing-lambda call
+# (`AppTheme { ... }`), not just `AppTheme(...)` — matching only "(" missed this shape.
+_SHADCN_THEME_CALL_RE = re.compile(r"\bShadcnTheme\s*[({]")
+_APP_THEME_CALL_RE = re.compile(r"\bAppTheme\s*[({]")
+
+
+def _detect_mixed_design_system_usage(root: Path) -> list[str]:
+    """Flag a project that calls both ShadcnTheme(...) and AppTheme(...) in real
+    (non-test, non-excluded) source — the two systems are documented as mutually
+    exclusive alternatives, never meant to coexist in the same project.
+    """
+    shadcn_files: list[Path] = []
+    app_theme_files: list[Path] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if _SHADCN_THEME_CALL_RE.search(text):
+            shadcn_files.append(path)
+        if _APP_THEME_CALL_RE.search(text):
+            app_theme_files.append(path)
+
+    if not shadcn_files or not app_theme_files:
+        return []
+
+    shadcn_example = shadcn_files[0].relative_to(root)
+    app_example = app_theme_files[0].relative_to(root)
+    return [
+        f"mixed component library usage [HIGH]: project calls both ShadcnTheme(...) "
+        f"(e.g. {shadcn_example}) and AppTheme(...) (e.g. {app_example}) in real source "
+        f"— kotlin-multiplatform-shadcn-compose and kotlin-multiplatform-design-system "
+        f"are documented mutually-exclusive alternatives, never meant to coexist. If the "
+        f"project has genuinely migrated to shadcn-compose, finish the migration "
+        f"(/kmm-migrate-to-shadcn) and remove the remaining AppTheme/App* usage rather "
+        f"than leaving both wired in; if design-system is still the intended system, "
+        f"remove the shadcn-compose dependency instead."
+    ]
+
+
 _COMPONENT_PREFIX_ROW_RE = re.compile(r"\|\s*Component prefix\s*\|\s*([A-Za-z][A-Za-z0-9]*)\s*\|")
 _APP_PREFIXED_DECL_RE = re.compile(
     r"\b(?:class|fun|object|val|data class|sealed interface|enum class)\s+(App[A-Z]\w*)"
@@ -2639,6 +2693,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Design system prefix mismatch ──────────────────────────────────────────
     findings.extend(_detect_design_system_prefix_mismatch(root))
+
+    # ── Mixed component library (ShadcnTheme + AppTheme both wired in) ─────────
+    findings.extend(_detect_mixed_design_system_usage(root))
 
     # ── Project-owned skill standards (skills/<name>/SKILL.md anatomy) ─────────
     findings.extend(_detect_project_skill_standards(root))
