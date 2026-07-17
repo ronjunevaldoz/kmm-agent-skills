@@ -70,8 +70,9 @@ the entry in `skills.json`. Renaming without updating `skills.json` breaks routi
 ### 8. Update tests when modifying a bundled script
 
 If the modification touches any `.py` file under `skills/kotlin-multiplatform-$ARGUMENTS/scripts/`
-or any file under the top-level `scripts/`, update `tests/test_skill_scripts.py` in the
-same commit. The pre-commit hook (`hooks/pre-commit-audit.sh`) will block the commit otherwise.
+or any file under the top-level `scripts/`, update the matching `tests/test_<script-name>.py`
+(tests are one file per script under `tests/`) in the same commit. The pre-commit hook
+(`hooks/pre-commit-audit.sh`) will block the commit otherwise.
 
 The test update must:
 - Add a test for every new function introduced

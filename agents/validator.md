@@ -128,7 +128,7 @@ LEVEL 3   — JVM + TESTS:   PASS | FAIL | SKIPPED  (<N> passed, <N> failed)
 LEVEL 4   — FULL BUILD:    PASS | FAIL | SKIPPED | NOT RUN
 
 OVERALL: PASS | FAIL
-NEXT:    <proceed to PR | hand to fixer — Level <N> failed: <summary>>
+NEXT:    <hand to agents/qa-engineer.md if the change has a real runtime surface | proceed to PR | hand to fixer — Level <N> failed: <summary>>
 ```
 
 ---
@@ -138,6 +138,12 @@ NEXT:    <proceed to PR | hand to fixer — Level <N> failed: <summary>>
 Update `.claude/pipeline-context.json`:
 - Increment `successful_validations`
 - Note which Gradle tasks ran and approximate duration (helps future runs estimate time)
+
+If the change has a real runtime surface (a new/changed screen, flow, or user-visible
+behavior), hand off to `agents/qa-engineer.md` before opening the PR — passing builds
+and tests only confirm what was explicitly asserted, not that the real behavior matches
+what was actually asked for. Skip this handoff for a pure refactor, docs-only, or
+test-only change with nothing new to exercise.
 
 ## After FAIL
 

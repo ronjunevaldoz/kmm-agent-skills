@@ -151,7 +151,7 @@ Before staging, check: did this session add or modify any `.py` file under `scri
 git diff --name-only HEAD | grep -E '^(scripts/|skills/.*/scripts/).*\.py$' || true
 ```
 
-If any scripts changed → add `tests/test_skill_scripts.py` to the staged files. The pre-commit hook will block if it is missing.
+If any scripts changed → add the matching `tests/test_<script-name>.py` to the staged files (tests are one file per script under `tests/`, see `tests/_helpers.py`). The pre-commit hook will block if none is staged.
 
 ```bash
 git add <all implementation files>

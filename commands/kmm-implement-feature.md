@@ -88,7 +88,7 @@ Before committing, check whether any `.py` script was added or modified during i
 git diff --name-only HEAD | grep -E '^(scripts/|skills/.*/scripts/).*\.py$' || true
 ```
 
-If any scripts changed → ensure `tests/test_skill_scripts.py` is staged in the same commit. The pre-commit hook blocks otherwise.
+If any scripts changed → ensure the matching `tests/test_<script-name>.py` is staged in the same commit (tests are one file per script under `tests/`). The pre-commit hook blocks otherwise.
 
 Update `.claude/pipeline-context.json` with patterns learned during this feature,
 then commit it so the next session inherits the context:

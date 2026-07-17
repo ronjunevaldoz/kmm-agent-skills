@@ -137,10 +137,10 @@ light mode may be invisible or wrong in dark mode.
 
 When any `.py` file under `scripts/` or `skills/*/scripts/` is added or modified as part of the implementation:
 
-1. Open `tests/test_skill_scripts.py`
-2. Add or update a test class for the changed script (mirror existing class structure)
+1. Open (or create) `tests/test_<script-name>.py` — one file per script, using `tests/_helpers.py`'s `load_module`/`REPO_ROOT` for the module import
+2. Add or update a test class for the changed script (mirror existing class structure in a sibling `tests/test_*.py` file)
 3. Cover every new public function and every new `main()` exit code path
-4. Stage `tests/test_skill_scripts.py` alongside the script in the same commit
+4. Stage `tests/test_<script-name>.py` alongside the script in the same commit
 
 This is not optional. The pre-commit hook (`hooks/pre-commit-audit.sh`) blocks the commit if script files change without a matching test update.
 

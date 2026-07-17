@@ -8,7 +8,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 AUDIT_SCRIPT="$REPO_ROOT/skills/kotlin-multiplatform-audit/scripts/audit_project.py"
-TEST_FILE="tests/test_skill_scripts.py"
+# tests/ was split from one monolithic test_skill_scripts.py into one file per
+# script (tests/test_<script-name>.py, plus a shared tests/_helpers.py) — match any
+# test file, not one hardcoded name.
+TEST_FILE_PATTERN='^tests/test_.*\.py$'
 
 STAGED=$(git diff --cached --name-only)
 
@@ -29,16 +32,16 @@ fi
 
 # --- Check 2: Python script changes must include test updates ---
 STAGED_PY=$(echo "$STAGED" | grep -E '^(scripts/|skills/.*/scripts/).*\.py$' || true)
-STAGED_TEST=$(echo "$STAGED" | grep -F "$TEST_FILE" || true)
+STAGED_TEST=$(echo "$STAGED" | grep -E "$TEST_FILE_PATTERN" || true)
 if [[ -n "$STAGED_PY" ]] && [[ -z "$STAGED_TEST" ]]; then
   echo ""
-  echo "Commit blocked: Python scripts changed without updating $TEST_FILE"
+  echo "Commit blocked: Python scripts changed without updating a tests/test_*.py file"
   echo ""
   echo "Changed scripts:"
   echo "$STAGED_PY" | sed 's/^/  /'
   echo ""
-  echo "Add or update tests in $TEST_FILE then re-stage it before committing."
-  echo "Pattern: see existing test classes in $TEST_FILE for examples."
+  echo "Add or update the matching tests/test_<script-name>.py then re-stage it before committing."
+  echo "Pattern: see existing test files under tests/ for examples."
   exit 1
 fi
 

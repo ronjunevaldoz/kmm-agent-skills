@@ -160,7 +160,9 @@ Fix any findings before proceeding.
 ## Step 6 — Add tests for any bundled script
 
 If the skill ships a script under `skills/kotlin-multiplatform-$ARGUMENTS/scripts/`,
-add test coverage in `tests/test_skill_scripts.py` following the existing pattern.
+add test coverage in a new `tests/test_<script-name>.py` (one file per script — use
+`tests/_helpers.py`'s `load_module`/`REPO_ROOT`), following the pattern in any
+existing sibling `tests/test_*.py` file.
 
 ---
 
