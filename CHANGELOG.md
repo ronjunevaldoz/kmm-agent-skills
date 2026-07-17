@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.84.0] — 2026-07-17
+
+### Added
+
+- feat(audit): add agent file standards + deployment drift detectors
+
+---
+
 ## [v1.83.0] — 2026-07-17
 
 ### Added
