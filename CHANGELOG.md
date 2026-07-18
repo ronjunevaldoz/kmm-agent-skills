@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.86.0] — 2026-07-18
+
+### Added
+
+- feat(new-project): persist plan to PLAN.md, use AskUserQuestion, fix format
+
+---
+
 ## [v1.85.0] — 2026-07-18
 
 ### Added
