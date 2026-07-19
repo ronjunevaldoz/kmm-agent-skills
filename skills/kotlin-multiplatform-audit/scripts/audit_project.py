@@ -1384,6 +1384,56 @@ def _detect_long_stacked_comment_block(root: Path) -> list[str]:
     return findings
 
 
+# ── Destructive-read accessor (single-writer snapshot anti-pattern) ────────────
+# kotlin-multiplatform-code-quality's Side-Effect-Free Accessors rule: a getter/consume
+# function must never mutate shared state as a side effect of being read — a second
+# caller in the same tick/request silently sees the already-cleared value. Heuristic-only:
+# matches the exact "read field into local, clear that same field, return the local"
+# 3-line shape — the real bug shape found (and fixed) in awaken's Input.consumeTypedText()/
+# consumeEditActions(), before they were replaced by a single owned snapshot() call.
+
+_DESTRUCTIVE_READ_LOCAL_RE = re.compile(r"^\s*val\s+(\w+)\s*=\s*(\w+)(?:\.\w+\(\))?\s*$")
+_DESTRUCTIVE_READ_CLEAR_RE = re.compile(
+    r'^\s*(\w+)\s*(?:=\s*(?:0f?|""|null|false|emptyList\(\)|emptySet\(\))|\.clear\(\))\s*$'
+)
+_DESTRUCTIVE_READ_RETURN_RE = re.compile(r"^\s*return\s+(\w+)\s*$")
+
+
+def _detect_destructive_read_accessor(root: Path) -> list[str]:
+    """Flag a function that reads a field into a local, clears that same field, then
+    returns the local — fine with exactly one caller, but breaks silently the moment a
+    second caller reads the same accessor in the same tick/request.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        for i in range(len(lines) - 2):
+            local_match = _DESTRUCTIVE_READ_LOCAL_RE.match(lines[i])
+            if not local_match:
+                continue
+            local_name, field_name = local_match.groups()
+            clear_match = _DESTRUCTIVE_READ_CLEAR_RE.match(lines[i + 1])
+            if not clear_match or clear_match.group(1) != field_name:
+                continue
+            return_match = _DESTRUCTIVE_READ_RETURN_RE.match(lines[i + 2])
+            if not return_match or return_match.group(1) != local_name:
+                continue
+            findings.append(
+                f"destructive read accessor [MEDIUM]: {path.relative_to(root)}:{i + 1} "
+                f"— reads '{field_name}' into a local then clears it before returning; a "
+                f"second caller in the same tick/request sees the already-cleared value. "
+                f"Per kotlin-multiplatform-code-quality's Side-Effect-Free Accessors rule, "
+                f"expose a single snapshot()/drain() owned by one caller instead\n"
+                f"    {i + 1} | {lines[i].strip()}"
+            )
+    return findings
+
+
 # ── Extensible abstract class in commonMain ─────────────────────────────────────
 # commonMain APIs should be called or composed, not extended. An abstract class with
 # only abstract members (no concrete implementation at all) forces every consumer into
@@ -2805,6 +2855,9 @@ def audit_project(root: Path) -> list[str]:
     # ── WHAT-comment inside a loop or conditional ────────────────────────────────
     findings.extend(_detect_what_comment_in_control_flow(root))
     findings.extend(_detect_long_stacked_comment_block(root))
+
+    # ── Destructive-read accessor (single-writer snapshot anti-pattern) ─────────
+    findings.extend(_detect_destructive_read_accessor(root))
 
     # ── Extensible abstract class in commonMain ─────────────────────────────────
     findings.extend(_detect_extensible_abstract_class_in_common(root))

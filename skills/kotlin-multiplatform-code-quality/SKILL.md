@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-14'
+  last-updated: '2026-07-19'
   keywords:
     - Ktlint
     - Detekt
@@ -411,6 +411,69 @@ headers" for the rule config and template.
 
 ---
 
+## Side-Effect-Free Accessors (Destructive Reads)
+
+A getter/consume function must never mutate shared state as a side effect of being
+called. If more than one caller can read it, whichever caller runs second silently sees
+the already-cleared value — no exception thrown, no compile error, just a dropped event.
+
+```kotlin
+// ❌ destructive read — 2nd caller in the same tick/request gets the empty value
+class Input {
+    private val typedText = StringBuilder()
+    fun consumeTypedText(): String {
+        val value = typedText.toString()
+        typedText.clear()      // side effect buried inside a read
+        return value
+    }
+}
+```
+
+```kotlin
+// ✓ single owned snapshot — one call site clears, every reader gets the same value
+class Input {
+    private val typedText = StringBuilder()
+    fun snapshot(): InputSnapshot {
+        val captured = InputSnapshot(typedText = typedText.toString(), /* ... */)
+        typedText.clear()      // cleared once, at the frame/request boundary that owns it
+        return captured
+    }
+}
+```
+
+The fix generalizes past input handling — any shared mutable state with more than one
+reader has the same failure shape:
+
+```kotlin
+// ❌ two ViewModels (badge icon + notification screen) both call this — whichever
+// runs second sees 0 instead of the real count
+class NotificationRepository {
+    private var unreadCount = 0
+    fun consumeUnreadCount(): Int {
+        val v = unreadCount
+        unreadCount = 0
+        return v
+    }
+}
+
+// ✓ readers observe a StateFlow; clearing is an explicit, separately-named action
+// called from exactly one place
+class NotificationRepository {
+    private val _unreadCount = MutableStateFlow(0)
+    val unreadCount: StateFlow<Int> = _unreadCount.asStateFlow()
+    fun markAllRead() { _unreadCount.value = 0 }
+}
+```
+
+**Rule:** if state needs to be cleared or drained, expose that as a separate,
+explicitly-named action (`markAllRead()`, `clear()`, `reset()`, or a single owned
+`snapshot()`) called from exactly one place — never bury the clear inside a method every
+consumer calls just to read the value. Mechanically checked by `kotlin-multiplatform-audit`'s
+`_detect_destructive_read_accessor` — a heuristic match on the "read field into a local,
+clear that same field, return the local" 3-line shape.
+
+---
+
 ## CI Integration
 
 Add to `.github/workflows/ci.yml` lint job:
@@ -456,7 +519,7 @@ lint:
 - `kotlin-multiplatform-feature-scaffold` — convention plugins are where Ktlint/Detekt are applied
 - `kotlin-multiplatform-project-docs-maintainer` — `docs/reference/` is where development notes go when a code comment's rationale outgrows what belongs inline
 - `kotlin-multiplatform-library-publishing` — per-file license headers, a related but separate comment-placement decision
-- `kotlin-multiplatform-audit` — `_detect_what_comment_in_control_flow` checks the "Inline blocks" rule below automatically; `/kmm-clean-comments` applies the fix across all four documentation levels
+- `kotlin-multiplatform-audit` — `_detect_what_comment_in_control_flow` checks the "Inline blocks" rule below automatically; `/kmm-clean-comments` applies the fix across all four documentation levels; `_detect_destructive_read_accessor` checks the "Side-Effect-Free Accessors" rule
 - `kotlin-multiplatform-docs-site` — applies this skill's `@sample` principle (a real, compiled reference beats a pasted block that can drift stale) to public developer-guide code examples via snippet extraction
 
 ---
@@ -473,6 +536,7 @@ lint:
 - placing a `//` comment inside a function call's argument list before its closing `)`/`{` — silently comments out the rest of the line; this exact bug shipped in `kotlin-multiplatform-imagevector-generator`'s own codegen
 - writing a multi-paragraph inline comment that mixes "why this code exists" with mechanism detail, rejected alternatives, and exact version numbers — split it: the short WHY stays inline, the exhaustive rationale goes in `docs/reference/` with a one-line pointer left in the comment
 - documenting an extension function's return value without stating the receiver scope or precondition it assumes — callers can't tell when it's safe to call versus when to reach for the member function instead
+- a `consume*()`/getter that clears the field it just read before returning — fine with one caller, silently drops data for every other caller reading the same accessor in the same tick/request; expose a single owned `snapshot()`/`markAllRead()` instead
 
 If Detekt reports false positives, use `@Suppress("RuleName")` at the call site, not a global exclude.
 
@@ -493,6 +557,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-19 | New "Side-Effect-Free Accessors (Destructive Reads)" section — a real gap found while diagnosing a skill-vs-model-capability question against a separate KMP game project's commit history: a `consume*()` accessor that clears the field it just read before returning silently drops data for a second caller in the same tick/request (real bug: `Input.consumeTypedText()`/`consumeEditActions()`, fixed by moving the clear into one owned `snapshot()`). Rule generalized past input handling with a repository/`StateFlow` example. New `kotlin-multiplatform-audit` detector `_detect_destructive_read_accessor` (heuristic 3-line "read into local, clear same field, return local" shape), 1 new anti-pattern, cross-referenced in Related Skills. |
 | 2026-07-14 | Two additions to Comment & KDoc Conventions: (1) "Whether to write a comment at all" — a 4-step decision order that was previously scattered across prose rather than stated as one procedure. (2) "Formatting" — real, verified rules from Kotlin's own official coding conventions (kotlinlang.org): one space after `//`, KDoc's `/**`-alone-then-`*`-prefixed-lines-then-`*/`-alone shape for long comments vs single-line `/** ... */` for short ones, and the official guidance to *avoid* `@param`/`@return` in favor of inline prose — which contradicted this skill's own tag table until now (fixed both rows to state the real guidance instead of presenting the tags as the default shape). |
 | 2026-07-14 | Real gap closed: the "grows past ~4 lines, split to docs/reference/" rule was documented but never mechanically checked anywhere — a user reported still seeing long stacked `//` blocks in their project after this skill shipped. Added `kotlin-multiplatform-audit`'s `_detect_long_stacked_comment_block` (5+ consecutive `//` lines, no `docs/reference/` pointer) and cross-referenced it inline in the Comment & KDoc Conventions table. Excludes a leading license/copyright header (consistent with this skill's own existing license-header note) — verified against a real false-positive case before shipping. |
 | 2026-07-10 | Added "By architectural level" — a second cut through the same rules organized by Classes/Functions/Extension functions/Inline blocks instead of by comment type, closing a real gap: extension functions had no documentation guidance at all beyond a passing `@receiver` mention. New rule: extension KDoc must state receiver scope/precondition, since "when to use it" outranks "what it does" for a function that could otherwise be mistaken for a member. 1 new anti-pattern, 1 new example. Wired into automation: `kotlin-multiplatform-audit` gained a `what-comment in control flow` heuristic detector for the inline-block rule, and a new `/kmm-clean-comments` command applies the fix across all four levels (the convention was previously knowledge-only — nothing scanned or refactored comments automatically). |

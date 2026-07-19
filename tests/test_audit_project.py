@@ -2417,6 +2417,87 @@ class LongStackedCommentBlockTests(unittest.TestCase):
             self.assertFalse(any("long stacked comment block" in f for f in findings))
 
 
+class DestructiveReadAccessorTests(unittest.TestCase):
+    """A getter/consume function that clears the field it just read breaks the moment a
+    second caller reads it in the same tick/request — the real bug found (and fixed) in
+    awaken's Input.consumeTypedText()/consumeEditActions().
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_clear_call_shape(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/x/src/commonMain/kotlin/Input.kt",
+                "class Input {\n"
+                "    private val typedText = StringBuilder()\n"
+                "    fun consumeTypedText(): String {\n"
+                "        val value = typedText.toString()\n"
+                "        typedText.clear()\n"
+                "        return value\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("destructive read accessor" in f for f in findings))
+
+    def test_flags_zero_assignment_shape(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/x/src/commonMain/kotlin/Input.kt",
+                "class Input {\n"
+                "    var scrollDeltaY: Float = 0f\n"
+                "    fun consumeScrollDeltaY(): Float {\n"
+                "        val delta = scrollDeltaY\n"
+                "        scrollDeltaY = 0f\n"
+                "        return delta\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("destructive read accessor" in f for f in findings))
+
+    def test_ignores_snapshot_that_clears_a_different_field(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/x/src/commonMain/kotlin/Input.kt",
+                "class Input {\n"
+                "    var scrollDeltaY: Float = 0f\n"
+                "    var pointerX: Float = 0f\n"
+                "    fun snapshot(): Float {\n"
+                "        val delta = scrollDeltaY\n"
+                "        pointerX = 0f\n"
+                "        return delta\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("destructive read accessor" in f for f in findings))
+
+    def test_ignores_read_without_clear(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/x/src/commonMain/kotlin/Input.kt",
+                "class Input {\n"
+                "    var scrollDeltaY: Float = 0f\n"
+                "    fun peekScrollDeltaY(): Float {\n"
+                "        val delta = scrollDeltaY\n"
+                "        log(delta)\n"
+                "        return delta\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("destructive read accessor" in f for f in findings))
+
+
 class MixedDesignSystemUsageTests(unittest.TestCase):
     """kotlin-multiplatform-shadcn-compose says "Never combine with
     kotlin-multiplatform-design-system" - documented but never mechanically checked.
