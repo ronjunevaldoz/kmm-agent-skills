@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.90.0] — 2026-07-19
+
+### Added
+
+- feat(kmm-new-project): bake in mandatory baseline skill set
+
+---
+
 ## [v1.89.0] — 2026-07-19
 
 ### Added
