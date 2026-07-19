@@ -2,6 +2,19 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.88.0] — 2026-07-19
+
+### Added
+
+- feat(skills): add kotlin-multiplatform-android-cli skill
+- feat(hooks): auto-check for skill updates every session
+
+### Docs
+
+- docs: wire kotlin-multiplatform-android-cli into README + planner routing
+
+---
+
 ## [v1.87.0] — 2026-07-19
 
 ### Added

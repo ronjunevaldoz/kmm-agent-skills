@@ -1,5 +1,5 @@
 {
-  "version": "1.87.0",
+  "version": "1.88.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -166,6 +166,45 @@
         "analytics facade",
         "mixpanel KMP",
         "amplitude KMP"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-android-cli",
+      "path": "skills/kotlin-multiplatform-android-cli",
+      "description": "Wires Google's Android CLI (`android` binary, developer.android.com/tools/agents) into a KMP project's Android target \u2014 agent-first project scaffolding, emulator/device management, build + deploy, and SDK component installs from the terminal, without opening Android Studio. Covers `android init`/`android skills add` agent setup and the stable command surface; treats `android studio *` subcommands as Preview (require Android Studio Quail 2 Canary 1+) rather than a default dependency.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-07-19",
+      "keywords": [
+        "Android CLI",
+        "android-cli",
+        "android init",
+        "android skills",
+        "agent-first Android",
+        "emulator management",
+        "AVD",
+        "android run",
+        "android sdk",
+        "Android Studio agent tools",
+        "Journeys",
+        "Antigravity"
+      ],
+      "triggers": [
+        "android cli",
+        "android-cli",
+        "android init",
+        "android skills add",
+        "create android virtual device",
+        "AVD from terminal",
+        "start emulator cli",
+        "android run apk",
+        "install apk cli",
+        "android sdk install",
+        "agent-first android",
+        "android studio quail",
+        "render compose preview cli",
+        "journeys",
+        "google antigravity android"
       ],
       "scripts": []
     },
