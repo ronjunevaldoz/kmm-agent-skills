@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.87.0] — 2026-07-19
+
+### Added
+
+- feat(code-quality): add Side-Effect-Free Accessors rule + audit detector
+
+---
+
 ## [v1.86.0] — 2026-07-18
 
 ### Added
