@@ -116,7 +116,7 @@ python3 scripts/release.py auto --dry-run # preview first
 
 ## Skills
 
-60 skills covering the full KMP stack. Load the smallest set that answers the request.
+64 skills covering the full KMP stack. Load the smallest set that answers the request.
 
 ### Foundation
 - [`feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) — 6-layer module structure, build-logic, TOML catalog, Koin
@@ -125,6 +125,7 @@ python3 scripts/release.py auto --dry-run # preview first
 - [`dependency-injection`](skills/kotlin-multiplatform-dependency-injection/) — Koin wiring and scopes
 - [`flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) — BuildKonfig, secrets, env setup
 - [`ci-github-actions`](skills/kotlin-multiplatform-ci-github-actions/) — CI matrix and release workflow
+- [`android-cli`](skills/kotlin-multiplatform-android-cli/) — Google's `android` CLI: emulator, build/deploy, SDK installs, agent bootstrap
 
 ### Infrastructure
 - [`ktor-auth-service`](skills/kotlin-multiplatform-ktor-auth-service/) — auth service, bearer/JWT, sessions
