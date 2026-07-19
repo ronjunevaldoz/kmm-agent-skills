@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.91.0] — 2026-07-19
+
+### Added
+
+- feat(migration): retrofit path for projects on an older skills release
+
+---
+
 ## [v1.90.0] — 2026-07-19
 
 ### Added
