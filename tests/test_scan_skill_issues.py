@@ -104,6 +104,24 @@ class ScanSkillIssuesTests(unittest.TestCase):
         testing_issues = [i for i in report["issues"] if i["check"] == "missing_testing"]
         self.assertEqual(len(testing_issues), 0)
 
+    def test_android_cli_skipped_for_missing_testing(self) -> None:
+        # CLI tool wrapper, no Kotlin API surface to unit test — same rationale as
+        # kotlin-multiplatform-ci-github-actions (CI YAML config).
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_skill(
+                root,
+                "kotlin-multiplatform-android-cli",
+                "---\nname: android-cli\ndescription: Android CLI wiring\nlast-updated: '2026-07-19'\n---\n\n"
+                "## Recommendation First\n\nUse the stable command surface.\n\n"
+                "## Common Anti-Patterns\n\nNone.\n\n## Related Skills\n\nAll.\n\n"
+                "## Output Style\n\nBe concise.\n",
+            )
+            report, _ = self._run_scan(root)
+
+        testing_issues = [i for i in report["issues"] if i["check"] == "missing_testing"]
+        self.assertEqual(len(testing_issues), 0)
+
     def test_report_structure_has_required_keys(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

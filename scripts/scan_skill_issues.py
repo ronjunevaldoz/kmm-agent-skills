@@ -25,6 +25,7 @@ SKIP_TESTING = {
     "kotlin-multiplatform-clean-architecture",   # contract doc
     "kotlin-multiplatform-audit",                # meta review tool
     "kotlin-multiplatform-ci-github-actions",    # CI YAML config
+    "kotlin-multiplatform-android-cli",          # CLI tool wrapper, no Kotlin API surface
     "kotlin-multiplatform-xcframework-spm",      # binary distribution
     "kotlin-multiplatform-library-publishing",   # Maven Central / GitHub Packages / BOM / binary-compat
     "kotlin-multiplatform-code-quality",         # linting/formatting config

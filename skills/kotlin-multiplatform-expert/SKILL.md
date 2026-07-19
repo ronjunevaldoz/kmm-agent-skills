@@ -203,7 +203,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 63 Skills and What They Own
+## The 64 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -218,6 +218,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-dependency-injection` | Koin module organization, manual vs annotated wiring, app/feature/ViewModel scopes, test overrides |
 | `kotlin-multiplatform-flavor-environment` | Dev/staging/prod config, BuildKonfig, secrets, `AppConfig` facade |
 | `kotlin-multiplatform-ci-github-actions` | GitHub Actions, test matrix, XCFramework release workflow YAML |
+| `kotlin-multiplatform-android-cli` | Google's `android` CLI — agent-first project scaffolding, emulator/device management, build + deploy, SDK installs; `android init`/`android skills add` agent bootstrap |
 | `kotlin-multiplatform-release` | Versioning (`gradle.properties`), Maven Central (vanniktech), GPG signing, git-cliff changelog, GitHub Release, secrets management, local publish script |
 | `kotlin-multiplatform-audit` | Existing project health checks, boundary review, architecture drift, readiness gaps; `--roadmap` for adoption plan |
 | `kotlin-multiplatform-migration` | Incremental adoption guide: assess current state, prioritized skill adoption order, MVVM→MVI, monolith→multi-module, Hilt→Koin migration paths |
@@ -304,6 +305,7 @@ kotlin-multiplatform-feature-scaffold       ← scaffold second (implements the 
 ├── kotlin-multiplatform-presenter-module   (depends on: scaffold, clean-architecture)
 ├── kotlin-multiplatform-flavor-environment (no deps)
 ├── kotlin-multiplatform-ci-github-actions  (no deps)
+├── kotlin-multiplatform-android-cli        (no deps)
 ├── kotlin-multiplatform-release            (depends on: ci-github-actions, xcframework-spm)
 ├── kotlin-multiplatform-dependency-injection (no deps)
 ├── kotlin-multiplatform-audit              (no deps for review work)
@@ -625,6 +627,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "add Ktor", "network layer", "API calls", "token refresh" | `kotlin-multiplatform-network-layer` |
 | "local database", "SQLite", "SQLDelight", "offline storage" | `kotlin-multiplatform-sqldelight-setup` |
 | "CI", "GitHub Actions", "run KMP tests" | `kotlin-multiplatform-ci-github-actions` |
+| "android cli", "android-cli", "android init", "android skills add", "create AVD from terminal", "android run apk", "agent-first android", "android studio quail", "render compose preview cli" | `kotlin-multiplatform-android-cli` |
 | "publish to Maven Central", "Maven publish", "release library", "release project", "cut release", "ship version", "versioning", "semantic versioning", "bump version", "vanniktech", "Sonatype", "git-cliff", "changelog", "GitHub Release", "release pipeline", "GPG signing" | `kotlin-multiplatform-release` |
 | "dev/staging/prod", "BuildKonfig", "environment config" | `kotlin-multiplatform-flavor-environment` |
 | "XCFramework", "Swift Package Manager", "SPM", "iOS binary" | `kotlin-multiplatform-xcframework-spm` |
@@ -783,7 +786,7 @@ right place instead of drifting straight into `.claude/`.
 anatomy (`anthropic-skills:skill-creator`'s own documented convention): a skill's
 folder is named after what the skill *does*, flat under `skills/` — this is also how
 `.claude/skills/` is actually scanned. If a project-owned skill's name might collide
-with one of this collection's 63, resolve it by giving the project-owned skill a more
+with one of this collection's 64, resolve it by giving the project-owned skill a more
 specific name (e.g. `awaken-ecs-conventions`, not `ecs`) — not by nesting it under an
 app-name folder, which isn't a real convention Claude Code (or this collection)
 recognizes.
