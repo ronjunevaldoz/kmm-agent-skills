@@ -53,6 +53,48 @@ Report the result:
 
 ---
 
+## Step 2b — Mandatory baseline check (existing project scaffolded on an older release)
+
+A project scaffolded before a given kmm-agent-skills version may predate skills that
+later became part of the mandatory baseline (see `kotlin-multiplatform-migration`'s
+Tier 1 Foundation table). `audit_project.py` catches architecture *smells* in code that
+exists — it can't flag a skill nobody has adopted yet, since there's no violating code
+to find. Check for the baseline explicitly:
+
+```bash
+# code-quality — Detekt + Ktlint config present?
+test -f detekt.yml || find . -maxdepth 3 -name detekt.yml
+grep -rl "ktlint" **/build.gradle.kts 2>/dev/null
+
+# unit-testing — any real test source with an assertion, not just an empty dir?
+find . -path '*/src/*Test/kotlin' -name '*.kt' | xargs grep -l '@Test' 2>/dev/null
+
+# project-docs-maintainer — docs/reference/ synced?
+test -d docs/reference
+
+# android-cli — no file footprint to grep for (it wraps a terminal tool, doesn't
+# scaffold files); ask directly instead: "Is the Android target built/run via the
+# android CLI, or still through Android Studio only?"
+```
+
+Report any missing item as a gap, not a blocker:
+
+```
+Mandatory baseline check:
+  [x] code-quality   — detekt.yml found
+  [ ] unit-testing   — no @Test found under any *Test/kotlin source set
+  [x] project-docs-maintainer — docs/reference/ present
+  [?] android-cli    — ask the user directly, no file signal exists
+
+Missing: unit-testing. Load kotlin-multiplatform-unit-testing to retrofit test source
+sets and fakes/mocks conventions before continuing feature work.
+```
+
+Do not auto-apply a missing skill — this is a report, same as the audit findings above.
+Let the user decide whether and when to retrofit it.
+
+---
+
 ## Step 3 — Updating commands (manual — requires explicit approval)
 
 Commands are NOT auto-deployed. If the user wants to update slash commands, run the guided

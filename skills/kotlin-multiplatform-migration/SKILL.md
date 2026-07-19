@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-11'
+  last-updated: '2026-07-19'
   keywords:
     - migration
     - incremental adoption
@@ -131,6 +131,7 @@ Adopt skills in this order. Each builds on the previous.
 | `kotlin-multiplatform-clean-architecture` | Sets the contract all other migrations must satisfy |
 | `kotlin-multiplatform-code-quality` | Detekt gates prevent new violations during migration |
 | `kotlin-multiplatform-feature-scaffold` | Defines the module structure to migrate toward |
+| `kotlin-multiplatform-project-docs-maintainer` | Documents the target architecture and migration decisions as Phase 2 makes them, not deferred to the end — a migration that stalls mid-way with no written contract is worse than the state it started from |
 
 ### Tier 2 — Screen layer (apply per screen as you migrate)
 
@@ -148,6 +149,7 @@ Adopt skills in this order. Each builds on the previous.
 | `kotlin-multiplatform-repository-pattern` | When splitting data access from ViewModels. If a feature being migrated has no real backend yet (a common mid-migration state — old screen ripped out, new one not API-ready), wire an `InMemory<Feature>Repository` behind the same interface first ("In-memory repository (no backend yet)" section) rather than blocking the migration on backend work. |
 | `kotlin-multiplatform-dependency-injection` | When migrating from Hilt/manual DI to Koin 4 |
 | `kotlin-multiplatform-sqldelight-setup` | When migrating from Room to SQLDelight |
+| `kotlin-multiplatform-android-cli` | Once the Android target builds again after the module-graph migration — verify it builds/runs/deploys from the terminal instead of only re-confirming through Android Studio |
 
 ### Tier 4 — UI system (after infrastructure is stable)
 
@@ -379,5 +381,6 @@ is too large to finish in a single session.
 
 | Date | Change |
 |---|---|
+| 2026-07-19 | Added `kotlin-multiplatform-project-docs-maintainer` to Tier 1 Foundation and `kotlin-multiplatform-android-cli` to Tier 3 Infrastructure — real gap: a project on an older kmm-agent-skills release that never adopted these (both became part of the mandatory new-project baseline this same day) had no adoption-order guidance for retrofitting them into an existing migration. |
 | 2026-07-11 | Added `/kmm-migrate-to-shadcn` to Tier 4 — full design-system-to-shadcn-compose library swap, distinct from the existing "consolidating hardcoded colors/spacing" design-system row. |
 | 2026-06-28 | Initial release — assessment phase, adoption order, migration paths A/B/C. |
