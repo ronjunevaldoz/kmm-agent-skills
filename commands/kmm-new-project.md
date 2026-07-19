@@ -367,8 +367,13 @@ Use intake answers directly — do not re-infer. Run each in dependency order:
 | always | `kotlin-multiplatform-logging` | Kermit setup, log levels, Koin wiring |
 | always | `kotlin-multiplatform-ci-github-actions` | GitHub Actions matrix: build, test, detekt, ktlint |
 | always | `kotlin-multiplatform-code-quality` | Ktlint + Detekt config, baseline, CI gate |
+| always | `kotlin-multiplatform-unit-testing` | Test source sets, fakes/mocks conventions, coroutine test rules for every layer |
+| always | `kotlin-multiplatform-android-cli` | Wires the `android` CLI's stable command surface — emulator management, `android run` deploy, SDK installs — so the Android target is buildable/runnable from the terminal without opening Android Studio |
+| always | `kotlin-multiplatform-project-docs-maintainer` | README, onboarding, `docs/reference/` sync — kept current as each step below writes new project docs, not deferred to the end |
 
-CI/CD, code quality, DI, and logging are always included — every new project needs them from day one.
+CI/CD, code quality, unit testing, android-cli, docs maintenance, DI, and logging are
+always included — every new project needs them from day one, regardless of what feature
+work the intake describes.
 
 ---
 
