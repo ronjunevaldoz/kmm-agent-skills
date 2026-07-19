@@ -15,6 +15,7 @@ There are two independent integration points: **git hooks** (for your local repo
 | `hooks/pre-commit-audit.sh` | Runs `audit_project.py` before any commit touching `.kt`/`.kts` files. Blocks the commit if architecture smells are found. | `git commit` |
 | `hooks/validate-architecture.sh` | Runs `audit_project.py` after any file edit. Surfaces findings inline in the agent's output. | After every `Edit`/`Write` |
 | `hooks/check-skill-freshness.sh` | Warns when a skill's `last-updated` is >90 days old. Non-blocking. | Manually or scheduled CI |
+| `hooks/session-start-check-updates.sh` | Wraps `scripts/check_updates.py` — warns the agent up front if this repo's skills are behind `origin/main`. Non-blocking, always exits 0. | Every Claude Code session start (kmm-agent-skills clone only) |
 
 ---
 
@@ -102,12 +103,43 @@ To make it blocking, add `set -e` at the top of `check-skill-freshness.sh`.
 
 ---
 
+## Option D — Claude Code SessionStart hook (skill update check)
+
+Only applicable when you're working from a clone of `kmm-agent-skills` itself (or a fork
+tracking it as `origin`) — `check_updates.py` compares your local checkout against
+`origin/main`, so it has nothing to compare against inside a project that only has a
+deployed `skills/` copy. Already wired into this repo's own `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash hooks/session-start-check-updates.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Effect:** every new session opened in this repo prints an up-to-date/behind status
+before any work starts, instead of relying on a maintainer to remember `/check-updates`.
+Always exits 0 — a stale-skills warning should never block starting a session.
+
+---
+
 ## Recommended setup for most projects
 
 ```
 Option A  (pre-commit) — always set up
 Option B  (PostToolUse) — set up if you use Claude Code regularly for KMP work
 Option C  (CI freshness) — set up once the skills collection stabilises (v2.0+)
+Option D  (SessionStart update check) — kmm-agent-skills clone/fork only, already wired here
 ```
 
 ---
@@ -123,4 +155,7 @@ git stash && git commit --allow-empty -m "hook test" && git stash pop
 
 # Test freshness script manually
 bash hooks/check-skill-freshness.sh
+
+# Test the SessionStart update check manually
+bash hooks/session-start-check-updates.sh
 ```

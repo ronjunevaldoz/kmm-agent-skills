@@ -132,6 +132,51 @@ class HookScriptTests(unittest.TestCase):
             "check-skill-freshness.sh should exit 0 when the skills directory is empty."
         ))
 
+    # --- session-start-check-updates.sh ---
+
+    def test_session_start_check_updates_always_exits_0(self) -> None:
+        # A SessionStart hook must never fail the session — exit 0 regardless of
+        # whether check_updates.py reports up-to-date, behind, or unreachable.
+        result = subprocess.run(
+            ["bash", str(HOOKS_DIR / "session-start-check-updates.sh")],
+            capture_output=True,
+            cwd=str(REPO_ROOT),
+        )
+        self.assertEqual(result.returncode, 0, (
+            "session-start-check-updates.sh must always exit 0 (non-blocking hook). "
+            f"stdout: {result.stdout.decode()}  stderr: {result.stderr.decode()}"
+        ))
+
+    def test_session_start_check_updates_prints_status(self) -> None:
+        result = subprocess.run(
+            ["bash", str(HOOKS_DIR / "session-start-check-updates.sh")],
+            capture_output=True,
+            cwd=str(REPO_ROOT),
+        )
+        self.assertIn(b"Checking for skill updates", result.stdout)
+
+    def test_session_start_check_updates_exits_0_even_when_offline(self) -> None:
+        # Simulate check_updates.py's own offline path (exit 2) by pointing the
+        # hook's REPO_ROOT resolution at a directory with no git remote at all.
+        with tempfile.TemporaryDirectory() as tmp:
+            fake_repo = Path(tmp)
+            (fake_repo / "hooks").mkdir()
+            (fake_repo / "scripts").mkdir()
+            hook_src = (HOOKS_DIR / "session-start-check-updates.sh").read_text()
+            (fake_repo / "hooks" / "session-start-check-updates.sh").write_text(hook_src)
+            check_updates_src = (REPO_ROOT / "scripts" / "check_updates.py").read_text()
+            (fake_repo / "scripts" / "check_updates.py").write_text(check_updates_src)
+            result = subprocess.run(
+                ["bash", str(fake_repo / "hooks" / "session-start-check-updates.sh")],
+                capture_output=True,
+                cwd=str(fake_repo),
+            )
+        self.assertEqual(result.returncode, 0, (
+            "session-start-check-updates.sh must exit 0 even when the wrapped "
+            "check_updates.py can't reach a git remote. "
+            f"stdout: {result.stdout.decode()}  stderr: {result.stderr.decode()}"
+        ))
+
 
 if __name__ == "__main__":
     unittest.main()
