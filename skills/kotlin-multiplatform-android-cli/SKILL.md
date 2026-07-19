@@ -44,7 +44,9 @@ project with an `:androidApp`/Android target module) and the `android` CLI insta
 **Trigger keywords:** android cli, android-cli, android init, android skills add,
 create android virtual device, AVD from terminal, start emulator cli, android run apk,
 install apk cli, android sdk install, agent-first android, android studio quail,
-render compose preview cli, journeys, google antigravity android.
+render compose preview cli, journeys, google antigravity android,
+build and run android app, deploy to emulator, run on device from terminal,
+launch android app terminal, run KMP android target, test android target locally.
 
 **Freshness rule:** Android CLI is an actively evolving Google tool (own release notes,
 separate cadence from AGP/Gradle). Re-check `android --version` output and
@@ -263,4 +265,5 @@ When asked about Android CLI setup or usage for a KMP project, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-19 | Broadened Trigger keywords with generic task phrasing ("build and run android app", "deploy to emulator", "run KMP android target") — the initial keyword set required knowing the tool's name ("android cli") up front, so a natural "how do I run this on an emulator" ask wouldn't have surfaced it. Also cross-referenced from `kotlin-multiplatform-feature-scaffold`'s Related Skills so it's discoverable from project-foundation work, not only from its own literal keywords. |
 | 2026-07-19 | Initial skill. Real gap found: the user asked for Android CLI (`developer.android.com/tools/agents`) as a mandatory skill; verified no official Claude Code skill exists for it and this repo had zero references. Covers the stable command surface (`init`/`skills add`, `create`/`describe`, `emulator`, `run`, `sdk`) as the default, and scopes `android studio *` IDE-integration commands as Preview (verified: requires Android Studio Quail 2 Canary 1+, known Windows emulator/PowerShell issues) rather than a default dependency. |

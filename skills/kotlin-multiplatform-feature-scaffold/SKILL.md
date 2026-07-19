@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-09'
+  last-updated: '2026-07-19'
   keywords:
     - Kotlin Multiplatform
     - KMP
@@ -1169,6 +1169,7 @@ Treat project bootstrap and command entrypoints as orchestration only.
 - `kotlin-multiplatform-mvi` — screen architecture layer built on top of this scaffold
 - `kotlin-multiplatform-flavor-environment` — add dev/staging/prod environments after scaffolding
 - `kotlin-multiplatform-ci-github-actions` — CI workflow consumes the module structure this skill creates
+- `kotlin-multiplatform-android-cli` — build/deploy/emulator management for this scaffold's Android target from the terminal, once the module structure exists
 
 ---
 
@@ -1209,6 +1210,7 @@ Ask for GROUP_ID and feature name before generating files. Map all paths to the 
 
 | Date | Change |
 |---|---|
+| 2026-07-19 | Cross-referenced `kotlin-multiplatform-android-cli` in Related Skills — build/deploy/emulator management for this scaffold's Android target, surfaced whenever project-foundation work already triggers this skill instead of requiring the literal "android cli" phrase. |
 | 2026-07-05 | Added anti-pattern against pre-creating empty platform source directories (`androidMain`, `iosMain`, `jvmMain`, ...) "just in case" — a real recurring smell reported from field experience. New audit detector `empty platform source set [LOW]` in `kotlin-multiplatform-audit` catches directories with zero `.kt` files or files containing only package/import/comments. Declaring the compile target is still required and correct; only the physical directory should be created on-demand, when there's real expect/actual code to write. |
 | 2026-07-09 | Added bootstrap / CLI refactor guardrails: keep entrypoints orchestration-only, split workflow modes into dedicated helpers, prefer file-local helper names, move long notes out of bootstrap code, and compile after each extraction. |
 | 2026-06-21 | **Improved** — App versioning pattern defined: `VERSION_NAME`/`VERSION_CODE` in `gradle.properties` as the single source of truth; `androidApp` convention plugin reads from properties; `BuildKonfig` exposes `APP_VERSION` to `commonMain`; CI bump pattern documented. |

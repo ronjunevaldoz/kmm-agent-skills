@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-14'
+  last-updated: '2026-07-19'
   keywords:
     - KMP expert
     - orchestrator
@@ -627,7 +627,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "add Ktor", "network layer", "API calls", "token refresh" | `kotlin-multiplatform-network-layer` |
 | "local database", "SQLite", "SQLDelight", "offline storage" | `kotlin-multiplatform-sqldelight-setup` |
 | "CI", "GitHub Actions", "run KMP tests" | `kotlin-multiplatform-ci-github-actions` |
-| "android cli", "android-cli", "android init", "android skills add", "create AVD from terminal", "android run apk", "agent-first android", "android studio quail", "render compose preview cli" | `kotlin-multiplatform-android-cli` |
+| "android cli", "android-cli", "android init", "android skills add", "create AVD from terminal", "android run apk", "agent-first android", "android studio quail", "render compose preview cli", "build and run android app", "deploy to emulator", "run KMP android target" | `kotlin-multiplatform-android-cli` |
 | "publish to Maven Central", "Maven publish", "release library", "release project", "cut release", "ship version", "versioning", "semantic versioning", "bump version", "vanniktech", "Sonatype", "git-cliff", "changelog", "GitHub Release", "release pipeline", "GPG signing" | `kotlin-multiplatform-release` |
 | "dev/staging/prod", "BuildKonfig", "environment config" | `kotlin-multiplatform-flavor-environment` |
 | "XCFramework", "Swift Package Manager", "SPM", "iOS binary" | `kotlin-multiplatform-xcframework-spm` |
