@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.89.0] — 2026-07-19
+
+### Added
+
+- feat(android-cli): broaden triggers + cross-reference from feature-scaffold
+
+---
+
 ## [v1.88.0] — 2026-07-19
 
 ### Added
