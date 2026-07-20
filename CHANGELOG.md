@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.93.0] — 2026-07-20
+
+### Added
+
+- feat(audit): detect pattern-adoption opportunities, not just misuse
+
+---
+
 ## [v1.92.0] — 2026-07-20
 
 ### Added
