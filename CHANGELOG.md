@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.92.0] — 2026-07-20
+
+### Added
+
+- feat(skills): cover value class + context parameters
+
+---
+
 ## [v1.91.1] — 2026-07-20
 
 ### Fixed

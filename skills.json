@@ -1,5 +1,5 @@
 {
-  "version": "1.91.1",
+  "version": "1.92.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -399,7 +399,7 @@
       "path": "skills/kotlin-multiplatform-clean-architecture",
       "description": "Defines the 6-layer clean architecture contract for KMP feature modules: :model / :api / :domain / :data / :presenter / :ui. Covers layer dependency rules, :model vs :api split, internal visibility enforcement, and Detekt architecture fitness functions that make violations fail the build.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-13",
+      "last_updated": "2026-07-20",
       "keywords": [
         "clean architecture",
         "Kotlin Multiplatform",
@@ -821,7 +821,7 @@
       "path": "skills/kotlin-multiplatform-dependency-injection",
       "description": "KMP dependency injection with Koin \u2014 recommend manual modules first, then annotated mode when less wiring is preferred. Covers app/feature scope boundaries, constructor injection, module organization, platform startup, test overrides, and the anti-patterns that hide architecture problems behind DI. Use this when deciding how to wire KMP dependencies instead of repeating Koin setup across other skills.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-09",
+      "last_updated": "2026-07-20",
       "keywords": [
         "dependency injection",
         "DI",
