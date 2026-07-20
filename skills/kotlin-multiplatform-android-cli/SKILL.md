@@ -1,12 +1,14 @@
 ---
 name: kotlin-multiplatform-android-cli
 description: >
-  Wires Google's Android CLI (`android` binary, developer.android.com/tools/agents) into
-  a KMP project's Android target — agent-first project scaffolding, emulator/device
-  management, build + deploy, and SDK component installs from the terminal, without
-  opening Android Studio. Covers `android init`/`android skills add` agent setup and the
-  stable command surface; treats `android studio *` subcommands as Preview (require
-  Android Studio Quail 2 Canary 1+) rather than a default dependency.
+  KMP-specific integration guide for Google's official `android` CLI. The CLI's own
+  command reference already exists as a real, officially maintained skill at
+  github.com/android/skills/tree/main/devtools/android-cli (installable via
+  `android skills add android-cli`) — this skill does not re-document that surface.
+  It covers what's specific to a Kotlin Multiplatform project: locating the Android
+  target inside a multi-module 6-layer graph, why `android create` doesn't apply once
+  `kotlin-multiplatform-feature-scaffold` has run, and CI wiring alongside the existing
+  Android/iOS/Desktop/Web matrix.
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
@@ -15,180 +17,115 @@ metadata:
     - Android CLI
     - android-cli
     - android init
-    - android skills
-    - agent-first Android
+    - android skills add
     - emulator management
     - AVD
     - android run
     - android sdk
     - Android Studio agent tools
-    - Journeys
-    - Antigravity
 ---
 
 ## When to Use This Skill
 
 Use when you need to:
-- Set up a KMP project's Android target for agent-driven builds, deploys, and emulator
-  management without a human opening Android Studio
-- Create/start/stop an Android Virtual Device from the terminal
-- Build and install a debug APK onto a device or emulator, or launch a specific activity
-- Install SDK platforms/build-tools/system-images without the Android Studio SDK Manager UI
-- Bootstrap `android init`/`android skills add` so this and other agents (Claude, Gemini,
-  Codex) get Android-specific skills and a standardized entry point
+- Point the official `android` CLI at a KMP project's Android target (not a fresh
+  Android-only project — that's `android create`'s use case, not this one)
+- Decide whether a build/deploy/emulator/SDK task belongs to the official `android-cli`
+  skill's command surface or to a KMP-specific skill (`feature-scaffold`,
+  `ci-github-actions`)
+- Wire the CLI's stable commands into this collection's existing CI matrix
 
 **Requires:** `kotlin-multiplatform-feature-scaffold` project structure (or any Gradle
-project with an `:androidApp`/Android target module) and the `android` CLI installed
-(`https://developer.android.com/tools/agents`).
+project with an Android target module) and the `android` CLI installed.
 
 **Trigger keywords:** android cli, android-cli, android init, android skills add,
 create android virtual device, AVD from terminal, start emulator cli, android run apk,
-install apk cli, android sdk install, agent-first android, android studio quail,
-render compose preview cli, journeys, google antigravity android,
-build and run android app, deploy to emulator, run on device from terminal,
-launch android app terminal, run KMP android target, test android target locally.
+install apk cli, android sdk install, build and run android app, deploy to emulator,
+run on device from terminal, launch android app terminal, run KMP android target,
+test android target locally.
 
-**Freshness rule:** Android CLI is an actively evolving Google tool (own release notes,
-separate cadence from AGP/Gradle). Re-check `android --version` output and
-`developer.android.com/tools/agents` before relying on any command below in a new
-project — flags and subcommands have moved between Preview and stable.
+**Freshness rule:** the command reference lives upstream, not here — always defer to
+`github.com/android/skills/tree/main/devtools/android-cli`'s current `SKILL.md` for exact
+flags. Re-verify before relying on any command below; this repo doesn't control that
+release cadence.
 
 ---
 
 ## Recommendation First
 
-Default to **the stable command surface** (`create`, `describe`, `run`, `emulator`,
-`sdk`) for anything scriptable/CI-safe. Treat `android studio *` (IDE-integration
-subcommands — `analyze-file`, `find-declaration`, `render-compose-preview`) as
-**Preview** — verified against Google's own docs: it explicitly requires Android Studio
-Quail 2 Canary 1 or higher, and known issues include the Windows emulator command being
-disabled and no PowerShell download support.
+**Install the real, official skill instead of re-learning the CLI from scratch:**
 
-Why:
-- the stable surface has no IDE dependency — it works in CI, in a headless dev
-  container, or in any agent session that doesn't have Android Studio open
-- gating on a Canary IDE build for anything beyond the Preview commands would make this
-  skill unreliable outside that one environment
-- `android init` + `android skills add` is the intended agent-onboarding path per
-  Google's own docs (they explicitly name Claude/Gemini/Codex as supported agents) —
-  wiring it once at project setup means every future agent session in this project gets
-  Android-specific skills without re-discovering the tool
+```bash
+android skills find android-cli   # confirm it's available
+android skills add android-cli    # installs the real command reference as a skill
+```
 
-Reach for the Preview `android studio *` commands only when the project's IDE is
-confirmed to be a qualifying Canary build — never assume it is.
+That skill (Google LLC, `github.com/android/skills/tree/main/devtools/android-cli`) is
+the canonical source for every `android` subcommand — `create`, `describe`, `emulator`,
+`run`, `sdk`, `docs`, `screen`, `layout`, `studio`, `skills`, `info`, `init`, `update`.
+This skill does not duplicate that reference — a second, hand-maintained copy of a
+CLI's flags is exactly the kind of thing that silently drifts stale (verified against
+the real upstream `SKILL.md` while writing this: several details an earlier draft of
+this skill guessed — `create`'s flag names, whether `skills add` takes an `--all` flag —
+were wrong). Read the upstream skill for command syntax; read this one only for how it
+applies to a KMP project's module graph.
 
 ---
 
-## Installation & Verification
+## Installation
 
 ```bash
-# Install: follow the platform-specific instructions at
-# https://developer.android.com/tools/agents
+# Linux
+curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash
+# macOS Apple Silicon
+curl -fsSL https://dl.google.com/android/cli/latest/darwin_arm64/install.sh | bash
+# macOS Intel
+curl -fsSL https://dl.google.com/android/cli/latest/darwin_x86_64/install.sh | bash
+# Windows
+curl -fsSL https://dl.google.com/android/cli/latest/windows_x86_64/install.cmd -o "%TEMP%\i.cmd" && "%TEMP%\i.cmd"
 
-# Verify installed and on PATH
-which android
-android --version
-
-# Keep it current
+# Verify
+android info
 android update
 ```
 
 ---
 
-## Step 1: Bootstrap agent integration (once per project)
+## Where this differs from the official skill: KMP project layout
 
-```bash
-# From the KMP project root
-android init            # sets up the project for agent workflows, installs the android-cli skill
-android skills add --all   # installs all Android-specific skills for this and future agent sessions
-android skills find 'performance'   # discover a narrower skill set instead of --all
-```
+The official skill's `create`/`describe`/`run` examples assume a single-module Android
+project. A KMP project scaffolded by `kotlin-multiplatform-feature-scaffold` is not that
+shape — apply the same commands with these adjustments:
 
-`android init` is idempotent — safe to re-run after an `android update` to pick up new
-agent-facing skills without touching project files that already exist.
+**Don't use `android create` on an existing KMP project.** It creates a fresh,
+Android-only project from a template (`empty-activity`, etc.) — it has no concept of the
+6-layer `:model`/`:api`/`:domain`/`:data`/`:presenter`/`:ui` module graph
+`kotlin-multiplatform-feature-scaffold` builds. Use that skill to add the Android target
+instead.
 
----
+**`android describe --project_dir=<KMP root>`** still works — it walks the Gradle build
+and reports every target's build/output paths, including the Android target buried
+inside a multi-module graph. Use its output to find the APK path for `android run`
+instead of guessing `androidApp/build/outputs/apk/debug/...` by hand — that path shape
+isn't guaranteed stable across AGP versions.
 
-## Step 2: Project & build
+**`android run --apks=<path from describe>`** deploys and launches — this replaces the
+`./gradlew installDebug && adb shell am start -n ...` two-step agents otherwise chain
+manually.
 
-```bash
-# Scaffold a new Android-only prototype (not for adding an Android target to an
-# existing KMP module — use kotlin-multiplatform-feature-scaffold for that)
-android create --template-name=<template> --output=<path>
+**Emulator and SDK management** (`android emulator create/start/stop`, `android sdk
+install`) are project-shape-agnostic — no KMP-specific adjustment needed, use them as the
+upstream skill documents.
 
-# Inspect an existing project (module graph, target SDK, dependencies)
-android describe --project_dir=/path/to/project
-```
-
-For a KMP project already scaffolded by `kotlin-multiplatform-feature-scaffold`, skip
-`android create` — it targets a fresh Android-only project, not a multi-target KMP
-module graph. Use `android describe` freely; it's read-only.
-
----
-
-## Step 3: Emulator / device management
-
-```bash
-# Create a virtual device from a named profile
-android emulator create --profile=medium_phone
-
-# Start / stop
-android emulator start medium_phone
-android emulator stop emulator-5554
-```
-
-Known issue (per Google's own docs, verified before shipping this skill): the emulator
-command is disabled on Windows. On Windows, fall back to `emulator -avd <name>` from the
-Android SDK's own `emulator/` tools directory, or drive a physical device instead.
+**`android studio *` (IDE-integration subcommands)** need a running, compatible Android
+Studio — `android studio check` first. If it fails (headless agent session, CI runner,
+no qualifying Studio version), fall back to `kotlin-multiplatform-roborazzi`'s
+`runComposeUiTest`/screenshot tests instead of `render-compose-preview`, and grep/read
+source instead of `find-declaration`/`find-usages`.
 
 ---
 
-## Step 4: Deploy & run
-
-```bash
-# Install and launch a built APK on a connected device or emulator
-android run --apks=app-debug.apk --device=<serial> --activity=<fully.qualified.Name>
-
-# Omit --device to target the only connected device/emulator
-android run --apks=app-debug.apk
-```
-
-This replaces the `./gradlew installDebug && adb shell am start -n ...` two-step for
-agent-driven runs — one command instead of chaining Gradle and `adb` manually.
-
----
-
-## Step 5: SDK component management
-
-```bash
-android sdk list <pattern>
-android sdk install platforms/android-34 build-tools/34.0.0
-```
-
-Prefer this over manually editing `local.properties`/SDK paths or scripting `sdkmanager`
-calls directly — `android sdk` resolves the same components through one consistent
-interface the rest of the CLI already uses.
-
----
-
-## Preview: Android Studio IDE-integration commands
-
-```bash
-android studio check                        # verify a qualifying Studio install is present
-android studio analyze-file <path>
-android studio find-declaration <symbol>
-android studio render-compose-preview <path> <composable>
-```
-
-**Gate these behind `android studio check` succeeding first** — do not assume Android
-Studio Quail 2 Canary 1+ is installed just because the rest of the CLI works. If `check`
-fails, fall back to the non-IDE equivalent (grep/read the source for `find-declaration`,
-Roborazzi/`runComposeUiTest` for `render-compose-preview` — see
-`kotlin-multiplatform-roborazzi`) rather than blocking on a Preview feature.
-
----
-
-## Wiring into CI (stable surface only)
+## Wiring into CI
 
 ```yaml
 # .github/workflows/android-cli-smoke.yml — stable commands only, no Studio dependency
@@ -200,33 +137,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Android CLI
-        run: |
-          # follow https://developer.android.com/tools/agents for the current install command
-          android --version
+        run: curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash
       - name: Describe project
         run: android describe --project_dir=.
       - name: Create + start emulator, run instrumented smoke test
         run: |
-          android emulator create --profile=medium_phone
-          android emulator start medium_phone
-          android sdk install platforms/android-34 build-tools/34.0.0
+          android emulator create --name smoke --package "system-images/android-34/google_apis/x86_64"
+          android emulator start smoke
+          android sdk install "platforms;android-34" "build-tools;34.0.0"
           ./gradlew connectedDebugAndroidTest
 ```
 
-Do not add `android studio *` steps to CI — they require a Canary IDE install CI
-runners don't have.
+Don't add `android studio *` steps to CI — they need a running Android Studio instance
+CI runners don't have. Re-check flag names against the upstream skill before relying on
+this job; the exact `emulator create`/`sdk install` argument shapes above are illustrative,
+not verified against a specific CLI version.
 
 ---
 
 ## Related Skills
 
-- `kotlin-multiplatform-feature-scaffold` — the project structure this skill's Android
-  target commands (`describe`, `run`) operate on; use that skill to add the Android
-  target itself, not `android create`
+- `kotlin-multiplatform-feature-scaffold` — the project structure `android describe`/
+  `android run` operate on; use that skill to add the Android target itself, never
+  `android create`
 - `kotlin-multiplatform-ci-github-actions` — where the CI smoke job above belongs
   alongside the existing Android/iOS/Desktop/Web test matrix
-- `kotlin-multiplatform-roborazzi` — the non-Preview fallback for
-  `android studio render-compose-preview` when a qualifying Studio install isn't present
+- `kotlin-multiplatform-roborazzi` — the fallback for `android studio
+  render-compose-preview` when a qualifying Studio install isn't present
 - `kotlin-multiplatform-audit` — run after any Android CLI-driven scaffold change to
   confirm the 6-layer module contract still holds
 
@@ -234,30 +171,33 @@ runners don't have.
 
 ## Common Anti-Patterns
 
-- running `android studio *` commands in CI or a headless agent session without first
-  checking `android studio check` — these require a Canary Android Studio install that
-  CI runners and headless dev containers don't have
+- re-documenting the `android` CLI's command reference instead of pointing at
+  `github.com/android/skills/tree/main/devtools/android-cli` — a hand-copied reference
+  drifts stale the moment the upstream skill updates; this exact mistake shipped in an
+  earlier draft of this skill (wrong `create` flags, an invented `skills add --all` flag)
 - using `android create` to add Android to an already-scaffolded KMP project — it
   targets a fresh Android-only project, not an existing multi-target module graph; use
   `kotlin-multiplatform-feature-scaffold` instead
-- skipping `android init`/`android skills add` at project setup, then re-discovering the
-  tool from scratch in every new agent session
+- guessing the APK output path by hand instead of reading it from `android describe`'s
+  output — the path shape isn't guaranteed stable across AGP versions
+- running `android studio *` commands in CI or a headless agent session without first
+  checking `android studio check`
 - scripting raw `adb`/`sdkmanager`/`emulator` calls once `android run`/`android sdk`/
   `android emulator` already wrap the same operations through one consistent interface
-- assuming the emulator command works identically on Windows — it's explicitly disabled
-  there per Google's own docs; verify before scripting a cross-platform CI job around it
 
 ---
 
 ## Output Style
 
-When asked about Android CLI setup or usage for a KMP project, respond in this order:
-1. Whether `android` is installed and on PATH (`android --version`)
-2. `android init` + `android skills add` bootstrap, if not already done
-3. The specific stable command for the task (project, emulator, deploy, or SDK)
-4. Whether the task actually needs a Preview `android studio *` command — if so, gate on
-   `android studio check` first and name the non-Preview fallback
-5. CI wiring, only if asked — stable surface only, never Preview
+When asked about Android CLI usage for a KMP project, respond in this order:
+1. Whether `android` is installed (`android info`) and whether the official
+   `android-cli` skill is installed (`android skills find android-cli`)
+2. Whether the task is KMP-specific (module layout, APK path inside a multi-module
+   graph) — if so, answer from this skill; otherwise defer to the upstream skill's
+   command reference
+3. Whether the task actually needs `android studio *` — if so, gate on `android studio
+   check` first and name the fallback
+4. CI wiring, only if asked
 
 ---
 
@@ -265,5 +205,6 @@ When asked about Android CLI setup or usage for a KMP project, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-19 | Corrected against the real upstream source: found `github.com/android/skills/tree/main/devtools/android-cli` — a genuine, Google-maintained skill in the same frontmatter format — after having claimed "no official skill exists" (the original research only checked developer.android.com, never searched GitHub for an actual skills repo). Rewrote this skill from a full command-reference duplicate (which was already wrong in places — invented `create --template-name=`/`skills add --all` flags that don't exist in the real CLI) into a thin KMP-integration layer that defers to the upstream skill for command syntax and only documents what's genuinely KMP-specific (module-graph-aware `describe`/`run` usage, why `create` doesn't apply post-scaffold). |
 | 2026-07-19 | Broadened Trigger keywords with generic task phrasing ("build and run android app", "deploy to emulator", "run KMP android target") — the initial keyword set required knowing the tool's name ("android cli") up front, so a natural "how do I run this on an emulator" ask wouldn't have surfaced it. Also cross-referenced from `kotlin-multiplatform-feature-scaffold`'s Related Skills so it's discoverable from project-foundation work, not only from its own literal keywords. |
 | 2026-07-19 | Initial skill. Real gap found: the user asked for Android CLI (`developer.android.com/tools/agents`) as a mandatory skill; verified no official Claude Code skill exists for it and this repo had zero references. Covers the stable command surface (`init`/`skills add`, `create`/`describe`, `emulator`, `run`, `sdk`) as the default, and scopes `android studio *` IDE-integration commands as Preview (verified: requires Android Studio Quail 2 Canary 1+, known Windows emulator/PowerShell issues) rather than a default dependency. |
