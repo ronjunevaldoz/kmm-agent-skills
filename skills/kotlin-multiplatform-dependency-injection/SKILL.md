@@ -403,6 +403,7 @@ Prefer replacing:
 - `kotlin-multiplatform-repository-pattern` — repository and data source bindings live in feature DI modules
 - `kotlin-multiplatform-network-layer` — `HttpClient` and `NetworkDataSource` are app-scope singletons in Koin
 - `kotlin-multiplatform-sqldelight-setup` — database driver and DAO bindings live in `:core:database` DI module
+- `kotlin-multiplatform-audit` — `_detect_context_parameter_opportunity` is a LOW-severity nudge for the Context Parameters section above
 
 ---
 
@@ -442,6 +443,7 @@ bindings to the actual module names in the repo.
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | Cross-referenced `kotlin-multiplatform-audit`'s new `_detect_context_parameter_opportunity` — a LOW-severity nudge that flags a parameter repeated across 5+ function signatures in the same file, mechanically surfacing the Context Parameters section below instead of relying on an agent to remember it unprompted. |
 | 2026-07-20 | Added "Context Parameters — Not a Replacement for Koin" — Kotlin 2.4 (this project's pinned version) stabilized context parameters in June 2026; verified this collection had zero references. Scopes it explicitly to cross-cutting implicit values (logger, session), not object-graph wiring, and flags the two sub-features still experimental in stable 2.4 (named context args, callable references). 2 new anti-patterns. |
 | 2026-06-28 | Add session scope pattern: named Koin scope created on login, closed on logout; rules for auth-gated objects. One new anti-pattern.
 | 2026-06-28 | Add SavedStateHandle + Koin wiring section: viewModelOf preferred form, automatic CreationExtras injection, getStateFlow for back-stack results. Two new anti-patterns. |

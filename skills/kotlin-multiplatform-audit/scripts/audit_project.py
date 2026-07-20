@@ -1434,6 +1434,124 @@ def _detect_destructive_read_accessor(root: Path) -> list[str]:
     return findings
 
 
+# ── Value class opportunity (2+ raw String/Long ID params in one signature) ─────
+# kotlin-multiplatform-clean-architecture's "Typed Domain IDs" rule: nothing stops
+# getOrder(userId, orderId) from compiling when both are raw String. This is an
+# opportunity nudge, not a misuse flag — the code isn't wrong, it's just missing a
+# cheap compile-time guardrail. Heuristic-only: matches parameter names ending in
+# "Id" (case-insensitive) typed as String or Long within the same function signature.
+
+_FUN_SIGNATURE_RE = re.compile(r"\bfun\s+(?:<[^>]*>\s*)?[\w.]*\s*\(([^)]*)\)", re.DOTALL)
+_ID_PARAM_RE = re.compile(r"(?:^|,)\s*(?:vararg\s+)?(\w*[Ii]d)\s*:\s*(String|Long)\b")
+
+
+def _split_top_level(param_str: str) -> list[str]:
+    """Split a parameter list on top-level commas only — doesn't break on commas
+    inside generic type arguments (Map<String, Int>) or default-value lambdas."""
+    parts: list[str] = []
+    depth = 0
+    current: list[str] = []
+    for ch in param_str:
+        if ch in "<([":
+            depth += 1
+        elif ch in ">)]":
+            depth -= 1
+        if ch == "," and depth == 0:
+            parts.append("".join(current))
+            current = []
+        else:
+            current.append(ch)
+    if current:
+        parts.append("".join(current))
+    return parts
+
+
+def _detect_value_class_opportunity(root: Path) -> list[str]:
+    """Flag a function signature with 2+ String/Long parameters whose names end in
+    'Id' — the exact shape that lets a caller pass them in the wrong order and still
+    compile. Nudge toward kotlin-multiplatform-clean-architecture's value class rule.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for match in _FUN_SIGNATURE_RE.finditer(text):
+            params = _split_top_level(match.group(1))
+            id_params = [
+                m.group(1)
+                for p in params
+                if (m := _ID_PARAM_RE.search("," + p))
+            ]
+            if len(id_params) < 2:
+                continue
+            line_no, snippet = _at(text, match.start())
+            findings.append(
+                f"value class opportunity [LOW]: {path.relative_to(root)}:{line_no} "
+                f"— {len(id_params)} raw String/Long ID parameters ({', '.join(id_params)}) "
+                f"in one signature; nothing stops them being passed in the wrong order. "
+                f"Per kotlin-multiplatform-clean-architecture's Typed Domain IDs rule, "
+                f"wrap each in a @JvmInline value class\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
+# ── Context parameter opportunity (same param repeated across many signatures) ──
+# kotlin-multiplatform-dependency-injection's Context Parameters section: a value
+# threaded through many function signatures in the same file (a logger, a session)
+# that isn't actually each function's job is a context-parameter candidate. Heuristic
+# and lower-confidence than the value-class check — a repeated parameter name/type
+# pair is a much weaker signal than a directly-observed bug shape, so this stays LOW
+# severity and is explicitly a nudge, not a claim the code is wrong.
+
+_CONTEXT_PARAM_OPPORTUNITY_MIN_COUNT = 5
+
+
+def _detect_context_parameter_opportunity(root: Path) -> list[str]:
+    """Flag a (name, type) parameter pair repeated across 5+ function signatures in
+    the same file — a candidate for Kotlin 2.4's context parameters instead of
+    threading the same explicit parameter through every function.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        counts: dict[tuple[str, str], int] = {}
+        first_line: dict[tuple[str, str], int] = {}
+        for match in _FUN_SIGNATURE_RE.finditer(text):
+            for p in _split_top_level(match.group(1)):
+                pm = re.match(r"\s*(?:vararg\s+)?(\w+)\s*:\s*([\w.]+)", p)
+                if not pm:
+                    continue
+                key = (pm.group(1), pm.group(2))
+                counts[key] = counts.get(key, 0) + 1
+                if key not in first_line:
+                    first_line[key] = _at(text, match.start())[0]
+        for (name, type_name), count in counts.items():
+            if count < _CONTEXT_PARAM_OPPORTUNITY_MIN_COUNT:
+                continue
+            line_no = first_line[(name, type_name)]
+            findings.append(
+                f"context parameter opportunity [LOW]: {path.relative_to(root)}:{line_no} "
+                f"— '{name}: {type_name}' repeated as an explicit parameter across "
+                f"{count} function signatures in this file. Per "
+                f"kotlin-multiplatform-dependency-injection's Context Parameters "
+                f"section, consider threading it implicitly via context(...) instead "
+                f"— only if it's a cross-cutting value, not part of each function's "
+                f"actual job\n"
+                f"    {line_no} | first appears here"
+            )
+    return findings
+
+
 # ── Extensible abstract class in commonMain ─────────────────────────────────────
 # commonMain APIs should be called or composed, not extended. An abstract class with
 # only abstract members (no concrete implementation at all) forces every consumer into
@@ -2858,6 +2976,10 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Destructive-read accessor (single-writer snapshot anti-pattern) ─────────
     findings.extend(_detect_destructive_read_accessor(root))
+
+    # ── Pattern-adoption opportunities (nudges, not misuse flags) ───────────────
+    findings.extend(_detect_value_class_opportunity(root))
+    findings.extend(_detect_context_parameter_opportunity(root))
 
     # ── Extensible abstract class in commonMain ─────────────────────────────────
     findings.extend(_detect_extensible_abstract_class_in_common(root))

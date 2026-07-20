@@ -2498,6 +2498,100 @@ class DestructiveReadAccessorTests(unittest.TestCase):
             self.assertFalse(any("destructive read accessor" in f for f in findings))
 
 
+class ValueClassOpportunityTests(unittest.TestCase):
+    """kotlin-multiplatform-clean-architecture's Typed Domain IDs rule: nothing stops
+    getOrder(userId, orderId) from compiling when both are raw String. This is an
+    opportunity nudge, not a misuse flag.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_two_raw_id_params(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/Orders.kt",
+                "fun getOrder(userId: String, orderId: String): Order = TODO()\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("value class opportunity" in f for f in findings))
+
+    def test_ignores_single_id_param(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/Orders.kt",
+                "fun getOrder(orderId: String): Order = TODO()\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("value class opportunity" in f for f in findings))
+
+    def test_ignores_non_id_string_params(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/Orders.kt",
+                "fun search(query: String, filter: String): List<Order> = TODO()\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("value class opportunity" in f for f in findings))
+
+    def test_flags_long_id_params(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/Orders.kt",
+                "fun link(userId: Long, orderId: Long): Unit = TODO()\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("value class opportunity" in f for f in findings))
+
+
+class ContextParameterOpportunityTests(unittest.TestCase):
+    """kotlin-multiplatform-dependency-injection's Context Parameters section: a value
+    threaded through many function signatures in the same file is a candidate for
+    context(...) instead of an explicit parameter on every function.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_param_repeated_five_times(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            body = "\n".join(
+                f"fun step{i}(logger: Logger, x: Int): Unit = TODO()" for i in range(5)
+            )
+            self._write(root, "feature/x/src/commonMain/kotlin/Steps.kt", body + "\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("context parameter opportunity" in f for f in findings))
+
+    def test_ignores_param_repeated_four_times(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            body = "\n".join(
+                f"fun step{i}(logger: Logger, x: Int): Unit = TODO()" for i in range(4)
+            )
+            self._write(root, "feature/x/src/commonMain/kotlin/Steps.kt", body + "\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("context parameter opportunity" in f for f in findings))
+
+    def test_ignores_differing_types_for_same_name(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            body = "\n".join(
+                f"fun step{i}(logger: Logger{i % 2}): Unit = TODO()" for i in range(6)
+            )
+            self._write(root, "feature/x/src/commonMain/kotlin/Steps.kt", body + "\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("context parameter opportunity" in f for f in findings))
+
+
 class MixedDesignSystemUsageTests(unittest.TestCase):
     """kotlin-multiplatform-shadcn-compose says "Never combine with
     kotlin-multiplatform-design-system" - documented but never mechanically checked.

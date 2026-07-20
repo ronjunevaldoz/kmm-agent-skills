@@ -617,7 +617,7 @@ which Gradle allows fine and nothing else catches.
 - `kotlin-multiplatform-unit-testing` — JVM-based ViewModel tests enabled by the `:presenter`/`:ui` split
 - `kotlin-multiplatform-code-quality` — Ktlint + Detekt setup; Detekt's `UnnecessaryAbstractClass` rule is the mechanical enforcement for Composition Over Inheritance
 - `kotlin-multiplatform-dependency-injection` — Koin wiring for interface + injection, the replacement for inheritance-based extension points
-- `kotlin-multiplatform-audit` — `_detect_extensible_abstract_class_in_common` and `_detect_module_layer_violation` are the mechanical enforcement for this skill's Composition Over Inheritance and layer-order rules, independent of whether Detekt is configured
+- `kotlin-multiplatform-audit` — `_detect_extensible_abstract_class_in_common` and `_detect_module_layer_violation` are the mechanical enforcement for this skill's Composition Over Inheritance and layer-order rules, independent of whether Detekt is configured; `_detect_value_class_opportunity` is a LOW-severity nudge for the Typed Domain IDs rule above
 
 ---
 
@@ -659,6 +659,7 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | Cross-referenced `kotlin-multiplatform-audit`'s new `_detect_value_class_opportunity` — a LOW-severity nudge that flags 2+ raw String/Long ID parameters in one function signature, mechanically surfacing the Typed Domain IDs rule below instead of relying on an agent to remember it unprompted. |
 | 2026-07-20 | Added "Typed Domain IDs" — `@JvmInline value class` for domain identifiers instead of raw `String`/`Long`, verified this collection had zero references to value classes despite them being idiomatic Kotlin since 1.5. Distinguishes from `typealias` (assignment-compatible, doesn't prevent the mix-up) and covers the multi-field/boxing/serialization caveats. 2 new anti-patterns. |
 | 2026-07-13 | Added a note explaining why the Use Case Pattern has no "skip it if trivial" exception, even for a 1:1 pass-through with zero added logic: the boundary rule ("ViewModel only ever depends on `:domain`") is bright-line and mechanically checkable; a judgment-call exception isn't. The cost tradeoff (small future refactor if skipped vs. paying ceremony cost today if always wrapped) is real but secondary to the enforceability argument in this repo specifically. |
 | 2026-07-11 | Added a "Module layer-order violation" fitness function: `kotlin-multiplatform-audit`'s new `_detect_module_layer_violation` parses every module's `build.gradle.kts` for `projects.*` references and checks the full layer order plus cross-feature dependencies, generalizing the single ad-hoc `:ui`-vs-`:data`/`:domain` grep this section used to show. A literal circular dependency can't happen silently (Gradle refuses to build a real cycle) — the real, previously-uncaught gap is a wrong-*direction* one-way dependency declared at the Gradle level before any file imports the forbidden package, which file-level Detekt rules can't see yet. Verified against 5 synthetic cases (3 violation types, a valid full graph, and a core-module dependency correctly ignored) before shipping. |
