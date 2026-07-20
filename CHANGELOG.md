@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.91.1] — 2026-07-20
+
+### Fixed
+
+- fix(android-cli): defer to the real official skill instead of duplicating it
+
+---
+
 ## [v1.91.0] — 2026-07-19
 
 ### Added

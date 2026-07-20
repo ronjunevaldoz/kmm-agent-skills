@@ -1,5 +1,5 @@
 {
-  "version": "1.91.0",
+  "version": "1.91.1",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -172,22 +172,19 @@
     {
       "name": "kotlin-multiplatform-android-cli",
       "path": "skills/kotlin-multiplatform-android-cli",
-      "description": "Wires Google's Android CLI (`android` binary, developer.android.com/tools/agents) into a KMP project's Android target \u2014 agent-first project scaffolding, emulator/device management, build + deploy, and SDK component installs from the terminal, without opening Android Studio. Covers `android init`/`android skills add` agent setup and the stable command surface; treats `android studio *` subcommands as Preview (require Android Studio Quail 2 Canary 1+) rather than a default dependency.",
+      "description": "KMP-specific integration guide for Google's official `android` CLI. The CLI's own command reference already exists as a real, officially maintained skill at github.com/android/skills/tree/main/devtools/android-cli (installable via `android skills add android-cli`) \u2014 this skill does not re-document that surface. It covers what's specific to a Kotlin Multiplatform project: locating the Android target inside a multi-module 6-layer graph, why `android create` doesn't apply once `kotlin-multiplatform-feature-scaffold` has run, and CI wiring alongside the existing Android/iOS/Desktop/Web matrix.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-19",
       "keywords": [
         "Android CLI",
         "android-cli",
         "android init",
-        "android skills",
-        "agent-first Android",
+        "android skills add",
         "emulator management",
         "AVD",
         "android run",
         "android sdk",
-        "Android Studio agent tools",
-        "Journeys",
-        "Antigravity"
+        "Android Studio agent tools"
       ],
       "triggers": [
         "android cli",
@@ -200,11 +197,6 @@
         "android run apk",
         "install apk cli",
         "android sdk install",
-        "agent-first android",
-        "android studio quail",
-        "render compose preview cli",
-        "journeys",
-        "google antigravity android",
         "build and run android app",
         "deploy to emulator",
         "run on device from terminal",
