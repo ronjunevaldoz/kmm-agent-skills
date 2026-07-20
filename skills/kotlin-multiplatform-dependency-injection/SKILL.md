@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-09'
+  last-updated: '2026-07-20'
   keywords:
     - dependency injection
     - DI
@@ -330,6 +330,46 @@ class ProfileViewModel(
 
 ---
 
+## Context Parameters — Not a Replacement for Koin
+
+Kotlin 2.4 (this project's pinned version — see `docs/reference/compatibility-matrix.md`)
+stabilized context parameters. They solve a different problem than Koin and are not an
+alternative DI mechanism — don't reach for them to wire the object graph.
+
+**What they're for:** a value every function in a call chain needs but that isn't part of
+that function's actual job signature — a logger, an authenticated session, a trace ID —
+threaded implicitly instead of added as an explicit parameter to every function in the
+chain (or smuggled through a `ThreadLocal`/global). Compile-time resolved, zero runtime
+cost — the compiler injects it as a hidden parameter, no reflection, no proxy.
+
+```kotlin
+// A cross-cutting dependency every use case in a chain needs, but that has nothing
+// to do with any single use case's actual job
+context(logger: Logger)
+suspend fun UserRepository.fetchAndCache(id: UserId): User {
+    logger.d { "fetching $id" }
+    return remote.fetch(id).also { local.save(it) }
+}
+
+// Called from a scope that already has a Logger in context — no explicit passing
+context(logger: Logger)
+suspend fun refreshProfile(id: UserId) {
+    val user = userRepository.fetchAndCache(id)   // logger flows through implicitly
+}
+```
+
+**Keep using Koin for:** constructing the object graph — repositories, use cases,
+ViewModels, anything with a lifecycle Koin scopes already manage above. Context
+parameters have no scoping/lifecycle model of their own; they're resolved per call site,
+not created-and-torn-down like a Koin scope.
+
+**Two sub-features are still experimental even in stable 2.4** — named context arguments
+(`charge(log = primary)`, needs `-Xexplicit-context-arguments`) and callable references to
+context-parameter functions (`::fetchAndCache` doesn't resolve cleanly yet). Avoid both
+until they stabilize (tracked for Kotlin 2.5).
+
+---
+
 ## Testing Overrides
 
 Tests should replace bindings, not production code.
@@ -377,6 +417,8 @@ Prefer replacing:
 - hiding bad boundaries behind DI
 - putting ephemeral screen state in Koin
 - upgrading `koin-compose-viewmodel` without checking the matching `androidx.lifecycle.viewmodelCompose` version — the pair must stay aligned, and Wasm verification must be part of the release gate
+- reaching for context parameters to wire the object graph — they have no scoping/lifecycle model of their own; that's what Koin scopes are for
+- using named context arguments or a callable reference to a context-parameter function — both are still experimental in Kotlin 2.4 (targeted for 2.5)
 
 If the DI graph feels too complicated, audit the architecture first.
 
@@ -400,6 +442,7 @@ bindings to the actual module names in the repo.
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | Added "Context Parameters — Not a Replacement for Koin" — Kotlin 2.4 (this project's pinned version) stabilized context parameters in June 2026; verified this collection had zero references. Scopes it explicitly to cross-cutting implicit values (logger, session), not object-graph wiring, and flags the two sub-features still experimental in stable 2.4 (named context args, callable references). 2 new anti-patterns. |
 | 2026-06-28 | Add session scope pattern: named Koin scope created on login, closed on logout; rules for auth-gated objects. One new anti-pattern.
 | 2026-06-28 | Add SavedStateHandle + Koin wiring section: viewModelOf preferred form, automatic CreationExtras injection, getStateFlow for back-stack results. Two new anti-patterns. |
 | 2026-07-09 | Added Koin Compose ViewModel ↔ AndroidX lifecycle compatibility warning: keep the pair aligned, and verify on Wasm because mismatches can surface only as runtime IR linkage errors there. |
