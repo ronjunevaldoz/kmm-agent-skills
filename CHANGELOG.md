@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.96.0] — 2026-07-25
+
+### Added
+
+- feat(skills): cover general KMM anti-patterns and library decoupling rules
+
+---
+
 ## [v1.95.0] — 2026-07-25
 
 ### Added

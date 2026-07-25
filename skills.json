@@ -1,5 +1,5 @@
 {
-  "version": "1.95.0",
+  "version": "1.96.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1152,7 +1152,7 @@
       "path": "skills/kotlin-multiplatform-expect-actual",
       "description": "The expect/actual mechanism in Kotlin Multiplatform \u2014 when to use it, when NOT to, and how to do it correctly. Covers: the four categories that genuinely warrant expect/actual (platform APIs, platform types, performance-critical code, SDK integration), the common-first rule that prefers a pure `commonMain` implementation before abstractions, the interface-injection alternative that handles most cases better, the \"actual everywhere\" anti-pattern, typealias actual for platform types, @ObjCName for clean Swift API surfaces, and Kotlin/Native memory considerations. Zero new dependencies.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-25",
+      "last_updated": "2026-07-20",
       "keywords": [
         "expect actual",
         "expect class",
@@ -2365,7 +2365,7 @@
       "path": "skills/kotlin-multiplatform-presenter-module",
       "description": "Sets up the :presenter module in a KMP feature \u2014 pure Kotlin ViewModels, MVI UiState/UiIntent contracts, Koin wiring, and convention plugin. No Compose dependency so ViewModels are testable on plain JVM without an Android device or emulator.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-18",
+      "last_updated": "2026-07-20",
       "keywords": [
         "presenter",
         "ViewModel",
