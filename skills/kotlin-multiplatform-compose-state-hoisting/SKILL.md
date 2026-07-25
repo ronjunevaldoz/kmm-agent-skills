@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-06'
+  last-updated: '2026-07-20'
   keywords:
     - state hoisting
     - stateful composable
@@ -592,6 +592,7 @@ If a composable is hard to preview or test, check whether the state is in the ri
 - `kotlin-multiplatform-mvi` — MVI Contract as the top of the hoisting hierarchy for screen state
 - `kotlin-multiplatform-preview-driven-development` — stateless composables from hoisting enable fast Desktop previews
 - `kotlin-multiplatform-compose-slot-api` — slot APIs pair naturally with hoisted state callbacks
+- `kotlin-multiplatform-audit` — `_detect_compose_unstable_collection_param` flags a raw `List`/`Map`/`Set` composable parameter (Compose treats these as unstable, forcing recomposition even when contents are unchanged — use `kotlinx.collections.immutable`'s `ImmutableList`/`ImmutableMap`/`ImmutableSet` instead)
 
 ---
 
@@ -611,6 +612,7 @@ Keep snippets small. Use the user's actual composable names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | Cross-referenced `kotlin-multiplatform-audit`'s new `_detect_compose_unstable_collection_param` — mechanically flags the exact raw `List`/`Map`/`Set` parameter case the existing @Stable/@Immutable section already warns about, instead of relying on an agent to remember it unprompted. |
 | 2026-06-28 | Add @Stable/@Immutable stability annotation section: decision table, where to apply, contract rules. Two new anti-patterns. |
 | 2026-06-28 | Add derivedStateOf section: memoized derived Compose state, decision table (when to use vs plain expression), list-filter example, remember wrapping rule. Two new anti-patterns. |
 | 2026-06-06 | Initial release. |

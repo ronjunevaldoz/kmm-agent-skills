@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-11'
+  last-updated: '2026-07-20'
   keywords:
     - maven central
     - maven publish
@@ -171,6 +171,9 @@ plugins {
 }
 
 kotlin {
+    explicitApi()   // library-only — forces every public declaration to state its
+                    // visibility and return type explicitly, see below
+
     androidTarget {
         publishLibraryVariants("release")
     }
@@ -278,6 +281,37 @@ comments:
 Keep the license identifier here consistent with the POM's `licenses { license { name = ... } }`
 block — a per-file header claiming a different license than the POM declares is worse
 than having no per-file header at all.
+
+### `explicitApi()` — library-only, not for app code
+
+Library code has a wider blast radius than app code: a `public` declaration nobody
+intended to expose becomes part of the API surface the moment it ships, and removing it
+later is a breaking change (exactly what `apiCheck`/binary-compatibility-validator in
+Step 5 exists to catch after the fact). `explicitApi()` catches it *before* publishing
+instead — it fails the build on any public declaration missing an explicit visibility
+modifier or return type:
+
+```kotlin
+// ❌ fails to compile under explicitApi() — implicit public visibility, inferred return type
+class UserRepository {
+    fun getUser(id: String) = api.fetchUser(id)
+}
+
+// ✓ compiles — visibility and return type both explicit
+public class UserRepository {
+    public fun getUser(id: String): User = api.fetchUser(id)
+}
+```
+
+**Don't add this to app code** — `kotlin-multiplatform-clean-architecture`'s 6-layer
+contract already controls what's exposed between modules via `internal`, and an app has
+no external consumers to protect from an accidental public leak the way a published
+library does. `explicitApi()` on app code is pure ceremony with no corresponding benefit.
+
+Two modes: `explicitApi()` fails the build (`ExplicitApiMode.Strict`), `explicitApiWarning()`
+only warns. Use the strict form for a library that's already past its first stable
+release — a warning is easy to ignore and defeats the point of catching this before
+publishing.
 
 ---
 
@@ -533,6 +567,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 | `signAllPublications()` fails locally | Set `signing.*` properties in `~/.gradle/gradle.properties`, not in the project |
 | Missing `scm` block in POM | Maven Central validation rejects POMs without SCM — always include it |
 | Per-file license header names a different license than the POM's `licenses { license { name = ... } }` | Keep both in sync — a mismatched per-file header is worse than no per-file header at all |
+| No `explicitApi()` | A public declaration nobody intended to expose ships as part of the API surface; `apiCheck` only catches the *next* accidental change, not the first one |
 
 ---
 
@@ -555,6 +590,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | Added `explicitApi()` — real gap found in a library-vs-app rules survey: this skill covered binary compatibility, signing, and publishing channels but never the compiler mode that catches an accidental public API leak *before* it ships (as opposed to `apiCheck`, which only catches the *next* change to an already-public surface). Explicitly scoped to library code only — app code has no external consumers to protect and gains nothing from the ceremony. 1 new anti-pattern. |
 | 2026-07-11 | Cross-referenced two new skills: `kotlin-multiplatform-project-docs-maintainer`'s new `docs/libraries.md` catalog page (release checklist should point there instead of nowhere), and `kotlin-multiplatform-docs-site` (public GitHub Pages developer guide, reuses this skill's Dokka setup for a separate HTML output, distinct from the Javadoc jar). |
 | 2026-07-09 | Added a "Per-file license headers (optional)" section — Detekt's `AbsentOrWrongFileLicense` rule (off by default) with a license template, and why this is worth it for a library (files get vendored/copy-pasted independently of the repo) but not for app code. New anti-pattern: per-file header must stay consistent with the POM's declared license. |
 | 2026-06-29 | Initial skill — vanniktech plugin, BOM, binary-compat-validator, SNAPSHOT/stable, GPG, GitHub Packages |

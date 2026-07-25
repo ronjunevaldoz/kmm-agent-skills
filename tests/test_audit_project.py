@@ -2653,6 +2653,157 @@ class GodClassTests(unittest.TestCase):
             self.assertTrue(any("viewmodel" in f.lower() for f in findings))
 
 
+class RunBlockingInSharedCodeTests(unittest.TestCase):
+    """runBlocking blocks the calling thread — often the main thread on Android/iOS —
+    a real correctness hazard anywhere in shared business logic outside a CLI entry point.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_runblocking_in_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/OrderRepository.kt",
+                "class OrderRepository {\n"
+                "    fun getOrderSync(id: String): Order = runBlocking { fetch(id) }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("runBlocking in shared code" in f for f in findings))
+
+    def test_ignores_runblocking_in_main_entry_point(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "app/src/commonMain/kotlin/Main.kt",
+                "fun main() {\n"
+                "    runBlocking { startApp() }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("runBlocking in shared code" in f for f in findings))
+
+    def test_ignores_runblocking_outside_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/androidMain/kotlin/OrderRepository.kt",
+                "class OrderRepository {\n"
+                "    fun getOrderSync(id: String): Order = runBlocking { fetch(id) }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("runBlocking in shared code" in f for f in findings))
+
+
+class KoinCircularDependencyTests(unittest.TestCase):
+    """Only detects explicitly-typed single<A>/factory<A>/scoped<A> bindings whose
+    body references get<B>() — narrow scope keeps false positives near zero.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_two_node_cycle(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "app/src/commonMain/kotlin/AppModule.kt",
+                "val appModule = module {\n"
+                "    single<A> { AImpl(get<B>()) }\n"
+                "    single<B> { BImpl(get<A>()) }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("koin circular dependency" in f for f in findings))
+
+    def test_ignores_acyclic_chain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "app/src/commonMain/kotlin/AppModule.kt",
+                "val appModule = module {\n"
+                "    single<A> { AImpl(get<B>()) }\n"
+                "    single<B> { BImpl(get<C>()) }\n"
+                "    single<C> { CImpl() }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("koin circular dependency" in f for f in findings))
+
+    def test_flags_three_node_cycle_across_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "app/src/commonMain/kotlin/ModuleOne.kt",
+                "val moduleOne = module {\n"
+                "    single<A> { AImpl(get<B>()) }\n"
+                "}\n",
+            )
+            self._write(
+                root, "app/src/commonMain/kotlin/ModuleTwo.kt",
+                "val moduleTwo = module {\n"
+                "    single<B> { BImpl(get<C>()) }\n"
+                "    single<C> { CImpl(get<A>()) }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("koin circular dependency" in f for f in findings))
+
+
+class ComposeUnstableCollectionParamTests(unittest.TestCase):
+    """Raw List/Map/Set params on a @Composable are unstable to the Compose compiler,
+    forcing recomposition even when contents haven't changed.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_raw_list_param(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/OrderListScreen.kt",
+                "@Composable\n"
+                "fun OrderListContent(orders: List<Order>) {\n"
+                "    Column {}\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("compose unstable collection param" in f for f in findings))
+
+    def test_ignores_immutable_list_param(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/OrderListScreen.kt",
+                "@Composable\n"
+                "fun OrderListContent(orders: ImmutableList<Order>) {\n"
+                "    Column {}\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("compose unstable collection param" in f for f in findings))
+
+    def test_ignores_non_composable_function(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/OrderMapper.kt",
+                "fun mapOrders(orders: List<OrderDto>): List<Order> = TODO()\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("compose unstable collection param" in f for f in findings))
+
+
 class MixedDesignSystemUsageTests(unittest.TestCase):
     """kotlin-multiplatform-shadcn-compose says "Never combine with
     kotlin-multiplatform-design-system" - documented but never mechanically checked.

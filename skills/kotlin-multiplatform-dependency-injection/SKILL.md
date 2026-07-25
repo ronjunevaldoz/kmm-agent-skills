@@ -403,12 +403,13 @@ Prefer replacing:
 - `kotlin-multiplatform-repository-pattern` — repository and data source bindings live in feature DI modules
 - `kotlin-multiplatform-network-layer` — `HttpClient` and `NetworkDataSource` are app-scope singletons in Koin
 - `kotlin-multiplatform-sqldelight-setup` — database driver and DAO bindings live in `:core:database` DI module
-- `kotlin-multiplatform-audit` — `_detect_context_parameter_opportunity` is a LOW-severity nudge for the Context Parameters section above
+- `kotlin-multiplatform-audit` — `_detect_context_parameter_opportunity` is a LOW-severity nudge for the Context Parameters section above; `_detect_koin_circular_dependency` flags a cycle among explicitly-typed `single<A>`/`factory<A>`/`scoped<A>` bindings
 
 ---
 
 ## Common Anti-Patterns
 
+- two bindings depending on each other (`A` needs `B`, `B` needs `A`) — Koin resolves this lazily so it often doesn't fail until runtime; break the cycle by extracting the shared piece into a third binding, or inject a `Lazy<T>`/`Provider`-style indirection at one edge
 - constructing `SavedStateHandle()` manually — always use `viewModelOf` or `viewModel { ViewModel(get()) }`; Koin provides it from CreationExtras
 - using `viewModel { ViewModel(get(), get()) }` when `viewModelOf(::ViewModel)` would do — adds boilerplate for no gain; only use the explicit form for custom qualifiers
 - injecting business rules into Koin modules
@@ -443,6 +444,7 @@ bindings to the actual module names in the repo.
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | Added a circular-dependency anti-pattern and cross-referenced `kotlin-multiplatform-audit`'s new `_detect_koin_circular_dependency` — real gap: nothing in this skill or the audit checked for two bindings depending on each other, which Koin resolves lazily and so often doesn't surface until runtime. |
 | 2026-07-20 | Cross-referenced `kotlin-multiplatform-audit`'s new `_detect_context_parameter_opportunity` — a LOW-severity nudge that flags a parameter repeated across 5+ function signatures in the same file, mechanically surfacing the Context Parameters section below instead of relying on an agent to remember it unprompted. |
 | 2026-07-20 | Added "Context Parameters — Not a Replacement for Koin" — Kotlin 2.4 (this project's pinned version) stabilized context parameters in June 2026; verified this collection had zero references. Scopes it explicitly to cross-cutting implicit values (logger, session), not object-graph wiring, and flags the two sub-features still experimental in stable 2.4 (named context args, callable references). 2 new anti-patterns. |
 | 2026-06-28 | Add session scope pattern: named Koin scope created on login, closed on logout; rules for auth-gated objects. One new anti-pattern.

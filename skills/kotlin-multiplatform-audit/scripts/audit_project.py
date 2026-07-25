@@ -753,6 +753,165 @@ def _detect_god_class(root: Path) -> list[str]:
     return findings
 
 
+# ── runBlocking in shared (commonMain) code ─────────────────────────────────────
+# runBlocking blocks the calling thread until the coroutine completes — on Android/iOS
+# that's very often the main thread. Fine in a JVM/Desktop CLI entry point (fun main),
+# a real correctness hazard (ANR / deadlock risk) anywhere else in shared business logic.
+
+_RUNBLOCKING_RE = re.compile(r"\brunBlocking\s*[{(]")
+_FUN_MAIN_RE = re.compile(r"\bfun\s+main\s*\(")
+
+
+def _detect_runblocking_in_shared_code(root: Path) -> list[str]:
+    """Flag runBlocking used in commonMain outside a fun main() entry point."""
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        if "/commonmain/" not in path.as_posix().lower():
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if _FUN_MAIN_RE.search(text):
+            continue
+        match = _RUNBLOCKING_RE.search(text)
+        if not match:
+            continue
+        line_no, snippet = _at(text, match.start())
+        findings.append(
+            f"runBlocking in shared code [MEDIUM]: {path.relative_to(root)}:{line_no} "
+            f"— blocks the calling thread, often the main thread on Android/iOS; use a "
+            f"suspend function and let the caller's coroutine scope handle it instead\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
+# ── Koin circular dependency ─────────────────────────────────────────────────────
+# Only detects bindings that use an explicit single<Type>/factory<Type>/scoped<Type>
+# declaration and explicit get<Type>() calls within the same line — this collection's
+# own kotlin-multiplatform-dependency-injection skill already recommends explicit
+# typing for interface bindings. A plain single { Foo(get(), get()) } with no explicit
+# type arguments can't be resolved to a dependency graph without also parsing Foo's
+# constructor signature elsewhere, which this heuristic doesn't attempt — real gap,
+# but narrowing scope to explicitly-typed bindings keeps false positives near zero.
+
+_KOIN_TYPED_BINDING_RE = re.compile(
+    r"\b(?:single|factory|scoped)\s*<\s*(\w+)\s*>\s*\{([^}]*)\}"
+)
+_KOIN_GET_TYPED_RE = re.compile(r"\bget\s*<\s*(\w+)\s*>\s*\(")
+
+
+def _detect_koin_circular_dependency(root: Path) -> list[str]:
+    """Flag a cycle among explicitly-typed Koin bindings (single<A>/factory<A>/
+    scoped<A> referencing get<B>() where B eventually depends back on A).
+    """
+    graph: dict[str, set[str]] = {}
+    origin: dict[str, tuple[Path, int]] = {}
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if "module {" not in text and "module{" not in text:
+            continue
+        for match in _KOIN_TYPED_BINDING_RE.finditer(text):
+            bound_type, body = match.group(1), match.group(2)
+            deps = set(_KOIN_GET_TYPED_RE.findall(body)) - {bound_type}
+            graph.setdefault(bound_type, set()).update(deps)
+            if bound_type not in origin:
+                origin[bound_type] = (path, _at(text, match.start())[0])
+
+    findings: list[str] = []
+    reported: set[frozenset] = set()
+
+    def find_cycle(start: str) -> list[str] | None:
+        stack = [(start, [start])]
+        seen_paths: set[str] = set()
+        while stack:
+            node, path_so_far = stack.pop()
+            for neighbor in graph.get(node, ()):
+                if neighbor == start:
+                    return path_so_far + [start]
+                if neighbor in path_so_far or neighbor in seen_paths:
+                    continue
+                seen_paths.add(neighbor)
+                stack.append((neighbor, path_so_far + [neighbor]))
+        return None
+
+    for bound_type in graph:
+        cycle = find_cycle(bound_type)
+        if not cycle:
+            continue
+        key = frozenset(cycle)
+        if key in reported:
+            continue
+        reported.add(key)
+        path, line_no = origin[bound_type]
+        findings.append(
+            f"koin circular dependency [HIGH]: {path.relative_to(root)}:{line_no} "
+            f"— {' → '.join(cycle)}; break the cycle by extracting the shared piece "
+            f"into a third binding both sides depend on, or by injecting a Provider/"
+            f"lazy indirection at one edge\n"
+            f"    {line_no} | {bound_type} binding"
+        )
+    return findings
+
+
+# ── Compose unstable collection parameter ─────────────────────────────────────
+# Raw List<T>/Map<K,V>/Set<T> parameters on a @Composable are treated as unstable by
+# the Compose compiler (they're mutable-capable interfaces), forcing recomposition on
+# every parent recompose even when the contents haven't changed. kotlinx.collections
+# .immutable's ImmutableList/ImmutableMap/ImmutableSet (or a wrapping @Immutable data
+# class) fix this. Heuristic-only nudge — a raw collection param is common and often
+# fine for a leaf composable that recomposes cheaply; this is a LOW-severity signal for
+# a composable worth checking, not a claim it's definitely wrong.
+
+_UNSTABLE_COLLECTION_PARAM_RE = re.compile(r"\b(?:List|Map|Set)\s*<")
+_IMMUTABLE_COLLECTION_PREFIX_RE = re.compile(r"\b(?:Immutable|Persistent)(?:List|Map|Set)\s*<")
+
+
+def _detect_compose_unstable_collection_param(root: Path) -> list[str]:
+    """Flag a @Composable function with a raw List/Map/Set parameter — Compose treats
+    these as unstable, causing unnecessary recomposition.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not _is_compose_ui_file(text, path):
+            continue
+        for match in _COMPOSABLE_FUN_RE.finditer(text):
+            fn_name = match.group(1)
+            params = _split_top_level(match.group("params"))
+            unstable = [
+                p.strip()
+                for p in params
+                if _UNSTABLE_COLLECTION_PARAM_RE.search(p)
+                and not _IMMUTABLE_COLLECTION_PREFIX_RE.search(p)
+            ]
+            if not unstable:
+                continue
+            line_no, snippet = _at(text, match.start())
+            findings.append(
+                f"compose unstable collection param [LOW]: {path.relative_to(root)}:{line_no} "
+                f"— '{fn_name}' takes a raw List/Map/Set parameter ({'; '.join(unstable)}); "
+                f"Compose treats these as unstable, forcing recomposition even when "
+                f"contents are unchanged. Use kotlinx.collections.immutable's "
+                f"ImmutableList/ImmutableMap/ImmutableSet instead\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
 _EXCLUDED_DIRS = {
     "build", ".gradle", ".git", "vendor", "third_party",
     "node_modules", ".idea", ".kotlin", "kotlin-js-store",
@@ -3037,6 +3196,11 @@ def audit_project(root: Path) -> list[str]:
 
     # ── God class (repo-wide, not scoped to ViewModel/Composable) ───────────────
     findings.extend(_detect_god_class(root))
+
+    # ── runBlocking in shared code, Koin cycles, unstable Compose collections ───
+    findings.extend(_detect_runblocking_in_shared_code(root))
+    findings.extend(_detect_koin_circular_dependency(root))
+    findings.extend(_detect_compose_unstable_collection_param(root))
 
     # ── Extensible abstract class in commonMain ─────────────────────────────────
     findings.extend(_detect_extensible_abstract_class_in_common(root))
