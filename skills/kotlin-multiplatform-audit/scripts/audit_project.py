@@ -699,6 +699,60 @@ def _detect_god_composable(root: Path) -> list[str]:
     return findings
 
 
+# ── God class (repo-wide, not scoped to ViewModel/Composable) ──────────────────
+# god-object detection existed for exactly two file types — ViewModel size and
+# god composable — nothing caught a repository, use case, or manager class
+# accumulating too many responsibilities. This is the heuristic backstop for a
+# project that hasn't wired kotlin-multiplatform-code-quality's LargeClass/
+# TooManyFunctions Detekt rules yet; those AST-based rules are the precise version
+# of this same check.
+
+_PLAIN_CLASS_DECL_RE = re.compile(
+    r"(?m)^(?!.*\b(?:data|sealed|enum|value|annotation)\s+class\b).*\bclass\s+(\w+)"
+)
+_FUN_DECL_RE = re.compile(r"\bfun\s+\w+\s*\(")
+_GOD_CLASS_LINE_THRESHOLD = 400
+_GOD_CLASS_FUN_THRESHOLD = 15
+
+
+def _detect_god_class(root: Path) -> list[str]:
+    """Flag a plain class (not data/sealed/enum/value/annotation) that's grown past
+    both a line-count and a function-count threshold — a repository, use case, or
+    manager accumulating too many responsibilities. Skips files already covered by
+    the ViewModel-size and god-composable detectors to avoid double-reporting.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if path.stem.endswith("ViewModel") or _is_viewmodel_file(text):
+            continue
+        if _is_compose_ui_file(text, path):
+            continue
+        class_match = _PLAIN_CLASS_DECL_RE.search(text)
+        if not class_match:
+            continue
+        line_count = len(text.splitlines())
+        fun_count = len(_FUN_DECL_RE.findall(text))
+        if line_count < _GOD_CLASS_LINE_THRESHOLD or fun_count < _GOD_CLASS_FUN_THRESHOLD:
+            continue
+        severity = "HIGH" if (line_count >= 700 or fun_count >= 25) else "MEDIUM"
+        line_no, snippet = _at(text, class_match.start())
+        findings.append(
+            f"god class [{severity}]: {path.relative_to(root)}:{line_no} "
+            f"— {line_count} lines, {fun_count} functions in '{class_match.group(1)}'; "
+            f"split into smaller, single-responsibility classes. Per "
+            f"kotlin-multiplatform-code-quality's LargeClass/TooManyFunctions Detekt "
+            f"rules, this should already fail CI once configured\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
 _EXCLUDED_DIRS = {
     "build", ".gradle", ".git", "vendor", "third_party",
     "node_modules", ".idea", ".kotlin", "kotlin-js-store",
@@ -2980,6 +3034,9 @@ def audit_project(root: Path) -> list[str]:
     # ── Pattern-adoption opportunities (nudges, not misuse flags) ───────────────
     findings.extend(_detect_value_class_opportunity(root))
     findings.extend(_detect_context_parameter_opportunity(root))
+
+    # ── God class (repo-wide, not scoped to ViewModel/Composable) ───────────────
+    findings.extend(_detect_god_class(root))
 
     # ── Extensible abstract class in commonMain ─────────────────────────────────
     findings.extend(_detect_extensible_abstract_class_in_common(root))

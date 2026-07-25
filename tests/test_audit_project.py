@@ -2592,6 +2592,67 @@ class ContextParameterOpportunityTests(unittest.TestCase):
             self.assertFalse(any("context parameter opportunity" in f for f in findings))
 
 
+class GodClassTests(unittest.TestCase):
+    """God-object detection existed for exactly two file types — ViewModel size and
+    god composable — nothing caught a repository/use-case/manager class accumulating
+    too many responsibilities. _detect_god_class is the repo-wide backstop.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def _big_class(self, name: str, fun_count: int, filler_lines_per_fun: int = 25) -> str:
+        funs = []
+        for i in range(fun_count):
+            body = "\n".join(f"        val x{j} = {j}" for j in range(filler_lines_per_fun))
+            funs.append(f"    fun op{i}(): Int {{\n{body}\n        return x0\n    }}")
+        return f"class {name} {{\n" + "\n".join(funs) + "\n}\n"
+
+    def test_flags_large_plain_class(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/OrderManager.kt",
+                self._big_class("OrderManager", fun_count=16),
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("god class" in f for f in findings))
+
+    def test_ignores_small_class(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/OrderMapper.kt",
+                "class OrderMapper {\n    fun toDomain(dto: OrderDto): Order = TODO()\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("god class" in f for f in findings))
+
+    def test_ignores_data_class_regardless_of_size(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            props = "\n".join(f"    val field{i}: Int = {i}," for i in range(500))
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/OrderState.kt",
+                f"data class OrderState(\n{props}\n)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("god class" in f for f in findings))
+
+    def test_ignores_viewmodel_already_covered_by_viewmodel_size(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            content = self._big_class("OrderViewModel", fun_count=16).replace(
+                "class OrderViewModel {", "class OrderViewModel : ViewModel() {"
+            )
+            self._write(root, "feature/orders/src/commonMain/kotlin/OrderViewModel.kt", content)
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("god class" in f for f in findings))
+            self.assertTrue(any("viewmodel" in f.lower() for f in findings))
+
+
 class MixedDesignSystemUsageTests(unittest.TestCase):
     """kotlin-multiplatform-shadcn-compose says "Never combine with
     kotlin-multiplatform-design-system" - documented but never mechanically checked.

@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-19'
+  last-updated: '2026-07-20'
   keywords:
     - Ktlint
     - Detekt
@@ -191,6 +191,17 @@ complexity:
   CyclomaticComplexMethod:
     active: true
     threshold: 15
+  LargeClass:
+    active: true
+    threshold: 400
+  TooManyFunctions:
+    active: true
+    thresholdInClasses: 15
+
+coupling:
+  CouplingBetweenObjects:
+    active: true
+    threshold: 12
 
 naming:
   FunctionNaming:
@@ -226,6 +237,24 @@ abstract class with only abstract members in `commonMain` forces every consumer 
 inheritance chain, which is exactly the pattern `kotlin-multiplatform-clean-architecture`'s
 "Composition Over Inheritance" section explains how to avoid — see that section for the
 full rationale and fix.
+
+`LargeClass`/`TooManyFunctions`/`CouplingBetweenObjects` were a real gap: this collection
+had god-object detection scoped to only two file types (`kotlin-multiplatform-audit`'s
+`_detect_viewmodel_size` for ViewModels, `_detect_god_composable` for Compose screens) —
+nothing caught a repository, use case, or manager class accumulating too many
+responsibilities. These three are real, AST-based Detekt rules (not this collection's own
+heuristic), so they catch it precisely instead of approximately:
+- `LargeClass` — a class over 400 lines, tuned above `LongMethod`'s 60-line function
+  threshold since a class legitimately holding several medium methods is normal; the
+  smell is the *class* growing unbounded, not any one method
+- `TooManyFunctions` — 15+ functions in one class is usually multiple responsibilities
+  that haven't been split yet
+- `CouplingBetweenObjects` — 12+ distinct types referenced by one class's signatures is a
+  fan-out smell; the class knows about too much of the codebase to test or change safely
+
+`kotlin-multiplatform-audit`'s `_detect_god_class` is the non-Detekt backstop for a
+project that hasn't wired this config yet — see that skill's own docs for its (looser,
+heuristic) thresholds.
 
 ### Usage
 
@@ -519,7 +548,7 @@ lint:
 - `kotlin-multiplatform-feature-scaffold` — convention plugins are where Ktlint/Detekt are applied
 - `kotlin-multiplatform-project-docs-maintainer` — `docs/reference/` is where development notes go when a code comment's rationale outgrows what belongs inline
 - `kotlin-multiplatform-library-publishing` — per-file license headers, a related but separate comment-placement decision
-- `kotlin-multiplatform-audit` — `_detect_what_comment_in_control_flow` checks the "Inline blocks" rule below automatically; `/kmm-clean-comments` applies the fix across all four documentation levels; `_detect_destructive_read_accessor` checks the "Side-Effect-Free Accessors" rule
+- `kotlin-multiplatform-audit` — `_detect_what_comment_in_control_flow` checks the "Inline blocks" rule below automatically; `/kmm-clean-comments` applies the fix across all four documentation levels; `_detect_destructive_read_accessor` checks the "Side-Effect-Free Accessors" rule; `_detect_god_class` is the non-Detekt backstop for `LargeClass`/`TooManyFunctions` above
 - `kotlin-multiplatform-docs-site` — applies this skill's `@sample` principle (a real, compiled reference beats a pasted block that can drift stale) to public developer-guide code examples via snippet extraction
 
 ---
@@ -527,6 +556,7 @@ lint:
 ## Common Anti-Patterns
 
 - applying Detekt only to the root project — violations in submodules go undetected; apply via convention plugins
+- leaving `LargeClass`/`TooManyFunctions`/`CouplingBetweenObjects` unconfigured — god-object detection then only exists for ViewModels and Composables (via `kotlin-multiplatform-audit`), not for a repository/use-case/manager class accumulating too many responsibilities
 - setting `maxIssues > 0` — a non-zero threshold lets violations accumulate silently
 - using Ktlint without `.editorconfig` — line length defaults to 80; too short for Kotlin
 - running `ktlintFormat` in CI instead of `ktlintCheck` — CI should fail, not silently reformat
@@ -557,6 +587,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | Enabled Detekt's `LargeClass`, `TooManyFunctions`, and `coupling.CouplingBetweenObjects` — real gap: god-object detection existed only for ViewModels and Composables (`kotlin-multiplatform-audit`'s `_detect_viewmodel_size`/`_detect_god_composable`), nothing caught a repository/use-case/manager class doing too much. These are real AST-based Detekt rules, not a hand-rolled heuristic. `_detect_god_class` added as the non-Detekt backstop, cross-referenced here. |
 | 2026-07-19 | New "Side-Effect-Free Accessors (Destructive Reads)" section — a real gap found while diagnosing a skill-vs-model-capability question against a separate KMP game project's commit history: a `consume*()` accessor that clears the field it just read before returning silently drops data for a second caller in the same tick/request (real bug: `Input.consumeTypedText()`/`consumeEditActions()`, fixed by moving the clear into one owned `snapshot()`). Rule generalized past input handling with a repository/`StateFlow` example. New `kotlin-multiplatform-audit` detector `_detect_destructive_read_accessor` (heuristic 3-line "read into local, clear same field, return local" shape), 1 new anti-pattern, cross-referenced in Related Skills. |
 | 2026-07-14 | Two additions to Comment & KDoc Conventions: (1) "Whether to write a comment at all" — a 4-step decision order that was previously scattered across prose rather than stated as one procedure. (2) "Formatting" — real, verified rules from Kotlin's own official coding conventions (kotlinlang.org): one space after `//`, KDoc's `/**`-alone-then-`*`-prefixed-lines-then-`*/`-alone shape for long comments vs single-line `/** ... */` for short ones, and the official guidance to *avoid* `@param`/`@return` in favor of inline prose — which contradicted this skill's own tag table until now (fixed both rows to state the real guidance instead of presenting the tags as the default shape). |
 | 2026-07-14 | Real gap closed: the "grows past ~4 lines, split to docs/reference/" rule was documented but never mechanically checked anywhere — a user reported still seeing long stacked `//` blocks in their project after this skill shipped. Added `kotlin-multiplatform-audit`'s `_detect_long_stacked_comment_block` (5+ consecutive `//` lines, no `docs/reference/` pointer) and cross-referenced it inline in the Comment & KDoc Conventions table. Excludes a leading license/copyright header (consistent with this skill's own existing license-header note) — verified against a real false-positive case before shipping. |
