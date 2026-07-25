@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.94.0] — 2026-07-25
+
+### Added
+
+- feat(audit): repo-wide god-class detection and coupling limits
+
+---
+
 ## [v1.93.0] — 2026-07-20
 
 ### Added
