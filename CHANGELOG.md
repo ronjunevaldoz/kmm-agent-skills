@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.95.0] — 2026-07-25
+
+### Added
+
+- feat(audit): detect runBlocking, Koin cycles, unstable Compose collections
+
+---
+
 ## [v1.94.0] — 2026-07-25
 
 ### Added

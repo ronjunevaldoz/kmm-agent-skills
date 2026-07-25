@@ -1,5 +1,5 @@
 {
-  "version": "1.94.0",
+  "version": "1.95.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -655,7 +655,7 @@
       "path": "skills/kotlin-multiplatform-compose-state-hoisting",
       "description": "State hoisting in Compose Multiplatform \u2014 the pattern of moving state up to the lowest common ancestor that needs it. Covers: stateful vs stateless composables, the controlled component pattern (value + onValueChange), the hoist-until-shared rule, UI state vs business state distinction, when to stop hoisting, and the common mistakes of over-hoisting (everything in ViewModel) and under-hoisting (buried state that can't be tested). Zero new dependencies.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-06",
+      "last_updated": "2026-07-20",
       "keywords": [
         "state hoisting",
         "stateful composable",
@@ -1856,7 +1856,7 @@
       "path": "skills/kotlin-multiplatform-library-publishing",
       "description": "Publish a Kotlin Multiplatform library to Maven Central, GitHub Packages, or both. Covers: vanniktech maven-publish plugin setup, POM metadata, Sonatype OSSRH staging, multi-artifact BOM, kotlinx-binary-compatibility-validator API tracking, SNAPSHOT vs stable channels, and a release checklist. Pairs with kotlin-multiplatform-xcframework-spm for iOS/SPM distribution.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-11",
+      "last_updated": "2026-07-20",
       "keywords": [
         "maven central",
         "maven publish",
