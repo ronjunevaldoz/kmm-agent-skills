@@ -313,6 +313,54 @@ only warns. Use the strict form for a library that's already past its first stab
 release — a warning is easy to ignore and defeats the point of catching this before
 publishing.
 
+### No forced framework coupling in library internals
+
+`kotlin-multiplatform-dependency-injection` recommends Koin for **app code** — a
+published library is a different situation. A consumer app might use Koin, Hilt, manual
+DI, or nothing at all; a library that hard-imports `org.koin.*` inside its own public
+classes forces that choice onto every consumer, or worse, silently requires Koin to be
+on the consumer's classpath at all.
+
+```kotlin
+// ❌ forces Koin onto every consumer of this library
+class UserRepository(scope: Scope) : KoinComponent {
+    private val api: ApiClient by inject()
+}
+
+// ✓ plain constructor injection — the consumer wires it however they want
+public class UserRepository(private val api: ApiClient) {
+    // ...
+}
+```
+
+If the library wants to *offer* Koin wiring as a convenience, ship it as a separate,
+optional artifact (`my-library-koin`) with its own `module { }` — never bake the
+dependency into the core artifact's own classes.
+
+### KDoc coverage on the public API surface
+
+`kotlin-multiplatform-code-quality`'s Comment & KDoc Conventions section covers KDoc
+*style* — this is about *coverage*. Once `explicitApi()` forces every public declaration
+to be deliberate, an undocumented one is a real gap: a consumer sees the declaration in
+autocomplete with no explanation of what it does or when to use it.
+
+```kotlin
+// ❌ compiles under explicitApi(), but a consumer has no idea what this does
+public class RetryPolicy(public val maxAttempts: Int, public val backoffMs: Long)
+
+// ✓ the public contract is documented, not just the visibility
+/**
+ * Controls retry behavior for transient network failures.
+ * @property maxAttempts stop retrying after this many attempts, including the first
+ * @property backoffMs delay between attempts, doubled after each failure
+ */
+public class RetryPolicy(public val maxAttempts: Int, public val backoffMs: Long)
+```
+
+`kotlin-multiplatform-audit`'s `_detect_undocumented_public_api` flags a public
+declaration with no preceding KDoc block, but only in a project that already uses
+`explicitApi()` — without it, "public" isn't a deliberate signal worth checking.
+
 ---
 
 ## Step 4 — BOM (Bill of Materials) for multi-artifact libraries
@@ -568,6 +616,8 @@ missing fields cause Maven Central validation failures that are hard to debug.
 | Missing `scm` block in POM | Maven Central validation rejects POMs without SCM — always include it |
 | Per-file license header names a different license than the POM's `licenses { license { name = ... } }` | Keep both in sync — a mismatched per-file header is worse than no per-file header at all |
 | No `explicitApi()` | A public declaration nobody intended to expose ships as part of the API surface; `apiCheck` only catches the *next* accidental change, not the first one |
+| Library's public classes `import org.koin.*` directly | Forces the consumer's DI choice; use plain constructor injection, ship Koin wiring as a separate optional artifact if wanted |
+| Public class/fun with no KDoc under `explicitApi()` | The declaration is deliberate but undocumented — a consumer sees it in autocomplete with no explanation |
 
 ---
 
@@ -583,6 +633,8 @@ missing fields cause Maven Central validation failures that are hard to debug.
 | `kotlin-multiplatform-release` | App release pipeline (different from library publishing — covers Play Store / App Store) |
 | `kotlin-multiplatform-project-docs-maintainer` | `docs/libraries.md` catalogs every published coordinate/version — point the release checklist there |
 | `kotlin-multiplatform-docs-site` | Public GitHub Pages developer guide + Dokka HTML API reference; reuses this skill's Dokka setup for the separate HTML output, not the Javadoc jar |
+| `kotlin-multiplatform-dependency-injection` | That skill's Koin recommendation is scoped to app code — see "No forced framework coupling in library internals" above for why a library's own classes shouldn't hard-depend on it |
+| `kotlin-multiplatform-audit` | `_detect_undocumented_public_api` flags a public declaration with no KDoc, scoped to projects using `explicitApi()` |
 
 ---
 
@@ -590,6 +642,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | Added "No forced framework coupling in library internals" (a library's own classes shouldn't hard-import Koin — ship it as a separate optional artifact instead) and "KDoc coverage on the public API surface", the second wired to `kotlin-multiplatform-audit`'s new `_detect_undocumented_public_api`. Real gaps from a library-vs-app rules discussion. 2 new anti-pattern rows, 2 new Related Skills. |
 | 2026-07-20 | Added `explicitApi()` — real gap found in a library-vs-app rules survey: this skill covered binary compatibility, signing, and publishing channels but never the compiler mode that catches an accidental public API leak *before* it ships (as opposed to `apiCheck`, which only catches the *next* change to an already-public surface). Explicitly scoped to library code only — app code has no external consumers to protect and gains nothing from the ceremony. 1 new anti-pattern. |
 | 2026-07-11 | Cross-referenced two new skills: `kotlin-multiplatform-project-docs-maintainer`'s new `docs/libraries.md` catalog page (release checklist should point there instead of nowhere), and `kotlin-multiplatform-docs-site` (public GitHub Pages developer guide, reuses this skill's Dokka setup for a separate HTML output, distinct from the Javadoc jar). |
 | 2026-07-09 | Added a "Per-file license headers (optional)" section — Detekt's `AbsentOrWrongFileLicense` rule (off by default) with a license template, and why this is worth it for a library (files get vendored/copy-pasted independently of the repo) but not for app code. New anti-pattern: per-file header must stay consistent with the POM's declared license. |

@@ -912,6 +912,64 @@ def _detect_compose_unstable_collection_param(root: Path) -> list[str]:
     return findings
 
 
+# ── Undocumented public API (library projects only) ─────────────────────────────
+# kotlin-multiplatform-library-publishing's explicitApi() forces every public
+# declaration to state its visibility explicitly — once "public" is a deliberate
+# choice, an undocumented one is a real gap. Gated on the project actually using
+# explicitApi()/explicitApiWarning() anywhere; without it "public" isn't a strong
+# enough signal to check (most app code is public by Kotlin's own default).
+
+_EXPLICIT_API_MARKER_RE = re.compile(r"\bexplicitApi(?:Warning)?\s*\(")
+_PUBLIC_DECL_RE = re.compile(
+    r"(?m)^(?P<indent>[ \t]*)public\s+(?:class|interface|object|fun)\s+(\w+)"
+)
+
+
+def _project_uses_explicit_api(root: Path) -> bool:
+    for path in root.rglob("*.gradle.kts"):
+        if _is_excluded(path, root):
+            continue
+        try:
+            if _EXPLICIT_API_MARKER_RE.search(path.read_text(encoding="utf-8", errors="ignore")):
+                return True
+        except OSError:
+            continue
+    return False
+
+
+def _detect_undocumented_public_api(root: Path) -> list[str]:
+    """Flag a `public class`/`interface`/`object`/`fun` with no KDoc block in the
+    lines immediately above it — scoped to projects that already use explicitApi().
+    """
+    if not _project_uses_explicit_api(root):
+        return []
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        for i, line in enumerate(lines):
+            match = _PUBLIC_DECL_RE.match(line)
+            if not match:
+                continue
+            # Look back up to 5 lines for a KDoc close (*/) — the doc block itself
+            # may span several lines above that.
+            preceding = lines[max(0, i - 5): i]
+            if any("*/" in p for p in preceding):
+                continue
+            findings.append(
+                f"undocumented public api [LOW]: {path.relative_to(root)}:{i + 1} "
+                f"— '{match.group(2)}' is public with no KDoc; a consumer sees it in "
+                f"autocomplete with no explanation. Per kotlin-multiplatform-library-"
+                f"publishing's KDoc coverage rule, document the public contract\n"
+                f"    {i + 1} | {line.strip()}"
+            )
+    return findings
+
+
 _EXCLUDED_DIRS = {
     "build", ".gradle", ".git", "vendor", "third_party",
     "node_modules", ".idea", ".kotlin", "kotlin-js-store",
@@ -3201,6 +3259,9 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_runblocking_in_shared_code(root))
     findings.extend(_detect_koin_circular_dependency(root))
     findings.extend(_detect_compose_unstable_collection_param(root))
+
+    # ── Undocumented public API (library projects only) ──────────────────────────
+    findings.extend(_detect_undocumented_public_api(root))
 
     # ── Extensible abstract class in commonMain ─────────────────────────────────
     findings.extend(_detect_extensible_abstract_class_in_common(root))

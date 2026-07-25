@@ -2804,6 +2804,55 @@ class ComposeUnstableCollectionParamTests(unittest.TestCase):
             self.assertFalse(any("compose unstable collection param" in f for f in findings))
 
 
+class UndocumentedPublicApiTests(unittest.TestCase):
+    """Gated on explicitApi() — once 'public' is a deliberate choice under that
+    compiler mode, an undocumented one is a real gap for a library's consumers.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def _enable_explicit_api(self, root: Path) -> None:
+        self._write(root, "library/build.gradle.kts", "kotlin {\n    explicitApi()\n}\n")
+
+    def test_flags_undocumented_public_class(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._enable_explicit_api(root)
+            self._write(
+                root, "library/src/commonMain/kotlin/RetryPolicy.kt",
+                "public class RetryPolicy(public val maxAttempts: Int)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("undocumented public api" in f for f in findings))
+
+    def test_ignores_documented_public_class(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._enable_explicit_api(root)
+            self._write(
+                root, "library/src/commonMain/kotlin/RetryPolicy.kt",
+                "/**\n"
+                " * Controls retry behavior for transient network failures.\n"
+                " */\n"
+                "public class RetryPolicy(public val maxAttempts: Int)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("undocumented public api" in f for f in findings))
+
+    def test_ignores_project_without_explicit_api(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "app/src/commonMain/kotlin/RetryPolicy.kt",
+                "public class RetryPolicy(public val maxAttempts: Int)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("undocumented public api" in f for f in findings))
+
+
 class MixedDesignSystemUsageTests(unittest.TestCase):
     """kotlin-multiplatform-shadcn-compose says "Never combine with
     kotlin-multiplatform-design-system" - documented but never mechanically checked.

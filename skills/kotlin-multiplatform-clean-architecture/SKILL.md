@@ -623,6 +623,7 @@ which Gradle allows fine and nothing else catches.
 
 ## Common Anti-Patterns
 
+- **umbrella module** — one massive `:shared` (or `:core`) module holding everything instead of the 6-layer per-feature split; every change recompiles the whole module, and nothing stops a screen from reaching straight into a repository implementation. `kotlin-multiplatform-audit`'s `_detect_feature_split` reports whether a project has the full split, a partial one, or none at all.
 - putting data classes in `:api` — they belong in `:model`; `:api` should be interfaces only
 - adding Compose to `:presenter` — kills JVM testability; Compose belongs only in `:ui`
 - `:ui` importing from `:data` directly — all state must route through `:presenter`
@@ -659,6 +660,7 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | Added an explicit "umbrella module" anti-pattern — a real, general KMM anti-pattern this skill's 6-layer contract already prevents structurally but never named outright; cross-referenced `kotlin-multiplatform-audit`'s existing `_detect_feature_split` status check. |
 | 2026-07-20 | Cross-referenced `kotlin-multiplatform-audit`'s new `_detect_value_class_opportunity` — a LOW-severity nudge that flags 2+ raw String/Long ID parameters in one function signature, mechanically surfacing the Typed Domain IDs rule below instead of relying on an agent to remember it unprompted. |
 | 2026-07-20 | Added "Typed Domain IDs" — `@JvmInline value class` for domain identifiers instead of raw `String`/`Long`, verified this collection had zero references to value classes despite them being idiomatic Kotlin since 1.5. Distinguishes from `typealias` (assignment-compatible, doesn't prevent the mix-up) and covers the multi-field/boxing/serialization caveats. 2 new anti-patterns. |
 | 2026-07-13 | Added a note explaining why the Use Case Pattern has no "skip it if trivial" exception, even for a 1:1 pass-through with zero added logic: the boundary rule ("ViewModel only ever depends on `:domain`") is bright-line and mechanically checkable; a judgment-call exception isn't. The cost tradeoff (small future refactor if skipped vs. paying ceremony cost today if always wrapped) is real but secondary to the enforceability argument in this repo specifically. |

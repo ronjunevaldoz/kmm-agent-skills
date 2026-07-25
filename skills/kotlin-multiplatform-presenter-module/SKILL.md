@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-18'
+  last-updated: '2026-07-20'
   keywords:
     - presenter
     - ViewModel
@@ -55,6 +55,22 @@ Why:
 
 The Screen/Content split in `:ui` is the counterpart: `Screen` holds the ViewModel,
 `Content` is a stateless `@Composable` that accepts `UiState` — no ViewModel reference in tests.
+
+### When NOT to share this ViewModel across platforms
+
+This skill's recommendation assumes the `:ui` layer is Compose Multiplatform on every
+target, including iOS — the ViewModel and its `UiState`/`UiIntent` contract are shared
+because the UI consuming them is also shared. That assumption doesn't hold for a project
+that needs genuinely **native iOS UI** (SwiftUI/UIKit instead of Compose Multiplatform
+for iOS): forcing the same `:presenter` ViewModel and MVI contract onto a native SwiftUI
+view fights that platform's own conventions (`@Published`/`ObservableObject`, its own
+navigation stack, its own lifecycle) instead of working with them, and produces a
+ViewModel that feels neither idiomatically Android nor idiomatically iOS.
+
+If native iOS UI is a real requirement, share only `:domain`/`:data` — write a
+platform-native presentation layer per platform instead of one shared `:presenter`.
+That's a different, larger architectural decision than this skill covers; if it's live,
+resolve it before scaffolding `:presenter` at all, not after.
 
 ---
 
@@ -369,6 +385,7 @@ private fun AuthContentSuccessPreview() {
 
 ## Common Anti-Patterns
 
+- forcing an identical shared `:presenter` ViewModel onto a native SwiftUI/UIKit iOS UI — fights that platform's own state/navigation/lifecycle conventions instead of working with them; see "When NOT to share this ViewModel across platforms" above
 - nesting `collect` inside `collect` for multi-source state — use `combine()` instead; nested collectors leak coroutines and miss updates
 - using `SharingStarted.Eagerly` or `SharingStarted.Lazily` in `stateIn` — upstream never stops after navigation; use `WhileSubscribed(5_000)` so it stops 5 s after the screen leaves
 - using `flatMap` instead of `flatMapLatest` for dependent flows — previous inner coroutine keeps running alongside the new one
@@ -397,5 +414,6 @@ When asked to set up a presenter module or ViewModel, respond in this order:
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | Added "When NOT to share this ViewModel across platforms" — real gap: this skill's recommendation assumes Compose Multiplatform UI on every target, never stated that assumption explicitly or named what breaks (native SwiftUI/UIKit conventions) if a project needs genuinely native iOS UI instead. 1 new anti-pattern. |
 | 2026-06-28 | Add multi-source state patterns: combine() for merging flows, SharingStarted.WhileSubscribed(5_000) explanation, flatMapLatest for dependent flows. Three new anti-patterns. |
 | 2026-06-18 | Initial release. |

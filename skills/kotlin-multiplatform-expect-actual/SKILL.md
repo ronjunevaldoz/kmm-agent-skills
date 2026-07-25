@@ -12,7 +12,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-25'
+  last-updated: '2026-07-20'
   keywords:
     - expect actual
     - expect class
@@ -436,6 +436,7 @@ opening the file.
 - **`expect`/`actual` for dependency injection** — inject the platform dependency through Koin instead; reserve `expect`/`actual` for platform capabilities that are not injectable objects.
 - **`actual` in a shared module** — `actual` declarations must live in platform source sets (`androidMain`, `iosMain`); putting them in `commonMain` defeats the purpose.
 - **Not annotating with `@ObjCName`** — every `expect` declaration that surfaces to Swift should carry `@ObjCName` to control the generated Swift name. Load `kotlin-multiplatform-xcframework-spm` for guidance.
+- **Leaking a raw platform type into a `commonMain` function signature** — `fun save(context: Context)` or `fun present(vc: UIViewController)` written directly in shared code forces every other target to either fake the type or never compile. This is exactly what `expect class PlatformContext` above exists to prevent — the platform type never appears in a `commonMain` signature at all, only its `expect`-declared abstraction does.
 
 ---
 
@@ -502,4 +503,5 @@ Lead with the decision rule. Keep snippets small — one `expect`/`actual` pair 
 
 | Date | Change |
 |---|---|
+| 2026-07-20 | Added an explicit "leaking a raw platform type into a commonMain function signature" anti-pattern — a real, general KMM anti-pattern (not library-specific), named explicitly even though the skill's own `expect class PlatformContext` example already teaches the correct pattern. |
 | 2026-06-06 | Initial release. |
