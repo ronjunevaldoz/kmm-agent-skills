@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-20'
+  last-updated: '2026-07-25'
   keywords:
     - Ktlint
     - Detekt
@@ -255,6 +255,63 @@ heuristic), so they catch it precisely instead of approximately:
 `kotlin-multiplatform-audit`'s `_detect_god_class` is the non-Detekt backstop for a
 project that hasn't wired this config yet — see that skill's own docs for its (looser,
 heuristic) thresholds.
+
+### Long Parameter List, and its worse variant: a regressed Parameter Object
+
+`LongParameterList` (Fowler's *Refactoring* catalog name — Detekt's rule is named the
+same thing) flags any function past the configured threshold. The standard fix is
+**Introduce Parameter Object**: group related parameters into one data class.
+
+There's a worse version of this smell than a plain long list: a function that *already
+has* a parameter object one call away, and re-explodes it into individual primitives
+anyway instead of accepting and forwarding the object directly.
+
+```kotlin
+// ❌ UiLayoutTracking already exists and is what layouts.createColumn actually wants —
+// this wrapper flattens it into 4 primitives just to reconstruct it one line later
+fun createColumn(
+    x: Float, y: Float, width: Float, height: Float? = null,
+    verticalArrangement: Arrangement = defaultArrangement(),
+    testTag: String? = null,
+    hasBoundedFillWidth: Boolean = true,
+    hasBoundedFillHeight: Boolean = height != null,
+    overlayOnly: Boolean = false,
+    plannedSlots: List<UiSlot>? = null,
+    horizontalAlignment: UiAlignment.Horizontal = UiAlignment.Horizontal.Start,
+): ColumnScope = layouts.createColumn(
+    x = x, y = y, width = width, height = height,
+    verticalArrangement = verticalArrangement,
+    tracking = UiLayoutTracking(testTag, hasBoundedFillWidth, hasBoundedFillHeight, overlayOnly),
+    plannedSlots = plannedSlots,
+    horizontalAlignment = horizontalAlignment,
+)
+
+// ✓ accept and forward the object that already exists — 11 params drop to 8,
+// and a future field added to UiLayoutTracking can't drift out of sync with this
+// wrapper's signature, because the wrapper no longer restates its shape
+fun createColumn(
+    x: Float, y: Float, width: Float, height: Float? = null,
+    verticalArrangement: Arrangement = defaultArrangement(),
+    tracking: UiLayoutTracking = UiLayoutTracking(),
+    plannedSlots: List<UiSlot>? = null,
+    horizontalAlignment: UiAlignment.Horizontal = UiAlignment.Horizontal.Start,
+): ColumnScope = layouts.createColumn(
+    x = x, y = y, width = width, height = height,
+    verticalArrangement = verticalArrangement,
+    tracking = tracking,
+    plannedSlots = plannedSlots,
+    horizontalAlignment = horizontalAlignment,
+)
+```
+
+This compounds **Primitive Obsession** (Fowler again — using primitives instead of a
+small object for something that already has one) onto Long Parameter List: the smell
+isn't that nobody solved it, it's that the solution was undone one layer up. Not
+mechanically detected here — distinguishing "this wrapper's params happen to overlap a
+nearby class" from "this wrapper is literally reconstructing that exact class" needs more
+context than a regex reasonably gets right without false positives. Catch it in review:
+if a function's parameter list, minus 1-2 params, matches a data class used in its own
+body, forward the object instead of restating its fields.
 
 ### Usage
 
@@ -557,6 +614,7 @@ lint:
 
 - applying Detekt only to the root project — violations in submodules go undetected; apply via convention plugins
 - leaving `LargeClass`/`TooManyFunctions`/`CouplingBetweenObjects` unconfigured — god-object detection then only exists for ViewModels and Composables (via `kotlin-multiplatform-audit`), not for a repository/use-case/manager class accumulating too many responsibilities
+- a wrapper function re-exploding an existing parameter object into individual primitives instead of accepting and forwarding the object — Primitive Obsession compounding Long Parameter List; the fix already exists one call away and got undone
 - setting `maxIssues > 0` — a non-zero threshold lets violations accumulate silently
 - using Ktlint without `.editorconfig` — line length defaults to 80; too short for Kotlin
 - running `ktlintFormat` in CI instead of `ktlintCheck` — CI should fail, not silently reformat
@@ -587,6 +645,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-25 | Added "Long Parameter List, and its worse variant: a regressed Parameter Object" — named from a real example (an 11-param wrapper that re-exploded an existing `UiLayoutTracking` parameter object into 4 primitives just to reconstruct it one line later, even though the function it delegates to already accepts the object directly). Not mechanically detected — flagged in review guidance instead, since distinguishing "params happen to overlap a class" from "this is literally that class flattened" needs more context than a safe regex gets. 1 new anti-pattern. |
 | 2026-07-20 | Enabled Detekt's `LargeClass`, `TooManyFunctions`, and `coupling.CouplingBetweenObjects` — real gap: god-object detection existed only for ViewModels and Composables (`kotlin-multiplatform-audit`'s `_detect_viewmodel_size`/`_detect_god_composable`), nothing caught a repository/use-case/manager class doing too much. These are real AST-based Detekt rules, not a hand-rolled heuristic. `_detect_god_class` added as the non-Detekt backstop, cross-referenced here. |
 | 2026-07-19 | New "Side-Effect-Free Accessors (Destructive Reads)" section — a real gap found while diagnosing a skill-vs-model-capability question against a separate KMP game project's commit history: a `consume*()` accessor that clears the field it just read before returning silently drops data for a second caller in the same tick/request (real bug: `Input.consumeTypedText()`/`consumeEditActions()`, fixed by moving the clear into one owned `snapshot()`). Rule generalized past input handling with a repository/`StateFlow` example. New `kotlin-multiplatform-audit` detector `_detect_destructive_read_accessor` (heuristic 3-line "read into local, clear same field, return local" shape), 1 new anti-pattern, cross-referenced in Related Skills. |
 | 2026-07-14 | Two additions to Comment & KDoc Conventions: (1) "Whether to write a comment at all" — a 4-step decision order that was previously scattered across prose rather than stated as one procedure. (2) "Formatting" — real, verified rules from Kotlin's own official coding conventions (kotlinlang.org): one space after `//`, KDoc's `/**`-alone-then-`*`-prefixed-lines-then-`*/`-alone shape for long comments vs single-line `/** ... */` for short ones, and the official guidance to *avoid* `@param`/`@return` in favor of inline prose — which contradicted this skill's own tag table until now (fixed both rows to state the real guidance instead of presenting the tags as the default shape). |
