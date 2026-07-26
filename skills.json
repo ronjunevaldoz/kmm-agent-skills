@@ -1,5 +1,5 @@
 {
-  "version": "1.96.0",
+  "version": "1.97.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -469,7 +469,7 @@
       "path": "skills/kotlin-multiplatform-code-quality",
       "description": "Sets up Ktlint (formatting) and Detekt (code smells + architecture rules) for a KMP project. Both run as CI gates. Ktlint is near-zero config. Detekt architecture rules enforce the 6-layer module boundary contract from kotlin-multiplatform-clean-architecture.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-20",
+      "last_updated": "2026-07-25",
       "keywords": [
         "Ktlint",
         "Detekt",

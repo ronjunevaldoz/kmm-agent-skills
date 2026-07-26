@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.97.0] — 2026-07-26
+
+### Added
+
+- feat(code-quality): name Long Parameter List's worse variant
+
+---
+
 ## [v1.96.0] — 2026-07-25
 
 ### Added
