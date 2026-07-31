@@ -127,7 +127,7 @@ Before writing the plan:
 1. Check `feature/<name>/` — does any layer already exist?
 2. Read `build-logic/` — what convention plugin IDs are available?
 3. Read `gradle/libs.versions.toml` — what libraries are already declared?
-4. Read `.claude/pipeline-context.json` — are there `recurring_issues` to avoid or `proven_patterns` to reuse?
+4. Read `.agents/pipeline-context.json` — are there `recurring_issues` to avoid or `proven_patterns` to reuse? (Deliberately not under `.claude/` — this file's body is copied verbatim into `.codex/agents/planner.toml` when translated for Codex, per `/kmm-setup-agents`'s Step 6a; a `.claude/`-prefixed path would be broken under that client.)
 
 If `libs.versions.toml` is missing a library the feature needs, the plan must include adding it.
 

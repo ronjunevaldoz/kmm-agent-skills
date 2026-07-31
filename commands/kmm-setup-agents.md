@@ -402,12 +402,14 @@ project sees the same skills, not just Claude Code.
 
 ---
 
-## Step 7a — Seed `.claude/pipeline-context.json`
+## Step 7a — Seed `.agents/pipeline-context.json`
 
-If `.claude/pipeline-context.json` does not already exist, write it so the `planner`
+If `.agents/pipeline-context.json` does not already exist, write it so the `planner`
 agent has project context from the first run instead of starting cold — this was
 previously only seeded for brand-new projects via `/kmm-new-project`, never for a
-project being initialized after the fact:
+project being initialized after the fact. Not under `.claude/`: `agents/planner.md`'s
+body is copied verbatim into `.codex/agents/planner.toml` if the user opts into Codex
+deployment (Step 6a above) — `.agents/` is the cross-client-neutral location:
 
 ```json
 {
@@ -503,7 +505,7 @@ Generated:
   ✅ .claude/commands/                         — <N> consumer commands installed
   ✅ .claude/skills/                           — <N> skills deployed
   ✅ .agents/skills/                           — same <N> skills, cross-client convention
-  ✅ .claude/pipeline-context.json             — project context seeded for the planner agent
+  ✅ .agents/pipeline-context.json             — project context seeded for the planner agent
   ✅ .claude/settings.json                     — Bash allowlist + hook wiring home
   <if deployed> .codex/agents/                 — <N> subagents translated to TOML
   <if deployed> .gemini/commands/              — <N> commands translated to TOML

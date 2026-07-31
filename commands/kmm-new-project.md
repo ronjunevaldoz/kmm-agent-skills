@@ -1123,7 +1123,11 @@ agentskills.io's cross-client convention (verified in
 `docs/reference/agentskills-io-standards.md`), so any agentskills.io-compliant client
 working in this new project sees the same skills, not just Claude Code.
 
-**Write `.claude/pipeline-context.json`** — seed the project planner with initial context:
+**Write `.agents/pipeline-context.json`** — seed the project planner with initial context.
+Deliberately not under `.claude/`: `agents/planner.md`'s body is copied verbatim into
+`.codex/agents/planner.toml` if the user opts into Codex deployment (Step 6a below), and
+a `.claude/`-prefixed path baked into that shared source text would be broken there —
+`.agents/` is the cross-client-neutral location, same reasoning as `.agents/skills/`:
 
 ```json
 {
@@ -1204,7 +1208,7 @@ Agent setup:
   .claude/AGENTS.md                       — skill routing<if App:> + feature module table</if><if Library:> + published artifacts + API surface rules</if>
   .claude/commands/kmm-*.md               — <N> slash commands installed
   .claude/skills/ + .agents/skills/       — <N> skills deployed to both (cross-client)
-  .claude/pipeline-context.json           — project context for the planner agent
+  .agents/pipeline-context.json           — project context for the planner agent
   .claude/settings.json                   — Bash allowlist + hook wiring home
   (if deployed) .codex/agents/            — <N> subagents translated to TOML
   (if deployed) .gemini/commands/         — <N> commands translated to TOML

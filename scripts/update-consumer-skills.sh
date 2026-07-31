@@ -153,6 +153,23 @@ else
   echo "  ✅  Skills deployed"
 fi
 
+# Mirror into .agents/skills/ too — the project-level half of agentskills.io's
+# cross-client convention (verified in docs/reference/agentskills-io-standards.md).
+# Deployed unconditionally, alongside whichever client-specific $AGENT_DIR was
+# detected/passed, so other agentskills.io-compliant clients working in this
+# project see the same skills without a separate per-client update step.
+if [[ "$AGENT_DIR" != ".agents/skills" ]]; then
+  echo ""
+  echo "Deploying skills to .agents/skills (cross-client convention)…"
+  if $DRY_RUN; then
+    echo "  [dry-run] would copy skills → .agents/skills/"
+  else
+    mkdir -p ".agents/skills"
+    cp -r "$SKILLS_SOURCE/skills/"* ".agents/skills/"
+    echo "  ✅  Skills deployed to .agents/skills"
+  fi
+fi
+
 # ── Deploy project-owned custom skills (auto — source of truth at ./skills) ──
 
 echo ""
@@ -449,7 +466,10 @@ Skills are installed in \`.claude/skills/\`.
 | Navigation | \`kotlin-multiplatform-navigation\` |
 | Dependency injection | \`kotlin-multiplatform-dependency-injection\` |
 | Design system | \`kotlin-multiplatform-design-system\` |
+| Code quality / linting | \`kotlin-multiplatform-code-quality\` |
 | Unit tests | \`kotlin-multiplatform-unit-testing\` |
+| Android CLI / emulator / deploy | \`kotlin-multiplatform-android-cli\` |
+| Project docs / onboarding | \`kotlin-multiplatform-project-docs-maintainer\` |
 | Architecture audit | \`kotlin-multiplatform-audit\` |
 
 ## Commands installed
@@ -529,8 +549,36 @@ EOF
       echo "  ✅  $SETTINGS_JSON generated"
     fi
   fi
+
+  # Not under $CLAUDE_DIR — agents/planner.md's body is copied verbatim into
+  # .codex/agents/planner.toml when translated for Codex, so a .claude/-prefixed
+  # path referenced from that shared source text would be broken there.
+  PIPELINE_CONTEXT=".agents/pipeline-context.json"
+  if [[ -f "$PIPELINE_CONTEXT" ]]; then
+    echo "  ✓  $PIPELINE_CONTEXT already exists"
+  else
+    if $DRY_RUN; then
+      echo "  [dry-run] would write $PIPELINE_CONTEXT"
+    else
+      mkdir -p ".agents"
+      cat > "$PIPELINE_CONTEXT" <<PIPELINE_EOF
+{
+  "project": "$PROJECT_NAME",
+  "group_id": "",
+  "platforms": [],
+  "skills_used": [],
+  "recurring_issues": [],
+  "proven_patterns": []
+}
+PIPELINE_EOF
+      echo "  ✅  $PIPELINE_CONTEXT seeded (empty — fill in as the project evolves, or run /kmm-setup-agents for a version populated from the actual module graph)"
+    fi
+  fi
 fi
 
 echo "  Done. Run your audit to verify:"
 echo "  python3 $AGENT_DIR/kotlin-multiplatform-audit/scripts/audit_project.py ."
+echo ""
+echo "  Not yet wired: git/CI architecture hooks (pre-commit audit, PostToolUse"
+echo "  validation). Run /kmm-setup-hooks to add them."
 echo ""
