@@ -339,7 +339,14 @@ kmp-wizard is the only valid starting point for a new project.
 ### [Library] F-01: Project scaffold — use library-publishing's structure
 
 Load `kotlin-multiplatform-library-publishing`. There is no equivalent to kmp-wizard for
-a library — build the structure that skill's own Step 1 defines directly:
+a library — build the structure that skill's own Step 1 defines directly.
+
+**Ask first (one `AskUserQuestion`):** does the intake description name more than one
+independent consumer surface (e.g., "core logic + a Compose UI layer," "core + testing
+fakes consumers need separately")? If yes, use the multi-module split below; if no or
+unclear, use the single-module structure — splitting speculatively is the wrong default.
+
+**Single module (default):**
 
 ```
 <PROJECT_NAME>/
@@ -356,6 +363,23 @@ a library — build the structure that skill's own Step 1 defines directly:
 └── build.gradle.kts              # Root: coordinates + publishing config
 ```
 
+**Multi-module (only when confirmed above)** — per `library-publishing`'s Step 1a,
+prefixed with `PROJECT_NAME`, never the literal word "library":
+
+```
+<PROJECT_NAME>/
+├── build-logic/
+├── <PROJECT_NAME>-core/          # io.github.you:<PROJECT_NAME>-core
+├── <PROJECT_NAME>-compose/       # io.github.you:<PROJECT_NAME>-compose — depends on -core
+├── <PROJECT_NAME>-testing/       # io.github.you:<PROJECT_NAME>-testing — depends on -core only
+├── bom/                          # io.github.you:<PROJECT_NAME>-bom
+├── sample/
+├── gradle/
+│   └── libs.versions.toml
+├── settings.gradle.kts
+└── build.gradle.kts
+```
+
 Configure using the intake values:
 - `rootProject.name = PROJECT_NAME` in `settings.gradle.kts`
 - `GROUP_ID` as the Maven `groupId`
@@ -365,8 +389,8 @@ Configure using the intake values:
   per that skill's Step 2/3/5 — do this now, not deferred to Step 8, since retrofitting
   `explicitApi()` after public declarations already exist means fixing every violation at
   once instead of writing them correctly from the first line
-- Skip `:bom` at scaffold time unless the intake description explicitly mentions multiple
-  published artifacts — add it later via that skill's Step 4 if the need appears
+- Add `:bom` at scaffold time only when the multi-module split above was confirmed —
+  single-module projects skip it; add it later via Step 4 if the need appears
 
 Run `./gradlew help` — must be `BUILD SUCCESSFUL` before any API work begins. Skip F-02
 and F-03 below entirely — jump to Step 5.

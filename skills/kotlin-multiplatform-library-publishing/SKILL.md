@@ -128,6 +128,66 @@ library's own internals the same way it does to an app's — `:model`/`:api` spl
 `internal` visibility between layers — the difference is only that the *outermost*
 public surface is what `explicitApi()`/`apiCheck` above govern, not an app's UI layer.
 
+### Step 1a — Splitting into multiple published modules
+
+Split when a sub-feature has a genuinely independent consumer surface — some consumers
+shouldn't have to pull another facet's transitive deps. Not the default, and not just
+because the code is "big" (that's what Step 1's internal 6-layer split is for, inside
+one module).
+
+Prefix every module and artifact with the library's own `PROJECT_NAME` — never the
+literal word "library." This matches the `<PROJECT_NAME>-bom` convention already used
+in Step 4 below, and real published multi-module libraries (Coil's `coil-core` /
+`coil-compose` / `coil-network`, not `library-core`):
+
+```
+<PROJECT_NAME>/
+├── <PROJECT_NAME>-core/       # io.github.you:<PROJECT_NAME>-core      — no Compose dep
+│   └── build.gradle.kts
+├── <PROJECT_NAME>-compose/    # io.github.you:<PROJECT_NAME>-compose   — depends on -core + Compose
+│   └── build.gradle.kts
+├── <PROJECT_NAME>-testing/    # io.github.you:<PROJECT_NAME>-testing   — fakes/test doubles, depends on -core only
+│   └── build.gradle.kts
+├── bom/                        # io.github.you:<PROJECT_NAME>-bom       — version-aligns all three
+├── sample/
+└── settings.gradle.kts
+```
+
+```kotlin
+// settings.gradle.kts
+include(":<PROJECT_NAME>-core")
+include(":<PROJECT_NAME>-compose")
+include(":<PROJECT_NAME>-testing")
+include(":bom")
+include(":sample:androidApp")
+```
+
+Dependency direction — one-way, never circular:
+
+```
+<PROJECT_NAME>-core  ←  <PROJECT_NAME>-compose
+<PROJECT_NAME>-core  ←  <PROJECT_NAME>-testing
+```
+
+`-compose` and `-testing` may depend on `-core`; `-core` never depends on either.
+
+Each module is its own `explicitApi()` surface with its own `.api` file — `apiCheck`
+runs per module, not once for the whole repo:
+
+```bash
+./gradlew :<PROJECT_NAME>-core:apiCheck :<PROJECT_NAME>-compose:apiCheck :<PROJECT_NAME>-testing:apiCheck
+```
+
+Each gets its own `mavenPublishing { coordinates(...) }` block with its own artifactId
+(`<PROJECT_NAME>-core`, `<PROJECT_NAME>-compose`, ...) — `bom/`'s `constraints` block
+(Step 4 below) is what lets a consumer pin all of them to one version via a single BOM
+import instead of separate version numbers per artifact.
+
+**When to split vs keep one `:library`:** a genuinely separate consumer surface (core
+logic vs a Compose UI layer vs test fakes) that some consumers want without the others'
+dependencies. Splitting because it's "organized that way internally" isn't a reason —
+that's Step 1's internal 6-layer split, inside one module, no extra published artifacts.
+
 ---
 
 ## Step 2 — Dependencies
@@ -735,6 +795,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added Step 1a — splitting into multiple published modules: real gap where this skill only ever scaffolded one `:library` module, with a BOM step that aligns multiple artifacts' versions but no guidance on how/when to actually create them. Covers the split decision (genuinely independent consumer surface, not just "big code"), one-way dependency direction (`-core` never depends on `-compose`/`-testing`), per-module `apiCheck`, and the `<PROJECT_NAME>-*` naming convention (never the literal word "library" — matches real published multi-module libraries like Coil's `coil-core`/`coil-compose`). Wired into `/kmm-new-project`'s Library F-01 as a confirm-first branch. |
 | 2026-07-31 | Added Step 11 — ongoing maintenance: real gap where this skill covered shipping (publish, apiCheck, signing) but nothing about maintaining a published library afterward. Covers the deprecation cycle (`@Deprecated(WARNING)` → `ERROR` → removal, tied to SemVer), breaking-change communication (CHANGELOG entry + migration note before a major bump, never bundled silently), dependency upgrade cadence (Renovate/Dependabot scoped to the version catalog, sample pinned to the library's own versions), and keeping `sample/` from drifting (its own CI compile job — the only thing that actually compiles against the real public surface the way a consumer would). |
 | 2026-07-31 | Added "`apiCheck` catches that the API changed, not whether the version bump matches" — real gap: `apiCheck` has no concept of semver, so nothing blocks tagging a breaking `.api` diff as a minor release. Also cross-referenced `kotlin-multiplatform-clean-architecture`'s 6-layer contract for a library's own internal structure once `:library` outgrows a single module. 1 new anti-pattern, 1 new Related Skills row. |
 | 2026-07-20 | Added "No forced framework coupling in library internals" (a library's own classes shouldn't hard-import Koin — ship it as a separate optional artifact instead) and "KDoc coverage on the public API surface", the second wired to `kotlin-multiplatform-audit`'s new `_detect_undocumented_public_api`. Real gaps from a library-vs-app rules discussion. 2 new anti-pattern rows, 2 new Related Skills. |
