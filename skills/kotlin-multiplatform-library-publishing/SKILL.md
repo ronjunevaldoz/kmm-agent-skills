@@ -101,14 +101,36 @@ the vanniktech plugin handles all the boilerplate correctly.
 
 A KMP library has **no** application plugin. The root module exposes multiplatform targets.
 
+**Clone the official JetBrains starting point first — never hand-write this from
+scratch.** `Kotlin/multiplatform-library-template` is the real, actively-maintained
+equivalent of `kmp-wizard` for a library (verified against the live repo, not assumed —
+"official project" badge, same GitHub org):
+
+```bash
+git clone --depth 1 https://github.com/Kotlin/multiplatform-library-template <PROJECT_NAME>
+cd <PROJECT_NAME> && rm -rf .git && git init
+```
+
+What it gives you out of the box: `vanniktech-mavenPublish`, the AGP 9
+`com.android.kotlin.multiplatform.library` plugin, and `jvm()`/`androidLibrary()`/
+`iosArm64()`/`iosSimulatorArm64()`/`linuxX64()` targets already wired in one `:library`
+module. Add `js()`/`wasmJs()` yourself if `PLATFORMS` includes Web — the template doesn't
+include them by default. The template's own README says explicitly what it deliberately
+leaves out: binary-compatibility tracking, `explicitApi()`, licensing, and a contribution
+guideline — that's exactly what Steps 2/5/12/13 below add on top, the same way this
+collection's own 6-layer conventions layer on top of kmp-wizard for an app.
+
+Resulting structure, once this collection's own additions (`library-testing`, `bom`,
+`sample`) are layered on:
+
 ```
 my-library/
 ├── build-logic/                  # Convention plugins (optional but recommended)
-├── library/                      # Main library module
+├── library/                      # Main library module (from the template)
 │   └── build.gradle.kts
-├── library-testing/              # Test helpers for consumers (optional)
-├── bom/                          # Bill of Materials (optional, for multi-artifact)
-├── sample/                       # Sample app that consumes the library
+├── library-testing/              # Test helpers for consumers (optional, added by this skill)
+├── bom/                          # Bill of Materials (optional, added by this skill)
+├── sample/                       # Sample app that consumes the library (added by this skill)
 │   └── build.gradle.kts          # Has com.android.application — only here
 ├── gradle/
 │   └── libs.versions.toml
@@ -856,6 +878,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 | Library's public classes `import org.koin.*` directly | Forces the consumer's DI choice; use plain constructor injection, ship Koin wiring as a separate optional artifact if wanted |
 | Public class/fun with no KDoc under `explicitApi()` | The declaration is deliberate but undocumented — a consumer sees it in autocomplete with no explanation |
 | Shipping a breaking `.api` diff as a minor version | `apiCheck` only confirms the diff was deliberate, not that the semver bump matches its severity — classify every diff (addition = minor, signature change/removal = major) before tagging |
+| Hand-writing `settings.gradle.kts`/root `build.gradle.kts` from scratch for a new library | Clone `Kotlin/multiplatform-library-template` first (Step 1) — the real official starting point, same discipline as `kmp-wizard` for an app |
 
 ---
 
@@ -881,6 +904,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | **Self-correction, verified via GitHub API + raw source, not assumed**: this skill and `/kmm-new-project` both stated "there is no equivalent to kmp-wizard for a library" — wrong. `Kotlin/multiplatform-library-template` is a real, official, actively-maintained JetBrains repo (same org as `kmp-wizard`, "official project" badge, 332 stars) that scaffolds exactly this: one `:library` module with `vanniktech-mavenPublish`, the AGP 9 `com.android.kotlin.multiplatform.library` plugin, and `jvm()`/`androidLibrary()`/`iosArm64()`/`iosSimulatorArm64()`/`linuxX64()` already wired — the template's own README explicitly says it omits binary-compat tracking, `explicitApi()`, licensing, and a contribution guideline, which is exactly what this skill's Steps 2/5/12/13 already add on top. Rewrote Step 1 to clone it as the mandatory starting point instead of hand-building the structure, mirroring `kmp-wizard`'s own discipline for apps. Added a matching anti-pattern. |
 | 2026-07-31 | Added four more real maintenance gaps from a follow-up survey: a pre-1.0 API stability policy (0.x may break without a major bump per SemVer 2.4; 1.0+ is where the stability promise starts — state it in the README, don't leave it implicit), Step 12 (NOTICE file for bundled/redistributed third-party assets — distinct from a normal Maven dependency a consumer resolves themselves; `heroicons-compose`'s own `NOTICE.md` is the real precedent), Step 13 (OSS contribution scaffolding — CONTRIBUTING/CODE_OF_CONDUCT/issue+PR templates, only once a library actually takes outside contributions), and a dependency-vulnerability-scanning subsection under Step 11 (Dependabot security alerts, distinct from the routine upgrade-cadence review already there). |
 | 2026-07-31 | Added Step 1a — splitting into multiple published modules: real gap where this skill only ever scaffolded one `:library` module, with a BOM step that aligns multiple artifacts' versions but no guidance on how/when to actually create them. Covers the split decision (genuinely independent consumer surface, not just "big code"), one-way dependency direction (`-core` never depends on `-compose`/`-testing`), per-module `apiCheck`, and the `<PROJECT_NAME>-*` naming convention (never the literal word "library" — matches real published multi-module libraries like Coil's `coil-core`/`coil-compose`). Wired into `/kmm-new-project`'s Library F-01 as a confirm-first branch. |
 | 2026-07-31 | Added Step 11 — ongoing maintenance: real gap where this skill covered shipping (publish, apiCheck, signing) but nothing about maintaining a published library afterward. Covers the deprecation cycle (`@Deprecated(WARNING)` → `ERROR` → removal, tied to SemVer), breaking-change communication (CHANGELOG entry + migration note before a major bump, never bundled silently), dependency upgrade cadence (Renovate/Dependabot scoped to the version catalog, sample pinned to the library's own versions), and keeping `sample/` from drifting (its own CI compile job — the only thing that actually compiles against the real public surface the way a consumer would). |

@@ -336,22 +336,37 @@ Run `./gradlew help` — must be `BUILD SUCCESSFUL` before any feature work begi
 Never write `build-logic/`, `settings.gradle.kts`, or `gradle.properties` from scratch —
 kmp-wizard is the only valid starting point for a new project.
 
-### [Library] F-01: Project scaffold — use library-publishing's structure
+### [Library] F-01: Project scaffold — clone the official library template first
 
-Load `kotlin-multiplatform-library-publishing`. There is no equivalent to kmp-wizard for
-a library — build the structure that skill's own Step 1 defines directly.
+Load `kotlin-multiplatform-library-publishing`. There **is** an equivalent to kmp-wizard
+for a library — `Kotlin/multiplatform-library-template` (verified against the live repo,
+official JetBrains org, same as kmp-wizard). Clone it as the mandatory starting point,
+the same discipline as the App path's F-01:
+
+```bash
+git clone --depth 1 https://github.com/Kotlin/multiplatform-library-template <PROJECT_NAME>
+cd <PROJECT_NAME> && rm -rf .git && git init
+```
+
+It ships one `:library` module with `vanniktech-mavenPublish`, the AGP 9
+`com.android.kotlin.multiplatform.library` plugin, and `jvm()`/`androidLibrary()`/
+`iosArm64()`/`iosSimulatorArm64()`/`linuxX64()` targets already wired. It does **not**
+include `js()`/`wasmJs()` (add them if `PLATFORMS` has Web), binary-compat tracking,
+`explicitApi()`, licensing, or a contribution guideline — that's what the rest of this
+step and `library-publishing`'s Steps 2/5/12/13 add on top.
 
 **Ask first (one `AskUserQuestion`):** does the intake description name more than one
 independent consumer surface (e.g., "core logic + a Compose UI layer," "core + testing
-fakes consumers need separately")? If yes, use the multi-module split below; if no or
-unclear, use the single-module structure — splitting speculatively is the wrong default.
+fakes consumers need separately")? If yes, restructure the template's single `:library`
+module into the multi-module split below; if no or unclear, keep the template's
+single-module structure as-is — splitting speculatively is the wrong default.
 
-**Single module (default):**
+**Single module (default — the template's own layout, extended):**
 
 ```
 <PROJECT_NAME>/
 ├── build-logic/                  # Convention plugins (optional but recommended)
-├── library/                      # Main library module
+├── library/                      # Main library module (from the template)
 │   └── build.gradle.kts
 ├── library-testing/              # Test helpers for consumers (optional — add if the
 │                                  #   library exposes fakes/test doubles consumers need)
