@@ -1539,6 +1539,7 @@ must stay synchronized — see the Shared ViewModel section above for the patter
 
 ## Common Anti-Patterns
 
+- a ViewModel's constructor injecting a `*Repository` directly instead of a use case — the bright-line rule has no trivial-pass-through exception, and `_detect_module_layer_violation` can't catch it since `presenter -> api` is an allowed module-level dependency for other reasons
 - a ViewModel's `Intent` sealed type growing past ~15 variants — a god-ViewModel signal that line count alone can miss, since terse `when` branches keep the file short while the ViewModel still does one screen too many jobs
 - exposing `state1`/`state2`/`state3` as separate public `StateFlow` properties instead of `combine()`-ing them into one `State` — breaks the Contract pattern's "one State per screen" rule without tripping a size threshold
 - Divergent Change in a `State` type — fields for unrelated concerns (chat + project + session) that each change for their own reason, wearing one `State`; see "Field count alone isn't the test — Divergent Change is" above
@@ -1586,7 +1587,7 @@ If the ViewModel is growing beyond 150–200 lines, apply the decomposition deci
 - `kotlin-multiplatform-unit-testing` — `runTest` + Turbine for testing `StateFlow` transitions and `Channel` effects
 - `kotlin-multiplatform-compose-state-container` — when to use `remember` vs ViewModel as the state container
 - `kotlin-multiplatform-preview-driven-development` — `FooContent` stateless composables are the fast-preview target
-- `kotlin-multiplatform-audit` — `_detect_viewmodel_too_many_intents` (15+ Intent variants — a god-ViewModel signal line count alone can miss) and `_detect_viewmodel_multiple_stateflows` (2+ exposed StateFlow properties beyond `state` — the Contract pattern's "one State per screen" broken a different way)
+- `kotlin-multiplatform-audit` — `_detect_viewmodel_too_many_intents` (15+ Intent variants — a god-ViewModel signal line count alone can miss), `_detect_viewmodel_multiple_stateflows` (2+ exposed StateFlow properties beyond `state` — the Contract pattern's "one State per screen" broken a different way), and `_detect_viewmodel_injects_repository` (a `*Repository` constructor param — the ViewModel-depends-only-on-`:domain` rule, made mechanically enforced instead of just documented)
 
 ---
 
@@ -1607,6 +1608,7 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
+| 2026-07-26 | Real gap closed: this skill's own earlier changelog called the ViewModel-depends-only-on-`:domain` rule "bright-line and mechanically checkable," but nothing actually checked it — `_detect_module_layer_violation` can't, since `presenter -> api` is an allowed module-level edge. Added `kotlin-multiplatform-audit`'s new `_detect_viewmodel_injects_repository`, a file-level check on the ViewModel's constructor param types. 1 new anti-pattern. |
 | 2026-07-26 | Renamed the previous entry's section to "Field count alone isn't the test — Divergent Change is" and named the smell properly (Fowler's *Refactoring* catalog — same family as Long Parameter List/Primitive Obsession already named elsewhere in this collection) instead of an ad-hoc "relatedness litmus test" phrase, for a better search term. Added `Divergent Change`/`God State` to keywords and trigger keywords. |
 | 2026-07-26 | Added "Field count alone isn't the test — relatedness is" — clarifies the existing ~8-field god-ViewModel symptom, which couldn't distinguish a cohesive multi-field `State` (`SearchState`) from an unrelated-concerns `State` (a real `ChatShellState` mixing chat/project/session). Gives a naming litmus test instead of a count. Deliberately not mechanically detected — same treatment as the Parameter Object regression in `kotlin-multiplatform-code-quality`. |
 | 2026-07-26 | Added two more god-ViewModel signals beyond line count: 15+ `Intent` variants, and 2+ exposed `StateFlow` properties beyond `state`. Backed by `kotlin-multiplatform-audit`'s new `_detect_viewmodel_too_many_intents`/`_detect_viewmodel_multiple_stateflows` — real gap, since `_detect_viewmodel_size` alone can miss a terse-but-overloaded ViewModel. 2 new anti-patterns. |

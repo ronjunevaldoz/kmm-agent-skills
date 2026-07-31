@@ -1654,6 +1654,54 @@ def _detect_viewmodel_multiple_stateflows(root: Path) -> list[str]:
     return findings
 
 
+# ── ViewModel injecting a Repository directly instead of a UseCase ─────────────
+# kotlin-multiplatform-mvi's own changelog: "the boundary rule (ViewModel only ever
+# depends on :domain) is bright-line and mechanically checkable" — it wasn't actually
+# checked. _detect_module_layer_violation can't catch this either: _ALLOWED_DEPS
+# explicitly permits presenter -> api at the module level (legitimate for other
+# reasons), so a ViewModel injecting a Repository interface directly doesn't fail
+# that check. This is a file-level check instead: a *ViewModel's primary constructor
+# parameter typed *Repository.
+
+_VM_CLASS_CTOR_RE = re.compile(r"\bclass\s+(\w*ViewModel)\s*\(([^)]*)\)\s*(?::[^{]*)?\{", re.DOTALL)
+_CTOR_PARAM_TYPE_RE = re.compile(r"\bval\s+\w+\s*:\s*(\w+)")
+
+
+def _detect_viewmodel_injects_repository(root: Path) -> list[str]:
+    """Flag a ViewModel's primary constructor taking a *Repository param directly —
+    per kotlin-multiplatform-mvi's rule, a ViewModel depends on :domain (use cases),
+    never :api/:data (repositories) directly, with no trivial-case exception.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for match in _VM_CLASS_CTOR_RE.finditer(text):
+            vm_name = match.group(1)
+            params = _split_top_level(match.group(2))
+            repo_params = [
+                pm.group(1)
+                for p in params
+                if (pm := _CTOR_PARAM_TYPE_RE.search(p)) and pm.group(1).endswith("Repository")
+            ]
+            if not repo_params:
+                continue
+            line_no, snippet = _at(text, match.start())
+            findings.append(
+                f"viewmodel injects repository [HIGH]: {path.relative_to(root)}:{line_no} "
+                f"— '{vm_name}' takes {', '.join(repo_params)} directly in its "
+                f"constructor; per kotlin-multiplatform-mvi, a ViewModel depends on a "
+                f"use case (:domain), never a repository (:api/:data) directly — no "
+                f"trivial-pass-through exception\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
 # ── Raw HTTP bypassing an established Ktor client ──────────────────────────────
 # Real bug: kotlin-multiplatform-network-layer only checked for a module literally
 # named :core:network. A new server module or feature under a different name found no
@@ -3452,6 +3500,7 @@ def audit_project(root: Path) -> list[str]:
     # ── ViewModel god-class signals beyond line count ────────────────────────────
     findings.extend(_detect_viewmodel_too_many_intents(root))
     findings.extend(_detect_viewmodel_multiple_stateflows(root))
+    findings.extend(_detect_viewmodel_injects_repository(root))
 
     # ── Extensible abstract class in commonMain ─────────────────────────────────
     findings.extend(_detect_extensible_abstract_class_in_common(root))

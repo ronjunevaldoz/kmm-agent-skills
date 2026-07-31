@@ -3040,6 +3040,58 @@ class ViewModelMultipleStateFlowsTests(unittest.TestCase):
             self.assertFalse(any("viewmodel multiple stateflows" in f for f in findings))
 
 
+class ViewModelInjectsRepositoryTests(unittest.TestCase):
+    """kotlin-multiplatform-mvi's own changelog calls the ViewModel-depends-only-on-
+    :domain rule 'bright-line and mechanically checkable' — it wasn't actually checked.
+    _detect_module_layer_violation can't catch it either since presenter -> api is an
+    allowed module-level edge; this is a file-level constructor-param check instead.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_repository_in_constructor(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/chat/presenter/src/commonMain/kotlin/ChatViewModel.kt",
+                "class ChatViewModel(\n"
+                "    private val chatRepository: ChatRepository,\n"
+                ") : ViewModel() {\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel injects repository" in f for f in findings))
+
+    def test_ignores_usecase_in_constructor(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/chat/presenter/src/commonMain/kotlin/ChatViewModel.kt",
+                "class ChatViewModel(\n"
+                "    private val sendMessageUseCase: SendMessageUseCase,\n"
+                ") : ViewModel() {\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel injects repository" in f for f in findings))
+
+    def test_ignores_repository_in_non_viewmodel_class(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/chat/domain/src/commonMain/kotlin/SendMessageUseCase.kt",
+                "class SendMessageUseCase(\n"
+                "    private val chatRepository: ChatRepository,\n"
+                ") {\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel injects repository" in f for f in findings))
+
+
 class MixedDesignSystemUsageTests(unittest.TestCase):
     """kotlin-multiplatform-shadcn-compose says "Never combine with
     kotlin-multiplatform-design-system" - documented but never mechanically checked.
