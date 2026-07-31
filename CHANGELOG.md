@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.98.0] — 2026-07-31
+
+### Added
+
+- feat(audit): style-file bundling and two more god-ViewModel signals
+
+---
+
 ## [v1.97.1] — 2026-07-31
 
 ### Fixed
