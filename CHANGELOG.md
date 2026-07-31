@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.100.1] — 2026-07-31
+
+### Fixed
+
+- fix(commands): align existing-project init with new-project init
+
+---
+
 ## [v1.100.0] — 2026-07-31
 
 ### Added
