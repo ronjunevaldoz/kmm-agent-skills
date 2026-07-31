@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-21'
+  last-updated: '2026-07-31'
   keywords:
     - kotlin rpc
     - kRPC
@@ -141,6 +141,36 @@ class GreetingRpcClient(
 }
 ```
 
+## Streaming with Flow
+
+kRPC supports server-push streaming natively — a service method can return a `Flow`
+instead of a single value, and kotlinx-rpc handles the framing over its Ktor transport:
+
+```kotlin
+interface CounterService {
+    fun countUpdates(): Flow<Int>   // streaming method
+}
+```
+
+Real constraints, verified against kotlinx-rpc's actual support surface (not every
+Flow-shaped signature works):
+- **`Flow` only** — `StateFlow` and `SharedFlow` are explicitly not supported and there
+  are no plans to add them. Convert with `.stateIn`/`.shareIn` on the client after
+  collecting, not on the service interface itself.
+- **The streaming method must be non-suspending**, and the `Flow` must be the
+  **top-level return type** — `suspend fun countUpdates(): Flow<Int>` and
+  `suspend fun getPage(): List<Flow<Int>>` are both invalid shapes.
+- Runs over the same Ktor transport as request/response RPC calls — no separate
+  connection or protocol to manage.
+- As of 2026, kotlinx-rpc also supports native gRPC/Protobuf as an alternative
+  protocol (schema-first `.proto` files, Gradle plugin generates suspend functions +
+  `Flow`-based streaming + type-safe builders) — use this only when the contract must
+  interop with non-Kotlin gRPC clients; for Kotlin-only streaming, plain kRPC `Flow`
+  methods above are simpler.
+
+If the streaming target is one-way push to a client that may not be Kotlin, use SSE
+instead — see `kotlin-multiplatform-network-layer`'s SSE section and its decision table.
+
 ## When Not to Use It
 
 Do not default to Kotlin RPC when:
@@ -168,7 +198,7 @@ Before changing this skill, re-read the current official docs:
 - `kotlin-multiplatform-ktor-auth-service` — auth guards for the RPC route live here
 - `kotlin-multiplatform-mongodb-database` — RPC service implementations often delegate to a MongoDB repository
 - `kotlin-multiplatform-feature-scaffold` — the shared contract module is a peer of the server and client modules
-- `kotlin-multiplatform-network-layer` — use this instead of RPC when the client is non-Kotlin or the API is public
+- `kotlin-multiplatform-network-layer` — use this instead of RPC when the client is non-Kotlin or the API is public; also owns SSE for one-way server push
 
 ---
 
@@ -251,4 +281,5 @@ Lead with the fit/no-fit decision. Keep the code snippet to the interface and on
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added a "Streaming with Flow" section documenting kRPC's real streaming constraints (Flow only — not StateFlow/SharedFlow; non-suspending top-level `Flow` return type required) and the 2026 native gRPC/Protobuf integration. Cross-referenced `kotlin-multiplatform-network-layer`'s new SSE decision table. Real gap — the only prior streaming example was incidental, with no deliberate guidance. |
 | 2026-06-21 | Initial release. |
