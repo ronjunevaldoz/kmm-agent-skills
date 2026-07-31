@@ -1402,6 +1402,42 @@ Stop and decompose when the ViewModel:
 - has a `State` data class with more than ~8 fields
 - contains `if/else` or `when` chains that span more than 10–15 lines per branch
 
+### Field count alone isn't the test — relatedness is
+
+The ~8-field guideline above is a rough trigger, not the actual rule. A `State` with 8
+*related* fields is normal and correct; a `State` with 3 *unrelated* fields can already be
+a violation. The real question: **does every field belong to one cohesive screen concern,
+or does the `State` span concerns that don't actually depend on each other?**
+
+```kotlin
+// ✓ 4 fields, all part of ONE concern (search) — combining these is the whole point
+// of MVI's Contract pattern, not a violation
+data class SearchState(
+    val query: String = "",
+    val results: List<Item> = emptyList(),
+    val isLoading: Boolean = false,
+    val filters: SearchFilters = SearchFilters(),
+)
+
+// ❌ 3 fields, THREE unrelated concerns wearing one State — a "shell" ViewModel that
+// grew past coordinating into owning chat business logic, project metadata, and
+// session lifecycle all at once
+data class ChatShellState(
+    val messages: List<Message> = emptyList(),   // chat concern
+    val projectName: String = "",                // project concern
+    val sessionExpiresAt: Instant? = null,        // session concern
+)
+```
+
+Litmus test: if you can name the `State` after a single noun that every field is *about*
+(`SearchState`, `OrderState`) without stretching, it's cohesive. If describing what the
+`State` holds needs "and" between unrelated nouns ("chat messages *and* project info *and*
+session status"), split it — each concern gets its own `State`/ViewModel (`ChatViewModel`,
+`ProjectSideBarViewModel`, a session-owning ViewModel), not one `State` holding all three.
+This can't be mechanically checked — a field-count threshold can't tell "8 related fields"
+from "8 unrelated ones" — so this is a review-time judgment call, same treatment as
+`kotlin-multiplatform-code-quality`'s Parameter Object regression.
+
 ### Decision table: what to extract
 
 | Symptom | Extract to |
@@ -1562,6 +1598,7 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
+| 2026-07-26 | Added "Field count alone isn't the test — relatedness is" — clarifies the existing ~8-field god-ViewModel symptom, which couldn't distinguish a cohesive multi-field `State` (`SearchState`) from an unrelated-concerns `State` (a real `ChatShellState` mixing chat/project/session). Gives a naming litmus test instead of a count. Deliberately not mechanically detected — same treatment as the Parameter Object regression in `kotlin-multiplatform-code-quality`. |
 | 2026-07-26 | Added two more god-ViewModel signals beyond line count: 15+ `Intent` variants, and 2+ exposed `StateFlow` properties beyond `state`. Backed by `kotlin-multiplatform-audit`'s new `_detect_viewmodel_too_many_intents`/`_detect_viewmodel_multiple_stateflows` — real gap, since `_detect_viewmodel_size` alone can miss a terse-but-overloaded ViewModel. 2 new anti-patterns. |
 | 2026-07-26 | Added a de-escalation guardrail: a Coordinator ViewModel (Option 2/3) is not exempt from `_detect_viewmodel_size`'s god-ViewModel threshold — a real gap where choosing a coordinator to escape a god composable could quietly relocate the same size problem instead of fixing it. If a coordinator keeps growing after delegating to State Holders/use cases, that's a signal to split back to Option 1. 1 new anti-pattern. |
 | 2026-06-28 | Add @Stable/@Immutable rule for State types; CoroutineExceptionHandler in MviViewModel base class; rememberUpdatedState section with decision table. Three new anti-patterns.
