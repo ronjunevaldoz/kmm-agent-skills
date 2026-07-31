@@ -52,22 +52,32 @@ questions, ask one field at a time in this order and keep the same defaults.
 
 | Field | Ask | Default if omitted |
 |---|---|---|
+| `PROJECT_TYPE` | Is this an app, or a library other projects will depend on? | Inferred from the description (`library`/`SDK`/`package`/"other projects can use this" → Library; otherwise App) |
 | `PROJECT_NAME` | What is the app/project name? | Derived from the description |
 | `GROUP_ID` | What package/group ID should the project use? | `com.example.<project>` |
-| `APP_TYPE` | What kind of app is this? | Derived from the description |
-| `WHAT_IT_DOES` | What does the app do in one sentence? | Derived from the description |
+| `APP_TYPE` | What kind of app is this? (App only) | Derived from the description |
+| `WHAT_IT_DOES` | What does the app/library do in one sentence? | Derived from the description |
 | `PLATFORMS` | Which targets should we scaffold? | Android + iOS |
 | `MIN_SDK` | Minimum Android SDK version? | 26 |
 | `IOS_TARGET` | Minimum iOS deployment target? | 16.0 |
-| `PERSISTENCE` | Does it need local storage, settings, or neither? | Inferred |
-| `BACKEND` | Does it talk to an API, auth service, or server? | none |
-| `AUTH` | Does it have login / sign-in / identity? | none |
+| `PERSISTENCE` | Does it need local storage, settings, or neither? (App only) | Inferred |
+| `BACKEND` | Does it talk to an API, auth service, or server? (App only) | none |
+| `AUTH` | Does it have login / sign-in / identity? (App only) | none |
 | `DI_APPROACH` | Annotated or manual DI? | annotated |
-| `DISTRIBUTION` | Where will the app be distributed? | Play Store + App Store |
+| `DISTRIBUTION` | Where will the app be distributed? (App only) | Play Store + App Store |
+| `PUBLISH_TARGET` | Maven Central, GitHub Packages, or both? (Library only) | Maven Central |
 | `CI_CD` | Wire GitHub Actions now, or skip and rely on running scripts locally for now? | yes |
 
 Distribution options: `Play Store + App Store` · `Internal / enterprise` · `Open source / side project`
 This affects signing config, ProGuard aggressiveness, and whether the CI release lane includes store upload.
+
+**`PROJECT_TYPE = Library` changes the rest of this pipeline significantly** — no UI,
+no screens, no design system. Steps 3 (wireframes), 6 (design system), and 7 (design
+previews) are skipped entirely; Step 4's foundation uses
+`kotlin-multiplatform-library-publishing`'s project structure instead of the kmp-wizard
+app clone; Step 8's "features" become public API surfaces instead of screens. Each
+step below is marked `[App]`, `[Library]`, or unmarked (applies to both) — resolve
+`PROJECT_TYPE` before Step 2 and follow only the steps that apply.
 
 `CI_CD = no` is a legitimate choice, not a shortcut being discouraged — `./gradlew detekt`/
 `ktlintCheck`/`test` and `audit_project.py` all run identically from a local terminal;
@@ -242,10 +252,11 @@ the live source of truth for what's done, not the chat transcript.
 
 ## Step 4 — Foundation (always first, always in this order)
 
-Run these two before any feature work. They establish the module graph and layer contract
-everything else depends on.
+Run these before any feature work. They establish the module graph and layer contract
+everything else depends on. `PROJECT_TYPE` branches which foundation gets built.
 
-**F-01: Project scaffold — clone kmp-wizard first**
+### [App] F-01: Project scaffold — clone kmp-wizard first
+
 Load `kotlin-multiplatform-feature-scaffold`. The first action is always:
 
 ```bash
@@ -269,13 +280,48 @@ Run `./gradlew help` — must be `BUILD SUCCESSFUL` before any feature work begi
 Never write `build-logic/`, `settings.gradle.kts`, or `gradle.properties` from scratch —
 kmp-wizard is the only valid starting point for a new project.
 
-**F-02: Clean architecture**
+### [Library] F-01: Project scaffold — use library-publishing's structure
+
+Load `kotlin-multiplatform-library-publishing`. There is no equivalent to kmp-wizard for
+a library — build the structure that skill's own Step 1 defines directly:
+
+```
+<PROJECT_NAME>/
+├── build-logic/                  # Convention plugins (optional but recommended)
+├── library/                      # Main library module
+│   └── build.gradle.kts
+├── library-testing/              # Test helpers for consumers (optional — add if the
+│                                  #   library exposes fakes/test doubles consumers need)
+├── sample/                       # Sample app that consumes the library
+│   └── build.gradle.kts          # com.android.application only here
+├── gradle/
+│   └── libs.versions.toml
+├── settings.gradle.kts
+└── build.gradle.kts              # Root: coordinates + publishing config
+```
+
+Configure using the intake values:
+- `rootProject.name = PROJECT_NAME` in `settings.gradle.kts`
+- `GROUP_ID` as the Maven `groupId`
+- `android.minSdk = MIN_SDK` if an Android target is included in `PLATFORMS`
+- `iosDeploymentTarget = IOS_TARGET` if iOS is included
+- Wire `explicitApi()`, the `vanniktech` publish plugin, and `binary-compatibility-validator`
+  per that skill's Step 2/3/5 — do this now, not deferred to Step 8, since retrofitting
+  `explicitApi()` after public declarations already exist means fixing every violation at
+  once instead of writing them correctly from the first line
+- Skip `:bom` at scaffold time unless the intake description explicitly mentions multiple
+  published artifacts — add it later via that skill's Step 4 if the need appears
+
+Run `./gradlew help` — must be `BUILD SUCCESSFUL` before any API work begins. Skip F-02
+and F-03 below entirely — jump to Step 5.
+
+### [App] F-02: Clean architecture
 Load `kotlin-multiplatform-clean-architecture`. Generate the 6-layer module structure
 (`:model`, `:api`, `:domain`, `:data`, `:presenter`, `:ui`) for each inferred feature.
 
 After each foundation step: run `validate_module_graph.py` and confirm zero errors before proceeding.
 
-**F-03: Draft wireframes and architecture diagram (required, before design system or feature work)**
+### [App] F-03: Draft wireframes and architecture diagram (required, before design system or feature work)
 
 Design must exist before code — draft both now, using the confirmed screen list from
 Step 3, and confirm with the user before proceeding to Step 5. Do not defer this to
@@ -366,11 +412,13 @@ Use intake answers directly — do not re-infer. Run each in dependency order:
 
 | Intake value | Skill | What it generates |
 |---|---|---|
-| `PERSISTENCE = local` | `kotlin-multiplatform-sqldelight-setup` | Schema, drivers, migrations, Flow queries |
-| `PERSISTENCE = settings` | `kotlin-multiplatform-datastore` | Preferences DataStore, expect/actual factory |
-| `BACKEND = REST API` | `kotlin-multiplatform-network-layer` | Ktor client, NetworkResult<T>, safeRequest |
-| `BACKEND = kRPC` | `kotlin-multiplatform-kotlin-rpc` | Shared contract, Ktor auth integration |
-| `AUTH = yes` | `kotlin-multiplatform-ktor-auth-service` | Bearer/JWT, login/refresh/logout |
+| `[App]` `PERSISTENCE = local` | `kotlin-multiplatform-sqldelight-setup` | Schema, drivers, migrations, Flow queries |
+| `[App]` `PERSISTENCE = settings` | `kotlin-multiplatform-datastore` | Preferences DataStore, expect/actual factory |
+| `[App]` `BACKEND = REST API` | `kotlin-multiplatform-network-layer` | Ktor client, NetworkResult<T>, safeRequest |
+| `[App]` `BACKEND = kRPC` | `kotlin-multiplatform-kotlin-rpc` | Shared contract, Ktor auth integration |
+| `[App]` `AUTH = yes` | `kotlin-multiplatform-ktor-auth-service` | Bearer/JWT, login/refresh/logout |
+| `[Library]` always | `kotlin-multiplatform-library-publishing` | `explicitApi()`, `apiCheck`/`apiDump`, GPG signing, `PUBLISH_TARGET` wiring (already started in Step 4 — this is where BOM/multi-artifact gets added if the need appeared) |
+| `[Library]` `PLATFORMS` includes iOS | `kotlin-multiplatform-xcframework-spm` | XCFramework + SPM export alongside Maven |
 | always | `kotlin-multiplatform-dependency-injection` | Koin modules, scope rules |
 | always | `kotlin-multiplatform-logging` | Kermit setup, log levels, Koin wiring |
 | `CI_CD = yes` | `kotlin-multiplatform-ci-github-actions` | GitHub Actions matrix: build, test, detekt, ktlint |
@@ -390,7 +438,7 @@ run automatically without a CI provider.
 
 ---
 
-## Step 6 — Design system
+## Step 6 — Design system [App only — skip entirely for Library, go to Step 8]
 
 ### 6a — Draft design decisions (always pre-recommend, always confirm before generating)
 
@@ -518,7 +566,7 @@ component source, so it combines with either.
 
 ---
 
-## Step 7 — Design previews
+## Step 7 — Design previews [App only]
 
 Wireframes were already drafted in Step 4's F-03, before design system or feature work
 — this step turns those confirmed wireframes into compilable preview stubs, still
@@ -580,7 +628,7 @@ Then use `AskUserQuestion` — "Starting Sprint <N>, this will generate code. Pr
 
 **8b — Implement the sprint tasks in order**
 
-For each task in the sprint:
+### [App] For each task in the sprint:
 
 1. **Implement** — load the relevant skill(s), generate all 6 layers:
    - `:model` — data classes, sealed results
@@ -606,6 +654,37 @@ For each task in the sprint:
    ```
    Fix any findings before moving to the next task.
 
+### [Library] For each task in the sprint:
+
+A library's "sprint tasks" are public API surfaces, not screens — there is no
+`:presenter`/`:ui`/MVI/navigation. Each task is a class, interface, or function set the
+library exposes, plus its tests and docs:
+
+1. **Implement the public API** — a `:library` module, or a sub-package if `:library` is
+   still small enough to stay one module (see `kotlin-multiplatform-clean-architecture`'s
+   6-layer contract, which `library-publishing` cross-references, once it outgrows that):
+   - Design the API surface first — public interface/function signatures, before the
+     implementation — since `explicitApi()` (wired in Step 4) makes every visibility
+     choice deliberate and `apiCheck` (Step 5) will flag any change to it later
+   - Write the KDoc for every public declaration alongside the code, not after — an
+     undocumented public API is exactly what `_detect_undocumented_public_api` flags
+   - Keep the library's own classes free of Koin/other framework imports — see
+     `library-publishing`'s "No forced framework coupling in library internals"
+2. **Write tests** — `library/src/commonTest` unit tests for the public contract; add
+   platform-specific tests under `androidTest`/`iosTest` only for platform-specific
+   (`expect`/`actual`) behavior.
+3. **Update the API dump** — after any public API change:
+   ```bash
+   ./gradlew apiDump   # regenerate library/api/library.api
+   git add library/api/
+   ```
+4. **Validate** — after each task:
+   ```bash
+   ./gradlew apiCheck   # confirms the dump matches, and was regenerated deliberately
+   python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py .
+   ```
+   Fix any findings before moving to the next task.
+
 **8c — Sprint review gate**
 
 After all tasks in the sprint are done: check off this sprint's tasks in `PLAN.md`
@@ -627,7 +706,8 @@ Done:
   [x] X-01 <task name>
   [x] X-02 <task name>
 
-Audit: PASS | Tests: <N> passed | Screenshots: <N> recorded
+Audit: PASS | Tests: <N> passed | <if App:> Screenshots: <N> recorded </if>
+<if Library:> apiCheck: PASS </if>
 
 Next up - Sprint <N+1>: <sprint name>
   Tasks: Y-01 Y-02 ...
@@ -637,7 +717,7 @@ Then use `AskUserQuestion` — options: continue to Sprint `<N+1>` / redo a spec
 / add a task to this sprint before moving on / stop here (resume later with
 `/kmm-implement-feature`). **Do not start the next sprint until the user responds.**
 
-Skills to load per common feature type:
+**[App]** Skills to load per common feature type:
 
 | Feature type | Skills |
 |---|---|
@@ -647,9 +727,19 @@ Skills to load per common feature type:
 | Auth / login | `ktor-auth-service`, `mvi`, `form-validation`, `biometric-auth` (if mentioned) |
 | Offline list | `sqldelight-setup`, `offline-first`, `mvi` |
 
+**[Library]** Skills to load per common API surface type:
+
+| API surface type | Skills |
+|---|---|
+| Any public class/function | `clean-architecture` (once `:library` outgrows one module), `unit-testing` |
+| Platform-specific behavior | `expect-actual` — common-first rule, interface injection before `expect`/`actual` |
+| Native/JNI bridge | `jni-pro` |
+| Kotlin/Native cinterop | `expect-actual` |
+| Multi-artifact split | `library-publishing`'s BOM step (Step 4) |
+
 ---
 
-## Step 9 — Record goldens + run `/kmm-verify`
+## Step 9 — Record goldens + run `/kmm-verify` [App]
 
 After all sprints are complete, record Roborazzi golden images first — screenshot tests
 always fail on a fresh project if goldens haven't been recorded yet:
@@ -673,6 +763,28 @@ This runs:
 - Visual design audit on screenshot goldens
 
 Fix any blockers. Do not mark the project complete until `/kmm-verify` reports `RESULT: PASS`.
+
+## Step 9 — API dump + local publish smoke test [Library]
+
+After all sprints are complete, generate the initial API dump if not already committed
+from Step 8's per-task `apiDump` calls, then confirm the library actually resolves as a
+Maven artifact before calling it done — the release checklist's own
+`./gradlew publishToMavenLocal` smoke test, run now instead of waiting for the first
+real release:
+
+```bash
+./gradlew apiDump
+git add library/api/
+git commit -m "chore: initial API dump" --allow-empty
+
+./gradlew build test apiCheck
+./gradlew publishToMavenLocal
+```
+
+Then verify a throwaway consumer project can actually resolve it from `mavenLocal()`
+before reporting success — an artifact that only builds in isolation but never resolves
+as a real dependency isn't actually done. Fix any blockers. Do not mark the project
+complete until `apiCheck`/`build`/`test` all pass and the local-publish resolve succeeds.
 
 ---
 
@@ -744,7 +856,7 @@ compliant client, not just Claude Code.
 --ignore="**/third_party/**"
 ```
 
-**Write `.claude/AGENTS.md`** — tailored to this project's actual modules and stack:
+**[App] Write `.claude/AGENTS.md`** — tailored to this project's actual modules and stack:
 
 ```markdown
 # AGENTS.md — <PROJECT_NAME>
@@ -809,7 +921,63 @@ Key commands:
 - `/kmm-update-skills` — pull latest skills and re-deploy
 ```
 
-**Write `README.md`** at the project root:
+**[Library] Write `.claude/AGENTS.md`** — same shape `/kmm-setup-agents` generates for
+an existing library project (see that command's Step 4 "For LIBRARY projects" template
+verbatim), so a library scaffolded here and one onboarded later via `/kmm-setup-agents`
+end up with identical routing:
+
+```markdown
+# AGENTS.md — <PROJECT_NAME>
+
+This project uses [kmm-agent-skills](https://github.com/ronjunevaldoz/kmm-agent-skills).
+Skills are installed in `.claude/skills/`.
+
+## Project overview
+
+<1–2 sentences: what the library does, target consumers>
+Group ID: <GROUP_ID>   Artifact: <PROJECT_NAME>   Published to: <PUBLISH_TARGET>
+
+## Skill routing
+
+| Topic | Skill |
+|---|---|
+| Publishing to Maven Central | `kotlin-multiplatform-library-publishing` |
+| iOS / SPM distribution | `kotlin-multiplatform-xcframework-spm` |
+| API surface management | `kotlin-multiplatform-library-publishing` (apiCheck / apiDump) |
+| Platform-specific implementations | `kotlin-multiplatform-expect-actual` |
+| Unit / integration tests | `kotlin-multiplatform-unit-testing` |
+| Code quality (detekt, ktlint) | `kotlin-multiplatform-code-quality` |
+| CI automation | `kotlin-multiplatform-ci-github-actions` |
+| Android CLI / emulator / deploy | `kotlin-multiplatform-android-cli` |
+| Project docs / onboarding | `kotlin-multiplatform-project-docs-maintainer` |
+| Architecture audit | `kotlin-multiplatform-audit` |
+| Harvest consumer lessons | `kotlin-multiplatform-audit` (`--harvest` mode via `/kmm-harvest-lessons`) |
+
+## Published artifacts
+
+| Artifact | Module |
+|---|---|
+| <GROUP_ID>:<PROJECT_NAME> | :library |
+| <GROUP_ID>:<PROJECT_NAME>-testing | :library-testing (if present) |
+
+## API surface rules
+
+- Never remove or rename public symbols without a major version bump
+- Run `./gradlew apiDump` after any public API change; commit the `.api` file
+- `./gradlew apiCheck` runs in CI and blocks merge if API diff is uncommitted
+- Mark internal symbols with `@InternalApi` to exclude from the dump
+
+## Commands installed
+
+See `.claude/commands/kmm-*.md` for available slash commands.
+Key commands:
+- `/kmm-run-audit` — architecture audit with per-finding remediation
+- `/kmm-harvest-lessons` — collect patterns to upstream to skills
+- `/kmm-verify` — full validation pipeline (build + test + apiCheck)
+- `/kmm-check-updates` — check for skill updates
+```
+
+**[App] Write `README.md`** at the project root:
 
 ```markdown
 # <PROJECT_NAME>
@@ -842,7 +1010,52 @@ Install [kmm-agent-skills](https://github.com/ronjunevaldoz/kmm-agent-skills), t
 - `/kmm-verify` — full validation pipeline
 ```
 
-**Finalize `docs/`** — `docs/architecture.md` and `docs/layout-system/` already exist
+**[Library] Write `README.md`** at the project root:
+
+```markdown
+# <PROJECT_NAME>
+
+<WHAT_IT_DOES>
+
+## Install
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("<GROUP_ID>:<PROJECT_NAME>:<VERSION>")
+}
+```
+
+Published to <PUBLISH_TARGET>. See [releases](../../releases) for the latest version.
+
+## Platforms
+
+<list platforms from intake>
+
+## Build
+
+```bash
+./gradlew build test           # build + unit tests, all targets
+./gradlew apiCheck              # verify public API surface is unchanged
+./gradlew publishToMavenLocal   # smoke-test a local consumer can resolve it
+```
+
+## API stability
+
+This library uses `explicitApi()` and `binary-compatibility-validator` — every public
+declaration is deliberate, and `library/api/library.api` tracks the full surface.
+See `docs/reference/agentskills-io-standards.md`'s sibling doc (once written for this
+project) or `kotlin-multiplatform-library-publishing`'s semver classification table
+before bumping versions.
+
+## Agent workflows
+
+Install [kmm-agent-skills](https://github.com/ronjunevaldoz/kmm-agent-skills), then:
+- `/kmm-run-audit` — check architecture health
+- `/kmm-verify` — full validation pipeline (build + test + apiCheck)
+```
+
+**[App] Finalize `docs/`** — `docs/architecture.md` and `docs/layout-system/` already exist
 from Step 4's F-03 (written immediately after confirmation, not deferred to here).
 Append the `## Features` and `## Stack` sections now that implementation is complete —
 the sprint plan and `libs.versions.toml` weren't final back at Step 4:
@@ -948,36 +1161,47 @@ Update `recurring_issues` and `proven_patterns` manually as the project evolves.
 
 ## Step 11 — Summary
 
-Print a summary of everything generated:
+Print a summary of everything generated. `[App]`/`[Library]` lines are exclusive —
+include only the block matching `PROJECT_TYPE`, shared lines apply to both:
 
 ```
 ## Project complete
 
-App:       <name> — <one-line description>
+<if App:> App:       <name> — <one-line description> </if>
+<if Library:> Library:   <name> — <one-line description> </if>
 Platforms: <platforms from intake>
+<if App:>
 Features:  <N> implemented
   [x] F-01  Project scaffold
   [x] F-02  Clean architecture
   [x] F-03  <feature>
+</if>
+<if Library:>
+API surfaces: <N> implemented
+  [x] F-01  Project scaffold (library-publishing structure)
+  [x] F-02  <public API task>
+</if>
 
 Generated:
   Modules:      <N> Gradle modules
   Source files: <N> .kt files
-  Tests:        <N> unit tests, <N> Roborazzi screenshot tests
-  Screenshots:  <N> PNG goldens (<N> light, <N> dark)
+<if App:>  Tests:        <N> unit tests, <N> Roborazzi screenshot tests
+  Screenshots:  <N> PNG goldens (<N> light, <N> dark) </if>
+<if Library:>  Tests:        <N> unit tests
+  API dump:     library/api/library.api (<N> public declarations) </if>
 
 Docs:
-  README.md                        — project overview, build commands, architecture link
+  README.md                        — <if App:> project overview, build commands, architecture link </if><if Library:> install instructions, API stability notes </if>
   PLAN.md                          — MVP scope + delivery plan, checked off as sprints complete
-  docs/architecture.md             — 6-layer rules, module map, stack
+<if App:>  docs/architecture.md             — 6-layer rules, module map, stack
   docs/decisions/                  — ADRs for key tech choices
-  docs/layout-system/              — ASCII wireframes per screen
+  docs/layout-system/              — ASCII wireframes per screen </if>
 
 Agent setup:
   agents/ rules/ hooks/ commands/ skills/ — project-owned source scaffold
   docs/reference/ai-collaboration.md      — canonical cross-agent policy
   CLAUDE.md                               — thin bootstrap into .claude/AGENTS.md
-  .claude/AGENTS.md                       — skill routing + feature module table
+  .claude/AGENTS.md                       — skill routing<if App:> + feature module table</if><if Library:> + published artifacts + API surface rules</if>
   .claude/commands/kmm-*.md               — <N> slash commands installed
   .claude/skills/ + .agents/skills/       — <N> skills deployed to both (cross-client)
   .claude/pipeline-context.json           — project context for the planner agent
@@ -992,22 +1216,29 @@ Not yet wired: git/CI architecture hooks (pre-commit audit, PostToolUse validati
 Run /kmm-setup-hooks now to add them — recommended for every team project.
 
 Next steps:
-<if Android in platforms>  ./gradlew :androidApp:assembleDebug      — build Android APK</if>
-<if iOS in platforms>      ./gradlew :iosApp:buildReleaseXCFramework — build iOS XCFramework</if>
-<if Desktop in platforms>  ./gradlew :desktopApp:run                 — run Desktop app</if>
-  ./gradlew jvmTest                             — run all tests
+<if App and Android in platforms>  ./gradlew :androidApp:assembleDebug      — build Android APK</if>
+<if App and iOS in platforms>      ./gradlew :iosApp:buildReleaseXCFramework — build iOS XCFramework</if>
+<if App and Desktop in platforms>  ./gradlew :desktopApp:run                 — run Desktop app</if>
+<if App:>  ./gradlew jvmTest                             — run all tests </if>
+<if Library:>  ./gradlew apiCheck                            — verify public API surface
+  ./gradlew publishToMavenLocal                — smoke-test local resolution </if>
   /kmm-setup-hooks                              — wire git/CI architecture hooks
-  /kmm-implement-feature <name>                 — add your next feature
+  /kmm-implement-feature <name>                 — add your next <if App:>feature</if><if Library:>API surface</if>
 ```
 
 ---
 
 ## Notes
 
-- Always generate `Content` composables (pure state, no ViewModel) — they are what
-  Roborazzi tests inject. Never screenshot a `Screen` directly.
-- Every screen needs `AppScaffold` + `AppTopAppBar`. The visual audit will catch missing chrome.
-- Roborazzi golden images must be recorded and committed:
-  `./gradlew recordRoborazziJvm` — run this before Step 7.
+- **[App]** Always generate `Content` composables (pure state, no ViewModel) — they are
+  what Roborazzi tests inject. Never screenshot a `Screen` directly.
+- **[App]** Every screen needs `AppScaffold` + `AppTopAppBar`. The visual audit will
+  catch missing chrome.
+- **[App]** Roborazzi golden images must be recorded and committed:
+  `./gradlew recordRoborazziJvm` — run this before Step 9.
+- **[Library]** Design the public API signature before the implementation — `explicitApi()`
+  (wired in Step 4) makes every visibility choice deliberate from the first line instead
+  of a retrofit; changing a signature after `apiDump` has run means a real `apiCheck`
+  failure, not just a style nit.
 - This command is the consumer-facing entry point. For E2E testing the skills themselves,
   use a spec from `samples/` as the `$ARGUMENTS` input in a clean sandbox directory.
