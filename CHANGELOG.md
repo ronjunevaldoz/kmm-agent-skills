@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.99.3] — 2026-07-31
+
+### Docs
+
+- docs(skills): semver discipline for apiCheck, .agents/skills in project scaffold
+
+---
+
 ## [v1.99.2] — 2026-07-31
 
 ### Docs

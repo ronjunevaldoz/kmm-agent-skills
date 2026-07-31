@@ -1,5 +1,5 @@
 {
-  "version": "1.99.2",
+  "version": "1.99.3",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1856,7 +1856,7 @@
       "path": "skills/kotlin-multiplatform-library-publishing",
       "description": "Publish a Kotlin Multiplatform library to Maven Central, GitHub Packages, or both. Covers: vanniktech maven-publish plugin setup, POM metadata, Sonatype OSSRH staging, multi-artifact BOM, kotlinx-binary-compatibility-validator API tracking, SNAPSHOT vs stable channels, and a release checklist. Pairs with kotlin-multiplatform-xcframework-spm for iOS/SPM distribution.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-20",
+      "last_updated": "2026-07-31",
       "keywords": [
         "maven central",
         "maven publish",
