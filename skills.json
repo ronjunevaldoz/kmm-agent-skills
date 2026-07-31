@@ -1,10 +1,10 @@
 {
-  "version": "1.99.3",
+  "version": "1.99.4",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
       "path": "skills/kotlin-multiplatform-accessibility",
-      "description": ">-",
+      "description": "Accessibility (a11y) for Kotlin Multiplatform Compose \u2014 semantic roles and mergeDescendants, contentDescription on interactive and image elements, screen reader traversal order, minimum touch target size, Roborazzi accessibility snapshot tests, reduced-motion support, and a Compose a11y audit checklist.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -56,7 +56,7 @@
     {
       "name": "kotlin-multiplatform-adaptive-layout",
       "path": "skills/kotlin-multiplatform-adaptive-layout",
-      "description": ">-",
+      "description": "Adaptive UI for Kotlin Multiplatform \u2014 WindowSizeClass-driven layouts that respond correctly to Compact (phone), Medium (tablet), and Expanded (desktop) breakpoints. Covers list-detail splits, adaptive navigation (bottom bar \u2192 rail \u2192 drawer), single-source WindowSizeClass propagation, and Roborazzi tests for each breakpoint. Enforces cross-session pattern consistency so every screen in the project uses the same adaptive strategy.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-07",
       "keywords": [
@@ -136,7 +136,7 @@
     {
       "name": "kotlin-multiplatform-analytics",
       "path": "skills/kotlin-multiplatform-analytics",
-      "description": ">-",
+      "description": "Shared Analytics interface for Kotlin Multiplatform \u2014 sealed event types in commonMain, platform implementations for Firebase Analytics (Android) and equivalent (iOS/Desktop), automatic screen tracking, Koin wiring with platform modules, and testing with a fake analytics recorder.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -307,7 +307,7 @@
     {
       "name": "kotlin-multiplatform-biometric-auth",
       "path": "skills/kotlin-multiplatform-biometric-auth",
-      "description": ">-",
+      "description": "Biometric authentication for Kotlin Multiplatform \u2014 a sealed BiometricResult type in commonMain, expect/actual BiometricAuthenticator, Android BiometricPrompt with CryptoObject, iOS LocalAuthentication (LAContext.evaluatePolicy), Koin wiring, and graceful fallback to device PIN/password when biometrics are unavailable.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -514,7 +514,7 @@
     {
       "name": "kotlin-multiplatform-compose-animation",
       "path": "skills/kotlin-multiplatform-compose-animation",
-      "description": ">-",
+      "description": "Compose Multiplatform animation patterns \u2014 AnimatedVisibility with enter/exit transitions, animateContentSize, Crossfade for screen-level transitions, animateFloatAsState / animateDpAsState for property animations, and shared element transitions (Compose 1.7+). Covers when to use each API and how to keep animations accessible with reduced-motion support.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -777,7 +777,7 @@
     {
       "name": "kotlin-multiplatform-deep-linking",
       "path": "skills/kotlin-multiplatform-deep-linking",
-      "description": ">-",
+      "description": "Deep linking for Kotlin Multiplatform \u2014 Android App Links (Digital Asset Links), iOS Universal Links (Apple App Site Association), NavHost route integration, deep-link route parsing in commonMain, intent handling in AndroidActivity, and NSUserActivity/openURL handling in the iOS app delegate.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -1250,7 +1250,7 @@
     {
       "name": "kotlin-multiplatform-feature-flags",
       "path": "skills/kotlin-multiplatform-feature-flags",
-      "description": ">-",
+      "description": "Feature flag evaluation for Kotlin Multiplatform \u2014 a FeatureFlag enum and FeatureFlagProvider interface in commonMain, Firebase Remote Config as the default backend, A/B variant types, offline fallback defaults, flag evaluation in the :domain layer, and kill-switch support for fast disablement.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -1378,7 +1378,7 @@
     {
       "name": "kotlin-multiplatform-form-validation",
       "path": "skills/kotlin-multiplatform-form-validation",
-      "description": ">-",
+      "description": "Declarative form validation for Kotlin Multiplatform \u2014 field-level validation rules in commonMain, synchronous and async validators, error state integrated into MVI UiState, submit gating, and reusable field components that display inline errors. No third-party validation library required.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -1460,7 +1460,7 @@
     {
       "name": "kotlin-multiplatform-image-loading",
       "path": "skills/kotlin-multiplatform-image-loading",
-      "description": ">-",
+      "description": "Image loading for Kotlin Multiplatform using Coil 3 \u2014 AsyncImage, cache policy, placeholder and error states, circular/rounded clipping, local resource images, Koin wiring of ImageLoader, and memory/disk cache tuning. Coil 3 is KMP-ready for Android, iOS, Desktop, and WASM targets.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -1502,7 +1502,7 @@
     {
       "name": "kotlin-multiplatform-imagevector-generator",
       "path": "skills/kotlin-multiplatform-imagevector-generator",
-      "description": ">-",
+      "description": "Eliminates raw pixel assets and hand-written vector paths from KMP Compose projects. Compiles raster images (PNG/JPG) and SVGs into Kotlin ImageVector code via a local, deterministic toolchain (quantize \u2192 trace \u2192 normalize \u2192 codegen). Agents are forbidden from writing path coordinates by hand \u2014 all vector generation is delegated to scripts/convert_image_to_imagevector.py. Use whenever a project needs an icon, logo, or flat illustration as a Compose asset, or when replacing PNG icons with vectors.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-08",
       "keywords": [
@@ -1612,7 +1612,7 @@
     {
       "name": "kotlin-multiplatform-jni-pro",
       "path": "skills/kotlin-multiplatform-jni-pro",
-      "description": ">-",
+      "description": "Expert in JNI bridge engineering between Kotlin/JVM and native C++ libraries. Specializes in memory safety across the JVM boundary, shared-library symbol isolation, type mapping, GPU-sync correctness, algorithm porting discipline, and stable-feature protection. Language and library agnostic \u2014 applies to any Kotlin \u2194 native pipeline.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-26",
       "keywords": [
@@ -1748,7 +1748,7 @@
     {
       "name": "kotlin-multiplatform-layout-system",
       "path": "skills/kotlin-multiplatform-layout-system",
-      "description": ">-",
+      "description": "Drafts and documents screen layouts for any KMP consumer project. Creates docs/layout-system/ with one markdown file per screen \u2014 each file has a component table and an ASCII wireframe. A shared _components.md holds the project-wide component registry. Use this skill whenever a new screen is being designed, an existing screen changes, a layout review is requested, or a project has no layout-system docs yet. Trigger proactively on any new project or new screen \u2014 layout-system docs should exist before or alongside implementation, not after. Trigger keywords: layout system, screen layout, wireframe, layout spec, layout docs, draft screen, add screen layout, document layout, layout-system, component layout, screen wireframe, layout diagram, screen structure, layout missing, no layout docs, create layout, update layout, design screen, sketch layout, plan screen, html wireframe, html to compose, implement wireframe, html mockup to jetpack compose.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-17",
       "keywords": [
@@ -1817,7 +1817,7 @@
     {
       "name": "kotlin-multiplatform-lessons",
       "path": "skills/kotlin-multiplatform-lessons",
-      "description": ">-",
+      "description": "Consumer-side skill for capturing lessons learned from real KMP project work. Writes structured lesson files to docs/lessons/ whenever a skill's guidance was wrong, incomplete, or led to a bug \u2014 so that knowledge flows back into the skills collection. Use this skill whenever you fix a bug caused by following skill guidance, discover a better pattern than what the skill teaches, find a gap in skill coverage, or notice that a skill's dependency reference is stale. Trigger it proactively after any non-trivial fix \u2014 don't wait for the user to ask.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-12",
       "keywords": [
@@ -2286,7 +2286,7 @@
     {
       "name": "kotlin-multiplatform-paging",
       "path": "skills/kotlin-multiplatform-paging",
-      "description": ">-",
+      "description": "Paging 3 in Kotlin Multiplatform \u2014 PagingSource, Pager, PagingData, and collectAsLazyPagingItems for cursor-based and offset-based list loading. Covers layer placement (PagingSource in :data, Pager in :presenter, LazyPagingItems in :ui), load-state handling, RemoteMediator for network+DB, Koin wiring, and testing PagingSource in isolation. Keeps PagingData out of UiState.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -2331,7 +2331,7 @@
     {
       "name": "kotlin-multiplatform-permissions",
       "path": "skills/kotlin-multiplatform-permissions",
-      "description": ">-",
+      "description": "Runtime permission handling for Kotlin Multiplatform \u2014 a sealed PermissionState type in commonMain, expect/actual PermissionController, Android Activity-based launcher, iOS Info.plist keys and AVFoundation/CoreLocation usage, and cross-platform Compose UI for rationale dialogs.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -2548,7 +2548,7 @@
     {
       "name": "kotlin-multiplatform-push-notifications",
       "path": "skills/kotlin-multiplatform-push-notifications",
-      "description": ">-",
+      "description": "Push notification handling for Kotlin Multiplatform \u2014 a shared PushToken and NotificationPayload domain type in commonMain, Android FCM token registration and FirebaseMessagingService, iOS APNs token bridging to FCM, NotificationHandler expect/actual for foreground display and tap routing, and deep-link navigation from a notification tap.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -2946,7 +2946,7 @@
     {
       "name": "kotlin-multiplatform-skill-harvester",
       "path": "skills/kotlin-multiplatform-skill-harvester",
-      "description": ">-",
+      "description": "Reads docs/lessons/*.md files from one or more consumer KMP projects and proposes concrete amendments to the source skills in kmm-agent-skills. Use this skill when the user wants to incorporate consumer feedback into the skills collection, when lessons have accumulated in a project and need upstreaming, or when running a skills governance review. Produces a structured amendment report and optionally drafts the actual skill diffs. Trigger when the user says \"harvest lessons\", \"upstream the lessons\", \"incorporate feedback\", \"update skills from consumer projects\", or \"skills review\". Also trigger proactively when you see a docs/lessons/ directory with unprocessed files.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-26",
       "keywords": [
@@ -3113,7 +3113,7 @@
     {
       "name": "kotlin-multiplatform-workmanager",
       "path": "skills/kotlin-multiplatform-workmanager",
-      "description": ">-",
+      "description": "Background task scheduling for Kotlin Multiplatform \u2014 WorkManager (Android) and BGTaskScheduler / BGProcessingTask (iOS) behind an expect/actual BackgroundScheduler. Covers one-time work, periodic work, retry with backoff, input/output data, and chained work on Android. iOS uses BGAppRefreshTask for short frequent tasks and BGProcessingTask for long network or maintenance jobs.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
