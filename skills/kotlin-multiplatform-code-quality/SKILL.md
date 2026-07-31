@@ -708,6 +708,60 @@ If Detekt reports false positives, use `@Suppress("RuleName")` at the call site,
 
 ---
 
+## Kotlin Library & Pattern Choices
+
+### `kotlin-reflect` — avoid in shared code
+
+`kotlin-reflect` is a JVM-primary API — limited or absent on Kotlin/Native and Kotlin/JS,
+and a real runtime/startup cost even on JVM. Never add it to `commonMain`'s dependencies;
+if a `commonMain` file imports `kotlin.reflect.*` beyond the always-available `KClass`/
+`::class` literal (full reflection: `memberProperties`, `KFunction.call`, etc.), that's a
+signal the platform split was skipped, not a genuine cross-platform need.
+
+- **Fine**: JVM-only modules (a Ktor server, a desktop-only feature) that already accept
+  JVM as their sole target
+- **Not fine**: reaching for reflection-based serialization or object inspection in
+  shared code — use `kotlinx.serialization` instead, which code-generates via a compiler
+  plugin and needs no runtime reflection on any platform
+- `kotlin-multiplatform-audit`'s `_detect_kotlin_reflect_in_common` catches full-reflection
+  imports in `commonMain`
+
+### Util/extension file organization
+
+A single `Utils.kt`/`Helpers.kt`/`Extensions.kt` file accumulating unrelated top-level
+functions across different domains (string formatting next to date math next to network
+retry logic) is a real smell — the file has no single responsibility, and nothing about
+its name tells a reader what's actually inside. Split by what the functions are *for*:
+`StringExtensions.kt`, `DateExtensions.kt`, or move the function into the module that
+owns the domain it touches. A file of extension functions all sharing the same receiver
+type is fine and not what this flags — the smell is unrelated functions sharing only a
+generic filename. `_detect_god_utils_file` flags a `*Utils.kt`/`*Helpers.kt` file with
+10+ top-level functions spanning 3+ distinct (or no) receiver types.
+
+### Regex readability
+
+A regex used more than once, or complex enough to need explaining, must be bound to a
+well-named constant — never inlined as a raw literal inside a function call:
+
+```kotlin
+// ❌ — unreadable inline, no name to signal intent, recompiled if hit in a hot path
+if (Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$").matches(input)) { ... }
+
+// ✓ — named, compiled once, self-documenting call site
+private val EMAIL_RE = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+if (EMAIL_RE.matches(input)) { ... }
+```
+
+For a pattern with 2+ capture groups, prefer named groups over positional ones — a caller
+reading `match.groups["year"]` doesn't need to cross-reference the pattern to know what
+`match.groupValues[2]` means. Add a one-line WHY comment above any pattern using
+lookaheads/lookbehinds or non-obvious escaping — what it matches should not require
+mentally executing the regex. `_detect_inline_unnamed_regex` flags a `Regex(...)`/
+`toRegex()` call inlined directly as a function-call argument instead of bound to a
+`val`.
+
+---
+
 ## Output Style
 
 When asked about code quality, linting, or formatting for KMP, respond in this order:
@@ -723,6 +777,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added "Kotlin Library & Pattern Choices" — `kotlin-reflect` (avoid in `commonMain`, JVM-primary and limited/absent on Native/JS), util/extension file organization (a god `Utils.kt` grab-bag is a real smell distinct from a single-receiver extension file), and regex readability (bind to a named `val`, never inline; named capture groups over positional for 2+ groups). Backed by `kotlin-multiplatform-audit`'s three new detectors. Also added the Alpha-stability caveat kotlinx.collections.immutable was missing wherever this skill referenced it. |
 | 2026-07-31 | Added a completeness rule to `@param`/`@return` guidance: the existing "avoid these tags, weave into prose" advice was about *form*, never about whether every parameter gets addressed — a user reported seeing generated KDoc that documented 1 of several parameters. Coverage is now explicit: all parameters or none, never partial. Backed by `kotlin-multiplatform-audit`'s new `_detect_partial_param_documentation`. |
 | 2026-07-31 | Added "Naming Conventions (Android Kotlin Style Guide)" — real gap: this skill covered formatting (Ktlint/Detekt, mechanical) and comment/KDoc conventions, but never naming *semantics* — verified against the real, current [Android Kotlin style guide](https://developer.android.com/kotlin/style-guide). Covers file/package naming, the type/function/constant naming table (including the `@Composable`-returning-`Unit`-must-be-PascalCase rule this repo's own generated components already followed by convention but never stated explicitly), acronym casing (`XmlHttpRequest` not `XMLHTTPRequest`), backing property `_x` convention, type variable naming, and the required KDoc block-tag order. Also flagged a real, deliberate conflict: the guide sets a 100-char line limit, this repo's `.editorconfig` sets 120 (matching kotlinlang.org's own convention instead) — documented as an acknowledged deviation, not silently changed. Added `kotlin-multiplatform-audit`'s `_detect_lowercase_unit_composable` as the mechanical enforcement for the Composable-naming rule. |
 | 2026-07-25 | Added "Long Parameter List, and its worse variant: a regressed Parameter Object" — named from a real example (an 11-param wrapper that re-exploded an existing `UiLayoutTracking` parameter object into 4 primitives just to reconstruct it one line later, even though the function it delegates to already accepts the object directly). Not mechanically detected — flagged in review guidance instead, since distinguishing "params happen to overlap a class" from "this is literally that class flattened" needs more context than a safe regex gets. 1 new anti-pattern. |

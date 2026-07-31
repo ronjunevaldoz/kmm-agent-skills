@@ -60,6 +60,9 @@ The script detects architectural and design smells:
 | `leftover wizard demo code` | kmp-wizard's default `class Greeting`/`compose_multiplatform` logo demo still present — delete it before real feature work starts; `:app:shared` should only ever hold composition-root wiring |
 | `lowercase unit composable` | A `@Composable` function returning `Unit` (no explicit return type) named camelCase like a verb (`appButton`) instead of PascalCase like a noun (`AppButton`) — per the Android Kotlin style guide's naming rules |
 | `partial param documentation` | A KDoc block documents some of a function's 2+ parameters (via `@param` or inline `[name]`) but not others — reads as complete and isn't; coverage must be all-or-nothing |
+| `kotlin-reflect in commonMain` | A `commonMain` file uses full reflection (`memberProperties`, `primaryConstructor`, etc.) — `kotlin-reflect` is JVM-primary, limited/absent on Native and JS/Wasm |
+| `god utils file` | A `*Utils.kt`/`*Helpers.kt` file with 10+ top-level functions spanning 3+ distinct receiver types — a grab-bag with no single responsibility |
+| `inline unnamed regex` | A `Regex(...)`/`.toRegex()` constructed inline inside an expression instead of bound to a named `val` — unreadable at the call site, recompiled on every call |
 
 The script also prints a separate, non-blocking `HINTS` section:
 
@@ -163,6 +166,9 @@ For every finding, load the relevant skill and give a concrete fix:
 | `leftover wizard demo code` | `feature-scaffold` | Delete `Greeting.kt`/the demo `App()` body; rewrite `:app:shared`'s `App()` as composition-root-only wiring (theme, Koin, NavHost) |
 | `lowercase unit composable` | `code-quality` | Rename to PascalCase; update every call site and the Koin/nav references to it |
 | `partial param documentation` | `code-quality` | Either document every listed parameter (mixing `@param` and inline `[name]` is fine) or strip back to a plain summary with no parameter-level detail at all |
+| `kotlin-reflect in commonMain` | `code-quality` | Use `kotlinx.serialization` instead for cross-platform needs, or move the code to a JVM-only module |
+| `god utils file` | `code-quality` | Split into files named for what each function is for (`StringExtensions.kt`, ...), or move each function into the module that owns its domain |
+| `inline unnamed regex` | `code-quality` | Bind the pattern to a `private val <NAME>_RE = Regex(...)` constant and reference it by name at the call site |
 | `name-behavior drift` (hint) | `mvi` | Read the ViewModel and its Contract — if the name genuinely no longer fits, rename it and update its Koin binding + composable references. If it's a false positive (generic name is fine), no action needed — this is a manual call, not a rule |
 
 ---

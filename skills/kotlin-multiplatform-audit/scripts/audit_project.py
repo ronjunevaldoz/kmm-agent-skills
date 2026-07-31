@@ -946,7 +946,9 @@ def _detect_compose_unstable_collection_param(root: Path) -> list[str]:
                 f"— '{fn_name}' takes a raw List/Map/Set parameter ({'; '.join(unstable)}); "
                 f"Compose treats these as unstable, forcing recomposition even when "
                 f"contents are unchanged. Use kotlinx.collections.immutable's "
-                f"ImmutableList/ImmutableMap/ImmutableSet instead\n"
+                f"ImmutableList/ImmutableMap/ImmutableSet instead — note the library is "
+                f"still Alpha (API subject to change), so pin its version deliberately "
+                f"and don't expose it across a library's own public API surface\n"
                 f"    {line_no} | {snippet}"
             )
     return findings
@@ -1124,6 +1126,124 @@ def _detect_partial_param_documentation(root: Path) -> list[str]:
                 f"parameter or none — a partially-documented signature reads as complete "
                 f"and isn't\n"
                 f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
+# ── Full kotlin-reflect usage in commonMain ──────────────────────────────────
+# kotlin-reflect is JVM-primary — limited/absent on Kotlin/Native and Kotlin/JS, and a
+# real runtime cost even on JVM. A commonMain file reaching for full reflection (not the
+# always-available KClass/::class literal) signals the platform split was skipped.
+
+_KOTLIN_REFLECT_FULL_RE = re.compile(
+    r"\bimport\s+kotlin\.reflect\.full\.|\bmemberProperties\b|\bdeclaredMemberFunctions\b|"
+    r"\bprimaryConstructor\b|\.callBy\("
+)
+
+
+def _detect_kotlin_reflect_in_common(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        if "/commonmain/" not in path.as_posix().lower():
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        match = _KOTLIN_REFLECT_FULL_RE.search(text)
+        if not match:
+            continue
+        line_no, snippet = _at(text, match.start())
+        findings.append(
+            f"kotlin-reflect in commonMain [MEDIUM]: {path.relative_to(root)}:{line_no} "
+            f"— full reflection API used in shared code; kotlin-reflect is JVM-primary "
+            f"and limited/absent on Native and JS/Wasm. Use kotlinx.serialization "
+            f"(compiler-plugin codegen, no runtime reflection) for cross-platform needs, "
+            f"or move this code to a JVM-only module\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
+# ── God Utils/Helpers/Extensions file ────────────────────────────────────────
+# A *Utils.kt/*Helpers.kt file accumulating unrelated top-level functions across
+# different domains has no single responsibility — the filename tells a reader nothing
+# about what's actually inside. A file of extensions all sharing one receiver type is
+# fine; the smell is unrelated functions sharing only a generic filename.
+
+_UTILS_FILENAME_RE = re.compile(r"(Utils|Helpers)$", re.IGNORECASE)
+_TOP_LEVEL_FUN_RE = re.compile(r"(?m)^fun\s+(?:<[^>]*>\s*)?(?:([\w.]+)\.)?(\w+)\s*\(")
+_GOD_UTILS_MIN_FUNCTIONS = 10
+_GOD_UTILS_MIN_RECEIVER_TYPES = 3
+
+
+def _detect_god_utils_file(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        if not _UTILS_FILENAME_RE.search(path.stem):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        matches = list(_TOP_LEVEL_FUN_RE.finditer(text))
+        if len(matches) < _GOD_UTILS_MIN_FUNCTIONS:
+            continue
+        receivers = {m.group(1) or "(none)" for m in matches}
+        if len(receivers) < _GOD_UTILS_MIN_RECEIVER_TYPES:
+            continue
+        findings.append(
+            f"god utils file [LOW]: {path.relative_to(root)} — {len(matches)} top-level "
+            f"functions spanning {len(receivers)} distinct receiver types/none "
+            f"({sorted(receivers)}); split by what each function is for "
+            f"(StringExtensions.kt, DateExtensions.kt, ...) or move each into the "
+            f"module that owns its domain\n"
+            f"    1 | {path.name}"
+        )
+    return findings
+
+
+# ── Regex literal inlined instead of bound to a named val ───────────────────
+# A regex used more than once, or complex enough to need explaining, should be a
+# well-named constant — an inline literal buried in a function call is unreadable at
+# the call site and gets recompiled on every call if it's on a hot path.
+
+_INLINE_REGEX_CALL_RE = re.compile(r"\b(?:Regex|Pattern)\s*\(\s*\"(?P<pattern>(?:[^\"\\]|\\.)*)\"|\"(?P<pattern2>(?:[^\"\\]|\\.)*)\"\.toRegex\(")
+_NAMED_REGEX_BINDING_RE = re.compile(
+    r"\b(?:private\s+|internal\s+)?val\s+\w+\s*(?::\s*(?:Regex|Pattern))?\s*=\s*"
+)
+_MIN_INLINE_REGEX_PATTERN_LEN = 12
+
+
+def _detect_inline_unnamed_regex(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        for i, line in enumerate(lines):
+            match = _INLINE_REGEX_CALL_RE.search(line)
+            if not match:
+                continue
+            prefix = line[: match.start()]
+            if _NAMED_REGEX_BINDING_RE.search(prefix):
+                continue  # bound to a val on this line — named, not inline
+            pattern_text = match.group("pattern") or match.group("pattern2") or ""
+            if len(pattern_text) < _MIN_INLINE_REGEX_PATTERN_LEN:
+                continue  # short enough not to need a name
+            findings.append(
+                f"inline unnamed regex [LOW]: {path.relative_to(root)}:{i + 1} — a "
+                f"Regex/Pattern is constructed inline as part of an expression instead "
+                f"of bound to a named `val`; bind it to a well-named constant so the "
+                f"call site is readable and it isn't recompiled on every call\n"
+                f"    {i + 1} | {line.strip()}"
             )
     return findings
 
@@ -3865,6 +3985,9 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_undocumented_public_api(root))
     findings.extend(_detect_lowercase_unit_composable(root))
     findings.extend(_detect_partial_param_documentation(root))
+    findings.extend(_detect_kotlin_reflect_in_common(root))
+    findings.extend(_detect_god_utils_file(root))
+    findings.extend(_detect_inline_unnamed_regex(root))
 
     # ── Combined design-system component file ────────────────────────────────────
     findings.extend(_detect_combined_component_file(root))

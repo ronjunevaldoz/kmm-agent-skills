@@ -143,6 +143,14 @@ int         vr_renderer_draw_frame(VrRenderer* renderer);
 - opaque pointer handles (`VrRenderer*`), never a struct with C++ members exposed by value
 - every `_create` paired with a `_destroy` — `kotlin-multiplatform-jni-pro`'s own memory-safety
   discipline depends on this pairing existing at the native layer, not invented at the bridge
+- **using C's `uint8_t`/`uint16_t`/`uint32_t`/`uint64_t` in the header is fine and often
+  correct** (pixel formats, bit flags, checksums) — but the two Kotlin sides handle it
+  differently: Kotlin/Native cinterop maps them directly to `UByte`/`UShort`/`UInt`/
+  `ULong` automatically, while JNI has no unsigned primitive at all — see
+  `kotlin-multiplatform-jni-pro`'s type-mapping reference for the JNI-side conversion.
+  Verified against kotlinlang.org's own unsigned-integer-types docs: don't use unsigned
+  types for sizes/indices/array lengths in the header, even though C conventionally does
+  for those — Kotlin's own guidance is to keep those signed
 
 ## Step 3: CMakeLists.txt — one project, every platform
 
@@ -280,4 +288,5 @@ surface than what was asked for.
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added a note on C unsigned integer types in the public header — cinterop maps them directly to Kotlin's `UByte`/`UShort`/`UInt`/`ULong`, JNI has no unsigned primitive at all (see `jni-pro`'s type-mapping reference); also flagged that sizes/indices should stay signed even where C convention uses unsigned, per kotlinlang.org's own guidance. |
 | 2026-07-31 | Initial release. |

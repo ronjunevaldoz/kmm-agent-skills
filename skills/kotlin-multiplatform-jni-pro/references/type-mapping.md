@@ -14,6 +14,7 @@
 | `Int` | `jint` | direct | — | — |
 | `Float` | `jfloat` | direct | — | — |
 | `Long` (return) | `jlong` | — | — | Cast pointer: `static_cast<jlong>(reinterpret_cast<uintptr_t>(ptr))` |
+| C `uint8_t`/`uint16_t`/`uint32_t`/`uint64_t` | `jbyte`/`jshort`/`jint`/`jlong` (JNI has no unsigned primitive at all) | Pass the bit pattern through as the signed JNI type — do not manually mask/widen | — | Kotlin-side, either keep it `Byte`/`Short`/`Int`/`Long` or immediately wrap with `.toUByte()`/`.toUInt()`/etc. if the domain genuinely needs unsigned semantics; verified against kotlinlang.org's own unsigned-integer-types docs — Kotlin's `UInt`/`ULong`/etc. are inline classes wrapping the signed type, not a JNI-level type, so this conversion is a Kotlin-side concern, not a JNI one |
 
 ## Native handle pattern
 

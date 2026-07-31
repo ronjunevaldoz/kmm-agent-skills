@@ -3402,6 +3402,130 @@ class AgentFileStandardsTests(unittest.TestCase):
             self.assertFalse(any(f.startswith("project agent") for f in findings))
 
 
+class KotlinReflectInCommonTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_full_reflection_import_in_commonmain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/src/commonMain/kotlin/Reflecty.kt",
+                "import kotlin.reflect.full.memberProperties\n"
+                "fun x() { Foo::class.memberProperties }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("kotlin-reflect in commonMain" in f for f in findings))
+
+    def test_ignores_kclass_literal_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/src/commonMain/kotlin/Plain.kt",
+                "fun x(): KClass<*> = Foo::class\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("kotlin-reflect in commonMain" in f for f in findings))
+
+    def test_ignores_reflection_in_jvm_main(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/src/jvmMain/kotlin/Reflecty.kt",
+                "import kotlin.reflect.full.memberProperties\n"
+                "fun x() { Foo::class.memberProperties }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("kotlin-reflect in commonMain" in f for f in findings))
+
+
+class GodUtilsFileTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_utils_file_with_many_unrelated_functions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            funcs = "\n\n".join(
+                [f"fun String.f{i}() = this" for i in range(4)]
+                + [f"fun Int.g{i}() = this" for i in range(4)]
+                + [f"fun h{i}() = Unit" for i in range(4)]
+            )
+            self._write(root, "core/AppUtils.kt", funcs)
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("god utils file" in f for f in findings))
+
+    def test_ignores_single_receiver_extension_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            funcs = "\n\n".join(f"fun String.f{i}() = this" for i in range(12))
+            self._write(root, "core/StringUtils.kt", funcs)
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("god utils file" in f for f in findings))
+
+    def test_ignores_non_utils_named_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            funcs = "\n\n".join(
+                [f"fun String.f{i}() = this" for i in range(4)]
+                + [f"fun Int.g{i}() = this" for i in range(4)]
+                + [f"fun h{i}() = Unit" for i in range(4)]
+            )
+            self._write(root, "core/AuthRepository.kt", funcs)
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("god utils file" in f for f in findings))
+
+    def test_ignores_small_utils_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            funcs = "\n\n".join(
+                [f"fun String.f{i}() = this" for i in range(2)]
+                + [f"fun Int.g{i}() = this" for i in range(2)]
+            )
+            self._write(root, "core/AppUtils.kt", funcs)
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("god utils file" in f for f in findings))
+
+
+class InlineUnnamedRegexTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_inline_regex_in_call(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Validate.kt",
+                "fun check(s: String) = Regex(\"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}$\").matches(s)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("inline unnamed regex" in f for f in findings))
+
+    def test_ignores_named_val_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Validate.kt",
+                "private val EMAIL_RE = Regex(\"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}$\")\n"
+                "fun check(s: String) = EMAIL_RE.matches(s)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("inline unnamed regex" in f for f in findings))
+
+    def test_ignores_short_inline_regex(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "core/Validate.kt", "fun ok(s: String) = Regex(\"a\").matches(s)\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("inline unnamed regex" in f for f in findings))
+
+
 class AgentsSkillsCrossClientTests(unittest.TestCase):
     def _base_claude_setup(self, root: Path) -> Path:
         (root / "settings.gradle.kts").write_text("", encoding="utf-8")

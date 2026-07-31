@@ -9,7 +9,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-06-26'
+  last-updated: '2026-07-31'
   keywords:
     - JNI
     - Kotlin native
@@ -454,6 +454,7 @@ Never reimplement a library function found in step 1 — cite it by name.
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added a C unsigned-integer type-mapping row to `references/type-mapping.md` — real gap: JNI has no unsigned primitive type at all, so a C `uint32_t` must cross as the equivalent signed JNI type (`jint`) and become a Kotlin `UInt` only after, as a Kotlin-side wrapper, never a JNI-level concept. Verified against kotlinlang.org's own unsigned-integer-types docs. |
 | 2026-06-22 | B1/B2 bloat compression: merged "Recommendation First" + "Core identity" into single "Stack contract" section with DO/NEVER table; compressed "Common Anti-Patterns" from prose to reference table + EP-1 code example; trimmed "Output Style" to concise 8-step list. No information removed. |
 | 2026-06-22 | Added references/header-compatibility-matrix.md (deterministic `.h` audit: Supported/Conditional/Unsupported tiers for 22 C++ constructs, decision gate) and references/architectural-feedback-schema.md (halt-and-report format + 9 C-shim strategies for Unsupported constructs). Added Phase 0.5 (header audit) to the workflow, pre-task checklist, output style (matrix as required artifact #2), References and Integration sections. |
 | 2026-06-22 | Added references/cmake-jni-setup.md (3 inclusion options, compile-definition config, Dockerfile checklist, CMake boundary guard) and references/wrapper-patterns.md (4 concrete patterns: lifecycle, streaming, callback/trampoline, multi-library pipeline; anti-patterns table). Wired both into References and Integration sections. |
