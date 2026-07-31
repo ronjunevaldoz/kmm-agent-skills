@@ -11,8 +11,8 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-mvi`](../../skills/kotlin-multiplatform-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kotlin-multiplatform-feature-scaffold`](../../skills/kotlin-multiplatform-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-expert`](../../skills/kotlin-multiplatform-expert/) | 894 | 2026-07-31 | 🟡 1 known debt |
+| [`kotlin-multiplatform-library-publishing`](../../skills/kotlin-multiplatform-library-publishing/) | 892 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-navigation`](../../skills/kotlin-multiplatform-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
-| [`kotlin-multiplatform-library-publishing`](../../skills/kotlin-multiplatform-library-publishing/) | 805 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-legal-docs`](../../skills/kotlin-multiplatform-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
 | [`kotlin-multiplatform-roborazzi`](../../skills/kotlin-multiplatform-roborazzi/) | 769 | 2026-07-10 | 🟡 1 known debt |
 | [`kotlin-multiplatform-code-quality`](../../skills/kotlin-multiplatform-code-quality/) | 729 | 2026-07-31 | 🟡 1 known debt |

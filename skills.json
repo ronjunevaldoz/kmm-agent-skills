@@ -1,5 +1,5 @@
 {
-  "version": "1.108.0",
+  "version": "1.109.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1931,6 +1931,12 @@
         "release candidate",
         "library consumers",
         "multiplatform library",
+        "pre-1.0 api stability",
+        "NOTICE file",
+        "third-party license aggregation",
+        "CONTRIBUTING.md",
+        "open source contribution",
+        "dependency vulnerability scanning",
         "publish to maven",
         "open source library",
         "license header",
