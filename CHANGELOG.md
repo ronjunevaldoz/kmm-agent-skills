@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.110.1] — 2026-08-01
+
+### Fixed
+
+- fix(audit): .agents/skills was never the deploy/detection default it claimed to be
+
+---
+
 ## [v1.110.0] — 2026-07-31
 
 ### Added
