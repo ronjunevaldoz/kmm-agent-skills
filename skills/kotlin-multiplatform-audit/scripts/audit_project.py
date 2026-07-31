@@ -1248,6 +1248,51 @@ def _detect_inline_unnamed_regex(root: Path) -> list[str]:
     return findings
 
 
+# ── Hardcoded user-facing string in Compose UI ───────────────────────────────
+# Documented in this skill's own "What to Inspect" checklist since the beginning
+# ("flag hardcoded user-facing strings, route to kotlin-multiplatform-shared-resources")
+# but never mechanically checked — every other "hardcoded X" (colors, spacing, URLs,
+# version codes) already has a real detector; strings didn't.
+
+_HARDCODED_TEXT_CALL_RE = re.compile(
+    r'\b(?:Text|AppText|ShadcnText)\s*\(\s*"([^"]{2,})"'
+)
+_HARDCODED_CONTENT_DESC_RE = re.compile(r'\bcontentDescription\s*=\s*"([^"]{2,})"')
+_NON_TRANSLATABLE_STRING_RE = re.compile(r"^[\d\s.,:/%+\-]*$")
+
+
+def _detect_hardcoded_ui_string(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        if "Preview" in path.stem:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not _is_compose_ui_file(text, path):
+            continue
+        for pattern, label in (
+            (_HARDCODED_TEXT_CALL_RE, "Text/AppText/ShadcnText call"),
+            (_HARDCODED_CONTENT_DESC_RE, "contentDescription"),
+        ):
+            for match in pattern.finditer(text):
+                literal = match.group(1)
+                if _NON_TRANSLATABLE_STRING_RE.match(literal):
+                    continue  # numbers/punctuation only — nothing to localize
+                line_no, snippet = _at(text, match.start())
+                findings.append(
+                    f"hardcoded ui string [LOW]: {path.relative_to(root)}:{line_no} "
+                    f"— literal \"{literal}\" in a {label}; route through "
+                    f"kotlin-multiplatform-shared-resources's stringResource(Res.string.x) "
+                    f"instead so it can be localized\n"
+                    f"    {line_no} | {snippet}"
+                )
+    return findings
+
+
 _EXCLUDED_DIRS = {
     "build", ".gradle", ".git", "vendor", "third_party",
     "node_modules", ".idea", ".kotlin", "kotlin-js-store",
@@ -3988,6 +4033,7 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_kotlin_reflect_in_common(root))
     findings.extend(_detect_god_utils_file(root))
     findings.extend(_detect_inline_unnamed_regex(root))
+    findings.extend(_detect_hardcoded_ui_string(root))
 
     # ── Combined design-system component file ────────────────────────────────────
     findings.extend(_detect_combined_component_file(root))

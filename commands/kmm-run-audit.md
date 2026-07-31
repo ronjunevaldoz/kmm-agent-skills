@@ -63,6 +63,7 @@ The script detects architectural and design smells:
 | `kotlin-reflect in commonMain` | A `commonMain` file uses full reflection (`memberProperties`, `primaryConstructor`, etc.) — `kotlin-reflect` is JVM-primary, limited/absent on Native and JS/Wasm |
 | `god utils file` | A `*Utils.kt`/`*Helpers.kt` file with 10+ top-level functions spanning 3+ distinct receiver types — a grab-bag with no single responsibility |
 | `inline unnamed regex` | A `Regex(...)`/`.toRegex()` constructed inline inside an expression instead of bound to a named `val` — unreadable at the call site, recompiled on every call |
+| `hardcoded ui string` | A literal string in a `Text`/`AppText`/`ShadcnText` call or `contentDescription` — not localizable; route through `stringResource(Res.string.x)` |
 
 The script also prints a separate, non-blocking `HINTS` section:
 
@@ -169,6 +170,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `kotlin-reflect in commonMain` | `code-quality` | Use `kotlinx.serialization` instead for cross-platform needs, or move the code to a JVM-only module |
 | `god utils file` | `code-quality` | Split into files named for what each function is for (`StringExtensions.kt`, ...), or move each function into the module that owns its domain |
 | `inline unnamed regex` | `code-quality` | Bind the pattern to a `private val <NAME>_RE = Regex(...)` constant and reference it by name at the call site |
+| `hardcoded ui string` | `shared-resources` | Move the literal to `values/strings.xml`, wrap with `stringResource(Res.string.x)` |
 | `name-behavior drift` (hint) | `mvi` | Read the ViewModel and its Contract — if the name genuinely no longer fits, rename it and update its Koin binding + composable references. If it's a false positive (generic name is fine), no action needed — this is a manual call, not a rule |
 
 ---

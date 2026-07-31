@@ -3402,6 +3402,68 @@ class AgentFileStandardsTests(unittest.TestCase):
             self.assertFalse(any(f.startswith("project agent") for f in findings))
 
 
+class HardcodedUiStringTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_hardcoded_text_call(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/Screen.kt",
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun AuthScreen() { Text(\"Welcome back\") }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded ui string" in f and "Welcome back" in f for f in findings))
+
+    def test_flags_hardcoded_content_description(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/Screen.kt",
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun AuthScreen() { Icon(imageVector = X, contentDescription = \"Close dialog\") }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("hardcoded ui string" in f and "Close dialog" in f for f in findings))
+
+    def test_ignores_string_resource_call(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/Screen.kt",
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun AuthScreen() { Text(stringResource(Res.string.hello)) }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded ui string" in f for f in findings))
+
+    def test_ignores_numeric_only_literal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/Screen.kt",
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun AuthScreen() { Text(\"42\") }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded ui string" in f for f in findings))
+
+    def test_ignores_preview_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/ScreenPreview.kt",
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\nfun AuthScreenPreview() { Text(\"Welcome back\") }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("hardcoded ui string" in f for f in findings))
+
+
 class KotlinReflectInCommonTests(unittest.TestCase):
     def _write(self, root: Path, rel_path: str, content: str) -> None:
         path = root / rel_path
