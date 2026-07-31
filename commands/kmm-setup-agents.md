@@ -269,7 +269,12 @@ Key commands:
 
 ---
 
-## Step 5 — Scaffold project-owned source locations
+## Step 5 — Scaffold project-owned source locations (MANDATORY — do not skip)
+
+This step is not optional and not secondary to Step 4. `.claude/` is a **deployed
+runtime copy** — these root-level paths are the actual git-tracked source of truth this
+whole scaffold exists to protect. A setup that only produces `.claude/` and stops has not
+finished, even if `.claude/AGENTS.md` looks complete on its own.
 
 Create these project-owned paths if they do not exist yet:
 
@@ -367,6 +372,17 @@ Load `kotlin-multiplatform-native-authoring` for authoring the C/C++ core itself
 
 Both examples are starting points, not fixed templates — the real checklist should
 reflect the project's actual `MIRROR_MAP.md`/native layout, not be copied verbatim.
+
+**Gate — verify before proceeding:**
+
+```bash
+ls agents/README.md rules/README.md hooks/README.md commands/README.md skills/README.md \
+   docs/reference/ai-collaboration.md docs/reference/agent-catalog.md
+```
+
+Every path must exist on disk. If any are missing, create them now — do not move to
+Step 6 with a partial scaffold, and do not rely on Step 10's summary to catch it later;
+that summary reports what this gate already confirmed, not a fresh check.
 
 ---
 
@@ -561,6 +577,16 @@ If it already exists, print the current permissions and skip — do not overwrit
 
 ## Step 10 — Summary
 
+**Before printing this summary, re-verify each line — do not print `✅` from the
+template blindly.** Run the same check Step 5's gate already ran
+(`ls agents/README.md rules/README.md hooks/README.md commands/README.md
+skills/README.md`) plus `.claude/AGENTS.md`, `.claude/commands/`, `.claude/skills/`,
+`.agents/skills/`, `.agents/pipeline-context.json`, `.claude/settings.json`. Print `✅`
+only for a path that actually exists on disk right now; print `❌ missing` for anything
+that doesn't, and go back and create it before telling the user setup is complete. Never
+print a raw `<if>`/`</if>` tag — resolve the Codex/Gemini lines to plain text, present
+only when actually deployed.
+
 ```
 AGENT SETUP COMPLETE
 ─────────────────────
@@ -578,8 +604,8 @@ Generated:
   ✅ .agents/skills/                           — same <N> skills, cross-client convention
   ✅ .agents/pipeline-context.json             — project context seeded for the planner agent
   ✅ .claude/settings.json                     — Bash allowlist + hook wiring home
-  <if deployed> .codex/agents/                 — <N> subagents translated to TOML
-  <if deployed> .gemini/commands/              — <N> commands translated to TOML
+  ✅ .codex/agents/                            — <N> subagents translated to TOML (only if Codex was deployed)
+  ✅ .gemini/commands/                         — <N> commands translated to TOML (only if Gemini was deployed)
 
 Detected skill set:
   <list of skills matched from libs.versions.toml>
