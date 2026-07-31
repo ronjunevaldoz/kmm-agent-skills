@@ -1031,6 +1031,63 @@ def _detect_lowercase_unit_composable(root: Path) -> list[str]:
     return findings
 
 
+# ── KDoc documents some parameters but not others ───────────────────────────
+# A KDoc block that names one parameter and stays silent on the rest reads as
+# complete but isn't — worse than no KDoc, since a reader has no signal anything
+# is missing. Coverage must be all-or-nothing: either every parameter gets a
+# mention (inline [name] or @param), or none do (a plain summary with no
+# parameter-level detail, which the official guidance already allows).
+
+_KDOC_BLOCK_RE = re.compile(r"/\*\*(.*?)\*/", re.DOTALL)
+_KDOC_FUN_SIGNATURE_RE = re.compile(r"\bfun\s+(?:<[^>]*>\s*)?\w+\s*\(")
+_PARAM_NAME_RE = re.compile(r"^\s*(?:vararg\s+)?(?:val\s+|var\s+)?(\w+)\s*:")
+_PARAM_TAG_NAME_RE = re.compile(r"@param\s+(\w+)")
+_INLINE_BRACKET_REF_RE = re.compile(r"\[(\w+)\]")
+
+
+def _detect_partial_param_documentation(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for kdoc_match in _KDOC_BLOCK_RE.finditer(text):
+            window_start = kdoc_match.end()
+            window = text[window_start:window_start + 300]
+            fun_match = _KDOC_FUN_SIGNATURE_RE.search(window)
+            if not fun_match or fun_match.start() > 200:
+                continue  # not immediately followed by a function (annotations tolerated)
+            paren_start = window_start + fun_match.end() - 1
+            close_idx = _find_matching_paren(text, paren_start)
+            if close_idx is None:
+                continue
+            params = _split_top_level(text[paren_start + 1:close_idx])
+            names = [m.group(1) for p in params if (m := _PARAM_NAME_RE.search(p))]
+            if len(names) < 2:
+                continue  # "partial" is meaningless with 0-1 params
+            kdoc_body = kdoc_match.group(1)
+            documented = set(_PARAM_TAG_NAME_RE.findall(kdoc_body)) | set(
+                _INLINE_BRACKET_REF_RE.findall(kdoc_body)
+            )
+            covered = [n for n in names if n in documented]
+            missing = [n for n in names if n not in documented]
+            if not covered or not missing:
+                continue  # zero coverage (allowed) or full coverage — not partial
+            line_no, snippet = _at(text, window_start + fun_match.start())
+            findings.append(
+                f"partial param documentation [MEDIUM]: {path.relative_to(root)}:{line_no} "
+                f"— KDoc documents {covered} but not {missing}; per "
+                f"kotlin-multiplatform-code-quality's coverage rule, either address every "
+                f"parameter or none — a partially-documented signature reads as complete "
+                f"and isn't\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
 _EXCLUDED_DIRS = {
     "build", ".gradle", ".git", "vendor", "third_party",
     "node_modules", ".idea", ".kotlin", "kotlin-js-store",
@@ -3767,6 +3824,7 @@ def audit_project(root: Path) -> list[str]:
     # ── Undocumented public API (library projects only) ──────────────────────────
     findings.extend(_detect_undocumented_public_api(root))
     findings.extend(_detect_lowercase_unit_composable(root))
+    findings.extend(_detect_partial_param_documentation(root))
 
     # ── Combined design-system component file ────────────────────────────────────
     findings.extend(_detect_combined_component_file(root))

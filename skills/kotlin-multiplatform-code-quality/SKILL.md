@@ -437,6 +437,14 @@ Verified against Kotlin's own official coding conventions (kotlinlang.org), not 
   links wherever it's mentioned, and use `@param`/`@return` only when the description is
   long enough that it doesn't fit the flow of the prose. This repo's own tag table below
   lists them as available tags, not as the default shape every KDoc should take.
+- **Coverage is all-or-nothing, never partial.** The choice above is about *form*
+  (inline `[name]` vs an `@param` tag), never about which parameters get addressed at
+  all. If a function has 3 parameters and the KDoc documents 1 of them, that's a real
+  defect — either say something about all 3 (mixing inline mentions and `@param` tags on
+  the same declaration is fine) or write a plain single-line summary with no parameter
+  detail at all. A KDoc block that looks thorough but silently skips 2 of 3 parameters is
+  worse than no KDoc — it reads as complete and isn't. `kotlin-multiplatform-audit`'s
+  `_detect_partial_param_documentation` catches this mechanically.
 - **KDoc supports Markdown** — verified against kotlinlang.org, not assumed. Inline markup
   inside `/** */` is regular Markdown (bold/italic, lists, links), plus a KDoc-specific
   shorthand for linking to another declaration:
@@ -715,6 +723,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added a completeness rule to `@param`/`@return` guidance: the existing "avoid these tags, weave into prose" advice was about *form*, never about whether every parameter gets addressed — a user reported seeing generated KDoc that documented 1 of several parameters. Coverage is now explicit: all parameters or none, never partial. Backed by `kotlin-multiplatform-audit`'s new `_detect_partial_param_documentation`. |
 | 2026-07-31 | Added "Naming Conventions (Android Kotlin Style Guide)" — real gap: this skill covered formatting (Ktlint/Detekt, mechanical) and comment/KDoc conventions, but never naming *semantics* — verified against the real, current [Android Kotlin style guide](https://developer.android.com/kotlin/style-guide). Covers file/package naming, the type/function/constant naming table (including the `@Composable`-returning-`Unit`-must-be-PascalCase rule this repo's own generated components already followed by convention but never stated explicitly), acronym casing (`XmlHttpRequest` not `XMLHTTPRequest`), backing property `_x` convention, type variable naming, and the required KDoc block-tag order. Also flagged a real, deliberate conflict: the guide sets a 100-char line limit, this repo's `.editorconfig` sets 120 (matching kotlinlang.org's own convention instead) — documented as an acknowledged deviation, not silently changed. Added `kotlin-multiplatform-audit`'s `_detect_lowercase_unit_composable` as the mechanical enforcement for the Composable-naming rule. |
 | 2026-07-25 | Added "Long Parameter List, and its worse variant: a regressed Parameter Object" — named from a real example (an 11-param wrapper that re-exploded an existing `UiLayoutTracking` parameter object into 4 primitives just to reconstruct it one line later, even though the function it delegates to already accepts the object directly). Not mechanically detected — flagged in review guidance instead, since distinguishing "params happen to overlap a class" from "this is literally that class flattened" needs more context than a safe regex gets. 1 new anti-pattern. |
 | 2026-07-20 | Enabled Detekt's `LargeClass`, `TooManyFunctions`, and `coupling.CouplingBetweenObjects` — real gap: god-object detection existed only for ViewModels and Composables (`kotlin-multiplatform-audit`'s `_detect_viewmodel_size`/`_detect_god_composable`), nothing caught a repository/use-case/manager class doing too much. These are real AST-based Detekt rules, not a hand-rolled heuristic. `_detect_god_class` added as the non-Detekt backstop, cross-referenced here. |

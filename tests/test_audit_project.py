@@ -3402,6 +3402,93 @@ class AgentFileStandardsTests(unittest.TestCase):
             self.assertFalse(any(f.startswith("project agent") for f in findings))
 
 
+class PartialParamDocumentationTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_partial_param_coverage(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/domain/Login.kt",
+                "/**\n"
+                " * Logs a user in.\n"
+                " * @param email The user email address.\n"
+                " */\n"
+                "fun login(email: String, password: String, rememberMe: Boolean): Result<User> { TODO() }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("partial param documentation" in f for f in findings))
+
+    def test_ignores_fully_documented_params(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/domain/Login.kt",
+                "/**\n"
+                " * Fully documented.\n"
+                " * @param email The email.\n"
+                " * @param password The password.\n"
+                " */\n"
+                "fun login(email: String, password: String): Result<User> { TODO() }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("partial param documentation" in f for f in findings))
+
+    def test_ignores_zero_param_detail_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/domain/Login.kt",
+                "/** Plain summary, no param detail at all. */\n"
+                "fun login(email: String, password: String): Result<User> { TODO() }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("partial param documentation" in f for f in findings))
+
+    def test_ignores_single_param_function(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/domain/Login.kt",
+                "/**\n"
+                " * Logs a user in.\n"
+                " * @param email The user email address.\n"
+                " */\n"
+                "fun login(email: String): Result<User> { TODO() }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("partial param documentation" in f for f in findings))
+
+    def test_covers_inline_bracket_references_too(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/domain/Login.kt",
+                "/**\n"
+                " * Uses [email] to authenticate.\n"
+                " */\n"
+                "fun login(email: String, password: String, rememberMe: Boolean): Result<User> { TODO() }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("partial param documentation" in f for f in findings))
+
+    def test_ignores_full_inline_bracket_coverage(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/domain/Login.kt",
+                "/**\n"
+                " * Uses [email] and [password] to authenticate, ignoring [rememberMe].\n"
+                " */\n"
+                "fun login(email: String, password: String, rememberMe: Boolean): Result<User> { TODO() }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("partial param documentation" in f for f in findings))
+
+
 class LowercaseUnitComposableTests(unittest.TestCase):
     def _write(self, root: Path, rel_path: str, content: str) -> None:
         path = root / rel_path
