@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.99.1] — 2026-07-31
+
+### Fixed
+
+- fix(scripts): sync to ~/.agents/skills, the real cross-client convention
+
+---
+
 ## [v1.99.0] — 2026-07-31
 
 ### Added
