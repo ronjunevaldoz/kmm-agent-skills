@@ -203,6 +203,11 @@ This updates:
 - `~/.claude/skills`
 - `~/.codex/skills`
 - `~/.gemini/skills`
+- `~/.agents/skills` — the cross-client convention from
+  [agentskills.io](https://agentskills.io/client-implementation/adding-skills-support) —
+  syncing here makes these skills visible to any agentskills.io-compliant client
+  (Cursor, Amp, Goose, OpenCode, Letta, Roo Code, Kiro, and others) without a
+  client-specific sync step per tool
 
 It does not copy slash commands.
 

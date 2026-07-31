@@ -12,6 +12,23 @@ each supports a different subset, in a different file format.
 | Skills | ✅ `.claude/skills/<name>/SKILL.md` | ✅ `~/.codex/skills` (global only, confirmed) | ✅ `~/.gemini/skills` (global only, confirmed) |
 | Bootstrap file | `CLAUDE.md` | `AGENTS.md` | `GEMINI.md` |
 
+## The `.agents/skills/` cross-client convention
+
+Verified against `agentskills.io/client-implementation/adding-skills-support` (the
+official Agent Skills implementation guide, not assumed): `.agents/skills/` — at both
+project level (`<project>/.agents/skills/`) and user level (`~/.agents/skills/`) — "has
+emerged as a widely-adopted convention for cross-client skill sharing." A
+skills-compliant client is expected to scan it *in addition to* its own native
+directory, meaning skills placed there become visible to Cursor, Amp, Goose, OpenCode,
+Letta, Roo Code, Kiro, VT Code, and any other compliant client — without a
+client-specific sync step per tool.
+
+`scripts/sync-local-assistant-skills.sh` syncs to `~/.agents/skills` alongside
+`~/.claude/skills`/`~/.codex/skills`/`~/.gemini/skills` for exactly this reason. Name
+collisions follow the spec's own documented precedence: project-level skills override
+user-level skills; within the same scope, either first-found or last-found is
+acceptable (client's choice) as long as it's consistent and logs a warning.
+
 ## Translation, Not Copying
 
 `agents/*.md` and `commands/*.md` at the project root stay the single canonical

@@ -6,6 +6,14 @@
 #   ~/.claude/skills
 #   ~/.codex/skills
 #   ~/.gemini/skills
+#   ~/.agents/skills  — the cross-client convention (agentskills.io's own
+#                       client-implementation guide: "Some implementations also
+#                       scan .claude/skills/ ... other [clients] scan .agents/skills/
+#                       ... means skills installed by other compliant clients are
+#                       automatically visible to yours, and vice versa"). Syncing
+#                       here makes these skills visible to any agentskills.io-compliant
+#                       client without a client-specific sync step per tool — Cursor,
+#                       Amp, Goose, OpenCode, Letta, Roo Code, Kiro, and others.
 #
 # Commands are not copied. They stay project-local and require explicit review.
 #
@@ -70,6 +78,7 @@ TARGETS=(
   "$HOME/.claude/skills"
   "$HOME/.codex/skills"
   "$HOME/.gemini/skills"
+  "$HOME/.agents/skills"
 )
 
 echo ""
