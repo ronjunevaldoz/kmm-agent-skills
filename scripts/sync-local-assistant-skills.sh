@@ -109,7 +109,15 @@ for target in "${TARGETS[@]}"; do
   fi
 
   rsync -a --delete --exclude '.git' --exclude '.DS_Store' --exclude '.pytest_cache' \
+    --exclude '.kmm-agent-skills-version' \
     "$SKILLS_SOURCE/skills/" "$target/"
+
+  # A global (non-git) install otherwise has no record of what version it's on,
+  # making "is this stale?" unanswerable without diffing file contents by hand —
+  # the exact pain that motivated adding this marker. Written after rsync and
+  # excluded from it above, so --delete never removes it.
+  echo "$SOURCE_VERSION" > "$target/.kmm-agent-skills-version"
+
   echo "  ✅  Synced"
 done
 

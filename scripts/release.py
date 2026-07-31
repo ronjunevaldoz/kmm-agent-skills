@@ -38,9 +38,18 @@ What it does (in order):
     12. Stage skills.json, PLAN.md, CHANGELOG.md
     13. Create a release commit: "Release vX.Y.Z" or "Release vX.Y.Z-rc.N"
     14. Create an annotated git tag vX.Y.Z or vX.Y.Z-rc.N
-    15. --rc: create pre-release GitHub Release
-        stable: create full GitHub Release
-    16. Print push instructions — does NOT push automatically
+    15. Print push instructions — does NOT push automatically, does NOT create a
+        GitHub Release yet (see `publish` below for why)
+
+After pushing, run:
+    python3 scripts/release.py publish            # publishes the current HEAD's tag
+    python3 scripts/release.py publish v1.2.3      # or an explicit tag
+
+This creates the GitHub Release — it must run AFTER `git push`, since `gh release
+create` requires the tag to already exist on the remote. Calling it before the push
+(the previous behavior) failed every single time, silently (logged as non-fatal) —
+confirmed via `gh release list`: 142 of 255 tags had no GitHub Release at all, and
+"latest" was stuck weeks behind the real latest tag.
 
 Agents: run this script exactly as shown above. Do not push to remote
 without explicit user confirmation. Never run `git tag` manually.
@@ -227,7 +236,12 @@ def extract_skills() -> list[dict]:
         license_ = re.search(r"^license:\s*(.+)$", fm, re.MULTILINE)
         last_updated = re.search(r"last-updated:\s*['\"]?(.+?)['\"]?\s*$", fm, re.MULTILINE)
 
-        desc_match = re.search(r"^description:\s*>\n((?:  .+\n?)+)", fm, re.MULTILINE)
+        # `>-`/`|-` (YAML "strip" chomp) are as common as bare `>`/`|` in this repo's
+        # skills — the old regex only matched a bare `>` immediately before the
+        # newline, so `description: >-` fell through to the single-line fallback and
+        # captured the literal ">-" as the description. Confirmed shipped broken in
+        # skills.json for 18 of 64 skills before this fix.
+        desc_match = re.search(r"^description:\s*[>|]-?\n((?:  .+\n?)+)", fm, re.MULTILINE)
         if desc_match:
             desc = " ".join(line.strip() for line in desc_match.group(1).splitlines())
         else:
@@ -426,6 +440,46 @@ def create_github_release(tag: str, changelog_section: str, dry_run: bool, prere
         info(f"GitHub Release creation failed (non-fatal): {result.stderr.strip()}")
 
 
+def changelog_section_for_tag(tag: str) -> str:
+    """Extract one version's section body from CHANGELOG.md, keyed by its tag."""
+    text = CHANGELOG_MD.read_text(encoding="utf-8")
+    pattern = re.compile(
+        rf"^## \[{re.escape(tag)}\].*?\n(.*?)(?=^## \[|\Z)", re.MULTILINE | re.DOTALL
+    )
+    match = pattern.search(text)
+    if not match:
+        return ""
+    return match.group(1).strip().rstrip("-").strip()
+
+
+def cmd_publish(tag: str | None) -> int:
+    """Create the GitHub Release for an already-pushed tag.
+
+    Must run AFTER `git push origin <tag>` — `gh release create` requires the tag
+    to exist on the remote first. See the module docstring for why this is a
+    separate step instead of happening automatically during the release commit.
+    """
+    if tag is None:
+        result = run(["git", "describe", "--tags", "--exact-match"], check=False)
+        if result.returncode != 0:
+            fail("HEAD is not exactly on a tag — pass the tag explicitly: release.py publish vX.Y.Z")
+        tag = result.stdout.strip()
+
+    # Confirm the tag actually exists on the remote before attempting gh release create
+    # — a clear error here beats gh's own less obvious failure message.
+    result = run(["git", "ls-remote", "--tags", "origin", tag], check=False)
+    if not result.stdout.strip():
+        fail(f"Tag {tag} not found on origin — push it first: git push origin {tag}")
+
+    changelog_section = changelog_section_for_tag(tag)
+    if not changelog_section:
+        info(f"No CHANGELOG.md section found for {tag} — creating release with empty notes")
+
+    prerelease = "-rc." in tag
+    create_github_release(tag, changelog_section, dry_run=False, prerelease=prerelease)
+    return 0
+
+
 def git_commit_and_tag(
     new_version: str,
     tag: str,
@@ -446,12 +500,23 @@ def git_commit_and_tag(
     run(["git", "commit", "-m", msg])
     run(["git", "tag", "-a", tag, "-m", f"Release {tag} — {skill_count} skills"])
     ok(f"Committed and tagged {tag}")
-    create_github_release(tag, changelog_section, dry_run=False, prerelease=prerelease)
+    # NOTE: does NOT create the GitHub Release here — `gh release create` requires the
+    # tag to already exist on the remote, and pushing is a separate, later, manual step
+    # (see the printed instructions below). Calling it at this point failed 100% of the
+    # time, every release, for months (confirmed: 142 of 255 tags had no GitHub Release
+    # — `gh release list` showed "latest" stuck at a release from weeks before the real
+    # latest tag). Use `python3 scripts/release.py publish <tag>` after pushing instead.
 
 
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def main() -> int:
+    # `publish` is a separate mode (post-push GitHub Release creation) — dispatched
+    # before the main argparse setup since it takes an optional tag, not a bump choice.
+    if len(sys.argv) >= 2 and sys.argv[1] == "publish":
+        tag = sys.argv[2] if len(sys.argv) >= 3 else None
+        return cmd_publish(tag)
+
     parser = argparse.ArgumentParser(description="Release kmm-agent-skills")
     parser.add_argument(
         "bump",
@@ -522,9 +587,10 @@ def main() -> int:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   {'Release candidate' if args.rc else 'Release'} {tag} ready.
 
-  Push when confirmed:
+  Push when confirmed, then publish the GitHub Release:
     git push origin main
     git push origin {tag}
+    python3 scripts/release.py publish {tag}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """)
     return 0
