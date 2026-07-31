@@ -35,7 +35,8 @@ What it does (in order):
     9.  Regenerate all skill entries in skills.json from SKILL.md frontmatter
     10. Update shipped skill count in PLAN.md
     11. Prepend new section to CHANGELOG.md (auto-generated from git log)
-    12. Stage skills.json, PLAN.md, CHANGELOG.md
+    11b. Regenerate docs/reference/skills-report.md (per-skill health-at-a-glance)
+    12. Stage skills.json, PLAN.md, CHANGELOG.md, docs/reference/skills-report.md
     13. Create a release commit: "Release vX.Y.Z" or "Release vX.Y.Z-rc.N"
     14. Create an annotated git tag vX.Y.Z or vX.Y.Z-rc.N
     15. Print push instructions — does NOT push automatically, does NOT create a
@@ -283,6 +284,17 @@ def update_skills_json(new_version: str) -> None:
     ok(f"skills.json updated — version {new_version}, {len(skills)} skills")
 
 
+def update_skills_report() -> None:
+    """Regenerate docs/reference/skills-report.md so it never drifts from the
+    skills.json / scan_skill_issues.py state actually being released.
+    """
+    sys.path.insert(0, str(Path(__file__).parent))
+    from generate_skills_report import build_report, REPORT_MD
+    REPORT_MD.parent.mkdir(parents=True, exist_ok=True)
+    REPORT_MD.write_text(build_report(), encoding="utf-8")
+    ok("docs/reference/skills-report.md regenerated")
+
+
 # ── step 6: update PLAN.md shipped count ─────────────────────────────────────
 
 def update_plan_md(skill_count: int) -> None:
@@ -496,7 +508,7 @@ def git_commit_and_tag(
         info(f"[dry-run] would tag:    {tag}")
         return
 
-    run(["git", "add", "skills.json", "PLAN.md", "CHANGELOG.md"])
+    run(["git", "add", "skills.json", "PLAN.md", "CHANGELOG.md", "docs/reference/skills-report.md"])
     run(["git", "commit", "-m", msg])
     run(["git", "tag", "-a", tag, "-m", f"Release {tag} — {skill_count} skills"])
     ok(f"Committed and tagged {tag}")
@@ -581,6 +593,7 @@ def main() -> int:
     skill_count = len(json.loads(SKILLS_JSON.read_text())["skills"])
     update_plan_md(skill_count)
     changelog_section = update_changelog(full_version, prev_tag, dry_run=False)
+    update_skills_report()
     git_commit_and_tag(new_base_version, tag, skill_count, changelog_section, dry_run=False, prerelease=args.rc)
 
     print(f"""

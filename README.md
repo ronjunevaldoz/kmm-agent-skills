@@ -123,6 +123,8 @@ python3 scripts/release.py auto --dry-run # preview first
 ## Skills
 
 64 skills covering the full KMP stack. Load the smallest set that answers the request.
+Health at a glance (size, freshness, known issues) without reading every `SKILL.md`:
+[`docs/reference/skills-report.md`](docs/reference/skills-report.md).
 
 | Category | Count | Covers |
 |---|---|---|

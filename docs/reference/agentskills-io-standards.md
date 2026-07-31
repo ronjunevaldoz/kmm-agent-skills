@@ -90,6 +90,10 @@ instructions loading with detail deferred to `references/*.md`. Fixing this is a
 skill-by-skill content restructuring effort, not a mechanical script — each skill needs a
 judgment call on what's core-on-every-load vs. reference-on-demand.
 
+[`docs/reference/skills-report.md`](skills-report.md) is the live, per-skill view of this
+gap — regenerated on every release by `scripts/generate_skills_report.py`, sourced from
+the same `scan_skill_issues.py` data as the compliance script above.
+
 ## Best-practice guidance worth knowing (not enforced, but real)
 
 From `agentskills.io/skill-creation/best-practices.md` and `optimizing-descriptions.md`:
