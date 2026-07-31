@@ -14,12 +14,12 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-navigation`](../../skills/kotlin-multiplatform-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
 | [`kotlin-multiplatform-legal-docs`](../../skills/kotlin-multiplatform-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
 | [`kotlin-multiplatform-roborazzi`](../../skills/kotlin-multiplatform-roborazzi/) | 769 | 2026-07-10 | 🟡 1 known debt |
+| [`kotlin-multiplatform-network-layer`](../../skills/kotlin-multiplatform-network-layer/) | 690 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-library-publishing`](../../skills/kotlin-multiplatform-library-publishing/) | 682 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-clean-architecture`](../../skills/kotlin-multiplatform-clean-architecture/) | 672 | 2026-07-26 | 🟡 1 known debt |
 | [`kotlin-multiplatform-code-quality`](../../skills/kotlin-multiplatform-code-quality/) | 658 | 2026-07-25 | 🟡 1 known debt |
 | [`kotlin-multiplatform-compose-slot-api`](../../skills/kotlin-multiplatform-compose-slot-api/) | 648 | 2026-06-26 | 🟡 1 known debt |
 | [`kotlin-multiplatform-repository-pattern`](../../skills/kotlin-multiplatform-repository-pattern/) | 632 | 2026-07-13 | 🟡 1 known debt |
-| [`kotlin-multiplatform-network-layer`](../../skills/kotlin-multiplatform-network-layer/) | 631 | 2026-07-10 | 🟡 1 known debt |
 | [`kotlin-multiplatform-sqldelight-setup`](../../skills/kotlin-multiplatform-sqldelight-setup/) | 628 | 2026-07-09 | 🟡 1 known debt |
 | [`kotlin-multiplatform-compose-state-hoisting`](../../skills/kotlin-multiplatform-compose-state-hoisting/) | 618 | 2026-07-20 | 🟡 1 known debt |
 | [`kotlin-multiplatform-compose-state-container`](../../skills/kotlin-multiplatform-compose-state-container/) | 589 | 2026-06-06 | 🟡 1 known debt |
@@ -61,12 +61,12 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-benchmark`](../../skills/kotlin-multiplatform-benchmark/) | 301 | 2026-07-10 | ✅ |
 | [`kotlin-multiplatform-analytics`](../../skills/kotlin-multiplatform-analytics/) | 297 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-logging`](../../skills/kotlin-multiplatform-logging/) | 297 | 2026-06-24 | ✅ |
+| [`kotlin-multiplatform-kotlin-rpc`](../../skills/kotlin-multiplatform-kotlin-rpc/) | 285 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-imagevector-generator`](../../skills/kotlin-multiplatform-imagevector-generator/) | 276 | 2026-07-08 | ✅ |
 | [`kotlin-multiplatform-preview-driven-development`](../../skills/kotlin-multiplatform-preview-driven-development/) | 276 | 2026-07-08 | ✅ |
 | [`kotlin-multiplatform-proguard-r8`](../../skills/kotlin-multiplatform-proguard-r8/) | 269 | 2026-06-29 | ✅ |
 | [`kotlin-multiplatform-unit-testing`](../../skills/kotlin-multiplatform-unit-testing/) | 269 | 2026-06-18 | ✅ |
 | [`kotlin-multiplatform-graphics-modifiers`](../../skills/kotlin-multiplatform-graphics-modifiers/) | 266 | 2026-06-13 | ✅ |
-| [`kotlin-multiplatform-kotlin-rpc`](../../skills/kotlin-multiplatform-kotlin-rpc/) | 254 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-ktor-auth-service`](../../skills/kotlin-multiplatform-ktor-auth-service/) | 242 | 2026-06-13 | ✅ |
 | [`kotlin-multiplatform-android-cli`](../../skills/kotlin-multiplatform-android-cli/) | 210 | 2026-07-19 | ✅ |
 | [`kotlin-multiplatform-token-saver`](../../skills/kotlin-multiplatform-token-saver/) | 186 | 2026-07-13 | ✅ |

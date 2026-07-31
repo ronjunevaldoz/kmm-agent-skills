@@ -1,5 +1,5 @@
 {
-  "version": "1.101.1",
+  "version": "1.102.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1664,7 +1664,7 @@
       "path": "skills/kotlin-multiplatform-kotlin-rpc",
       "description": "Kotlin RPC for Kotlin Multiplatform full-stack apps. Covers when to use Kotlin RPC instead of REST or gRPC, shared request/response contracts, client/server module layout, auth boundaries, service interface design, and a scaffold script for initial RPC project setup. Use this for Kotlin-to-Kotlin service boundaries, especially when the client and server both live in the same KMP ecosystem.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-21",
+      "last_updated": "2026-07-31",
       "keywords": [
         "kotlin rpc",
         "kRPC",
@@ -2190,7 +2190,7 @@
       "path": "skills/kotlin-multiplatform-network-layer",
       "description": "Scaffolds a production-ready Ktor 3 network layer inside :core:network for a Kotlin Multiplatform project. Covers: platform engines (OkHttp/Darwin/CIO/Js) for Android, iOS, Desktop (JVM), and Web (JS + WasmJs), ContentNegotiation, Bearer auth with automatic token refresh (race-condition-safe), structured error mapping to a NetworkResult<T> sealed type, request/response logging, and Koin wiring. Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-10",
+      "last_updated": "2026-07-31",
       "keywords": [
         "Ktor 3",
         "KMP networking",

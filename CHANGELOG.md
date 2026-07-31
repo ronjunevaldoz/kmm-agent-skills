@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.102.0] — 2026-07-31
+
+### Added
+
+- feat(kotlin-rpc): document SSE vs kRPC streaming decision guidance
+
+---
+
 ## [v1.101.1] — 2026-07-31
 
 ### Fixed
