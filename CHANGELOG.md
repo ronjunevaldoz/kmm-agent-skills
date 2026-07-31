@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.109.2] — 2026-07-31
+
+### Fixed
+
+- fix(library-publishing): correct false claim — kmp-wizard DOES have a library equivalent
+
+---
+
 ## [v1.109.1] — 2026-07-31
 
 ### Fixed
