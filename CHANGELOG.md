@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.105.0] — 2026-07-31
+
+### Added
+
+- feat(audit): enforce demo-code removal and shadcn raw-component checks, default App to shadcn-compose
+
+---
+
 ## [v1.104.1] — 2026-07-31
 
 ### Fixed

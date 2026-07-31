@@ -24,7 +24,7 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-compose-state-hoisting`](../../skills/kotlin-multiplatform-compose-state-hoisting/) | 618 | 2026-07-20 | 🟡 1 known debt |
 | [`kotlin-multiplatform-compose-state-container`](../../skills/kotlin-multiplatform-compose-state-container/) | 589 | 2026-06-06 | 🟡 1 known debt |
 | [`kotlin-multiplatform-release`](../../skills/kotlin-multiplatform-release/) | 583 | 2026-07-04 | 🟡 1 known debt |
-| [`kotlin-multiplatform-shadcn-compose`](../../skills/kotlin-multiplatform-shadcn-compose/) | 545 | 2026-07-17 | 🟡 1 known debt |
+| [`kotlin-multiplatform-shadcn-compose`](../../skills/kotlin-multiplatform-shadcn-compose/) | 583 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-layout-system`](../../skills/kotlin-multiplatform-layout-system/) | 532 | 2026-07-17 | 🟡 2 known debt |
 | [`kotlin-multiplatform-expect-actual`](../../skills/kotlin-multiplatform-expect-actual/) | 507 | 2026-07-20 | 🟡 1 known debt |
 | [`kotlin-multiplatform-shared-resources`](../../skills/kotlin-multiplatform-shared-resources/) | 504 | 2026-07-08 | 🟡 1 known debt |
@@ -36,9 +36,9 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-adaptive-layout`](../../skills/kotlin-multiplatform-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
 | [`kotlin-multiplatform-flavor-environment`](../../skills/kotlin-multiplatform-flavor-environment/) | 437 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-paging`](../../skills/kotlin-multiplatform-paging/) | 432 | 2026-06-21 | ✅ |
+| [`kotlin-multiplatform-audit`](../../skills/kotlin-multiplatform-audit/) | 419 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-presenter-module`](../../skills/kotlin-multiplatform-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kotlin-multiplatform-datastore`](../../skills/kotlin-multiplatform-datastore/) | 413 | 2026-06-18 | ✅ |
-| [`kotlin-multiplatform-audit`](../../skills/kotlin-multiplatform-audit/) | 412 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-mongodb-database`](../../skills/kotlin-multiplatform-mongodb-database/) | 409 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-compose-animation`](../../skills/kotlin-multiplatform-compose-animation/) | 389 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-migration`](../../skills/kotlin-multiplatform-migration/) | 386 | 2026-07-19 | ✅ |
