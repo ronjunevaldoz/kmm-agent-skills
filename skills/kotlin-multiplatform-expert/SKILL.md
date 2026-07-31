@@ -748,17 +748,22 @@ Layout — flat, `<name>` is the artifact's own name, never the app/project name
 ├── agents/<agent-name>.md               ← source
 ├── rules/<rule-name>.md                 ← source
 ├── commands/<command-name>.md           ← source
-├── skills/<skill-name>/SKILL.md         ← source
+├── skills/<skill-name>/SKILL.md         ← source — project-owned CUSTOM skills only,
+│                                           never bundled kmm-agent-skills content
 ├── hooks/<hook-name>.sh                 ← source
 ├── docs/reference/ai-collaboration.md   ← canonical cross-agent policy
 ├── docs/reference/agent-catalog.md      ← canonical model-tier mapping
 ├── AGENTS.md                            ← optional thin bootstrap
 ├── CLAUDE.md                            ← optional thin bootstrap
 ├── GEMINI.md                            ← optional thin bootstrap
+├── .agents/
+│   └── skills/<skill-name>/             ← DEPLOYED — bundled kmm-agent-skills + mirrored
+│                                           custom skills; the cross-client target, read
+│                                           by any agentskills.io-compliant client
 └── .claude/
     ├── AGENTS.md                        ← deployed routing/context
     ├── commands/<command-name>.md       ← deployed copy
-    ├── skills/<skill-name>/             ← deployed copy
+    ├── skills/<skill-name>/             ← deployed copy, mirrors .agents/skills/
     └── settings.json                    ← permissions + hook wiring
 ```
 
@@ -877,6 +882,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Fixed the "Project-Specific Commands/Agents/Skills" canonical layout diagram — it never mentioned `.agents/skills/` at all, only `.claude/`, despite `.agents/skills/` being the actual cross-client deploy target this collection has used since an earlier fix. Added it to the diagram, and clarified project-root `skills/` is for custom skills only. Matches the same fix applied to `docs/reference/ai-collaboration.md`. |
 | 2026-07-31 | Added `kotlin-multiplatform-native-authoring` (66th skill) — real gap: `kotlin-multiplatform-jni-pro` explicitly assumes the native C/C++ code already exists (its whole framing is "3rd-party files are read-only," library-first discovery) and never covered authoring brand-new first-party native source. Scaffolds directory layout, CMake, public C-ABI header design, and native-side testing; always hands off to `jni-pro` for the actual bridge. Added to the Meta list, Skill Invocation Map, and dependency graph. |
 | 2026-07-31 | Added `kotlin-multiplatform-api-mimicry` (65th skill) — a real gap: nothing covered mimicking a reference API's *shape* (Modifier-style chains, slot lambdas, DSL markers) when building a KMP library on a non-standard runtime (custom native renderer, custom transport) that isn't real Compose Multiplatform underneath. Distinct from `design-system`, which builds atop the real Compose runtime. Added to the Meta list, Skill Invocation Map, and dependency graph. |
 | 2026-07-15 | Expanded the project-owned scaffold contract for Claude consumers: `rules/` and `docs/reference/ai-collaboration.md` are now part of the canonical source layout, and `CLAUDE.md` is explicitly treated as a thin bootstrap rather than the only copy of project policy. This keeps project-specific agent guidance at the repo root while `.claude/` remains the deployed runtime layer. |

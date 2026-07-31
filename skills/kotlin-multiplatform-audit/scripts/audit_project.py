@@ -327,6 +327,46 @@ def _detect_agent_setup(root: Path) -> list[str]:
         findings.append("agent-setup [MEDIUM]: .claude/skills/ missing or empty — skills not deployed")
 
     has_claude_setup = (root / "CLAUDE.md").exists() or claude.exists()
+
+    agents_skills_dir = root / ".agents" / "skills"
+    if has_claude_setup:
+        if not agents_skills_dir.exists() or not any(agents_skills_dir.iterdir()):
+            findings.append(
+                "agent-setup [MEDIUM]: .agents/skills/ missing or empty — the "
+                "agentskills.io cross-client target isn't deployed; other clients "
+                "(Cursor, Amp, Goose, ...) working in this project see no skills "
+                "(run /kmm-setup-agents or update-consumer-skills.sh)"
+            )
+        elif skills_dir.exists() and any(skills_dir.iterdir()):
+            claude_names = {p.name for p in skills_dir.iterdir() if p.is_dir()}
+            agents_names = {p.name for p in agents_skills_dir.iterdir() if p.is_dir()}
+            if claude_names != agents_names:
+                only_claude = sorted(claude_names - agents_names)
+                only_agents = sorted(agents_names - claude_names)
+                detail = []
+                if only_claude:
+                    detail.append(f"only in .claude/skills/: {only_claude}")
+                if only_agents:
+                    detail.append(f"only in .agents/skills/: {only_agents}")
+                findings.append(
+                    "agent-setup [MEDIUM]: .claude/skills/ and .agents/skills/ have "
+                    "drifted — " + "; ".join(detail) + " (re-run the deploy step so "
+                    "both copies match)"
+                )
+
+    project_skills_dir = root / "skills"
+    if project_skills_dir.is_dir():
+        bundled_named = sorted(
+            p.name for p in project_skills_dir.iterdir()
+            if p.is_dir() and (p.name.startswith("kotlin-multiplatform-") or p.name.startswith("jni-"))
+        )
+        if bundled_named:
+            findings.append(
+                "agent-setup [HIGH]: bundled-looking skill name(s) under project-root "
+                f"skills/ — {bundled_named}; project-root skills/ is for project-owned "
+                "CUSTOM skills only, bundled kmm-agent-skills content belongs in "
+                ".agents/skills/ and .claude/skills/, never copied into the source tree"
+            )
     source_layout = {
         "agents/": root / "agents",
         "rules/": root / "rules",

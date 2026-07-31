@@ -50,19 +50,29 @@ Each assistant also has its own mechanism for loading external context. The patt
 
 Claude Code loads skills from the `.claude/skills/` directory in your project root. Each skill directory must contain a `SKILL.md` file. Trigger keywords in the frontmatter fire the skill automatically when Claude detects a matching intent.
 
+Also copy the same skills to `.agents/skills/` — the
+[agentskills.io](https://agentskills.io/client-implementation/adding-skills-support)
+cross-client convention. `.agents/skills/` is the primary, client-neutral target; the
+`.claude/skills/` copy is Claude Code's own mirror of it. If you only run Claude Code in
+this project, the `.agents/skills/` copy costs nothing and future-proofs the project for
+any other agentskills.io-compliant client (Cursor, Amp, Goose, and others) added later.
+
 ### Install all skills
 
 ```bash
 # Clone this repo alongside your project
 git clone https://github.com/ronjunevaldoz/kmm-agent-skills
 
-# Copy all skills into your project
+# Copy all skills into your project — both the cross-client target and Claude's mirror
+cp -r kmm-agent-skills/skills/* your-kmp-project/.agents/skills/
 cp -r kmm-agent-skills/skills/* your-kmp-project/.claude/skills/
 ```
 
 ### Install a single skill
 
 ```bash
+cp -r kmm-agent-skills/skills/kotlin-multiplatform-feature-scaffold \
+      your-kmp-project/.agents/skills/
 cp -r kmm-agent-skills/skills/kotlin-multiplatform-feature-scaffold \
       your-kmp-project/.claude/skills/
 ```
@@ -71,13 +81,16 @@ cp -r kmm-agent-skills/skills/kotlin-multiplatform-feature-scaffold \
 
 ```
 your-kmp-project/
+├── .agents/
+│   └── skills/                  # cross-client target — primary
+│       ├── kotlin-multiplatform-feature-scaffold/
+│       │   └── SKILL.md
+│       ├── kotlin-multiplatform-clean-architecture/
+│       │   └── SKILL.md
+│       └── ...
 └── .claude/
-    └── skills/
-        ├── kotlin-multiplatform-feature-scaffold/
-        │   └── SKILL.md
-        ├── kotlin-multiplatform-clean-architecture/
-        │   └── SKILL.md
-        └── ...
+    └── skills/                  # Claude Code's own mirror of .agents/skills/
+        └── ... (same contents)
 ```
 
 ### Usage
@@ -145,6 +158,9 @@ bash kmm-agent-skills/scripts/update-consumer-skills.sh \
   --agent-dir your-kmp-project/.claude/skills \
   --install-commands
 ```
+
+Unlike the manual `cp` commands above, this script mirrors to `.agents/skills/`
+automatically — no separate step needed.
 
 The `--install-commands` flag lists each command with its header line and asks `[y/N]` before
 copying it. You can review the source file in another terminal before answering.
@@ -397,17 +413,22 @@ directories, following the same hierarchical pattern as Claude Code's `CLAUDE.md
 
 ### Install
 
+First deploy skills to `.agents/skills/` (the cross-client target — see the "Keeping
+local assistants in sync" section, or run `update-consumer-skills.sh`). Project-root
+`skills/*/SKILL.md` is reserved for your own custom skills, never the bundled
+kmm-agent-skills collection — point `GEMINI.md` at the deployed copy instead:
+
 ```bash
-# Create GEMINI.md with a pointer to the skills
+# Create GEMINI.md with a pointer to the deployed skills
 cat > GEMINI.md << 'EOF'
 # KMM Agent Skills
 
-This project uses the KMM agent skills collection. The skills are in `skills/*/SKILL.md`.
+This project uses the KMM agent skills collection, deployed at `.agents/skills/*/SKILL.md`.
 
 Before making architecture decisions, read the relevant skill file. Start with:
-- `skills/kotlin-multiplatform-expert/SKILL.md` — routing and build order
-- `skills/kotlin-multiplatform-clean-architecture/SKILL.md` — layer contract
-- `skills/kotlin-multiplatform-feature-scaffold/SKILL.md` — module structure
+- `.agents/skills/kotlin-multiplatform-expert/SKILL.md` — routing and build order
+- `.agents/skills/kotlin-multiplatform-clean-architecture/SKILL.md` — layer contract
+- `.agents/skills/kotlin-multiplatform-feature-scaffold/SKILL.md` — module structure
 
 Key architecture rules:
 - 6-layer feature model: :model / :api / :domain / :data / :presenter / :ui
@@ -422,13 +443,13 @@ Gemini CLI reads `GEMINI.md` at session start. For skill-specific work, referenc
 
 ```
 gemini
-> Read skills/kotlin-multiplatform-roborazzi/SKILL.md then add screenshot tests for auth.
+> Read .agents/skills/kotlin-multiplatform-roborazzi/SKILL.md then add screenshot tests for auth.
 ```
 
 Or use `@` to include files directly:
 
 ```
-> @skills/kotlin-multiplatform-presenter-module/SKILL.md set up the presenter for dashboard
+> @.agents/skills/kotlin-multiplatform-presenter-module/SKILL.md set up the presenter for dashboard
 ```
 
 ---

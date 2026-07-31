@@ -70,7 +70,8 @@ fi
 # ── Detect agent destination ──────────────────────────────────────────────────
 
 if [[ -z "$AGENT_DIR" ]]; then
-  if   [[ -d ".claude/skills" ]];         then AGENT_DIR=".claude/skills"
+  if   [[ -d ".agents/skills" ]];         then AGENT_DIR=".agents/skills"
+  elif [[ -d ".claude/skills" ]];         then AGENT_DIR=".claude/skills"
   elif [[ -d ".codex/skills" ]];          then AGENT_DIR=".codex/skills"
   elif [[ -d ".github/copilot/skills" ]]; then AGENT_DIR=".github/copilot/skills"
   elif [[ -d ".cursor/skills" ]];         then AGENT_DIR=".cursor/skills"
@@ -78,7 +79,7 @@ if [[ -z "$AGENT_DIR" ]]; then
   else
     echo "" >&2
     echo "  ❌  Could not detect an agent skills directory in the current project." >&2
-    echo "  Pass --agent-dir PATH (e.g. --agent-dir .claude/skills)." >&2
+    echo "  Pass --agent-dir PATH (e.g. --agent-dir .agents/skills)." >&2
     echo "" >&2
     exit 1
   fi
@@ -205,6 +206,22 @@ if [[ -d "skills" ]]; then
       cp -R "$skill_dir" "$AGENT_DIR/"
     fi
     echo "  ✅  project skill synced: $skill_name"
+
+    # Mirror into .agents/skills/ too, same cross-client reasoning as the bundled-skills
+    # mirror above — a project-owned custom skill should be visible to any
+    # agentskills.io-compliant client, not just whichever $AGENT_DIR was detected/passed.
+    if [[ "$AGENT_DIR" != ".agents/skills" ]]; then
+      agents_target=".agents/skills/$skill_name"
+      mkdir -p "$agents_target"
+      if command -v rsync >/dev/null 2>&1; then
+        rsync -a --delete "$skill_dir/" "$agents_target/"
+      else
+        rm -rf "$agents_target"
+        mkdir -p ".agents/skills"
+        cp -R "$skill_dir" ".agents/skills/"
+      fi
+      echo "  ✅  project skill mirrored to .agents/skills: $skill_name"
+    fi
   done
 fi
 

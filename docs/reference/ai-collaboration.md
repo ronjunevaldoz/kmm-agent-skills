@@ -10,14 +10,18 @@ repo-local skills, and one-off notes in `docs/`.
 Use these boundaries:
 
 - `docs/*` — stable project design, ownership, architecture, and human-facing guidance
-- `skills/*` — repo-local execution guidance for agents: what to read, what to run,
-  what validations to perform, and project-specific workflow checklists
+- `skills/*` (project root) — **project-owned custom skills only**, never bundled
+  `kmm-agent-skills` content: what to read, what to run, what to validate
 - `agents/*` — role/persona overlays for project-specific agents
 - `rules/*` — optional short assistant-facing overlays only; never the only copy of
   canonical policy
 - `commands/*` — repo-local slash-command sources
 - `hooks/*` — repo-local hook sources
-- `.claude/*` — deployed Claude runtime copy
+- `.agents/skills/` — deployed skills, the cross-client target (bundled
+  `kmm-agent-skills` + a mirror of any custom skill) — any agentskills.io-compliant
+  client reads from here, not just Claude Code
+- `.claude/*` — deployed Claude-specific runtime copy (mirrors `.agents/skills/`,
+  plus Claude-only `AGENTS.md`/`commands/`/`settings.json`)
 
 Quick rule:
 
@@ -40,15 +44,18 @@ Do not let `skills/*` grow into duplicated architecture docs.
 ├── rules/
 ├── commands/
 ├── hooks/
-├── skills/
+├── skills/            # source, custom skills only
 │   └── <skill-name>/SKILL.md
 ├── AGENTS.md        # optional Codex/OpenAI-facing bootstrap
 ├── CLAUDE.md        # optional Claude-facing bootstrap
 ├── GEMINI.md        # optional Gemini-facing bootstrap
+├── .agents/
+│   ├── skills/                  # deployed, cross-client target
+│   └── pipeline-context.json    # planner agent context
 ├── .claude/
 │   ├── AGENTS.md
 │   ├── commands/
-│   ├── skills/
+│   ├── skills/                  # deployed, mirrors .agents/skills/
 │   └── settings.json
 ├── .codex/
 │   ├── agents/      # *.toml — subagents; Codex has no custom-commands mechanism
@@ -64,29 +71,17 @@ real, verified matrix and the translation rules before deploying to either.
 
 ## Thin Entrypoints
 
-`AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` should stay thin.
-
-They may contain:
-
-- bootstrap flags or tool-specific startup config
-- a short "read these docs first" list
-- a few critical guardrails that are important enough to repeat on startup
-
-They should not become the only place that architecture or repo policy lives.
+`AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` should stay thin — bootstrap flags, a short
+"read these docs first" list, and a few startup-critical guardrails. They should never
+become the only place architecture or repo policy lives.
 
 ## Duplication Rule
 
-Keep the long-form explanation canonical in:
-
-- `docs/reference/ai-collaboration.md`
-- `docs/reference/agent-catalog.md`
-- other `docs/reference/*.md` domain rules
-
-Duplicate only short startup guardrails in entrypoint files when all are true:
-
-1. the agent must reliably see it on startup
-2. missing it would cause expensive or unsafe work
-3. the duplicated text stays short and points back to the canonical doc
+Keep the long-form explanation canonical in `docs/reference/ai-collaboration.md`,
+`docs/reference/agent-catalog.md`, and other `docs/reference/*.md` domain rules.
+Duplicate only short startup guardrails in entrypoint files, and only when: the agent
+must reliably see it on startup, missing it would cause expensive/unsafe work, and the
+duplicated text stays short and points back to the canonical doc.
 
 ## Docs Versus Skills
 

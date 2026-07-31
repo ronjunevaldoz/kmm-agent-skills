@@ -70,6 +70,8 @@ class UpdateConsumerSkillsScriptTests(unittest.TestCase):
             # Real gaps fixed: .agents/skills cross-client mirror, pipeline-context.json
             # seeding, and the mandatory-baseline rows in the fallback AGENTS.md template.
             self.assertTrue((project / ".agents" / "skills" / "shared-skill" / "SKILL.md").is_file())
+            # Project-owned custom skills mirror too, not just the bundled ones.
+            self.assertTrue((project / ".agents" / "skills" / "demo-skill" / "SKILL.md").is_file())
             self.assertTrue((project / ".agents" / "pipeline-context.json").is_file())
             agents_md = (project / ".claude" / "AGENTS.md").read_text(encoding="utf-8")
             self.assertIn("kotlin-multiplatform-code-quality", agents_md)
@@ -105,6 +107,31 @@ class UpdateConsumerSkillsScriptTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
             # Only one deploy message, not a redundant self-mirror.
             self.assertNotIn("cross-client convention", result.stdout)
+
+    def test_auto_detects_agents_skills_without_agent_dir_flag(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            source = tmp_root / "source"
+            project = tmp_root / "project"
+            source.mkdir()
+            project.mkdir()
+
+            self._write(source, "skills.json", '{"version":"0.0.1"}\n')
+            self._write(
+                source, "skills/shared-skill/SKILL.md",
+                "---\nname: shared-skill\ndescription: Shared bundle skill.\n---\n",
+            )
+            self._write(source, "CHANGELOG.md", "## [v0.0.1]\n- init\n---\n")
+            # Only .agents/skills/ exists — no --agent-dir passed, no .claude/skills/ present.
+            (project / ".agents" / "skills").mkdir(parents=True)
+
+            result = subprocess.run(
+                ["bash", str(REPO_ROOT / "scripts" / "update-consumer-skills.sh"), "--source", str(source)],
+                cwd=project, capture_output=True, text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertTrue((project / ".agents" / "skills" / "shared-skill" / "SKILL.md").is_file())
 
 
 if __name__ == "__main__":

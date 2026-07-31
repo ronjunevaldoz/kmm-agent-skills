@@ -300,7 +300,10 @@ correct frontmatter shape from day one.
 - `rules/` is optional for assistant-specific overlays and must not duplicate the canonical policy doc
 - `docs/*` owns stable project design; `skills/*` owns repo-local execution guidance
 - `.claude/settings.json` owns runtime permissions and hook wiring
-- any edit to a project-owned artifact must be re-deployed into `.claude/`
+- any edit to a project-owned skill must be re-deployed into **both** `.agents/skills/`
+  (the cross-client target) and `.claude/skills/` (Claude's own mirror) — `update-
+  consumer-skills.sh` handles both automatically, so this is one command, not two
+  manual copies
 
 `docs/reference/agent-catalog.md` should explain:
 - provider-neutral model tiers such as `flagship-coding`, `balanced-coding`, `fast-utility`, `precision-review`
@@ -592,7 +595,7 @@ AGENT SETUP COMPLETE
 ─────────────────────
 Project:   <name> (<root>)
 Features:  <N> detected (<list>)
-Skills:    <N> deployed → .claude/skills/
+Skills:    <N> deployed → .agents/skills/ (cross-client) + .claude/skills/ (mirror)
 
 Generated:
   ✅ agents/ rules/ hooks/ commands/ skills/   — project-owned source scaffold
@@ -600,8 +603,8 @@ Generated:
   ✅ CLAUDE.md                                 — thin bootstrap into `.claude/AGENTS.md`
   ✅ .claude/AGENTS.md                         — skill routing tailored to this project
   ✅ .claude/commands/                         — <N> consumer commands installed
-  ✅ .claude/skills/                           — <N> skills deployed
-  ✅ .agents/skills/                           — same <N> skills, cross-client convention
+  ✅ .agents/skills/                           — <N> skills deployed (cross-client, primary)
+  ✅ .claude/skills/                           — same <N> skills, Claude Code's own mirror
   ✅ .agents/pipeline-context.json             — project context seeded for the planner agent
   ✅ .claude/settings.json                     — Bash allowlist + hook wiring home
   ✅ .codex/agents/                            — <N> subagents translated to TOML (only if Codex was deployed)

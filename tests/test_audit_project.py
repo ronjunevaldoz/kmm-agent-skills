@@ -3402,6 +3402,80 @@ class AgentFileStandardsTests(unittest.TestCase):
             self.assertFalse(any(f.startswith("project agent") for f in findings))
 
 
+class AgentsSkillsCrossClientTests(unittest.TestCase):
+    def _base_claude_setup(self, root: Path) -> Path:
+        (root / "settings.gradle.kts").write_text("", encoding="utf-8")
+        (root / "CLAUDE.md").write_text("", encoding="utf-8")
+        claude = root / ".claude"
+        (claude / "commands").mkdir(parents=True)
+        (claude / "commands" / "x.md").write_text("", encoding="utf-8")
+        (claude / "AGENTS.md").write_text("", encoding="utf-8")
+        skill_dir = claude / "skills" / "kotlin-multiplatform-mvi"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("", encoding="utf-8")
+        return claude
+
+    def test_flags_missing_agents_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._base_claude_setup(root)
+            findings = audit_scripts._detect_agent_setup(root)
+            self.assertTrue(any(".agents/skills/ missing or empty" in f for f in findings))
+
+    def test_ignores_when_agents_skills_matches(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._base_claude_setup(root)
+            agents_skill = root / ".agents" / "skills" / "kotlin-multiplatform-mvi"
+            agents_skill.mkdir(parents=True)
+            (agents_skill / "SKILL.md").write_text("", encoding="utf-8")
+            findings = audit_scripts._detect_agent_setup(root)
+            self.assertFalse(any(".agents/skills/" in f and "missing" in f for f in findings))
+            self.assertFalse(any("drifted" in f for f in findings))
+
+    def test_flags_drift_between_claude_and_agents_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            claude = self._base_claude_setup(root)
+            agents_skill = root / ".agents" / "skills" / "kotlin-multiplatform-mvi"
+            agents_skill.mkdir(parents=True)
+            (agents_skill / "SKILL.md").write_text("", encoding="utf-8")
+            # Extra skill only in .claude/skills/ — a real drift.
+            extra = claude / "skills" / "kotlin-multiplatform-audit"
+            extra.mkdir(parents=True)
+            (extra / "SKILL.md").write_text("", encoding="utf-8")
+            findings = audit_scripts._detect_agent_setup(root)
+            self.assertTrue(any("drifted" in f for f in findings))
+
+    def test_flags_bundled_skill_name_under_project_root_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._base_claude_setup(root)
+            agents_skill = root / ".agents" / "skills" / "kotlin-multiplatform-mvi"
+            agents_skill.mkdir(parents=True)
+            (agents_skill / "SKILL.md").write_text("", encoding="utf-8")
+            bundled_looking = root / "skills" / "kotlin-multiplatform-fake"
+            bundled_looking.mkdir(parents=True)
+            (bundled_looking / "SKILL.md").write_text("", encoding="utf-8")
+            findings = audit_scripts._detect_agent_setup(root)
+            self.assertTrue(
+                any("bundled-looking skill name" in f and "kotlin-multiplatform-fake" in f for f in findings)
+            )
+
+    def test_ignores_genuine_custom_skill_under_project_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._base_claude_setup(root)
+            agents_skill = root / ".agents" / "skills" / "kotlin-multiplatform-mvi"
+            agents_skill.mkdir(parents=True)
+            (agents_skill / "SKILL.md").write_text("", encoding="utf-8")
+            custom = root / "skills" / "my-app-custom-widget"
+            custom.mkdir(parents=True)
+            (custom / "SKILL.md").write_text("", encoding="utf-8")
+            findings = audit_scripts._detect_agent_setup(root)
+            self.assertFalse(any("bundled-looking skill name" in f for f in findings))
+
+
 class PartialParamDocumentationTests(unittest.TestCase):
     def _write(self, root: Path, rel_path: str, content: str) -> None:
         path = root / rel_path
