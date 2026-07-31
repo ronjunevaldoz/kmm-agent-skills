@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-20'
+  last-updated: '2026-07-26'
   keywords:
     - clean architecture
     - Kotlin Multiplatform
@@ -617,13 +617,13 @@ which Gradle allows fine and nothing else catches.
 - `kotlin-multiplatform-unit-testing` — JVM-based ViewModel tests enabled by the `:presenter`/`:ui` split
 - `kotlin-multiplatform-code-quality` — Ktlint + Detekt setup; Detekt's `UnnecessaryAbstractClass` rule is the mechanical enforcement for Composition Over Inheritance
 - `kotlin-multiplatform-dependency-injection` — Koin wiring for interface + injection, the replacement for inheritance-based extension points
-- `kotlin-multiplatform-audit` — `_detect_extensible_abstract_class_in_common` and `_detect_module_layer_violation` are the mechanical enforcement for this skill's Composition Over Inheritance and layer-order rules, independent of whether Detekt is configured; `_detect_value_class_opportunity` is a LOW-severity nudge for the Typed Domain IDs rule above
+- `kotlin-multiplatform-audit` — `_detect_extensible_abstract_class_in_common` and `_detect_module_layer_violation` are the mechanical enforcement for this skill's Composition Over Inheritance and layer-order rules, independent of whether Detekt is configured; `_detect_value_class_opportunity` is a LOW-severity nudge for the Typed Domain IDs rule above; `_detect_bare_core_module` enforces the ":core" vs ":feature" Split below
 
 ---
 
 ## Common Anti-Patterns
 
-- **umbrella module** — one massive `:shared` (or `:core`) module holding everything instead of the 6-layer per-feature split; every change recompiles the whole module, and nothing stops a screen from reaching straight into a repository implementation. `kotlin-multiplatform-audit`'s `_detect_feature_split` reports whether a project has the full split, a partial one, or none at all.
+- **umbrella module** — one massive `:shared` (or `:core`) module holding everything instead of the 6-layer per-feature split; every change recompiles the whole module, and nothing stops a screen from reaching straight into a repository implementation. `kotlin-multiplatform-audit`'s `_detect_feature_split` reports whether a project has the full split, a partial one, or none at all; `_detect_bare_core_module` specifically flags a `core/build.gradle.kts` — `:core` must be a folder group of separate modules (`:core:model`, `:core:api`, ...), never a module in its own right.
 - putting data classes in `:api` — they belong in `:model`; `:api` should be interfaces only
 - adding Compose to `:presenter` — kills JVM testability; Compose belongs only in `:ui`
 - `:ui` importing from `:data` directly — all state must route through `:presenter`
@@ -660,6 +660,7 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
+| 2026-07-26 | Real gap closed: the ":core" vs ":feature" Split table already documented `:core` as separate modules (`:core:model`, `:core:api`, ...) mirroring `:feature:*`'s shape, but `_detect_module_layer_violation`'s module-path regex only ever matched `feature/<name>/<layer>` — it never applied to `:core` at all, so a monolithic `:core` module went completely uncaught. Added `kotlin-multiplatform-audit`'s new `_detect_bare_core_module`. |
 | 2026-07-20 | Added an explicit "umbrella module" anti-pattern — a real, general KMM anti-pattern this skill's 6-layer contract already prevents structurally but never named outright; cross-referenced `kotlin-multiplatform-audit`'s existing `_detect_feature_split` status check. |
 | 2026-07-20 | Cross-referenced `kotlin-multiplatform-audit`'s new `_detect_value_class_opportunity` — a LOW-severity nudge that flags 2+ raw String/Long ID parameters in one function signature, mechanically surfacing the Typed Domain IDs rule below instead of relying on an agent to remember it unprompted. |
 | 2026-07-20 | Added "Typed Domain IDs" — `@JvmInline value class` for domain identifiers instead of raw `String`/`Long`, verified this collection had zero references to value classes despite them being idiomatic Kotlin since 1.5. Distinguishes from `typealias` (assignment-compatible, doesn't prevent the mix-up) and covers the multi-field/boxing/serialization caveats. 2 new anti-patterns. |

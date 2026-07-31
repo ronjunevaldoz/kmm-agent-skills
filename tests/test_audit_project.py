@@ -3092,6 +3092,39 @@ class ViewModelInjectsRepositoryTests(unittest.TestCase):
             self.assertFalse(any("viewmodel injects repository" in f for f in findings))
 
 
+class BareCoreModuleTests(unittest.TestCase):
+    """:core must be a folder GROUP of separate modules (:core:model, :core:api, ...),
+    mirroring :feature:*'s own shape — never a module in its own right.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_bare_core_build_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "core/build.gradle.kts", "plugins {\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("bare core module" in f for f in findings))
+
+    def test_ignores_split_core_submodules(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "core/model/build.gradle.kts", "plugins {\n}\n")
+            self._write(root, "core/api/build.gradle.kts", "plugins {\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("bare core module" in f for f in findings))
+
+    def test_ignores_when_no_core_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "feature/auth/model/build.gradle.kts", "plugins {\n}\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("bare core module" in f for f in findings))
+
+
 class MixedDesignSystemUsageTests(unittest.TestCase):
     """kotlin-multiplatform-shadcn-compose says "Never combine with
     kotlin-multiplatform-design-system" - documented but never mechanically checked.

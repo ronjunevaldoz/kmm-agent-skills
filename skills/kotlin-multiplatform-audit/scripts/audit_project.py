@@ -2236,6 +2236,36 @@ def _detect_module_layer_violation(root: Path) -> list[str]:
     return findings
 
 
+# ── Bare :core module (not split into :core:model/:core:api/etc.) ──────────────
+# kotlin-multiplatform-clean-architecture's ":core vs :feature Split" documents :core
+# as a folder GROUP of separate modules (:core:model, :core:api, :core:domain,
+# :core:testing, :core:ui, ...), mirroring :feature:*'s own shape — never stated as
+# an enforced rule. _detect_module_layer_violation's _MODULE_PATH_RE only matches
+# feature/<name>/<layer> — it never applied to :core at all, so a monolithic :core
+# module (root/core/build.gradle.kts, no further nesting) went uncaught.
+
+def _detect_bare_core_module(root: Path) -> list[str]:
+    """Flag a root/core/build.gradle.kts — :core must be a folder group of separate
+    modules (:core:model, :core:api, ...), never a module in its own right.
+    """
+    findings: list[str] = []
+    for core_dir_name in ("core", "shared/core"):
+        candidate = root / core_dir_name / "build.gradle.kts"
+        if _is_excluded(candidate, root) or not candidate.is_file():
+            continue
+        findings.append(
+            f"bare core module [HIGH]: {candidate.relative_to(root)} — "
+            f":core has its own build.gradle.kts, making it a single monolithic "
+            f"module instead of a folder group. Per kotlin-multiplatform-clean-"
+            f"architecture's \":core\" vs \":feature\" Split, split into "
+            f":core:model/:core:api/:core:domain/:core:testing/:core:ui (etc.), "
+            f"mirroring :feature:*'s own shape — :core itself should have no "
+            f"build.gradle.kts, only its named submodules do\n"
+            f"    1 | {core_dir_name}/build.gradle.kts"
+        )
+    return findings
+
+
 # ── Design system prefix mismatch ─────────────────────────────────────────────
 # "App" in the design-system skill is a template placeholder (see Step 0) — real
 # projects must substitute their resolved COMPONENT_PREFIX when generating files, not
@@ -3507,6 +3537,7 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Module layer-order violation ────────────────────────────────────────────
     findings.extend(_detect_module_layer_violation(root))
+    findings.extend(_detect_bare_core_module(root))
 
     # ── Hardcoded base URL (library-first / configurability) ───────────────────
     findings.extend(_detect_hardcoded_base_url(root))
