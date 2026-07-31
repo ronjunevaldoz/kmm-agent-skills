@@ -970,6 +970,67 @@ def _detect_undocumented_public_api(root: Path) -> list[str]:
     return findings
 
 
+# ── @Composable function returning Unit named like a verb, not a type ──────────
+# Per the Android Kotlin style guide's naming rules: a @Composable function that
+# returns Unit is a UI node, not an action — it must be PascalCase, read as a noun
+# (AppButton, ProductListScreen), never camelCase like a verb (appButton). A
+# @Composable that returns a value (rememberScrollState()) is a factory, not a UI
+# node, and correctly stays camelCase — excluded by requiring no explicit return
+# type before the opening brace.
+
+_COMPOSABLE_ANNOTATION_RE = re.compile(r"@Composable\b")
+_FUN_AFTER_COMPOSABLE_RE = re.compile(
+    r"\bfun\s+(?:<[^>]*>\s*)?([a-zA-Z_]\w*)\s*\("
+)
+
+
+def _find_matching_paren(text: str, open_idx: int) -> int | None:
+    depth = 0
+    for i in range(open_idx, len(text)):
+        if text[i] == "(":
+            depth += 1
+        elif text[i] == ")":
+            depth -= 1
+            if depth == 0:
+                return i
+    return None
+
+
+def _detect_lowercase_unit_composable(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for ann_match in _COMPOSABLE_ANNOTATION_RE.finditer(text):
+            fun_match = _FUN_AFTER_COMPOSABLE_RE.search(text, ann_match.end())
+            if not fun_match or fun_match.start() > ann_match.end() + 200:
+                continue
+            name = fun_match.group(1)
+            if not name[0].islower():
+                continue
+            paren_start = fun_match.end() - 1
+            close_idx = _find_matching_paren(text, paren_start)
+            if close_idx is None:
+                continue
+            rest = text[close_idx + 1:close_idx + 30]
+            after = rest.lstrip()
+            if not after.startswith("{"):
+                continue  # explicit return type present — a factory function, not a UI node
+            line_no, snippet = _at(text, fun_match.start())
+            findings.append(
+                f"lowercase unit composable [MEDIUM]: {path.relative_to(root)}:{line_no} "
+                f"— '{name}' is a @Composable function returning Unit (a UI node), named "
+                f"like a verb; per the Android Kotlin style guide, it must be PascalCase, "
+                f"read as a noun (e.g. '{name[0].upper()}{name[1:]}')\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
 _EXCLUDED_DIRS = {
     "build", ".gradle", ".git", "vendor", "third_party",
     "node_modules", ".idea", ".kotlin", "kotlin-js-store",
@@ -3705,6 +3766,7 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Undocumented public API (library projects only) ──────────────────────────
     findings.extend(_detect_undocumented_public_api(root))
+    findings.extend(_detect_lowercase_unit_composable(root))
 
     # ── Combined design-system component file ────────────────────────────────────
     findings.extend(_detect_combined_component_file(root))

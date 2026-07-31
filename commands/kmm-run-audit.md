@@ -58,6 +58,7 @@ The script detects architectural and design smells:
 | `empty platform source set` | An `androidMain`/`iosMain`/`jvmMain`/... source directory with no `.kt` files, or files containing only package/import/comments — dead scaffolding; Gradle compiles fine without it |
 | `unauthorized app submodule` | A `build.gradle.kts` under `app/<name>/` where `<name>` isn't one of kmp-wizard's own four entry points (`androidApp`/`desktopApp`/`webApp`/`shared`) — new feature logic belongs in `:feature:*`, new cross-feature infrastructure in `:core:*`, never a new `:app:<name>` module |
 | `leftover wizard demo code` | kmp-wizard's default `class Greeting`/`compose_multiplatform` logo demo still present — delete it before real feature work starts; `:app:shared` should only ever hold composition-root wiring |
+| `lowercase unit composable` | A `@Composable` function returning `Unit` (no explicit return type) named camelCase like a verb (`appButton`) instead of PascalCase like a noun (`AppButton`) — per the Android Kotlin style guide's naming rules |
 
 The script also prints a separate, non-blocking `HINTS` section:
 
@@ -159,6 +160,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `empty platform source set` | `feature-scaffold` | Delete the empty source directory, or implement the real `expect`/`actual` code if this module genuinely needs platform-specific logic — never scaffold the folder "just in case" |
 | `unauthorized app submodule` | `feature-scaffold` | Move the module's content into `:feature:<name>:*` or `:core:*`, then delete the `app/<name>/` module and its `settings.gradle.kts` include |
 | `leftover wizard demo code` | `feature-scaffold` | Delete `Greeting.kt`/the demo `App()` body; rewrite `:app:shared`'s `App()` as composition-root-only wiring (theme, Koin, NavHost) |
+| `lowercase unit composable` | `code-quality` | Rename to PascalCase; update every call site and the Koin/nav references to it |
 | `name-behavior drift` (hint) | `mvi` | Read the ViewModel and its Contract — if the name genuinely no longer fits, rename it and update its Koin binding + composable references. If it's a false positive (generic name is fine), no action needed — this is a manual call, not a rule |
 
 ---

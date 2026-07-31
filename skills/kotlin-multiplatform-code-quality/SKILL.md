@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-25'
+  last-updated: '2026-07-31'
   keywords:
     - Ktlint
     - Detekt
@@ -26,6 +26,12 @@ metadata:
     - kdoc vs comment
     - extension function documentation
     - documentation by architectural level
+    - Android Kotlin style guide
+    - naming conventions
+    - acronym casing
+    - composable naming
+    - constant naming
+    - backing property
 ---
 
 ## When to Use This Skill
@@ -328,6 +334,65 @@ body, forward the object instead of restating its fields.
 
 ---
 
+## Naming Conventions (Android Kotlin Style Guide)
+
+Ktlint/Detekt above enforce *formatting* mechanically. They do not enforce naming
+*semantics* — whether an acronym is cased right, whether a `val` actually qualifies as a
+constant, whether a `@Composable` reads as a type or a verb. Verified against the real,
+current [Android Kotlin style guide](https://developer.android.com/kotlin/style-guide)
+(Google's official doc, last updated 2023-09-06), not assumed:
+
+### File and package naming
+
+- A file with one top-level class is named exactly after that class, case-sensitive —
+  `AuthViewModel.kt`, never `authviewmodel.kt` or `AuthVM.kt`
+- A file with multiple top-level declarations (extension functions, several small types)
+  gets a descriptive PascalCase name — `StringExtensions.kt`, `NetworkResult.kt`
+- Package names are all lowercase, words concatenated with no underscores —
+  `GROUP_ID.feature.auth.presenter`, never `GROUP_ID.feature.auth_flow`
+
+### Type, function, and constant names
+
+| Kind | Case | Notes |
+|---|---|---|
+| Class / interface / object | `PascalCase` | Nouns or noun phrases (`AuthRepository`); interfaces may be adjectives too (`Readable`) |
+| Test class | `PascalCase` + `Test` | `AuthViewModelTest`, `AuthRepositoryIntegrationTest` |
+| Function | `camelCase` | Verb or verb phrase — `sendMessage`, `refreshToken` |
+| Test function | `camelCase`, underscores allowed | `` `pop_emptyStack`` — underscores separate logical components, test names only |
+| **`@Composable` function returning `Unit`** | **`PascalCase`, noun** | Read as a type, not a verb — `AppButton`, `ProductListScreen`. **Not** `appButton`/`renderProductList` |
+| `@Composable` function returning a value | `camelCase` | A factory, not a UI node — `rememberScrollState()`, not `RememberScrollState()` |
+| Constant (`const val`, or a `val` with no custom getter and deeply immutable contents) | `UPPER_SNAKE_CASE` | Only legal in an `object` or at top level — a `class`'s own property can't be a "constant" by this definition, even if it never changes; use `camelCase` there instead |
+| Backing property | `_` + real property name | `private var _table: Map<...>?` backing `val table: Map<...>` |
+| Type variable | Single capital + optional numeral, or `NameT` | `T`, `E`, `T2`, or `RequestT` |
+
+The `@Composable` PascalCase rule is the one most relevant to this collection's own
+generated code — every `App*`/`Shadcn*` component already follows it by convention; this
+is the first place it's stated as an explicit, checkable naming rule rather than an
+implicit pattern. `kotlin-multiplatform-audit`'s `_detect_lowercase_unit_composable`
+mechanically enforces it.
+
+### Acronym casing
+
+The style guide's camelCase conversion process lowercases an acronym's letters except
+the first, same as any other word — never keep an acronym fully capitalized:
+
+| Prose | Correct | Incorrect |
+|---|---|---|
+| "XML Http Request" | `XmlHttpRequest` | `XMLHTTPRequest` |
+| "new customer ID" | `newCustomerId` | `newCustomerID` |
+| "supports IPv6 on iOS" | `supportsIpv6OnIos` | `supportsIPv6OnIOS` |
+
+### A known, deliberate deviation: line length
+
+The Android guide sets a 100-character column limit. This repo's own
+`.editorconfig` (see Ktlint Setup above) sets `max_line_length = 120`, matching
+[kotlinlang.org's own Coding Conventions](https://kotlinlang.org/docs/coding-conventions.html)
+recommendation instead. This is a real, acknowledged conflict between the two official
+sources, not an oversight — 120 stays the default here; a project that wants strict
+Android-guide alignment should set `max_line_length = 100` in its own `.editorconfig`.
+
+---
+
 ## Comment & KDoc Conventions
 
 ### Whether to write a comment at all
@@ -453,6 +518,11 @@ includeBuild("tailwind/style-experimental")
 DSL) — never required per function or per file, same "why not what" rule as `//`. When one
 is warranted, use `@sample`, not a pasted code block: it points at a real compiled
 function, so it's type-checked and can't silently drift stale.
+
+**When more than one tag is used on the same declaration, the required order is**
+`@constructor`, `@receiver`, `@param`, `@property`, `@return`, `@throws`, `@see` — per the
+[Android Kotlin style guide](https://developer.android.com/kotlin/style-guide)'s Block
+tags rule. A tag never appears with an empty description; skip it entirely instead.
 
 ```kotlin
 /**
@@ -645,6 +715,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added "Naming Conventions (Android Kotlin Style Guide)" — real gap: this skill covered formatting (Ktlint/Detekt, mechanical) and comment/KDoc conventions, but never naming *semantics* — verified against the real, current [Android Kotlin style guide](https://developer.android.com/kotlin/style-guide). Covers file/package naming, the type/function/constant naming table (including the `@Composable`-returning-`Unit`-must-be-PascalCase rule this repo's own generated components already followed by convention but never stated explicitly), acronym casing (`XmlHttpRequest` not `XMLHTTPRequest`), backing property `_x` convention, type variable naming, and the required KDoc block-tag order. Also flagged a real, deliberate conflict: the guide sets a 100-char line limit, this repo's `.editorconfig` sets 120 (matching kotlinlang.org's own convention instead) — documented as an acknowledged deviation, not silently changed. Added `kotlin-multiplatform-audit`'s `_detect_lowercase_unit_composable` as the mechanical enforcement for the Composable-naming rule. |
 | 2026-07-25 | Added "Long Parameter List, and its worse variant: a regressed Parameter Object" — named from a real example (an 11-param wrapper that re-exploded an existing `UiLayoutTracking` parameter object into 4 primitives just to reconstruct it one line later, even though the function it delegates to already accepts the object directly). Not mechanically detected — flagged in review guidance instead, since distinguishing "params happen to overlap a class" from "this is literally that class flattened" needs more context than a safe regex gets. 1 new anti-pattern. |
 | 2026-07-20 | Enabled Detekt's `LargeClass`, `TooManyFunctions`, and `coupling.CouplingBetweenObjects` — real gap: god-object detection existed only for ViewModels and Composables (`kotlin-multiplatform-audit`'s `_detect_viewmodel_size`/`_detect_god_composable`), nothing caught a repository/use-case/manager class doing too much. These are real AST-based Detekt rules, not a hand-rolled heuristic. `_detect_god_class` added as the non-Detekt backstop, cross-referenced here. |
 | 2026-07-19 | New "Side-Effect-Free Accessors (Destructive Reads)" section — a real gap found while diagnosing a skill-vs-model-capability question against a separate KMP game project's commit history: a `consume*()` accessor that clears the field it just read before returning silently drops data for a second caller in the same tick/request (real bug: `Input.consumeTypedText()`/`consumeEditActions()`, fixed by moving the clear into one owned `snapshot()`). Rule generalized past input handling with a repository/`StateFlow` example. New `kotlin-multiplatform-audit` detector `_detect_destructive_read_accessor` (heuristic 3-line "read into local, clear same field, return local" shape), 1 new anti-pattern, cross-referenced in Related Skills. |

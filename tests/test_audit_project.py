@@ -3402,6 +3402,53 @@ class AgentFileStandardsTests(unittest.TestCase):
             self.assertFalse(any(f.startswith("project agent") for f in findings))
 
 
+class LowercaseUnitComposableTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_lowercase_unit_composable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/Screen.kt",
+                "@Composable\nfun appButton(onClick: () -> Unit) { Text(\"x\") }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("lowercase unit composable" in f and "appButton" in f for f in findings))
+
+    def test_ignores_pascalcase_composable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/Screen.kt",
+                "@Composable\nfun AppButton(onClick: () -> Unit) { Text(\"x\") }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("lowercase unit composable" in f for f in findings))
+
+    def test_ignores_composable_with_explicit_return_type(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/Screen.kt",
+                "@Composable\nfun rememberScrollState(): ScrollState { return ScrollState() }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("lowercase unit composable" in f for f in findings))
+
+    def test_flags_private_lowercase_composable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/Screen.kt",
+                "@Composable\nprivate fun homeContent(state: State) { }\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("lowercase unit composable" in f and "homeContent" in f for f in findings))
+
+
 class UnauthorizedAppSubmoduleTests(unittest.TestCase):
     def _touch(self, root: Path, rel_path: str) -> None:
         path = root / rel_path
