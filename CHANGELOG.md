@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.99.2] — 2026-07-31
+
+### Docs
+
+- docs(readme): simplify skill list, add Agent Skills spec compliance mention
+
+---
+
 ## [v1.99.1] — 2026-07-31
 
 ### Fixed
