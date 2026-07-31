@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.101.1] — 2026-07-31
+
+### Fixed
+
+- fix(scripts): fix the actual consumer skills updater, move pipeline-context
+
+---
+
 ## [v1.101.0] — 2026-07-31
 
 ### Added
