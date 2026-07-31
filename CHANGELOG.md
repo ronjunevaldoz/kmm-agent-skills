@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.108.0] — 2026-07-31
+
+### Added
+
+- feat(library-publishing): add multi-module library splitting guidance
+
+---
+
 ## [v1.107.0] — 2026-07-31
 
 ### Added
