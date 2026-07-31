@@ -64,9 +64,17 @@ questions, ask one field at a time in this order and keep the same defaults.
 | `AUTH` | Does it have login / sign-in / identity? | none |
 | `DI_APPROACH` | Annotated or manual DI? | annotated |
 | `DISTRIBUTION` | Where will the app be distributed? | Play Store + App Store |
+| `CI_CD` | Wire GitHub Actions now, or skip and rely on running scripts locally for now? | yes |
 
 Distribution options: `Play Store + App Store` · `Internal / enterprise` · `Open source / side project`
 This affects signing config, ProGuard aggressiveness, and whether the CI release lane includes store upload.
+
+`CI_CD = no` is a legitimate choice, not a shortcut being discouraged — `./gradlew detekt`/
+`ktlintCheck`/`test` and `audit_project.py` all run identically from a local terminal;
+GitHub Actions automates *when* they run, it doesn't change what they check. Skipping it
+doesn't skip code quality or testing (`kotlin-multiplatform-code-quality`/`unit-testing`
+stay in the always-included list below) — it only skips the automation wrapper around
+running them.
 
 If the user omits a field, state the assumption before proceeding and keep moving.
 
@@ -365,15 +373,20 @@ Use intake answers directly — do not re-infer. Run each in dependency order:
 | `AUTH = yes` | `kotlin-multiplatform-ktor-auth-service` | Bearer/JWT, login/refresh/logout |
 | always | `kotlin-multiplatform-dependency-injection` | Koin modules, scope rules |
 | always | `kotlin-multiplatform-logging` | Kermit setup, log levels, Koin wiring |
-| always | `kotlin-multiplatform-ci-github-actions` | GitHub Actions matrix: build, test, detekt, ktlint |
+| `CI_CD = yes` | `kotlin-multiplatform-ci-github-actions` | GitHub Actions matrix: build, test, detekt, ktlint |
 | always | `kotlin-multiplatform-code-quality` | Ktlint + Detekt config, baseline, CI gate |
 | always | `kotlin-multiplatform-unit-testing` | Test source sets, fakes/mocks conventions, coroutine test rules for every layer |
 | always | `kotlin-multiplatform-android-cli` | Wires the `android` CLI's stable command surface — emulator management, `android run` deploy, SDK installs — so the Android target is buildable/runnable from the terminal without opening Android Studio |
 | always | `kotlin-multiplatform-project-docs-maintainer` | README, onboarding, `docs/reference/` sync — kept current as each step below writes new project docs, not deferred to the end |
 
-CI/CD, code quality, unit testing, android-cli, docs maintenance, DI, and logging are
-always included — every new project needs them from day one, regardless of what feature
-work the intake describes.
+Code quality, unit testing, android-cli, docs maintenance, DI, and logging are always
+included — every new project needs them from day one, regardless of what feature work
+the intake describes. CI/CD is the one exception: it's optional (`CI_CD` intake field,
+defaults to yes) since every check it runs (Detekt, Ktlint, tests, the audit script) also
+runs identically from a local terminal — GitHub Actions automates the schedule, not the
+substance. If `CI_CD = no`, skip this row and mention in the final report that
+`/setup-hooks`'s Option A (git pre-commit) is worth wiring instead, so quality gates still
+run automatically without a CI provider.
 
 ---
 
