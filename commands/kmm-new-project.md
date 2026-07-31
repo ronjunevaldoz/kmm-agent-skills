@@ -361,11 +361,12 @@ fakes consumers need separately")? If yes, restructure the template's single `:l
 module into the multi-module split below; if no or unclear, keep the template's
 single-module structure as-is — splitting speculatively is the wrong default.
 
-**Single module (default — the template's own layout, extended):**
+**Single module (default — the template's own layout, extended).** No `build-logic/` —
+the template doesn't ship one, and one `:library` module has nothing for a convention
+plugin to de-duplicate:
 
 ```
 <PROJECT_NAME>/
-├── build-logic/                  # Convention plugins (optional but recommended)
 ├── library/                      # Main library module (from the template)
 │   └── build.gradle.kts
 ├── library-testing/              # Test helpers for consumers (optional — add if the
@@ -383,7 +384,8 @@ prefixed with `PROJECT_NAME`, never the literal word "library":
 
 ```
 <PROJECT_NAME>/
-├── build-logic/
+├── build-logic/                  # Shared explicitApi()/AGP/apiCheck config — see
+│                                  #   library-publishing's Step 1a for the real wiring
 ├── <PROJECT_NAME>-core/          # io.github.you:<PROJECT_NAME>-core
 ├── <PROJECT_NAME>-compose/       # io.github.you:<PROJECT_NAME>-compose — depends on -core
 ├── <PROJECT_NAME>-testing/       # io.github.you:<PROJECT_NAME>-testing — depends on -core only

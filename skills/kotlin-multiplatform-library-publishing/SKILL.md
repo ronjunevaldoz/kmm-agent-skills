@@ -121,11 +121,14 @@ guideline — that's exactly what Steps 2/5/12/13 below add on top, the same way
 collection's own 6-layer conventions layer on top of kmp-wizard for an app.
 
 Resulting structure, once this collection's own additions (`library-testing`, `bom`,
-`sample`) are layered on:
+`sample`) are layered on. **No `build-logic/`** — the template doesn't ship one, and for
+a single `:library` module it adds nothing: there's only one `build.gradle.kts` to
+configure, so there's no duplication for a convention plugin to remove. It only earns
+its keep once Step 1a's multi-module split is in play — see that section for the real
+wiring, not asserted here as a default:
 
 ```
 my-library/
-├── build-logic/                  # Convention plugins (optional but recommended)
 ├── library/                      # Main library module (from the template)
 │   └── build.gradle.kts
 ├── library-testing/              # Test helpers for consumers (optional, added by this skill)
@@ -183,11 +186,55 @@ in Step 4 below, and real published multi-module libraries (Coil's `coil-core` /
 
 ```kotlin
 // settings.gradle.kts
+includeBuild("build-logic")
 include(":<PROJECT_NAME>-core")
 include(":<PROJECT_NAME>-compose")
 include(":<PROJECT_NAME>-testing")
 include(":bom")
 include(":sample:androidApp")
+```
+
+**This is where `build-logic/` actually earns its keep** — three-plus modules that all
+need the same `explicitApi()`/AGP/`apiCheck` configuration is real duplication a
+convention plugin removes. Single-module libraries (Step 1 above) skip this entirely.
+
+```kotlin
+// build-logic/build.gradle.kts
+plugins { `kotlin-dsl` }
+dependencies {
+    compileOnly(libs.plugins.kotlinMultiplatform.get().let { "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version}" })
+    compileOnly(libs.plugins.vanniktech.mavenPublish.get().let { "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version}" })
+}
+gradlePlugin {
+    plugins {
+        register("libraryModule") {
+            id = "<PROJECT_NAME>.library-module"
+            implementationClass = "LibraryModuleConventionPlugin"
+        }
+    }
+}
+```
+
+```kotlin
+// build-logic/src/main/kotlin/LibraryModuleConventionPlugin.kt — the shared config,
+// written once, applied to <PROJECT_NAME>-core/-compose/-testing's own build.gradle.kts
+class LibraryModuleConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) = with(target) {
+        pluginManager.apply("org.jetbrains.kotlin.multiplatform")
+        pluginManager.apply("com.vanniktech.maven.publish")
+        extensions.configure<KotlinMultiplatformExtension> {
+            explicitApi()
+        }
+    }
+}
+```
+
+```kotlin
+// <PROJECT_NAME>-core/build.gradle.kts — each module applies the convention plugin,
+// then only its own module-specific bits (dependencies, its own coordinates())
+plugins {
+    id("<PROJECT_NAME>.library-module")
+}
 ```
 
 Dependency direction — one-way, never circular:
@@ -904,6 +951,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Fixed a second real gap found right after the correction below: `build-logic/` was listed as "optional but recommended" in every structure diagram but never actually wired anywhere — no `includeBuild`, no convention plugin content, and the real official template doesn't ship one at all. It adds nothing for a single `:library` module (nothing to de-duplicate), so removed it from Step 1's default diagram entirely. It does earn its keep once Step 1a's multi-module split is in play (3+ modules needing the same `explicitApi()`/AGP/`apiCheck` config) — added the real `includeBuild("build-logic")` wiring and a convention plugin example there instead of asserting it as a default. |
 | 2026-07-31 | **Self-correction, verified via GitHub API + raw source, not assumed**: this skill and `/kmm-new-project` both stated "there is no equivalent to kmp-wizard for a library" — wrong. `Kotlin/multiplatform-library-template` is a real, official, actively-maintained JetBrains repo (same org as `kmp-wizard`, "official project" badge, 332 stars) that scaffolds exactly this: one `:library` module with `vanniktech-mavenPublish`, the AGP 9 `com.android.kotlin.multiplatform.library` plugin, and `jvm()`/`androidLibrary()`/`iosArm64()`/`iosSimulatorArm64()`/`linuxX64()` already wired — the template's own README explicitly says it omits binary-compat tracking, `explicitApi()`, licensing, and a contribution guideline, which is exactly what this skill's Steps 2/5/12/13 already add on top. Rewrote Step 1 to clone it as the mandatory starting point instead of hand-building the structure, mirroring `kmp-wizard`'s own discipline for apps. Added a matching anti-pattern. |
 | 2026-07-31 | Added four more real maintenance gaps from a follow-up survey: a pre-1.0 API stability policy (0.x may break without a major bump per SemVer 2.4; 1.0+ is where the stability promise starts — state it in the README, don't leave it implicit), Step 12 (NOTICE file for bundled/redistributed third-party assets — distinct from a normal Maven dependency a consumer resolves themselves; `heroicons-compose`'s own `NOTICE.md` is the real precedent), Step 13 (OSS contribution scaffolding — CONTRIBUTING/CODE_OF_CONDUCT/issue+PR templates, only once a library actually takes outside contributions), and a dependency-vulnerability-scanning subsection under Step 11 (Dependabot security alerts, distinct from the routine upgrade-cadence review already there). |
 | 2026-07-31 | Added Step 1a — splitting into multiple published modules: real gap where this skill only ever scaffolded one `:library` module, with a BOM step that aligns multiple artifacts' versions but no guidance on how/when to actually create them. Covers the split decision (genuinely independent consumer surface, not just "big code"), one-way dependency direction (`-core` never depends on `-compose`/`-testing`), per-module `apiCheck`, and the `<PROJECT_NAME>-*` naming convention (never the literal word "library" — matches real published multi-module libraries like Coil's `coil-core`/`coil-compose`). Wired into `/kmm-new-project`'s Library F-01 as a confirm-first branch. |
