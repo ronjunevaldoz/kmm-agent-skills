@@ -1,12 +1,18 @@
 # kmm-agent-skills
 
 [![skills.sh](https://skills.sh/b/ronjunevaldoz/kmm-agent-skills)](https://skills.sh/ronjunevaldoz/kmm-agent-skills)
+[![Agent Skills spec](https://img.shields.io/badge/Agent%20Skills-spec%20compliant-brightgreen)](docs/reference/agentskills-io-standards.md)
 [![License](https://img.shields.io/github/license/ronjunevaldoz/kmm-agent-skills)](LICENSE)
 [![Repo size](https://img.shields.io/github/repo-size/ronjunevaldoz/kmm-agent-skills)](https://github.com/ronjunevaldoz/kmm-agent-skills)
 [![Last commit](https://img.shields.io/github/last-commit/ronjunevaldoz/kmm-agent-skills)](https://github.com/ronjunevaldoz/kmm-agent-skills)
 
 AI agent skills for **Kotlin Multiplatform (KMP)** development — clean module boundaries,
 version catalogs, build-logic convention plugins, and explicit review loops before code is generated.
+
+Built on the open [Agent Skills](https://agentskills.io) format. All 64 skills verified
+against the real [`skills-ref`](https://github.com/agentskills/agentskills) reference
+validator — see [`docs/reference/agentskills-io-standards.md`](docs/reference/agentskills-io-standards.md)
+for what was checked and how.
 
 ---
 
@@ -118,6 +124,18 @@ python3 scripts/release.py auto --dry-run # preview first
 
 64 skills covering the full KMP stack. Load the smallest set that answers the request.
 
+| Category | Count | Covers |
+|---|---|---|
+| Foundation | 7 | Module structure, clean architecture, DI, CI, Android CLI |
+| Infrastructure | 10 | Auth, networking, database, publishing, JNI |
+| Patterns | 21 | MVI, navigation, offline-first, notifications, IAP, and more |
+| UI System | 12 | Design system, state hoisting, animation, adaptive layout |
+| Testing & Quality | 5 | Unit tests, screenshot tests, lint/static analysis |
+| Meta | 9 | Routing, audit, migration, docs, release |
+
+<details>
+<summary>Full skill list (click to expand)</summary>
+
 ### Foundation
 - [`feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) — 6-layer module structure, build-logic, TOML catalog, Koin
 - [`clean-architecture`](skills/kotlin-multiplatform-clean-architecture/) — layer contract, `:model` vs `:api`, `internal` rules
@@ -193,6 +211,8 @@ python3 scripts/release.py auto --dry-run # preview first
 - [`skill-harvester`](skills/kotlin-multiplatform-skill-harvester/) — reads lessons, proposes skill amendments
 - [`token-saver`](skills/kotlin-multiplatform-token-saver/) — terse replies, output compression, and smallest-correct-solution checks
 - [`release`](skills/kotlin-multiplatform-release/) — versioning, Maven Central, git-cliff, GitHub Release
+
+</details>
 
 ---
 
