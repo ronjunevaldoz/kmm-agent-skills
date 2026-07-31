@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.109.4] — 2026-07-31
+
+### Fixed
+
+- fix(kmm-setup-agents): add mandatory verification gate for project-owned scaffold
+
+---
+
 ## [v1.109.3] — 2026-07-31
 
 ### Fixed
