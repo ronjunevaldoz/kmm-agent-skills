@@ -11,7 +11,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-20'
+  last-updated: '2026-07-26'
   keywords:
     - KMP audit
     - project audit
@@ -366,6 +366,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-07-26 | Added `_detect_combined_component_file` — a user asked why the collection would introduce component-file bloat; found that `kotlin-multiplatform-design-system`'s own generated templates already follow one-component-per-file by convention, but nothing stated or checked that rule for a real project. Flags 3+ top-level components in one `designsystem`/`components/` file, excluding Preview functions and Screen/Content pairs. 4 new regression tests. |
 | 2026-07-20 | Added `_detect_undocumented_public_api` — flags a `public class`/`interface`/`object`/`fun` with no preceding KDoc block, gated on the project already using `explicitApi()`/`explicitApiWarning()` (without it, "public" isn't a deliberate-enough signal to check — most app code is public by Kotlin's own default). Backs `kotlin-multiplatform-library-publishing`'s new KDoc coverage rule. 3 new regression tests. |
 | 2026-07-20 | Added three more anti-pattern detectors from a user-requested gap survey: `_detect_runblocking_in_shared_code` (runBlocking in commonMain outside a `fun main()` entry point — blocks the calling thread, often the main thread on Android/iOS), `_detect_koin_circular_dependency` (a cycle among explicitly-typed `single<A>`/`factory<A>`/`scoped<A>` Koin bindings — narrowed to explicit type args to keep false positives near zero, since a plain `get()` with no type argument can't be resolved to a dependency graph without also parsing the constructor it's injected into), and `_detect_compose_unstable_collection_param` (raw `List`/`Map`/`Set` composable parameters, which the Compose compiler treats as unstable). 9 new regression tests. |
 | 2026-07-20 | Added `_detect_god_class` — repo-wide god-object detection, not scoped to ViewModel/Composable. A plain class (excludes data/sealed/enum/value/annotation classes, and files already covered by the ViewModel-size/god-composable detectors) past 400 lines and 15 functions is flagged. Real gap: `kotlin-multiplatform-code-quality`'s new `LargeClass`/`TooManyFunctions`/`CouplingBetweenObjects` Detekt rules are the precise version; this is the heuristic backstop for a project that hasn't wired that config yet. 4 new regression tests. |

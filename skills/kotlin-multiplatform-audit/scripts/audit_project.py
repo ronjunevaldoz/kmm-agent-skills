@@ -1472,6 +1472,59 @@ def _detect_combined_sqldelight_table_file(root: Path) -> list[str]:
     return findings
 
 
+# ── Combined design-system component file ───────────────────────────────────────
+# kotlin-multiplatform-design-system/-extended's own generated templates always put
+# one component per file (verified: 27 + 18 separate file headings, zero bundling
+# across both skills) — but that convention was never stated as a rule, and nothing
+# checked it for a real project's own component files. Scoped to designsystem/
+# components/ paths so a legitimate multi-composable feature file (Screen + Content,
+# or a screen with private helper composables) isn't caught by mistake.
+
+_TOP_LEVEL_COMPOSABLE_NAME_RE = re.compile(
+    r"@Composable\s*\n?\s*(?:private\s+|internal\s+|public\s+)?fun\s+(\w+)\s*\("
+)
+
+
+def _is_design_system_component_path(path: Path) -> bool:
+    p = path.as_posix().lower()
+    return "designsystem" in p or "/components/" in p
+
+
+def _detect_combined_component_file(root: Path) -> list[str]:
+    """Flag a designsystem/components file defining 3+ top-level component-style
+    composables — excludes Preview functions and Screen/Content pairs, which
+    legitimately live together per this collection's own MVI convention.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        if not _is_design_system_component_path(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        matches = [
+            m for m in _TOP_LEVEL_COMPOSABLE_NAME_RE.finditer(text)
+            if "Preview" not in m.group(1)
+            and not m.group(1).endswith("Screen")
+            and not m.group(1).endswith("Content")
+        ]
+        if len(matches) < 3:
+            continue
+        names = [m.group(1) for m in matches]
+        line_no, snippet = _at(text, matches[0].start())
+        findings.append(
+            f"combined component file [MEDIUM]: {path.relative_to(root)}:{line_no} — "
+            f"defines {len(names)} components ({', '.join(names)}) in one file; "
+            f"keep one component per file, matching kotlin-multiplatform-design-system's "
+            f"own generated file layout\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
 # ── Raw HTTP bypassing an established Ktor client ──────────────────────────────
 # Real bug: kotlin-multiplatform-network-layer only checked for a module literally
 # named :core:network. A new server module or feature under a different name found no
@@ -3262,6 +3315,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Undocumented public API (library projects only) ──────────────────────────
     findings.extend(_detect_undocumented_public_api(root))
+
+    # ── Combined design-system component file ────────────────────────────────────
+    findings.extend(_detect_combined_component_file(root))
 
     # ── Extensible abstract class in commonMain ─────────────────────────────────
     findings.extend(_detect_extensible_abstract_class_in_common(root))

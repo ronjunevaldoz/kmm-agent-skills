@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-09'
+  last-updated: '2026-07-26'
   keywords:
     - MVI
     - Model-View-Intent
@@ -1293,6 +1293,7 @@ transform, submit) rather than independent state machines.
 - State assembly uses `combine(...).stateIn(...)` — never `derivedStateOf` in the composable.
 - Effect collection lives in the ViewModel (`init {}` via `viewModelScope.launch`), never in the screen — the screen keeps exactly one `LaunchedEffect(vm)` for its own nav/toast effects.
 - Extract state-combination into a pure `StateAssembler` object so precedence rules are unit-tested independently of the ViewModel.
+- **A coordinator is not exempt from the same size limits as any other ViewModel.** Choosing Option 2/3 to escape a god composable doesn't grant immunity from becoming a god ViewModel instead — `kotlin-multiplatform-audit`'s `_detect_viewmodel_size` still applies to `DashboardCoordinatorViewModel` exactly like any other ViewModel. If a coordinator crosses that threshold even after delegating to State Holders/use cases and extracting a `StateAssembler`, that's a signal the sub-units were never simultaneous-and-interactive enough to justify Option 2/3 in the first place — split back out to Option 1 (separate screens + repository) rather than adding a second layer of coordinators.
 
 ---
 
@@ -1498,6 +1499,7 @@ must stay synchronized — see the Shared ViewModel section above for the patter
 - emitting `Effect` from `init {}` — fires on every ViewModel recreation, not just on user action
 - putting navigation logic inside `State` — navigation is an effect, not persisted state
 - using `copy {}` with a stale `state` reference instead of `update {}` — causes lost updates under concurrency
+- treating a Coordinator ViewModel as exempt from `_detect_viewmodel_size`'s god-ViewModel threshold — escaping a god composable by centralizing into a coordinator just relocates the same size problem unless it actually stays small; a coordinator that keeps growing after delegating to State Holders/use cases needed Option 1 (separate screens), not a bigger coordinator
 - exposing mutable `StateFlow` from the ViewModel — UI should never mutate state directly
 - missing `isLoading` guard on submit actions — lets rapid taps fire multiple network calls
 - forgetting to reset `isLoading` on error — every branch that sets it `true` must reset it in success, error, and cancellation
@@ -1557,6 +1559,7 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
+| 2026-07-26 | Added a de-escalation guardrail: a Coordinator ViewModel (Option 2/3) is not exempt from `_detect_viewmodel_size`'s god-ViewModel threshold — a real gap where choosing a coordinator to escape a god composable could quietly relocate the same size problem instead of fixing it. If a coordinator keeps growing after delegating to State Holders/use cases, that's a signal to split back to Option 1. 1 new anti-pattern. |
 | 2026-06-28 | Add @Stable/@Immutable rule for State types; CoroutineExceptionHandler in MviViewModel base class; rememberUpdatedState section with decision table. Three new anti-patterns.
 | 2026-06-28 | Add multi-source state: combine(), WhileSubscribed(5_000) table, flatMapLatest, snapshotFlow with debounce example. Four new anti-patterns.
 | 2026-06-28 | Add collectAsStateWithLifecycle vs collectAsState rule; LaunchedEffect vs DisposableEffect vs SideEffect decision table; SavedStateHandle + viewModelOf Koin wiring; four new anti-patterns.

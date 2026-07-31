@@ -2853,6 +2853,65 @@ class UndocumentedPublicApiTests(unittest.TestCase):
             self.assertFalse(any("undocumented public api" in f for f in findings))
 
 
+class CombinedComponentFileTests(unittest.TestCase):
+    """kotlin-multiplatform-design-system's own generated templates always put one
+    component per file — never stated as a rule, never mechanically checked for a
+    real project's own component files, until now.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_three_components_in_one_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/designsystem/components/Overlays.kt",
+                "@Composable\nfun AppDialog() {}\n"
+                "@Composable\nfun AppSheet() {}\n"
+                "@Composable\nfun AppTooltip() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("combined component file" in f for f in findings))
+
+    def test_ignores_two_components(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/designsystem/components/Overlays.kt",
+                "@Composable\nfun AppDialog() {}\n"
+                "@Composable\nfun AppSheet() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined component file" in f for f in findings))
+
+    def test_ignores_screen_content_pair(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/designsystem/components/OrderScreen.kt",
+                "@Composable\nfun OrderScreen() {}\n"
+                "@Composable\nfun OrderContent() {}\n"
+                "@Composable\nfun OrderScreenPreview() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined component file" in f for f in findings))
+
+    def test_ignores_outside_designsystem_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/Widgets.kt",
+                "@Composable\nfun WidgetOne() {}\n"
+                "@Composable\nfun WidgetTwo() {}\n"
+                "@Composable\nfun WidgetThree() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined component file" in f for f in findings))
+
+
 class MixedDesignSystemUsageTests(unittest.TestCase):
     """kotlin-multiplatform-shadcn-compose says "Never combine with
     kotlin-multiplatform-design-system" - documented but never mechanically checked.

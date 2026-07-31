@@ -15,7 +15,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-17'
+  last-updated: '2026-07-26'
   keywords:
     - design system
     - Compose Styles API
@@ -2578,6 +2578,7 @@ not `ComponentRegistryViolation` or `DesignTokenImportBoundary`.
 
 - magic color literals in composables — `Color(0xFF6200EE)` written directly inside a `@Composable` instead of `appTheme.colors.primary`; the audit script flags `Color(0x…)` in any `/ui/` or `/presentation/` file that is not a token definition file
 - inlining `variant.style then size.style` directly in a modifier chain instead of `rememberStyle(variant, size)` — rebuilds the merged descriptor on every recomposition instead of once per variant/size change
+- bundling multiple components into one file under `core/designsystem/components/` — every generated template in this skill and `kotlin-multiplatform-design-system-extended` puts one component per file; `kotlin-multiplatform-audit`'s `_detect_combined_component_file` flags 3+ components in one file
 - a `Modifier` extension taking a theme value as a required parameter with a hardcoded literal default (`fun Modifier.appDivider(color: Color = Color(0xFFE4E4E7))`) — resolve it internally via `Modifier.composed { AppTheme.LocalAppTheme.current... }` so call sites stay parameter-free
 - a sealed variant `data object` holding a pre-resolved `Color`/`Dp` value instead of a `Style` descriptor built from `StyleScope` extensions (`colors.primary`, not a captured `Color` literal) — breaks theme switching and light/dark parity
 - hardcoded spacing in composables — `padding(16.dp)` or `padding(horizontal = 8.dp)` written directly instead of `padding(horizontal = appTheme.spacing.lg)`; the audit script flags `.dp` literals inside `padding(…)` calls in UI files
@@ -2622,6 +2623,7 @@ defaults (`App` prefix, token names as shown in the steps) are used.
 
 - `kotlin-multiplatform-feature-scaffold` — `:core:designsystem` follows the same convention plugin pattern
 - `kotlin-multiplatform-design-system-extended` — additional components (`AppDialog`, `AppToast`, `AppTabs`, etc.) built on this foundation
+- `kotlin-multiplatform-audit` — `_detect_combined_component_file` mechanically checks the one-component-per-file convention above
 - `kotlin-multiplatform-shared-resources` — fonts and icons loaded via `Res` accessors inside the design system
 - `kotlin-multiplatform-preview-driven-development` — Desktop previews for each component variant using `PreviewParameterProvider`
 - `kotlin-multiplatform-shadcn-compose` — the published-library alternative to this skill's owned-scaffold approach; see its own skill for the experimental-API risk tradeoff in full
@@ -2646,6 +2648,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-07-26 | Named the one-component-per-file convention explicitly and backed it with `kotlin-multiplatform-audit`'s new `_detect_combined_component_file` — real gap: every generated template in this skill already follows the convention (verified: 27 separate file headings, zero bundling), but it was never stated as a rule nor mechanically checked for a real project's own component files. 1 new anti-pattern. |
 | 2026-07-17 | Added explicit "if `ShadcnTheme` is already in use, don't suggest `App*`/`AppTheme`" guidance, mirroring `kotlin-multiplatform-shadcn-compose`'s own "never combine" note (either skill can be the one consulted first). Backed by `kotlin-multiplatform-audit`'s new `_detect_mixed_design_system_usage`, which flags a project calling both theme wrappers — considered retiring this skill in favor of shadcn-compose instead, but design-system stays the documented default (shadcn-compose explicitly defers to it unless explicitly chosen), so the detection+ignore rule solves the actual mixing problem without that much larger, disruptive change. |
 | 2026-07-13 | Made UI test coverage strict for feature `*Content.kt` screens: `scan_design_violations.py`'s `preview_coverage` check now also flags a missing commonTest interaction test (`runComposeUiTest`), alongside the existing preview-stub/multi-device/Roborazzi checks — all four required, no exceptions. `scaffold_preview_coverage.py` generates all four now, not three. (First attempt built a redundant, weaker duplicate of this in `kotlin-multiplatform-audit`'s `audit_project.py` without checking this scanner already existed — reverted that and added only the genuinely missing piece here instead.) |
 | 2026-07-13 | Fixed a real keyword-routing collision with `kotlin-multiplatform-shadcn-compose`: this skill's own trigger keywords included bare `shadcn` (frontmatter) and `shadcn KMP` (body) — the exact same phrase `shadcn-compose` uses as its own trigger keyword, despite the two being documented mutually-exclusive alternatives (`/kmm-new-project` loads one instead of the other). Removed both from this skill; `design system`/`AppTheme`/`ButtonVariant`/etc already route unambiguously without them. Root cause: `validate_keyword_routing.py` only checked that every skill appears in the expert's invocation map, never checked for keyword overlap between skills — added collision detection to catch this class of bug going forward. |
