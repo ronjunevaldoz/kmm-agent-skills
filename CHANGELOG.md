@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.100.0] — 2026-07-31
+
+### Added
+
+- feat(scripts): add skills health report, regenerated every release
+
+---
+
 ## [v1.99.4] — 2026-07-31
 
 ### Fixed
