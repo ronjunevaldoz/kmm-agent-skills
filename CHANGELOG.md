@@ -2,6 +2,15 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.98.3] — 2026-07-31
+
+### Fixed
+
+- fix(kmm-new-project): make CI/CD wiring optional, not always-on
+- fix(audit): enforce ViewModel-depends-only-on-domain, not just document it
+
+---
+
 ## [v1.98.2] — 2026-07-31
 
 ### Docs
