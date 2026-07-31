@@ -39,7 +39,7 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-presenter-module`](../../skills/kotlin-multiplatform-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kotlin-multiplatform-datastore`](../../skills/kotlin-multiplatform-datastore/) | 413 | 2026-06-18 | ✅ |
 | [`kotlin-multiplatform-mongodb-database`](../../skills/kotlin-multiplatform-mongodb-database/) | 409 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-audit`](../../skills/kotlin-multiplatform-audit/) | 392 | 2026-07-26 | ✅ |
+| [`kotlin-multiplatform-audit`](../../skills/kotlin-multiplatform-audit/) | 407 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-compose-animation`](../../skills/kotlin-multiplatform-compose-animation/) | 389 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-migration`](../../skills/kotlin-multiplatform-migration/) | 386 | 2026-07-19 | ✅ |
 | [`kotlin-multiplatform-permissions`](../../skills/kotlin-multiplatform-permissions/) | 386 | 2026-06-21 | ✅ |

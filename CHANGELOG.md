@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.103.0] — 2026-07-31
+
+### Added
+
+- feat(audit): add structure diagram and non-blocking naming-drift hint
+
+---
+
 ## [v1.102.0] — 2026-07-31
 
 ### Added
