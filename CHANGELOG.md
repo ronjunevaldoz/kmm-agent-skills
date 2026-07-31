@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.112.0] — 2026-08-01
+
+### Added
+
+- feat(audit): add _detect_hardcoded_ui_string
+
+---
+
 ## [v1.111.0] — 2026-08-01
 
 ### Added
