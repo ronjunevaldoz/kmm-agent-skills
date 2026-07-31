@@ -140,6 +140,170 @@ class ScanSkillIssuesTests(unittest.TestCase):
         self.assertEqual(rc, 0)
 
 
+class AgentSkillsSpecTests(unittest.TestCase):
+    """Real rules from agentskills.io's specification, verified against the actual
+    skills-ref reference validator (all 64 skills in this repo pass it today) rather
+    than assumed. These checks are a regression guard for future skills.
+    """
+
+    def _make_skill(self, root: Path, dir_name: str, content: str) -> Path:
+        skill_dir = root / "skills" / dir_name
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text(content, encoding="utf-8")
+        return skill_dir
+
+    def _run_scan(self, root: Path) -> dict:
+        import json, io
+        from contextlib import redirect_stdout
+        buf = io.StringIO()
+        old_root = scan_skill_issues_scripts.SKILLS_DIR
+        old_ki = scan_skill_issues_scripts.KNOWN_ISSUES_FILE
+        scan_skill_issues_scripts.SKILLS_DIR = root / "skills"
+        scan_skill_issues_scripts.KNOWN_ISSUES_FILE = root / "KNOWN_ISSUES.md"
+        try:
+            with redirect_stdout(buf):
+                scan_skill_issues_scripts.main()
+        finally:
+            scan_skill_issues_scripts.SKILLS_DIR = old_root
+            scan_skill_issues_scripts.KNOWN_ISSUES_FILE = old_ki
+        return json.loads(buf.getvalue())
+
+    def _minimal_skill_body(self, extra: str = "") -> str:
+        return (
+            "## Recommendation First\n\nDo X.\n\n"
+            "## Common Anti-Patterns\n\nNone.\n\n## Related Skills\n\nAll.\n\n"
+            "## Output Style\n\nBe concise.\n\nFreshness rule: check monthly\n"
+            + extra
+        )
+
+    def test_name_over_64_chars_flagged(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            long_name = "a" * 70
+            self._make_skill(
+                root, long_name,
+                f"---\nname: {long_name}\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
+                + self._minimal_skill_body(),
+            )
+            report = self._run_scan(root)
+        self.assertTrue(any(i["check"] == "name_too_long" for i in report["issues"]))
+
+    def test_name_uppercase_flagged_invalid_format(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_skill(
+                root, "kotlin-multiplatform-Foo",
+                "---\nname: kotlin-multiplatform-Foo\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
+                + self._minimal_skill_body(),
+            )
+            report = self._run_scan(root)
+        self.assertTrue(any(i["check"] == "name_invalid_format" for i in report["issues"]))
+
+    def test_name_dir_mismatch_flagged(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_skill(
+                root, "kotlin-multiplatform-foo",
+                "---\nname: kotlin-multiplatform-bar\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
+                + self._minimal_skill_body(),
+            )
+            report = self._run_scan(root)
+        self.assertTrue(any(i["check"] == "name_dir_mismatch" for i in report["issues"]))
+
+    def test_description_over_1024_flagged(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            long_desc = "x" * 1100
+            self._make_skill(
+                root, "kotlin-multiplatform-foo",
+                f"---\nname: kotlin-multiplatform-foo\ndescription: {long_desc}\nlast-updated: '2026-07-26'\n---\n\n"
+                + self._minimal_skill_body(),
+            )
+            report = self._run_scan(root)
+        self.assertTrue(any(i["check"] == "description_too_long" for i in report["issues"]))
+
+    def test_description_folded_block_parsed_correctly(self) -> None:
+        # A folded (>) description must be joined into real content, not read back
+        # as the literal ">" block indicator — this was a real bug in parse_frontmatter.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_skill(
+                root, "kotlin-multiplatform-foo",
+                "---\nname: kotlin-multiplatform-foo\ndescription: >\n"
+                "  This is a folded description that spans\n  multiple lines.\n"
+                "last-updated: '2026-07-26'\n---\n\n" + self._minimal_skill_body(),
+            )
+            report = self._run_scan(root)
+        matching = [i for i in report["issues"] if i["skill_dir"] == "kotlin-multiplatform-foo"]
+        for issue in matching:
+            self.assertNotEqual(issue["description"], ">")
+
+    def test_oversized_skill_md_flagged(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            padding = "\n".join(f"Line {i} of filler content." for i in range(600))
+            self._make_skill(
+                root, "kotlin-multiplatform-foo",
+                "---\nname: kotlin-multiplatform-foo\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
+                + self._minimal_skill_body(padding),
+            )
+            report = self._run_scan(root)
+        self.assertTrue(any(i["check"] == "oversized_skill_md" for i in report["issues"]))
+
+    def test_known_debt_reported_but_does_not_block(self) -> None:
+        # KI-008: a skill/check pair already in the KNOWN_DEBT baseline is real,
+        # visible debt — it must still show up in the report, but must not fail
+        # release.py's exit-code gate the way a brand-new violation would.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            padding = "\n".join(f"Line {i} of filler content." for i in range(600))
+            self._make_skill(
+                root, "kotlin-multiplatform-mvi",
+                "---\nname: kotlin-multiplatform-mvi\ndescription: Test\n"
+                "last-updated: '2026-07-26'\n---\n\n" + self._minimal_skill_body(padding),
+            )
+            report = self._run_scan(root)
+        self.assertTrue(any(i["check"] == "oversized_skill_md" for i in report["issues"]))
+        # missing_testing still legitimately blocks this synthetic fixture (unrelated
+        # to KNOWN_DEBT) — assert the oversized finding specifically isn't counted as
+        # blocking, not that nothing blocks at all.
+        blocking_checks = {
+            i["check"] for i in report["issues"]
+            if (i["skill_dir"], i["check"]) not in scan_skill_issues_scripts.KNOWN_DEBT
+        }
+        self.assertNotIn("oversized_skill_md", blocking_checks)
+
+    def test_new_violation_still_blocks(self) -> None:
+        # A skill NOT in the KNOWN_DEBT baseline must still block, even for the
+        # exact same check — KNOWN_DEBT is a snapshot, not a blanket exemption.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            padding = "\n".join(f"Line {i} of filler content." for i in range(600))
+            self._make_skill(
+                root, "kotlin-multiplatform-brand-new-skill",
+                "---\nname: kotlin-multiplatform-brand-new-skill\ndescription: Test\n"
+                "last-updated: '2026-07-26'\n---\n\n" + self._minimal_skill_body(padding),
+            )
+            report = self._run_scan(root)
+        self.assertGreater(report["blocking_issues"], 0)
+
+    def test_small_valid_skill_has_no_agentskills_issues(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._make_skill(
+                root, "kotlin-multiplatform-foo",
+                "---\nname: kotlin-multiplatform-foo\ndescription: A short valid description.\n"
+                "last-updated: '2026-07-26'\n---\n\n" + self._minimal_skill_body(),
+            )
+            report = self._run_scan(root)
+        agentskills_checks = {
+            "name_too_long", "name_invalid_format", "name_dir_mismatch",
+            "description_too_long", "description_approaching_limit", "oversized_skill_md",
+        }
+        found = {i["check"] for i in report["issues"]} & agentskills_checks
+        self.assertEqual(found, set())
+
+
 class ReadOpenKnownIssuesTests(unittest.TestCase):
     """read_open_known_issues() looked for the literal heading '## Open Issues', but
     KNOWN_ISSUES.md's real heading is '## Open' — the mismatch meant this function

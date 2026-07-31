@@ -52,6 +52,45 @@ accepting the residual risk as documented here.
 
 ---
 
+### KI-008 — 22 of 64 SKILL.md files exceed agentskills.io's recommended 500-line body
+
+**Status:** Open — confirmed via the real `skills-ref` reference validator (cloned from
+`github.com/agentskills/agentskills`, installed locally, run against all 64 skills):
+0 hard-spec violations (`name`/`description` fields all pass `skills-ref validate`), but
+the spec's progressive-disclosure guideline — "Keep your main `SKILL.md` under 500 lines"
+— is violated by 22 skills, several severely:
+
+| Skill | Lines | Over by |
+|---|---|---|
+| `kotlin-multiplatform-design-system-extended` | 3101 | 6.2x |
+| `kotlin-multiplatform-design-system` | 2674 | 5.3x |
+| `kotlin-multiplatform-mvi` | 1626 | 3.3x |
+| `kotlin-multiplatform-feature-scaffold` | 1219 | 2.4x |
+| `kotlin-multiplatform-expert` | 886 | 1.8x |
+| `kotlin-multiplatform-navigation` | 828 | 1.7x |
+| ...16 more, 501–796 lines | | |
+
+**Why it matters:** the spec's progressive-disclosure model assumes `SKILL.md`'s full
+body loads into context on every activation; detail belongs in `references/*.md`, loaded
+only when the agent needs it. A 3101-line `SKILL.md` defeats that — the entire file loads
+every time the skill activates, competing for context with everything else in the window.
+
+**Also found:** `parse_frontmatter` in `scripts/scan_skill_issues.py` mis-parsed any
+multi-line YAML folded (`>`) `description` field as the literal `>` character instead of
+its real content — a real bug, fixed as part of adding the checks below (verified no
+existing test depended on the old behavior).
+
+**Mitigation already in place:** `scripts/scan_skill_issues.py` now checks all of this —
+`name` length/charset/dir-match, `description` length (1024 hard limit, 800 soft warning),
+and the 500-line `SKILL.md` guideline (`oversized_skill_md` check) — as a regression guard
+for any *new* skill. It does not fix the 22 existing oversized skills.
+
+**Fix:** Not attempted yet — splitting 22 skills' detail into `references/*.md` is a
+large, skill-by-skill content restructuring effort (deciding what's core-on-every-load
+vs. reference-on-demand per skill), not a mechanical script. Proposed, not started.
+
+---
+
 ## Resolved
 
 ### KI-R01 — Agent not detecting magic color/variable violations in design system

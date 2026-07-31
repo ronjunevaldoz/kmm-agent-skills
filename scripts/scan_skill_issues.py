@@ -49,6 +49,45 @@ TESTING_MARKERS = [
 ]
 TESTING_RE = re.compile("|".join(TESTING_MARKERS))
 
+# agentskills.io spec (verified against the real skills-ref validator, not guessed):
+# name must be lowercase unicode alphanumeric + hyphens, no leading/trailing/double hyphen.
+_AGENTSKILLS_NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+_AGENTSKILLS_MAX_RECOMMENDED_LINES = 500
+
+# Known, tracked, deliberately-deferred debt (KI-008) — restructuring 22 skills'
+# content into references/*.md is a large per-skill judgment call, not a mechanical
+# fix, so these don't block a release the way a *new* violation would. Any skill or
+# check not in this exact set still blocks — this is a snapshot, not a blanket
+# exemption for the two checks. Update via `python3 scripts/scan_skill_issues.py`
+# only after actually fixing the corresponding skill, never to silence a new one.
+KNOWN_DEBT: set[tuple[str, str]] = {
+    ("kotlin-multiplatform-clean-architecture", "oversized_skill_md"),
+    ("kotlin-multiplatform-code-quality", "oversized_skill_md"),
+    ("kotlin-multiplatform-compose-slot-api", "oversized_skill_md"),
+    ("kotlin-multiplatform-compose-state-container", "oversized_skill_md"),
+    ("kotlin-multiplatform-compose-state-hoisting", "oversized_skill_md"),
+    ("kotlin-multiplatform-design-system", "description_approaching_limit"),
+    ("kotlin-multiplatform-design-system", "oversized_skill_md"),
+    ("kotlin-multiplatform-design-system-extended", "description_approaching_limit"),
+    ("kotlin-multiplatform-design-system-extended", "oversized_skill_md"),
+    ("kotlin-multiplatform-expect-actual", "oversized_skill_md"),
+    ("kotlin-multiplatform-expert", "oversized_skill_md"),
+    ("kotlin-multiplatform-feature-scaffold", "oversized_skill_md"),
+    ("kotlin-multiplatform-layout-system", "description_approaching_limit"),
+    ("kotlin-multiplatform-layout-system", "oversized_skill_md"),
+    ("kotlin-multiplatform-legal-docs", "oversized_skill_md"),
+    ("kotlin-multiplatform-library-publishing", "oversized_skill_md"),
+    ("kotlin-multiplatform-mvi", "oversized_skill_md"),
+    ("kotlin-multiplatform-navigation", "oversized_skill_md"),
+    ("kotlin-multiplatform-network-layer", "oversized_skill_md"),
+    ("kotlin-multiplatform-release", "oversized_skill_md"),
+    ("kotlin-multiplatform-repository-pattern", "oversized_skill_md"),
+    ("kotlin-multiplatform-roborazzi", "oversized_skill_md"),
+    ("kotlin-multiplatform-shadcn-compose", "oversized_skill_md"),
+    ("kotlin-multiplatform-shared-resources", "oversized_skill_md"),
+    ("kotlin-multiplatform-sqldelight-setup", "oversized_skill_md"),
+}
+
 # Required quality sections (as headings or inline markers)
 REQUIRED_SECTIONS = {
     "freshness_rule":    (r"Freshness rule:", "MEDIUM"),
@@ -60,19 +99,46 @@ REQUIRED_SECTIONS = {
 
 
 def parse_frontmatter(text: str) -> dict:
-    """Extract simple key: value pairs from YAML frontmatter."""
+    """Extract key: value pairs from YAML frontmatter — including multi-line
+    folded (`>`) or literal (`|`) block scalars, which most skills use for
+    `description`. Without this, a folded description reads back as the
+    single-character block indicator instead of its real content.
+
+    Deliberately permissive about indentation for plain `key: value` lines (matches
+    the previous implementation) so nested fields like `metadata: / last-updated:`
+    still get picked up — only the block-scalar case needs indentation-aware parsing,
+    to consume its continuation lines instead of misreading each as its own key.
+    """
     fm: dict = {}
+    lines = text.splitlines()
     in_fm = False
-    for line in text.splitlines():
+    i = 0
+    while i < len(lines):
+        line = lines[i]
         if line.strip() == "---":
             if not in_fm:
                 in_fm = True
+                i += 1
                 continue
             else:
                 break
         if in_fm and ":" in line:
             key, _, val = line.partition(":")
-            fm[key.strip()] = val.strip().strip("'\"")
+            key = key.strip()
+            val = val.strip()
+            if val in (">", "|", ">-", "|-"):
+                indent = len(line) - len(line.lstrip())
+                block_lines: list[str] = []
+                i += 1
+                while i < len(lines) and (
+                    not lines[i].strip() or (len(lines[i]) - len(lines[i].lstrip())) > indent
+                ):
+                    block_lines.append(lines[i].strip())
+                    i += 1
+                fm[key] = " ".join(l for l in block_lines if l)
+                continue
+            fm[key] = val.strip("'\"")
+        i += 1
     return fm
 
 
@@ -166,6 +232,70 @@ def scan_skill(skill_dir: Path) -> list[dict]:
             ),
         )
 
+    # 5. agentskills.io spec: name field (verified against the real skills-ref
+    # validator — all 64 skills pass today, kept as a regression guard for new ones)
+    name_val = fm.get("name", "")
+    if len(name_val) > 64:
+        add(
+            severity="HIGH",
+            check="name_too_long",
+            detail=f"name is {len(name_val)} chars — spec limit is 64",
+            prompt_hint=f'Shorten the `name` field in `{skill_name}`\'s frontmatter to 64 characters or fewer.',
+        )
+    if name_val and not _AGENTSKILLS_NAME_RE.match(name_val):
+        add(
+            severity="HIGH",
+            check="name_invalid_format",
+            detail=f"name '{name_val}' fails agentskills.io's charset/hyphen rules",
+            prompt_hint=(
+                f'Fix the `name` field in `{skill_name}`\'s frontmatter — must be lowercase '
+                f'alphanumeric + hyphens only, no leading/trailing/consecutive hyphens.'
+            ),
+        )
+    if name_val and name_val != skill_dir.name:
+        add(
+            severity="HIGH",
+            check="name_dir_mismatch",
+            detail=f"frontmatter name '{name_val}' != directory name '{skill_dir.name}'",
+            prompt_hint=f'Make the `name` field in `{skill_name}`\'s frontmatter match its parent directory name — required by the agentskills.io spec.',
+        )
+
+    # 6. agentskills.io spec: description length (hard limit 1024; soft warning
+    # above 800 since "keep it concise" is an explicit best-practice)
+    if len(description) > 1024:
+        add(
+            severity="HIGH",
+            check="description_too_long",
+            detail=f"description is {len(description)} chars — spec hard limit is 1024",
+            prompt_hint=f'Shorten `{skill_name}`\'s `description` field to 1024 characters or fewer.',
+        )
+    elif len(description) > 800:
+        add(
+            severity="LOW",
+            check="description_approaching_limit",
+            detail=f"description is {len(description)} chars — {1024 - len(description)} under the 1024 hard limit",
+            prompt_hint=f'Consider trimming `{skill_name}`\'s `description` — approaching the 1024-char spec limit, and agentskills.io\'s own guidance says to keep it concise.',
+        )
+
+    # 7. agentskills.io best-practice: SKILL.md body under 500 lines, with detail
+    # pushed to references/ (progressive disclosure) — soft guideline, not part of
+    # the hard spec (skills-ref validate doesn't check it), but real and verified:
+    # this collection's own consumer-project skill-standards detector already
+    # enforces this exact 500-line number on OTHER people's skills without holding
+    # itself to it.
+    if len(lines) > _AGENTSKILLS_MAX_RECOMMENDED_LINES:
+        add(
+            severity="MEDIUM",
+            check="oversized_skill_md",
+            detail=f"{len(lines)} lines — agentskills.io recommends under 500, with detail moved to references/",
+            prompt_hint=(
+                f'`{skill_name}` is {len(lines)} lines. Per agentskills.io\'s progressive-'
+                f'disclosure guidance, split detailed reference material into `references/'
+                f'*.md` files, telling the agent exactly when to load each one, and keep '
+                f'`SKILL.md` itself under 500 lines / ~5000 tokens.'
+            ),
+        )
+
     return issues
 
 
@@ -202,9 +332,14 @@ def main() -> int:
         by_severity[issue["severity"]] = by_severity.get(issue["severity"], 0) + 1
         by_check[issue["check"]] = by_check.get(issue["check"], 0) + 1
 
+    blocking_issues = [
+        i for i in all_issues if (i["skill_dir"], i["check"]) not in KNOWN_DEBT
+    ]
+
     report = {
         "generated": TODAY.isoformat(),
         "total_issues": len(all_issues),
+        "blocking_issues": len(blocking_issues),
         "by_severity": by_severity,
         "by_check": by_check,
         "open_known_issues": open_known,
@@ -212,7 +347,7 @@ def main() -> int:
     }
 
     print(json.dumps(report, indent=2))
-    return 0 if not all_issues else 1
+    return 0 if not blocking_issues else 1
 
 
 if __name__ == "__main__":
