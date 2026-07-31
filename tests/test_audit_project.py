@@ -2912,6 +2912,134 @@ class CombinedComponentFileTests(unittest.TestCase):
             self.assertFalse(any("combined component file" in f for f in findings))
 
 
+class CombinedStyleFileTests(unittest.TestCase):
+    """Same bundling problem as combined component files, one directory over —
+    styles/ButtonStyles.kt should hold exactly ButtonVariant, not every variant.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_two_variant_types_in_one_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/designsystem/styles/AllStyles.kt",
+                "sealed class ButtonVariant\nsealed class CardVariant\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("combined style file" in f for f in findings))
+
+    def test_ignores_single_variant_type(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/designsystem/styles/ButtonStyles.kt",
+                "sealed class ButtonVariant\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined style file" in f for f in findings))
+
+    def test_ignores_outside_styles_path(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/designsystem/other/AllStyles.kt",
+                "sealed class ButtonVariant\nsealed class CardVariant\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("combined style file" in f for f in findings))
+
+
+class ViewModelTooManyIntentsTests(unittest.TestCase):
+    """_detect_viewmodel_size only measures lines — a terse ViewModel handling 20+
+    Intent variants in short when-branches can dodge that threshold.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def _intent_block(self, count: int) -> str:
+        variants = "\n".join(f"    data object Action{i} : Intent" for i in range(count))
+        return f"sealed interface Intent {{\n{variants}\n}}\n"
+
+    def test_flags_fifteen_plus_intents(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/chat/presenter/src/commonMain/kotlin/ChatViewModel.kt",
+                "class ChatViewModel : ViewModel() {\n}\n" + self._intent_block(16),
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel too many intents" in f for f in findings))
+
+    def test_ignores_few_intents(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/chat/presenter/src/commonMain/kotlin/ChatViewModel.kt",
+                "class ChatViewModel : ViewModel() {\n}\n" + self._intent_block(4),
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel too many intents" in f for f in findings))
+
+
+class ViewModelMultipleStateFlowsTests(unittest.TestCase):
+    """MVI's contract is one State per screen — exposing state1/state2/state3 as
+    separate public StateFlows is often the same god-ViewModel smell wearing a
+    different shape.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_multiple_exposed_stateflows(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/chat/presenter/src/commonMain/kotlin/ChatViewModel.kt",
+                "class ChatViewModel : ViewModel() {\n"
+                "    val state: StateFlow<ChatState> = TODO()\n"
+                "    val projectState: StateFlow<ProjectState> = TODO()\n"
+                "    val sessionState: StateFlow<SessionState> = TODO()\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("viewmodel multiple stateflows" in f for f in findings))
+
+    def test_ignores_single_state_and_effect(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/chat/presenter/src/commonMain/kotlin/ChatViewModel.kt",
+                "class ChatViewModel : ViewModel() {\n"
+                "    val state: StateFlow<ChatState> = TODO()\n"
+                "    val effect: Flow<ChatEffect> = TODO()\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel multiple stateflows" in f for f in findings))
+
+    def test_ignores_one_extra_stateflow(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/chat/presenter/src/commonMain/kotlin/ChatViewModel.kt",
+                "class ChatViewModel : ViewModel() {\n"
+                "    val state: StateFlow<ChatState> = TODO()\n"
+                "    val validationState: StateFlow<Boolean> = TODO()\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel multiple stateflows" in f for f in findings))
+
+
 class MixedDesignSystemUsageTests(unittest.TestCase):
     """kotlin-multiplatform-shadcn-compose says "Never combine with
     kotlin-multiplatform-design-system" - documented but never mechanically checked.

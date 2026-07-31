@@ -1525,6 +1525,135 @@ def _detect_combined_component_file(root: Path) -> list[str]:
     return findings
 
 
+# ── Combined design-system style file ────────────────────────────────────────────
+# Same bundling problem as _detect_combined_component_file, one directory over:
+# styles/ButtonStyles.kt holds exactly ButtonVariant, matched 1:1 with
+# components/AppButton.kt. Nothing stopped a styles/AllStyles.kt from bundling
+# ButtonVariant/CardVariant/BadgeVariant into one file the same way components/ could.
+
+_VARIANT_SEALED_TYPE_RE = re.compile(r"\bsealed\s+(?:class|interface)\s+(\w*Variant)\b")
+
+
+def _detect_combined_style_file(root: Path) -> list[str]:
+    """Flag a designsystem/styles file defining 2+ *Variant sealed types."""
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        p = path.as_posix().lower()
+        if "designsystem" not in p or "/styles/" not in p:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        matches = list(_VARIANT_SEALED_TYPE_RE.finditer(text))
+        if len(matches) < 2:
+            continue
+        names = [m.group(1) for m in matches]
+        line_no, snippet = _at(text, matches[0].start())
+        findings.append(
+            f"combined style file [MEDIUM]: {path.relative_to(root)}:{line_no} — "
+            f"defines {len(names)} variant types ({', '.join(names)}) in one file; "
+            f"keep one component's variants per file, matching this project's own "
+            f"styles/<Component>Styles.kt layout\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
+# ── ViewModel handling too many distinct Intent variants ────────────────────────
+# _detect_viewmodel_size only measures line count — a terse ViewModel handling 20+
+# Intent variants in short when-branches can dodge that threshold while still doing
+# far too much. Counts data class/data object declarations nested inside a
+# `sealed interface Intent { ... }` (or `sealed class`) block via brace depth.
+
+_INTENT_SEALED_TYPE_RE = re.compile(r"\bsealed\s+(?:class|interface)\s+Intent\b[^{]*\{")
+_INTENT_VARIANT_RE = re.compile(r"\bdata\s+(?:class|object)\s+\w+")
+_INTENT_COUNT_THRESHOLD = 15
+
+
+def _detect_viewmodel_too_many_intents(root: Path) -> list[str]:
+    """Flag a ViewModel/Contract file whose sealed Intent type has 15+ variants."""
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not (path.stem.endswith("ViewModel") or path.stem.endswith("Contract")
+                or _is_viewmodel_file(text)):
+            continue
+        match = _INTENT_SEALED_TYPE_RE.search(text)
+        if not match:
+            continue
+        depth = 1
+        i = match.end()
+        while i < len(text) and depth > 0:
+            if text[i] == "{":
+                depth += 1
+            elif text[i] == "}":
+                depth -= 1
+            i += 1
+        body = text[match.end():i]
+        count = len(_INTENT_VARIANT_RE.findall(body))
+        if count < _INTENT_COUNT_THRESHOLD:
+            continue
+        line_no, snippet = _at(text, match.start())
+        findings.append(
+            f"viewmodel too many intents [MEDIUM]: {path.relative_to(root)}:{line_no} "
+            f"— {count} Intent variants in one sealed type; a ViewModel handling this "
+            f"many distinct user actions is likely doing more than one screen's worth "
+            f"of work even if it stays under the line-count threshold — consider "
+            f"splitting into separate screens/ViewModels per kotlin-multiplatform-mvi's "
+            f"orchestration decision order\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
+# ── ViewModel exposing multiple StateFlow properties instead of one UiState ────
+# MVI's whole contract is one State per screen. A ViewModel exposing state1/state2/
+# state3 as separate public StateFlows is often the same god-ViewModel smell wearing
+# a different shape — the fix is combine() into one State, not multiple flows a
+# screen has to collect independently. `state` and `effect` are the standard MVI
+# pair and excluded.
+
+_PUBLIC_STATEFLOW_PROPERTY_RE = re.compile(r"(?m)^\s*val\s+(\w+)\s*:\s*StateFlow\s*<")
+
+
+def _detect_viewmodel_multiple_stateflows(root: Path) -> list[str]:
+    """Flag a ViewModel exposing 2+ public StateFlow properties beyond `state`."""
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not (path.stem.endswith("ViewModel") or _is_viewmodel_file(text)):
+            continue
+        matches = [
+            m for m in _PUBLIC_STATEFLOW_PROPERTY_RE.finditer(text)
+            if m.group(1) != "state"
+        ]
+        if len(matches) < 2:
+            continue
+        names = [m.group(1) for m in matches]
+        line_no, snippet = _at(text, matches[0].start())
+        findings.append(
+            f"viewmodel multiple stateflows [MEDIUM]: {path.relative_to(root)}:{line_no} "
+            f"— exposes {len(names)} StateFlow properties beyond 'state' "
+            f"({', '.join(names)}); MVI's contract is one State per screen — combine() "
+            f"these into one State instead of making the screen collect multiple flows\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
 # ── Raw HTTP bypassing an established Ktor client ──────────────────────────────
 # Real bug: kotlin-multiplatform-network-layer only checked for a module literally
 # named :core:network. A new server module or feature under a different name found no
@@ -3318,6 +3447,11 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Combined design-system component file ────────────────────────────────────
     findings.extend(_detect_combined_component_file(root))
+    findings.extend(_detect_combined_style_file(root))
+
+    # ── ViewModel god-class signals beyond line count ────────────────────────────
+    findings.extend(_detect_viewmodel_too_many_intents(root))
+    findings.extend(_detect_viewmodel_multiple_stateflows(root))
 
     # ── Extensible abstract class in commonMain ─────────────────────────────────
     findings.extend(_detect_extensible_abstract_class_in_common(root))

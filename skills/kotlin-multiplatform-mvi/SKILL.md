@@ -1495,6 +1495,8 @@ must stay synchronized — see the Shared ViewModel section above for the patter
 
 ## Common Anti-Patterns
 
+- a ViewModel's `Intent` sealed type growing past ~15 variants — a god-ViewModel signal that line count alone can miss, since terse `when` branches keep the file short while the ViewModel still does one screen too many jobs
+- exposing `state1`/`state2`/`state3` as separate public `StateFlow` properties instead of `combine()`-ing them into one `State` — breaks the Contract pattern's "one State per screen" rule without tripping a size threshold
 - using `SharedFlow` for effects — events replay on new collectors and break "fire once" guarantees
 - emitting `Effect` from `init {}` — fires on every ViewModel recreation, not just on user action
 - putting navigation logic inside `State` — navigation is an effect, not persisted state
@@ -1539,6 +1541,7 @@ If the ViewModel is growing beyond 150–200 lines, apply the decomposition deci
 - `kotlin-multiplatform-unit-testing` — `runTest` + Turbine for testing `StateFlow` transitions and `Channel` effects
 - `kotlin-multiplatform-compose-state-container` — when to use `remember` vs ViewModel as the state container
 - `kotlin-multiplatform-preview-driven-development` — `FooContent` stateless composables are the fast-preview target
+- `kotlin-multiplatform-audit` — `_detect_viewmodel_too_many_intents` (15+ Intent variants — a god-ViewModel signal line count alone can miss) and `_detect_viewmodel_multiple_stateflows` (2+ exposed StateFlow properties beyond `state` — the Contract pattern's "one State per screen" broken a different way)
 
 ---
 
@@ -1559,6 +1562,7 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
+| 2026-07-26 | Added two more god-ViewModel signals beyond line count: 15+ `Intent` variants, and 2+ exposed `StateFlow` properties beyond `state`. Backed by `kotlin-multiplatform-audit`'s new `_detect_viewmodel_too_many_intents`/`_detect_viewmodel_multiple_stateflows` — real gap, since `_detect_viewmodel_size` alone can miss a terse-but-overloaded ViewModel. 2 new anti-patterns. |
 | 2026-07-26 | Added a de-escalation guardrail: a Coordinator ViewModel (Option 2/3) is not exempt from `_detect_viewmodel_size`'s god-ViewModel threshold — a real gap where choosing a coordinator to escape a god composable could quietly relocate the same size problem instead of fixing it. If a coordinator keeps growing after delegating to State Holders/use cases, that's a signal to split back to Option 1. 1 new anti-pattern. |
 | 2026-06-28 | Add @Stable/@Immutable rule for State types; CoroutineExceptionHandler in MviViewModel base class; rememberUpdatedState section with decision table. Three new anti-patterns.
 | 2026-06-28 | Add multi-source state: combine(), WhileSubscribed(5_000) table, flatMapLatest, snapshotFlow with debounce example. Four new anti-patterns.
