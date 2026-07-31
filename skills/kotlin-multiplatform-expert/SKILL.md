@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-19'
+  last-updated: '2026-07-31'
   keywords:
     - KMP expert
     - orchestrator
@@ -203,7 +203,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 64 Skills and What They Own
+## The 65 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -243,6 +243,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-xcframework-spm` | XCFramework build, SPM binary target, Xcode integration |
 | `kotlin-multiplatform-library-publishing` | Maven Central publishing (vanniktech plugin), GitHub Packages, BOM, binary-compatibility-validator, SNAPSHOT vs stable channels, GPG signing, release checklist |
 | `kotlin-multiplatform-docs-site` | GitHub Pages developer guide for a published library — MkDocs Material, Dokka HTML API reference, compiler-verified snippet extraction, release-tag-triggered CI deploy |
+| `kotlin-multiplatform-api-mimicry` | Mimicking a reference API's shape (Modifier-style chains, slot lambdas, DSL markers) for a from-scratch library on a non-standard runtime (custom native renderer, custom transport) — plain-function DSL vs. real-compiler-plugin decision, mirror-map documentation |
 | `kotlin-multiplatform-logging` | logger wrapper, kotlin-logging or Kermit, log levels, logger factory, crash breadcrumb bridge, Koin wiring |
 
 ### Layer 3 — Platform Patterns
@@ -321,6 +322,7 @@ kotlin-multiplatform-feature-scaffold       ← scaffold second (implements the 
 ├── kotlin-multiplatform-network-layer      (depends on: scaffold)
 ├── kotlin-multiplatform-sqldelight-setup   (depends on: scaffold)
 ├── kotlin-multiplatform-xcframework-spm    (depends on: scaffold, ci)
+├── kotlin-multiplatform-api-mimicry        (depends on: library-publishing)
 ├── kotlin-multiplatform-expect-actual      (depends on: scaffold)
 ├── kotlin-multiplatform-repository-pattern (depends on: network-layer, sqldelight-setup)
 ├── kotlin-multiplatform-navigation         (depends on: scaffold)
@@ -648,6 +650,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "adaptive layout", "WindowSizeClass", "tablet layout", "desktop layout", "mobile layout", "phone layout", "list detail", "detail split", "split screen", "navigation rail", "Compact Medium Expanded", "responsive UI", "master detail", "multi-pane", "different layout phone tablet", "different layout phone desktop", "screen size breakpoint", "pane layout", "layout per screen size", "layout phone desktop" | `kotlin-multiplatform-adaptive-layout` |
 | "dialog", "bottom sheet", "toast", "tabs", "TopAppBar", "Checkbox" | `kotlin-multiplatform-design-system-extended` |
 | "shadcn-compose", "ShadcnButton", "ShadcnTheme", "ShadcnCard", "shadcn ui kotlin", "shadcn compose multiplatform", "ExperimentalFoundationStyleApi", "shadcn kmp" | `kotlin-multiplatform-shadcn-compose` |
+| "mimic api", "api mimicry", "clone api shape", "inspired by jetpack compose", "custom dsl engine", "from-scratch renderer", "vulkan ui", "metal ui", "port api ergonomics", "reimplement compose-like dsl", "non-compose renderer", "engine-agnostic dsl", "own compiler-free dsl", "api shape porting" | `kotlin-multiplatform-api-mimicry` |
 | "slot API", "content lambda", "composable parameter", "scoped slot" | `kotlin-multiplatform-compose-slot-api` |
 | "state hoisting", "hoist state", "controlled component", "where does state go" | `kotlin-multiplatform-compose-state-hoisting` |
 | "remember vs ViewModel", "rememberSaveable", "state survival", "config change" | `kotlin-multiplatform-compose-state-container` |
@@ -871,6 +874,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added `kotlin-multiplatform-api-mimicry` (65th skill) — a real gap: nothing covered mimicking a reference API's *shape* (Modifier-style chains, slot lambdas, DSL markers) when building a KMP library on a non-standard runtime (custom native renderer, custom transport) that isn't real Compose Multiplatform underneath. Distinct from `design-system`, which builds atop the real Compose runtime. Added to the Meta list, Skill Invocation Map, and dependency graph. |
 | 2026-07-15 | Expanded the project-owned scaffold contract for Claude consumers: `rules/` and `docs/reference/ai-collaboration.md` are now part of the canonical source layout, and `CLAUDE.md` is explicitly treated as a thin bootstrap rather than the only copy of project policy. This keeps project-specific agent guidance at the repo root while `.claude/` remains the deployed runtime layer. |
 | 2026-07-14 | Added "Project-Specific Commands/Agents/Skills — Source of Truth": a real gap found while reviewing a consumer project (a KMP game engine) whose two custom agent definitions were authored directly into `.claude/agents/` with no project-owned source anywhere. Documents mirroring this repo's own layout (`agents/`, `commands/`, `skills/`, `hooks/` at the project root as canonical source, `.claude/` as the deployed copy) for any project-specific artifact that isn't from `kmm-agent-skills` itself. Cross-referenced from `/kmm-setup-agents`, which only deploys this collection's own skills/commands, not project-owned ones. Corrected same-day: the layout initially nested a skill under an app-name folder (`skills/<app-name>/<skill-name>/`) — verified against `anthropic-skills:skill-creator`'s real, official skill anatomy that this isn't a recognized convention; skills are flat, named after what they do. Fixed to `skills/<skill-name>/`, with name-collision guidance (rename the skill, don't nest it) instead. |
 | 2026-07-11 | Added an invocation-map row routing "composition over inheritance"/"abstract class in commonMain"/"agent over-abstracting" to `kotlin-multiplatform-clean-architecture`'s new Composition Over Inheritance section — a real, recurring anti-pattern where an agent creates a public abstract class in commonMain requiring consumer inheritance. |

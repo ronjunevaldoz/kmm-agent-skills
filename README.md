@@ -9,7 +9,7 @@
 AI agent skills for **Kotlin Multiplatform (KMP)** development — clean module boundaries,
 version catalogs, build-logic convention plugins, and explicit review loops before code is generated.
 
-Built on the open [Agent Skills](https://agentskills.io) format. All 64 skills verified
+Built on the open [Agent Skills](https://agentskills.io) format. All 65 skills verified
 against the real [`skills-ref`](https://github.com/agentskills/agentskills) reference
 validator — see [`docs/reference/agentskills-io-standards.md`](docs/reference/agentskills-io-standards.md)
 for what was checked and how.
@@ -122,7 +122,7 @@ python3 scripts/release.py auto --dry-run # preview first
 
 ## Skills
 
-64 skills covering the full KMP stack. Load the smallest set that answers the request.
+65 skills covering the full KMP stack. Load the smallest set that answers the request.
 Health at a glance (size, freshness, known issues) without reading every `SKILL.md`:
 [`docs/reference/skills-report.md`](docs/reference/skills-report.md).
 
@@ -155,6 +155,7 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 - [`xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) — XCFramework and SPM export
 - [`library-publishing`](skills/kotlin-multiplatform-library-publishing/) — Maven Central, GitHub Packages, BOM, binary-compat-validator, GPG signing
 - [`docs-site`](skills/kotlin-multiplatform-docs-site/) — GitHub Pages developer guide, MkDocs Material, Dokka HTML API reference, compiler-verified code examples
+- [`api-mimicry`](skills/kotlin-multiplatform-api-mimicry/) — mimic a reference API's shape (Modifier chains, slot DSLs) for a from-scratch library on a non-standard runtime
 - [`mongodb-database`](skills/kotlin-multiplatform-mongodb-database/) — MongoDB coroutine driver and repositories
 - [`kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) — Kotlin RPC boundaries and scaffolding
 - [`jni-pro`](skills/kotlin-multiplatform-jni-pro/) — JVM JNI bridge to native C/C++
