@@ -57,6 +57,7 @@ The script detects architectural and design smells:
 | `design system prefix mismatch` | An `App*`-named declaration under `core/designsystem` while `docs/design-system.md` records a different resolved `COMPONENT_PREFIX` — the resolved prefix wasn't actually used when generating |
 | `empty platform source set` | An `androidMain`/`iosMain`/`jvmMain`/... source directory with no `.kt` files, or files containing only package/import/comments — dead scaffolding; Gradle compiles fine without it |
 | `unauthorized app submodule` | A `build.gradle.kts` under `app/<name>/` where `<name>` isn't one of kmp-wizard's own four entry points (`androidApp`/`desktopApp`/`webApp`/`shared`) — new feature logic belongs in `:feature:*`, new cross-feature infrastructure in `:core:*`, never a new `:app:<name>` module |
+| `leftover wizard demo code` | kmp-wizard's default `class Greeting`/`compose_multiplatform` logo demo still present — delete it before real feature work starts; `:app:shared` should only ever hold composition-root wiring |
 
 The script also prints a separate, non-blocking `HINTS` section:
 
@@ -131,7 +132,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `string navigation` | `navigation` | String-based routes (`composable("…")`, `navigate("…")`, `startDestination = "…"`) — switch to `@Serializable` type-safe routes: `composable<Route>`, `navigate(Route)` |
 | `dto leak to domain` | `repository-pattern`, `clean-architecture` | A `:domain` / `*UseCase` file imports `*.dto.*` or `*.entity.*` — map to domain models in `:data`; domain never sees DTOs/entities |
 | `repository leaks data type` | `repository-pattern` | A `*Repository` **interface** references `*Dto` / `*Entity` — the interface must speak domain types only; return domain models and map DTOs/entities in `:data` |
-| `raw component bypass` | `design-system`, `design-system-extended` | A screen uses raw Material components (`Scaffold`, `Button`, `Card`, `TextField`, …) while the project has a design system — use the `App*` wrappers (`AppScaffold`, `AppButton`, …) so tokens stay consistent |
+| `raw component bypass` | `design-system`, `design-system-extended`, `shadcn-compose` | A screen uses raw Material components while the project has a design system wired — generated/owned (`Scaffold`→`AppScaffold`, `Button`→`AppButton`, …) or shadcn-compose (`Button`/`Card`/`TextField`/`AlertDialog`/`ModalBottomSheet`→`Shadcn*`; `Scaffold`/`TopAppBar` deliberately excluded for shadcn — no equivalent exists, keep them raw) |
 | `fixed width overflow` | `adaptive-layout` | A fixed `.width(≥360.dp)` / `.size(≥360.dp)` or constraint-ignoring `.requiredWidth(…)` overflows a compact phone — use `fillMaxWidth()`, `weight()`, or `widthIn(max = …)`. For true "compact enough" verification, render at 360×800 via Roborazzi and run `/kmm-audit-screenshots` |
 | `handwritten imagevector` | `imagevector-generator` | An `ImageVector.Builder` with 10+ hand-written path commands and no GENERATED header — hallucinated coordinates produce broken art; re-trace with `convert_image_to_imagevector.py` (`/kmm-vectorize`) |
 | `raster asset in commonMain` | `imagevector-generator` | PNG/JPG in `commonMain` resources — icons/flat art should be compiled ImageVectors (`/kmm-vectorize`); photos are exempt under `assets/photos/` |
@@ -157,6 +158,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `design system prefix mismatch` | `design-system` | Regenerate the flagged file(s) with the resolved `COMPONENT_PREFIX` directly — don't hand-rename `App*` symbols after the fact |
 | `empty platform source set` | `feature-scaffold` | Delete the empty source directory, or implement the real `expect`/`actual` code if this module genuinely needs platform-specific logic — never scaffold the folder "just in case" |
 | `unauthorized app submodule` | `feature-scaffold` | Move the module's content into `:feature:<name>:*` or `:core:*`, then delete the `app/<name>/` module and its `settings.gradle.kts` include |
+| `leftover wizard demo code` | `feature-scaffold` | Delete `Greeting.kt`/the demo `App()` body; rewrite `:app:shared`'s `App()` as composition-root-only wiring (theme, Koin, NavHost) |
 | `name-behavior drift` (hint) | `mvi` | Read the ViewModel and its Contract — if the name genuinely no longer fits, rename it and update its Koin binding + composable references. If it's a false positive (generic name is fine), no action needed — this is a manual call, not a rule |
 
 ---

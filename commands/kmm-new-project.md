@@ -507,17 +507,15 @@ Draft three concrete color options, not just a category name, then use
 4. Corner radius — Medium 8dp/12dp (recommended) / Small 4dp / Large 16dp
 
 **Batch 2 — component sourcing** (3 questions, one call):
-1. Component library — **Generated & owned** (`kotlin-multiplatform-design-system`, recommended default: no external dependency, full control, safe across CMP upgrades) vs. **shadcn-compose** (published library, 70+ components, faster start — note inline: depends on the experimental `@ExperimentalFoundationStyleApi`; a future CMP release that changes it breaks the dependency with no fix except an upstream shadcn-compose release, which is exactly the risk the owned option avoids)
-2. Icons — Generate on demand (`kotlin-multiplatform-imagevector-generator`, recommended: no dependency, exact icons, deterministic) vs. heroicons-compose (published, faster start, Outline variant only today)
+1. Component library — **shadcn-compose** (recommended default: published library, 70+ components, real preset theming via `ShadcnTheme`, faster start — note inline: depends on the experimental `@ExperimentalFoundationStyleApi`; a future CMP release that changes it breaks the dependency with no fix except an upstream shadcn-compose release) vs. **Generated & owned** (`kotlin-multiplatform-design-system`, no external dependency, full control, safe across CMP upgrades — pick this to avoid the experimental-API risk entirely)
+2. Icons — **heroicons-compose** (recommended default: published, Maven Central, faster start, Outline variant only today) vs. Generate on demand (`kotlin-multiplatform-imagevector-generator`, no dependency, exact icons, deterministic)
 3. Utility styling — Skip (recommended) vs. add tailwind-compose (stable-API utility modifiers, combines with either component library choice)
 
-**Do not generate any design system code until both batches are confirmed.**
-
-If shadcn-compose was chosen, get an explicit second confirmation via `AskUserQuestion`
-before proceeding — this is a real, hard-to-reverse dependency risk, not a stylistic
-default: "Add shadcn-compose as a real Gradle dependency, accepting a future CMP release
-may break it with no fix except an upstream shadcn-compose release?" — options: confirm,
-or switch to the owned scaffold instead.
+**Do not generate any design system code until both batches are confirmed.** The Batch 2
+question's inline risk note is the confirmation for shadcn-compose — since it's now the
+recommended default, do not add a second separate confirmation step on top of it; the
+user already saw and answered the risk in the same question. If the owned scaffold was
+picked instead, skip Step 6a-ii and go straight to Step 6b's owned-scaffold branch.
 
 ### 6a-ii — Draft a ShadcnTheme recommendation (only if shadcn-compose was confirmed)
 
@@ -556,7 +554,7 @@ rule as the token draft in 6a.
 
 ### 6b — Generate the design system using confirmed tokens
 
-**If the owned scaffold (default) was chosen:**
+**If the owned scaffold was chosen:**
 
 Load `kotlin-multiplatform-design-system`. Generate using the confirmed choices:
 - `AppColors` — light and dark color schemes with the confirmed palette
@@ -569,7 +567,7 @@ Load `kotlin-multiplatform-design-system`. Generate using the confirmed choices:
 If the inferred plan has more than 3 screens, also load
 `kotlin-multiplatform-design-system-extended` for Dialog, Sheet, Toast, Tabs.
 
-**If shadcn-compose was chosen and confirmed:**
+**If shadcn-compose was chosen (recommended default):**
 
 Load `kotlin-multiplatform-shadcn-compose` instead of `kotlin-multiplatform-design-system`
 — it covers the Maven dependency (`io.github.ronjunevaldoz:shadcn-compose` plus the

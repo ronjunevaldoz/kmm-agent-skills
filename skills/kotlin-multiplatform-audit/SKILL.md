@@ -111,6 +111,12 @@ the user and the other skills what to do next.
   the four entry points kmp-wizard itself creates (`androidApp`/`desktopApp`/`webApp`/
   `shared`). A new `app/<name>/build.gradle.kts` is a HIGH finding; the content belongs
   in `:feature:*` or `:core:*`.
+- kmp-wizard's default demo screen (`class Greeting`, the `compose_multiplatform` logo
+  resource) must not survive past scaffolding — a HIGH finding if it's still present.
+- Raw Material components are flagged against **whichever** design system a project
+  actually has wired — the generated/owned `App*` system, or shadcn-compose's `Shadcn*`
+  components. For shadcn-compose specifically, `Scaffold`/`TopAppBar` are never flagged —
+  shadcn/ui has no equivalent, keeping them raw is correct, not a bypass.
 
 ### 1a) Naming still matches behavior
 - `audit_project.py` runs a cheap, non-blocking heuristic (`name-behavior drift`): flags a
@@ -384,6 +390,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added `_detect_leftover_wizard_demo_code` — kmp-wizard's real `all-targets` template ships a working demo screen (`class Greeting`, a `compose_multiplatform` logo resource) that must be deleted once real feature work starts; left in place it's dead sample code shipping to production. Extended `_detect_raw_component_bypass` to also fire for shadcn-compose projects (`ShadcnTheme`/`Shadcn*` marker), using a narrower, separately-verified component map (`Button`/`Card`/`TextField`/`AlertDialog`/`ModalBottomSheet` only — `Scaffold`/`TopAppBar` deliberately excluded since shadcn/ui has no equivalent, per `/kmm-migrate-to-shadcn`'s own mapping table; flagging them would have been wrong). Previously this detector only recognized the generated/owned `App*` system, so a shadcn-compose project got zero raw-component enforcement. 7 new regression tests. |
 | 2026-07-31 | Added `_detect_unauthorized_app_submodule` — kmp-wizard's real `all-targets` template (verified against the live repo) nests exactly four modules under `app/`: `androidApp`/`desktopApp`/`webApp`/`shared`. A new module dropped directly under `app/<name>/` duplicates `:core:*`/`:feature:*`'s job and blurs the entry-point boundary kmp-wizard itself draws. 3 new regression tests. |
 | 2026-07-31 | Added `generate_structure_diagram.py` — renders actual App/Library module structure (markdown tree + Mermaid) against the canonical layout, so a developer can visually verify a project hasn't drifted; informational only, wired into `/kmm-verify` as an optional Step 1a. Added `_detect_name_behavior_drift` — a non-blocking heuristic flagging a `*ViewModel` whose name shares no word with its own Intent variants; deliberately kept out of `audit_project()`'s blocking findings and surfaced through a separate `HINTS` section in `main()`, since a token-overlap check has real false-positive risk. Real gaps — no structure-visualization tool existed, and naming drift had zero mechanical or documented check. 7 new regression tests. |
 | 2026-07-26 | Added `_detect_bare_core_module` — `_detect_module_layer_violation`'s module-path regex only ever matched `feature/<name>/<layer>`, so it never applied to `:core` at all; a monolithic `core/build.gradle.kts` (instead of split `:core:model`/`:core:api`/etc. submodules, per `kotlin-multiplatform-clean-architecture`'s own ":core" vs ":feature" Split table) went completely uncaught. 3 new regression tests. |

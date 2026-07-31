@@ -1,6 +1,6 @@
 # /setup-hooks
 
-**KMM Agent Skills** — wire the three provided hooks into your project so the pipeline
+**KMM Agent Skills** — wire the provided hooks into your project so the pipeline
 enforces architecture rules automatically, without requiring you to remember to run them.
 
 There are two independent integration points: **git hooks** (for your local repo) and
@@ -8,7 +8,7 @@ There are two independent integration points: **git hooks** (for your local repo
 
 ---
 
-## The three hooks
+## The hooks
 
 | Hook file | What it does | When it runs |
 |---|---|---|
@@ -16,6 +16,7 @@ There are two independent integration points: **git hooks** (for your local repo
 | `hooks/validate-architecture.sh` | Runs `audit_project.py` after any file edit. Surfaces findings inline in the agent's output. | After every `Edit`/`Write` |
 | `hooks/check-skill-freshness.sh` | Warns when a skill's `last-updated` is >90 days old. Non-blocking. | Manually or scheduled CI |
 | `hooks/session-start-check-updates.sh` | Wraps `scripts/check_updates.py` — warns the agent up front if this repo's skills are behind `origin/main`. Non-blocking, always exits 0. | Every Claude Code session start (kmm-agent-skills clone only) |
+| `scripts/check-installed-skills-version.sh` | Compares a *deployed* `skills/` copy's version marker against the latest GitHub Release. Non-blocking when wrapped per Option E. | Every Claude Code session start (any consumer project with a deployed copy) |
 
 ---
 
@@ -133,6 +134,46 @@ Always exits 0 — a stale-skills warning should never block starting a session.
 
 ---
 
+## Option E — Claude Code SessionStart hook (installed skills version check, consumer projects)
+
+Applicable to any project with a **deployed** (non-git) `skills/` copy — one synced via
+`sync-local-assistant-skills.sh` or `update-consumer-skills.sh`, either of which writes a
+`.kmm-agent-skills-version` marker file. Unlike Option D (which needs a git clone tracking
+`origin/main`), this works from just the deployed copy plus network access — one `curl`
+call against the latest GitHub Release, no git required:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash <path-to-skills-repo>/scripts/check-installed-skills-version.sh .claude/skills; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Pass the project's actual deployed skills path as the argument (`.claude/skills` for a
+project-local deploy, or omit it entirely to check the default global
+`~/.claude/skills`). The trailing `; exit 0` matters — the script's own exit codes (1 =
+update available, 2 = no marker or unreachable) are meaningful for a human running it
+directly, but a SessionStart hook must never fail the session over a stale-skills
+warning, so the wrapper always succeeds regardless.
+
+**Why SessionStart, not a per-skill-invocation interceptor:** a version check needs one
+network round-trip: cheap once per session, wasteful (and slow) if repeated on every
+single skill load within that session — skills don't go stale mid-session. SessionStart
+gives the same "notice a stale install early" value at a fraction of the cost, and
+degrades safely offline (exit 2, printed, session continues).
+
+---
+
 ## Recommended setup for most projects
 
 ```
@@ -140,6 +181,7 @@ Option A  (pre-commit) — always set up
 Option B  (PostToolUse) — set up if you use Claude Code regularly for KMP work
 Option C  (CI freshness) — set up once the skills collection stabilises (v2.0+)
 Option D  (SessionStart update check) — kmm-agent-skills clone/fork only, already wired here
+Option E  (SessionStart installed-version check) — any consumer project with a deployed skills/ copy
 ```
 
 ---

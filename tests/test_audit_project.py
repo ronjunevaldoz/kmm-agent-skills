@@ -1759,6 +1759,98 @@ class RawComponentBypassTests(unittest.TestCase):
             self.assertFalse(any("raw component bypass" in f for f in findings))
 
 
+class ShadcnRawComponentBypassTests(unittest.TestCase):
+    def _shadcn_marker(self, d: Path) -> None:
+        (d / "ShadcnButton.kt").write_text(
+            "import androidx.compose.runtime.Composable\n"
+            "@Composable\nfun ShadcnButton(onClick: () -> Unit) { Button(onClick) { } }\n",
+            encoding="utf-8",
+        )
+
+    def test_flags_raw_button_and_card_in_shadcn_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            self._shadcn_marker(d)
+            (d / "HomeScreen.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\n"
+                "fun HomeScreen() {\n"
+                "    Button(onClick = {}) { Text(\"Save\") }\n"
+                "    Card { Text(\"hi\") }\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(
+                any("raw component bypass" in f and "ShadcnButton" in f for f in findings)
+            )
+
+    def test_does_not_flag_scaffold_or_topappbar_in_shadcn_project(self) -> None:
+        # shadcn/ui has no Scaffold/TopAppBar concept — /kmm-migrate-to-shadcn's own
+        # mapping table says keep raw Compose Scaffold/TopAppBar; flagging it would be wrong.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            self._shadcn_marker(d)
+            (d / "HomeScreen.kt").write_text(
+                "import androidx.compose.runtime.Composable\n"
+                "@Composable\n"
+                "fun HomeScreen() { Scaffold(topBar = { TopAppBar(title = {}) }) { } }\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("raw component bypass" in f for f in findings))
+
+    def test_ignores_shadcn_wrapper_definition_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            self._shadcn_marker(d)
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("ShadcnButton.kt" in f and "raw component bypass" in f for f in findings))
+
+
+class LeftoverWizardDemoCodeTests(unittest.TestCase):
+    def test_flags_greeting_class(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "shared" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "Greeting.kt").write_text(
+                "class Greeting {\n    fun greet(): String = \"Hello\"\n}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("leftover wizard demo code" in f for f in findings))
+
+    def test_flags_compose_multiplatform_resource_reference(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "shared" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "App.kt").write_text(
+                "import kotlinproject.app.shared.generated.resources.compose_multiplatform\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("leftover wizard demo code" in f for f in findings))
+
+    def test_ignores_project_with_no_demo_markers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "shared" / "src" / "commonMain" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "App.kt").write_text(
+                "@Composable\nfun App() { AppTheme { } }\n", encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("leftover wizard demo code" in f for f in findings))
+
+
 class FindingEvidenceTests(unittest.TestCase):
     def test_findings_include_file_line_and_snippet(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

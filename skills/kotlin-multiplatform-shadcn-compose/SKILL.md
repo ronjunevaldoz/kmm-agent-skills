@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-17'
+  last-updated: '2026-07-31'
   keywords:
     - shadcn-compose
     - ShadcnButton
@@ -401,11 +401,47 @@ catalog app (`app/shared/.../catalog/docs/*Doc.kt`) — treat that catalog app a
 authoritative usage reference for anything not verified above, not a guess from the name
 alone.
 
-No icon-library dependency exists — every component draws from this library's own tokens,
-not `heroicons-compose` or any other icon package. An icon needed in a screen built with
-these components must come from a separate source (`kotlin-multiplatform-imagevector-generator`
-or a third-party Compose icon library) — this is a real gap to plan for, not an oversight
-to work around with a guessed API.
+No icon-library dependency is bundled *into* shadcn-compose — every component draws from
+this library's own tokens for color/shape, not icon art. An icon needed in a screen built
+with these components comes from a separate dependency:
+[`heroicons-compose`](https://github.com/ronjunevaldoz/heroicons-compose)
+(`io.github.ronjunevaldoz:heroicons-outline:<version>`, Maven Central, Heroicons compiled
+to CMP `ImageVector` — Outline variant only today; Solid/Mini/Micro not yet built), or
+`kotlin-multiplatform-imagevector-generator` for anything Heroicons doesn't cover. Do not
+assume any icon set ships automatically with the `shadcn-compose` dependency itself.
+
+### Density/sizing requests — reach for the library's own parameters first
+
+This isn't only about the literal word "compact." Any request that's really about
+density or sizing — "make this compact," "tighter," "denser," "smaller," "more
+breathing room," "roomier" — has two real levers already built into this library.
+Check both before writing a single custom `Style { }` override:
+
+1. **Whole-app/whole-screen density → `ShadcnTheme`'s `preset` parameter.** The preset
+   table earlier in this skill is not cosmetic — `Mira` ("made for compact interfaces,"
+   tightest timings) and `Nova` ("reduced padding and margins," snappy) both compress
+   spacing/timing across every component at once. If the request is about the app's
+   overall feel, changing `preset` is very likely the actual fix — not a per-component
+   override, and not introducing a custom modifier at all.
+2. **One component's size → its own preset `Size` enum.** Every sized `Shadcn*`
+   component ships one. Verified against real source (2026-07-31):
+
+```kotlin
+sealed interface ButtonSize {
+    data object Xs : ButtonSize    // 28.dp height — the compact preset
+    data object Sm : ButtonSize    // 32.dp height
+    data object Md : ButtonSize    // 36.dp height — default
+    data object Lg : ButtonSize    // 40.dp height
+    data object Icon : ButtonSize  // 36×36.dp square, icon-only
+}
+```
+
+`ShadcnCard` and `ShadcnAvatar` (`ShadcnAvatarSize`) also take a `size` parameter — verify
+each component's actual `Size` enum with `fetch_component_signature.py` before assuming it
+does or doesn't have one; do not assume a component lacks a preset just because one isn't
+shown above. Only reach for a custom `Style { }` override when the request needs a value
+neither lever covers (an exact one-off `height`, not a general density change) — and say
+so explicitly when doing it, since it's the exception, not the norm.
 
 ---
 
@@ -499,7 +535,8 @@ UI; nothing shadcn-compose-specific changes that workflow.
 - adding this dependency without the user having seen the experimental-API warning — route through `/kmm-new-project` Step 6a or get explicit confirmation first
 - forgetting `@OptIn(ExperimentalFoundationStyleApi::class)` on a file that references a component's `style` parameter — a compile error, not a runtime issue, but confusing without knowing the cause
 - pinning a version from `search.maven.org` — it lagged the real Maven Central publish by over a day when verified; check `repo1.maven.org` or the README directly
-- assuming heroicons-compose integration exists — this library explicitly has "no icon-library dependency"; every component draws from its own tokens
+- assuming an icon set ships bundled with the `shadcn-compose` dependency itself — it doesn't; `heroicons-compose` is a real, separate, published dependency (Maven Central, same author), not a guess or an unmet gap
+- reaching for a custom `Style { }` padding/height override on any density/sizing request (compact, tighter, denser, smaller, roomier, ...) before checking `ShadcnTheme`'s own `preset` (e.g. `Mira`/`Nova` for whole-app density) and the component's own `Size` enum (`ButtonSize.Xs`, etc.) — one of the two almost always covers it; a custom override should be the fallback, not the first move
 - treating this as a stable, slow-moving dependency — 3 releases shipped in 3 days during this skill's own research; recheck before every use, not just once
 - suggesting a `Shadcn*` component for a layout-quality finding without stating the experimental-API risk in the same message — a suggestion that omits it isn't complete, even if it's "just an option"
 - copying a component's own official KDoc usage example verbatim — `ShadcnItem`'s KDoc shows `ShadcnItemMedia`/`ShadcnItemContent`/`ShadcnItemActions` as if real; none exist anywhere in the repo (confirmed by searching the actual file). Verify every individual symbol with `fetch_component_signature.py`, even ones shown in the library's own documentation
@@ -536,6 +573,7 @@ When asked to add or use shadcn-compose, respond in this order:
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Fixed a real drift: this skill's own icon-dependency note read as if no real icon library was available at all, but `heroicons-compose` (`io.github.ronjunevaldoz:heroicons-outline`, Maven Central) shipped since — verified real and live. Corrected the note to name it directly instead of only pointing at the icon-generator skill. Added a "Density/sizing requests" section after a report that these were producing hand-rolled `Style{}` overrides instead of using the library's own two real levers: `ShadcnTheme`'s `preset` param (`Mira`/`Nova` compress spacing/timing app-wide) for whole-app/whole-screen density, and each component's own `Size` enum (documented the real, verified `ButtonSize`: `Xs`/`Sm`/`Md`/`Lg`/`Icon`) for one component. Deliberately not scoped to the literal word "compact" — covers any density/sizing phrasing. Added a matching anti-pattern. Also extended `kotlin-multiplatform-audit`'s `_detect_raw_component_bypass` to cover shadcn-compose projects (see that skill's own changelog). |
 | 2026-07-17 | Added explicit "if `ShadcnTheme` is already in use, stop suggesting `App*`/`AppTheme`" guidance, mirrored in `kotlin-multiplatform-design-system`'s own doc. The "never combine" rule existed but was never mechanically checked — added `kotlin-multiplatform-audit`'s `_detect_mixed_design_system_usage`, scoped to both theme wrappers coexisting (not individual `App*` component names, which risked a false positive on unrelated real identifiers like `AppConfig(...)`). Caught and fixed a real bug in my own first draft: the regex only matched `ShadcnTheme(`/`AppTheme(` with parens, missing the common parenthesis-free trailing-lambda call shape (`AppTheme { ... }`) both functions support since every other param is defaulted. 4 new regression tests. |
 | 2026-07-13 | Added a layout-pattern lookup reference (Shadcn Studio, shadcnstudio.com) for when no wireframe template or component here covers the needed shape — verified directly it's a third-party paid catalog, explicitly not affiliated with shadcn/ui or this library. Labeled clearly as a shape reference only: its output is React/JSX, not Kotlin/Compose, so any block from it must go through `kotlin-multiplatform-layout-system`'s HTML-translation table plus `fetch_component_signature.py` verification, never copied directly. |
 | 2026-07-13 | Added Step 4: a worked multi-component composition example (settings-list-in-a-card, using `ShadcnCard`/`ShadcnItemGroup`/`ShadcnItem`/`ShadcnAvatar`/`ShadcnButton` together) — closes a real gap where the skill only taught single-component verification and per-element HTML mapping, never how to assemble components into a good screen. Found and documented a real trap in the process: `ShadcnItem`'s own official KDoc usage example references `ShadcnItemMedia`/`ShadcnItemContent`/`ShadcnItemActions` as if they were real slot composables — none exist anywhere in the repo (confirmed by searching the actual source, not just the doc comment). Also documented that `ShadcnItemGroup` auto-separates its items, so a manual `ShadcnSeparator` between them double-draws. 2 new anti-patterns. |

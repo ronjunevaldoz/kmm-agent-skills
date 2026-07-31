@@ -2363,6 +2363,39 @@ def _detect_unauthorized_app_submodule(root: Path) -> list[str]:
     return findings
 
 
+# ── Leftover kmp-wizard demo/placeholder code ────────────────────────────────
+# kmp-wizard's real all-targets template ships app/shared with a working demo screen
+# (a "Click me!" button revealing Greeting().greet() text over a Compose Multiplatform
+# logo image) — verified against the live template, not assumed. It must be deleted
+# once real feature work starts; left in place it ships to production as dead sample
+# code and confuses anyone reading :app:shared expecting only composition-root wiring.
+
+_WIZARD_DEMO_RE = re.compile(r"\bclass\s+Greeting\b|\bcompose_multiplatform\b")
+
+
+def _detect_leftover_wizard_demo_code(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        match = _WIZARD_DEMO_RE.search(text)
+        if not match:
+            continue
+        line_no, snippet = _at(text, match.start())
+        findings.append(
+            f"leftover wizard demo code [HIGH]: {path.relative_to(root)}:{line_no} — "
+            f"kmp-wizard's default Greeting/\"Compose Multiplatform\" logo demo is still "
+            f"present; delete it before real feature work starts — :app:shared should "
+            f"only ever hold composition-root wiring (App(), theme, Koin, NavHost)\n"
+            f"    {line_no} | {snippet}"
+        )
+    return findings
+
+
 # ── Design system prefix mismatch ─────────────────────────────────────────────
 # "App" in the design-system skill is a template placeholder (see Step 0) — real
 # projects must substitute their resolved COMPONENT_PREFIX when generating files, not
@@ -2941,8 +2974,40 @@ _DESIGN_SYSTEM_MARKER_RE = re.compile(r"\bAppTheme\b|\bfun\s+App[A-Z]\w*\s*\(")
 # A file that DEFINES App* wrappers — legitimately uses raw primitives internally.
 _APP_WRAPPER_DEF_RE = re.compile(r"\bfun\s+App[A-Z]")
 
+# shadcn-compose subset — deliberately narrower than _RAW_COMPONENT_MAP. Verified against
+# /kmm-migrate-to-shadcn's own Component Mapping Table: shadcn/ui is web-first and has no
+# Scaffold/TopAppBar concept, so those stay raw Compose by design in a shadcn-compose
+# project — including them here would produce a wrong "bypass" finding.
+_SHADCN_RAW_COMPONENT_MAP = {
+    "Button": "ShadcnButton",
+    "OutlinedButton": "ShadcnButton",
+    "TextButton": "ShadcnButton",
+    "ElevatedButton": "ShadcnButton",
+    "FilledTonalButton": "ShadcnButton",
+    "Card": "ShadcnCard",
+    "ElevatedCard": "ShadcnCard",
+    "OutlinedCard": "ShadcnCard",
+    "TextField": "ShadcnTextField",
+    "OutlinedTextField": "ShadcnTextField",
+    "AlertDialog": "ShadcnAlertDialog",
+    "ModalBottomSheet": "ShadcnSheet",
+    "Badge": "ShadcnBadge",
+}
+_SHADCN_RAW_COMPONENT_RE = re.compile(
+    r"\b(" + "|".join(sorted(map(re.escape, _SHADCN_RAW_COMPONENT_MAP), key=len, reverse=True)) + r")\s*[({]"
+)
+_SHADCN_MARKER_RE = re.compile(r"\bShadcnTheme\b|\bfun\s+Shadcn[A-Z]\w*\s*\(")
+_SHADCN_WRAPPER_DEF_RE = re.compile(r"\bfun\s+Shadcn[A-Z]")
 
-def _project_has_design_system(root: Path) -> bool:
+
+def _project_design_system_kind(root: Path) -> str | None:
+    """Return 'app' if the project has a generated/owned design system (AppTheme/App*
+    wrappers), 'shadcn' if it has shadcn-compose wired (ShadcnTheme/Shadcn* wrappers),
+    or None if neither is present. The two are documented as mutually exclusive
+    alternatives — `_detect_mixed_design_system_usage` handles the case both fire.
+    """
+    has_app = False
+    has_shadcn = False
     for path in root.rglob("*.kt"):
         if _is_excluded(path, root):
             continue
@@ -2950,21 +3015,40 @@ def _project_has_design_system(root: Path) -> bool:
             text = path.read_text(encoding="utf-8", errors="ignore")
         except OSError:
             continue
-        if _DESIGN_SYSTEM_MARKER_RE.search(text):
-            return True
-    return False
+        if not has_app and _DESIGN_SYSTEM_MARKER_RE.search(text):
+            has_app = True
+        if not has_shadcn and _SHADCN_MARKER_RE.search(text):
+            has_shadcn = True
+        if has_app and has_shadcn:
+            break
+    if has_app:
+        return "app"
+    if has_shadcn:
+        return "shadcn"
+    return None
 
 
 def _detect_raw_component_bypass(root: Path) -> list[str]:
-    """Flag raw Material/Foundation components used where an App* wrapper exists.
-
-    Only runs when the project HAS a design system (App* components / AppTheme). Files
-    that define App* wrappers, theme/token files, and previews are skipped — they
-    legitimately build on raw primitives. The design-system skill mandates the App*
-    components ('never raw Scaffold'); raw usage elsewhere is a design-system bypass.
+    """Flag raw Material/Foundation components used where a design-system wrapper
+    exists — either the generated/owned App* system or shadcn-compose's Shadcn*
+    components, whichever the project actually has wired. Files that define wrappers,
+    theme/token files, and previews are skipped — they legitimately build on raw
+    primitives.
     """
-    if not _project_has_design_system(root):
+    kind = _project_design_system_kind(root)
+    if kind is None:
         return []
+
+    if kind == "app":
+        component_map, component_re, wrapper_def_re, skip_path_tokens = (
+            _RAW_COMPONENT_MAP, _RAW_COMPONENT_RE, _APP_WRAPPER_DEF_RE,
+            ("designsystem", "design-system"),
+        )
+    else:
+        component_map, component_re, wrapper_def_re, skip_path_tokens = (
+            _SHADCN_RAW_COMPONENT_MAP, _SHADCN_RAW_COMPONENT_RE, _SHADCN_WRAPPER_DEF_RE,
+            ("designsystem", "design-system", "shadcn"),
+        )
 
     findings: list[str] = []
     for path in root.rglob("*.kt"):
@@ -2977,27 +3061,29 @@ def _detect_raw_component_bypass(root: Path) -> list[str]:
         if not _is_compose_ui_file(text, path):
             continue
         # Skip the design-system definition layer, theme/token files, and previews.
-        if _APP_WRAPPER_DEF_RE.search(text):
+        if wrapper_def_re.search(text):
             continue
         if any(p in path.stem for p in ("Theme", "theme", "Token", "token", "Preview")):
             continue
-        if "designsystem" in path.as_posix() or "design-system" in path.as_posix():
+        if any(t in path.as_posix() for t in skip_path_tokens):
             continue
 
         found: dict[str, str] = {}
         anchor = None
-        for m in _RAW_COMPONENT_RE.finditer(text):
+        for m in component_re.finditer(text):
             raw = m.group(1)
-            found.setdefault(raw, _RAW_COMPONENT_MAP[raw])
+            found.setdefault(raw, component_map[raw])
             if anchor is None:
                 anchor = m
         if found:
             line_no, snippet = _at(text, anchor.start())
             mapping = ", ".join(f"{r}→{a}" for r, a in list(found.items())[:5])
+            wrapper_skill = "shadcn-compose" if kind == "shadcn" else "design-system"
             findings.append(
                 f"raw component bypass [MEDIUM]: {path.relative_to(root)}:{line_no} "
                 f"— raw components instead of design-system wrappers ({mapping}); use the "
-                f"App* components so styling/tokens stay consistent (see design-system skill)\n"
+                f"{'Shadcn*' if kind == 'shadcn' else 'App*'} components so styling/tokens "
+                f"stay consistent (see {wrapper_skill} skill)\n"
                 f"    {line_no} | {snippet}"
             )
     return findings
@@ -3636,6 +3722,7 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_module_layer_violation(root))
     findings.extend(_detect_bare_core_module(root))
     findings.extend(_detect_unauthorized_app_submodule(root))
+    findings.extend(_detect_leftover_wizard_demo_code(root))
 
     # ── Hardcoded base URL (library-first / configurability) ───────────────────
     findings.extend(_detect_hardcoded_base_url(root))
