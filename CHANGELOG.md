@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.99.0] — 2026-07-31
+
+### Added
+
+- feat(scripts): audit and enforce agentskills.io compliance
+
+---
+
 ## [v1.98.4] — 2026-07-31
 
 ### Fixed
