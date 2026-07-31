@@ -1,5 +1,5 @@
 {
-  "version": "1.98.3",
+  "version": "1.98.4",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -399,7 +399,7 @@
       "path": "skills/kotlin-multiplatform-clean-architecture",
       "description": "Defines the 6-layer clean architecture contract for KMP feature modules: :model / :api / :domain / :data / :presenter / :ui. Covers layer dependency rules, :model vs :api split, internal visibility enforcement, and Detekt architecture fitness functions that make violations fail the build.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-20",
+      "last_updated": "2026-07-26",
       "keywords": [
         "clean architecture",
         "Kotlin Multiplatform",

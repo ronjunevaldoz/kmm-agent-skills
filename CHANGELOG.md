@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.98.4] — 2026-07-31
+
+### Fixed
+
+- fix(audit): enforce :core as a folder group, not a monolithic module
+
+---
+
 ## [v1.98.3] — 2026-07-31
 
 ### Fixed
