@@ -46,7 +46,25 @@ python3 .claude/skills/kotlin-multiplatform-audit/scripts/audit_project.py <proj
 
 # Adoption roadmap (for existing projects with no prior skill adoption)
 python3 .claude/skills/kotlin-multiplatform-audit/scripts/audit_project.py <project_root> --roadmap
+
+# Module structure vs canonical App/Library layout — informational, not a gate
+python3 .claude/skills/kotlin-multiplatform-audit/scripts/generate_structure_diagram.py <project_root> --mermaid
 ```
+
+`audit_project.py` prints its blocking findings first, then a separate non-blocking
+`HINTS` section (currently: `name-behavior drift` — a ViewModel whose name shares no words
+with its own Intents). Report hints to the user distinctly from findings; never count them
+toward BLOCKERS/WARNINGS or a pass/fail verdict — they're a manual "does this name still
+fit?" nudge, not an enforced rule.
+
+### Naming judgment (agent-driven, not scriptable)
+
+A token-overlap heuristic only catches the crudest drift. When reviewing a project or a
+diff, also judge with actual reading comprehension: for each touched class, does the name
+still describe what the body does after this change? Flag it as a WARNING (not a BLOCKER)
+if a class was renamed away from its purpose, or grew a responsibility its name doesn't
+cover — e.g. a `TokenStorage` that now also handles biometric prompts. This is a review
+judgment call, not something `audit_project.py` can verify mechanically.
 
 ### Skills repo audit
 

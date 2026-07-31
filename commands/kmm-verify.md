@@ -23,6 +23,24 @@ Expected: `OK: no lightweight architecture smells matched the current scan`
 Any finding is a blocker. List each verbatim — do not proceed to Step 2 until this passes
 or the user explicitly overrides.
 
+`audit_project.py` also prints a `HINTS (non-blocking, manual review only)` section when
+present — e.g. `name-behavior drift`, a ViewModel whose name shares no words with its own
+Intents. Show these to the user but never treat them as a blocker or count them in the
+PASS/FAIL result.
+
+---
+
+## Step 1a — Project structure diagram (optional, on request)
+
+```bash
+python3 skills/kotlin-multiplatform-audit/scripts/generate_structure_diagram.py "${ARGUMENTS:-.}" --mermaid
+```
+
+Run this when the user asks to see or verify the module structure, or after any module
+add/remove/rename. Purely informational — prints the actual App (feature/*'s 6 layers) or
+Library (library/library-testing/sample) layout against the canonical shape, with a Mermaid
+diagram. Never blocks; layer violations are already caught by Step 1's hard gates.
+
 ---
 
 ## Step 2 — Code style (ktlint)
@@ -103,7 +121,7 @@ Skip silently if no PNGs exist or the user chose "Skip Roborazzi" in Step 4.
 ```
 VERIFY: <project path>
 
-  Step 1 — Architecture audit:  PASS | FAIL (<N> findings)
+  Step 1 — Architecture audit:  PASS | FAIL (<N> findings) (<N> non-blocking hints)
   Step 2 — ktlint:              PASS | FAIL | SKIPPED
   Step 3 — detekt:              PASS | FAIL | SKIPPED
   Step 4 — jvmTest:             PASS | FAIL (<N> tests failed)

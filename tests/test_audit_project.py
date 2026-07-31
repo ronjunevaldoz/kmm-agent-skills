@@ -3310,5 +3310,87 @@ class AgentFileStandardsTests(unittest.TestCase):
             self.assertFalse(any(f.startswith("project agent") for f in findings))
 
 
+class NameBehaviorDriftTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_viewmodel_name_with_no_overlap_with_its_intents(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/AuthContract.kt",
+                """
+                object AuthContract {
+                    sealed interface Intent {
+                        data object LogoutClicked : Intent
+                        data object RefreshTapped : Intent
+                    }
+                }
+                """,
+            )
+            self._write(root, "feature/auth/ui/AuthViewModel.kt", "class AuthViewModel {}")
+
+            hints = audit_scripts._detect_name_behavior_drift(root)
+            self.assertTrue(any("name-behavior drift" in h for h in hints))
+
+    def test_does_not_flag_viewmodel_name_that_overlaps_its_intents(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/login/ui/LoginContract.kt",
+                """
+                object LoginContract {
+                    sealed interface Intent {
+                        data object LoginClicked : Intent
+                        data class EmailChanged(val v: String) : Intent
+                    }
+                }
+                """,
+            )
+            self._write(root, "feature/login/ui/LoginViewModel.kt", "class LoginViewModel {}")
+
+            hints = audit_scripts._detect_name_behavior_drift(root)
+            self.assertFalse(hints)
+
+    def test_does_not_flag_with_fewer_than_two_intents(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/AuthContract.kt",
+                """
+                object AuthContract {
+                    sealed interface Intent {
+                        data object RefreshTapped : Intent
+                    }
+                }
+                """,
+            )
+            self._write(root, "feature/auth/ui/AuthViewModel.kt", "class AuthViewModel {}")
+
+            hints = audit_scripts._detect_name_behavior_drift(root)
+            self.assertFalse(hints)
+
+    def test_hints_are_excluded_from_blocking_audit_project_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/ui/AuthContract.kt",
+                """
+                object AuthContract {
+                    sealed interface Intent {
+                        data object LogoutClicked : Intent
+                        data object RefreshTapped : Intent
+                    }
+                }
+                """,
+            )
+            self._write(root, "feature/auth/ui/AuthViewModel.kt", "class AuthViewModel {}")
+
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("name-behavior drift" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()

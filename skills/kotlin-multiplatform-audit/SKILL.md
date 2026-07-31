@@ -11,7 +11,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-26'
+  last-updated: '2026-07-31'
   keywords:
     - KMP audit
     - project audit
@@ -102,6 +102,20 @@ the user and the other skills what to do next.
 - Domain must not know about DTOs or SQLDelight entities
 - Repository interfaces should live in `:api`, implementations in `:data`
 - Shared UI primitives should live in the design system, not feature modules
+- Run `generate_structure_diagram.py <project_root> --mermaid` to render the actual module
+  layout against the canonical App (`feature/*`'s 6 layers) or Library
+  (`library`/`library-testing`/`sample`) shape — informational, use it to visually confirm
+  a project hasn't drifted before deeper review. Hard layer-order and bare-`:core` gates
+  still come from `audit_project.py`'s own findings, not this diagram.
+
+### 1a) Naming still matches behavior
+- `audit_project.py` runs a cheap, non-blocking heuristic (`name-behavior drift`): flags a
+  `*ViewModel` whose name shares no word with its own Intent variants. It only catches the
+  crudest drift and prints under a separate `HINTS` section — never a BLOCKER.
+- On top of that, use actual judgment during review: for each touched class, does the name
+  still describe what the body does after this change? A class that quietly grew a second
+  responsibility, or was renamed away from its real purpose, is a WARNING even though no
+  script can catch it — call it out the same as any other finding.
 
 ### 2) State and MVI
 - Screen state should be immutable
@@ -366,6 +380,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added `generate_structure_diagram.py` — renders actual App/Library module structure (markdown tree + Mermaid) against the canonical layout, so a developer can visually verify a project hasn't drifted; informational only, wired into `/kmm-verify` as an optional Step 1a. Added `_detect_name_behavior_drift` — a non-blocking heuristic flagging a `*ViewModel` whose name shares no word with its own Intent variants; deliberately kept out of `audit_project()`'s blocking findings and surfaced through a separate `HINTS` section in `main()`, since a token-overlap check has real false-positive risk. Real gaps — no structure-visualization tool existed, and naming drift had zero mechanical or documented check. 7 new regression tests. |
 | 2026-07-26 | Added `_detect_bare_core_module` — `_detect_module_layer_violation`'s module-path regex only ever matched `feature/<name>/<layer>`, so it never applied to `:core` at all; a monolithic `core/build.gradle.kts` (instead of split `:core:model`/`:core:api`/etc. submodules, per `kotlin-multiplatform-clean-architecture`'s own ":core" vs ":feature" Split table) went completely uncaught. 3 new regression tests. |
 | 2026-07-26 | Added `_detect_viewmodel_injects_repository` — `kotlin-multiplatform-mvi`'s own changelog called the ViewModel-depends-only-on-`:domain` rule mechanically checkable, but it wasn't; `_detect_module_layer_violation` can't catch it since `presenter -> api` is an allowed module-level edge for other reasons. File-level check instead: a `*ViewModel`'s constructor param typed `*Repository`. 3 new regression tests. |
 | 2026-07-26 | Added three more detectors following the same session's gap survey: `_detect_combined_style_file` (2+ `*Variant` sealed types bundled in one `styles/` file — the same problem as combined component files, one directory over), `_detect_viewmodel_too_many_intents` (15+ `Intent` variants — a god-ViewModel signal `_detect_viewmodel_size`'s line count alone can miss), and `_detect_viewmodel_multiple_stateflows` (2+ exposed `StateFlow` properties beyond `state` — MVI's one-State-per-screen rule broken a different way). 8 new regression tests. |

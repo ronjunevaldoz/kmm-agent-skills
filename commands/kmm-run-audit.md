@@ -57,6 +57,25 @@ The script detects architectural and design smells:
 | `design system prefix mismatch` | An `App*`-named declaration under `core/designsystem` while `docs/design-system.md` records a different resolved `COMPONENT_PREFIX` — the resolved prefix wasn't actually used when generating |
 | `empty platform source set` | An `androidMain`/`iosMain`/`jvmMain`/... source directory with no `.kt` files, or files containing only package/import/comments — dead scaffolding; Gradle compiles fine without it |
 
+The script also prints a separate, non-blocking `HINTS` section:
+
+| Hint | What it catches |
+|---|---|
+| `name-behavior drift` | A `*ViewModel` whose name shares no word with any of its own Intent variants (e.g. `AuthViewModel` handling only `RefreshTapped`/`LogoutClicked`) — a nudge to verify the name still describes the screen, never a blocker |
+
+---
+
+## Step 1b — Structure diagram (optional, on request)
+
+```bash
+python3 skills/kotlin-multiplatform-audit/scripts/generate_structure_diagram.py "${ARGUMENTS:-.}" --mermaid
+```
+
+Run when the user wants to visually verify the module layout, or after adding/removing/
+renaming a module. Renders the actual App (`feature/*`'s 6-layer contract) or Library
+(`library`/`library-testing`/`sample`) structure against the canonical shape, with a Mermaid
+diagram. Purely informational — layer violations are already gated by Step 1's findings.
+
 ---
 
 ## Step 2 — Quality scan
@@ -136,6 +155,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `cross-feature module dependency` | `clean-architecture` | Extract a `:core:api` contract the other feature implements, instead of depending on its module directly |
 | `design system prefix mismatch` | `design-system` | Regenerate the flagged file(s) with the resolved `COMPONENT_PREFIX` directly — don't hand-rename `App*` symbols after the fact |
 | `empty platform source set` | `feature-scaffold` | Delete the empty source directory, or implement the real `expect`/`actual` code if this module genuinely needs platform-specific logic — never scaffold the folder "just in case" |
+| `name-behavior drift` (hint) | `mvi` | Read the ViewModel and its Contract — if the name genuinely no longer fits, rename it and update its Koin binding + composable references. If it's a false positive (generic name is fine), no action needed — this is a manual call, not a rule |
 
 ---
 

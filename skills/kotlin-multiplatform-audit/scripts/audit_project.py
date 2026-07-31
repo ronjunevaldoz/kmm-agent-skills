@@ -1702,6 +1702,64 @@ def _detect_viewmodel_injects_repository(root: Path) -> list[str]:
     return findings
 
 
+# ── ViewModel name vs its own Intent set (semantic naming drift hint) ──────────
+# Non-blocking by design: a token-overlap heuristic will misfire on legitimately
+# generic names. Kept out of audit_project()'s findings list and surfaced through a
+# separate hints() channel in main() so it never gates CI or /kmm-verify — it's a
+# nudge to manually check the name still matches the behavior, not an enforced rule.
+
+_INTENT_VARIANT_RE = re.compile(r"\bdata\s+(?:object|class)\s+(\w+)\s*[:(]")
+_INTENT_BLOCK_RE = re.compile(r"sealed\s+interface\s+Intent\b[^{]*\{(.*?)\n\s*\}", re.DOTALL)
+_CAMEL_WORD_RE = re.compile(r"[A-Z][a-z0-9]*|[a-z0-9]+")
+
+
+def _camel_words(name: str) -> set[str]:
+    return {w.lower() for w in _CAMEL_WORD_RE.findall(name) if len(w) > 2}
+
+
+def _detect_name_behavior_drift(root: Path) -> list[str]:
+    """Hint-only: flag a ViewModel whose name shares no words with any of its own
+    Intent variant names. Reads a sibling <Base>Contract.kt if present (the
+    kotlin-multiplatform-mvi Contract-pattern convention), else the ViewModel file
+    itself. Needs at least 2 intents to fire — too little signal below that.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*ViewModel.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        base = path.stem[: -len("ViewModel")]
+        if not base:
+            continue
+        contract_path = path.parent / f"{base}Contract.kt"
+        source_path = contract_path if contract_path.is_file() else path
+        try:
+            text = source_path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+
+        block_match = _INTENT_BLOCK_RE.search(text)
+        search_text = block_match.group(1) if block_match else text
+        intents = _INTENT_VARIANT_RE.findall(search_text)
+        if len(intents) < 2:
+            continue
+
+        base_words = _camel_words(base)
+        intent_words: set[str] = set()
+        for intent in intents:
+            intent_words |= _camel_words(intent)
+        if not base_words or base_words & intent_words:
+            continue
+
+        shown = ", ".join(intents[:5]) + ("..." if len(intents) > 5 else "")
+        findings.append(
+            f"name-behavior drift (hint) [INFO]: {path.relative_to(root)} — "
+            f"'{base}ViewModel' shares no words with its own Intents ({shown}); "
+            f"verify the name still describes what this screen does — non-blocking, "
+            f"manual check only"
+        )
+    return findings
+
+
 # ── Raw HTTP bypassing an established Ktor client ──────────────────────────────
 # Real bug: kotlin-multiplatform-network-layer only checked for a module literally
 # named :core:network. A new server module or feature under a different name found no
@@ -3652,14 +3710,23 @@ def main() -> int:
         return 1 if has_high else 0
 
     findings = audit_project(root)
+    hints = _detect_name_behavior_drift(root)
 
     if findings:
         print("FINDINGS:")
         for finding in findings:
             print(f"- {finding}")
+        if hints:
+            print("\nHINTS (non-blocking, manual review only):")
+            for hint in hints:
+                print(f"- {hint}")
         return 1
 
     print("OK: no architecture violations detected")
+    if hints:
+        print("\nHINTS (non-blocking, manual review only):")
+        for hint in hints:
+            print(f"- {hint}")
     return 0
 
 
