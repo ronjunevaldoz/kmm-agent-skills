@@ -1,5 +1,5 @@
 {
-  "version": "1.98.1",
+  "version": "1.98.2",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -2067,7 +2067,9 @@
         "architecture pattern",
         "screen state",
         "side effect",
-        "one-shot event"
+        "one-shot event",
+        "Divergent Change",
+        "God State"
       ],
       "triggers": [
         "MVI",
@@ -2117,7 +2119,11 @@
         "UiError sealed",
         "shared ViewModel",
         "wizard ViewModel",
-        "multi-step flow"
+        "multi-step flow",
+        "Divergent Change",
+        "God State",
+        "unrelated concerns in one ViewModel",
+        "state cohesion"
       ],
       "scripts": []
     },

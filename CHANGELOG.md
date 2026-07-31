@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.98.2] — 2026-07-31
+
+### Docs
+
+- docs(mvi): name the God State smell properly as Divergent Change
+
+---
+
 ## [v1.98.1] — 2026-07-31
 
 ### Docs
