@@ -775,7 +775,9 @@ git add -A
 git commit -m "feat(<sprint-name>): complete Sprint <N> — <sprint goal>"
 ```
 
-Then print a summary:
+Then print a summary — the third field on the `Audit:` line is `Screenshots: <N>
+recorded` for `[App]` or `apiCheck: PASS` for `[Library]`; print only the one matching
+`PROJECT_TYPE`, resolved to plain text, never a raw conditional marker:
 
 ```
 ## Sprint <N> complete
@@ -784,8 +786,7 @@ Done:
   [x] X-01 <task name>
   [x] X-02 <task name>
 
-Audit: PASS | Tests: <N> passed | <if App:> Screenshots: <N> recorded </if>
-<if Library:> apiCheck: PASS </if>
+Audit: PASS | Tests: <N> passed | Screenshots: <N> recorded
 
 Next up - Sprint <N+1>: <sprint name>
   Tasks: Y-01 Y-02 ...
@@ -1243,53 +1244,50 @@ Update `recurring_issues` and `proven_patterns` manually as the project evolves.
 
 ## Step 11 — Summary
 
-Print a summary of everything generated. `[App]`/`[Library]` lines are exclusive —
-include only the block matching `PROJECT_TYPE`, shared lines apply to both:
+Print a summary of everything generated. The two templates below are **fully separate**
+— pick the one matching `PROJECT_TYPE` and print it as-is with placeholders filled in.
+**Never print an `<if>`/`</if>` tag itself** — those markers exist only in this
+command's source to keep one file instead of two; the actual terminal output must be
+plain text, fully resolved, with consistent column alignment (pad labels to the widest
+one in each block).
+
+**`[App]` template:**
 
 ```
 ## Project complete
 
-<if App:> App:       <name> — <one-line description> </if>
-<if Library:> Library:   <name> — <one-line description> </if>
+App:       <name> — <one-line description>
 Platforms: <platforms from intake>
-<if App:>
-Features:  <N> implemented
+
+Features: <N> implemented
   [x] F-01  Project scaffold
   [x] F-02  Clean architecture
   [x] F-03  <feature>
-</if>
-<if Library:>
-API surfaces: <N> implemented
-  [x] F-01  Project scaffold (library-publishing structure)
-  [x] F-02  <public API task>
-</if>
 
 Generated:
   Modules:      <N> Gradle modules
   Source files: <N> .kt files
-<if App:>  Tests:        <N> unit tests, <N> Roborazzi screenshot tests
-  Screenshots:  <N> PNG goldens (<N> light, <N> dark) </if>
-<if Library:>  Tests:        <N> unit tests
-  API dump:     library/api/library.api (<N> public declarations) </if>
+  Tests:        <N> unit tests, <N> Roborazzi screenshot tests
+  Screenshots:  <N> PNG goldens (<N> light, <N> dark)
 
 Docs:
-  README.md                        — <if App:> project overview, build commands, architecture link </if><if Library:> install instructions, API stability notes </if>
-  PLAN.md                          — MVP scope + delivery plan, checked off as sprints complete
-<if App:>  docs/architecture.md             — 6-layer rules, module map, stack
-  docs/decisions/                  — ADRs for key tech choices
-  docs/layout-system/              — ASCII wireframes per screen </if>
+  README.md              — project overview, build commands, architecture link
+  PLAN.md                — MVP scope + delivery plan, checked off as sprints complete
+  docs/architecture.md   — 6-layer rules, module map, stack
+  docs/decisions/        — ADRs for key tech choices
+  docs/layout-system/    — ASCII wireframes per screen
 
 Agent setup:
-  agents/ rules/ hooks/ commands/ skills/ — project-owned source scaffold
-  docs/reference/ai-collaboration.md      — canonical cross-agent policy
-  CLAUDE.md                               — thin bootstrap into .claude/AGENTS.md
-  .claude/AGENTS.md                       — skill routing<if App:> + feature module table</if><if Library:> + published artifacts + API surface rules</if>
-  .claude/commands/kmm-*.md               — <N> slash commands installed
-  .claude/skills/ + .agents/skills/       — <N> skills deployed to both (cross-client)
-  .agents/pipeline-context.json           — project context for the planner agent
-  .claude/settings.json                   — Bash allowlist + hook wiring home
-  (if deployed) .codex/agents/            — <N> subagents translated to TOML
-  (if deployed) .gemini/commands/         — <N> commands translated to TOML
+  agents/ rules/ hooks/ commands/ skills/  — project-owned source scaffold
+  docs/reference/ai-collaboration.md       — canonical cross-agent policy
+  CLAUDE.md                                — thin bootstrap into .claude/AGENTS.md
+  .claude/AGENTS.md                        — skill routing + feature module table
+  .claude/commands/kmm-*.md                — <N> slash commands installed
+  .claude/skills/ + .agents/skills/        — <N> skills deployed to both (cross-client)
+  .agents/pipeline-context.json            — project context for the planner agent
+  .claude/settings.json                    — Bash allowlist + hook wiring home
+  (if deployed) .codex/agents/             — <N> subagents translated to TOML
+  (if deployed) .gemini/commands/          — <N> commands translated to TOML
 
 Verify:      PASS
 Skills used: <list>
@@ -1298,14 +1296,59 @@ Not yet wired: git/CI architecture hooks (pre-commit audit, PostToolUse validati
 Run /kmm-setup-hooks now to add them — recommended for every team project.
 
 Next steps:
-<if App and Android in platforms>  ./gradlew :app:androidApp:assembleDebug             — build Android APK</if>
-<if App and iOS in platforms>      ./gradlew :app:shared:assembleSharedReleaseXCFramework — build iOS XCFramework, then open app/iosApp/iosApp.xcodeproj in Xcode</if>
-<if App and Desktop in platforms>  ./gradlew :app:desktopApp:run                        — run Desktop app</if>
-<if App:>  ./gradlew jvmTest                             — run all tests </if>
-<if Library:>  ./gradlew apiCheck                            — verify public API surface
-  ./gradlew publishToMavenLocal                — smoke-test local resolution </if>
-  /kmm-setup-hooks                              — wire git/CI architecture hooks
-  /kmm-implement-feature <name>                 — add your next <if App:>feature</if><if Library:>API surface</if>
+  ./gradlew :app:androidApp:assembleDebug                 — build Android APK (if Android in platforms)
+  ./gradlew :app:shared:assembleSharedReleaseXCFramework   — build iOS XCFramework, then open app/iosApp/iosApp.xcodeproj (if iOS in platforms)
+  ./gradlew :app:desktopApp:run                            — run Desktop app (if Desktop in platforms)
+  ./gradlew jvmTest                                        — run all tests
+  /kmm-setup-hooks                                         — wire git/CI architecture hooks
+  /kmm-implement-feature <name>                            — add your next feature
+```
+
+**`[Library]` template:**
+
+```
+## Project complete
+
+Library:   <name> — <one-line description>
+Platforms: <platforms from intake>
+
+API surfaces: <N> implemented
+  [x] F-01  Project scaffold (library-publishing structure)
+  [x] F-02  <public API task>
+
+Generated:
+  Modules:      <N> Gradle modules
+  Source files: <N> .kt files
+  Tests:        <N> unit tests
+  API dump:     library/api/library.api (<N> public declarations)
+
+Docs:
+  README.md   — install instructions, API stability notes
+  PLAN.md     — MVP scope + delivery plan, checked off as sprints complete
+
+Agent setup:
+  agents/ rules/ hooks/ commands/ skills/  — project-owned source scaffold
+  docs/reference/ai-collaboration.md       — canonical cross-agent policy
+  CLAUDE.md                                — thin bootstrap into .claude/AGENTS.md
+  .claude/AGENTS.md                        — skill routing + published artifacts + API surface rules
+  .claude/commands/kmm-*.md                — <N> slash commands installed
+  .claude/skills/ + .agents/skills/        — <N> skills deployed to both (cross-client)
+  .agents/pipeline-context.json            — project context for the planner agent
+  .claude/settings.json                    — Bash allowlist + hook wiring home
+  (if deployed) .codex/agents/             — <N> subagents translated to TOML
+  (if deployed) .gemini/commands/          — <N> commands translated to TOML
+
+Verify:      PASS
+Skills used: <list>
+
+Not yet wired: git/CI architecture hooks (pre-commit audit, PostToolUse validation).
+Run /kmm-setup-hooks now to add them — recommended for every team project.
+
+Next steps:
+  ./gradlew apiCheck              — verify public API surface
+  ./gradlew publishToMavenLocal   — smoke-test local resolution
+  /kmm-setup-hooks                — wire git/CI architecture hooks
+  /kmm-implement-feature <name>   — add your next API surface
 ```
 
 ---
