@@ -711,7 +711,10 @@ CLAUDE.md
 
 `skills/README.md` should include a minimal `skills/<name>/SKILL.md` starter template
 with YAML frontmatter (`name`, `description`) and a note that project-owned custom
-skills are synced into `.claude/skills/<name>/`.
+skills are synced into `.claude/skills/<name>/` — and, per agentskills.io's own
+cross-client convention (verified in `docs/reference/agentskills-io-standards.md`),
+also into `.agents/skills/<name>/` so the skill is visible to any agentskills.io-
+compliant client, not just Claude Code.
 
 `CLAUDE.md` should stay thin and only bootstrap Claude into the generated runtime:
 

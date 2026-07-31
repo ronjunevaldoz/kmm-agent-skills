@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-20'
+  last-updated: '2026-07-31'
   keywords:
     - maven central
     - maven publish
@@ -120,6 +120,13 @@ include(":library-testing")    // optional
 include(":bom")                // optional
 include(":sample:androidApp")  // sample only — no maven-publish applied here
 ```
+
+For a library small enough to fit in one `:library` module, that's the whole structure.
+Once `:library` itself grows past a handful of files covering genuinely separate
+concerns, `kotlin-multiplatform-clean-architecture`'s 6-layer contract applies to a
+library's own internals the same way it does to an app's — `:model`/`:api` split,
+`internal` visibility between layers — the difference is only that the *outermost*
+public surface is what `explicitApi()`/`apiCheck` above govern, not an app's UI layer.
 
 ---
 
@@ -446,6 +453,29 @@ annotation class InternalApi
 
 Add `InternalApi` to `nonPublicMarkers` in `apiValidation { }` (Step 2).
 
+### `apiCheck` catches *that* the API changed, not *whether the version bump matches*
+
+`apiCheck` fails on any `.api` diff, forcing a deliberate `apiDump` — but it has no
+concept of semver. It passes identically whether the diff is a source-compatible
+addition (minor-worthy) or a signature change/removal that breaks every consumer
+(major-worthy). Nothing currently blocks tagging a *breaking* diff as a minor release.
+
+This isn't mechanically enforceable from the `.api` file alone — the file lists symbols,
+not which specific lines changed *how* between two dumps, and "is this actually
+source/binary breaking" needs a real diff, not just a checksum mismatch. Treat it as a
+review-time discipline instead: before tagging, `git diff` the previous `library.api`
+against the new one and classify every change —
+
+| Change | Semver bump |
+|---|---|
+| New public class/function/property added | Minor |
+| Existing public signature changed or removed | Major |
+| Internal-only change, `.api` file untouched | Patch |
+
+Get this wrong once (a breaking change shipped as a minor) and every consumer pinned to
+`^x.y` silently breaks on their next `./gradlew build` — there's no compiler error on
+their side, just a runtime `NoSuchMethodError` or a build failure with no obvious cause.
+
 ---
 
 ## Step 6 — GPG signing and secrets
@@ -618,6 +648,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 | No `explicitApi()` | A public declaration nobody intended to expose ships as part of the API surface; `apiCheck` only catches the *next* accidental change, not the first one |
 | Library's public classes `import org.koin.*` directly | Forces the consumer's DI choice; use plain constructor injection, ship Koin wiring as a separate optional artifact if wanted |
 | Public class/fun with no KDoc under `explicitApi()` | The declaration is deliberate but undocumented — a consumer sees it in autocomplete with no explanation |
+| Shipping a breaking `.api` diff as a minor version | `apiCheck` only confirms the diff was deliberate, not that the semver bump matches its severity — classify every diff (addition = minor, signature change/removal = major) before tagging |
 
 ---
 
@@ -635,6 +666,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 | `kotlin-multiplatform-docs-site` | Public GitHub Pages developer guide + Dokka HTML API reference; reuses this skill's Dokka setup for the separate HTML output, not the Javadoc jar |
 | `kotlin-multiplatform-dependency-injection` | That skill's Koin recommendation is scoped to app code — see "No forced framework coupling in library internals" above for why a library's own classes shouldn't hard-depend on it |
 | `kotlin-multiplatform-audit` | `_detect_undocumented_public_api` flags a public declaration with no KDoc, scoped to projects using `explicitApi()` |
+| `kotlin-multiplatform-clean-architecture` | The 6-layer contract applies to a library's own `:library` internals too, once it outgrows a single module — see Step 1 |
 
 ---
 
@@ -642,6 +674,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added "`apiCheck` catches that the API changed, not whether the version bump matches" — real gap: `apiCheck` has no concept of semver, so nothing blocks tagging a breaking `.api` diff as a minor release. Also cross-referenced `kotlin-multiplatform-clean-architecture`'s 6-layer contract for a library's own internal structure once `:library` outgrows a single module. 1 new anti-pattern, 1 new Related Skills row. |
 | 2026-07-20 | Added "No forced framework coupling in library internals" (a library's own classes shouldn't hard-import Koin — ship it as a separate optional artifact instead) and "KDoc coverage on the public API surface", the second wired to `kotlin-multiplatform-audit`'s new `_detect_undocumented_public_api`. Real gaps from a library-vs-app rules discussion. 2 new anti-pattern rows, 2 new Related Skills. |
 | 2026-07-20 | Added `explicitApi()` — real gap found in a library-vs-app rules survey: this skill covered binary compatibility, signing, and publishing channels but never the compiler mode that catches an accidental public API leak *before* it ships (as opposed to `apiCheck`, which only catches the *next* change to an already-public surface). Explicitly scoped to library code only — app code has no external consumers to protect and gains nothing from the ceremony. 1 new anti-pattern. |
 | 2026-07-11 | Cross-referenced two new skills: `kotlin-multiplatform-project-docs-maintainer`'s new `docs/libraries.md` catalog page (release checklist should point there instead of nowhere), and `kotlin-multiplatform-docs-site` (public GitHub Pages developer guide, reuses this skill's Dokka setup for a separate HTML output, distinct from the Javadoc jar). |
