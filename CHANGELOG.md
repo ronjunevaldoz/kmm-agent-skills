@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.98.1] — 2026-07-31
+
+### Docs
+
+- docs(mvi): clarify god-ViewModel field-count test with a relatedness litmus
+
+---
+
 ## [v1.98.0] — 2026-07-31
 
 ### Added
