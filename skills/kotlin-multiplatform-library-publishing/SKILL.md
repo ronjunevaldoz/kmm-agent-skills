@@ -37,6 +37,12 @@ metadata:
     - release candidate
     - library consumers
     - multiplatform library
+    - pre-1.0 api stability
+    - NOTICE file
+    - third-party license aggregation
+    - CONTRIBUTING.md
+    - open source contribution
+    - dependency vulnerability scanning
     - publish to maven
     - open source library
     - license header
@@ -644,6 +650,21 @@ dependencyResolutionManagement {
     # same secrets as above
 ```
 
+### Pre-1.0 API stability policy
+
+State this explicitly in the README, not just implicitly through version numbers — a
+consumer has no way to know your intent otherwise:
+
+- **`0.x.y`**: any release, including a patch, may break the public API without a major
+  bump. SemVer's own spec (2.4) says 0.x is for initial development and stability isn't
+  promised yet. `apiCheck` still runs and still catches the diff — it just doesn't gate
+  the version bump the way it does post-1.0.
+- **`1.0.0` and later**: a breaking `apiCheck` diff requires a major bump, full stop —
+  this is the point SemVer's stability promise actually starts.
+- **Ship 1.0.0 deliberately**, not by drift. Cutting it means committing to the current
+  public surface — do it after the API has had real consumer usage, not on the first
+  release that happens to work.
+
 ---
 
 ## Step 9 — Release checklist
@@ -656,6 +677,7 @@ Before tagging a stable release:
 [ ] Tests pass on all targets: ./gradlew allTests
 [ ] VERSION_NAME in gradle.properties has no -SNAPSHOT suffix
 [ ] CHANGELOG updated
+[ ] NOTICE.md current — no newly-bundled dependency missing an entry (Step 12)
 [ ] POM metadata complete (description, license, SCM, developers)
 [ ] GPG key not expired: gpg --list-keys
 [ ] ./gradlew publishToMavenLocal  → smoke-test consumer can resolve from mavenLocal()
@@ -724,6 +746,16 @@ conservatively and review on a cadence, not reactively:
 - Keep `sample/`'s own dependency versions pinned to the library's own — a stale sample
   masks a real compatibility break until a real consumer hits it first
 
+### Dependency vulnerability scanning
+
+Distinct from the version-cadence review above — a dependency can be current and still
+carry a disclosed CVE. Enable GitHub's own **Dependabot security alerts** (Settings →
+Security → Dependabot, or a `.github/dependabot.yml` scoped to `gradle`) on the repo — it
+flags a known vulnerability in a dependency independent of whether a routine upgrade PR
+would have touched it. Treat an alert on a library's own dependency as higher priority
+than the same alert in an app: every consumer inherits it transitively, and a library
+maintainer usually doesn't know how many downstream apps are affected.
+
 ### Keep `sample/` from drifting
 
 The sample app is the only thing that actually compiles against the library's *public*
@@ -738,6 +770,60 @@ every PR, not just at release time:
 A sample that still compiles against a symbol scheduled for removal is a signal the
 deprecation cycle above hasn't actually reached consumers yet — don't remove the symbol
 from the library until the sample itself has migrated off it.
+
+---
+
+## Step 12 — Third-party license aggregation (NOTICE file)
+
+Any dependency the library bundles or statically links (not a transitive Maven
+dependency a consumer's own build resolves separately — the reused *art/code* inside
+your own artifact) needs its license terms disclosed, not just satisfied silently. Real
+precedent from this collection's own published libraries: `heroicons-compose` compiles
+Tailwind Labs' MIT-licensed Heroicons into its own `ImageVector`s and ships a
+`NOTICE.md` naming the origin, license, and copyright — required because the icon *art*
+is redistributed inside the artifact, not merely referenced.
+
+```markdown
+<!-- NOTICE.md -->
+This library includes compiled artwork from Heroicons (https://github.com/tailwindlabs/heroicons),
+Copyright (c) Tailwind Labs, Inc., licensed under the MIT License. See LICENSES/heroicons-MIT.txt
+for the full license text.
+```
+
+Rules:
+- One entry per bundled/redistributed dependency, naming the project, copyright holder,
+  license, and a pointer to the full license text (`LICENSES/<name>-<license>.txt`)
+- A dependency a consumer resolves themselves via Maven (a normal `api`/`implementation`
+  declaration) does **not** need a NOTICE entry — that consumer already sees the
+  dependency's own license via their own build tool; NOTICE is for what's *inside* your
+  artifact, not what's next to it on the classpath
+- Regenerate the check as part of the release checklist (Step 9), not once at the start —
+  a NOTICE file goes stale silently the moment a new bundled asset/dependency is added
+
+---
+
+## Step 13 — Open-source contribution scaffolding
+
+Only add this once the library actually intends to take outside contributions — it's
+overhead a solo-maintained library doesn't need yet. Once it does:
+
+```
+.github/
+├── CONTRIBUTING.md          # build/test/PR steps — link back to this repo's own AGENTS.md
+│                             #   if AI-assisted contributions are welcome
+├── CODE_OF_CONDUCT.md        # Contributor Covenant is the common default
+├── ISSUE_TEMPLATE/
+│   ├── bug_report.md
+│   └── feature_request.md
+└── PULL_REQUEST_TEMPLATE.md  # checklist: apiCheck passes, CHANGELOG updated, tests added
+```
+
+`CONTRIBUTING.md` should point at this skill's own release checklist (Step 9) and
+`kotlin-multiplatform-code-quality`'s Ktlint/Detekt setup so a contributor's PR matches
+CI expectations before review, not after a round-trip of comments. This is a library-
+specific concern distinct from `kotlin-multiplatform-project-docs-maintainer`'s
+consumer-facing README/onboarding docs — CONTRIBUTING is for people *changing* the
+library, not people *using* it.
 
 ---
 
@@ -795,6 +881,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added four more real maintenance gaps from a follow-up survey: a pre-1.0 API stability policy (0.x may break without a major bump per SemVer 2.4; 1.0+ is where the stability promise starts — state it in the README, don't leave it implicit), Step 12 (NOTICE file for bundled/redistributed third-party assets — distinct from a normal Maven dependency a consumer resolves themselves; `heroicons-compose`'s own `NOTICE.md` is the real precedent), Step 13 (OSS contribution scaffolding — CONTRIBUTING/CODE_OF_CONDUCT/issue+PR templates, only once a library actually takes outside contributions), and a dependency-vulnerability-scanning subsection under Step 11 (Dependabot security alerts, distinct from the routine upgrade-cadence review already there). |
 | 2026-07-31 | Added Step 1a — splitting into multiple published modules: real gap where this skill only ever scaffolded one `:library` module, with a BOM step that aligns multiple artifacts' versions but no guidance on how/when to actually create them. Covers the split decision (genuinely independent consumer surface, not just "big code"), one-way dependency direction (`-core` never depends on `-compose`/`-testing`), per-module `apiCheck`, and the `<PROJECT_NAME>-*` naming convention (never the literal word "library" — matches real published multi-module libraries like Coil's `coil-core`/`coil-compose`). Wired into `/kmm-new-project`'s Library F-01 as a confirm-first branch. |
 | 2026-07-31 | Added Step 11 — ongoing maintenance: real gap where this skill covered shipping (publish, apiCheck, signing) but nothing about maintaining a published library afterward. Covers the deprecation cycle (`@Deprecated(WARNING)` → `ERROR` → removal, tied to SemVer), breaking-change communication (CHANGELOG entry + migration note before a major bump, never bundled silently), dependency upgrade cadence (Renovate/Dependabot scoped to the version catalog, sample pinned to the library's own versions), and keeping `sample/` from drifting (its own CI compile job — the only thing that actually compiles against the real public surface the way a consumer would). |
 | 2026-07-31 | Added "`apiCheck` catches that the API changed, not whether the version bump matches" — real gap: `apiCheck` has no concept of semver, so nothing blocks tagging a breaking `.api` diff as a minor release. Also cross-referenced `kotlin-multiplatform-clean-architecture`'s 6-layer contract for a library's own internal structure once `:library` outgrows a single module. 1 new anti-pattern, 1 new Related Skills row. |
