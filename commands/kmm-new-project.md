@@ -769,6 +769,10 @@ Examples:
 | ViewModel / screen state | `mvi` |
 | Navigation | `navigation` |
 | Dependency injection | `dependency-injection` |
+| Code quality / linting | `code-quality` |
+| Unit tests | `unit-testing` |
+| Android CLI / emulator / deploy | `android-cli` |
+| Project docs / onboarding | `project-docs-maintainer` |
 <only rows for skills actually scaffolded in this project:>
 | Auth / login | `ktor-auth-service` |
 | Local database | `sqldelight-setup` |
@@ -777,7 +781,6 @@ Examples:
 | Screenshot tests | `roborazzi` |
 | ProGuard / release build | `proguard-r8` |
 | Design system | `design-system` (or `shadcn-compose`/`tailwind-compose`/`heroicons-compose` if chosen in Step 6a) |
-| Unit tests | `unit-testing` |
 | Architecture audit | `audit` |
 
 ## Feature modules
@@ -902,6 +905,11 @@ that don't map cleanly — review before relying on it.
 - first copy the shared `kmm-agent-skills/skills/` bundle
 - then sync any project-owned custom skills from `skills/<name>/` into `.claude/skills/<name>/`
 
+**Mirror the same copy into `.agents/skills/`** — the project-level half of
+agentskills.io's cross-client convention (verified in
+`docs/reference/agentskills-io-standards.md`), so any agentskills.io-compliant client
+working in this new project sees the same skills, not just Claude Code.
+
 **Write `.claude/pipeline-context.json`** — seed the project planner with initial context:
 
 ```json
@@ -971,6 +979,7 @@ Agent setup:
   CLAUDE.md                               — thin bootstrap into .claude/AGENTS.md
   .claude/AGENTS.md                       — skill routing + feature module table
   .claude/commands/kmm-*.md               — <N> slash commands installed
+  .claude/skills/ + .agents/skills/       — <N> skills deployed to both (cross-client)
   .claude/pipeline-context.json           — project context for the planner agent
   .claude/settings.json                   — Bash allowlist + hook wiring home
   (if deployed) .codex/agents/            — <N> subagents translated to TOML
@@ -979,11 +988,15 @@ Agent setup:
 Verify:      PASS
 Skills used: <list>
 
+Not yet wired: git/CI architecture hooks (pre-commit audit, PostToolUse validation).
+Run /kmm-setup-hooks now to add them — recommended for every team project.
+
 Next steps:
 <if Android in platforms>  ./gradlew :androidApp:assembleDebug      — build Android APK</if>
 <if iOS in platforms>      ./gradlew :iosApp:buildReleaseXCFramework — build iOS XCFramework</if>
 <if Desktop in platforms>  ./gradlew :desktopApp:run                 — run Desktop app</if>
   ./gradlew jvmTest                             — run all tests
+  /kmm-setup-hooks                              — wire git/CI architecture hooks
   /kmm-implement-feature <name>                 — add your next feature
 ```
 

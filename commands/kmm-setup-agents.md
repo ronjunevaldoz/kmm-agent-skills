@@ -85,23 +85,30 @@ Modules discovered:
 
 ### 2c — Detect active skills from `gradle/libs.versions.toml`
 
-**App projects check for:**
+**Always include, regardless of detected signals** (matches `/kmm-new-project`'s Step 5
+mandatory baseline — a project scaffolded via either command must end up with the same
+routing, not depend on which command happened to initialize it):
+- `code-quality` — Ktlint/Detekt is a baseline expectation, not library-specific
+- `unit-testing` — same reasoning; don't gate this behind a `turbine` signal alone
+- `android-cli` — Android target build/deploy/emulator tooling applies whenever an
+  Android target exists, which every app project and most libraries have
+- `project-docs-maintainer` — README/onboarding upkeep, not tied to any dependency
+
+**App projects additionally check for:**
 - `koin` → dependency-injection
 - `ktor` → network-layer
 - `sqldelight` → sqldelight-setup
 - `androidx.datastore` → datastore
 - `roborazzi` → roborazzi
-- `turbine` → unit-testing
 - navigation libraries → navigation
 
-**Library projects check for:**
+**Library projects additionally check for:**
 - `vanniktech` or `maven.publish` → library-publishing
 - `binary-compatibility-validator` → library-publishing (apiCheck)
 - `dokka` → library-publishing (Javadoc jars)
-- `roborazzi` or `turbine` → unit-testing
 - `iosX64`, `iosArm64` targets in build files → xcframework-spm
 
-Print the detected skill set.
+Print the detected skill set — always-included skills first, then signal-detected ones.
 
 ---
 
@@ -157,6 +164,10 @@ Examples:
 | ViewModel / screen state | `kotlin-multiplatform-mvi` |
 | Navigation | `kotlin-multiplatform-navigation` |
 | Dependency injection | `kotlin-multiplatform-dependency-injection` |
+| Code quality / linting | `kotlin-multiplatform-code-quality` |
+| Unit tests | `kotlin-multiplatform-unit-testing` |
+| Android CLI / emulator / deploy | `kotlin-multiplatform-android-cli` |
+| Project docs / onboarding | `kotlin-multiplatform-project-docs-maintainer` |
 <include only skills detected in Step 2c>
 | Auth / login | `kotlin-multiplatform-ktor-auth-service` |
 | Local database | `kotlin-multiplatform-sqldelight-setup` |
@@ -164,7 +175,6 @@ Examples:
 | Key-value settings | `kotlin-multiplatform-datastore` |
 | Screenshot tests | `kotlin-multiplatform-roborazzi` |
 | Design system | `kotlin-multiplatform-design-system` |
-| Unit tests | `kotlin-multiplatform-unit-testing` |
 | Architecture audit | `kotlin-multiplatform-audit` |
 | Harvest consumer lessons | `kotlin-multiplatform-audit` (`--harvest` mode via `/kmm-harvest-lessons`) |
 </end detected skills>
@@ -215,6 +225,8 @@ Group ID: <groupId>   Artifact: <artifactId>   Published to: Maven Central | Git
 | Unit / integration tests | `kotlin-multiplatform-unit-testing` |
 | Code quality (detekt, ktlint) | `kotlin-multiplatform-code-quality` |
 | CI automation | `kotlin-multiplatform-ci-github-actions` |
+| Android CLI / emulator / deploy | `kotlin-multiplatform-android-cli` |
+| Project docs / onboarding | `kotlin-multiplatform-project-docs-maintainer` |
 | Architecture audit | `kotlin-multiplatform-audit` |
 | Harvest consumer lessons | `kotlin-multiplatform-audit` (`--harvest` mode via `/kmm-harvest-lessons`) |
 <add only if detected>
@@ -382,6 +394,35 @@ to sync changed skills without prompting for each file (skills are passive docs)
 That sync includes both the shared `kmm-agent-skills` bundle and any project-owned
 custom skills under `skills/<name>/`.
 
+**Also deploy to `.agents/skills/`** — the project-level half of agentskills.io's
+cross-client convention (verified in `docs/reference/agentskills-io-standards.md`;
+the global sync script covers the user-level half at `~/.agents/skills`). Mirror the
+same copy into `.agents/skills/` so any agentskills.io-compliant client working in this
+project sees the same skills, not just Claude Code.
+
+---
+
+## Step 7a — Seed `.claude/pipeline-context.json`
+
+If `.claude/pipeline-context.json` does not already exist, write it so the `planner`
+agent has project context from the first run instead of starting cold — this was
+previously only seeded for brand-new projects via `/kmm-new-project`, never for a
+project being initialized after the fact:
+
+```json
+{
+  "project": "<project name, from settings.gradle.kts rootProject.name>",
+  "group_id": "<group ID, from gradle.properties or root build.gradle.kts>",
+  "platforms": ["<platforms detected from the module graph in Step 2b>"],
+  "skills_used": ["<the detected skill set from Step 2c, always-included + signal-detected>"],
+  "recurring_issues": [],
+  "proven_patterns": []
+}
+```
+
+If it already exists, print its current contents and skip — don't overwrite a project's
+accumulated `recurring_issues`/`proven_patterns` history.
+
 ---
 
 ## Step 8 — Write `CLAUDE.md`
@@ -461,6 +502,8 @@ Generated:
   ✅ .claude/AGENTS.md                         — skill routing tailored to this project
   ✅ .claude/commands/                         — <N> consumer commands installed
   ✅ .claude/skills/                           — <N> skills deployed
+  ✅ .agents/skills/                           — same <N> skills, cross-client convention
+  ✅ .claude/pipeline-context.json             — project context seeded for the planner agent
   ✅ .claude/settings.json                     — Bash allowlist + hook wiring home
   <if deployed> .codex/agents/                 — <N> subagents translated to TOML
   <if deployed> .gemini/commands/              — <N> commands translated to TOML
@@ -468,7 +511,11 @@ Generated:
 Detected skill set:
   <list of skills matched from libs.versions.toml>
 
+Not yet wired: git/CI architecture hooks (pre-commit audit, PostToolUse validation).
+Run /kmm-setup-hooks now to add them — recommended for every team project.
+
 Try it now:
+  /kmm-setup-hooks               — wire git pre-commit + PostToolUse architecture hooks
   /kmm-run-audit                 — check architecture health (auto-reports skill gaps)
   /kmm-harvest-lessons           — collect good patterns; propose GitHub issues upstream
   /kmm-implement-feature <name>  — add a new feature
