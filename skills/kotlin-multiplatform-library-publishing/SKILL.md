@@ -620,6 +620,67 @@ The release CI should run both publish tasks in the same workflow run when a tag
 
 ---
 
+## Step 11 — Ongoing maintenance (post-1.0)
+
+Everything above covers shipping. A published library also needs a maintenance
+practice — real gaps found repeatedly in libraries that only had a publish checklist:
+
+### Deprecation cycle, not silent removal
+
+Never delete a public symbol a consumer might already depend on. Mark it first:
+
+```kotlin
+@Deprecated(
+    message = "Use fetchUserV2() — handles pagination correctly",
+    replaceWith = ReplaceWith("fetchUserV2(id)"),
+    level = DeprecationLevel.WARNING,
+)
+fun fetchUser(id: String): User
+```
+
+Cycle, tied to SemVer:
+1. **This minor version** — add `@Deprecated(level = WARNING)`. `apiCheck` still passes;
+   this is not a binary-breaking change.
+2. **Next minor version** — bump to `level = ERROR`. Consumers must migrate to keep
+   compiling, but the symbol still exists (source-compatible migration window).
+3. **Next major version** — remove the symbol entirely. `apiDump` records the removal;
+   `apiCheck` correctly fails until the API dump is regenerated for the major bump.
+
+### Communicating a breaking change
+
+A binary-incompatible change (an `apiCheck` failure you're accepting on purpose, not a
+mistake to fix) needs three things before it ships, not just a version bump:
+- A `CHANGELOG.md` entry naming the exact symbol and the replacement, not just "breaking changes"
+- A migration note if the fix isn't mechanical (find/replace) — show the before/after
+- The major version bump itself, per SemVer — a breaking change is never a minor/patch release
+
+### Dependency upgrade cadence
+
+A library's own dependency versions become every consumer's transitive minimum. Pin
+conservatively and review on a cadence, not reactively:
+- Renovate or Dependabot on the repo, scoped to `gradle/libs.versions.toml`
+- Treat a transitive major-version bump (Compose Multiplatform, Kotlin itself) as its own
+  reviewed change, never bundled silently into an unrelated feature release
+- Keep `sample/`'s own dependency versions pinned to the library's own — a stale sample
+  masks a real compatibility break until a real consumer hits it first
+
+### Keep `sample/` from drifting
+
+The sample app is the only thing that actually compiles against the library's *public*
+API the way a real consumer would — an internal test suite compiles against internals
+too and can miss a public-surface break. Run the sample's build as its own CI job on
+every PR, not just at release time:
+
+```bash
+./gradlew :sample:compileKotlinX  # X = every registered target
+```
+
+A sample that still compiles against a symbol scheduled for removal is a signal the
+deprecation cycle above hasn't actually reached consumers yet — don't remove the symbol
+from the library until the sample itself has migrated off it.
+
+---
+
 ## Output Style
 
 When generating publishing configuration or release steps, output:
@@ -674,6 +735,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added Step 11 — ongoing maintenance: real gap where this skill covered shipping (publish, apiCheck, signing) but nothing about maintaining a published library afterward. Covers the deprecation cycle (`@Deprecated(WARNING)` → `ERROR` → removal, tied to SemVer), breaking-change communication (CHANGELOG entry + migration note before a major bump, never bundled silently), dependency upgrade cadence (Renovate/Dependabot scoped to the version catalog, sample pinned to the library's own versions), and keeping `sample/` from drifting (its own CI compile job — the only thing that actually compiles against the real public surface the way a consumer would). |
 | 2026-07-31 | Added "`apiCheck` catches that the API changed, not whether the version bump matches" — real gap: `apiCheck` has no concept of semver, so nothing blocks tagging a breaking `.api` diff as a minor release. Also cross-referenced `kotlin-multiplatform-clean-architecture`'s 6-layer contract for a library's own internal structure once `:library` outgrows a single module. 1 new anti-pattern, 1 new Related Skills row. |
 | 2026-07-20 | Added "No forced framework coupling in library internals" (a library's own classes shouldn't hard-import Koin — ship it as a separate optional artifact instead) and "KDoc coverage on the public API surface", the second wired to `kotlin-multiplatform-audit`'s new `_detect_undocumented_public_api`. Real gaps from a library-vs-app rules discussion. 2 new anti-pattern rows, 2 new Related Skills. |
 | 2026-07-20 | Added `explicitApi()` — real gap found in a library-vs-app rules survey: this skill covered binary compatibility, signing, and publishing channels but never the compiler mode that catches an accidental public API leak *before* it ships (as opposed to `apiCheck`, which only catches the *next* change to an already-public surface). Explicitly scoped to library code only — app code has no external consumers to protect and gains nothing from the ceremony. 1 new anti-pattern. |

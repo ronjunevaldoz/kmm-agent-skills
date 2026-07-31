@@ -9,7 +9,7 @@
 AI agent skills for **Kotlin Multiplatform (KMP)** development — clean module boundaries,
 version catalogs, build-logic convention plugins, and explicit review loops before code is generated.
 
-Built on the open [Agent Skills](https://agentskills.io) format. All 65 skills verified
+Built on the open [Agent Skills](https://agentskills.io) format. All 66 skills verified
 against the real [`skills-ref`](https://github.com/agentskills/agentskills) reference
 validator — see [`docs/reference/agentskills-io-standards.md`](docs/reference/agentskills-io-standards.md)
 for what was checked and how.
@@ -122,14 +122,14 @@ python3 scripts/release.py auto --dry-run # preview first
 
 ## Skills
 
-65 skills covering the full KMP stack. Load the smallest set that answers the request.
+66 skills covering the full KMP stack. Load the smallest set that answers the request.
 Health at a glance (size, freshness, known issues) without reading every `SKILL.md`:
 [`docs/reference/skills-report.md`](docs/reference/skills-report.md).
 
 | Category | Count | Covers |
 |---|---|---|
 | Foundation | 7 | Module structure, clean architecture, DI, CI, Android CLI |
-| Infrastructure | 10 | Auth, networking, database, publishing, JNI |
+| Infrastructure | 11 | Auth, networking, database, publishing, JNI |
 | Patterns | 21 | MVI, navigation, offline-first, notifications, IAP, and more |
 | UI System | 12 | Design system, state hoisting, animation, adaptive layout |
 | Testing & Quality | 5 | Unit tests, screenshot tests, lint/static analysis |
@@ -159,6 +159,7 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 - [`mongodb-database`](skills/kotlin-multiplatform-mongodb-database/) — MongoDB coroutine driver and repositories
 - [`kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) — Kotlin RPC boundaries and scaffolding
 - [`jni-pro`](skills/kotlin-multiplatform-jni-pro/) — JVM JNI bridge to native C/C++
+- [`native-authoring`](skills/kotlin-multiplatform-native-authoring/) — author brand-new first-party C/C++ source for a native core, before any JNI bridge exists
 
 ### Patterns
 - [`mvi`](skills/kotlin-multiplatform-mvi/) — State / Intent / Effect, Channel effects, MviViewModel base

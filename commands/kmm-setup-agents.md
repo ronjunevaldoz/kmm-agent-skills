@@ -107,6 +107,11 @@ routing, not depend on which command happened to initialize it):
 - `binary-compatibility-validator` → library-publishing (apiCheck)
 - `dokka` → library-publishing (Javadoc jars)
 - `iosX64`, `iosArm64` targets in build files → xcframework-spm
+- `@DslMarker`-annotated types with names ending in `Modifier`/`Scope`/`UiDsl`, or a
+  `MIRROR_MAP.md` at the project root → api-mimicry
+- `CMakeLists.txt` or `*.def` cinterop files present → check whether the referenced
+  native code already exists as a 3rd-party/vendored source (→ jni-pro) or is authored
+  first-party in this repo (→ native-authoring); read the file paths, don't assume
 
 Print the detected skill set — always-included skills first, then signal-detected ones.
 
@@ -232,6 +237,9 @@ Group ID: <groupId>   Artifact: <artifactId>   Published to: Maven Central | Git
 <add only if detected>
 | Screenshot / visual tests | `kotlin-multiplatform-roborazzi` |
 | BOM / multi-artifact | `kotlin-multiplatform-library-publishing` (Step 4) |
+| Library mimics a reference API's shape (Modifier/slot DSL) on a custom runtime | `kotlin-multiplatform-api-mimicry` |
+| Bridges to an existing 3rd-party C/C++ library | `kotlin-multiplatform-jni-pro` |
+| Authors brand-new first-party C/C++ source (not bridging to an existing library) | `kotlin-multiplatform-native-authoring` |
 </end>
 
 ## Published artifacts
@@ -296,6 +304,69 @@ correct frontmatter shape from day one.
 
 If any of these files already exist, print their current contents and skip unless the
 user explicitly asks to overwrite them.
+
+### Library-specific maintainer agents (project-owned, optional)
+
+The generic `agents/*.md` roster this collection ships (`planner`, `implementer`,
+`reviewer`, `fixer`, ...) is domain-agnostic — none of them own a library's own
+sub-domain concept, like a mimicked UI DSL's mirror-map staying honest, or a native core
+staying separated from its JNI/cinterop bridge. When a library has a real, distinct
+sub-domain like that, author a project-owned maintainer agent the same way a project
+authors a custom skill: `agents/<name>-maintainer.md` at the project root, deployed to
+`.claude/agents/<name>-maintainer.md`.
+
+Only do this when the sub-domain is real and ongoing — a one-off task doesn't need a
+standing agent. Two concrete cases this collection's own skills already point at:
+
+**A library that mimics a reference API's shape** (`kotlin-multiplatform-api-mimicry`):
+
+```markdown
+# <library name> — UI DSL Maintainer
+
+Owns: keeping the mimicked API shape honest against `MIRROR_MAP.md`.
+
+## When to use
+- Adding a new mimicked primitive (a new `*Modifier` function, a new slot composable)
+- Reviewing whether a change quietly started claiming real reference-API behavior
+  (recomposition, skipping) this library doesn't actually provide
+
+## Checklist
+1. Does `MIRROR_MAP.md` have a row for every mimicked primitive touched this session?
+2. Does the naming avoid fusing the target runtime's name with the reference API's own
+   type name (see `kotlin-multiplatform-api-mimicry`'s naming-placeholder guidance)?
+3. Does any new doc comment or README line imply real compiler-plugin behavior
+   (`@Composable`-compatible, "supports recomposition") that isn't actually true?
+
+Load `kotlin-multiplatform-api-mimicry` for the underlying method; this agent only owns
+enforcing it stays applied as the library grows.
+```
+
+**A library with a first-party native core** (`kotlin-multiplatform-native-authoring` +
+`kotlin-multiplatform-jni-pro`):
+
+```markdown
+# <library name> — Native Core Maintainer
+
+Owns: the boundary between this library's own C/C++ core and its JNI/cinterop bridge.
+
+## When to use
+- Adding a new native function that needs a Kotlin-side binding
+- Reviewing whether JNI glue is being written before the native core's own public
+  header API has stabilized (see `kotlin-multiplatform-native-authoring`'s handoff point)
+
+## Checklist
+1. Is the new native function's public C-ABI signature in `native/include/` before any
+   `external fun` is written on the Kotlin side?
+2. Does the bridge stay a marshalling-only C-shim, with no reimplemented logic
+   (`kotlin-multiplatform-jni-pro`'s Phase 0 discovery + EP-1)?
+3. Are native-side tests (ctest/gtest) passing independently of the Kotlin test suite?
+
+Load `kotlin-multiplatform-native-authoring` for authoring the C/C++ core itself, and
+`kotlin-multiplatform-jni-pro` for the bridge — this agent owns the boundary between them.
+```
+
+Both examples are starting points, not fixed templates — the real checklist should
+reflect the project's actual `MIRROR_MAP.md`/native layout, not be copied verbatim.
 
 ---
 

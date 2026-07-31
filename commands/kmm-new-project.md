@@ -6,6 +6,11 @@
 - Omitted: the command asks what the app does before proceeding
 - Plain description: `build a todo app in kmm`
 - A path to a sample spec: `samples/todo-app.md`
+- Append `--dry-run` anywhere in the description to run intake, inference, and planning
+  through Step 4's F-03 architecture diagram, then print the resulting module structure
+  and stop — no `git clone`, no file writes. Re-run without `--dry-run` to actually
+  scaffold once the preview looks right. Strip `--dry-run` from the text before treating
+  the rest as the app description.
 
 This command drives the full pipeline end-to-end across 11 steps:
 intake → infer → **plan (compact MVP + delivery slices, gated approval, persisted to `PLAN.md`)** → scaffold → infrastructure → design system → screen layouts + previews → features → verify → agent setup → summary.
@@ -251,6 +256,18 @@ the live source of truth for what's done, not the chat transcript.
 ---
 
 ## Step 4 — Foundation (always first, always in this order)
+
+**If `--dry-run` was set in Step 1:** stop here, before F-01. Using the confirmed
+`PROJECT_TYPE`, `PLATFORMS`, and the feature list from Step 3's sprint plan, print the
+module structure that would be created — no `git clone`, no file writes, nothing touches
+disk. For `[App]`, use kmp-wizard's own real module map (documented in F-01 below) plus
+one `:feature:<name>/{model,api,domain,data,presenter,ui}` block per planned feature and
+the `:core:*` modules Step 5's skill-loading table would trigger. For `[Library]`, use
+F-01's own `library`/`library-testing`/`sample` structure. End with:
+```
+Dry run complete — <N> features, <N> modules planned. Re-run without --dry-run to scaffold.
+```
+Do not proceed to F-01 itself in a dry run.
 
 Run these before any feature work. They establish the module graph and layer contract
 everything else depends on. `PROJECT_TYPE` branches which foundation gets built.

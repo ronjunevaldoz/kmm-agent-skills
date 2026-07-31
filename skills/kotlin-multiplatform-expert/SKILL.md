@@ -203,7 +203,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 65 Skills and What They Own
+## The 66 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -252,6 +252,7 @@ versions when the local repo can be checked directly.
 | `kotlin-multiplatform-expect-actual` | `expect/actual` mechanism, interface-injection alternative, `@ObjCName`, Kotlin/Native memory |
 | `kotlin-multiplatform-repository-pattern` | Data layer, single source of truth, fetch strategies, domain mapping, optimistic updates |
 | `kotlin-multiplatform-jni-pro` | JVM↔C++ JNI bridges (`JNIEnv`, `Java_*`, `GetStringUTFChars`, `*-jni.cpp`/`*-wrapper.cpp`), memory safety across the JVM boundary, 3rd-party C++ as read-only black box + C-shim wrapping, symbol-conflict isolation. **NOT** Kotlin/Native cinterop (`CPointer`/`.def`) |
+| `kotlin-multiplatform-native-authoring` | Authoring brand-new, first-party C/C++ source for a KMP library's native core (directory layout, CMake, public C-ABI header, native ctest) — always followed by `jni-pro` for the actual bridge. **NOT** bridging to code that already exists |
 
 ### Layer 4 — Feature Building Blocks
 | Skill | Owns |
@@ -323,6 +324,7 @@ kotlin-multiplatform-feature-scaffold       ← scaffold second (implements the 
 ├── kotlin-multiplatform-sqldelight-setup   (depends on: scaffold)
 ├── kotlin-multiplatform-xcframework-spm    (depends on: scaffold, ci)
 ├── kotlin-multiplatform-api-mimicry        (depends on: library-publishing)
+├── kotlin-multiplatform-native-authoring   (no deps; always followed by jni-pro)
 ├── kotlin-multiplatform-expect-actual      (depends on: scaffold)
 ├── kotlin-multiplatform-repository-pattern (depends on: network-layer, sqldelight-setup)
 ├── kotlin-multiplatform-navigation         (depends on: scaffold)
@@ -676,6 +678,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "crash reporting", "crashlytics", "firebase crashes", "sentry", "non-fatal", "symbolication", "dSYM", "breadcrumb bridge", "crash handler", "breadcrumb crash" | `kotlin-multiplatform-crash-reporting` |
 | "DataStore", "Preferences DataStore", "Proto DataStore", "save settings", "persist user prefs", "SharedPreferences migration", "createDataStore", "local key-value store" | `kotlin-multiplatform-datastore` |
 | "JNI", "JNI bridge", "native bridge", "JNIEnv", "Java_*", "GetStringUTFChars", "jbyteArray", "wrapper.cpp", "vendor C++", "3rd-party C++", "CMake JNI", "NDK", "call C++ from Kotlin/JVM", "native memory leak", "symbol conflict", "C-shim", "header compatibility" | `kotlin-multiplatform-jni-pro` |
+| "native core", "first-party native code", "author C++ library", "write native code from scratch", "native library scaffold", "public C-ABI header", "native renderer", "custom engine", "native ctest" | `kotlin-multiplatform-native-authoring` |
 | Disambiguation — "platform-specific code", "iOS implementation", "CPointer", "cinterop", ".def file", "Kotlin/Native" → `kotlin-multiplatform-expect-actual` (NOT `kotlin-multiplatform-jni-pro`; JNI is JVM-only) | — |
 | "privacy policy", "terms and conditions", "terms of service", "GDPR", "CCPA", "data safety", "App Store privacy", "legal docs", "user data disclosure", "consent screen", "privacy screen", "play store legal", "app store compliance" | `kotlin-multiplatform-legal-docs` |
 | "ProGuard", "R8", "obfuscation", "minification", "keep rules", "proguard-rules.pro", "release build crash", "ClassNotFoundException release", "NoSuchMethodException release", "APK size", "minifyEnabled", "shrinkResources", "Koin keep", "Ktor keep", "SQLDelight keep", "kotlinx.serialization keep" | `kotlin-multiplatform-proguard-r8` |
@@ -874,6 +877,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added `kotlin-multiplatform-native-authoring` (66th skill) — real gap: `kotlin-multiplatform-jni-pro` explicitly assumes the native C/C++ code already exists (its whole framing is "3rd-party files are read-only," library-first discovery) and never covered authoring brand-new first-party native source. Scaffolds directory layout, CMake, public C-ABI header design, and native-side testing; always hands off to `jni-pro` for the actual bridge. Added to the Meta list, Skill Invocation Map, and dependency graph. |
 | 2026-07-31 | Added `kotlin-multiplatform-api-mimicry` (65th skill) — a real gap: nothing covered mimicking a reference API's *shape* (Modifier-style chains, slot lambdas, DSL markers) when building a KMP library on a non-standard runtime (custom native renderer, custom transport) that isn't real Compose Multiplatform underneath. Distinct from `design-system`, which builds atop the real Compose runtime. Added to the Meta list, Skill Invocation Map, and dependency graph. |
 | 2026-07-15 | Expanded the project-owned scaffold contract for Claude consumers: `rules/` and `docs/reference/ai-collaboration.md` are now part of the canonical source layout, and `CLAUDE.md` is explicitly treated as a thin bootstrap rather than the only copy of project policy. This keeps project-specific agent guidance at the repo root while `.claude/` remains the deployed runtime layer. |
 | 2026-07-14 | Added "Project-Specific Commands/Agents/Skills — Source of Truth": a real gap found while reviewing a consumer project (a KMP game engine) whose two custom agent definitions were authored directly into `.claude/agents/` with no project-owned source anywhere. Documents mirroring this repo's own layout (`agents/`, `commands/`, `skills/`, `hooks/` at the project root as canonical source, `.claude/` as the deployed copy) for any project-specific artifact that isn't from `kmm-agent-skills` itself. Cross-referenced from `/kmm-setup-agents`, which only deploys this collection's own skills/commands, not project-owned ones. Corrected same-day: the layout initially nested a skill under an app-name folder (`skills/<app-name>/<skill-name>/`) — verified against `anthropic-skills:skill-creator`'s real, official skill anatomy that this isn't a recognized convention; skills are flat, named after what they do. Fixed to `skills/<skill-name>/`, with name-collision guidance (rename the skill, don't nest it) instead. |
