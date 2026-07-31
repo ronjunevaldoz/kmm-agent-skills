@@ -2,7 +2,7 @@
 
 Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
-**65 skills** — 43 clean, 22 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
+**66 skills** — 44 clean, 22 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
@@ -10,12 +10,12 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-design-system`](../../skills/kotlin-multiplatform-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
 | [`kotlin-multiplatform-mvi`](../../skills/kotlin-multiplatform-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kotlin-multiplatform-feature-scaffold`](../../skills/kotlin-multiplatform-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
-| [`kotlin-multiplatform-expert`](../../skills/kotlin-multiplatform-expert/) | 890 | 2026-07-31 | 🟡 1 known debt |
+| [`kotlin-multiplatform-expert`](../../skills/kotlin-multiplatform-expert/) | 894 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-navigation`](../../skills/kotlin-multiplatform-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
 | [`kotlin-multiplatform-legal-docs`](../../skills/kotlin-multiplatform-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
 | [`kotlin-multiplatform-roborazzi`](../../skills/kotlin-multiplatform-roborazzi/) | 769 | 2026-07-10 | 🟡 1 known debt |
+| [`kotlin-multiplatform-library-publishing`](../../skills/kotlin-multiplatform-library-publishing/) | 744 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-network-layer`](../../skills/kotlin-multiplatform-network-layer/) | 690 | 2026-07-31 | 🟡 1 known debt |
-| [`kotlin-multiplatform-library-publishing`](../../skills/kotlin-multiplatform-library-publishing/) | 682 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-clean-architecture`](../../skills/kotlin-multiplatform-clean-architecture/) | 672 | 2026-07-26 | 🟡 1 known debt |
 | [`kotlin-multiplatform-code-quality`](../../skills/kotlin-multiplatform-code-quality/) | 658 | 2026-07-25 | 🟡 1 known debt |
 | [`kotlin-multiplatform-compose-slot-api`](../../skills/kotlin-multiplatform-compose-slot-api/) | 648 | 2026-06-26 | 🟡 1 known debt |
@@ -63,6 +63,7 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-analytics`](../../skills/kotlin-multiplatform-analytics/) | 297 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-logging`](../../skills/kotlin-multiplatform-logging/) | 297 | 2026-06-24 | ✅ |
 | [`kotlin-multiplatform-kotlin-rpc`](../../skills/kotlin-multiplatform-kotlin-rpc/) | 285 | 2026-07-31 | ✅ |
+| [`kotlin-multiplatform-native-authoring`](../../skills/kotlin-multiplatform-native-authoring/) | 283 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-imagevector-generator`](../../skills/kotlin-multiplatform-imagevector-generator/) | 276 | 2026-07-08 | ✅ |
 | [`kotlin-multiplatform-preview-driven-development`](../../skills/kotlin-multiplatform-preview-driven-development/) | 276 | 2026-07-08 | ✅ |
 | [`kotlin-multiplatform-proguard-r8`](../../skills/kotlin-multiplatform-proguard-r8/) | 269 | 2026-06-29 | ✅ |

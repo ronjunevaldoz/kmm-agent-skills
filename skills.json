@@ -1,5 +1,5 @@
 {
-  "version": "1.105.0",
+  "version": "1.106.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -2165,6 +2165,40 @@
         "God State",
         "unrelated concerns in one ViewModel",
         "state cohesion"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kotlin-multiplatform-native-authoring",
+      "path": "skills/kotlin-multiplatform-native-authoring",
+      "description": "Scaffolds and structures brand-new, first-party C/C++ source for a Kotlin Multiplatform library's native core (a custom renderer, codec, or engine you are writing yourself) \u2014 directory layout, CMake setup, public C-ABI header design, and native-side testing. Produces the artifact kotlin-multiplatform-jni-pro's Phase 0 discovery expects to find. Does NOT cover bridging Kotlin to native code \u2014 that is kotlin-multiplatform-jni-pro's job, always used after this skill, never instead of it. Does NOT cover wrapping an existing 3rd-party C/C++ library \u2014 that is also jni-pro's job (its Phase 0 library-first discovery), not this skill's.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-07-31",
+      "keywords": [
+        "native core",
+        "first-party native code",
+        "author C++ library",
+        "CMakeLists.txt",
+        "native renderer",
+        "custom engine",
+        "native library scaffold",
+        "public C-ABI header",
+        "cinterop def file",
+        "native ctest",
+        "write native code from scratch"
+      ],
+      "triggers": [
+        "native core",
+        "first-party native code",
+        "author C++ library",
+        "CMakeLists.txt",
+        "native renderer",
+        "custom engine",
+        "native library scaffold",
+        "public C-ABI header",
+        "cinterop def file",
+        "native ctest",
+        "write native code from scratch"
       ],
       "scripts": []
     },

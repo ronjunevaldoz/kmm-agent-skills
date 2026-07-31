@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.106.0] — 2026-07-31
+
+### Added
+
+- feat(native-authoring): add new skill for first-party native C/C++ core authoring
+
+---
+
 ## [v1.105.0] — 2026-07-31
 
 ### Added
