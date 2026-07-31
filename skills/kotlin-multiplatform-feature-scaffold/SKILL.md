@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmm-agent-skills
-  last-updated: '2026-07-19'
+  last-updated: '2026-07-31'
   keywords:
     - Kotlin Multiplatform
     - KMP
@@ -197,7 +197,7 @@ datetime              = "0.8.0"
 
 > **Note on BuildKonfig**: `com.codingfeline.buildkonfig` is the KMP equivalent of
 > Android's `BuildConfig`. It generates a `BuildKonfig` object accessible from
-> `commonMain`, `androidMain`, and `iosMain`. Configure it in `:androidApp`'s
+> `commonMain`, `androidMain`, and `iosMain`. Configure it in `:app:androidApp`'s
 > `build.gradle.kts` using a `buildkonfig {}` block.
 
 ---
@@ -338,7 +338,7 @@ find build-logic/convention/src/main/kotlin -name "*.kt" \
   -exec sed -i '' 's/org\.example/GROUP_ID/g' {} +
 ```
 
-**`androidApp/build.gradle.kts`** and any `applicationId` occurrences — replace
+**`app/androidApp/build.gradle.kts`** and any `applicationId` occurrences — replace
 the wizard placeholder with `GROUP_ID`.
 
 ### 3c. Verify the base builds
@@ -351,6 +351,50 @@ Run this before adding any modules:
 
 `BUILD SUCCESSFUL` means the base is sound. Fix any version resolution errors
 before proceeding. Do not add feature modules to a broken base.
+
+### 3d. Fix kmp-wizard's known scaffold gaps before adding anything
+
+The `all-targets` clone's real module map (verified against the live template):
+
+```
+:app:androidApp / :app:desktopApp / :app:webApp  — thin per-platform entry points
+app/iosApp/                                       — native Xcode project, not a Gradle module
+:app:shared                                       — CMP composition root (depends on :core)
+:core                                             — ships as ONE bare module
+:server                                           — present only on the all-targets branch
+```
+
+Two things must be fixed before Step 4's convention plugins are added, or the project
+fails this collection's own audit on its first run:
+
+1. **`:core` ships bare.** Rename it to `:core:common` — update its
+   `settings.gradle.kts` include and `app/shared/build.gradle.kts`'s
+   `implementation(project(":core"))` to `project(":core:common")`. This is exactly the
+   `bare core module [HIGH]` finding `kotlin-multiplatform-audit`'s
+   `_detect_bare_core_module` flags — fix it now, don't scaffold on top of it. Add
+   `:core:network`/`:core:database`/`:core:ui`/`:core:testing` later, on demand, not all
+   at scaffold time.
+2. **`:app:shared` ships with demo placeholder content.** Delete kmp-wizard's default
+   Greeting/counter sample. Keep `:app:shared` as a **composition root only** — the
+   top-level `App()` composable, theme wrapper, `startKoin {}`, and a `NavHost`
+   referencing `:feature:*:ui` screens. Feature logic, data access, and feature-specific
+   UI never live in `:app:shared` — see "The `:app:*` Module Boundary" below.
+
+---
+
+## The `:app:*` Module Boundary
+
+Nothing new is ever nested directly under `:app:*`. The only modules there are the four
+kmp-wizard already created — `androidApp`, `desktopApp`, `webApp`, `shared` — plus the
+native (non-Gradle) `app/iosApp/` Xcode project. A new feature, or a new piece of shared
+infrastructure, never gets its own `:app:<name>` module: it goes in `:feature:<name>:*`
+(business logic) or `:core:*` (cross-feature infrastructure). `:app:shared` itself stays
+a thin composition root — if it starts accumulating anything beyond theme/DI/nav wiring,
+that's a signal the content belongs in `:feature:*` or `:core:*` instead.
+
+`kotlin-multiplatform-audit`'s `unauthorized app submodule` check enforces this
+mechanically — a `build.gradle.kts` under `app/<name>/` where `<name>` isn't one of the
+four known entry points is a finding, not a judgment call.
 
 ---
 
@@ -912,7 +956,7 @@ class GetUserUseCase(private val repo: UserRepository) {
 class AuthViewModel(private val getUser: GetUserUseCase) : ViewModel() { ... }
 ```
 
-Auto-generated modules are collected in `AppModule`. Declare in `:androidApp`:
+Auto-generated modules are collected in `AppModule`. Declare in `:app:androidApp`:
 
 ```kotlin
 startKoin {
@@ -938,7 +982,7 @@ val authPresenterModule = module {
 }
 ```
 
-Declare all modules in `:androidApp`:
+Declare all modules in `:app:androidApp`:
 
 ```kotlin
 startKoin {
@@ -972,7 +1016,7 @@ When adding a feature to an existing project:
    include(":feature:FEATURE_NAME:presenter")
    include(":feature:FEATURE_NAME:ui")
    ```
-4. Wire into `:androidApp` dependencies:
+4. Wire into `:app:androidApp` dependencies:
    ```kotlin
    implementation(projects.feature.FEATURE_NAME.ui)
    ```
@@ -1120,7 +1164,7 @@ After scaffolding, verify in order:
 
 1. `./gradlew help` — Gradle resolves the build without errors
 2. `./gradlew :feature:FEATURE_NAME:api:compileKotlinMetadata` — KMP common compiles
-3. `./gradlew :androidApp:assembleDebug --dry-run` — Android wiring is correct
+3. `./gradlew :app:androidApp:assembleDebug --dry-run` — Android wiring is correct
 4. Confirm all `include()` entries in `settings.gradle.kts` match actual directories
 5. Confirm no module references another module that it should not (enforce the layer rules:
    `:ui` depends only on `:presenter`; `:presenter` has NO Compose dep; `:domain` must not depend on `:data`;
@@ -1210,6 +1254,7 @@ Ask for GROUP_ID and feature name before generating files. Map all paths to the 
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Fixed real drift: this skill (and `/kmm-new-project`) referenced a bare `:androidApp` module and, in one place, a nonexistent `:composeApp` — verified against the live `Kotlin/kmp-wizard` `all-targets` template and found the real paths are `:app:androidApp`/`:app:desktopApp`/`:app:webApp`/`:app:shared`, plus a native (non-Gradle) `app/iosApp/` Xcode project. Fixed all 5 occurrences. Added Step 3d: kmp-wizard's default `:core` ships as one bare module (the exact `bare core module [HIGH]` anti-pattern this repo's own audit flags) and `:app:shared` ships with unused demo content — both must be fixed before Step 4, not scaffolded on top of. Added "The `:app:*` Module Boundary" section and a new `_detect_unauthorized_app_submodule` audit check enforcing that only kmp-wizard's own four entry points ever live under `app/`. 3 new regression tests. |
 | 2026-07-19 | Cross-referenced `kotlin-multiplatform-android-cli` in Related Skills — build/deploy/emulator management for this scaffold's Android target, surfaced whenever project-foundation work already triggers this skill instead of requiring the literal "android cli" phrase. |
 | 2026-07-05 | Added anti-pattern against pre-creating empty platform source directories (`androidMain`, `iosMain`, `jvmMain`, ...) "just in case" — a real recurring smell reported from field experience. New audit detector `empty platform source set [LOW]` in `kotlin-multiplatform-audit` catches directories with zero `.kt` files or files containing only package/import/comments. Declaring the compile target is still required and correct; only the physical directory should be created on-demand, when there's real expect/actual code to write. |
 | 2026-07-09 | Added bootstrap / CLI refactor guardrails: keep entrypoints orchestration-only, split workflow modes into dedicated helpers, prefer file-local helper names, move long notes out of bootstrap code, and compile after each extraction. |

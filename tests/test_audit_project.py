@@ -3310,6 +3310,36 @@ class AgentFileStandardsTests(unittest.TestCase):
             self.assertFalse(any(f.startswith("project agent") for f in findings))
 
 
+class UnauthorizedAppSubmoduleTests(unittest.TestCase):
+    def _touch(self, root: Path, rel_path: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("", encoding="utf-8")
+
+    def test_flags_new_module_under_app(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._touch(root, "app/newFeature/build.gradle.kts")
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("unauthorized app submodule" in f for f in findings))
+
+    def test_ignores_known_kmp_wizard_entry_points(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for name in ("androidApp", "desktopApp", "webApp", "shared"):
+                self._touch(root, f"app/{name}/build.gradle.kts")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("unauthorized app submodule" in f for f in findings))
+
+    def test_ignores_unrelated_modules(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._touch(root, "core/common/build.gradle.kts")
+            self._touch(root, "feature/auth/ui/build.gradle.kts")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("unauthorized app submodule" in f for f in findings))
+
+
 class NameBehaviorDriftTests(unittest.TestCase):
     def _write(self, root: Path, rel_path: str, content: str) -> None:
         path = root / rel_path

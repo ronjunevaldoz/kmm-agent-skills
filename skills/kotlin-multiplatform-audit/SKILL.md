@@ -107,6 +107,10 @@ the user and the other skills what to do next.
   (`library`/`library-testing`/`sample`) shape — informational, use it to visually confirm
   a project hasn't drifted before deeper review. Hard layer-order and bare-`:core` gates
   still come from `audit_project.py`'s own findings, not this diagram.
+- Nothing new lives directly under `:app:*` for a kmp-wizard-scaffolded project — only
+  the four entry points kmp-wizard itself creates (`androidApp`/`desktopApp`/`webApp`/
+  `shared`). A new `app/<name>/build.gradle.kts` is a HIGH finding; the content belongs
+  in `:feature:*` or `:core:*`.
 
 ### 1a) Naming still matches behavior
 - `audit_project.py` runs a cheap, non-blocking heuristic (`name-behavior drift`): flags a
@@ -380,6 +384,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-07-31 | Added `_detect_unauthorized_app_submodule` — kmp-wizard's real `all-targets` template (verified against the live repo) nests exactly four modules under `app/`: `androidApp`/`desktopApp`/`webApp`/`shared`. A new module dropped directly under `app/<name>/` duplicates `:core:*`/`:feature:*`'s job and blurs the entry-point boundary kmp-wizard itself draws. 3 new regression tests. |
 | 2026-07-31 | Added `generate_structure_diagram.py` — renders actual App/Library module structure (markdown tree + Mermaid) against the canonical layout, so a developer can visually verify a project hasn't drifted; informational only, wired into `/kmm-verify` as an optional Step 1a. Added `_detect_name_behavior_drift` — a non-blocking heuristic flagging a `*ViewModel` whose name shares no word with its own Intent variants; deliberately kept out of `audit_project()`'s blocking findings and surfaced through a separate `HINTS` section in `main()`, since a token-overlap check has real false-positive risk. Real gaps — no structure-visualization tool existed, and naming drift had zero mechanical or documented check. 7 new regression tests. |
 | 2026-07-26 | Added `_detect_bare_core_module` — `_detect_module_layer_violation`'s module-path regex only ever matched `feature/<name>/<layer>`, so it never applied to `:core` at all; a monolithic `core/build.gradle.kts` (instead of split `:core:model`/`:core:api`/etc. submodules, per `kotlin-multiplatform-clean-architecture`'s own ":core" vs ":feature" Split table) went completely uncaught. 3 new regression tests. |
 | 2026-07-26 | Added `_detect_viewmodel_injects_repository` — `kotlin-multiplatform-mvi`'s own changelog called the ViewModel-depends-only-on-`:domain` rule mechanically checkable, but it wasn't; `_detect_module_layer_violation` can't catch it since `presenter -> api` is an allowed module-level edge for other reasons. File-level check instead: a `*ViewModel`'s constructor param typed `*Repository`. 3 new regression tests. |

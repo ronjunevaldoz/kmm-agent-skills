@@ -2324,6 +2324,45 @@ def _detect_bare_core_module(root: Path) -> list[str]:
     return findings
 
 
+# ── Unauthorized module nested under :app:* ──────────────────────────────────
+# kmp-wizard's real all-targets template (verified against the live repo, not
+# assumed) nests exactly four modules under app/: androidApp, desktopApp, webApp
+# (thin platform entry points) and shared (the CMP composition root) — plus a
+# native, non-Gradle app/iosApp/ Xcode project. :core:*/:feature:* already own
+# business logic and cross-feature infrastructure; a new module dropped directly
+# under app/ duplicates that job and blurs the entry-point boundary kmp-wizard
+# itself draws.
+
+_KNOWN_APP_SUBMODULES = {"androidApp", "desktopApp", "webApp", "shared"}
+_APP_SUBMODULE_RE = re.compile(r"^app[\\/](\w+)$")
+
+
+def _detect_unauthorized_app_submodule(root: Path) -> list[str]:
+    """Flag a build.gradle.kts under app/<name>/ where <name> isn't one of
+    kmp-wizard's own four entry-point modules (androidApp/desktopApp/webApp/shared).
+    """
+    findings: list[str] = []
+    for path in root.rglob("build.gradle.kts"):
+        if _is_excluded(path, root):
+            continue
+        module_dir = path.parent.relative_to(root).as_posix()
+        match = _APP_SUBMODULE_RE.match(module_dir)
+        if not match:
+            continue
+        name = match.group(1)
+        if name in _KNOWN_APP_SUBMODULES:
+            continue
+        findings.append(
+            f"unauthorized app submodule [HIGH]: {path.relative_to(root)} — "
+            f"a module was created directly under :app:*, but only kmp-wizard's own "
+            f"four entry points (androidApp, desktopApp, webApp, shared) belong there. "
+            f"New feature logic goes in :feature:<name>:*, new cross-feature "
+            f"infrastructure goes in :core:* — never a new :app:<name> module\n"
+            f"    1 | app/{name}/build.gradle.kts"
+        )
+    return findings
+
+
 # ── Design system prefix mismatch ─────────────────────────────────────────────
 # "App" in the design-system skill is a template placeholder (see Step 0) — real
 # projects must substitute their resolved COMPONENT_PREFIX when generating files, not
@@ -3596,6 +3635,7 @@ def audit_project(root: Path) -> list[str]:
     # ── Module layer-order violation ────────────────────────────────────────────
     findings.extend(_detect_module_layer_violation(root))
     findings.extend(_detect_bare_core_module(root))
+    findings.extend(_detect_unauthorized_app_submodule(root))
 
     # ── Hardcoded base URL (library-first / configurability) ───────────────────
     findings.extend(_detect_hardcoded_base_url(root))

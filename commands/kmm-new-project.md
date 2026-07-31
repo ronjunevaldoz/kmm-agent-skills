@@ -274,6 +274,45 @@ Then configure the clone using the intake values:
 - If `DISTRIBUTION` is `Internal / enterprise`: configure release signing from env vars; disable store-upload CI step
 - If `DISTRIBUTION` is `Open source / side project`: skip signing config; CI publishes only artifacts, no store upload
 
+The real `all-targets` branch (verified against the live template, not assumed) ships
+this module map — know it before touching anything:
+
+```
+:app:androidApp   — thin Android entry point (MainActivity only), depends on :app:shared
+:app:desktopApp   — thin Desktop entry point (main() only), depends on :app:shared
+:app:webApp       — thin JS/Wasm entry point, depends on :app:shared
+app/iosApp/       — native Xcode project (NOT a Gradle module) consuming :app:shared's
+                    built XCFramework — build/run it via Xcode, not ./gradlew
+:app:shared       — the CMP composition root: depends on :core, pulls in Compose
+                    runtime/foundation/material3, holds the App() entry composable
+:core             — ships as ONE bare module by default — this is exactly the
+                    "bare core module [HIGH]" anti-pattern kotlin-multiplatform-audit's
+                    _detect_bare_core_module flags; must not survive past this step
+:server           — Ktor/kRPC backend module (present only if SERVER is in PLATFORMS)
+```
+
+Before adding the 6-layer convention plugins, fix the two things kmp-wizard leaves in a
+state this collection's own audit would immediately flag:
+
+1. **Split the bare `:core`.** Rename it to `:core:common` — update its
+   `settings.gradle.kts` include line and `:app:shared/build.gradle.kts`'s
+   `implementation(project(":core"))` reference to `project(":core:common")`. Do not add
+   `:core:network`/`:core:database`/`:core:ui`/`:core:testing` yet — those get created
+   on demand per Step 5's skill-loading table, not all at once at scaffold time.
+2. **Gut `:app:shared`'s placeholder content.** kmp-wizard ships it with demo
+   Greeting/counter code — delete it. Rewire `:app:shared` as a thin **composition
+   root only**: the top-level `App()` composable, theme wrapper, Koin `startKoin {}`
+   call, and a `NavHost` referencing `:feature:*:ui` screens. Never put business logic,
+   data access, or feature-specific UI directly in `:app:shared` — that is what
+   `:feature:*` and `:core:*` exist for.
+
+**Rule — nothing new lives directly under `:app:*`.** The only modules ever nested
+under `:app:` are the four kmp-wizard already created (`androidApp`, `desktopApp`,
+`webApp`, `shared`). A new feature or a new piece of shared infrastructure never gets
+its own `:app:<name>` module — it goes in `:feature:<name>:*` or `:core:*`. This is
+enforced mechanically by `kotlin-multiplatform-audit`'s `unauthorized app submodule`
+check.
+
 Then add the 6-layer convention plugins on top of what kmp-wizard already ships.
 Run `./gradlew help` — must be `BUILD SUCCESSFUL` before any feature work begins.
 
@@ -600,7 +639,7 @@ private fun ProductListFilledPreview() =
     AppThemePreview { ProductListContent(state = ProductListContract.State(products = sampleProducts)) }
 ```
 
-After generating stubs: run `./gradlew :composeApp:jvmRun` (or open Android Studio
+After generating stubs: run `./gradlew :app:desktopApp:run` (or open Android Studio
 previews) and confirm the slot structure looks right before moving to Step 8.
 
 ---
@@ -991,9 +1030,9 @@ Key commands:
 ## Build
 
 ```bash
-./gradlew :androidApp:assembleDebug     # Android APK
-./gradlew :iosApp:buildReleaseXCFramework  # iOS XCFramework (if iOS target)
-./gradlew jvmTest                        # All tests
+./gradlew :app:androidApp:assembleDebug              # Android APK
+./gradlew :app:shared:assembleSharedReleaseXCFramework  # iOS XCFramework (if iOS target) — open app/iosApp/iosApp.xcodeproj in Xcode to build/run the app itself
+./gradlew jvmTest                                     # All tests
 ```
 
 ## Architecture
@@ -1220,9 +1259,9 @@ Not yet wired: git/CI architecture hooks (pre-commit audit, PostToolUse validati
 Run /kmm-setup-hooks now to add them — recommended for every team project.
 
 Next steps:
-<if App and Android in platforms>  ./gradlew :androidApp:assembleDebug      — build Android APK</if>
-<if App and iOS in platforms>      ./gradlew :iosApp:buildReleaseXCFramework — build iOS XCFramework</if>
-<if App and Desktop in platforms>  ./gradlew :desktopApp:run                 — run Desktop app</if>
+<if App and Android in platforms>  ./gradlew :app:androidApp:assembleDebug             — build Android APK</if>
+<if App and iOS in platforms>      ./gradlew :app:shared:assembleSharedReleaseXCFramework — build iOS XCFramework, then open app/iosApp/iosApp.xcodeproj in Xcode</if>
+<if App and Desktop in platforms>  ./gradlew :app:desktopApp:run                        — run Desktop app</if>
 <if App:>  ./gradlew jvmTest                             — run all tests </if>
 <if Library:>  ./gradlew apiCheck                            — verify public API surface
   ./gradlew publishToMavenLocal                — smoke-test local resolution </if>

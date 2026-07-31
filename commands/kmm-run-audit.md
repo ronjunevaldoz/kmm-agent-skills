@@ -56,6 +56,7 @@ The script detects architectural and design smells:
 | `cross-feature module dependency` | A feature module's `build.gradle.kts` depends directly on another feature's module instead of going through a `:core:api` contract |
 | `design system prefix mismatch` | An `App*`-named declaration under `core/designsystem` while `docs/design-system.md` records a different resolved `COMPONENT_PREFIX` — the resolved prefix wasn't actually used when generating |
 | `empty platform source set` | An `androidMain`/`iosMain`/`jvmMain`/... source directory with no `.kt` files, or files containing only package/import/comments — dead scaffolding; Gradle compiles fine without it |
+| `unauthorized app submodule` | A `build.gradle.kts` under `app/<name>/` where `<name>` isn't one of kmp-wizard's own four entry points (`androidApp`/`desktopApp`/`webApp`/`shared`) — new feature logic belongs in `:feature:*`, new cross-feature infrastructure in `:core:*`, never a new `:app:<name>` module |
 
 The script also prints a separate, non-blocking `HINTS` section:
 
@@ -155,6 +156,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `cross-feature module dependency` | `clean-architecture` | Extract a `:core:api` contract the other feature implements, instead of depending on its module directly |
 | `design system prefix mismatch` | `design-system` | Regenerate the flagged file(s) with the resolved `COMPONENT_PREFIX` directly — don't hand-rename `App*` symbols after the fact |
 | `empty platform source set` | `feature-scaffold` | Delete the empty source directory, or implement the real `expect`/`actual` code if this module genuinely needs platform-specific logic — never scaffold the folder "just in case" |
+| `unauthorized app submodule` | `feature-scaffold` | Move the module's content into `:feature:<name>:*` or `:core:*`, then delete the `app/<name>/` module and its `settings.gradle.kts` include |
 | `name-behavior drift` (hint) | `mvi` | Read the ViewModel and its Contract — if the name genuinely no longer fits, rename it and update its Koin binding + composable references. If it's a false positive (generic name is fine), no action needed — this is a manual call, not a rule |
 
 ---
