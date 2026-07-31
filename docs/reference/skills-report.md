@@ -14,8 +14,8 @@ Generated 2026-08-01 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-expert`](../../skills/kotlin-multiplatform-expert/) | 900 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-navigation`](../../skills/kotlin-multiplatform-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
 | [`kotlin-multiplatform-legal-docs`](../../skills/kotlin-multiplatform-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
+| [`kotlin-multiplatform-code-quality`](../../skills/kotlin-multiplatform-code-quality/) | 793 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-roborazzi`](../../skills/kotlin-multiplatform-roborazzi/) | 769 | 2026-07-10 | 🟡 1 known debt |
-| [`kotlin-multiplatform-code-quality`](../../skills/kotlin-multiplatform-code-quality/) | 738 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-network-layer`](../../skills/kotlin-multiplatform-network-layer/) | 690 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-clean-architecture`](../../skills/kotlin-multiplatform-clean-architecture/) | 672 | 2026-07-26 | 🟡 1 known debt |
 | [`kotlin-multiplatform-compose-slot-api`](../../skills/kotlin-multiplatform-compose-slot-api/) | 648 | 2026-06-26 | 🟡 1 known debt |
@@ -30,13 +30,13 @@ Generated 2026-08-01 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-shared-resources`](../../skills/kotlin-multiplatform-shared-resources/) | 504 | 2026-07-08 | 🟡 1 known debt |
 | [`kotlin-multiplatform-in-app-purchases`](../../skills/kotlin-multiplatform-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
 | [`kotlin-multiplatform-ci-github-actions`](../../skills/kotlin-multiplatform-ci-github-actions/) | 475 | 2026-07-14 | ✅ |
-| [`kotlin-multiplatform-jni-pro`](../../skills/kotlin-multiplatform-jni-pro/) | 464 | 2026-06-26 | ✅ |
+| [`kotlin-multiplatform-jni-pro`](../../skills/kotlin-multiplatform-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-desktop-app`](../../skills/kotlin-multiplatform-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kotlin-multiplatform-dependency-injection`](../../skills/kotlin-multiplatform-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kotlin-multiplatform-adaptive-layout`](../../skills/kotlin-multiplatform-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
 | [`kotlin-multiplatform-flavor-environment`](../../skills/kotlin-multiplatform-flavor-environment/) | 437 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-paging`](../../skills/kotlin-multiplatform-paging/) | 432 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-audit`](../../skills/kotlin-multiplatform-audit/) | 422 | 2026-07-31 | ✅ |
+| [`kotlin-multiplatform-audit`](../../skills/kotlin-multiplatform-audit/) | 423 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-presenter-module`](../../skills/kotlin-multiplatform-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kotlin-multiplatform-datastore`](../../skills/kotlin-multiplatform-datastore/) | 413 | 2026-06-18 | ✅ |
 | [`kotlin-multiplatform-mongodb-database`](../../skills/kotlin-multiplatform-mongodb-database/) | 409 | 2026-06-21 | ✅ |
@@ -62,8 +62,8 @@ Generated 2026-08-01 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-benchmark`](../../skills/kotlin-multiplatform-benchmark/) | 301 | 2026-07-10 | ✅ |
 | [`kotlin-multiplatform-analytics`](../../skills/kotlin-multiplatform-analytics/) | 297 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-logging`](../../skills/kotlin-multiplatform-logging/) | 297 | 2026-06-24 | ✅ |
+| [`kotlin-multiplatform-native-authoring`](../../skills/kotlin-multiplatform-native-authoring/) | 292 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-kotlin-rpc`](../../skills/kotlin-multiplatform-kotlin-rpc/) | 285 | 2026-07-31 | ✅ |
-| [`kotlin-multiplatform-native-authoring`](../../skills/kotlin-multiplatform-native-authoring/) | 283 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-imagevector-generator`](../../skills/kotlin-multiplatform-imagevector-generator/) | 276 | 2026-07-08 | ✅ |
 | [`kotlin-multiplatform-preview-driven-development`](../../skills/kotlin-multiplatform-preview-driven-development/) | 276 | 2026-07-08 | ✅ |
 | [`kotlin-multiplatform-proguard-r8`](../../skills/kotlin-multiplatform-proguard-r8/) | 269 | 2026-06-29 | ✅ |

@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.111.0] — 2026-08-01
+
+### Added
+
+- feat(code-quality): add kotlin-reflect, god-utils, regex-readability rules
+
+---
+
 ## [v1.110.1] — 2026-08-01
 
 ### Fixed

@@ -1,5 +1,5 @@
 {
-  "version": "1.110.1",
+  "version": "1.111.0",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -1661,7 +1661,7 @@
       "path": "skills/kotlin-multiplatform-jni-pro",
       "description": "Expert in JNI bridge engineering between Kotlin/JVM and native C++ libraries. Specializes in memory safety across the JVM boundary, shared-library symbol isolation, type mapping, GPU-sync correctness, algorithm porting discipline, and stable-feature protection. Language and library agnostic \u2014 applies to any Kotlin \u2194 native pipeline.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-26",
+      "last_updated": "2026-07-31",
       "keywords": [
         "JNI",
         "Kotlin native",
