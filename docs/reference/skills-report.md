@@ -9,7 +9,7 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-design-system-extended`](../../skills/kotlin-multiplatform-design-system-extended/) | 3101 | 2026-07-08 | 🟡 2 known debt |
 | [`kotlin-multiplatform-design-system`](../../skills/kotlin-multiplatform-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
 | [`kotlin-multiplatform-mvi`](../../skills/kotlin-multiplatform-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
-| [`kotlin-multiplatform-feature-scaffold`](../../skills/kotlin-multiplatform-feature-scaffold/) | 1219 | 2026-07-19 | 🟡 1 known debt |
+| [`kotlin-multiplatform-feature-scaffold`](../../skills/kotlin-multiplatform-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-expert`](../../skills/kotlin-multiplatform-expert/) | 890 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-navigation`](../../skills/kotlin-multiplatform-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
 | [`kotlin-multiplatform-legal-docs`](../../skills/kotlin-multiplatform-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
@@ -38,8 +38,8 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-paging`](../../skills/kotlin-multiplatform-paging/) | 432 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-presenter-module`](../../skills/kotlin-multiplatform-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kotlin-multiplatform-datastore`](../../skills/kotlin-multiplatform-datastore/) | 413 | 2026-06-18 | ✅ |
+| [`kotlin-multiplatform-audit`](../../skills/kotlin-multiplatform-audit/) | 412 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-mongodb-database`](../../skills/kotlin-multiplatform-mongodb-database/) | 409 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-audit`](../../skills/kotlin-multiplatform-audit/) | 407 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-compose-animation`](../../skills/kotlin-multiplatform-compose-animation/) | 389 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-migration`](../../skills/kotlin-multiplatform-migration/) | 386 | 2026-07-19 | ✅ |
 | [`kotlin-multiplatform-permissions`](../../skills/kotlin-multiplatform-permissions/) | 386 | 2026-06-21 | ✅ |

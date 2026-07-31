@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.104.1] — 2026-07-31
+
+### Fixed
+
+- fix(feature-scaffold): correct module paths to match real kmp-wizard template, gate :app:* boundary
+
+---
+
 ## [v1.104.0] — 2026-07-31
 
 ### Added
