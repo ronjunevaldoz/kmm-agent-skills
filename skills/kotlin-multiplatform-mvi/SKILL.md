@@ -31,6 +31,8 @@ metadata:
     - screen state
     - side effect
     - one-shot event
+    - Divergent Change
+    - God State
 ---
 
 ## When to Use This Skill
@@ -55,7 +57,8 @@ screen behavior, screen interaction, handle user input, form state, form handlin
 user interaction, screen state management, UI state, state management,
 nav args ViewModel, route arguments ViewModel, pass id to ViewModel,
 search debounce ViewModel, cancel job intent, in-flight cancellation,
-typed error state, UiError sealed, shared ViewModel, wizard ViewModel, multi-step flow.
+typed error state, UiError sealed, shared ViewModel, wizard ViewModel, multi-step flow,
+Divergent Change, God State, unrelated concerns in one ViewModel, state cohesion.
 
 **Freshness rule:** `lifecycle-viewmodel-compose` and CMP lifecycle integration change between
 releases — recheck the AndroidX lifecycle and JetBrains CMP docs before upgrading.
@@ -1402,12 +1405,17 @@ Stop and decompose when the ViewModel:
 - has a `State` data class with more than ~8 fields
 - contains `if/else` or `when` chains that span more than 10–15 lines per branch
 
-### Field count alone isn't the test — relatedness is
+### Field count alone isn't the test — Divergent Change is
 
 The ~8-field guideline above is a rough trigger, not the actual rule. A `State` with 8
 *related* fields is normal and correct; a `State` with 3 *unrelated* fields can already be
-a violation. The real question: **does every field belong to one cohesive screen concern,
-or does the `State` span concerns that don't actually depend on each other?**
+a violation. The named smell (Fowler's *Refactoring* catalog, same family as Long
+Parameter List/Primitive Obsession elsewhere in this collection) is **Divergent Change**:
+one type gets modified for multiple unrelated reasons. A `State` mixing chat, project, and
+session fields changes every time *any one* of those three unrelated concerns changes —
+three different reasons to touch one type. The real question: **does every field belong to
+one cohesive screen concern, or does the `State` span concerns that don't actually depend
+on each other?**
 
 ```kotlin
 // ✓ 4 fields, all part of ONE concern (search) — combining these is the whole point
@@ -1533,6 +1541,7 @@ must stay synchronized — see the Shared ViewModel section above for the patter
 
 - a ViewModel's `Intent` sealed type growing past ~15 variants — a god-ViewModel signal that line count alone can miss, since terse `when` branches keep the file short while the ViewModel still does one screen too many jobs
 - exposing `state1`/`state2`/`state3` as separate public `StateFlow` properties instead of `combine()`-ing them into one `State` — breaks the Contract pattern's "one State per screen" rule without tripping a size threshold
+- Divergent Change in a `State` type — fields for unrelated concerns (chat + project + session) that each change for their own reason, wearing one `State`; see "Field count alone isn't the test — Divergent Change is" above
 - using `SharedFlow` for effects — events replay on new collectors and break "fire once" guarantees
 - emitting `Effect` from `init {}` — fires on every ViewModel recreation, not just on user action
 - putting navigation logic inside `State` — navigation is an effect, not persisted state
@@ -1598,6 +1607,7 @@ Keep each snippet to one block. Use the user's actual screen name and state fiel
 
 | Date | Change |
 |---|---|
+| 2026-07-26 | Renamed the previous entry's section to "Field count alone isn't the test — Divergent Change is" and named the smell properly (Fowler's *Refactoring* catalog — same family as Long Parameter List/Primitive Obsession already named elsewhere in this collection) instead of an ad-hoc "relatedness litmus test" phrase, for a better search term. Added `Divergent Change`/`God State` to keywords and trigger keywords. |
 | 2026-07-26 | Added "Field count alone isn't the test — relatedness is" — clarifies the existing ~8-field god-ViewModel symptom, which couldn't distinguish a cohesive multi-field `State` (`SearchState`) from an unrelated-concerns `State` (a real `ChatShellState` mixing chat/project/session). Gives a naming litmus test instead of a count. Deliberately not mechanically detected — same treatment as the Parameter Object regression in `kotlin-multiplatform-code-quality`. |
 | 2026-07-26 | Added two more god-ViewModel signals beyond line count: 15+ `Intent` variants, and 2+ exposed `StateFlow` properties beyond `state`. Backed by `kotlin-multiplatform-audit`'s new `_detect_viewmodel_too_many_intents`/`_detect_viewmodel_multiple_stateflows` — real gap, since `_detect_viewmodel_size` alone can miss a terse-but-overloaded ViewModel. 2 new anti-patterns. |
 | 2026-07-26 | Added a de-escalation guardrail: a Coordinator ViewModel (Option 2/3) is not exempt from `_detect_viewmodel_size`'s god-ViewModel threshold — a real gap where choosing a coordinator to escape a god composable could quietly relocate the same size problem instead of fixing it. If a coordinator keeps growing after delegating to State Holders/use cases, that's a signal to split back to Option 1. 1 new anti-pattern. |
