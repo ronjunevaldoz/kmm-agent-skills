@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.104.0] — 2026-07-31
+
+### Added
+
+- feat(api-mimicry): add new skill — mimic a reference API's shape for a from-scratch library
+
+---
+
 ## [v1.103.0] — 2026-07-31
 
 ### Added

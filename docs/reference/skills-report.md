@@ -2,7 +2,7 @@
 
 Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
-**64 skills** — 42 clean, 22 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
+**65 skills** — 43 clean, 22 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
@@ -10,7 +10,7 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-design-system`](../../skills/kotlin-multiplatform-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
 | [`kotlin-multiplatform-mvi`](../../skills/kotlin-multiplatform-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kotlin-multiplatform-feature-scaffold`](../../skills/kotlin-multiplatform-feature-scaffold/) | 1219 | 2026-07-19 | 🟡 1 known debt |
-| [`kotlin-multiplatform-expert`](../../skills/kotlin-multiplatform-expert/) | 886 | 2026-07-19 | 🟡 1 known debt |
+| [`kotlin-multiplatform-expert`](../../skills/kotlin-multiplatform-expert/) | 890 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-navigation`](../../skills/kotlin-multiplatform-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
 | [`kotlin-multiplatform-legal-docs`](../../skills/kotlin-multiplatform-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
 | [`kotlin-multiplatform-roborazzi`](../../skills/kotlin-multiplatform-roborazzi/) | 769 | 2026-07-10 | 🟡 1 known debt |
@@ -53,6 +53,7 @@ Generated 2026-07-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-deep-linking`](../../skills/kotlin-multiplatform-deep-linking/) | 351 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-crash-reporting`](../../skills/kotlin-multiplatform-crash-reporting/) | 350 | 2026-06-24 | ✅ |
 | [`kotlin-multiplatform-skill-harvester`](../../skills/kotlin-multiplatform-skill-harvester/) | 337 | 2026-06-26 | ✅ |
+| [`kotlin-multiplatform-api-mimicry`](../../skills/kotlin-multiplatform-api-mimicry/) | 336 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-feature-flags`](../../skills/kotlin-multiplatform-feature-flags/) | 334 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-accessibility`](../../skills/kotlin-multiplatform-accessibility/) | 330 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-docs-site`](../../skills/kotlin-multiplatform-docs-site/) | 326 | 2026-07-11 | ✅ |
