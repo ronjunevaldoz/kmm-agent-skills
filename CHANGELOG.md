@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.113.1] — 2026-08-01
+
+### Docs
+
+- docs(provider-matrix): add Antigravity, resolve Gemini path discrepancy
+
+---
+
 ## [v1.113.0] — 2026-08-01
 
 ### Added
