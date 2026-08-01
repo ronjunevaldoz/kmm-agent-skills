@@ -384,8 +384,15 @@ mavenPublishing {
 ```properties
 GROUP=io.github.yourhandle
 POM_ARTIFACT_ID=my-library
-VERSION_NAME=1.0.0-SNAPSHOT
+VERSION_NAME=0.1.0-SNAPSHOT
 ```
+
+Start at `0.1.0`, not `1.0.0` — a fresh library has had zero real consumer usage yet, and
+`1.0.0` is a stability promise this skill's own pre-1.0 policy (below) says to make
+deliberately, not on the first commit. `Kotlin/multiplatform-library-template` (Step 1's
+starting clone) hardcodes `version = "1.0.0"` in its own `build.gradle.kts` — change it
+to `0.1.0` as part of the same configuration pass that sets `GROUP_ID`/coordinates, don't
+leave the template's default in place.
 
 ### Per-file license headers (optional)
 
@@ -951,6 +958,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 
 | Date | Change |
 |---|---|
+| 2026-08-01 | Fixed a self-contradiction found the same day: this skill's own pre-1.0 policy section says `1.0.0` is a deliberate stability promise cut after real usage, but its `gradle.properties` example (and the official `multiplatform-library-template` we clone in Step 1) both defaulted to `1.0.0` for a brand-new library. Changed the example to `0.1.0-SNAPSHOT` and added an explicit instruction to override the template's hardcoded `1.0.0`. Same fix applied to `kotlin-multiplatform-release`'s version example and `/kmm-new-project`'s Library F-01. |
 | 2026-07-31 | Fixed a second real gap found right after the correction below: `build-logic/` was listed as "optional but recommended" in every structure diagram but never actually wired anywhere — no `includeBuild`, no convention plugin content, and the real official template doesn't ship one at all. It adds nothing for a single `:library` module (nothing to de-duplicate), so removed it from Step 1's default diagram entirely. It does earn its keep once Step 1a's multi-module split is in play (3+ modules needing the same `explicitApi()`/AGP/`apiCheck` config) — added the real `includeBuild("build-logic")` wiring and a convention plugin example there instead of asserting it as a default. |
 | 2026-07-31 | **Self-correction, verified via GitHub API + raw source, not assumed**: this skill and `/kmm-new-project` both stated "there is no equivalent to kmp-wizard for a library" — wrong. `Kotlin/multiplatform-library-template` is a real, official, actively-maintained JetBrains repo (same org as `kmp-wizard`, "official project" badge, 332 stars) that scaffolds exactly this: one `:library` module with `vanniktech-mavenPublish`, the AGP 9 `com.android.kotlin.multiplatform.library` plugin, and `jvm()`/`androidLibrary()`/`iosArm64()`/`iosSimulatorArm64()`/`linuxX64()` already wired — the template's own README explicitly says it omits binary-compat tracking, `explicitApi()`, licensing, and a contribution guideline, which is exactly what this skill's Steps 2/5/12/13 already add on top. Rewrote Step 1 to clone it as the mandatory starting point instead of hand-building the structure, mirroring `kmp-wizard`'s own discipline for apps. Added a matching anti-pattern. |
 | 2026-07-31 | Added four more real maintenance gaps from a follow-up survey: a pre-1.0 API stability policy (0.x may break without a major bump per SemVer 2.4; 1.0+ is where the stability promise starts — state it in the README, don't leave it implicit), Step 12 (NOTICE file for bundled/redistributed third-party assets — distinct from a normal Maven dependency a consumer resolves themselves; `heroicons-compose`'s own `NOTICE.md` is the real precedent), Step 13 (OSS contribution scaffolding — CONTRIBUTING/CODE_OF_CONDUCT/issue+PR templates, only once a library actually takes outside contributions), and a dependency-vulnerability-scanning subsection under Step 11 (Dependabot security alerts, distinct from the routine upgrade-cadence review already there). |

@@ -400,6 +400,10 @@ prefixed with `PROJECT_NAME`, never the literal word "library":
 Configure using the intake values:
 - `rootProject.name = PROJECT_NAME` in `settings.gradle.kts`
 - `GROUP_ID` as the Maven `groupId`
+- **Override the template's `version = "1.0.0"` to `0.1.0`** — the clone hardcodes
+  `1.0.0`, but a fresh library with zero consumer usage hasn't earned a `1.0.0`
+  stability promise yet; per `library-publishing`'s pre-1.0 policy, that version is cut
+  deliberately later, not left as the scaffold default
 - `android.minSdk = MIN_SDK` if an Android target is included in `PLATFORMS`
 - `iosDeploymentTarget = IOS_TARGET` if iOS is included
 - Wire `explicitApi()`, the `vanniktech` publish plugin, and `binary-compatibility-validator`

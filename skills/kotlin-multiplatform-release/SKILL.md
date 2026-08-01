@@ -90,8 +90,14 @@ Use a secrets manager (Doppler, 1Password, AWS Secrets Manager) only if your tea
 ```properties
 # gradle.properties
 # Library version — edit this line to bump, then publish
-VERSION=1.0.0
+VERSION=0.1.0
 ```
+
+Start a fresh library at `0.1.0`, not `1.0.0` — see
+`kotlin-multiplatform-library-publishing`'s pre-1.0 policy: `1.0.0` is a deliberate
+stability promise cut after real consumer usage, not a scaffold default. An app's first
+release starting at `1.0.0` is fine — apps carry no public-API stability promise the way
+a published library does.
 
 Each publishable module reads it:
 
@@ -576,6 +582,7 @@ Never generate credentials or keys. If GPG setup is needed, give the commands th
 
 | Date | Change |
 |---|---|
+| 2026-08-01 | Changed the library-version example from `1.0.0` to `0.1.0` — contradicted `library-publishing`'s own pre-1.0 policy (a fresh library hasn't earned a `1.0.0` stability promise yet). Apps are unaffected — no public-API stability promise applies there. |
 | 2026-07-04 | Added "App targets: deriving platform-native version fields from one semver source" — Android versionCode, iOS CFBundleVersion, desktop package versions, all derived (never hardcoded) from the single semver source. New checklist items and anti-patterns for the hardcoded-versionCode silent trap (filed as GitHub issue #2). |
 | 2026-06-27 | Replaced id("...") with alias(libs.plugins.*) in both the convention plugin and consuming modules. Added convention plugin alias to libs.versions.toml. |
 | 2026-06-26 | Bumped vanniktech maven-publish plugin base version to 0.37.0. |
