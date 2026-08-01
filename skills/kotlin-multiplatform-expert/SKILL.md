@@ -52,6 +52,15 @@ Use this skill when you need to:
   fixing if the user wants repo tracking
 - Get a high-level roadmap before diving into implementation
 
+**Do NOT use this skill, or route to any skill in this collection, when the request
+names a different stack** (React, Swift/SwiftUI native-only, Flutter, plain Android
+Views, a backend framework unrelated to Ktor/kRPC, etc.) or no stack at all with no
+Kotlin/KMP signal anywhere in the request. This collection is Kotlin Multiplatform +
+Compose Multiplatform + Koin + Ktor specific — nothing here applies to "build a React
+tic-tac-toe app" or similarly unrelated requests, even if the task shape sounds generic
+(a UI component, a state machine, a build pipeline). If the stack is genuinely
+ambiguous, ask which stack before assuming KMP.
+
 **Branch recommendation:** use `Kotlin/kmp-wizard` `all-targets` by default for new
 full-stack KMP projects. Use `all-frontends-shared` only if you want to omit the server.
 
@@ -882,6 +891,7 @@ Keep the response concise — this skill routes to other skills, not implements.
 
 | Date | Change |
 |---|---|
+| 2026-08-01 | Added an explicit non-KMP scope guard to "When to Use This Skill" — verified no literal trigger-keyword collision exists with unrelated stacks (React, Flutter, etc.), but nothing stated the boundary explicitly for a request naming a different stack outright or no stack at all. Now states plainly: don't route to this collection unless there's real Kotlin/KMP signal, even when the task shape sounds generic (a UI component, a state machine). |
 | 2026-07-31 | Fixed the "Project-Specific Commands/Agents/Skills" canonical layout diagram — it never mentioned `.agents/skills/` at all, only `.claude/`, despite `.agents/skills/` being the actual cross-client deploy target this collection has used since an earlier fix. Added it to the diagram, and clarified project-root `skills/` is for custom skills only. Matches the same fix applied to `docs/reference/ai-collaboration.md`. |
 | 2026-07-31 | Added `kotlin-multiplatform-native-authoring` (66th skill) — real gap: `kotlin-multiplatform-jni-pro` explicitly assumes the native C/C++ code already exists (its whole framing is "3rd-party files are read-only," library-first discovery) and never covered authoring brand-new first-party native source. Scaffolds directory layout, CMake, public C-ABI header design, and native-side testing; always hands off to `jni-pro` for the actual bridge. Added to the Meta list, Skill Invocation Map, and dependency graph. |
 | 2026-07-31 | Added `kotlin-multiplatform-api-mimicry` (65th skill) — a real gap: nothing covered mimicking a reference API's *shape* (Modifier-style chains, slot lambdas, DSL markers) when building a KMP library on a non-standard runtime (custom native renderer, custom transport) that isn't real Compose Multiplatform underneath. Distinct from `design-system`, which builds atop the real Compose runtime. Added to the Meta list, Skill Invocation Map, and dependency graph. |
