@@ -2083,6 +2083,46 @@ def _detect_name_behavior_drift(root: Path) -> list[str]:
     return findings
 
 
+# ── Vague class-name suffix (hint) ───────────────────────────────────────────
+# Non-blocking by design, same reasoning as name-behavior drift above: Manager/
+# Processor/Helper/Info/Data are a well-known naming smell (Clean Code) — they say a
+# class "does stuff" without saying what, but a well-scoped, small class using one of
+# these suffixes for a genuinely bounded concern (this repo's own offline-first skill
+# ships a SyncManager interface) is not automatically wrong. A pure regex can't judge
+# whether the name is actually vague for *this* class's real responsibility — that
+# needs a reader, so this stays a nudge, never a blocking finding.
+
+_VAGUE_CLASS_DECL_RE = re.compile(
+    r"(?m)^(?!.*\b(?:data|enum|sealed|annotation)\s+class\b)"
+    r"(?:[\w@()]+\s+)*(?:class|interface|object)\s+(\w*(?:Manager|Processor|Helper|Info|Data))\b"
+)
+
+
+def _detect_vague_class_name_suffix(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for match in _VAGUE_CLASS_DECL_RE.finditer(text):
+            name = match.group(1)
+            line_no, snippet = _at(text, match.start())
+            findings.append(
+                f"vague class name suffix (hint) [INFO]: {path.relative_to(root)}:{line_no} "
+                f"— '{name}' uses a filler suffix (Manager/Processor/Helper/Info/Data) "
+                f"that names what the class *is* without saying what it *does*; per "
+                f"Clean Code's naming guidance, consider a name describing its actual "
+                f"responsibility (e.g. a Coordinator, Service, Repository, or Store) — "
+                f"non-blocking, a well-scoped small class with this suffix can still be "
+                f"the right call\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
 # ── Raw HTTP bypassing an established Ktor client ──────────────────────────────
 # Real bug: kotlin-multiplatform-network-layer only checked for a module literally
 # named :core:network. A new server module or feature under a different name found no
@@ -4166,7 +4206,7 @@ def main() -> int:
         return 1 if has_high else 0
 
     findings = audit_project(root)
-    hints = _detect_name_behavior_drift(root)
+    hints = _detect_name_behavior_drift(root) + _detect_vague_class_name_suffix(root)
 
     if findings:
         print("FINDINGS:")

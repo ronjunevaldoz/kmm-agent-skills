@@ -3908,5 +3908,54 @@ class NameBehaviorDriftTests(unittest.TestCase):
             self.assertFalse(any("name-behavior drift" in f for f in findings))
 
 
+class VagueClassNameSuffixTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_manager_suffix_class(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "core/SyncManager.kt", "class SyncManager(val x: Int) { }\n")
+            hints = audit_scripts._detect_vague_class_name_suffix(root)
+            self.assertTrue(any("SyncManager" in h for h in hints))
+
+    def test_flags_helper_suffix_object(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "core/ConfigHelper.kt", "object ConfigHelper { }\n")
+            hints = audit_scripts._detect_vague_class_name_suffix(root)
+            self.assertTrue(any("ConfigHelper" in h for h in hints))
+
+    def test_ignores_data_class(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "core/UserData.kt", "data class UserData(val id: String)\n")
+            hints = audit_scripts._detect_vague_class_name_suffix(root)
+            self.assertFalse(hints)
+
+    def test_ignores_enum_class(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "core/InfoType.kt", "enum class InfoType { A, B }\n")
+            hints = audit_scripts._detect_vague_class_name_suffix(root)
+            self.assertFalse(hints)
+
+    def test_ignores_coordinator_suffix(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "feature/auth/AuthCoordinator.kt", "class AuthCoordinator { }\n")
+            hints = audit_scripts._detect_vague_class_name_suffix(root)
+            self.assertFalse(hints)
+
+    def test_hints_are_excluded_from_blocking_audit_project_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "core/SyncManager.kt", "class SyncManager(val x: Int) { }\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("vague class name suffix" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()
