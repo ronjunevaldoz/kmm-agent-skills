@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.113.3] — 2026-08-01
+
+### Docs
+
+- docs(expert): add explicit non-KMP scope guard
+
+---
+
 ## [v1.113.2] — 2026-08-01
 
 ### Fixed
