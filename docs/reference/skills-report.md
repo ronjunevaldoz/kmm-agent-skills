@@ -10,7 +10,7 @@ Generated 2026-08-01 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-design-system`](../../skills/kotlin-multiplatform-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
 | [`kotlin-multiplatform-mvi`](../../skills/kotlin-multiplatform-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kotlin-multiplatform-feature-scaffold`](../../skills/kotlin-multiplatform-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
-| [`kotlin-multiplatform-library-publishing`](../../skills/kotlin-multiplatform-library-publishing/) | 964 | 2026-07-31 | 🟡 1 known debt |
+| [`kotlin-multiplatform-library-publishing`](../../skills/kotlin-multiplatform-library-publishing/) | 972 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-expert`](../../skills/kotlin-multiplatform-expert/) | 900 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-navigation`](../../skills/kotlin-multiplatform-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
 | [`kotlin-multiplatform-legal-docs`](../../skills/kotlin-multiplatform-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
@@ -22,8 +22,8 @@ Generated 2026-08-01 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-repository-pattern`](../../skills/kotlin-multiplatform-repository-pattern/) | 632 | 2026-07-13 | 🟡 1 known debt |
 | [`kotlin-multiplatform-sqldelight-setup`](../../skills/kotlin-multiplatform-sqldelight-setup/) | 628 | 2026-07-09 | 🟡 1 known debt |
 | [`kotlin-multiplatform-compose-state-hoisting`](../../skills/kotlin-multiplatform-compose-state-hoisting/) | 618 | 2026-07-20 | 🟡 1 known debt |
+| [`kotlin-multiplatform-release`](../../skills/kotlin-multiplatform-release/) | 590 | 2026-07-04 | 🟡 1 known debt |
 | [`kotlin-multiplatform-compose-state-container`](../../skills/kotlin-multiplatform-compose-state-container/) | 589 | 2026-06-06 | 🟡 1 known debt |
-| [`kotlin-multiplatform-release`](../../skills/kotlin-multiplatform-release/) | 583 | 2026-07-04 | 🟡 1 known debt |
 | [`kotlin-multiplatform-shadcn-compose`](../../skills/kotlin-multiplatform-shadcn-compose/) | 583 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-layout-system`](../../skills/kotlin-multiplatform-layout-system/) | 532 | 2026-07-17 | 🟡 2 known debt |
 | [`kotlin-multiplatform-expect-actual`](../../skills/kotlin-multiplatform-expect-actual/) | 507 | 2026-07-20 | 🟡 1 known debt |

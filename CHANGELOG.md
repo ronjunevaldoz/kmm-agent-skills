@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.113.2] — 2026-08-01
+
+### Fixed
+
+- fix(library-publishing): initial version was 1.0.0, contradicting the pre-1.0 policy
+
+---
+
 ## [v1.113.1] — 2026-08-01
 
 ### Docs
