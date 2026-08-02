@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.4.1] — 2026-08-02
+
+### Docs
+
+- docs(code-quality): document NamedArguments rule and argument-wrapping conventions
+
+---
+
 ## [v2.4.0] — 2026-08-02
 
 ### Added

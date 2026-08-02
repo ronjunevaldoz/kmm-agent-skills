@@ -10,7 +10,7 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
-| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 983 | 2026-07-31 | 🟡 1 known debt |
+| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 1060 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 972 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-expert`](../../skills/kmp-expert/) | 913 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
