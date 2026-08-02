@@ -380,6 +380,35 @@ class AuditSkillsRepoTests(unittest.TestCase):
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertFalse(any("naming" in f for f in findings))
 
+    # ── Doc lifecycle: stale Task-kind docs at root ──────────────────────────────
+
+    def test_flags_task_kind_doc_at_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            (root / "AUDIT_REPORT.md").write_text("# audit\n", encoding="utf-8")
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any(
+                "docs-hygiene" in f and "AUDIT_REPORT.md" in f and "docs/tasks/" in f
+                for f in findings
+            ))
+
+    def test_permanent_root_docs_not_flagged(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            for name in (
+                "AGENTS", "CHANGELOG", "CLAUDE", "CONTRIBUTING", "FUNDING",
+                "GETTING_STARTED", "INSTALL", "KNOWN_ISSUES", "PLAN", "RELEASING",
+            ):
+                (root / f"{name}.md").write_text(f"# {name}\n", encoding="utf-8")
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertFalse(any("docs-hygiene" in f for f in findings))
+
 
 if __name__ == "__main__":
     unittest.main()

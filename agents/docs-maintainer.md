@@ -54,6 +54,27 @@ Read the relevant files before editing:
 - the touched `skills/*/SKILL.md`
 - `skills/kmp-expert/SKILL.md` when skill routing text changes
 
+## Doc lifecycle — Reference vs Task
+
+Before creating any new root-level or `docs/` file, classify it — same test
+`kmp-project-docs-maintainer`'s `docs-hygiene.md` uses for consumer projects, applied to
+this repo's own docs:
+
+- **Reference** — "how does this work?", still accurate in six months without edits.
+  Stays in place, updated in place. `README.md`, `AGENTS.md`, `INSTALL.md`,
+  `docs/reference/*.md`, per-skill `SKILL.md`.
+- **Task** — "what are we doing right now?" A one-off audit, gap analysis, or migration
+  report. Goes in `docs/tasks/`, never at repo root. Archive to `docs/tasks/archive/YYYY-MM-DD-slug.md`
+  the moment its findings are actioned or the work ships — see `docs/tasks/archive/` for
+  precedent. Never delete a Task doc — archive it; the history is evidence.
+- **Permanent registry, resolved-stays** — `KNOWN_ISSUES.md` is its own third case:
+  resolved issues stay in place marked resolved, because they explain why a rule exists.
+  Don't archive these into `docs/tasks/`.
+
+If a Task-kind doc (an audit report, a diagnose-only snapshot, a gap-analysis) is about
+to be written, write it directly to `docs/tasks/`, not repo root — don't create it at
+root and plan to move it later.
+
 ## Workflow
 
 1. Identify the exact doc surface and the files it depends on.

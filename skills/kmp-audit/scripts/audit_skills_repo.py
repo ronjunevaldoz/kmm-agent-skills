@@ -115,6 +115,17 @@ KEBAB_DIRS = ("agents", "commands", "docs", "samples")
 _SCREAMING_RE = re.compile(r"^[A-Z][A-Z0-9_-]*$")
 _KEBAB_RE = re.compile(r"^(\d{4}-\d{2}-\d{2}-)?[a-z][a-z0-9-]*$")
 
+# The only root-level .md files this repo's own docs-hygiene policy (see
+# agents/docs-maintainer.md "Doc lifecycle") treats as permanent Reference docs
+# (or the resolved-stays-for-reference KNOWN_ISSUES.md registry). Anything else at
+# root is either a new permanent doc that needs adding here deliberately, or a
+# Task-kind doc (an audit report, gap analysis, migration snapshot) that belongs
+# in docs/tasks/ — never at repo root, archived to docs/tasks/archive/ when done.
+_PERMANENT_ROOT_DOCS = {
+    "AGENTS", "CHANGELOG", "CLAUDE", "CONTRIBUTING", "FUNDING",
+    "GETTING_STARTED", "INSTALL", "KNOWN_ISSUES", "PLAN", "README", "RELEASING",
+}
+
 
 def _check_naming_conventions(root: Path, findings: list[str]) -> None:
     # Root-level .md files must be SCREAMING_CASE
@@ -136,6 +147,18 @@ def _check_naming_conventions(root: Path, findings: list[str]) -> None:
                     f"naming: {f.relative_to(root)} should be kebab-case "
                     f"(e.g. {f.stem.lower().replace('_', '-')}.md)"
                 )
+
+
+def _check_stale_task_docs_at_root(root: Path, findings: list[str]) -> None:
+    for f in root.glob("*.md"):
+        if f.stem.upper() not in _PERMANENT_ROOT_DOCS:
+            findings.append(
+                f"docs-hygiene: root-level {f.name} looks like a Task-kind doc "
+                f"(one-off audit/report/gap-analysis) — move to docs/tasks/, and "
+                f"archive to docs/tasks/archive/YYYY-MM-DD-slug.md once actioned. "
+                f"If this is a genuinely new permanent doc, add its name to "
+                f"_PERMANENT_ROOT_DOCS in audit_skills_repo.py."
+            )
 
 
 DOCS_MAX_LINES = 150
@@ -322,6 +345,7 @@ def audit_skills_repo(root: Path) -> list[str]:
             )
 
     _check_naming_conventions(root, findings)
+    _check_stale_task_docs_at_root(root, findings)
     _check_docs_hygiene(root, findings)
     _check_commonmain_jvm_apis(root, findings)
 
