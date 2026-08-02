@@ -3458,6 +3458,61 @@ class ObjectCreationInLoopTests(unittest.TestCase):
             self.assertFalse(any("object creation in loop" in f for f in findings))
 
 
+class ContextLeakInSingletonTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_context_in_companion_object(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/AppContextHolder.kt",
+                "class AppContextHolder {\n"
+                "    companion object {\n"
+                "        var appContext: Context? = null\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("context leak in singleton" in f for f in findings))
+
+    def test_flags_activity_in_object_singleton(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/BadSingleton.kt",
+                "object BadSingleton {\n    var activity: Activity? = null\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("context leak in singleton" in f for f in findings))
+
+    def test_ignores_application_type(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/SafeHolder.kt",
+                "class SafeHolder {\n"
+                "    companion object {\n"
+                "        lateinit var applicationContext: Application\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("context leak in singleton" in f for f in findings))
+
+    def test_ignores_context_outside_singleton_scope(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Screen.kt",
+                "class Screen {\n    var context: Context? = null\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("context leak in singleton" in f for f in findings))
+
+
 class PublicMutableCollectionTests(unittest.TestCase):
     def _write(self, root: Path, rel_path: str, content: str) -> None:
         path = root / rel_path

@@ -66,6 +66,7 @@ The script detects architectural and design smells:
 | `hardcoded ui string` | A literal string in a `Text`/`AppText`/`ShadcnText` call or `contentDescription` — not localizable; route through `stringResource(Res.string.x)` |
 | `object creation in loop` | A known-expensive constructor (`SimpleDateFormat`, `HttpClient`, `MessageDigest`, ...) built inside a `for`/`while` body with no apparent dependency on the loop variable — hoist it before the loop |
 | `public mutable collection exposure` | A public `val`/`fun` exposes `MutableList`/`MutableMap`/`MutableSet` directly — a caller can mutate internal state through the reference; expose the read-only type instead |
+| `context leak in singleton` | A `companion object`/singleton `object` caches a `Context`/`Activity`/`FragmentActivity`/`AppCompatActivity`/`ComponentActivity` reference — outlives the Activity, prevents garbage collection; `applicationContext`/`Application` is the safe exception |
 
 The script also prints a separate, non-blocking `HINTS` section:
 
@@ -176,6 +177,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `hardcoded ui string` | `shared-resources` | Move the literal to `values/strings.xml`, wrap with `stringResource(Res.string.x)` |
 | `object creation in loop` | `code-quality` | Move the constructor call to a `val` declared before the loop |
 | `public mutable collection exposure` | `code-quality` | Change the declared type to `List`/`Map`/`Set`, back it with a private `Mutable*` |
+| `context leak in singleton` | `code-quality` | Replace the cached `Context`/`Activity` with `applicationContext`, or stop caching the reference and pass it explicitly where needed |
 | `name-behavior drift` (hint) | `mvi` | Read the ViewModel and its Contract — if the name genuinely no longer fits, rename it and update its Koin binding + composable references. If it's a false positive (generic name is fine), no action needed — this is a manual call, not a rule |
 | `vague class name suffix` (hint) | `clean-architecture` | Rename to describe the actual responsibility (`SyncCoordinator`, `AuthService`, `TokenStore`, ...) — or leave it if the name genuinely fits a small, well-scoped concern; this is a manual call, not a rule |
 

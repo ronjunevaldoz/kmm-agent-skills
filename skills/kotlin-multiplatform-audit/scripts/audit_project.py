@@ -1347,6 +1347,49 @@ def _detect_public_mutable_collection(root: Path) -> list[str]:
     return findings
 
 
+# ── Android Context/Activity leak in a singleton scope ───────────────────────
+# The classic Android memory leak: a companion object or singleton `object` holding
+# a Context/Activity reference outlives the Activity itself, preventing garbage
+# collection. `applicationContext`/`Application` is safe to hold long-term (it lives
+# for the process) — this only flags Context/Activity/*Activity subtypes.
+
+_SINGLETON_SCOPE_RE = re.compile(r"\bcompanion\s+object\b[^{]*\{|(?<!companion\s)\bobject\s+\w+\s*(?::[^{]*)?\{")
+_CONTEXT_PROPERTY_RE = re.compile(
+    r"(?m)^\s*(?:private\s+|internal\s+)?(?:var|val)\s+\w+\s*:\s*"
+    r"(Context|Activity|FragmentActivity|AppCompatActivity|ComponentActivity)\??\s*(?:=|$)"
+)
+
+
+def _detect_context_leak_in_singleton(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for scope_match in _SINGLETON_SCOPE_RE.finditer(text):
+            brace_open = text.index("{", scope_match.start())
+            brace_close = _find_matching_brace(text, brace_open)
+            if brace_close is None:
+                continue
+            body = text[brace_open + 1: brace_close]
+            for prop_match in _CONTEXT_PROPERTY_RE.finditer(body):
+                type_name = prop_match.group(1)
+                abs_pos = brace_open + 1 + prop_match.start()
+                line_no, snippet = _at(text, abs_pos)
+                findings.append(
+                    f"context leak in singleton [HIGH]: {path.relative_to(root)}:{line_no} "
+                    f"— a companion object/singleton stores a `{type_name}` reference; it "
+                    f"outlives the Activity, preventing garbage collection. Store "
+                    f"applicationContext instead (safe — lives for the process), or don't "
+                    f"cache the reference at all\n"
+                    f"    {line_no} | {snippet}"
+                )
+    return findings
+
+
 # ── Hardcoded user-facing string in Compose UI ───────────────────────────────
 # Documented in this skill's own "What to Inspect" checklist since the beginning
 # ("flag hardcoded user-facing strings, route to kotlin-multiplatform-shared-resources")
@@ -4175,6 +4218,7 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_hardcoded_ui_string(root))
     findings.extend(_detect_object_creation_in_loop(root))
     findings.extend(_detect_public_mutable_collection(root))
+    findings.extend(_detect_context_leak_in_singleton(root))
 
     # ── Combined design-system component file ────────────────────────────────────
     findings.extend(_detect_combined_component_file(root))

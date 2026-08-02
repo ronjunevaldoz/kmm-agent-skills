@@ -832,6 +832,36 @@ Especially relevant on an `explicitApi()` library's public surface, where this b
 a permanent part of the contract. `_detect_public_mutable_collection` flags a
 non-`private`/non-`internal` declaration exposing a `Mutable*` type directly.
 
+### Android Context/Activity leak in a singleton
+
+The classic Android memory leak: a `companion object` or singleton `object` caching a
+`Context`/`Activity` reference. The singleton outlives the Activity, so the reference
+prevents garbage collection for the process's whole lifetime — a real leak, not a style
+nit. `applicationContext` (or an `Application` type) is the one safe exception — it
+already lives for the process, so caching it long-term is fine:
+
+```kotlin
+// ❌ — leaks the Activity every time a new one is created
+class SessionManager {
+    companion object {
+        var activity: Activity? = null
+    }
+}
+
+// ✓ — application context is safe to hold long-term
+class SessionManager {
+    companion object {
+        lateinit var appContext: Context  // set once, from Application.onCreate() with applicationContext
+    }
+}
+```
+
+Applies equally to a KMP library's Android `actual` implementation and an app —
+`_detect_context_leak_in_singleton` scans both, no project-type gating.
+`_detect_context_leak_in_singleton` flags a `Context`/`Activity`/`FragmentActivity`/
+`AppCompatActivity`/`ComponentActivity`-typed property inside a `companion object`/
+singleton scope.
+
 ---
 
 ## Output Style
@@ -849,6 +879,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-08-02 | Added "Android Context/Activity leak in a singleton" — the classic Android memory leak, uncovered until now. Applies to both App and Library projects (a KMP library's Android `actual` code is exactly as leak-prone). Backed by `kotlin-multiplatform-audit`'s new `_detect_context_leak_in_singleton`. |
 | 2026-08-01 | Enabled Detekt's own Performance ruleset (verified against detekt.dev — 8 real rules: `ArrayPrimitive`, `CouldBeSequence`, `ForEachOnRange`, `SpreadOperator`, `UnnecessaryInitOnArray`, `UnnecessaryPartOfBinaryExpression`, `UnnecessaryTemporaryInstantiation`, `UnnecessaryTypeCasting`), previously off entirely. Added "Performance killers" (object constructed inside a loop, the one real gap Detekt's ruleset doesn't cover) and "Public mutable collection exposure" (an encapsulation concern distinct from the existing Compose-only unstable-collection-param check). Backed by `kotlin-multiplatform-audit`'s two new detectors. |
 | 2026-07-31 | Added "Kotlin Library & Pattern Choices" — `kotlin-reflect` (avoid in `commonMain`, JVM-primary and limited/absent on Native/JS), util/extension file organization (a god `Utils.kt` grab-bag is a real smell distinct from a single-receiver extension file), and regex readability (bind to a named `val`, never inline; named capture groups over positional for 2+ groups). Backed by `kotlin-multiplatform-audit`'s three new detectors. Also added the Alpha-stability caveat kotlinx.collections.immutable was missing wherever this skill referenced it. |
 | 2026-07-31 | Added a completeness rule to `@param`/`@return` guidance: the existing "avoid these tags, weave into prose" advice was about *form*, never about whether every parameter gets addressed — a user reported seeing generated KDoc that documented 1 of several parameters. Coverage is now explicit: all parameters or none, never partial. Backed by `kotlin-multiplatform-audit`'s new `_detect_partial_param_documentation`. |
