@@ -201,6 +201,8 @@ the user and the other skills what to do next.
 - Ensure KMM projects route plugin and dependency versions through `build-logic/`
   convention plugins and `gradle/libs.versions.toml` instead of scattering versions
   across module build files
+- Run `scripts/check_redundancy.py` to flag skill pairs and agent pairs with heavy
+  keyword/vocabulary overlap — a heuristic scan, not a verdict; read both before acting
 
 ---
 
