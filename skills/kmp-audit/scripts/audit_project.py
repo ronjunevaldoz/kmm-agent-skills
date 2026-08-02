@@ -474,18 +474,81 @@ def _detect_design_system_wiring(root: Path) -> list[str]:
 
 # A class that extends a ViewModel base (ViewModel, MviViewModel, BaseViewModel, …).
 # Filename-independent: catches *Presenter.kt, coordinators, *VM.kt, etc.
-# Note: no leading \b before ViewModel — the base may be MviViewModel/BaseViewModel
-# (no word boundary inside the identifier), so we match `…ViewModel` as a suffix.
-_VM_CLASS_DECL_RE = re.compile(
-    r"\bclass\s+\w+[^:{]*:\s*[^{]*ViewModel\b",
-    re.DOTALL,
-)
+_CLASS_DECL_RE = re.compile(r"\bclass\s+(\w+)")
+
+
+def _class_header_end(text: str, name_end: int) -> int:
+    """Return the index right after a class's `<T>` generic params, optional
+    constructor annotation/`constructor` keyword, and primary constructor —
+    i.e. where a supertype clause (`: Foo`) would start if the class has one.
+
+    Skips the primary constructor by balancing parens (`_find_matching_paren`)
+    rather than stopping at the first `)`, so a lambda-typed param like
+    `val onChange: (CueSettings) -> Unit` — which has its own parens — doesn't
+    get mistaken for the constructor's own close.
+    """
+    i, n = name_end, len(text)
+    while i < n and text[i].isspace():
+        i += 1
+    if i < n and text[i] == "<":
+        close = text.find(">", i)
+        i = close + 1 if close != -1 else i
+        while i < n and text[i].isspace():
+            i += 1
+    ann = re.match(r"@\w+(?:\([^)]*\))?\s*(?:constructor\s*)?", text[i:])
+    if ann:
+        i += ann.end()
+    if i < n and text[i] == "(":
+        close = _find_matching_paren(text, i)
+        i = close + 1 if close is not None else i
+    return i
+
+
+def _class_supertype_and_body(text: str, name_end: int) -> tuple[str, int | None, int | None]:
+    """Return (supertype_clause, body_start, body_end) for one `class Name` match.
+
+    supertype_clause is '' when the class has no `: Foo` clause at all — this is
+    positional (found right after the real constructor closes), so a comment or
+    an unrelated property's type-annotation colon elsewhere in the file can never
+    be mistaken for it. body_start/body_end (brace indices, via
+    `_find_matching_brace`) are None for a class with no body (e.g. a one-line
+    data class constructor with nothing after it).
+    """
+    i = _class_header_end(text, name_end)
+    n = len(text)
+    while i < n and text[i].isspace():
+        i += 1
+    supertype = ""
+    if i < n and text[i] == ":":
+        j = i + 1
+        brace_idx = text.find("{", j)
+        end = brace_idx if brace_idx != -1 else min(n, j + 300)
+        supertype = text[j:end]
+        i = brace_idx if brace_idx != -1 else end
+
+    j = i
+    while j < n and text[j] not in "{\n":
+        j += 1
+    body_start = body_end = None
+    if j < n and text[j] == "{":
+        body_start = j
+        body_end = _find_matching_brace(text, j)
+
+    return supertype, body_start, body_end
 
 
 def _is_viewmodel_file(text: str) -> bool:
     """True if the file defines a ViewModel — by supertype or viewModelScope usage —
     regardless of filename. Hardens detectors against alternate naming conventions."""
-    return "viewModelScope" in text or bool(_VM_CLASS_DECL_RE.search(text))
+    if "viewModelScope" in text:
+        return True
+    for m in _CLASS_DECL_RE.finditer(text):
+        supertype, _, _ = _class_supertype_and_body(text, m.end())
+        # Substring, not \bViewModel\b — the base is usually MviViewModel/BaseViewModel,
+        # so "ViewModel" never starts on a word boundary.
+        if "ViewModel" in supertype:
+            return True
+    return False
 
 
 def _detect_viewmodel_size(root: Path) -> dict:
@@ -620,15 +683,8 @@ def _detect_viewmodel_as_composable_param(root: Path) -> list[str]:
     return findings
 
 
-# Matches ANY class declaration with a primary constructor and a supertype list.
-# The supertype is checked for `ViewModel` separately, so this catches coordinators
-# that extend a VM base without a *ViewModel name (e.g. `class DashboardCoordinator(...)`).
-_VM_CLASS_RE = re.compile(
-    r"class\s+(\w+)\s*(?:@\w+(?:\([^)]*\))?\s*)?\((?P<ctor>.*?)\)\s*:\s*(?P<super>[^{]+)",
-    re.DOTALL,
-)
-_VM_PARAM_RE = re.compile(r":\s*\w*ViewModel\b")
 # A ViewModel held as a property (by inject, by viewModels, type annotation) inside a VM.
+_VM_PARAM_RE = re.compile(r":\s*\w*ViewModel\b")
 _VM_PROPERTY_RE = re.compile(r"\b(?:val|var)\s+\w+\s*:\s*\w*ViewModel\b")
 # A ViewModel instantiated directly: `= FooViewModel(`
 _VM_INSTANTIATE_RE = re.compile(r"=\s*\w*ViewModel\s*\(")
@@ -645,6 +701,11 @@ def _detect_viewmodel_in_viewmodel(root: Path) -> list[str]:
     DI. The fix: demote the injected sub-unit to a State Holder (plain class taking a
     CoroutineScope) or a use case. Scans all .kt files so coordinators that don't follow
     the *ViewModel.kt naming convention are still caught.
+
+    Every check below is scoped to one class's own constructor/body span (via
+    `_class_supertype_and_body`) — never the whole file — so a local `val` inside an
+    unrelated `@Composable` function, or a comment mentioning "ViewModel", can't be
+    mistaken for a property of the ViewModel class itself.
     """
     findings: list[str] = []
     for path in root.rglob("*.kt"):
@@ -659,44 +720,48 @@ def _detect_viewmodel_in_viewmodel(root: Path) -> list[str]:
         if not _is_viewmodel_file(text):
             continue
 
-        vm_name = path.stem
-        how: str | None = None
-        pos = 0
-
-        # 1) Constructor param typed *ViewModel (precise — scoped to the ctor block)
-        for m in _VM_CLASS_RE.finditer(text):
-            if "ViewModel" in m.group("super"):
-                pm = _VM_PARAM_RE.search(m.group("ctor"))
-                if pm:
-                    vm_name, how = m.group(1), "a constructor param"
-                    pos = m.start("ctor") + pm.start()
-                    break
-
-        # 2) Property / instantiation / DI-generic anywhere in the VM file
-        if how is None:
-            for rx, desc in (
-                (_VM_PROPERTY_RE, "an injected/declared property"),
-                (_VM_INSTANTIATE_RE, "a directly instantiated property"),
-                (_VM_INJECT_GENERIC_RE, "a DI lookup (inject<…ViewModel>())"),
-            ):
-                mm = rx.search(text)
-                if mm:
-                    how, pos = desc, mm.start()
-                    break
-            if how is not None:
-                cm = re.search(r"\bclass\s+(\w+)", text)
-                if cm:
-                    vm_name = cm.group(1)
-
-        if how is not None:
-            line_no, snippet = _at(text, pos)
-            findings.append(
-                f"viewmodel in viewmodel [HIGH]: {path.relative_to(root)}:{line_no} "
-                f"— {vm_name} depends on another ViewModel via {how}; "
-                f"demote it to a State Holder (plain class + injected CoroutineScope) "
-                f"or a use case (see MVI skill → Coordinator ViewModel)\n"
-                f"    {line_no} | {snippet}"
+        for m in _CLASS_DECL_RE.finditer(text):
+            supertype, body_start, body_end = _class_supertype_and_body(text, m.end())
+            body_end = body_end if body_end is not None else len(text)
+            is_vm_class = "ViewModel" in supertype or (
+                body_start is not None and "viewModelScope" in text[body_start:body_end]
             )
+            if not is_vm_class:
+                continue
+
+            vm_name = m.group(1)
+            how: str | None = None
+            pos = 0
+
+            # 1) Constructor param typed *ViewModel (scoped to this class's own ctor)
+            ctor_text = text[m.end():_class_header_end(text, m.end())]
+            pm = _VM_PARAM_RE.search(ctor_text)
+            if pm:
+                how = "a constructor param"
+                pos = m.end() + pm.start()
+
+            # 2) Property / instantiation / DI-generic — scoped to this class's own body
+            if how is None and body_start is not None:
+                body_text = text[body_start:body_end]
+                for rx, desc in (
+                    (_VM_PROPERTY_RE, "an injected/declared property"),
+                    (_VM_INSTANTIATE_RE, "a directly instantiated property"),
+                    (_VM_INJECT_GENERIC_RE, "a DI lookup (inject<…ViewModel>())"),
+                ):
+                    mm = rx.search(body_text)
+                    if mm:
+                        how, pos = desc, body_start + mm.start()
+                        break
+
+            if how is not None:
+                line_no, snippet = _at(text, pos)
+                findings.append(
+                    f"viewmodel in viewmodel [HIGH]: {path.relative_to(root)}:{line_no} "
+                    f"— {vm_name} depends on another ViewModel via {how}; "
+                    f"demote it to a State Holder (plain class + injected CoroutineScope) "
+                    f"or a use case (see MVI skill → Coordinator ViewModel)\n"
+                    f"    {line_no} | {snippet}"
+                )
     return findings
 
 

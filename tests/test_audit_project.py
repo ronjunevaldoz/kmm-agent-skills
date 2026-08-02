@@ -608,6 +608,60 @@ class ViewModelInViewModelTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
 
+    def test_ignores_comment_mentioning_viewmodel_in_plain_data_class(self) -> None:
+        # Real false positive: a data class with no supertype at all, whose comment
+        # happens to say "not the ViewModel" right after a property's type-annotation
+        # colon. The old regex read that colon + comment text as if it were the
+        # class's own `: ...ViewModel` supertype clause.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "AppRuntime.kt").write_text(
+                "internal data class AppRuntime(\n"
+                "    val settingsRepository: SettingsRepository,\n"
+                "    // A plain callback, not the ViewModel — forwarded to the sub-unit.\n"
+                "    val onSessionSettingsChanged: (CueSettings) -> Unit,\n"
+                "    val onSelectedNoteChange: (CueNote?) -> Unit,\n"
+                ")\n"
+                "\n"
+                "@Composable\n"
+                "internal fun rememberAppRuntime(): AppRuntime {\n"
+                "    val sessionViewModel: SessionViewModel = koinViewModel()\n"
+                "    return AppRuntime(\n"
+                "        settingsRepository = settingsRepository,\n"
+                "        onSessionSettingsChanged = sessionViewModel::updateSettings,\n"
+                "        onSelectedNoteChange = { selectedNote = it },\n"
+                "    )\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
+
+    def test_ignores_local_val_viewmodel_inside_unrelated_composable(self) -> None:
+        # A local `val x: FooViewModel = koinViewModel()` inside a @Composable function
+        # body is the correct pattern for obtaining a ViewModel at composition time —
+        # it must never be attributed to some other class in the same file as if it
+        # were that class's own injected property.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "Screen.kt").write_text(
+                "class ScreenStateHolder(private val scope: CoroutineScope) {\n"
+                "    fun onIntent(intent: I) {}\n"
+                "}\n"
+                "\n"
+                "@Composable\n"
+                "fun Screen() {\n"
+                "    val vm: SomeViewModel = koinViewModel()\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("viewmodel in viewmodel" in f for f in findings))
+
 
 class HandwrittenImageVectorTests(unittest.TestCase):
     def _builder(self, cmds: int, header: bool = False) -> str:
