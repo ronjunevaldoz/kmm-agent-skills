@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # migrate-kmm-to-kmp.sh — clean up a consumer project after kmp-agent-skills
-# v2.0.0 (kotlin-multiplatform-* -> kmp-*) and v3.0.0 (kmp-design-system etc.
+# v2.0.0 (kotlin-multiplatform-* -> kmp-*) and v2.2.0 (kmp-design-system etc.
 # -> kmp-compose-*) — both hard cutovers with no automatic migration.
 #
 # update-consumer-skills.sh's rsync only cleans files INSIDE a matched target
 # dir; it cannot remove an orphaned dir whose source no longer exists under
 # that name. Run this once per consumer project to remove the resulting
-# stale copies, after your skills source is already on v3.0.0+.
+# stale copies, after your skills source is already on v2.2.0+.
 #
 # Run from your KMP project root:
 #   bash path/to/kmp-agent-skills/scripts/migrate-kmm-to-kmp.sh
@@ -30,7 +30,7 @@ AGENT_DIRS=(
   ".cursor/skills" ".continue/skills" ".github/copilot/skills"
 )
 
-# The 6 skills renamed a second time (v2.0.0 name -> v3.0.0 kmp-compose-* name).
+# The 6 skills renamed a second time (v2.0.0 name -> v2.2.0 kmp-compose-* name).
 COMPOSE_RENAMES=(
   "kmp-design-system" "kmp-design-system-extended" "kmp-adaptive-layout"
   "kmp-accessibility" "kmp-preview-driven-development" "kmp-graphics-modifiers"
@@ -48,7 +48,7 @@ run_or_show() {
 }
 
 echo ""
-echo "Scanning for stale pre-v3.0.0 skill copies…"
+echo "Scanning for stale pre-v2.2.0 skill copies…"
 echo ""
 
 for agent_dir in "${AGENT_DIRS[@]}"; do
@@ -90,7 +90,7 @@ fi
 
 echo ""
 if [[ "$removed_count" -eq 0 ]]; then
-  echo "✅  Nothing stale found — already migrated, or nothing was installed pre-v3.0.0."
+  echo "✅  Nothing stale found — already migrated, or nothing was installed pre-v2.2.0."
 else
   echo "✅  Migration cleanup done ($removed_count item(s))."
   echo ""
