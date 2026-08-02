@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.120.0] — 2026-08-02
+
+### Added
+
+- feat(audit): add heuristic redundancy detector for skills and agents
+
+---
+
 ## [v1.119.0] — 2026-08-02
 
 ### Added
