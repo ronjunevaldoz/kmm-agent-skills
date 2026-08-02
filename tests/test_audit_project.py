@@ -491,6 +491,61 @@ class AuditHardeningTests(unittest.TestCase):
             self.assertFalse(any("viewmodel" in f and "UserModel" in f for f in findings))
 
 
+class RepositoryInComposableTests(unittest.TestCase):
+    def test_flags_repository_injected_and_flow_collected_directly(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "AppRuntime.kt").write_text(
+                "@Composable\n"
+                "internal fun rememberAppRuntime(): AppRuntime {\n"
+                "    val settingsRepository: SettingsRepository = koinInject()\n"
+                "    val settings by settingsRepository.settings.collectAsState()\n"
+                "    return AppRuntime(settingsRepository)\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("repository in composable" in f for f in findings))
+
+    def test_ignores_repository_forwarded_to_controller(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "GoodRuntime.kt").write_text(
+                "@Composable\n"
+                "internal fun RememberGoodRuntime() {\n"
+                "    val settingsRepository: SettingsRepository = koinInject()\n"
+                "    val controller = rememberSettingsController(settingsRepository)\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("repository in composable" in f for f in findings))
+
+    def test_ignores_repository_injected_outside_a_composable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            d = root / "app" / "src" / "main" / "kotlin"
+            d.mkdir(parents=True)
+            (d / "SettingsViewModel.kt").write_text(
+                "@Composable\n"
+                "fun Marker() {}\n"
+                "\n"
+                "class SettingsViewModel(\n"
+                "    private val settingsRepository: SettingsRepository,\n"
+                ") : MviViewModel<S, I, E>(S()) {\n"
+                "    val settings = settingsRepository.settings.collectAsState()\n"
+                "    override suspend fun handleIntent(intent: I) {}\n"
+                "}\n",
+                encoding="utf-8",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("repository in composable" in f for f in findings))
+
+
 class ViewModelInViewModelTests(unittest.TestCase):
     def test_flags_viewmodel_with_viewmodel_param(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

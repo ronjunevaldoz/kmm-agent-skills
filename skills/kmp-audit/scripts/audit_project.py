@@ -765,6 +765,81 @@ def _detect_viewmodel_in_viewmodel(root: Path) -> list[str]:
     return findings
 
 
+# A repository injected inside a @Composable — suffix-matched (`*Repository`), same
+# convention as this file's other type-suffix checks. Injecting it and forwarding it
+# to a real ViewModel/state-holder/controller constructor is fine; the violation
+# (checked separately below) is the composable itself reading the repository's Flow.
+_COMPOSABLE_FUN_START_RE = re.compile(
+    r"@Composable\s+(?:private\s+|internal\s+|public\s+)?fun\s+(\w+)\s*\("
+)
+_REPO_INJECT_RE = re.compile(
+    r"\b(?:val|var)\s+(\w+)\s*:\s*\w*Repository\b\s*=\s*koinInject\s*(?:<[^>]*>)?\s*\("
+)
+
+
+def _composable_body_span(text: str, open_paren_idx: int) -> tuple[int | None, int | None]:
+    """Given the index of a composable function's opening '(', balance the
+    parameter list (so a lambda-typed param's own parens don't confuse the scan),
+    skip an optional `: ReturnType`, and return the function body's brace span."""
+    close_paren = _find_matching_paren(text, open_paren_idx)
+    if close_paren is None:
+        return None, None
+    brace_idx = text.find("{", close_paren + 1)
+    if brace_idx == -1:
+        return None, None
+    return brace_idx, _find_matching_brace(text, brace_idx)
+
+
+def _detect_repository_in_composable(root: Path) -> list[str]:
+    """Flag a repository injected directly inside a @Composable function and then
+    Flow-collected there — the UI layer reading the data layer with nothing in
+    between. A ViewModel (or a use case it calls) should own that read; the
+    composable should only ever see already-processed UI state.
+
+    Known gaps, by design — a textual heuristic, not a compiler:
+      - misses indirection through an intermediate local val
+        (`val flow = repo.settings; val s by flow.collectAsState()`)
+      - only matches the `*Repository` suffix convention, not a raw client/DAO
+        doing the same thing (widening that net raises false positives, since
+        some client types are legitimately UI-safe)
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if not _is_compose_ui_file(text, path):
+            continue
+
+        for fm in _COMPOSABLE_FUN_START_RE.finditer(text):
+            body_start, body_end = _composable_body_span(text, fm.end() - 1)
+            if body_start is None:
+                continue
+            body_text = text[body_start:body_end if body_end is not None else len(text)]
+
+            for rm in _REPO_INJECT_RE.finditer(body_text):
+                repo_name = rm.group(1)
+                collect_re = re.compile(
+                    rf"\b{re.escape(repo_name)}\.\w+\.collect(?:AsState)?\s*\("
+                )
+                cm = collect_re.search(body_text)
+                if cm:
+                    pos = body_start + cm.start()
+                    line_no, snippet = _at(text, pos)
+                    findings.append(
+                        f"repository in composable [MEDIUM]: {path.relative_to(root)}:{line_no} "
+                        f"— '{repo_name}' (a Repository) is injected and its Flow collected "
+                        f"directly inside '{fm.group(1)}', bypassing ViewModel ownership; "
+                        f"move this read into a ViewModel (or a use case it calls) and expose "
+                        f"already-processed UI state instead (see kmp-repository-pattern)\n"
+                        f"    {line_no} | {snippet}"
+                    )
+    return findings
+
+
 def _detect_god_composable(root: Path) -> list[str]:
     """Flag Screen/Content composables that orchestrate too much side-effect logic.
 
@@ -4290,6 +4365,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── ViewModel passed as a composable parameter ─────────────────────────────
     findings.extend(_detect_viewmodel_as_composable_param(root))
+
+    # ── Repository injected and Flow-collected directly inside a Composable ────
+    findings.extend(_detect_repository_in_composable(root))
 
     # ── String-based (non-type-safe) navigation ────────────────────────────────
     findings.extend(_detect_string_navigation(root))

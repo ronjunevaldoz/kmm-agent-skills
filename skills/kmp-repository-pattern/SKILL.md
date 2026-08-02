@@ -590,7 +590,7 @@ class FakeUserRepository : UserRepository {
 
 ## Common Anti-Patterns
 
-- calling the repository from a composable directly instead of through a ViewModel — bypasses the MVI state machine
+- calling the repository from a composable directly instead of through a ViewModel — bypasses the MVI state machine. Mechanically caught by `kmp-audit`'s `_detect_repository_in_composable` when the repository is injected *and* its Flow collected in the same composable (forwarding it to a real ViewModel/state-holder constructor is fine — only the direct Flow-read is flagged)
 - leaking `NetworkResult`, `UserDto`, or `UserEntity` types into `:domain` or `:ui` — they belong in `:data` only
 - implementing fetch logic in a ViewModel instead of a repository — ViewModels coordinate, repositories fetch
 - returning `null` from a repository method when a typed error sealed class is clearer
@@ -628,5 +628,6 @@ Keep the snippet to one repository method. Map to the user's actual entity and d
 
 | Date | Change |
 |---|---|
+| 2026-08-03 | A consumer-project report confirmed a real gap: this skill's own long-standing "call the repository from a composable directly" anti-pattern had no mechanical check — an audit false positive on an unrelated finding (`viewmodel in viewmodel`, since fixed) surfaced that the *actual* smell in the reported code (repository injected and Flow-collected directly inside a `@Composable`) went uncaught. Added `kmp-audit`'s `_detect_repository_in_composable` (MEDIUM) and cross-referenced it here. |
 | 2026-07-13 | Real gap closed: no rule existed for starting a feature/project before the real backend exists — only a generic test/preview "mock DI wiring" example, and `/kmp-new-project`'s data-layer step assumed a real backend from day one. Added "In-memory repository (no backend yet)" with a full `InMemoryAuthRepository` example, a swap-in DI pattern, and a naming rule (`InMemory*`, never `Mock*`/`Fake*` — those names mean test-only). Wired into `/kmp-new-project`'s sprint implementation step and `kmp-migration`'s Tier 3 row for existing projects mid-migration. 2 new anti-patterns (wrong naming, leaving it wired past backend-ready). |
 | 2026-06-06 | Initial release. |
