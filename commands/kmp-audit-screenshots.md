@@ -184,11 +184,11 @@ For each WARNING or FAIL, give a concrete fix tied to the design-system skill:
 
 | Finding | Fix | Skill |
 |---|---|---|
-| Missing TopAppBar | Wrap content in `AppScaffold { AppTopAppBar(...) }` | `kmp-design-system` |
-| Dark mode identical to light | Check `AppTheme.colors.background` is not hardcoded; use semantic tokens | `kmp-design-system` |
-| Low-contrast text | Replace `Color(0xFFAAAAAA)` with `AppTheme.colors.onSurfaceVariant` | `kmp-design-system` |
-| Inconsistent spacing | Replace `padding(16.dp)` with `AppTheme.spacing.lg` | `kmp-design-system` |
-| Title duplicated in content | Remove `Text(title)` from content; move to `AppTopAppBar(title = "...")` | `kmp-design-system` |
+| Missing TopAppBar | Wrap content in `AppScaffold { AppTopAppBar(...) }` | `kmp-compose-design-system` |
+| Dark mode identical to light | Check `AppTheme.colors.background` is not hardcoded; use semantic tokens | `kmp-compose-design-system` |
+| Low-contrast text | Replace `Color(0xFFAAAAAA)` with `AppTheme.colors.onSurfaceVariant` | `kmp-compose-design-system` |
+| Inconsistent spacing | Replace `padding(16.dp)` with `AppTheme.spacing.lg` | `kmp-compose-design-system` |
+| Title duplicated in content | Remove `Text(title)` from content; move to `AppTopAppBar(title = "...")` | `kmp-compose-design-system` |
 
 ---
 

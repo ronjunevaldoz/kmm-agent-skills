@@ -48,7 +48,7 @@ grep -r "WindowSizeClass\|calculateWindowSizeClass\|WindowWidthSizeClass" \
   <project_root>/*/src --include="*.kt" -l
 ```
 
-If files match → load `skills/kmp-adaptive-layout/SKILL.md` and replicate
+If files match → load `skills/kmp-compose-adaptive-layout/SKILL.md` and replicate
 the exact existing pattern. Never introduce a second adaptive approach in the same project.
 
 If nothing matches → check the plan; if adaptive layout is in scope, establish the pattern

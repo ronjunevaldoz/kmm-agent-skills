@@ -48,7 +48,7 @@ Use this skill when you need to:
 Do NOT use this skill when:
 - The project already depends on the real reference library (Compose Multiplatform,
   Ktor, etc.) and just needs to *use* it — that is ordinary consumption, not mimicry;
-  see `kmp-design-system` for building a design system **on top of**
+  see `kmp-compose-design-system` for building a design system **on top of**
   real Compose Multiplatform
 - The goal is a real Kotlin compiler plugin providing true fine-grained recomposition —
   that is a distinct, much larger undertaking this skill deliberately does not cover;
@@ -304,7 +304,7 @@ class EngineScopeTest {
   cinterop, etc.), the JNI/cinterop bridge for it lives here
 - `kmp-expect-actual` — platform-specific backend wiring for the
   custom renderer
-- `kmp-design-system` — use this instead when the target runtime
+- `kmp-compose-design-system` — use this instead when the target runtime
   **is** real Compose Multiplatform; that skill builds a design system on top of the
   real thing rather than mimicking its shape
 - `kmp-compose-slot-api` — slot-lambda patterns for real Compose

@@ -205,7 +205,7 @@ Add a paired dark capture for every existing light capture:
 
 ### `[ADAPTIVE]` — screen missing `WindowSizeClass` parameter
 
-1. Load `skills/kmp-adaptive-layout/SKILL.md`
+1. Load `skills/kmp-compose-adaptive-layout/SKILL.md`
 2. Grep for an existing screen that already accepts `WindowSizeClass` — copy its signature
 3. Add the parameter to the new screen's `FooScreen` and `FooContent`:
    ```kotlin

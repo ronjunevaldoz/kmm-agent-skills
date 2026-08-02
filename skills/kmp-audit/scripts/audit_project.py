@@ -1696,7 +1696,7 @@ def _detect_missing_indication_null_with_style_state(root: Path) -> list[str]:
 # when toggled. The two most common causes: swapping between two differently-sized
 # icon composables instead of rotating one icon, and toggling content with a bare
 # `if` instead of AnimatedVisibility/animateContentSize (an instant layout snap reads
-# as "the button moved"). See kmp-design-system-extended's AppAccordion
+# as "the button moved"). See kmp-compose-design-system-extended's AppAccordion
 # for the correct pattern (graphicsLayer { rotationZ } + AnimatedVisibility below a
 # stable trigger row).
 
@@ -1938,7 +1938,7 @@ def _detect_combined_sqldelight_table_file(root: Path) -> list[str]:
 
 
 # ── Combined design-system component file ───────────────────────────────────────
-# kmp-design-system/-extended's own generated templates always put
+# kmp-compose-design-system/-extended's own generated templates always put
 # one component per file (verified: 27 + 18 separate file headings, zero bundling
 # across both skills) — but that convention was never stated as a rule, and nothing
 # checked it for a real project's own component files. Scoped to designsystem/
@@ -1983,7 +1983,7 @@ def _detect_combined_component_file(root: Path) -> list[str]:
         findings.append(
             f"combined component file [MEDIUM]: {path.relative_to(root)}:{line_no} — "
             f"defines {len(names)} components ({', '.join(names)}) in one file; "
-            f"keep one component per file, matching kmp-design-system's "
+            f"keep one component per file, matching kmp-compose-design-system's "
             f"own generated file layout\n"
             f"    {line_no} | {snippet}"
         )
@@ -3252,7 +3252,7 @@ def _detect_agent_deployment_drift(root: Path) -> list[str]:
 
 # ── Mixed component library: ShadcnTheme + AppTheme both in real use ────────────
 # kmp-shadcn-compose's SKILL.md says "Never combine with
-# kmp-design-system" — documented but never mechanically checked
+# kmp-compose-design-system" — documented but never mechanically checked
 # anywhere. Scoped to the two theme wrappers (ShadcnTheme/AppTheme call sites) rather than
 # individual App*-prefixed component names: a generic `App[A-Z]\w*(` call-site pattern
 # would false-positive on unrelated real identifiers (AppConfig(...), AppDatabase(...),
@@ -3295,7 +3295,7 @@ def _detect_mixed_design_system_usage(root: Path) -> list[str]:
     return [
         f"mixed component library usage [HIGH]: project calls both ShadcnTheme(...) "
         f"(e.g. {shadcn_example}) and AppTheme(...) (e.g. {app_example}) in real source "
-        f"— kmp-shadcn-compose and kmp-design-system "
+        f"— kmp-shadcn-compose and kmp-compose-design-system "
         f"are documented mutually-exclusive alternatives, never meant to coexist. If the "
         f"project has genuinely migrated to shadcn-compose, finish the migration "
         f"(/kmp-migrate-to-shadcn) and remove the remaining AppTheme/App* usage rather "
@@ -4025,7 +4025,7 @@ def _detect_positive_patterns(root: Path) -> list[dict]:
 
     if "compositionLocalOf<Boolean?>" in theme_kt and "isSystemInDarkTheme()" in theme_kt:
         lessons.append({
-            "skill": "kmp-design-system",
+            "skill": "kmp-compose-design-system",
             "pattern": "LocalAppDarkTheme compositionLocalOf<Boolean?> override",
             "description": (
                 "Consumer defines LocalAppDarkTheme = compositionLocalOf<Boolean?> { null } "
@@ -4037,7 +4037,7 @@ def _detect_positive_patterns(root: Path) -> list[dict]:
 
     if "userPreference" in theme_kt and ("LocalStorage" in theme_kt or "DataStore" in theme_kt or "SharedPreferences" in theme_kt):
         lessons.append({
-            "skill": "kmp-design-system",
+            "skill": "kmp-compose-design-system",
             "pattern": "ThemeSettings persistent override with cross-platform storage",
             "description": (
                 "Consumer persists theme preference via LocalStorage/DataStore into a ThemeSettings object "
@@ -4050,7 +4050,7 @@ def _detect_positive_patterns(root: Path) -> list[dict]:
     # currentIsDark() helper
     if "fun currentIsDark()" in theme_kt or "fun isDark()" in theme_kt:
         lessons.append({
-            "skill": "kmp-design-system",
+            "skill": "kmp-compose-design-system",
             "pattern": "currentIsDark() single-call-site helper",
             "description": (
                 "Consumer wraps the preference-or-system fallback into a @Composable fun currentIsDark(): Boolean. "

@@ -75,15 +75,15 @@ Update when skills are added, revised, or completed.
 ### Layer 5 — UI System
 | Skill | Status | Notes |
 |---|---|---|
-| `kmp-design-system` | ✅ | Tokens, AppTheme, dark mode, 6 core components (Stable tier), ownership model, `scripts/update_design_system.py`, `scripts/scan_design_violations.py` |
-| `kmp-design-system-extended` | ✅ | 27 additional components with stability tiers (Stable / Experimental) |
-| `kmp-adaptive-layout` | ✅ | WindowSizeClass, Compact/Medium/Expanded, list-detail split, migration mode |
+| `kmp-compose-design-system` | ✅ | Tokens, AppTheme, dark mode, 6 core components (Stable tier), ownership model, `scripts/update_design_system.py`, `scripts/scan_design_violations.py` |
+| `kmp-compose-design-system-extended` | ✅ | 27 additional components with stability tiers (Stable / Experimental) |
+| `kmp-compose-adaptive-layout` | ✅ | WindowSizeClass, Compact/Medium/Expanded, list-detail split, migration mode |
 | `kmp-compose-animation` | ✅ | AnimatedVisibility, Crossfade, AnimatedContent, animateXAsState, shared elements |
 | `kmp-compose-slot-api` | ✅ | Slot patterns, scoped slots, CompositionLocal, component API shape |
 | `kmp-compose-state-hoisting` | ✅ | Hoist-until-shared rule, controlled components, stateless vs stateful |
 | `kmp-compose-state-container` | ✅ | remember/rememberSaveable/ViewModel survival matrix, custom Saver |
-| `kmp-graphics-modifiers` | ✅ | graphicsLayer, Canvas, drawBehind, drawWithCache, workflow node shells |
-| `kmp-preview-driven-development` | ✅ | Desktop-first @Preview, PreviewParameterProvider, PDD cycle |
+| `kmp-compose-graphics-modifiers` | ✅ | graphicsLayer, Canvas, drawBehind, drawWithCache, workflow node shells |
+| `kmp-compose-preview-driven-development` | ✅ | Desktop-first @Preview, PreviewParameterProvider, PDD cycle |
 
 ### Layer 6 — Testing & Quality
 | Skill | Status | Notes |
@@ -91,7 +91,7 @@ Update when skills are added, revised, or completed.
 | `kmp-unit-testing` | ✅ | runTest, Turbine, fake-over-mock, :core:testing fixtures, JVM ViewModel tests |
 | `kmp-roborazzi` | ✅ | Screenshot tests from @Preview on JVM, golden images, CI diff |
 | `kmp-code-quality` | ✅ | Ktlint + Detekt, CI gates, pre-commit hook |
-| `kmp-accessibility` | ✅ | Semantic roles, contentDescription, touch targets, Roborazzi a11y snapshots |
+| `kmp-compose-accessibility` | ✅ | Semantic roles, contentDescription, touch targets, Roborazzi a11y snapshots |
 
 ### Meta
 | Skill | Status | Notes |

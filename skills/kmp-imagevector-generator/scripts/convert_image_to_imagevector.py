@@ -428,7 +428,7 @@ def generate_kotlin(
     color_mode: str,
     package: Optional[str] = None,
 ) -> str:
-    # `core.designsystem.icons` is the kmp-design-system skill's own
+    # `core.designsystem.icons` is the kmp-compose-design-system skill's own
     # module convention, not a universal one — this script must work standalone for
     # projects that don't use that module layout. `package` overrides it explicitly;
     # the group-id-derived default only applies when the caller doesn't opt in.

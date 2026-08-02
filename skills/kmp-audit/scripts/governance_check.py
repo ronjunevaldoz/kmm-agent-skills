@@ -29,7 +29,7 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent
 REPO_ROOT = SCRIPT_DIR.parent.parent.parent
-SCAN_VIOLATIONS = REPO_ROOT / "skills/kmp-design-system/scripts/scan_design_violations.py"
+SCAN_VIOLATIONS = REPO_ROOT / "skills/kmp-compose-design-system/scripts/scan_design_violations.py"
 AUDIT_PROJECT = REPO_ROOT / "skills/kmp-audit/scripts/audit_project.py"
 
 SEVERITY_RANK: dict[str, int] = {"HIGH": 2, "MEDIUM": 1, "LOW": 0}

@@ -440,7 +440,7 @@ fun `window state defaults to expected size`() = runTest {
 - `kmp-feature-scaffold` — Desktop is one of the scaffold targets
 - `kmp-datastore` — use DataStore to persist window size and user preferences on Desktop
 - `kmp-expect-actual` — file picker, tray, and platform handles need expect/actual
-- `kmp-preview-driven-development` — Desktop previews run on the JVM without a device
+- `kmp-compose-preview-driven-development` — Desktop previews run on the JVM without a device
 
 ---
 

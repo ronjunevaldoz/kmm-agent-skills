@@ -1,7 +1,7 @@
 # /kmp-update-design-system
 
 Compares the current KMP project's `:core:designsystem/components` against the reference
-implementations in the `kmp-design-system` skill and applies safe updates.
+implementations in the `kmp-compose-design-system` skill and applies safe updates.
 
 **What is project-owned (never touched):**
 - `tokens/` — `AppColors.kt`, `AppTypography.kt`, `AppShapes.kt`, `AppSpacing.kt`
@@ -28,7 +28,7 @@ Set `PROJECT_ROOT` from the answer.
 ## Step 2 — Run the comparison script
 
 ```bash
-python3 <skills_root>/skills/kmp-design-system/scripts/update_design_system.py \
+python3 <skills_root>/skills/kmp-compose-design-system/scripts/update_design_system.py \
   "$PROJECT_ROOT"
 ```
 
@@ -59,7 +59,7 @@ the file to `core/designsystem/components/`.
 Do NOT overwrite automatically. For each modified component, show the diff:
 
 ```bash
-python3 <skills_root>/skills/kmp-design-system/scripts/update_design_system.py \
+python3 <skills_root>/skills/kmp-compose-design-system/scripts/update_design_system.py \
   "$PROJECT_ROOT" --diff <ComponentName>
 ```
 
@@ -98,7 +98,7 @@ Next steps:
 
 ## Step 5 — Extended components (optional)
 
-If the project also uses `kmp-design-system-extended`, run the same
+If the project also uses `kmp-compose-design-system-extended`, run the same
 comparison against the extended skill's components. The extended skill does not have a
 dedicated script yet — check manually whether the project's extended components match the
 skill's Step 2 onward.

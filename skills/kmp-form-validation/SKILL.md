@@ -334,7 +334,7 @@ class ValidatorsTest {
 ## Related Skills
 
 - `kmp-mvi` — `FieldState` lives inside `UiState`; validation intent handling follows the standard MVI pattern
-- `kmp-design-system` — `AppTextField` and error text styling come from the design system; use `AppTheme.colors.error` not hardcoded red
+- `kmp-compose-design-system` — `AppTextField` and error text styling come from the design system; use `AppTheme.colors.error` not hardcoded red
 - `kmp-unit-testing` — `Validators` functions are pure; test them directly with `runTest` or plain `@Test`
 
 ---

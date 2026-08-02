@@ -9,7 +9,7 @@
 | Multi-module feature split (`api/domain/data/ui`) | covered | `kmp-feature-scaffold` |
 | `:model` module — pure domain types separate from `:api` | **missing** | — |
 | `:presenter` module — ViewModels isolated from Compose | **missing** | — |
-| Design system — custom tokens, no Material UI | covered | `kmp-design-system` + extended |
+| Design system — custom tokens, no Material UI | covered | `kmp-compose-design-system` + extended |
 | Environment config | covered | `kmp-flavor-environment` |
 | Preview-driven development | **missing** | — |
 | Unit testing patterns | **missing** | — |
@@ -108,7 +108,7 @@ Ktlint is the easier win. Add it today. Detekt's architecture rule set is the mo
 | 1 | `kmp-clean-architecture` | Layer contract, `:model` split, `internal` rules |
 | 2 | `kmp-presenter-module` | `:presenter` isolated from Compose; scaffold update |
 | 3 | `kmp-unit-testing` | `runTest`, Turbine, fakes, `:core:testing` module |
-| 4 | `kmp-preview-driven-development` | `@Preview` workflow, `PreviewParameterProvider`, PDD cycle |
+| 4 | `kmp-compose-preview-driven-development` | `@Preview` workflow, `PreviewParameterProvider`, PDD cycle |
 | 5 | `kmp-roborazzi` | Screenshot tests from previews, CI diff job |
 | 6 | `kmp-code-quality` | Ktlint + Detekt, architecture rule set, CI gates |
 | 7 | `kmp-logging` | Kermit, log levels, crash boundary |

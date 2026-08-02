@@ -290,7 +290,7 @@ class FakeImageLoader : ImageLoader {
 
 ## Related Skills
 
-- `kmp-design-system` — placeholder and error drawables should come from
+- `kmp-compose-design-system` — placeholder and error drawables should come from
   the design system's resource set via `Res.drawable.*`
 - `kmp-shared-resources` — bundled images live under `commonMain/composeResources`
   and are accessed via `Res.drawable.*`; wire them in before using `painterResource()`

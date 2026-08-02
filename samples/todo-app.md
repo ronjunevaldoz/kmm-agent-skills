@@ -76,7 +76,7 @@ correct project from a minimal description. The following must all be true when
 | `kmp-mvi` | ViewModel, UiState, UiEffect, Channel |
 | `kmp-form-validation` | Add todo title validation |
 | `kmp-navigation` | List → Add screen, back navigation |
-| `kmp-design-system` | AppTheme, AppScaffold, AppTopAppBar, tokens |
+| `kmp-compose-design-system` | AppTheme, AppScaffold, AppTopAppBar, tokens |
 | `kmp-unit-testing` | Presenter tests with runTest + Turbine |
 | `kmp-roborazzi` | Screenshot tests for all screen states |
 | `kmp-logging` | Debug logging in repository and use cases |

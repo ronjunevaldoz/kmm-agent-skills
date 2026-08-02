@@ -37,7 +37,7 @@ this skills collection (parent of `commands/`).
 **Primary (PSI-based — recommended when detekt is wired into the project):**
 ```bash
 ./gradlew detekt --rerun-tasks \
-  --config "$SKILLS_ROOT/skills/kmp-design-system/detekt-rules/config/detekt-design-system.yml"
+  --config "$SKILLS_ROOT/skills/kmp-compose-design-system/detekt-rules/config/detekt-design-system.yml"
 ```
 
 Parse the detekt XML/SARIF output. Violations map to rule IDs:
@@ -46,7 +46,7 @@ Parse the detekt XML/SARIF output. Violations map to rule IDs:
 
 **Fallback (quick CLI, no JVM warm-up, no Gradle required):**
 ```bash
-python3 "$SKILLS_ROOT/skills/kmp-design-system/scripts/scan_design_violations.py" \
+python3 "$SKILLS_ROOT/skills/kmp-compose-design-system/scripts/scan_design_violations.py" \
   "$PROJECT_ROOT" --json
 ```
 

@@ -569,7 +569,7 @@ Draft three concrete color options, not just a category name, then use
 4. Corner radius — Medium 8dp/12dp (recommended) / Small 4dp / Large 16dp
 
 **Batch 2 — component sourcing** (3 questions, one call):
-1. Component library — **shadcn-compose** (recommended default: published library, 70+ components, real preset theming via `ShadcnTheme`, faster start — note inline: depends on the experimental `@ExperimentalFoundationStyleApi`; a future CMP release that changes it breaks the dependency with no fix except an upstream shadcn-compose release) vs. **Generated & owned** (`kmp-design-system`, no external dependency, full control, safe across CMP upgrades — pick this to avoid the experimental-API risk entirely)
+1. Component library — **shadcn-compose** (recommended default: published library, 70+ components, real preset theming via `ShadcnTheme`, faster start — note inline: depends on the experimental `@ExperimentalFoundationStyleApi`; a future CMP release that changes it breaks the dependency with no fix except an upstream shadcn-compose release) vs. **Generated & owned** (`kmp-compose-design-system`, no external dependency, full control, safe across CMP upgrades — pick this to avoid the experimental-API risk entirely)
 2. Icons — **heroicons-compose** (recommended default: published, Maven Central, faster start, Outline variant only today) vs. Generate on demand (`kmp-imagevector-generator`, no dependency, exact icons, deterministic)
 3. Utility styling — Skip (recommended) vs. add tailwind-compose (stable-API utility modifiers, combines with either component library choice)
 
@@ -618,7 +618,7 @@ rule as the token draft in 6a.
 
 **If the owned scaffold was chosen:**
 
-Load `kmp-design-system`. Generate using the confirmed choices:
+Load `kmp-compose-design-system`. Generate using the confirmed choices:
 - `AppColors` — light and dark color schemes with the confirmed palette
 - `AppTypography` — type scale using the confirmed font style
 - `AppSpacing` — spacing scale (4dp base grid)
@@ -627,15 +627,15 @@ Load `kmp-design-system`. Generate using the confirmed choices:
 - `AppThemePreview` wrapper for Roborazzi
 
 If the inferred plan has more than 3 screens, also load
-`kmp-design-system-extended` for Dialog, Sheet, Toast, Tabs.
+`kmp-compose-design-system-extended` for Dialog, Sheet, Toast, Tabs.
 
 **If shadcn-compose was chosen (recommended default):**
 
-Load `kmp-shadcn-compose` instead of `kmp-design-system`
+Load `kmp-shadcn-compose` instead of `kmp-compose-design-system`
 — it covers the Maven dependency (`io.github.ronjunevaldoz:shadcn-compose` plus the
 per-target artifact for each registered platform), the required
 `@OptIn(ExperimentalFoundationStyleApi::class)`, and the `ShadcnTheme` wrapper. Do not also
-load `kmp-design-system` — the two are alternative component sources,
+load `kmp-compose-design-system` — the two are alternative component sources,
 never combined in the same project.
 
 Wire `ShadcnTheme` at the app root using the preset/baseColor/accent confirmed in 6a-ii:
@@ -671,7 +671,7 @@ Wireframes were already drafted in Step 4's F-03, before design system or featur
 — this step turns those confirmed wireframes into compilable preview stubs, still
 before real implementation.
 
-Load `kmp-preview-driven-development`. For each screen, generate stub
+Load `kmp-compose-preview-driven-development`. For each screen, generate stub
 `Content` composables with `@Preview` annotations covering all state variants — before
 the real implementation. This makes layout mistakes visible immediately on Desktop
 without running a device or emulator.

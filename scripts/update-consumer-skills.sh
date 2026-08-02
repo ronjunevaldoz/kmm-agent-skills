@@ -482,7 +482,7 @@ Skills are installed in \`.claude/skills/\`.
 | ViewModel / screen state | \`kmp-mvi\` |
 | Navigation | \`kmp-navigation\` |
 | Dependency injection | \`kmp-dependency-injection\` |
-| Design system | \`kmp-design-system\` |
+| Design system | \`kmp-compose-design-system\` |
 | Code quality / linting | \`kmp-code-quality\` |
 | Unit tests | \`kmp-unit-testing\` |
 | Android CLI / emulator / deploy | \`kmp-android-cli\` |

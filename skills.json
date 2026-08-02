@@ -2,8 +2,8 @@
   "version": "2.1.1",
   "skills": [
     {
-      "name": "kmp-accessibility",
-      "path": "skills/kmp-accessibility",
+      "name": "kmp-compose-accessibility",
+      "path": "skills/kmp-compose-accessibility",
       "description": "Accessibility (a11y) for Kotlin Multiplatform Compose \u2014 semantic roles and mergeDescendants, contentDescription on interactive and image elements, screen reader traversal order, minimum touch target size, Roborazzi accessibility snapshot tests, reduced-motion support, and a Compose a11y audit checklist.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -54,8 +54,8 @@
       "scripts": []
     },
     {
-      "name": "kmp-adaptive-layout",
-      "path": "skills/kmp-adaptive-layout",
+      "name": "kmp-compose-adaptive-layout",
+      "path": "skills/kmp-compose-adaptive-layout",
       "description": "Adaptive UI for Kotlin Multiplatform \u2014 WindowSizeClass-driven layouts that respond correctly to Compact (phone), Medium (tablet), and Expanded (desktop) breakpoints. Covers list-detail splits, adaptive navigation (bottom bar \u2192 rail \u2192 drawer), single-source WindowSizeClass propagation, and Roborazzi tests for each breakpoint. Enforces cross-session pattern consistency so every screen in the project uses the same adaptive strategy.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-07",
@@ -910,8 +910,8 @@
       "scripts": []
     },
     {
-      "name": "kmp-design-system",
-      "path": "skills/kmp-design-system",
+      "name": "kmp-compose-design-system",
+      "path": "skills/kmp-compose-design-system",
       "description": "Scaffolds a custom Compose Multiplatform design system in :core:designsystem using the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles, @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates: color/typography/shape/spacing tokens, AppTheme with light/dark support, StyleScope extensions for token access, shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant, ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision), and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText) built on BasicXxx CMP primitives. \"App\" is a placeholder prefix derived from the project's actual name (scripts/derive_component_prefix.py), not a hardcoded literal. No Material dependency \u2014 fully custom, fully owned.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-26",
@@ -1008,9 +1008,9 @@
       ]
     },
     {
-      "name": "kmp-design-system-extended",
-      "path": "skills/kmp-design-system-extended",
-      "description": "Extends :core:designsystem (from kmp-design-system) with 28 production-ready components using the Compose Styles API. Covers: Icon, IconButton, Label, Separator, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton, Switch, Slider, Select/Dropdown, Progress (linear + circular), Skeleton, Spinner, Alert, Toast/Snackbar system (AppToastHostState + Scaffold slot), Dialog, AlertDialog, Sheet (BottomSheet), Tooltip, Popover, Accordion/Collapsible, ScrollArea (Desktop-only scrollbar via expect/actual), ResizablePanelGroup (draggable divider). All components built on CMP primitives (no Material3). \"App\" is a placeholder prefix \u2014 see the base skill's Step 0 for how it is resolved from the project name (scripts/derive_component_prefix.py). Requires kmp-design-system skill.",
+      "name": "kmp-compose-design-system-extended",
+      "path": "skills/kmp-compose-design-system-extended",
+      "description": "Extends :core:designsystem (from kmp-compose-design-system) with 28 production-ready components using the Compose Styles API. Covers: Icon, IconButton, Label, Separator, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton, Switch, Slider, Select/Dropdown, Progress (linear + circular), Skeleton, Spinner, Alert, Toast/Snackbar system (AppToastHostState + Scaffold slot), Dialog, AlertDialog, Sheet (BottomSheet), Tooltip, Popover, Accordion/Collapsible, ScrollArea (Desktop-only scrollbar via expect/actual), ResizablePanelGroup (draggable divider). All components built on CMP primitives (no Material3). \"App\" is a placeholder prefix \u2014 see the base skill's Step 0 for how it is resolved from the project name (scripts/derive_component_prefix.py). Requires kmp-compose-design-system skill.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-08",
       "keywords": [
@@ -1468,8 +1468,8 @@
       "scripts": []
     },
     {
-      "name": "kmp-graphics-modifiers",
-      "path": "skills/kmp-graphics-modifiers",
+      "name": "kmp-compose-graphics-modifiers",
+      "path": "skills/kmp-compose-graphics-modifiers",
       "description": "Jetpack Compose graphics modifiers for KMP and CMP \u2014 use graphicsLayer for transforms, clipping, alpha, elevation, and layer effects; use Canvas, drawBehind, and drawWithCache for actual custom drawing. Recommended for workflow editors, node-based UIs, and other surfaces where a composable needs a transformable shell around a custom-drawn interior.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-13",
@@ -2495,8 +2495,8 @@
       "scripts": []
     },
     {
-      "name": "kmp-preview-driven-development",
-      "path": "skills/kmp-preview-driven-development",
+      "name": "kmp-compose-preview-driven-development",
+      "path": "skills/kmp-compose-preview-driven-development",
       "description": "Preview-Driven Development (PDD) workflow for KMP: write Content composables first, iterate on Desktop JVM previews (3-5x faster than Android), cover all states with @PreviewParameterProvider, then promote previews directly to Roborazzi screenshot tests.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-08",
@@ -2882,7 +2882,7 @@
     {
       "name": "kmp-shadcn-compose",
       "path": "skills/kmp-shadcn-compose",
-      "description": "Consumes the published shadcn-compose library (io.github.ronjunevaldoz:shadcn-compose) \u2014 a shadcn/ui-inspired Compose Multiplatform component library with 70+ components. Covers Maven Central setup, the required @OptIn(ExperimentalFoundationStyleApi::class), the ShadcnTheme wrapper and its preset/baseColor/accent/isDark/baseRadius/ring parameters, and real component usage (ShadcnButton, ShadcnCard, etc.) verified against the library's own source. Alternative to kmp-design-system's generated/owned approach \u2014 not both in the same project. Carries a real risk this skill exists specifically to disclose: a hard dependency on the experimental Compose Foundation Styles API that can break on any CMP upgrade, with no fix available except an upstream shadcn-compose release.",
+      "description": "Consumes the published shadcn-compose library (io.github.ronjunevaldoz:shadcn-compose) \u2014 a shadcn/ui-inspired Compose Multiplatform component library with 70+ components. Covers Maven Central setup, the required @OptIn(ExperimentalFoundationStyleApi::class), the ShadcnTheme wrapper and its preset/baseColor/accent/isDark/baseRadius/ring parameters, and real component usage (ShadcnButton, ShadcnCard, etc.) verified against the library's own source. Alternative to kmp-compose-design-system's generated/owned approach \u2014 not both in the same project. Carries a real risk this skill exists specifically to disclose: a hard dependency on the experimental Compose Foundation Styles API that can break on any CMP upgrade, with no fix available except an upstream shadcn-compose release.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
       "keywords": [

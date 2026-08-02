@@ -1,5 +1,5 @@
 ---
-name: kmp-adaptive-layout
+name: kmp-compose-adaptive-layout
 description: >-
   Adaptive UI for Kotlin Multiplatform — WindowSizeClass-driven layouts that
   respond correctly to Compact (phone), Medium (tablet), and Expanded (desktop)
@@ -413,7 +413,7 @@ is the required minimum.
 
 ## Related Skills
 
-- `kmp-design-system` — `AppTheme` drives the dark/light mode toggle
+- `kmp-compose-design-system` — `AppTheme` drives the dark/light mode toggle
   that adaptive screenshots depend on; tokens must have both light and dark variants
 - `kmp-navigation` — the nav host is where `WindowSizeClass` is
   distributed to each screen route

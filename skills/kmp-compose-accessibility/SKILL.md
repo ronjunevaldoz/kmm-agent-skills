@@ -1,5 +1,5 @@
 ---
-name: kmp-accessibility
+name: kmp-compose-accessibility
 description: >-
   Accessibility (a11y) for Kotlin Multiplatform Compose — semantic roles and
   mergeDescendants, contentDescription on interactive and image elements, screen
@@ -305,7 +305,7 @@ AppTopAppBar(
   `captureRoboImage` with `CaptureType.Dump` generates the semantic tree overlay
 - `kmp-compose-animation` — `respectsReducedMotion()` check is an a11y
   requirement; link both skills when adding animations to a screen
-- `kmp-design-system` — color contrast ratios must meet WCAG AA (4.5:1
+- `kmp-compose-design-system` — color contrast ratios must meet WCAG AA (4.5:1
   for normal text, 3:1 for large text); verify in the design system token definitions
 
 ---

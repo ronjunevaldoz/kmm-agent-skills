@@ -1,5 +1,5 @@
 ---
-name: kmp-graphics-modifiers
+name: kmp-compose-graphics-modifiers
 description: >
   Jetpack Compose graphics modifiers for KMP and CMP — use graphicsLayer for
   transforms, clipping, alpha, elevation, and layer effects; use Canvas, drawBehind,
@@ -241,7 +241,7 @@ outside the zoomed graph surface and sample zoom levels.
 
 ## Related Skills
 
-- `kmp-design-system` — design tokens and variants drive the visual style of workflow nodes
+- `kmp-compose-design-system` — design tokens and variants drive the visual style of workflow nodes
 - `kmp-compose-slot-api` — node content areas are often implemented as composable slots
 - `kmp-mvi` — draggable node state (position, selection) is managed through MVI state
 

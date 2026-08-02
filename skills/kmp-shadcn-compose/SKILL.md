@@ -6,7 +6,7 @@ description: >
   Maven Central setup, the required @OptIn(ExperimentalFoundationStyleApi::class), the
   ShadcnTheme wrapper and its preset/baseColor/accent/isDark/baseRadius/ring parameters, and
   real component usage (ShadcnButton, ShadcnCard, etc.) verified against the library's own
-  source. Alternative to kmp-design-system's generated/owned approach — not
+  source. Alternative to kmp-compose-design-system's generated/owned approach — not
   both in the same project. Carries a real risk this skill exists specifically to disclose:
   a hard dependency on the experimental Compose Foundation Styles API that can break on any
   CMP upgrade, with no fix available except an upstream shadcn-compose release.
@@ -97,7 +97,7 @@ Use only when:
 - The user explicitly asks to add shadcn-compose to an existing project, having accepted
   the experimental-API risk
 
-**Never combine with `kmp-design-system`.** They are alternative component
+**Never combine with `kmp-compose-design-system`.** They are alternative component
 sources for the same layer — pick one.
 
 **If a project already calls `ShadcnTheme(...)` in real source, treat shadcn-compose as
@@ -121,7 +121,7 @@ check) may suggest the matching component (`ShadcnTabsList`, `ShadcnItem`/`Shadc
 etc.) as one option alongside consolidating to the project's existing pattern manually.
 **Every such suggestion must state the experimental-API risk inline, in the same
 message** — never a bare "use ShadcnTabsList" with the risk left for the user to discover
-later. `kmp-design-system`'s Ownership Model exists specifically to avoid
+later. `kmp-compose-design-system`'s Ownership Model exists specifically to avoid
 this risk (a hard dependency on `@OptIn(ExperimentalFoundationStyleApi::class)`, an actual
 Jetpack Compose Foundation experimental annotation the Compose team can change or remove in
 any release) — a suggestion that omits it isn't a complete recommendation.
@@ -171,9 +171,9 @@ rule in Step 3.
 
 ## Recommendation First
 
-Default to `kmp-design-system` unless the user has explicitly chosen this
+Default to `kmp-compose-design-system` unless the user has explicitly chosen this
 library and confirmed they accept the experimental-API risk (see
-`kmp-design-system`'s Ownership Model note, and the warning-gated Step 6a
+`kmp-compose-design-system`'s Ownership Model note, and the warning-gated Step 6a
 flow in `/kmp-new-project`).
 
 Why:
@@ -183,7 +183,7 @@ Why:
   shadcn-compose itself to catch up.
 - This is a real dependency, not generated code — a CMP upgrade that breaks the
   experimental API breaks your build until shadcn-compose ships a compatible release,
-  whereas the owned scaffold in `kmp-design-system` stays on your own
+  whereas the owned scaffold in `kmp-compose-design-system` stays on your own
   upgrade schedule.
 - Once genuinely chosen (faster start, 70+ components, real published maintenance), use it
   as documented below — this skill isn't gatekeeping the choice, just making sure it's made
@@ -230,7 +230,7 @@ Every file that references a component's `style` parameter needs the opt-in:
 @file:OptIn(ExperimentalFoundationStyleApi::class)
 ```
 
-**Do not also load `kmp-design-system` in the same project** — the two are
+**Do not also load `kmp-compose-design-system` in the same project** — the two are
 alternative component sources for the same layer.
 
 ---
@@ -531,7 +531,7 @@ UI; nothing shadcn-compose-specific changes that workflow.
 
 ## Common Anti-Patterns
 
-- combining this skill with `kmp-design-system` in the same project — pick one component source, never both
+- combining this skill with `kmp-compose-design-system` in the same project — pick one component source, never both
 - adding this dependency without the user having seen the experimental-API warning — route through `/kmp-new-project` Step 6a or get explicit confirmation first
 - forgetting `@OptIn(ExperimentalFoundationStyleApi::class)` on a file that references a component's `style` parameter — a compile error, not a runtime issue, but confusing without knowing the cause
 - pinning a version from `search.maven.org` — it lagged the real Maven Central publish by over a day when verified; check `repo1.maven.org` or the README directly
@@ -561,10 +561,10 @@ When asked to add or use shadcn-compose, respond in this order:
 
 ## Related Skills
 
-- `kmp-design-system` — the default, owned-scaffold alternative this skill exists to be compared against; see its Ownership Model note for the full risk tradeoff
+- `kmp-compose-design-system` — the default, owned-scaffold alternative this skill exists to be compared against; see its Ownership Model note for the full risk tradeoff
 - `kmp-feature-scaffold` — project must be scaffolded first
 - `kmp-roborazzi` — screenshot-test screens built with these components the same as any other Compose UI
-- `/kmp-migrate-to-shadcn` — the file-by-file migration path from an existing `kmp-design-system` project to this library, with the full `App*`→`Shadcn*` mapping table
+- `/kmp-migrate-to-shadcn` — the file-by-file migration path from an existing `kmp-compose-design-system` project to this library, with the full `App*`→`Shadcn*` mapping table
 - `kmp-layout-system` — required translation step for any layout pulled from Shadcn Studio or any other HTML/React source; never copy code from an external site directly
 
 ---
@@ -574,7 +574,7 @@ When asked to add or use shadcn-compose, respond in this order:
 | Date | Change |
 |---|---|
 | 2026-07-31 | Fixed a real drift: this skill's own icon-dependency note read as if no real icon library was available at all, but `heroicons-compose` (`io.github.ronjunevaldoz:heroicons-outline`, Maven Central) shipped since — verified real and live. Corrected the note to name it directly instead of only pointing at the icon-generator skill. Added a "Density/sizing requests" section after a report that these were producing hand-rolled `Style{}` overrides instead of using the library's own two real levers: `ShadcnTheme`'s `preset` param (`Mira`/`Nova` compress spacing/timing app-wide) for whole-app/whole-screen density, and each component's own `Size` enum (documented the real, verified `ButtonSize`: `Xs`/`Sm`/`Md`/`Lg`/`Icon`) for one component. Deliberately not scoped to the literal word "compact" — covers any density/sizing phrasing. Added a matching anti-pattern. Also extended `kmp-audit`'s `_detect_raw_component_bypass` to cover shadcn-compose projects (see that skill's own changelog). |
-| 2026-07-17 | Added explicit "if `ShadcnTheme` is already in use, stop suggesting `App*`/`AppTheme`" guidance, mirrored in `kmp-design-system`'s own doc. The "never combine" rule existed but was never mechanically checked — added `kmp-audit`'s `_detect_mixed_design_system_usage`, scoped to both theme wrappers coexisting (not individual `App*` component names, which risked a false positive on unrelated real identifiers like `AppConfig(...)`). Caught and fixed a real bug in my own first draft: the regex only matched `ShadcnTheme(`/`AppTheme(` with parens, missing the common parenthesis-free trailing-lambda call shape (`AppTheme { ... }`) both functions support since every other param is defaulted. 4 new regression tests. |
+| 2026-07-17 | Added explicit "if `ShadcnTheme` is already in use, stop suggesting `App*`/`AppTheme`" guidance, mirrored in `kmp-compose-design-system`'s own doc. The "never combine" rule existed but was never mechanically checked — added `kmp-audit`'s `_detect_mixed_design_system_usage`, scoped to both theme wrappers coexisting (not individual `App*` component names, which risked a false positive on unrelated real identifiers like `AppConfig(...)`). Caught and fixed a real bug in my own first draft: the regex only matched `ShadcnTheme(`/`AppTheme(` with parens, missing the common parenthesis-free trailing-lambda call shape (`AppTheme { ... }`) both functions support since every other param is defaulted. 4 new regression tests. |
 | 2026-07-13 | Added a layout-pattern lookup reference (Shadcn Studio, shadcnstudio.com) for when no wireframe template or component here covers the needed shape — verified directly it's a third-party paid catalog, explicitly not affiliated with shadcn/ui or this library. Labeled clearly as a shape reference only: its output is React/JSX, not Kotlin/Compose, so any block from it must go through `kmp-layout-system`'s HTML-translation table plus `fetch_component_signature.py` verification, never copied directly. |
 | 2026-07-13 | Added Step 4: a worked multi-component composition example (settings-list-in-a-card, using `ShadcnCard`/`ShadcnItemGroup`/`ShadcnItem`/`ShadcnAvatar`/`ShadcnButton` together) — closes a real gap where the skill only taught single-component verification and per-element HTML mapping, never how to assemble components into a good screen. Found and documented a real trap in the process: `ShadcnItem`'s own official KDoc usage example references `ShadcnItemMedia`/`ShadcnItemContent`/`ShadcnItemActions` as if they were real slot composables — none exist anywhere in the repo (confirmed by searching the actual source, not just the doc comment). Also documented that `ShadcnItemGroup` auto-separates its items, so a manual `ShadcnSeparator` between them double-draws. 2 new anti-patterns. |
 | 2026-07-13 | Rechecked the real README and Maven Central directly (not `search.maven.org`): latest published version is `0.2.3`, not `0.2.1` — updated the Gradle version pin. Component count grew 62 → 64: found 2 new real components via a live file-list diff (`ShadcnIcon` — tinted icon renderer resolving `LocalShadcnContentColor`; `ShadcnStepper`/`ShadcnStepperStep` — multi-step progress indicator, presentational only, same pattern as `ShadcnTabs`/`ShadcnAccordion`). Added both to the Component Keyword Matrix and frontmatter keywords. |

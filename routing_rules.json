@@ -45,7 +45,7 @@
     { "path_glob": "**/feature/*/data/**.kt",      "skill": "kmp-repository-pattern",  "note": "DataSource + Repository mapping" },
     { "path_glob": "**/feature/*/model/**.kt",     "skill": "kmp-clean-architecture",  "note": "Pure domain types only" },
     { "path_glob": "**/feature/*/api/**.kt",       "skill": "kmp-clean-architecture",  "note": "Interfaces, nav contracts" },
-    { "path_glob": "**/core/designsystem/**.kt",   "skill": "kmp-design-system",       "note": "Tokens + components" },
+    { "path_glob": "**/core/designsystem/**.kt",   "skill": "kmp-compose-design-system",       "note": "Tokens + components" },
     { "path_glob": "**/*androidMain*/**.kt",       "skill": "kmp-expect-actual",       "note": "Platform actual; if it loads a .so via System.loadLibrary, also kmp-jni-pro" },
     { "path_glob": "**/*iosMain*/**.kt",           "skill": "kmp-expect-actual",       "note": "iOS actual / cinterop — NOT kmp-jni-pro (JNI is JVM-only)" }
   ],

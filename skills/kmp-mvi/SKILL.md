@@ -1586,7 +1586,7 @@ If the ViewModel is growing beyond 150–200 lines, apply the decomposition deci
 - `kmp-repository-pattern` — repository as single source of truth; how features share data without referencing each other's ViewModels
 - `kmp-unit-testing` — `runTest` + Turbine for testing `StateFlow` transitions and `Channel` effects
 - `kmp-compose-state-container` — when to use `remember` vs ViewModel as the state container
-- `kmp-preview-driven-development` — `FooContent` stateless composables are the fast-preview target
+- `kmp-compose-preview-driven-development` — `FooContent` stateless composables are the fast-preview target
 - `kmp-audit` — `_detect_viewmodel_too_many_intents` (15+ Intent variants — a god-ViewModel signal line count alone can miss), `_detect_viewmodel_multiple_stateflows` (2+ exposed StateFlow properties beyond `state` — the Contract pattern's "one State per screen" broken a different way), and `_detect_viewmodel_injects_repository` (a `*Repository` constructor param — the ViewModel-depends-only-on-`:domain` rule, made mechanically enforced instead of just documented)
 
 ---

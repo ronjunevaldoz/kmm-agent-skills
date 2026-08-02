@@ -1,6 +1,6 @@
 # /kmp-migrate-to-shadcn
 
-Migrates an existing project from the owned `kmp-design-system`
+Migrates an existing project from the owned `kmp-compose-design-system`
 (`App*` components) to the published `shadcn-compose` library (`Shadcn*` components).
 This is a full library swap, not an incremental fix — get explicit confirmation of the
 experimental-API risk before touching any code, same as `/kmp-new-project`'s Step 6a
@@ -188,7 +188,7 @@ grep -rln "\bApp\(Button\|Card\|Badge\|...\)\b" --include="*.kt" "$PROJECT_ROOT"
 ```
 
 If zero: delete `:core:designsystem`'s generated `tokens/`, `theme/`, and `components/`
-(everything `kmp-design-system`/`-extended` generated), and remove the
+(everything `kmp-compose-design-system`/`-extended` generated), and remove the
 module dependency from `settings.gradle.kts` and any `build.gradle.kts` that referenced
 it.
 

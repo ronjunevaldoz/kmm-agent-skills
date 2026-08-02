@@ -1491,7 +1491,7 @@ class HasAndCountFilesAlwaysTrueRegressionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             d = (
-                root / ".claude" / "skills" / "kmp-design-system"
+                root / ".claude" / "skills" / "kmp-compose-design-system"
                 / "detekt-rules" / "src" / "test" / "kotlin"
             )
             d.mkdir(parents=True)
@@ -1574,7 +1574,7 @@ class DeployedSkillsBundleExclusionTests(unittest.TestCase):
             root = Path(tmp)
             self._write(
                 root,
-                ".claude/skills/kmp-design-system/templates/AppTheme.kt",
+                ".claude/skills/kmp-compose-design-system/templates/AppTheme.kt",
                 "@Composable\nfun AppTheme(content: @Composable () -> Unit) {\n"
                 "    MaterialTheme(content = content)\n}\n",
             )
@@ -2946,7 +2946,7 @@ class UndocumentedPublicApiTests(unittest.TestCase):
 
 
 class CombinedComponentFileTests(unittest.TestCase):
-    """kmp-design-system's own generated templates always put one
+    """kmp-compose-design-system's own generated templates always put one
     component per file — never stated as a rule, never mechanically checked for a
     real project's own component files, until now.
     """
@@ -3219,7 +3219,7 @@ class BareCoreModuleTests(unittest.TestCase):
 
 class MixedDesignSystemUsageTests(unittest.TestCase):
     """kmp-shadcn-compose says "Never combine with
-    kmp-design-system" - documented but never mechanically checked.
+    kmp-compose-design-system" - documented but never mechanically checked.
     Scoped to both theme wrappers coexisting (ShadcnTheme(/AppTheme() rather than
     individual App*-prefixed component names, to avoid a false positive on an
     unrelated real identifier like AppConfig(...) or AppDatabase(...).

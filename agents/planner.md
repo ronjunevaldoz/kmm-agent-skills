@@ -31,7 +31,7 @@ first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
 |---|---|
 | New screen or feature end-to-end | `feature-scaffold`, `clean-architecture`, `presenter-module`, `mvi` |
 | Data access (network, cache, persistence) | `repository-pattern`, `network-layer`, `sqldelight-setup`, `datastore` |
-| UI only (composables, states, theming) | `designer`, `mvi`, `design-system`, `compose-state-hoisting`, `preview-driven-development`, `roborazzi` |
+| UI only (composables, states, theming) | `designer`, `mvi`, `compose-design-system`, `compose-state-hoisting`, `compose-preview-driven-development`, `roborazzi` |
 | Screen navigation or deep links | `navigation`, `mvi`, `deep-linking` |
 | Deep links (App Links / Universal Links) | `deep-linking`, `navigation` |
 | Authentication or token handling | `ktor-auth-service`, `network-layer`, `dependency-injection` |
@@ -65,18 +65,18 @@ first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
 | Analytics / event tracking | `analytics`, `expect-actual` |
 | Form validation | `form-validation`, `mvi` |
 | Feature flags / remote config | `feature-flags` |
-| Accessibility (a11y, screen reader, WCAG) | `accessibility`, `roborazzi` |
+| Accessibility (a11y, screen reader, WCAG) | `compose-accessibility`, `roborazzi` |
 | Compose animations | `compose-animation` |
-| Slot-based UI components | `compose-slot-api`, `design-system-extended` |
+| Slot-based UI components | `compose-slot-api`, `compose-design-system-extended` |
 | State container choice (remember vs ViewModel) | `compose-state-container`, `compose-state-hoisting` |
-| Custom graphics, canvas, visual effects | `graphics-modifiers` |
-| Icon/logo assets, SVG or PNG to ImageVector, vectorize | `imagevector-generator`, `design-system` |
-| Adaptive / responsive layouts | `adaptive-layout`, `roborazzi` |
-| Wireframes, screen flows, or layout specs | `designer`, `design-handoff`, `adaptive-layout`, `design-system`, `preview-driven-development`, `roborazzi` |
-| Design system setup or token changes | `design-system` |
-| Design system component library | `design-system-extended`, `design-system` |
-| shadcn-compose, ShadcnButton, ShadcnTheme, published shadcn-inspired component library | `shadcn-compose`, `design-system` |
-| UI/UX design or component API shaping | `designer`, `design-system`, `design-system-extended`, `compose-slot-api`, `compose-state-hoisting`, `accessibility`, `preview-driven-development`, `roborazzi` |
+| Custom graphics, canvas, visual effects | `compose-graphics-modifiers` |
+| Icon/logo assets, SVG or PNG to ImageVector, vectorize | `imagevector-generator`, `compose-design-system` |
+| Adaptive / responsive layouts | `compose-adaptive-layout`, `roborazzi` |
+| Wireframes, screen flows, or layout specs | `designer`, `design-handoff`, `compose-adaptive-layout`, `compose-design-system`, `compose-preview-driven-development`, `roborazzi` |
+| Design system setup or token changes | `compose-design-system` |
+| Design system component library | `compose-design-system-extended`, `compose-design-system` |
+| shadcn-compose, ShadcnButton, ShadcnTheme, published shadcn-inspired component library | `shadcn-compose`, `compose-design-system` |
+| UI/UX design or component API shaping | `designer`, `compose-design-system`, `compose-design-system-extended`, `compose-slot-api`, `compose-state-hoisting`, `compose-accessibility`, `compose-preview-driven-development`, `roborazzi` |
 | Paging / paginated lists | `paging`, `repository-pattern` |
 | Kotlin RPC (full-stack Kotlin backend) | `kotlin-rpc`, `network-layer` |
 | MongoDB backend / Ktor server data layer | `mongodb-database`, `kotlin-rpc` |

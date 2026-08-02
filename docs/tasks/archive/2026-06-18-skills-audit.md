@@ -29,12 +29,12 @@ Affected:
 - `kmp-compose-state-container`
 - `kmp-compose-state-hoisting`
 - `kmp-dependency-injection`
-- `kmp-design-system`
-- `kmp-design-system-extended`
+- `kmp-compose-design-system`
+- `kmp-compose-design-system-extended`
 - `kmp-expect-actual`
 - `kmp-feature-scaffold`
 - `kmp-flavor-environment`
-- `kmp-graphics-modifiers`
+- `kmp-compose-graphics-modifiers`
 - `kmp-ktor-auth-service`
 - `kmp-mongodb-database`
 - `kmp-mvi`
@@ -64,7 +64,7 @@ shipped skills; the repo has 23.
 Untracked:
 - `kmp-audit`
 - `kmp-dependency-injection`
-- `kmp-graphics-modifiers`
+- `kmp-compose-graphics-modifiers`
 - `kmp-kotlin-rpc`
 - `kmp-ktor-auth-service`
 - `kmp-mongodb-database`
@@ -90,14 +90,14 @@ Only 5 skills have scripts: `audit`, `expert`, `feature-scaffold`, `ktor-auth-se
 - `kmp-mvi`
 - `kmp-repository-pattern`
 - `kmp-network-layer`
-- `kmp-design-system`
+- `kmp-compose-design-system`
 - `kmp-dependency-injection`
 - `kmp-expect-actual`
 - `kmp-compose-slot-api`
 
 ### No visual references (22 skills)
 
-Only `kmp-graphics-modifiers` has a `references/` folder. Prime
+Only `kmp-compose-graphics-modifiers` has a `references/` folder. Prime
 candidates: `design-system`, `design-system-extended`, `mvi`, `navigation`,
 `feature-scaffold`, `repository-pattern`.
 
@@ -122,7 +122,7 @@ These skills reference at most one other skill, missing routing guidance:
 - `kmp-dependency-injection`
 - `kmp-expect-actual`
 - `kmp-feature-scaffold`
-- `kmp-graphics-modifiers`
+- `kmp-compose-graphics-modifiers`
 - `kmp-kotlin-rpc`
 - `kmp-ktor-auth-service`
 - `kmp-mongodb-database`

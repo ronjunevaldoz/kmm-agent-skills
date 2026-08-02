@@ -179,7 +179,7 @@ Examples:
 | REST API / network | `kmp-network-layer` |
 | Key-value settings | `kmp-datastore` |
 | Screenshot tests | `kmp-roborazzi` |
-| Design system | `kmp-design-system` |
+| Design system | `kmp-compose-design-system` |
 | Architecture audit | `kmp-audit` |
 | Harvest consumer lessons | `kmp-audit` (`--harvest` mode via `/kmp-harvest-lessons`) |
 </end detected skills>

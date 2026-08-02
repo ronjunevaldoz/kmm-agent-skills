@@ -14,8 +14,8 @@ body:
       label: Which skill does this apply to?
       description: Pick the closest match. Use "Unknown / Not sure" if it spans multiple skills.
       options:
-        - kmp-accessibility
-        - kmp-adaptive-layout
+        - kmp-compose-accessibility
+        - kmp-compose-adaptive-layout
         - kmp-analytics
         - kmp-audit
         - kmp-biometric-auth
@@ -30,15 +30,15 @@ body:
         - kmp-datastore
         - kmp-deep-linking
         - kmp-dependency-injection
-        - kmp-design-system
-        - kmp-design-system-extended
+        - kmp-compose-design-system
+        - kmp-compose-design-system-extended
         - kmp-expect-actual
         - kmp-expert
         - kmp-feature-flags
         - kmp-feature-scaffold
         - kmp-flavor-environment
         - kmp-form-validation
-        - kmp-graphics-modifiers
+        - kmp-compose-graphics-modifiers
         - kmp-image-loading
         - kmp-jni-pro
         - kmp-kotlin-rpc
@@ -53,7 +53,7 @@ body:
         - kmp-paging
         - kmp-permissions
         - kmp-presenter-module
-        - kmp-preview-driven-development
+        - kmp-compose-preview-driven-development
         - kmp-push-notifications
         - kmp-release
         - kmp-repository-pattern

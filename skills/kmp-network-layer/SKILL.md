@@ -128,7 +128,7 @@ grep -rl "HttpClient(\|io\.ktor\.client\.\|safeRequest\|NetworkResult<" \
   `:core:network` as the default name, or the project's own established core-module
   naming convention if one is already visible in `settings.gradle.kts`.
 
-This mirrors `kmp-adaptive-layout`'s cross-session pattern-consistency
+This mirrors `kmp-compose-adaptive-layout`'s cross-session pattern-consistency
 check — grep for the real signal before assuming a fixed path.
 
 ---

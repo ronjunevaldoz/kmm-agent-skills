@@ -378,7 +378,7 @@ private fun AuthContentSuccessPreview() {
 - `kmp-clean-architecture` — the layer contract that justifies this split
 - `kmp-feature-scaffold` — creates the module structure; presenter is one of six layers
 - `kmp-unit-testing` — how to test `AuthViewModel` with `runTest` + Turbine
-- `kmp-preview-driven-development` — `AuthContent` previews on Desktop JVM
+- `kmp-compose-preview-driven-development` — `AuthContent` previews on Desktop JVM
 - `kmp-roborazzi` — screenshot tests run from `AuthContent` previews
 
 ---

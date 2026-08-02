@@ -155,10 +155,10 @@ Adopt skills in this order. Each builds on the previous.
 
 | Skill | When to apply |
 |---|---|
-| `kmp-design-system` | When consolidating hardcoded colors/spacing |
+| `kmp-compose-design-system` | When consolidating hardcoded colors/spacing |
 | `/kmp-migrate-to-shadcn` | When switching an existing owned design-system project fully to the published shadcn-compose library |
 | `kmp-navigation` | When migrating from Fragments to Compose Navigation |
-| `kmp-preview-driven-development` | After Screen/Content split is in place |
+| `kmp-compose-preview-driven-development` | After Screen/Content split is in place |
 
 ### Tier 5 — Platform expansion (last)
 

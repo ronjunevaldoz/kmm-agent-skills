@@ -549,8 +549,8 @@ kmp-dependency-injection
 ### UI layer
 
 ```
-kmp-design-system
-kmp-preview-driven-development
+kmp-compose-design-system
+kmp-compose-preview-driven-development
 kmp-roborazzi
 ```
 

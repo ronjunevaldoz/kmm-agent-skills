@@ -6,7 +6,7 @@ from _helpers import REPO_ROOT, load_module
 
 generate_palette = load_module(
     "generate_palette",
-    REPO_ROOT / "skills" / "kmp-design-system" / "scripts" / "generate_palette.py",
+    REPO_ROOT / "skills" / "kmp-compose-design-system" / "scripts" / "generate_palette.py",
 )
 
 

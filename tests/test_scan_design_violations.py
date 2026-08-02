@@ -11,11 +11,11 @@ from _helpers import REPO_ROOT, load_module
 
 scan_design_violations_scripts = load_module(
     "scan_design_violations",
-    REPO_ROOT / "skills" / "kmp-design-system" / "scripts" / "scan_design_violations.py",
+    REPO_ROOT / "skills" / "kmp-compose-design-system" / "scripts" / "scan_design_violations.py",
 )
 scaffold_preview_coverage_scripts = load_module(
     "scaffold_preview_coverage",
-    REPO_ROOT / "skills" / "kmp-design-system" / "scripts" / "scaffold_preview_coverage.py",
+    REPO_ROOT / "skills" / "kmp-compose-design-system" / "scripts" / "scaffold_preview_coverage.py",
 )
 
 class ScanDesignViolationsTests(unittest.TestCase):
@@ -399,7 +399,7 @@ fun LoginContent(
         with tempfile.TemporaryDirectory() as tmp:
             result = subprocess.run(
                 ["python3",
-                 str(REPO_ROOT / "skills" / "kmp-design-system"
+                 str(REPO_ROOT / "skills" / "kmp-compose-design-system"
                      / "scripts" / "scan_design_violations.py"),
                  tmp],
                 capture_output=True,
@@ -412,7 +412,7 @@ fun LoginContent(
             (root / "Foo.kt").write_text("val c = Color(0xFF1A73E8)\n", encoding="utf-8")
             result = subprocess.run(
                 ["python3",
-                 str(REPO_ROOT / "skills" / "kmp-design-system"
+                 str(REPO_ROOT / "skills" / "kmp-compose-design-system"
                      / "scripts" / "scan_design_violations.py"),
                  tmp],
                 capture_output=True,
@@ -422,7 +422,7 @@ fun LoginContent(
     def test_cli_exit_2_on_missing_root(self) -> None:
         result = subprocess.run(
             ["python3",
-             str(REPO_ROOT / "skills" / "kmp-design-system"
+             str(REPO_ROOT / "skills" / "kmp-compose-design-system"
                  / "scripts" / "scan_design_violations.py"),
              "/nonexistent/path/that/does/not/exist"],
             capture_output=True,
@@ -435,7 +435,7 @@ fun LoginContent(
             (root / "Foo.kt").write_text("val c = Color(0xFF1A73E8)\n", encoding="utf-8")
             result = subprocess.run(
                 ["python3",
-                 str(REPO_ROOT / "skills" / "kmp-design-system"
+                 str(REPO_ROOT / "skills" / "kmp-compose-design-system"
                      / "scripts" / "scan_design_violations.py"),
                  tmp, "--json"],
                 capture_output=True,
@@ -464,7 +464,7 @@ class ScanDesignViolationsDeployedSkillsExclusionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             d = (
-                root / ".claude" / "skills" / "kmp-design-system"
+                root / ".claude" / "skills" / "kmp-compose-design-system"
                 / "detekt-rules" / "src" / "test" / "kotlin"
             )
             d.mkdir(parents=True)
@@ -479,7 +479,7 @@ class ScanDesignViolationsDeployedSkillsExclusionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             d = (
-                root / ".claude" / "skills" / "kmp-design-system"
+                root / ".claude" / "skills" / "kmp-compose-design-system"
                 / "detekt-rules" / "src" / "test" / "kotlin"
             )
             d.mkdir(parents=True)

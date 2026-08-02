@@ -82,7 +82,7 @@ gate, it's part of the same one.
 ## Known gaps
 
 **22 of 64 skills exceed the 500-line guideline** — up to 6.2x over
-(`kmp-design-system-extended` at 3101 lines). Tracked as
+(`kmp-compose-design-system-extended` at 3101 lines). Tracked as
 [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body).
 Not a hard-spec failure (`skills-ref validate` still passes all 64) — but it means the
 full body loads into context every time these skills activate, instead of the core

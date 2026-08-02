@@ -66,7 +66,7 @@ Verified per-script against `tests/` contents (an initial list of 8 shrank to 3 
 checking actual test file references):
 - `scripts/check_compat_matrix.py` — mitigated: runs inside every release gate, so a
   crash is caught, but its *logic* has no regression test
-- `skills/kmp-design-system/scripts/generate_palette.py`
+- `skills/kmp-compose-design-system/scripts/generate_palette.py`
 - `skills/kmp-skill-harvester/scripts/harvest_lessons.py`
 
 ### M-4 — Audit skill's own checklist contradicts repo reality on exec bits

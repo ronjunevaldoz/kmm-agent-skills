@@ -1,5 +1,5 @@
 ---
-name: kmp-preview-driven-development
+name: kmp-compose-preview-driven-development
 description: >
   Preview-Driven Development (PDD) workflow for KMP: write Content composables first,
   iterate on Desktop JVM previews (3-5x faster than Android), cover all states with

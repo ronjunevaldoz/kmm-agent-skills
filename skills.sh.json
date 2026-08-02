@@ -46,14 +46,14 @@
       "title": "UI System",
       "description": "No-Material design tokens, Compose components, state management, and preview-driven development.",
       "skills": [
-        "kmp-design-system",
-        "kmp-design-system-extended",
+        "kmp-compose-design-system",
+        "kmp-compose-design-system-extended",
         "kmp-mvi",
-        "kmp-preview-driven-development",
+        "kmp-compose-preview-driven-development",
         "kmp-compose-slot-api",
         "kmp-compose-state-hoisting",
         "kmp-compose-state-container",
-        "kmp-graphics-modifiers"
+        "kmp-compose-graphics-modifiers"
       ]
     },
     {

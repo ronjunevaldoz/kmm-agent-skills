@@ -362,9 +362,9 @@ fun AnimatedVisibilityOrInstant(
 
 ## Related Skills
 
-- `kmp-design-system` — animation durations and easing curves should be
+- `kmp-compose-design-system` — animation durations and easing curves should be
   tokens in the design system (e.g., `AppTheme.motion.standard`), not hardcoded `tween(300)`
-- `kmp-accessibility` — reduced-motion support is an a11y requirement;
+- `kmp-compose-accessibility` — reduced-motion support is an a11y requirement;
   check `LocalAccessibilityManager` before applying non-trivial animations
 - `kmp-navigation` — shared element transitions require the NavHost to be
   wrapped in `SharedTransitionLayout`; see the navigation skill for the full NavHost setup

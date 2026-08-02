@@ -590,7 +590,7 @@ If a composable is hard to preview or test, check whether the state is in the ri
 
 - `kmp-compose-state-container` — when hoisting reaches the ViewModel boundary
 - `kmp-mvi` — MVI Contract as the top of the hoisting hierarchy for screen state
-- `kmp-preview-driven-development` — stateless composables from hoisting enable fast Desktop previews
+- `kmp-compose-preview-driven-development` — stateless composables from hoisting enable fast Desktop previews
 - `kmp-compose-slot-api` — slot APIs pair naturally with hoisted state callbacks
 - `kmp-audit` — `_detect_compose_unstable_collection_param` flags a raw `List`/`Map`/`Set` composable parameter (Compose treats these as unstable, forcing recomposition even when contents are unchanged — use `kotlinx.collections.immutable`'s `ImmutableList`/`ImmutableMap`/`ImmutableSet` instead; the library is still **Alpha** — verified against its own repo, "API is subject to change" — pin its version deliberately and don't expose it across a library's own public API surface)
 

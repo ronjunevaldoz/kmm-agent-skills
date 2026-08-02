@@ -6,8 +6,8 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
-| [`kmp-design-system-extended`](../../skills/kmp-design-system-extended/) | 3101 | 2026-07-08 | 🟡 1 known debt |
-| [`kmp-design-system`](../../skills/kmp-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
+| [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 3101 | 2026-07-08 | 🟡 1 known debt |
+| [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 983 | 2026-07-31 | 🟡 1 known debt |
@@ -33,7 +33,7 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
-| [`kmp-adaptive-layout`](../../skills/kmp-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
+| [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
 | [`kmp-audit`](../../skills/kmp-audit/) | 432 | 2026-07-31 | ✅ |
 | [`kmp-paging`](../../skills/kmp-paging/) | 432 | 2026-06-21 | ✅ |
@@ -55,7 +55,7 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-skill-harvester`](../../skills/kmp-skill-harvester/) | 337 | 2026-06-26 | ✅ |
 | [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 336 | 2026-07-31 | ✅ |
 | [`kmp-feature-flags`](../../skills/kmp-feature-flags/) | 334 | 2026-06-21 | ✅ |
-| [`kmp-accessibility`](../../skills/kmp-accessibility/) | 330 | 2026-06-21 | ✅ |
+| [`kmp-compose-accessibility`](../../skills/kmp-compose-accessibility/) | 330 | 2026-06-21 | ✅ |
 | [`kmp-docs-site`](../../skills/kmp-docs-site/) | 326 | 2026-07-11 | ✅ |
 | [`kmp-offline-first`](../../skills/kmp-offline-first/) | 324 | 2026-06-21 | ✅ |
 | [`kmp-image-loading`](../../skills/kmp-image-loading/) | 317 | 2026-06-21 | ✅ |
@@ -65,10 +65,10 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-native-authoring`](../../skills/kmp-native-authoring/) | 292 | 2026-07-31 | ✅ |
 | [`kmp-kotlin-rpc`](../../skills/kmp-kotlin-rpc/) | 285 | 2026-07-31 | ✅ |
 | [`kmp-imagevector-generator`](../../skills/kmp-imagevector-generator/) | 276 | 2026-07-08 | ✅ |
-| [`kmp-preview-driven-development`](../../skills/kmp-preview-driven-development/) | 276 | 2026-07-08 | ✅ |
+| [`kmp-compose-preview-driven-development`](../../skills/kmp-compose-preview-driven-development/) | 276 | 2026-07-08 | ✅ |
 | [`kmp-proguard-r8`](../../skills/kmp-proguard-r8/) | 269 | 2026-06-29 | ✅ |
 | [`kmp-unit-testing`](../../skills/kmp-unit-testing/) | 269 | 2026-06-18 | ✅ |
-| [`kmp-graphics-modifiers`](../../skills/kmp-graphics-modifiers/) | 266 | 2026-06-13 | ✅ |
+| [`kmp-compose-graphics-modifiers`](../../skills/kmp-compose-graphics-modifiers/) | 266 | 2026-06-13 | ✅ |
 | [`kmp-ktor-auth-service`](../../skills/kmp-ktor-auth-service/) | 242 | 2026-06-13 | ✅ |
 | [`kmp-android-cli`](../../skills/kmp-android-cli/) | 210 | 2026-07-19 | ✅ |
 | [`kmp-token-saver`](../../skills/kmp-token-saver/) | 186 | 2026-07-13 | ✅ |

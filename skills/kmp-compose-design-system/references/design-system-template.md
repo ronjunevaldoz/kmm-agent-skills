@@ -1,7 +1,7 @@
 # PROJECT_NAME Design System
 
 > **Usage:** Copy this file to `docs/design-system.md` in your project and fill in every
-> `_fill in_` section. The `kmp-design-system` skill reads
+> `_fill in_` section. The `kmp-compose-design-system` skill reads
 > `docs/design-system.md` if it exists, so it can tailor generated code to your actual
 > token names and component prefix.
 >
@@ -148,7 +148,7 @@ Font family: _fill in_ (e.g. `Inter`, `Roboto`, system default)
 | `COMPONENT_PREFIXBadge` | `components/AppBadge.kt` | `Default`, `Success`, `Warning`, `Error` | _Stable / In progress / Planned_ | _fill in_ |
 | `COMPONENT_PREFIXText` | `components/AppText.kt` | `(type scale)` | _Stable / In progress / Planned_ | _fill in_ |
 
-### Extended components (from `kmp-design-system-extended`)
+### Extended components (from `kmp-compose-design-system-extended`)
 
 Add rows as each extended component is scaffolded:
 

@@ -477,8 +477,8 @@ If `Res.string.xxx` is unresolved, run `./gradlew generateCommonMainResourceAcce
 ## Related Skills
 
 - `kmp-feature-scaffold` — convention plugins that enable `composeResources/` in each module
-- `kmp-design-system` — fonts and icons distributed via `Res` accessors inside the design system
-- `kmp-preview-driven-development` — Desktop previews that consume `Res.string` and `Res.drawable`
+- `kmp-compose-design-system` — fonts and icons distributed via `Res` accessors inside the design system
+- `kmp-compose-preview-driven-development` — Desktop previews that consume `Res.string` and `Res.drawable`
 - `kmp-expect-actual` — platform-specific resource loading when CMP `Res` is insufficient
 
 ---

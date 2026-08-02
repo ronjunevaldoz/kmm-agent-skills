@@ -185,16 +185,16 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 - [`desktop-app`](skills/kmp-desktop-app/) — window management, tray, file picker, packaging
 
 ### UI System
-- [`design-system`](skills/kmp-design-system/) — tokens and core components
-- [`design-system-extended`](skills/kmp-design-system-extended/) — bottom sheet, dialog, snackbar, skeleton
+- [`design-system`](skills/kmp-compose-design-system/) — tokens and core components
+- [`design-system-extended`](skills/kmp-compose-design-system-extended/) — bottom sheet, dialog, snackbar, skeleton
 - [`shadcn-compose`](skills/kmp-shadcn-compose/) — published library alternative to `design-system` — 70+ components, real experimental-API dependency risk
 - [`compose-state-hoisting`](skills/kmp-compose-state-hoisting/) — hoisting rules, `@Stable`, `@Immutable`
 - [`compose-state-container`](skills/kmp-compose-state-container/) — `remember` vs `ViewModel`, `rememberUpdatedState`
 - [`compose-animation`](skills/kmp-compose-animation/) — AnimatedVisibility, Crossfade, shared elements
 - [`compose-slot-api`](skills/kmp-compose-slot-api/) — slot-based component APIs, CompositionLocal
-- [`adaptive-layout`](skills/kmp-adaptive-layout/) — WindowSizeClass, list-detail split
-- [`graphics-modifiers`](skills/kmp-graphics-modifiers/) — Canvas, graphicsLayer
-- [`preview-driven-development`](skills/kmp-preview-driven-development/) — Desktop-first `@Preview` workflow, PDD cycle
+- [`adaptive-layout`](skills/kmp-compose-adaptive-layout/) — WindowSizeClass, list-detail split
+- [`graphics-modifiers`](skills/kmp-compose-graphics-modifiers/) — Canvas, graphicsLayer
+- [`preview-driven-development`](skills/kmp-compose-preview-driven-development/) — Desktop-first `@Preview` workflow, PDD cycle
 - [`layout-system`](skills/kmp-layout-system/) — ASCII wireframe docs per screen + slot-grid layout contracts
 - [`imagevector-generator`](skills/kmp-imagevector-generator/) — raster/SVG → compiled Kotlin ImageVector; no hand-written paths, no PNG icons
 
@@ -202,7 +202,7 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 - [`unit-testing`](skills/kmp-unit-testing/) — `runTest`, Turbine, fake-over-mock
 - [`roborazzi`](skills/kmp-roborazzi/) — screenshot tests from `@Preview` on JVM
 - [`code-quality`](skills/kmp-code-quality/) — Ktlint + Detekt, CI gates
-- [`accessibility`](skills/kmp-accessibility/) — semantic roles, contentDescription, WCAG
+- [`accessibility`](skills/kmp-compose-accessibility/) — semantic roles, contentDescription, WCAG
 - [`benchmark`](skills/kmp-benchmark/) — kotlinx-benchmark setup, @Benchmark conventions, per-target registration
 
 ### Meta

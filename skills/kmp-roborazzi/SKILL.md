@@ -680,11 +680,11 @@ jobs:
 
 ## Related Skills
 
-- `kmp-preview-driven-development` — the `@Preview` workflow that feeds directly into Roborazzi
+- `kmp-compose-preview-driven-development` — the `@Preview` workflow that feeds directly into Roborazzi
 - `kmp-presenter-module` — Screen/Content split that makes `Content` injectable with fixed state
 - `kmp-unit-testing` — Roborazzi covers `:ui`; use `runTest` + Turbine for `:presenter` and `:domain`
 - `kmp-ci-github-actions` — where the CI screenshot job is wired
-- `kmp-design-system` — owns the `Style`/token source that border-width and corner-radius regressions are diffed against directly, instead of re-deriving them from a screenshot
+- `kmp-compose-design-system` — owns the `Style`/token source that border-width and corner-radius regressions are diffed against directly, instead of re-deriving them from a screenshot
 
 ---
 

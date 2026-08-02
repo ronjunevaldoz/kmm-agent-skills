@@ -48,7 +48,7 @@ Use this skill to:
 The skill is **fully generic** — component names, widths, and nav labels all come from
 the actual project. Templates use `<placeholders>`; fill them in from the project.
 
-Do NOT use this skill for Compose implementation — use `kmp-adaptive-layout`
+Do NOT use this skill for Compose implementation — use `kmp-compose-adaptive-layout`
 for breakpoint-driven responsive layouts.
 
 **Freshness rule:** recheck wireframes whenever a panel is added or removed, navigation
@@ -317,7 +317,7 @@ Some projects arrive with a wireframe already drafted as a real HTML/CSS file (e
 and vanilla JS), rather than starting from a blank screen. Translate it into this
 skill's standard output (`docs/layout-system/<feature>/<ScreenName>.md`) — do not
 invent a second, parallel wireframe format for HTML sources. The downstream pipeline
-(`kmp-preview-driven-development` generating preview stubs, then real
+(`kmp-compose-preview-driven-development` generating preview stubs, then real
 implementation) stays exactly the same either way.
 
 ### Structural mapping
@@ -502,10 +502,10 @@ Keep explanations short. The wireframe is the primary output — do not narrate 
 
 ## Related Skills
 
-- `kmp-adaptive-layout` — Compose implementation of breakpoint-driven
+- `kmp-compose-adaptive-layout` — Compose implementation of breakpoint-driven
   layouts (Compact/Medium/Expanded). Layout-system docs describe intent; this skill
   implements it in code.
-- `kmp-design-system` — Design tokens, colors, and typography used
+- `kmp-compose-design-system` — Design tokens, colors, and typography used
   by the components listed in `_components.md`.
 - `kmp-project-docs-maintainer` — Keeps `docs/` healthy. Layout-system
   files follow the same kebab-case and line-limit hygiene rules.

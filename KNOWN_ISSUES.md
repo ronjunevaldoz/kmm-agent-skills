@@ -62,8 +62,8 @@ the spec's progressive-disclosure guideline — "Keep your main `SKILL.md` under
 
 | Skill | Lines | Over by |
 |---|---|---|
-| `kmp-design-system-extended` | 3101 | 6.2x |
-| `kmp-design-system` | 2674 | 5.3x |
+| `kmp-compose-design-system-extended` | 3101 | 6.2x |
+| `kmp-compose-design-system` | 2674 | 5.3x |
 | `kmp-mvi` | 1626 | 3.3x |
 | `kmp-feature-scaffold` | 1219 | 2.4x |
 | `kmp-expert` | 886 | 1.8x |
@@ -124,7 +124,7 @@ theme files. Fixer has concrete before/after fixes for all three violations.
 **Was:** When one session implemented an adaptive layout (WindowSizeClass, list-detail
 split), a subsequent session had no way to know the pattern was established. New screens
 were generated without `WindowSizeClass` parameters, breaking layout consistency.  
-**Fix:** New `kmp-adaptive-layout` skill documents the canonical
+**Fix:** New `kmp-compose-adaptive-layout` skill documents the canonical
 pattern. Implementer agent runs a grep pre-check before any `:ui` layer —
 `grep -r "WindowSizeClass" */src --include="*.kt"` — and replicates the existing
 pattern if found. Reviewer Check 7 blocks new screens that omit `WindowSizeClass` when
@@ -153,7 +153,7 @@ gains `[LAYOUT]` before/after fixes.
 
 **Resolved:** `v1.2.3` — keyword expansion pass  
 **Was:** Queries like "test canvas layout", "visual accuracy", "pixel-perfect test"
-routed to `kmp-graphics-modifiers` instead of
+routed to `kmp-compose-graphics-modifiers` instead of
 `kmp-roborazzi`. Several other skills had narrow keyword vocabularies
 that caused misrouting on natural-language queries.  
 **Fix:** Added 14 skills with expanded trigger keyword lines. Added a new routing row

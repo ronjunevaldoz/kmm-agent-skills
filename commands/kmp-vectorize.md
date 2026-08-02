@@ -50,7 +50,7 @@ Beziers automatically (most icon sets, including Heroicons, use arcs for rounded
 
 ## Step 3 — Run the converter
 
-If the project does **not** use the `kmp-design-system` skill's
+If the project does **not** use the `kmp-compose-design-system` skill's
 `:core:designsystem` module layout, pass `--package` explicitly — the default package
 (`<group-id>.core.designsystem.icons`) is that skill's own convention, not universal.
 Never hand-edit the generated file's package line instead.

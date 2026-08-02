@@ -557,8 +557,8 @@ fun AppSomething(
 
 ## Related Skills
 
-- `kmp-design-system` — slot API is how design system components accept custom content
-- `kmp-design-system-extended` — extended components use slots for dialog/sheet content areas
+- `kmp-compose-design-system` — slot API is how design system components accept custom content
+- `kmp-compose-design-system-extended` — extended components use slots for dialog/sheet content areas
 - `kmp-compose-state-hoisting` — pair with hoisting when the slot content owns state
 - `kmp-mvi` — screen/content split uses slots to inject preview-friendly content composables
 

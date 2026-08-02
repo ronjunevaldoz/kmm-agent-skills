@@ -10,8 +10,8 @@ body:
       options:
         - jni-kotlin-pro
         - kmp-mvi
-        - kmp-design-system
-        - kmp-design-system-extended
+        - kmp-compose-design-system
+        - kmp-compose-design-system-extended
         - kmp-feature-scaffold
         - kmp-clean-architecture
         - kmp-presenter-module

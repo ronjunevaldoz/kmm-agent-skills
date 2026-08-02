@@ -1,5 +1,5 @@
 ---
-name: kmp-design-system
+name: kmp-compose-design-system
 description: >
   Scaffolds a custom Compose Multiplatform design system in :core:designsystem using
   the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles,
@@ -133,7 +133,7 @@ Concrete KMP design-system mapping:
 ## Screen Layout Contract
 
 > **Requires extended skill:** `AppScaffold` and `AppTopAppBar` are defined in
-> `kmp-design-system-extended`. Apply that skill before using the
+> `kmp-compose-design-system-extended`. Apply that skill before using the
 > screen layout contract below.
 
 Every screen must follow this structure — no exceptions. Consistency across all pages
@@ -290,7 +290,7 @@ The skill reads `docs/design-system.md` when it exists and uses it to:
 - Detect deviations you've documented as intentional
 
 ```bash
-cp skills/kmp-design-system/references/design-system-template.md \
+cp skills/kmp-compose-design-system/references/design-system-template.md \
    your-project/docs/design-system.md
 ```
 
@@ -396,12 +396,12 @@ data object Default : ButtonVariant {
 **Run the derivation script** (steps 3–4 are deterministic, not a guess):
 
 ```bash
-python3 ~/.claude/skills/kmp-design-system/scripts/derive_component_prefix.py <project_root>
+python3 ~/.claude/skills/kmp-compose-design-system/scripts/derive_component_prefix.py <project_root>
 ```
 
 If running from inside kmp-agent-skills:
 ```bash
-python3 skills/kmp-design-system/scripts/derive_component_prefix.py <project_root>
+python3 skills/kmp-compose-design-system/scripts/derive_component_prefix.py <project_root>
 ```
 
 The script reads, in order: `settings.gradle.kts` `rootProject.name` → the Gradle group
@@ -2565,7 +2565,7 @@ design-system:
 When detekt is not yet wired into the project, use the Python scanner for a fast check:
 
 ```bash
-python3 skills/kmp-design-system/scripts/scan_design_violations.py \
+python3 skills/kmp-compose-design-system/scripts/scan_design_violations.py \
   /path/to/project --json
 ```
 
@@ -2578,7 +2578,7 @@ not `ComponentRegistryViolation` or `DesignTokenImportBoundary`.
 
 - magic color literals in composables — `Color(0xFF6200EE)` written directly inside a `@Composable` instead of `appTheme.colors.primary`; the audit script flags `Color(0x…)` in any `/ui/` or `/presentation/` file that is not a token definition file
 - inlining `variant.style then size.style` directly in a modifier chain instead of `rememberStyle(variant, size)` — rebuilds the merged descriptor on every recomposition instead of once per variant/size change
-- bundling multiple components into one file under `core/designsystem/components/` — every generated template in this skill and `kmp-design-system-extended` puts one component per file; `kmp-audit`'s `_detect_combined_component_file` flags 3+ components in one file
+- bundling multiple components into one file under `core/designsystem/components/` — every generated template in this skill and `kmp-compose-design-system-extended` puts one component per file; `kmp-audit`'s `_detect_combined_component_file` flags 3+ components in one file
 - bundling multiple `*Variant` sealed types into one `styles/` file — `styles/ButtonStyles.kt` holds exactly `ButtonVariant`, matched 1:1 with `components/AppButton.kt`; `kmp-audit`'s `_detect_combined_style_file` flags 2+ variant types in one file
 - a `Modifier` extension taking a theme value as a required parameter with a hardcoded literal default (`fun Modifier.appDivider(color: Color = Color(0xFFE4E4E7))`) — resolve it internally via `Modifier.composed { AppTheme.LocalAppTheme.current... }` so call sites stay parameter-free
 - a sealed variant `data object` holding a pre-resolved `Color`/`Dp` value instead of a `Style` descriptor built from `StyleScope` extensions (`colors.primary`, not a captured `Color` literal) — breaks theme switching and light/dark parity
@@ -2623,10 +2623,10 @@ defaults (`App` prefix, token names as shown in the steps) are used.
 ## Related Skills
 
 - `kmp-feature-scaffold` — `:core:designsystem` follows the same convention plugin pattern
-- `kmp-design-system-extended` — additional components (`AppDialog`, `AppToast`, `AppTabs`, etc.) built on this foundation
+- `kmp-compose-design-system-extended` — additional components (`AppDialog`, `AppToast`, `AppTabs`, etc.) built on this foundation
 - `kmp-audit` — `_detect_combined_component_file`/`_detect_combined_style_file` mechanically check the one-component-per-file and one-component's-variants-per-file conventions above
 - `kmp-shared-resources` — fonts and icons loaded via `Res` accessors inside the design system
-- `kmp-preview-driven-development` — Desktop previews for each component variant using `PreviewParameterProvider`
+- `kmp-compose-preview-driven-development` — Desktop previews for each component variant using `PreviewParameterProvider`
 - `kmp-shadcn-compose` — the published-library alternative to this skill's owned-scaffold approach; see its own skill for the experimental-API risk tradeoff in full
 - `/kmp-migrate-to-shadcn` — the file-by-file migration path if a project decides to switch fully from this skill's generated components to shadcn-compose
 

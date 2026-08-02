@@ -152,7 +152,7 @@ def main() -> int:
 
     skill_root = args.skill_root or Path(__file__).resolve().parents[3]
     skill_md = (
-        skill_root / "skills" / "kmp-design-system" / "SKILL.md"
+        skill_root / "skills" / "kmp-compose-design-system" / "SKILL.md"
     )
     if not skill_md.exists():
         print(f"error: SKILL.md not found at {skill_md}", file=sys.stderr)

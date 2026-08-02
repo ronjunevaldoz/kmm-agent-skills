@@ -5,7 +5,7 @@ in the expert SKILL.md Skill Invocation Map, and that no two skills documented a
 mutually-exclusive alternatives (one skill's description says "alternative to
 <other-skill>") share a trigger keyword — that collision made both skills match
 the same prompt despite only one being appropriate at a time (real case: a bare
-`shadcn` keyword in kmp-design-system collided with
+`shadcn` keyword in kmp-compose-design-system collided with
 kmp-shadcn-compose's own trigger keywords).
 
 Exit codes:

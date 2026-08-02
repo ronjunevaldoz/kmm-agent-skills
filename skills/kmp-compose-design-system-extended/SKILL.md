@@ -1,7 +1,7 @@
 ---
-name: kmp-design-system-extended
+name: kmp-compose-design-system-extended
 description: >
-  Extends :core:designsystem (from kmp-design-system) with 28
+  Extends :core:designsystem (from kmp-compose-design-system) with 28
   production-ready components using the Compose Styles API. Covers: Icon, IconButton,
   Label, Separator, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton,
   Switch, Slider, Select/Dropdown, Progress (linear + circular), Skeleton, Spinner,
@@ -10,7 +10,7 @@ description: >
   scrollbar via expect/actual), ResizablePanelGroup (draggable divider). All components
   built on CMP primitives (no Material3). "App" is a placeholder prefix — see the base
   skill's Step 0 for how it is resolved from the project name
-  (scripts/derive_component_prefix.py). Requires kmp-design-system skill.
+  (scripts/derive_component_prefix.py). Requires kmp-compose-design-system skill.
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
@@ -53,7 +53,7 @@ metadata:
 
 ## When to Use This Skill
 
-Use **after** `kmp-design-system` has been applied. Use when the user asks to:
+Use **after** `kmp-compose-design-system` has been applied. Use when the user asks to:
 - Add Dialog, BottomSheet, Toast/Snackbar, Tabs, TopAppBar, or BottomNav
 - Add form controls: Checkbox, RadioButton, Switch, Slider, Select/Dropdown
 - Add loading states: Progress, Skeleton, Spinner
@@ -71,7 +71,7 @@ show dialog, show toast, loading state, empty state, error state,
 circular progress, progress ring, determinate progress, indeterminate progress.
 
 **Freshness rule:** `@ExperimentalStylesApi` and CMP primitive APIs change between releases —
-recheck the Compose docs and apply the same freshness check as `kmp-design-system`.
+recheck the Compose docs and apply the same freshness check as `kmp-compose-design-system`.
 
 ---
 
@@ -92,7 +92,7 @@ and apply the same `@ExperimentalStylesApi` token pattern as the core system.
 
 ## Prerequisites
 
-- `kmp-design-system` skill already applied (tokens, AppTheme, StyleScopeExtensions, 6 core components present)
+- `kmp-compose-design-system` skill already applied (tokens, AppTheme, StyleScopeExtensions, 6 core components present)
 - `:core:designsystem` module exists with `GROUP_ID.core.designsystem` package
 - The project's component prefix already resolved via the base skill's **Step 0** —
   `App` below is the same placeholder token (`AppIconButton` → `GuildBaseIconButton`,
@@ -3047,7 +3047,7 @@ fun SettingsPage() {
 
 ## Common Anti-Patterns
 
-- using an extended component before applying `kmp-design-system` — tokens are missing
+- using an extended component before applying `kmp-compose-design-system` — tokens are missing
 - overriding component internals via `Modifier` hacks instead of adding a variant — breaks the style contract
 - building a custom sheet or dialog without checking `AppBottomSheet` / `AppDialog` first
 - mixing Material3 components with extended design system components — creates token conflicts
@@ -3068,9 +3068,9 @@ Check the component list in this skill before building a custom alternative.
 
 ## Related Skills
 
-- `kmp-design-system` — the token and component foundation this skill extends
+- `kmp-compose-design-system` — the token and component foundation this skill extends
 - `kmp-compose-slot-api` — slot APIs used by `AppDialog`, `AppBottomSheet`, and `AppScaffold`
-- `kmp-preview-driven-development` — Desktop previews for each extended component variant
+- `kmp-compose-preview-driven-development` — Desktop previews for each extended component variant
 - `kmp-shared-resources` — icons and images loaded inside extended components via `Res`
 
 ---
@@ -3083,7 +3083,7 @@ When asked about extended design system components, respond in this order:
 3. why that component fits the use case
 4. main alternative (build from scratch, use Material3)
 
-Assume `kmp-design-system` is already applied. Use the user's variant names and theme tokens when provided.
+Assume `kmp-compose-design-system` is already applied. Use the user's variant names and theme tokens when provided.
 
 ---
 

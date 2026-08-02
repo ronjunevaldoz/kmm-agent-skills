@@ -285,15 +285,15 @@ versions when the local repo can be checked directly.
 ### Layer 5 — UI System
 | Skill | Owns |
 |---|---|
-| `kmp-design-system` | Tokens (colors, typography, shapes, spacing), dark mode, 6 core components, no Material dependency |
-| `kmp-design-system-extended` | 27 additional components: Dialog, Sheet, Toast, Tabs, TopAppBar, Checkbox, etc. |
+| `kmp-compose-design-system` | Tokens (colors, typography, shapes, spacing), dark mode, 6 core components, no Material dependency |
+| `kmp-compose-design-system-extended` | 27 additional components: Dialog, Sheet, Toast, Tabs, TopAppBar, Checkbox, etc. |
 | `kmp-shadcn-compose` | Published-library alternative to `design-system` — Maven Central setup, `ShadcnTheme`, 70+ components. Gated to explicit user choice (`/kmp-new-project` Step 6a); never suggested unprompted — carries a real experimental-API dependency risk |
-| `kmp-adaptive-layout` | WindowSizeClass, Compact/Medium/Expanded breakpoints, list-detail split, adaptive navigation, cross-session pattern consistency |
+| `kmp-compose-adaptive-layout` | WindowSizeClass, Compact/Medium/Expanded breakpoints, list-detail split, adaptive navigation, cross-session pattern consistency |
 | `kmp-compose-slot-api` | `@Composable () -> Unit` slots, scoped slots, CompositionLocal, component API shape |
 | `kmp-compose-state-hoisting` | Hoist-until-shared rule, controlled components, stateless vs stateful composables |
 | `kmp-compose-state-container` | `remember` vs `rememberSaveable` vs `ViewModel` survival matrix, custom Saver |
-| `kmp-graphics-modifiers` | `graphicsLayer`, Canvas, drawBehind, drawWithCache, workflow node shells, custom drawing performance |
-| `kmp-preview-driven-development` | Desktop-first `@Preview` workflow, `@PreviewParameterProvider`, PDD cycle, `./gradlew :desktopApp:run` |
+| `kmp-compose-graphics-modifiers` | `graphicsLayer`, Canvas, drawBehind, drawWithCache, workflow node shells, custom drawing performance |
+| `kmp-compose-preview-driven-development` | Desktop-first `@Preview` workflow, `@PreviewParameterProvider`, PDD cycle, `./gradlew :desktopApp:run` |
 | `kmp-imagevector-generator` | Raster/SVG → compiled ImageVector toolchain (quantize/trace/normalize/codegen), semantic vs literal tinting, node budget, no hand-written path data |
 
 ### Layer 6 — Testing & Quality
@@ -302,7 +302,7 @@ versions when the local repo can be checked directly.
 | `kmp-unit-testing` | `runTest`, Turbine, fake-over-mock, `:core:testing` fixtures module, JVM ViewModel tests |
 | `kmp-roborazzi` | Screenshot tests from `@Preview` on JVM/Desktop, golden images, CI diff job |
 | `kmp-code-quality` | Ktlint (formatting) + Detekt (architecture rules), CI gates |
-| `kmp-accessibility` | Semantic roles, `contentDescription`, `mergeDescendants`, touch targets, traversal order, Roborazzi a11y snapshots |
+| `kmp-compose-accessibility` | Semantic roles, `contentDescription`, `mergeDescendants`, touch targets, traversal order, Roborazzi a11y snapshots |
 | `kmp-compose-animation` | `AnimatedVisibility`, `animateContentSize`, `Crossfade`, `AnimatedContent`, `animateXAsState`, shared elements, reduced motion |
 | `kmp-benchmark` | `kotlinx-benchmark` setup, `@State`/`@Benchmark` conventions, per-target registration, `docs/reference/benchmark-matrix.md` result placement |
 
@@ -339,13 +339,13 @@ kmp-feature-scaffold       ← scaffold second (implements the rules)
 ├── kmp-navigation         (depends on: scaffold)
 ├── kmp-shared-resources   (depends on: scaffold)
 ├── kmp-mvi                (depends on: scaffold, navigation)
-├── kmp-design-system      (depends on: scaffold, shared-resources)
-├── kmp-design-system-extended (depends on: design-system)
+├── kmp-compose-design-system      (depends on: scaffold, shared-resources)
+├── kmp-compose-design-system-extended (depends on: design-system)
 ├── kmp-compose-slot-api   (depends on: design-system)
 ├── kmp-compose-state-hoisting (depends on: mvi)
 ├── kmp-compose-state-container (depends on: mvi, navigation)
-├── kmp-graphics-modifiers (depends on: design-system, compose-state-container)
-├── kmp-preview-driven-development (depends on: presenter-module, design-system)
+├── kmp-compose-graphics-modifiers (depends on: design-system, compose-state-container)
+├── kmp-compose-preview-driven-development (depends on: presenter-module, design-system)
 ├── kmp-unit-testing       (depends on: presenter-module)
 ├── kmp-roborazzi          (depends on: preview-driven-development)
 ├── kmp-code-quality       (depends on: scaffold, clean-architecture)
@@ -359,7 +359,7 @@ kmp-feature-scaffold       ← scaffold second (implements the rules)
 ├── kmp-push-notifications (depends on: permissions, deep-linking, workmanager)
 ├── kmp-workmanager        (depends on: dependency-injection)
 ├── kmp-feature-flags      (depends on: dependency-injection, analytics)
-├── kmp-accessibility      (depends on: design-system, roborazzi, compose-animation)
+├── kmp-compose-accessibility      (depends on: design-system, roborazzi, compose-animation)
 ├── kmp-compose-animation  (depends on: design-system)
 ├── kmp-offline-first      (depends on: repository-pattern, sqldelight-setup, workmanager)
 └── kmp-crash-reporting    (depends on: logging, dependency-injection)
@@ -555,7 +555,7 @@ What is X?
 │     for ephemeral state) or kmp-compose-state-hoisting (state
 │     buried too deep, forcing a wide recomposition scope)
 ├── Custom drawing (Canvas, graphicsLayer, drawBehind) is slow?
-│   → kmp-graphics-modifiers
+│   → kmp-compose-graphics-modifiers
 ├── A JNI/native bridge call?
 │   → kmp-jni-pro (minimize boundary crossings, batch marshalling,
 │     GPU sync tips already in the skill)
@@ -653,20 +653,20 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "paging", "Paging 3", "PagingSource", "infinite scroll", "load more", "next page", "cursor pagination", "offset pagination", "LazyPagingItems", "paginate" | `kmp-paging` |
 | "shared strings", "strings.xml", "stringresource", "hardcoded strings", "localization", "image assets", "fonts" | `kmp-shared-resources` |
 | "MVI", "ViewModel state", "one-shot effects", "Screen/Content split" | `kmp-mvi` |
-| "design system", "AppTheme", "design tokens", "dark mode", "spacing tokens", "layout consistency", "AppScaffold", "AppTopAppBar", "page title", "top bar", "action button placement" | `kmp-design-system` |
+| "design system", "AppTheme", "design tokens", "dark mode", "spacing tokens", "layout consistency", "AppScaffold", "AppTopAppBar", "page title", "top bar", "action button placement" | `kmp-compose-design-system` |
 | "update design system", "sync design system", "update components", "sync components", "update AppButton", "design system out of date", "new version of design system", "design system changed", "refresh design system" | `/kmp-update-design-system` |
 | "fix design", "fix colors", "fix spacing", "fix typography", "hardcoded color", "hardcoded dp", "design inconsistencies", "wrong colors", "MaterialTheme instead of AppTheme", "nested cards", "redundant surface", "design violations", "design audit project", "fix design system usage", "detekt design rules", "component reimplementation", "token import boundary" | `/kmp-fix-design` |
 | "record baselines", "record golden screenshots", "update golden images", "Roborazzi baseline", "screenshot baseline", "update screenshots", "record design screenshots" | `/kmp-record-design-baselines` |
 | "visual audit", "audit screenshots", "check visual consistency", "design visual check", "cross-screen consistency", "spacing rhythm", "color contrast audit", "vision audit design" | `/kmp-audit-design-visual` |
-| "adaptive layout", "WindowSizeClass", "tablet layout", "desktop layout", "mobile layout", "phone layout", "list detail", "detail split", "split screen", "navigation rail", "Compact Medium Expanded", "responsive UI", "master detail", "multi-pane", "different layout phone tablet", "different layout phone desktop", "screen size breakpoint", "pane layout", "layout per screen size", "layout phone desktop" | `kmp-adaptive-layout` |
-| "dialog", "bottom sheet", "toast", "tabs", "TopAppBar", "Checkbox" | `kmp-design-system-extended` |
+| "adaptive layout", "WindowSizeClass", "tablet layout", "desktop layout", "mobile layout", "phone layout", "list detail", "detail split", "split screen", "navigation rail", "Compact Medium Expanded", "responsive UI", "master detail", "multi-pane", "different layout phone tablet", "different layout phone desktop", "screen size breakpoint", "pane layout", "layout per screen size", "layout phone desktop" | `kmp-compose-adaptive-layout` |
+| "dialog", "bottom sheet", "toast", "tabs", "TopAppBar", "Checkbox" | `kmp-compose-design-system-extended` |
 | "shadcn-compose", "ShadcnButton", "ShadcnTheme", "ShadcnCard", "shadcn ui kotlin", "shadcn compose multiplatform", "ExperimentalFoundationStyleApi", "shadcn kmp" | `kmp-shadcn-compose` |
 | "mimic api", "api mimicry", "clone api shape", "inspired by jetpack compose", "custom dsl engine", "from-scratch renderer", "vulkan ui", "metal ui", "port api ergonomics", "reimplement compose-like dsl", "non-compose renderer", "engine-agnostic dsl", "own compiler-free dsl", "api shape porting" | `kmp-api-mimicry` |
 | "slot API", "content lambda", "composable parameter", "scoped slot" | `kmp-compose-slot-api` |
 | "state hoisting", "hoist state", "controlled component", "where does state go" | `kmp-compose-state-hoisting` |
 | "remember vs ViewModel", "rememberSaveable", "state survival", "config change" | `kmp-compose-state-container` |
-| "graphicsLayer", "Canvas", "drawWithCache", "workflow node", "custom drawing" | `kmp-graphics-modifiers` |
-| "@Preview", "desktop preview", "PDD", "fast UI iteration", "PreviewParameterProvider" | `kmp-preview-driven-development` |
+| "graphicsLayer", "Canvas", "drawWithCache", "workflow node", "custom drawing" | `kmp-compose-graphics-modifiers` |
+| "@Preview", "desktop preview", "PDD", "fast UI iteration", "PreviewParameterProvider" | `kmp-compose-preview-driven-development` |
 | "unit test", "runTest", "Turbine", "Flow test", "fake repository", ":core:testing" | `kmp-unit-testing` |
 | "screenshot test", "Roborazzi", "golden image", "visual regression", "CI diff" | `kmp-roborazzi` |
 | "test canvas layout", "canvas screenshot", "layout regression test", "visual accuracy", "pixel-perfect test", "arrangement test", "test node placement", "UI layout verification", "100% accuracy test" | `kmp-roborazzi` |
@@ -681,7 +681,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "push notifications", "FCM", "APNs", "Firebase Messaging", "push token", "FirebaseMessagingService", "remote notification", "notification tap" | `kmp-push-notifications` |
 | "WorkManager", "background work", "background task", "BGTaskScheduler", "BGProcessingTask", "one-time work", "periodic work", "CoroutineWorker", "background sync" | `kmp-workmanager` |
 | "feature flags", "feature toggle", "remote config", "Firebase Remote Config", "A/B test", "experiment", "kill switch", "flag evaluation", "FeatureFlagProvider" | `kmp-feature-flags` |
-| "accessibility", "a11y", "TalkBack", "VoiceOver", "contentDescription", "semantic role", "screen reader", "touch target", "WCAG", "traversal order", "mergeDescendants" | `kmp-accessibility` |
+| "accessibility", "a11y", "TalkBack", "VoiceOver", "contentDescription", "semantic role", "screen reader", "touch target", "WCAG", "traversal order", "mergeDescendants" | `kmp-compose-accessibility` |
 | "animation", "AnimatedVisibility", "animateContentSize", "Crossfade", "AnimatedContent", "animateFloatAsState", "shared element", "enter transition", "exit transition", "reduced motion", "spring animation" | `kmp-compose-animation` |
 | "offline first", "offline-first", "local first", "conflict resolution", "conflict handling", "background sync", "SyncManager", "SyncState" (opt-in — do NOT match on bare "sync", "cache", or "single source of truth"; those route to `repository-pattern`/`sqldelight-setup`) | `kmp-offline-first` |
 | "crash reporting", "crashlytics", "firebase crashes", "sentry", "non-fatal", "symbolication", "dSYM", "breadcrumb bridge", "crash handler", "breadcrumb crash" | `kmp-crash-reporting` |

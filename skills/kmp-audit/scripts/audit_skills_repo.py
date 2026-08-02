@@ -40,12 +40,12 @@ def _check_design_system(skill_dir: Path, text: str, findings: list[str]) -> Non
     """Targeted content checks for the design-system skills."""
     name = skill_dir.name
     if name not in (
-        "kmp-design-system",
-        "kmp-design-system-extended",
+        "kmp-compose-design-system",
+        "kmp-compose-design-system-extended",
     ):
         return
 
-    if name == "kmp-design-system":
+    if name == "kmp-compose-design-system":
         # All 6 declared core components must have an implementation.
         missing = [c for c in _DS_CORE_COMPONENTS if c not in text]
         if missing:

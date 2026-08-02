@@ -29,7 +29,7 @@ SKIP_TESTING = {
     "kmp-xcframework-spm",      # binary distribution
     "kmp-library-publishing",   # Maven Central / GitHub Packages / BOM / binary-compat
     "kmp-code-quality",         # linting/formatting config
-    "kmp-preview-driven-development",  # workflow guide
+    "kmp-compose-preview-driven-development",  # workflow guide
     "kmp-expert",               # meta orchestrator
     "jni-kotlin-pro",                            # separate domain
 }
@@ -66,10 +66,10 @@ KNOWN_DEBT: set[tuple[str, str]] = {
     ("kmp-compose-slot-api", "oversized_skill_md"),
     ("kmp-compose-state-container", "oversized_skill_md"),
     ("kmp-compose-state-hoisting", "oversized_skill_md"),
-    ("kmp-design-system", "description_approaching_limit"),
-    ("kmp-design-system", "oversized_skill_md"),
-    ("kmp-design-system-extended", "description_approaching_limit"),
-    ("kmp-design-system-extended", "oversized_skill_md"),
+    ("kmp-compose-design-system", "description_approaching_limit"),
+    ("kmp-compose-design-system", "oversized_skill_md"),
+    ("kmp-compose-design-system-extended", "description_approaching_limit"),
+    ("kmp-compose-design-system-extended", "oversized_skill_md"),
     ("kmp-expect-actual", "oversized_skill_md"),
     ("kmp-expert", "oversized_skill_md"),
     ("kmp-feature-scaffold", "oversized_skill_md"),

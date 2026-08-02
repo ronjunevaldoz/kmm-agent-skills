@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 derive_prefix_scripts = load_module(
     "derive_component_prefix",
-    REPO_ROOT / "skills" / "kmp-design-system" / "scripts" / "derive_component_prefix.py",
+    REPO_ROOT / "skills" / "kmp-compose-design-system" / "scripts" / "derive_component_prefix.py",
 )
 
 class DeriveComponentPrefixTests(unittest.TestCase):
