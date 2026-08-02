@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.115.0] — 2026-08-02
+
+### Added
+
+- feat(audit): add _detect_context_leak_in_singleton
+
+---
+
 ## [v1.114.0] — 2026-08-02
 
 ### Added
