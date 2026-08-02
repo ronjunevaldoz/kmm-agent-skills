@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.5.1] — 2026-08-03
+
+### Docs
+
+- docs(native-authoring): add header-vs-implementation comment convention
+
+---
+
 ## [v2.5.0] — 2026-08-03
 
 ### Added
