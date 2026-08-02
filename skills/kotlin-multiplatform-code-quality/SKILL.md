@@ -352,6 +352,42 @@ body, forward the object instead of restating its fields.
 
 ---
 
+## Compiler Warnings
+
+Ktlint and Detekt are both *static analysis* — neither invokes the real Kotlin
+compiler. A deprecated API call, an unchecked generic cast, an unused parameter the
+compiler itself flags, or a missing `@OptIn` only ever surfaces in `./gradlew build`
+output — and nothing in the Ktlint/Detekt pipeline above sees it. Android Studio shows
+these live while editing, which is why they're easy to assume are "covered" when
+they're actually invisible to CI unless wired separately.
+
+### Turn warnings into build failures — opt-in, not a day-one default
+
+```kotlin
+// build-logic convention plugin, or root build.gradle.kts
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+    compilerOptions {
+        allWarningsAsErrors.set(true)
+    }
+}
+```
+
+Gate this behind a real decision, not a blanket default: turning it on mid-project, on a
+codebase that already has accumulated warnings, is a big-bang change that blocks every
+build until every existing warning is fixed. Enable it once a project is warning-clean,
+or scope it to new/actively-developed modules first via `subprojects` filtering rather
+than the whole build at once.
+
+### Surface warnings in CI even without the hard gate
+
+If `allWarningsAsErrors` isn't turned on yet, still make warnings visible instead of
+silently swallowed in build logs nobody reads — `kotlin-multiplatform-ci-github-actions`'s
+Step 3 wires `./gradlew build` to run with `--warning-mode all` and greps compiler
+warning lines into the job summary, so warnings show up in the PR check even before
+they're a hard gate.
+
+---
+
 ## Naming Conventions (Android Kotlin Style Guide)
 
 Ktlint/Detekt above enforce *formatting* mechanically. They do not enforce naming
@@ -923,6 +959,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-08-02 | Added "Compiler Warnings" — a user reported seeing real Kotlin compiler warnings in Android Studio (deprecated calls, unchecked casts) that neither Ktlint nor Detekt catch, since neither invokes the actual compiler. Documented `allWarningsAsErrors` as an opt-in gate (never a day-one default — a big-bang change on a codebase with existing warnings) and cross-referenced `ci-github-actions`'s new CI step that surfaces warnings in the PR check before that gate is ready. |
 | 2026-08-02 | Documented Detekt's own `ForbiddenComment` rule (Style ruleset, active by default since 1.0.0, flags `TODO:`/`FIXME:`/`STOPSHIP:`) — already effectively running via `buildUponDefaultConfig = true`, but never stated anywhere, so no one knew it was there. Added "Patch-up fix instead of root-cause fix" — empty/log-only catch blocks and unjustified `@Suppress`, both non-blocking hints backed by `kotlin-multiplatform-audit`'s two new detectors, with `TODO`/`FIXME` adjacency woven in as corroborating evidence rather than a separate check. |
 | 2026-08-02 | Added "Android Context/Activity leak in a singleton" — the classic Android memory leak, uncovered until now. Applies to both App and Library projects (a KMP library's Android `actual` code is exactly as leak-prone). Backed by `kotlin-multiplatform-audit`'s new `_detect_context_leak_in_singleton`. |
 | 2026-08-01 | Enabled Detekt's own Performance ruleset (verified against detekt.dev — 8 real rules: `ArrayPrimitive`, `CouldBeSequence`, `ForEachOnRange`, `SpreadOperator`, `UnnecessaryInitOnArray`, `UnnecessaryPartOfBinaryExpression`, `UnnecessaryTemporaryInstantiation`, `UnnecessaryTypeCasting`), previously off entirely. Added "Performance killers" (object constructed inside a loop, the one real gap Detekt's ruleset doesn't cover) and "Public mutable collection exposure" (an encapsulation concern distinct from the existing Compose-only unstable-collection-param check). Backed by `kotlin-multiplatform-audit`'s two new detectors. |

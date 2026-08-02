@@ -319,6 +319,19 @@ subprojects {
 }
 ```
 
+### Surface compiler warnings in the PR check
+
+Ktlint/Detekt never see real compiler warnings (deprecated calls, unchecked casts) —
+those only exist in `./gradlew build` output and are otherwise buried in logs no one
+reads. Capture and surface them, non-blocking, until `allWarningsAsErrors` (see
+`code-quality`'s Compiler Warnings section) is ready to gate on it:
+
+```yaml
+- run: ./gradlew build --warning-mode all 2>&1 | tee build-output.log
+- if: always()
+  run: grep "^w: " build-output.log >> "$GITHUB_STEP_SUMMARY" || true
+```
+
 ---
 
 ## Step 4: Required GitHub secrets
@@ -472,4 +485,5 @@ Keep the YAML snippet to one job. Map to the user's actual module names and sign
 
 | Date | Change |
 |---|---|
+| 2026-08-02 | Added a CI step surfacing real Kotlin compiler warnings in the PR job summary — Ktlint/Detekt never invoke the actual compiler, so deprecated-API/unchecked-cast warnings were only ever visible live in Android Studio, invisible to CI. Non-blocking, cross-referenced to `code-quality`'s new `allWarningsAsErrors` gate for once a project is ready to enforce it. |
 | 2026-07-14 | Real gap closed: no guidance existed for recognizing/reducing free-tier CI minutes exhaustion (macOS runners bill at 10× — `test-ios` alone can exhaust the 2,000 min/month private-repo quota), and a "CI is red on every push" report traced to exactly this. Added a section on recognizing the real signal (a billing banner on the run page, not the job's own logs) and reducing it (`paths-ignore`, moving iOS off the required gate). Added `scripts/install-act.sh` and `scripts/run-ci-locally.sh` — dry-run the real workflow YAML locally via `act`/Docker before pushing, zero GitHub minutes spent. Verified act's real, documented limitation: no macOS Docker image exists, so `test-ios` can't be faithfully emulated — the script detects that job from the real workflow file and warns, rather than silently failing; documented the real fix (`if: ${{ !env.ACT }}`) rather than inventing a `--skip-job` flag act doesn't have (caught and fixed dead code in my own first draft that tried to build one). |
