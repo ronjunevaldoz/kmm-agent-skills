@@ -6,7 +6,7 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
-| [`kmp-design-system-extended`](../../skills/kmp-design-system-extended/) | 3101 | 2026-07-08 | 🟡 2 known debt |
+| [`kmp-design-system-extended`](../../skills/kmp-design-system-extended/) | 3101 | 2026-07-08 | 🟡 1 known debt |
 | [`kmp-design-system`](../../skills/kmp-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |

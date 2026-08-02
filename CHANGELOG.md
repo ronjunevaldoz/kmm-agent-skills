@@ -1,5 +1,17 @@
 # Changelog
 
+All notable changes to kmp-agent-skills are documented here.
+
+## [v2.0.0] — 2026-08-02
+
+### Other
+
+- refactor: rename kmm-agent-skills to kmp-agent-skills, kotlin-multiplatform-* skills to kmp-*
+
+---
+
+# Changelog
+
 All notable changes to kmm-agent-skills are documented here.
 
 ## [v1.120.0] — 2026-08-02
