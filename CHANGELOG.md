@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.116.0] — 2026-08-02
+
+### Added
+
+- feat(audit): add patch-not-root-cause hints, document Detekt's ForbiddenComment
+
+---
+
 ## [v1.115.0] — 2026-08-02
 
 ### Added
