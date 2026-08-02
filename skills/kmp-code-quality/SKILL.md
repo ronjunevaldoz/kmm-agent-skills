@@ -122,6 +122,50 @@ ktlint_standard_no-wildcard-imports = disabled
 ktlint_standard_import-ordering = disabled
 ```
 
+### Argument list wrapping — inline vs one-per-line
+
+Per [kotlinlang.org's coding conventions](https://kotlinlang.org/docs/coding-conventions.html):
+keep a call on one line if it fits; once it doesn't (or the list is long), break after the
+opening parenthesis and put every argument on its own line, indented 4 spaces — not a
+partial wrap:
+
+```kotlin
+// Fits — inline
+shift(25, 20)
+
+// Doesn't fit / long list — every argument on its own line
+drawSquare(
+    x = 10,
+    y = 10,
+    width = 100,
+    height = 100,
+    fill = true,
+)
+```
+
+Ktlint's `standard:argument-list-wrapping` rule enforces this mechanically (all arguments
+on one line, or all on separate lines — never a mix), but it **only runs when
+`ktlint_code_style = ktlint_official`** is set in `.editorconfig` (or the rule is enabled
+explicitly) — this repo's own baseline `.editorconfig` above deliberately doesn't set
+`ktlint_code_style`, since switching to `ktlint_official` changes several other rule
+defaults too, not just this one. Add `ktlint_code_style = ktlint_official` only if you've
+reviewed what else that style turns on; otherwise enable just this rule directly:
+`ktlint_standard_argument-list-wrapping = enabled`. It has also had reliability issues in
+some ktlint 1.x releases (see [ktlint#2368](https://github.com/pinterest/ktlint/issues/2368))
+— verify it actually reformats a deliberately-long call before relying on it in CI.
+
+### Android Studio's formatter is not ktlint
+
+Android Studio's built-in Kotlin code-style scheme implements the same
+[Android Kotlin Style Guide](https://developer.android.com/kotlin/style-guide) already
+referenced above under Naming Conventions — but **Android Studio's IDE formatter and
+ktlint are two separate tools with separate configuration**, and setting one does not
+configure the other. A project can have Android Studio's "Reformat Code" produce output
+that ktlint's `ktlintCheck` then fails, or vice versa, if only one side is configured.
+Set both explicitly rather than assuming IDE-formatted code will pass CI:
+- Android Studio: **Preferences > Editor > Code Style > Kotlin**, set the scheme
+- ktlint: `.editorconfig`'s `ktlint_code_style` and `ktlint_standard_*` keys, as above
+
 ### Usage
 
 ```bash
@@ -207,6 +251,10 @@ complexity:
   TooManyFunctions:
     active: true
     thresholdInClasses: 15
+  NamedArguments:
+    active: true
+    allowedArguments: 3
+    ignoreArgumentsMatchingNames: true
 
 coupling:
   CouplingBetweenObjects:
@@ -283,6 +331,34 @@ heuristic), so they catch it precisely instead of approximately:
 `kmp-audit`'s `_detect_god_class` is the non-Detekt backstop for a
 project that hasn't wired this config yet — see that skill's own docs for its (looser,
 heuristic) thresholds.
+
+### NamedArguments — requiring names, without requiring redundant ones
+
+`NamedArguments` (complexity ruleset, `active: false` by default — verified against
+Detekt's own source) requires named arguments once a call passes `allowedArguments`
+(3 here, matching Detekt's own default). Without `ignoreArgumentsMatchingNames: true`,
+this forces exactly the noise the rule is supposed to prevent:
+
+```kotlin
+// allowedArguments: 3, ignoreArgumentsMatchingNames: false (Detekt's default)
+User(id = id, name = name, age = age, email = email)   // passes, but "id = id" adds nothing
+
+// ignoreArgumentsMatchingNames: true (this repo's recommended config)
+User(id, name, age, email)   // passes too — every value's identifier already IS its param name
+```
+
+The rule still requires a name wherever it would carry real information — i.e. the
+argument's value expression differs from the parameter name:
+
+```kotlin
+val userId = "u1"
+User(userId, name, age, email)          // flagged — userId != id, naming isn't redundant
+User(id = userId, name = name, age = age, email = email)   // fix
+```
+
+Real, filed issue for this exact behavior:
+[detekt#4591](https://github.com/detekt/detekt/issues/4591), resolved via
+[#4613](https://github.com/detekt/detekt/pull/4613).
 
 ### Long Parameter List, and its worse variant: a regressed Parameter Object
 
@@ -963,6 +1039,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-08-02 | Added Detekt's `NamedArguments` rule (complexity ruleset) with `ignoreArgumentsMatchingNames: true` — a user asked whether `Foo(id = id, name = name)` (redundant naming, value already equals param name) is checked; verified the real rule and its exact opt-out flag via a filed Detekt issue (detekt#4591 -> #4613). Also added argument-list wrapping guidance (kotlinlang.org's inline-vs-one-per-line convention, ktlint's `standard:argument-list-wrapping` and its `ktlint_code_style` gating caveat) and a note that Android Studio's IDE formatter and ktlint are separate tools with separate config — setting one does not configure the other. |
 | 2026-08-02 | Added "Compiler Warnings" — a user reported seeing real Kotlin compiler warnings in Android Studio (deprecated calls, unchecked casts) that neither Ktlint nor Detekt catch, since neither invokes the actual compiler. Documented `allWarningsAsErrors` as an opt-in gate (never a day-one default — a big-bang change on a codebase with existing warnings) and cross-referenced `ci-github-actions`'s new CI step that surfaces warnings in the PR check before that gate is ready. |
 | 2026-08-02 | Documented Detekt's own `ForbiddenComment` rule (Style ruleset, active by default since 1.0.0, flags `TODO:`/`FIXME:`/`STOPSHIP:`) — already effectively running via `buildUponDefaultConfig = true`, but never stated anywhere, so no one knew it was there. Added "Patch-up fix instead of root-cause fix" — empty/log-only catch blocks and unjustified `@Suppress`, both non-blocking hints backed by `kmp-audit`'s two new detectors, with `TODO`/`FIXME` adjacency woven in as corroborating evidence rather than a separate check. |
 | 2026-08-02 | Added "Android Context/Activity leak in a singleton" — the classic Android memory leak, uncovered until now. Applies to both App and Library projects (a KMP library's Android `actual` code is exactly as leak-prone). Backed by `kmp-audit`'s new `_detect_context_leak_in_singleton`. |
