@@ -230,6 +230,48 @@ class HookScriptTests(unittest.TestCase):
             )
         self.assertEqual(result.returncode, 0)
 
+    # --- block-edit-vendored-skills.sh ---
+
+    def test_blocks_edit_under_each_mirror_path(self) -> None:
+        mirror_paths = [
+            ".claude/skills/kmp-mvi/SKILL.md",
+            ".agents/skills/kmp-mvi/SKILL.md",
+            ".codex/skills/kmp-mvi/SKILL.md",
+            ".gemini/skills/kmp-mvi/SKILL.md",
+            "/Users/dev/project/.claude/skills/kmp-mvi/SKILL.md",
+        ]
+        for path in mirror_paths:
+            with self.subTest(path=path):
+                result = subprocess.run(
+                    ["bash", str(HOOKS_DIR / "block-edit-vendored-skills.sh"), path],
+                    capture_output=True,
+                )
+                self.assertEqual(result.returncode, 2, (
+                    f"should block edits under {path}. stderr: {result.stderr.decode()}"
+                ))
+                self.assertIn(b"deployed skill mirror", result.stderr)
+
+    def test_allows_edit_under_source_skills_dir(self) -> None:
+        result = subprocess.run(
+            ["bash", str(HOOKS_DIR / "block-edit-vendored-skills.sh"), "skills/kmp-mvi/SKILL.md"],
+            capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0)
+
+    def test_allows_edit_of_unrelated_file(self) -> None:
+        result = subprocess.run(
+            ["bash", str(HOOKS_DIR / "block-edit-vendored-skills.sh"), "src/commonMain/kotlin/Foo.kt"],
+            capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0)
+
+    def test_allows_when_no_path_given(self) -> None:
+        result = subprocess.run(
+            ["bash", str(HOOKS_DIR / "block-edit-vendored-skills.sh")],
+            capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

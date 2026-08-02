@@ -19,6 +19,7 @@ There are two independent integration points: **git hooks** (for your local repo
 | `scripts/check-installed-skills-version.sh` | Compares a *deployed* `skills/` copy's version marker against the latest GitHub Release. Non-blocking when wrapped per Option E. | Every Claude Code session start (any consumer project with a deployed copy) |
 | `gitleaks` (via `pre-commit` framework) | Scans staged changes for API keys/passwords/tokens before they're committed. Platform-independent — scans source text, not compiled output. Blocks the commit if a secret is found. | `git commit`, wired per Option F |
 | `hooks/block-computer-use-for-compose.sh` | Blocks `mcp__computer-use__*` tool calls in a Compose Multiplatform project — forces the agent onto Roborazzi/`runComposeUiTest` instead of manually driving the app. | Before any `mcp__computer-use__*` call, wired per Option G |
+| `hooks/block-edit-vendored-skills.sh` | Blocks `Edit`/`Write` calls targeting a deployed skill mirror (`.claude/skills/`, `.agents/skills/`, `.codex/skills/`, `.gemini/skills/`) instead of the real source. | Before any `Edit`/`Write`, wired per Option H |
 
 ---
 
@@ -282,6 +283,58 @@ To remove: delete the `PreToolUse` entry from `settings.json`.
 
 ---
 
+## Option H — Block edits to vendored skill mirrors (Claude Code PreToolUse hook)
+
+Stops an agent from directly editing a *deployed* skill copy — `.claude/skills/`,
+`.agents/skills/`, `.codex/skills/`, or `.gemini/skills/` — instead of the real source.
+Those directories are sync targets, not sources: a deployed `kmp-*` skill is a mirror of
+this repo's own `skills/<name>/SKILL.md`, and a deployed project-owned custom skill is a
+mirror of the consumer project's own root `skills/<name>/SKILL.md`. An edit made directly
+in the deployed copy is silently overwritten by the next sync, or — worse — diverges
+unnoticed until `audit_project.py`'s agent-setup drift check catches it after the fact.
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<path-to-skills-repo>/hooks/block-edit-vendored-skills.sh \"$CLAUDE_TOOL_INPUT_FILE_PATH\""
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Effect:** any `Edit`/`Write` targeting a path under `.claude/skills/`, `.agents/skills/`,
+`.codex/skills/`, or `.gemini/skills/` is blocked, with a message pointing at the real
+source — upstream `kmp-agent-skills` for a bundled skill, or the project's own root
+`skills/<name>/SKILL.md` for a project-owned custom skill. Every other edit is unaffected.
+
+If you already have a `PreToolUse` hook on `Edit|Write` (e.g. Option B), add this as an
+additional entry in the same `hooks` array rather than a second `PreToolUse` key — Claude
+Code runs every matching hook, not just the first.
+
+Test it:
+```bash
+# Should print "Blocked: ..." and exit 2
+bash <path-to-skills-repo>/hooks/block-edit-vendored-skills.sh .claude/skills/kmp-mvi/SKILL.md
+echo $?
+
+# Should exit 0 — this is the real source, not a mirror
+bash <path-to-skills-repo>/hooks/block-edit-vendored-skills.sh skills/kmp-mvi/SKILL.md
+echo $?
+```
+
+To remove: delete the `PreToolUse` entry from `settings.json`.
+
+---
+
 ## Recommended setup for most projects
 
 ```
@@ -292,6 +345,7 @@ Option D  (SessionStart update check) — kmp-agent-skills clone/fork only, alre
 Option E  (SessionStart installed-version check) — any consumer project with a deployed skills/ copy
 Option F  (secrets scan) — always set up; real security risk, zero cost once wired
 Option G  (block computer-use for Compose) — set up for any Compose Multiplatform project
+Option H  (block edits to vendored skills) — always set up; prevents silent drift
 ```
 
 ---
