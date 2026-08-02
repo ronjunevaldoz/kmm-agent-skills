@@ -17,6 +17,7 @@ There are two independent integration points: **git hooks** (for your local repo
 | `hooks/check-skill-freshness.sh` | Warns when a skill's `last-updated` is >90 days old. Non-blocking. | Manually or scheduled CI |
 | `hooks/session-start-check-updates.sh` | Wraps `scripts/check_updates.py` — warns the agent up front if this repo's skills are behind `origin/main`. Non-blocking, always exits 0. | Every Claude Code session start (kmm-agent-skills clone only) |
 | `scripts/check-installed-skills-version.sh` | Compares a *deployed* `skills/` copy's version marker against the latest GitHub Release. Non-blocking when wrapped per Option E. | Every Claude Code session start (any consumer project with a deployed copy) |
+| `gitleaks` (via `pre-commit` framework) | Scans staged changes for API keys/passwords/tokens before they're committed. Platform-independent — scans source text, not compiled output. Blocks the commit if a secret is found. | `git commit`, wired per Option F |
 
 ---
 
@@ -174,6 +175,62 @@ degrades safely offline (exit 2, printed, session continues).
 
 ---
 
+## Option F — Secrets scan before commit (gitleaks, all platforms)
+
+Catches an API key, password, or token about to be committed — before it ever reaches
+git history. Platform-independent by nature: it scans git source content (regex over
+text), not compiled output, so one scan covers Android (`google-services.json`),
+iOS (`Info.plist`, provisioning profiles), Desktop, and Web/Wasm equally — nothing
+platform-specific to configure.
+
+Real tool, verified against its own docs: [gitleaks](https://github.com/gitleaks/gitleaks)
+(`brew install gitleaks`), exits non-zero when a secret is found (gates the commit), and
+supports a `.gitleaks.toml` allowlist for known false positives.
+
+**Wired via the `pre-commit` framework** (a separate real tool — `pip install
+pre-commit`), not a raw script symlink like Option A. Reason: gitleaks' own CLI flags
+have changed across versions (its old `--staged` flag was deprecated), but its
+`pre-commit` framework integration is stable and documented, and the framework itself
+correctly scopes the scan to staged changes without needing to track gitleaks' CLI
+directly. This also means Option A's raw `.git/hooks/pre-commit` symlink and this option
+**cannot both own the hook file** — pick one approach per project, or fold your own
+`pre-commit-audit.sh` into the same `.pre-commit-config.yaml` as a `local` hook so both
+run together:
+
+```yaml
+# .pre-commit-config.yaml — project root
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.2
+    hooks:
+      - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: kmm-architecture-audit
+        name: KMM architecture audit
+        entry: <path-to-skills-repo>/hooks/pre-commit-audit.sh
+        language: script
+        pass_filenames: false
+```
+
+```bash
+pip install pre-commit
+pre-commit install   # wires .git/hooks/pre-commit to run everything in the config above
+```
+
+Test it:
+```bash
+echo 'API_KEY = "sk-test-1234567890"' >> gradle.properties
+git add gradle.properties
+git commit -m "test secrets scan"   # should be blocked by gitleaks
+git reset HEAD gradle.properties && git checkout gradle.properties
+```
+
+To remove: `pre-commit uninstall`.
+
+---
+
 ## Recommended setup for most projects
 
 ```
@@ -182,6 +239,7 @@ Option B  (PostToolUse) — set up if you use Claude Code regularly for KMP work
 Option C  (CI freshness) — set up once the skills collection stabilises (v2.0+)
 Option D  (SessionStart update check) — kmm-agent-skills clone/fork only, already wired here
 Option E  (SessionStart installed-version check) — any consumer project with a deployed skills/ copy
+Option F  (secrets scan) — always set up; real security risk, zero cost once wired
 ```
 
 ---
