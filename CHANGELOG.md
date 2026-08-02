@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.118.0] — 2026-08-02
+
+### Added
+
+- feat(code-quality): add compiler-warnings coverage
+
+---
+
 ## [v1.117.0] — 2026-08-02
 
 ### Added

@@ -10,8 +10,8 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-design-system`](../../skills/kotlin-multiplatform-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
 | [`kotlin-multiplatform-mvi`](../../skills/kotlin-multiplatform-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kotlin-multiplatform-feature-scaffold`](../../skills/kotlin-multiplatform-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
+| [`kotlin-multiplatform-code-quality`](../../skills/kotlin-multiplatform-code-quality/) | 979 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-library-publishing`](../../skills/kotlin-multiplatform-library-publishing/) | 972 | 2026-07-31 | 🟡 1 known debt |
-| [`kotlin-multiplatform-code-quality`](../../skills/kotlin-multiplatform-code-quality/) | 942 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-expert`](../../skills/kotlin-multiplatform-expert/) | 910 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-navigation`](../../skills/kotlin-multiplatform-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
 | [`kotlin-multiplatform-legal-docs`](../../skills/kotlin-multiplatform-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
@@ -29,7 +29,7 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-expect-actual`](../../skills/kotlin-multiplatform-expect-actual/) | 507 | 2026-07-20 | 🟡 1 known debt |
 | [`kotlin-multiplatform-shared-resources`](../../skills/kotlin-multiplatform-shared-resources/) | 504 | 2026-07-08 | 🟡 1 known debt |
 | [`kotlin-multiplatform-in-app-purchases`](../../skills/kotlin-multiplatform-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
-| [`kotlin-multiplatform-ci-github-actions`](../../skills/kotlin-multiplatform-ci-github-actions/) | 475 | 2026-07-14 | ✅ |
+| [`kotlin-multiplatform-ci-github-actions`](../../skills/kotlin-multiplatform-ci-github-actions/) | 489 | 2026-07-14 | ✅ |
 | [`kotlin-multiplatform-jni-pro`](../../skills/kotlin-multiplatform-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-desktop-app`](../../skills/kotlin-multiplatform-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kotlin-multiplatform-dependency-injection`](../../skills/kotlin-multiplatform-dependency-injection/) | 453 | 2026-07-20 | ✅ |
