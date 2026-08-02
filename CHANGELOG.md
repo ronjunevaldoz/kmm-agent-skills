@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.118.1] — 2026-08-02
+
+### Fixed
+
+- fix(audit): resolve findings from deep technical audit (H-1/H-2, M-1..M-5, L-1/L-2)
+
+---
+
 ## [v1.118.0] — 2026-08-02
 
 ### Added

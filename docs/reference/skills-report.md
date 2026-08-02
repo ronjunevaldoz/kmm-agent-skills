@@ -10,7 +10,7 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-design-system`](../../skills/kotlin-multiplatform-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
 | [`kotlin-multiplatform-mvi`](../../skills/kotlin-multiplatform-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kotlin-multiplatform-feature-scaffold`](../../skills/kotlin-multiplatform-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
-| [`kotlin-multiplatform-code-quality`](../../skills/kotlin-multiplatform-code-quality/) | 979 | 2026-07-31 | 🟡 1 known debt |
+| [`kotlin-multiplatform-code-quality`](../../skills/kotlin-multiplatform-code-quality/) | 983 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-library-publishing`](../../skills/kotlin-multiplatform-library-publishing/) | 972 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-expert`](../../skills/kotlin-multiplatform-expert/) | 910 | 2026-07-31 | 🟡 1 known debt |
 | [`kotlin-multiplatform-navigation`](../../skills/kotlin-multiplatform-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
@@ -36,7 +36,7 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-adaptive-layout`](../../skills/kotlin-multiplatform-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
 | [`kotlin-multiplatform-flavor-environment`](../../skills/kotlin-multiplatform-flavor-environment/) | 437 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-paging`](../../skills/kotlin-multiplatform-paging/) | 432 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-audit`](../../skills/kotlin-multiplatform-audit/) | 428 | 2026-07-31 | ✅ |
+| [`kotlin-multiplatform-audit`](../../skills/kotlin-multiplatform-audit/) | 430 | 2026-07-31 | ✅ |
 | [`kotlin-multiplatform-presenter-module`](../../skills/kotlin-multiplatform-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kotlin-multiplatform-datastore`](../../skills/kotlin-multiplatform-datastore/) | 413 | 2026-06-18 | ✅ |
 | [`kotlin-multiplatform-mongodb-database`](../../skills/kotlin-multiplatform-mongodb-database/) | 409 | 2026-06-21 | ✅ |
@@ -45,7 +45,7 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 | [`kotlin-multiplatform-permissions`](../../skills/kotlin-multiplatform-permissions/) | 386 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-workmanager`](../../skills/kotlin-multiplatform-workmanager/) | 382 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-biometric-auth`](../../skills/kotlin-multiplatform-biometric-auth/) | 373 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-push-notifications`](../../skills/kotlin-multiplatform-push-notifications/) | 371 | 2026-06-21 | ✅ |
+| [`kotlin-multiplatform-push-notifications`](../../skills/kotlin-multiplatform-push-notifications/) | 372 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-xcframework-spm`](../../skills/kotlin-multiplatform-xcframework-spm/) | 364 | 2026-06-06 | ✅ |
 | [`kotlin-multiplatform-form-validation`](../../skills/kotlin-multiplatform-form-validation/) | 358 | 2026-06-21 | ✅ |
 | [`kotlin-multiplatform-project-docs-maintainer`](../../skills/kotlin-multiplatform-project-docs-maintainer/) | 358 | 2026-07-11 | ✅ |

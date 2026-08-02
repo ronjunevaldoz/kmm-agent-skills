@@ -1,5 +1,5 @@
 {
-  "version": "1.118.0",
+  "version": "1.118.1",
   "skills": [
     {
       "name": "kotlin-multiplatform-accessibility",
@@ -115,7 +115,6 @@
         "uniform layout",
         "layout patterns",
         "FlexBox",
-        "flexbox",
         "CSS flexbox",
         "flex container",
         "flex item",
@@ -1088,7 +1087,6 @@
         "component design",
         "redesign page",
         "button",
-        "dialog",
         "component",
         "use component",
         "add button",
@@ -1460,7 +1458,6 @@
         "validate",
         "validation",
         "form field",
-        "input validation",
         "form handling",
         "form state",
         "error message",
@@ -2668,7 +2665,8 @@
         "remote notification",
         "KMP push",
         "NotificationPayload",
-        "token refresh"
+        "push token refresh",
+        "FCM token refresh"
       ],
       "scripts": []
     },
