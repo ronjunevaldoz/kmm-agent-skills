@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.1.0] — 2026-08-02
+
+### Added
+
+- feat(hooks): block edits to vendored skill mirrors
+
+---
+
 ## [v2.0.0] — 2026-08-02
 
 ### Other
