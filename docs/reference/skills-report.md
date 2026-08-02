@@ -1,6 +1,6 @@
 # Skills Report
 
-Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
+Generated 2026-08-03 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
 **67 skills** — 45 clean, 22 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
@@ -19,7 +19,7 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-network-layer`](../../skills/kmp-network-layer/) | 690 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 672 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 648 | 2026-06-26 | 🟡 1 known debt |
-| [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 632 | 2026-07-13 | 🟡 1 known debt |
+| [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 633 | 2026-07-13 | 🟡 1 known debt |
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 628 | 2026-07-09 | 🟡 1 known debt |
 | [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 618 | 2026-07-20 | 🟡 1 known debt |
 | [`kmp-release`](../../skills/kmp-release/) | 590 | 2026-07-04 | 🟡 1 known debt |

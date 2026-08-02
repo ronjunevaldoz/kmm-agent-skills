@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.5.0] — 2026-08-03
+
+### Added
+
+- feat(audit): add _detect_repository_in_composable
+
+---
+
 ## [v2.4.2] — 2026-08-02
 
 ### Fixed
