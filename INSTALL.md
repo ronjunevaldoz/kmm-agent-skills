@@ -1,6 +1,6 @@
 # Installation Guide
 
-This guide covers how to install and use the KMM agent skills with every major AI coding assistant.
+This guide covers how to install and use the KMP agent skills with every major AI coding assistant.
 
 ## Quickest install — `npx skills add`
 
@@ -9,16 +9,16 @@ agent and copies the right files to the right place:
 
 ```bash
 # Install all skills (auto-detects Claude Code, Cursor, Codex, Copilot, etc.)
-npx skills add ronjunevaldoz/kmm-agent-skills
+npx skills add ronjunevaldoz/kmp-agent-skills
 
 # Install specific skills only
-npx skills add ronjunevaldoz/kmm-agent-skills --skill kotlin-multiplatform-feature-scaffold
+npx skills add ronjunevaldoz/kmp-agent-skills --skill kmp-feature-scaffold
 
 # Install to a specific agent
-npx skills add ronjunevaldoz/kmm-agent-skills --agent claude-code
+npx skills add ronjunevaldoz/kmp-agent-skills --agent claude-code
 
 # List available skills without installing
-npx skills add ronjunevaldoz/kmm-agent-skills --list
+npx skills add ronjunevaldoz/kmp-agent-skills --list
 ```
 
 The CLI handles every agent's destination directory automatically. Use manual steps below
@@ -61,19 +61,19 @@ any other agentskills.io-compliant client (Cursor, Amp, Goose, and others) added
 
 ```bash
 # Clone this repo alongside your project
-git clone https://github.com/ronjunevaldoz/kmm-agent-skills
+git clone https://github.com/ronjunevaldoz/kmp-agent-skills
 
 # Copy all skills into your project — both the cross-client target and Claude's mirror
-cp -r kmm-agent-skills/skills/* your-kmp-project/.agents/skills/
-cp -r kmm-agent-skills/skills/* your-kmp-project/.claude/skills/
+cp -r kmp-agent-skills/skills/* your-kmp-project/.agents/skills/
+cp -r kmp-agent-skills/skills/* your-kmp-project/.claude/skills/
 ```
 
 ### Install a single skill
 
 ```bash
-cp -r kmm-agent-skills/skills/kotlin-multiplatform-feature-scaffold \
+cp -r kmp-agent-skills/skills/kmp-feature-scaffold \
       your-kmp-project/.agents/skills/
-cp -r kmm-agent-skills/skills/kotlin-multiplatform-feature-scaffold \
+cp -r kmp-agent-skills/skills/kmp-feature-scaffold \
       your-kmp-project/.claude/skills/
 ```
 
@@ -83,9 +83,9 @@ cp -r kmm-agent-skills/skills/kotlin-multiplatform-feature-scaffold \
 your-kmp-project/
 ├── .agents/
 │   └── skills/                  # cross-client target — primary
-│       ├── kotlin-multiplatform-feature-scaffold/
+│       ├── kmp-feature-scaffold/
 │       │   └── SKILL.md
-│       ├── kotlin-multiplatform-clean-architecture/
+│       ├── kmp-clean-architecture/
 │       │   └── SKILL.md
 │       └── ...
 └── .claude/
@@ -98,7 +98,7 @@ your-kmp-project/
 Start any session with the expert skill to get routed to the right skill:
 
 ```
-@kotlin-multiplatform-expert what should I do next?
+@kmp-expert what should I do next?
 ```
 
 Or trigger a skill directly via keyword:
@@ -116,8 +116,8 @@ Claude Code matches the trigger keywords in each `SKILL.md` and loads the releva
 If you use the Claude Code desktop or web app, you can invoke skills with `/use`:
 
 ```
-/use kotlin-multiplatform-feature-scaffold
-/use kotlin-multiplatform-presenter-module
+/use kmp-feature-scaffold
+/use kmp-presenter-module
 ```
 
 ### Installing slash commands
@@ -133,11 +133,11 @@ If you use the Claude Code desktop or web app, you can invoke skills with `/use`
 
 ```bash
 # List available commands
-ls kmm-agent-skills/commands/
+ls kmp-agent-skills/commands/
 
 # Read one before approving
-cat kmm-agent-skills/commands/kmm-new-skill.md
-cat kmm-agent-skills/commands/kmm-run-audit.md
+cat kmp-agent-skills/commands/kmp-new-skill.md
+cat kmp-agent-skills/commands/kmp-run-audit.md
 ```
 
 **Step 2 — Install only the commands you have reviewed.**
@@ -146,15 +146,15 @@ cat kmm-agent-skills/commands/kmm-run-audit.md
 mkdir -p your-kmp-project/.claude/commands/
 
 # Install individually — one at a time, after reading each
-cp kmm-agent-skills/commands/kmm-new-skill.md your-kmp-project/.claude/commands/
-cp kmm-agent-skills/commands/kmm-run-audit.md      your-kmp-project/.claude/commands/
+cp kmp-agent-skills/commands/kmp-new-skill.md your-kmp-project/.claude/commands/
+cp kmp-agent-skills/commands/kmp-run-audit.md      your-kmp-project/.claude/commands/
 ```
 
 **Or use the guided installer** (prompts you per command):
 
 ```bash
-bash kmm-agent-skills/scripts/update-consumer-skills.sh \
-  --source kmm-agent-skills \
+bash kmp-agent-skills/scripts/update-consumer-skills.sh \
+  --source kmp-agent-skills \
   --agent-dir your-kmp-project/.claude/skills \
   --install-commands
 ```
@@ -169,37 +169,37 @@ copying it. You can review the source file in another terminal before answering.
 
 | Command | What it does |
 |---|---|
-| `/kmm-new-project <description>` | Scaffold a full KMP project from natural language |
-| `/kmm-setup-agents [path]` | Initialize `.claude/` agent setup in an existing KMP project |
-| `/kmm-implement-feature <name>` | Plan → Implement → Validate → Review a new feature |
-| `/kmm-execute-ticket <id>` | Implement a GitHub issue end-to-end |
-| `/kmm-run-audit [path]` | Run architecture audit with per-finding remediation |
-| `/kmm-verify [path]` | Full validation pipeline: tests, audit, screenshots |
-| `/kmm-review-changes` | Review git diff against 6-layer rules |
-| `/kmm-fix-design [path]` | Scan and fix design system violations |
-| `/kmm-update-design-system [path]` | Pull latest design system components |
-| `/kmm-record-design-baselines` | Record Roborazzi golden PNGs |
-| `/kmm-audit-screenshots [path]` | Vision audit of Roborazzi goldens |
-| `/kmm-audit-design-visual [path]` | Cross-screen visual consistency check |
-| `/kmm-update-skills` | Pull latest skills and re-deploy |
-| `/kmm-check-updates` | Check whether a newer version is available |
-| `/kmm-report-skill-issue` | File a structured skill bug report |
+| `/kmp-new-project <description>` | Scaffold a full KMP project from natural language |
+| `/kmp-setup-agents [path]` | Initialize `.claude/` agent setup in an existing KMP project |
+| `/kmp-implement-feature <name>` | Plan → Implement → Validate → Review a new feature |
+| `/kmp-execute-ticket <id>` | Implement a GitHub issue end-to-end |
+| `/kmp-run-audit [path]` | Run architecture audit with per-finding remediation |
+| `/kmp-verify [path]` | Full validation pipeline: tests, audit, screenshots |
+| `/kmp-review-changes` | Review git diff against 6-layer rules |
+| `/kmp-fix-design [path]` | Scan and fix design system violations |
+| `/kmp-update-design-system [path]` | Pull latest design system components |
+| `/kmp-record-design-baselines` | Record Roborazzi golden PNGs |
+| `/kmp-audit-screenshots [path]` | Vision audit of Roborazzi goldens |
+| `/kmp-audit-design-visual [path]` | Cross-screen visual consistency check |
+| `/kmp-update-skills` | Pull latest skills and re-deploy |
+| `/kmp-check-updates` | Check whether a newer version is available |
+| `/kmp-report-skill-issue` | File a structured skill bug report |
 
 **Or use the guided installer** to set up the full `.claude/` in one step:
 
 ```bash
 # New project — scaffolds code + generates .claude/ at the end
-/kmm-new-project "build a todo app with offline sync"
+/kmp-new-project "build a todo app with offline sync"
 
 # Existing project — generates .claude/AGENTS.md, installs commands, deploys skills
-/kmm-setup-agents .
+/kmp-setup-agents .
 ```
 
 Or run the shell script manually with the `--setup-agents` flag:
 
 ```bash
-bash kmm-agent-skills/scripts/update-consumer-skills.sh \
-  --source kmm-agent-skills \
+bash kmp-agent-skills/scripts/update-consumer-skills.sh \
+  --source kmp-agent-skills \
   --agent-dir your-kmp-project/.claude/skills \
   --install-commands \
   --setup-agents
@@ -211,7 +211,7 @@ If you use Claude, Codex, or Gemini on this Mac and want all three to read the s
 released skill set, run:
 
 ```bash
-bash kmm-agent-skills/scripts/sync-local-assistant-skills.sh
+bash kmp-agent-skills/scripts/sync-local-assistant-skills.sh
 ```
 
 This updates:
@@ -228,7 +228,7 @@ This updates:
 It does not copy slash commands.
 
 If you also want to refresh the local Claude / Codex / Gemini installs on this Mac,
-run the repo-maintenance command `/kmm-sync-local-skills` from the kmm-agent-skills repo.
+run the repo-maintenance command `/kmp-sync-local-skills` from the kmp-agent-skills repo.
 
 ---
 
@@ -240,8 +240,8 @@ Codex CLI auto-reads `AGENTS.md` from the project root and any parent directorie
 
 ```bash
 # Append the skills you want Codex to always have in context
-cat kmm-agent-skills/skills/kotlin-multiplatform-feature-scaffold/SKILL.md >> AGENTS.md
-cat kmm-agent-skills/skills/kotlin-multiplatform-clean-architecture/SKILL.md >> AGENTS.md
+cat kmp-agent-skills/skills/kmp-feature-scaffold/SKILL.md >> AGENTS.md
+cat kmp-agent-skills/skills/kmp-clean-architecture/SKILL.md >> AGENTS.md
 ```
 
 ### Option B — reference at session start
@@ -249,7 +249,7 @@ cat kmm-agent-skills/skills/kotlin-multiplatform-clean-architecture/SKILL.md >> 
 If your AGENTS.md is already large, reference skills on-demand in your prompt:
 
 ```
-Read skills/kotlin-multiplatform-presenter-module/SKILL.md then set up the presenter layer.
+Read skills/kmp-presenter-module/SKILL.md then set up the presenter layer.
 ```
 
 ### Usage
@@ -280,12 +280,12 @@ cat >> .github/copilot-instructions.md << 'EOF'
 
 ## KMP Architecture Skills
 
-This project follows the KMM agent skills architecture. Key constraints:
+This project follows the KMP agent skills architecture. Key constraints:
 
 EOF
 
 # Append the skills you want enforced globally
-cat kmm-agent-skills/skills/kotlin-multiplatform-clean-architecture/SKILL.md \
+cat kmp-agent-skills/skills/kmp-clean-architecture/SKILL.md \
     >> .github/copilot-instructions.md
 ```
 
@@ -293,9 +293,9 @@ cat kmm-agent-skills/skills/kotlin-multiplatform-clean-architecture/SKILL.md \
 
 Include these three — they shape the most decisions:
 
-- `kotlin-multiplatform-clean-architecture` — layer rules Copilot should never violate
-- `kotlin-multiplatform-presenter-module` — ViewModel conventions
-- `kotlin-multiplatform-feature-scaffold` — module naming and dependency graph
+- `kmp-clean-architecture` — layer rules Copilot should never violate
+- `kmp-presenter-module` — ViewModel conventions
+- `kmp-feature-scaffold` — module naming and dependency graph
 
 ### Usage in Copilot Chat
 
@@ -320,14 +320,14 @@ mkdir -p .cursor/rules
 
 # Convert a skill to a Cursor rule
 # The SKILL.md content becomes the rule body
-cp kmm-agent-skills/skills/kotlin-multiplatform-feature-scaffold/SKILL.md \
-   .cursor/rules/kmm-feature-scaffold.mdc
+cp kmp-agent-skills/skills/kmp-feature-scaffold/SKILL.md \
+   .cursor/rules/kmp-feature-scaffold.mdc
 
-cp kmm-agent-skills/skills/kotlin-multiplatform-clean-architecture/SKILL.md \
-   .cursor/rules/kmm-clean-architecture.mdc
+cp kmp-agent-skills/skills/kmp-clean-architecture/SKILL.md \
+   .cursor/rules/kmp-clean-architecture.mdc
 
-cp kmm-agent-skills/skills/kotlin-multiplatform-presenter-module/SKILL.md \
-   .cursor/rules/kmm-presenter-module.mdc
+cp kmp-agent-skills/skills/kmp-presenter-module/SKILL.md \
+   .cursor/rules/kmp-presenter-module.mdc
 ```
 
 ### Add Cursor frontmatter
@@ -350,8 +350,8 @@ clean-architecture rules so they are always in context.
 
 ```bash
 # Concatenate the most important skills into .cursorrules
-cat kmm-agent-skills/skills/kotlin-multiplatform-clean-architecture/SKILL.md \
-    kmm-agent-skills/skills/kotlin-multiplatform-presenter-module/SKILL.md \
+cat kmp-agent-skills/skills/kmp-clean-architecture/SKILL.md \
+    kmp-agent-skills/skills/kmp-presenter-module/SKILL.md \
     > .cursorrules
 ```
 
@@ -361,7 +361,7 @@ Reference skills in Cursor Chat with `@Rules` or by file:
 
 ```
 @Rules scaffold a new auth feature module
-@kmm-feature-scaffold add a presenter module for the dashboard feature
+@kmp-feature-scaffold add a presenter module for the dashboard feature
 ```
 
 ---
@@ -374,10 +374,10 @@ Windsurf reads `.windsurfrules` (project-level) and `~/.windsurfrules` (global) 
 
 ```bash
 # Add architecture rules to your project
-cat kmm-agent-skills/skills/kotlin-multiplatform-clean-architecture/SKILL.md \
+cat kmp-agent-skills/skills/kmp-clean-architecture/SKILL.md \
     >> .windsurfrules
 
-cat kmm-agent-skills/skills/kotlin-multiplatform-presenter-module/SKILL.md \
+cat kmp-agent-skills/skills/kmp-presenter-module/SKILL.md \
     >> .windsurfrules
 ```
 
@@ -389,7 +389,7 @@ into the chat context when you need it:
 
 ```
 Here is the Roborazzi skill:
-[paste skills/kotlin-multiplatform-roborazzi/SKILL.md]
+[paste skills/kmp-roborazzi/SKILL.md]
 
 Now add screenshot tests for the auth feature.
 ```
@@ -399,7 +399,7 @@ Now add screenshot tests for the auth feature.
 Windsurf also supports persistent Memories (set via the chat). Add a memory like:
 
 ```
-This project uses the KMM 6-layer architecture: :model/:api/:domain/:data/:presenter/:ui.
+This project uses the KMP 6-layer architecture: :model/:api/:domain/:data/:presenter/:ui.
 :presenter has no Compose dependency. :ui depends only on :presenter.
 Read .windsurfrules for the full contract.
 ```
@@ -416,19 +416,19 @@ directories, following the same hierarchical pattern as Claude Code's `CLAUDE.md
 First deploy skills to `.agents/skills/` (the cross-client target — see the "Keeping
 local assistants in sync" section, or run `update-consumer-skills.sh`). Project-root
 `skills/*/SKILL.md` is reserved for your own custom skills, never the bundled
-kmm-agent-skills collection — point `GEMINI.md` at the deployed copy instead:
+kmp-agent-skills collection — point `GEMINI.md` at the deployed copy instead:
 
 ```bash
 # Create GEMINI.md with a pointer to the deployed skills
 cat > GEMINI.md << 'EOF'
-# KMM Agent Skills
+# KMP Agent Skills
 
-This project uses the KMM agent skills collection, deployed at `.agents/skills/*/SKILL.md`.
+This project uses the KMP agent skills collection, deployed at `.agents/skills/*/SKILL.md`.
 
 Before making architecture decisions, read the relevant skill file. Start with:
-- `.agents/skills/kotlin-multiplatform-expert/SKILL.md` — routing and build order
-- `.agents/skills/kotlin-multiplatform-clean-architecture/SKILL.md` — layer contract
-- `.agents/skills/kotlin-multiplatform-feature-scaffold/SKILL.md` — module structure
+- `.agents/skills/kmp-expert/SKILL.md` — routing and build order
+- `.agents/skills/kmp-clean-architecture/SKILL.md` — layer contract
+- `.agents/skills/kmp-feature-scaffold/SKILL.md` — module structure
 
 Key architecture rules:
 - 6-layer feature model: :model / :api / :domain / :data / :presenter / :ui
@@ -443,13 +443,13 @@ Gemini CLI reads `GEMINI.md` at session start. For skill-specific work, referenc
 
 ```
 gemini
-> Read .agents/skills/kotlin-multiplatform-roborazzi/SKILL.md then add screenshot tests for auth.
+> Read .agents/skills/kmp-roborazzi/SKILL.md then add screenshot tests for auth.
 ```
 
 Or use `@` to include files directly:
 
 ```
-> @.agents/skills/kotlin-multiplatform-presenter-module/SKILL.md set up the presenter for dashboard
+> @.agents/skills/kmp-presenter-module/SKILL.md set up the presenter for dashboard
 ```
 
 ---
@@ -462,8 +462,8 @@ Aider supports `--read` to add read-only context files that the model can refere
 
 ```bash
 # Pass skills as read-only context for a session
-aider --read kmm-agent-skills/skills/kotlin-multiplatform-feature-scaffold/SKILL.md \
-      --read kmm-agent-skills/skills/kotlin-multiplatform-clean-architecture/SKILL.md \
+aider --read kmp-agent-skills/skills/kmp-feature-scaffold/SKILL.md \
+      --read kmp-agent-skills/skills/kmp-clean-architecture/SKILL.md \
       feature/auth/presenter/build.gradle.kts
 
 # Or add to your .aider.conf.yml
@@ -473,9 +473,9 @@ aider --read kmm-agent-skills/skills/kotlin-multiplatform-feature-scaffold/SKILL
 
 ```yaml
 read:
-  - kmm-agent-skills/skills/kotlin-multiplatform-clean-architecture/SKILL.md
-  - kmm-agent-skills/skills/kotlin-multiplatform-presenter-module/SKILL.md
-  - kmm-agent-skills/skills/kotlin-multiplatform-feature-scaffold/SKILL.md
+  - kmp-agent-skills/skills/kmp-clean-architecture/SKILL.md
+  - kmp-agent-skills/skills/kmp-presenter-module/SKILL.md
+  - kmp-agent-skills/skills/kmp-feature-scaffold/SKILL.md
 ```
 
 ### `CONVENTIONS.md` approach
@@ -484,7 +484,7 @@ For skills that apply project-wide:
 
 ```bash
 # Create or append to CONVENTIONS.md
-cat kmm-agent-skills/skills/kotlin-multiplatform-clean-architecture/SKILL.md \
+cat kmp-agent-skills/skills/kmp-clean-architecture/SKILL.md \
     >> CONVENTIONS.md
 
 # Use with --read on every session
@@ -502,7 +502,7 @@ system prompts via `.continue/config.json`.
 
 ```json
 {
-  "systemMessage": "This project uses the KMM 6-layer architecture. Before making decisions, read the relevant skill file in skills/*/SKILL.md. Key rules: :presenter has no Compose dependency; :ui depends only on :presenter.",
+  "systemMessage": "This project uses the KMP 6-layer architecture. Before making decisions, read the relevant skill file in skills/*/SKILL.md. Key rules: :presenter has no Compose dependency; :ui depends only on :presenter.",
   "contextProviders": [
     {
       "name": "file",
@@ -515,7 +515,7 @@ system prompts via `.continue/config.json`.
 ### Usage in Continue Chat
 
 ```
-@file skills/kotlin-multiplatform-presenter-module/SKILL.md
+@file skills/kmp-presenter-module/SKILL.md
 Set up the presenter layer for the profile feature.
 ```
 
@@ -528,46 +528,46 @@ Not every project needs all 30 skills. Install by phase:
 ### Starting a new project
 
 ```
-kotlin-multiplatform-expert
-kotlin-multiplatform-feature-scaffold
-kotlin-multiplatform-clean-architecture
-kotlin-multiplatform-flavor-environment
-kotlin-multiplatform-ci-github-actions
+kmp-expert
+kmp-feature-scaffold
+kmp-clean-architecture
+kmp-flavor-environment
+kmp-ci-github-actions
 ```
 
 ### Adding features
 
 ```
-kotlin-multiplatform-presenter-module
-kotlin-multiplatform-mvi
-kotlin-multiplatform-navigation
-kotlin-multiplatform-network-layer
-kotlin-multiplatform-repository-pattern
-kotlin-multiplatform-dependency-injection
+kmp-presenter-module
+kmp-mvi
+kmp-navigation
+kmp-network-layer
+kmp-repository-pattern
+kmp-dependency-injection
 ```
 
 ### UI layer
 
 ```
-kotlin-multiplatform-design-system
-kotlin-multiplatform-preview-driven-development
-kotlin-multiplatform-roborazzi
+kmp-design-system
+kmp-preview-driven-development
+kmp-roborazzi
 ```
 
 ### Testing & quality
 
 ```
-kotlin-multiplatform-unit-testing
-kotlin-multiplatform-code-quality
-kotlin-multiplatform-audit
+kmp-unit-testing
+kmp-code-quality
+kmp-audit
 ```
 
 ### Infrastructure
 
 ```
-kotlin-multiplatform-sqldelight-setup
-kotlin-multiplatform-logging
-kotlin-multiplatform-shared-resources
+kmp-sqldelight-setup
+kmp-logging
+kmp-shared-resources
 ```
 
 ---
@@ -592,17 +592,17 @@ freshness rules. When you upgrade dependencies, pull the latest skills:
 
 ```bash
 # Quick update — pulls latest and redeploys skills/
-bash kmm-agent-skills/scripts/update-consumer-skills.sh
+bash kmp-agent-skills/scripts/update-consumer-skills.sh
 
 # Dry-run first to see what would change
-bash kmm-agent-skills/scripts/update-consumer-skills.sh --dry-run
+bash kmp-agent-skills/scripts/update-consumer-skills.sh --dry-run
 ```
 
 > **Commands are not updated automatically.** The update script only redeploys `skills/`.
 > If a command file changes between releases, the script will print a reminder. Review the
 > diff manually and re-install the command if you want the update:
 > ```bash
-> bash kmm-agent-skills/scripts/update-consumer-skills.sh --install-commands
+> bash kmp-agent-skills/scripts/update-consumer-skills.sh --install-commands
 > ```
 
 Each `SKILL.md` has a `**Freshness rule:**` section that tells you exactly which version

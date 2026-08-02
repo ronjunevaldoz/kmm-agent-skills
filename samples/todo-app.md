@@ -1,6 +1,6 @@
 # Sample: Todo App
 
-**E2E test spec for KMM Agent Skills.**
+**E2E test spec for KMP Agent Skills.**
 
 Build a KMP todo app targeting Android and Desktop.
 No backend. No auth. Local persistence only.
@@ -50,14 +50,14 @@ No backend. No auth. Local persistence only.
 
 ## Quality bar
 
-This spec is used to test whether the KMM skills pipeline can produce a complete,
+This spec is used to test whether the KMP skills pipeline can produce a complete,
 correct project from a minimal description. The following must all be true when
-`/kmm-new-project samples/todo-app.md` finishes:
+`/kmp-new-project samples/todo-app.md` finishes:
 
-- [ ] `python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py .` → zero findings
+- [ ] `python3 skills/kmp-audit/scripts/audit_project.py .` → zero findings
 - [ ] `./gradlew jvmTest` → all tests pass
 - [ ] Roborazzi goldens exist for every screen state (empty, loading, error, populated) in light + dark
-- [ ] `/kmm-audit-screenshots .` → no FAIL findings (TopAppBar present, dark mode distinct, no raw colors)
+- [ ] `/kmp-audit-screenshots .` → no FAIL findings (TopAppBar present, dark mode distinct, no raw colors)
 - [ ] Every `:presenter` ViewModel has unit tests covering at least: load success, load error, action happy path
 - [ ] No screen imports from `:data` or `:domain` directly
 - [ ] Koin modules wire every ViewModel and repository
@@ -68,17 +68,17 @@ correct project from a minimal description. The following must all be true when
 
 | Skill | Why |
 |---|---|
-| `kotlin-multiplatform-feature-scaffold` | Project foundation, version catalog, build-logic |
-| `kotlin-multiplatform-clean-architecture` | 6-layer module structure |
-| `kotlin-multiplatform-dependency-injection` | Koin modules for all layers |
-| `kotlin-multiplatform-sqldelight-setup` | Local todo persistence |
-| `kotlin-multiplatform-repository-pattern` | TodoRepository interface + implementation |
-| `kotlin-multiplatform-mvi` | ViewModel, UiState, UiEffect, Channel |
-| `kotlin-multiplatform-form-validation` | Add todo title validation |
-| `kotlin-multiplatform-navigation` | List → Add screen, back navigation |
-| `kotlin-multiplatform-design-system` | AppTheme, AppScaffold, AppTopAppBar, tokens |
-| `kotlin-multiplatform-unit-testing` | Presenter tests with runTest + Turbine |
-| `kotlin-multiplatform-roborazzi` | Screenshot tests for all screen states |
-| `kotlin-multiplatform-logging` | Debug logging in repository and use cases |
+| `kmp-feature-scaffold` | Project foundation, version catalog, build-logic |
+| `kmp-clean-architecture` | 6-layer module structure |
+| `kmp-dependency-injection` | Koin modules for all layers |
+| `kmp-sqldelight-setup` | Local todo persistence |
+| `kmp-repository-pattern` | TodoRepository interface + implementation |
+| `kmp-mvi` | ViewModel, UiState, UiEffect, Channel |
+| `kmp-form-validation` | Add todo title validation |
+| `kmp-navigation` | List → Add screen, back navigation |
+| `kmp-design-system` | AppTheme, AppScaffold, AppTopAppBar, tokens |
+| `kmp-unit-testing` | Presenter tests with runTest + Turbine |
+| `kmp-roborazzi` | Screenshot tests for all screen states |
+| `kmp-logging` | Debug logging in repository and use cases |
 
 12 skills. A passing run validates that these skills compose correctly with no gaps.

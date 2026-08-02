@@ -6,7 +6,7 @@ Usage:
   python3 scripts/generate_release_notes.py
   python3 scripts/generate_release_notes.py --since v1.14.0
   python3 scripts/generate_release_notes.py --since v1.13.0 --until v1.14.0
-  python3 scripts/generate_release_notes.py --since v1.14.0 --skill kotlin-multiplatform-mvi
+  python3 scripts/generate_release_notes.py --since v1.14.0 --skill kmp-mvi
   python3 scripts/generate_release_notes.py --list-tags
 
 Output: JSON on stdout with shape:

@@ -1,4 +1,4 @@
-# KMM Dependency Compatibility Matrix
+# KMP Dependency Compatibility Matrix
 
 Tracks the pinned versions used across all skills and documents known hard constraints between them.
 Update this table whenever a version is bumped in any skill.
@@ -83,7 +83,7 @@ SQLDelight has its own Gradle plugin that must stay in sync:
 1. Bump the version in the relevant `SKILL.md` (`libs.versions.toml` block).
 2. Update the **Pinned Versions** table above.
 3. Check the **Hard Constraints** and **Conflict Zones** tables — bump all coupled entries.
-4. Run the audit: `python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .`
+4. Run the audit: `python3 skills/kmp-audit/scripts/audit_skills_repo.py .`
 5. Update `CHANGELOG.md` and tag a new release.
 
 ---

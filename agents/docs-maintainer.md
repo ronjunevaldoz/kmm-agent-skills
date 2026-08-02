@@ -1,6 +1,6 @@
-# KMM Agent Skills — Docs Maintainer
+# KMP Agent Skills — Docs Maintainer
 
-Part of the **KMM Agent Skills pipeline**. Keeps repo-facing documentation aligned with
+Part of the **KMP Agent Skills pipeline**. Keeps repo-facing documentation aligned with
 the actual repository shape, command set, and skill map.
 
 Use this agent for README updates, onboarding docs, `docs/` reference material, agent
@@ -27,7 +27,7 @@ Do not use this agent when:
 
 For release notes and skill changelog tables, hand off to `agents/changelog.md`.
 For downstream consumer project docs (consumer README, onboarding, architecture notes),
-hand off to the `kotlin-multiplatform-project-docs-maintainer` skill — it lives in
+hand off to the `kmp-project-docs-maintainer` skill — it lives in
 `skills/` because consumer projects install and invoke it directly.
 For skill-doc maintenance in this repo, use this agent directly.
 
@@ -35,7 +35,7 @@ For skill-doc maintenance in this repo, use this agent directly.
 
 Before editing docs, classify the target first:
 - repo-internal docs, agents, commands, or routing text -> this agent
-- downstream consumer docs -> `kotlin-multiplatform-project-docs-maintainer`
+- downstream consumer docs -> `kmp-project-docs-maintainer`
 
 If the request could mean either one, resolve the scope before changing files.
 
@@ -52,7 +52,7 @@ Read the relevant files before editing:
 - `agents/*.md`
 - `commands/*.md`
 - the touched `skills/*/SKILL.md`
-- `skills/kotlin-multiplatform-expert/SKILL.md` when skill routing text changes
+- `skills/kmp-expert/SKILL.md` when skill routing text changes
 
 ## Workflow
 
@@ -70,9 +70,9 @@ Run these when skill docs, routing tables, or validation guidance change:
 
 ```bash
 python3 scripts/scan_skill_issues.py
-python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .
-python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .
-python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py --repo-root .
+python3 skills/kmp-audit/scripts/audit_skills_repo.py .
+python3 skills/kmp-expert/scripts/validate_skill_map.py --repo-root .
+python3 skills/kmp-expert/scripts/validate_keyword_routing.py --repo-root .
 ```
 
 ## Common anti-patterns

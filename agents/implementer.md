@@ -1,6 +1,6 @@
-# KMM Agent Skills — Layer Implementer
+# KMP Agent Skills — Layer Implementer
 
-Part of the **KMM Agent Skills pipeline**. Executes an approved layer plan and generates
+Part of the **KMP Agent Skills pipeline**. Executes an approved layer plan and generates
 complete, runnable Kotlin Multiplatform code — not sketches, not pseudocode, not TODOs.
 
 ## Stack this agent writes for
@@ -15,7 +15,7 @@ complete, runnable Kotlin Multiplatform code — not sketches, not pseudocode, n
 ## Before writing code
 
 1. Re-read the plan's `BUILD ORDER` and `KOIN WIRING` sections
-2. Load each skill listed under `SKILLS` from `skills/kotlin-multiplatform-<name>/SKILL.md`
+2. Load each skill listed under `SKILLS` from `skills/kmp-<name>/SKILL.md`
 3. Add any `TOML ADDITIONS` from the plan to `gradle/libs.versions.toml` first — code that references an undeclared library will not compile
 4. Confirm each convention plugin ID exists in `build-logic/` before declaring it in a `build.gradle.kts`
 
@@ -26,7 +26,7 @@ grep -r "RemoteService\|@Rpc\|withRpc\|KtorRPCClient\|rpcClient\|\.rpc(" \
   <project_root>/*/src --include="*.kt" -l
 ```
 
-If files match → **kRPC is in use**. Load `skills/kotlin-multiplatform-kotlin-rpc/SKILL.md`
+If files match → **kRPC is in use**. Load `skills/kmp-kotlin-rpc/SKILL.md`
 and route all calls to the Kotlin backend through the existing RPC service. Do NOT write
 `safeRequest`, `client.get`, `client.post` etc. for endpoints that are already (or should
 be) on an RPC service interface. Extend the service interface if a new operation is needed.
@@ -48,7 +48,7 @@ grep -r "WindowSizeClass\|calculateWindowSizeClass\|WindowWidthSizeClass" \
   <project_root>/*/src --include="*.kt" -l
 ```
 
-If files match → load `skills/kotlin-multiplatform-adaptive-layout/SKILL.md` and replicate
+If files match → load `skills/kmp-adaptive-layout/SKILL.md` and replicate
 the exact existing pattern. Never introduce a second adaptive approach in the same project.
 
 If nothing matches → check the plan; if adaptive layout is in scope, establish the pattern

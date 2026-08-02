@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 auth_service_scripts = load_module(
     "scaffold_auth_service",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-ktor-auth-service" / "scripts" / "scaffold_auth_service.py",
+    REPO_ROOT / "skills" / "kmp-ktor-auth-service" / "scripts" / "scaffold_auth_service.py",
 )
 
 class ScaffoldAuthServiceTests(unittest.TestCase):

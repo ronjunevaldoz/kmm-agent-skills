@@ -7,7 +7,7 @@ guesses about any specific tool's internals.
 
 Confirmed failure modes:
   - `find` using `-not` as a word-form predicate. This broke under a real user's
-    RTK proxy hook (2026-07-10) on commands/kmm-audit-screenshots.md's screenshot
+    RTK proxy hook (2026-07-10) on commands/kmp-audit-screenshots.md's screenshot
     scan. Fixed there by moving the exclusion out of find's predicate grammar
     entirely into a `grep -v` pipe — flag any other occurrence the same way.
 

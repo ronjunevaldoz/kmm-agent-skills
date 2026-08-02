@@ -13,7 +13,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-AUDIT_SCRIPT="$REPO_ROOT/skills/kotlin-multiplatform-audit/scripts/audit_project.py"
+AUDIT_SCRIPT="$REPO_ROOT/skills/kmp-audit/scripts/audit_project.py"
 
 # Optional overrides for testability
 MODIFIED_FILE="${1:-}"

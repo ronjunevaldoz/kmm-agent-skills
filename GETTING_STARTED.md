@@ -1,4 +1,4 @@
-# Getting Started with KMM Agent Skills
+# Getting Started with KMP Agent Skills
 
 You have a Kotlin Multiplatform (KMP) project or want to start one. These agent skills guide you through architecture decisions, module structure, and implementation — end-to-end, one feature at a time.
 
@@ -11,7 +11,7 @@ You have a Kotlin Multiplatform (KMP) project or want to start one. These agent 
 ### Start a brand-new KMP project
 
 ```
-/kmm-new-project "A shopping app with auth, product listing, and orders"
+/kmp-new-project "A shopping app with auth, product listing, and orders"
 ```
 
 Collects your group ID, project name, platforms, and what the app does — then runs a
@@ -21,7 +21,7 @@ features → tests → `.claude/` agent setup. Everything is wired and ready to 
 ### Add agent workflows to an existing project
 
 ```
-/kmm-setup-agents
+/kmp-setup-agents
 ```
 
 Reads your `settings.gradle.kts` and `libs.versions.toml`, generates a tailored
@@ -30,7 +30,7 @@ Reads your `settings.gradle.kts` and `libs.versions.toml`, generates a tailored
 ### Audit an existing project
 
 ```
-/kmm-run-audit
+/kmp-run-audit
 ```
 
 Runs `audit_project.py` and produces per-finding remediation using the relevant skill.
@@ -46,11 +46,11 @@ claude
 
 Then in Claude Code:
 
-1. **New project** → `/kmm-new-project <description>`
-2. **Existing project** → `/kmm-setup-agents`
-3. **Audit** → `/kmm-run-audit`
-4. **Add a feature** → `/kmm-implement-feature <name>`
-5. **Not sure?** → Ask `kotlin-multiplatform-expert` — it routes you to the smallest relevant skill set
+1. **New project** → `/kmp-new-project <description>`
+2. **Existing project** → `/kmp-setup-agents`
+3. **Audit** → `/kmp-run-audit`
+4. **Add a feature** → `/kmp-implement-feature <name>`
+5. **Not sure?** → Ask `kmp-expert` — it routes you to the smallest relevant skill set
 
 ---
 
@@ -58,16 +58,16 @@ Then in Claude Code:
 
 | Goal | Command / Skill |
 |---|---|
-| **New KMP project from scratch** | `/kmm-new-project <description>` |
-| **Set up agents in existing project** | `/kmm-setup-agents` |
-| **Add a new feature** | `/kmm-implement-feature <name>` or ask `kotlin-multiplatform-expert` |
-| **Audit an existing project** | `/kmm-run-audit` |
-| **Implement a GitHub issue end-to-end** | `/kmm-execute-ticket <id>` |
-| **Fix design system violations** | `/kmm-fix-design` |
-| **Set up CI/CD** | `kotlin-multiplatform-ci-github-actions` skill |
-| **Publish to Maven Central** | `kotlin-multiplatform-release` skill |
-| **Migrate MVVM → MVI** | `kotlin-multiplatform-migration` skill |
-| **Debug architecture issues** | `/kmm-run-audit` → `kotlin-multiplatform-expert` routes fixes |
+| **New KMP project from scratch** | `/kmp-new-project <description>` |
+| **Set up agents in existing project** | `/kmp-setup-agents` |
+| **Add a new feature** | `/kmp-implement-feature <name>` or ask `kmp-expert` |
+| **Audit an existing project** | `/kmp-run-audit` |
+| **Implement a GitHub issue end-to-end** | `/kmp-execute-ticket <id>` |
+| **Fix design system violations** | `/kmp-fix-design` |
+| **Set up CI/CD** | `kmp-ci-github-actions` skill |
+| **Publish to Maven Central** | `kmp-release` skill |
+| **Migrate MVVM → MVI** | `kmp-migration` skill |
+| **Debug architecture issues** | `/kmp-run-audit` → `kmp-expert` routes fixes |
 
 ---
 
@@ -79,7 +79,7 @@ Skills auto-activate when you mention a trigger keyword. You don't need to say t
 How do I set up auth with JWT?
 ```
 
-Claude invokes `kotlin-multiplatform-ktor-auth-service` automatically because "JWT" and
+Claude invokes `kmp-ktor-auth-service` automatically because "JWT" and
 "auth" are trigger keywords. See [README.md](README.md) for the full keyword list.
 
 ---
@@ -102,13 +102,13 @@ See [README.md](README.md) for the full map.
 ## Versioning & Stability
 
 ```bash
-npx skills add ronjunevaldoz/kmm-agent-skills
+npx skills add ronjunevaldoz/kmp-agent-skills
 ```
 
-Or pin in `.kmm-skills`:
+Or pin in `.kmp-skills`:
 ```json
 {
-  "skills_repo": "ronjunevaldoz/kmm-agent-skills",
+  "skills_repo": "ronjunevaldoz/kmp-agent-skills",
   "version": "1.29.18"
 }
 ```
@@ -124,4 +124,4 @@ Or pin in `.kmm-skills`:
 
 **File in your own repo** if you applied the guidance correctly and something in your project broke.
 
-Use `/kmm-report-skill-issue` from Claude Code to file with the right template.
+Use `/kmp-report-skill-issue` from Claude Code to file with the right template.

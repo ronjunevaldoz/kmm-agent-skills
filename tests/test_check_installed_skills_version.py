@@ -13,7 +13,7 @@ SCRIPT = REPO_ROOT / "scripts" / "check-installed-skills-version.sh"
 class CheckInstalledSkillsVersionTests(unittest.TestCase):
     """Real gap this fixes: a global (non-git) skills install had no record of
     what version it's on — sync-local-assistant-skills.sh now writes a
-    .kmm-agent-skills-version marker; this script reads it. Network-dependent
+    .kmp-agent-skills-version marker; this script reads it. Network-dependent
     paths (the actual GitHub comparison) are verified manually, not here.
     """
 

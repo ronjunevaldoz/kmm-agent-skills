@@ -6,7 +6,7 @@ All tests live in `tests/test_skill_scripts.py`. Current status: **16 tests, 16 
 
 ## Coverage by script
 
-### `kotlin-multiplatform-expert` — `validate_skill_map.py`
+### `kmp-expert` — `validate_skill_map.py`
 
 | Test | What it verifies |
 |---|---|
@@ -17,7 +17,7 @@ All tests live in `tests/test_skill_scripts.py`. Current status: **16 tests, 16 
 
 ---
 
-### `kotlin-multiplatform-feature-scaffold` — `validate_module_graph.py`
+### `kmp-feature-scaffold` — `validate_module_graph.py`
 
 | Test | What it verifies |
 |---|---|
@@ -28,7 +28,7 @@ All tests live in `tests/test_skill_scripts.py`. Current status: **16 tests, 16 
 
 ---
 
-### `kotlin-multiplatform-audit` — `audit_project.py`
+### `kmp-audit` — `audit_project.py`
 
 Detects four architecture smell patterns in `.kt`/`.kts`/`.md` files:
 
@@ -44,7 +44,7 @@ Detects four architecture smell patterns in `.kt`/`.kts`/`.md` files:
 
 ---
 
-### `kotlin-multiplatform-audit` — `audit_skills_repo.py`
+### `kmp-audit` — `audit_skills_repo.py`
 
 | Test | What it verifies |
 |---|---|
@@ -56,7 +56,7 @@ Detects four architecture smell patterns in `.kt`/`.kts`/`.md` files:
 
 ---
 
-### `kotlin-multiplatform-audit` — `draft_issue.py`
+### `kmp-audit` — `draft_issue.py`
 
 | Test | What it verifies |
 |---|---|
@@ -66,7 +66,7 @@ Detects four architecture smell patterns in `.kt`/`.kts`/`.md` files:
 
 ---
 
-### `kotlin-multiplatform-ktor-auth-service` — `scaffold_auth_service.py`
+### `kmp-ktor-auth-service` — `scaffold_auth_service.py`
 
 | Test | What it verifies |
 |---|---|
@@ -76,7 +76,7 @@ Detects four architecture smell patterns in `.kt`/`.kts`/`.md` files:
 
 ---
 
-### `kotlin-multiplatform-mongodb-database` — `scaffold_mongodb_database.py`
+### `kmp-mongodb-database` — `scaffold_mongodb_database.py`
 
 | Test | What it verifies |
 |---|---|
@@ -86,7 +86,7 @@ Detects four architecture smell patterns in `.kt`/`.kts`/`.md` files:
 
 ---
 
-### `kotlin-multiplatform-kotlin-rpc` — `scaffold_kotlin_rpc.py`
+### `kmp-kotlin-rpc` — `scaffold_kotlin_rpc.py`
 
 | Test | What it verifies |
 |---|---|
@@ -114,7 +114,7 @@ These 18 skills have no scaffold or validation scripts, so there is nothing to t
 `dependency-injection`, `design-system`, `design-system-extended`, `expect-actual`,
 `flavor-environment`, `graphics-modifiers`, `mvi`, `navigation`, `network-layer`,
 `repository-pattern`, `shared-resources`, `sqldelight-setup`, `xcframework-spm`,
-`(plus kotlin-multiplatform-audit references/ only)`
+`(plus kmp-audit references/ only)`
 
 ---
 

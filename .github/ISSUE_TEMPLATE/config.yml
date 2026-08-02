@@ -1,13 +1,13 @@
 blank_issues_enabled: false
 contact_links:
   - name: Browse the skill collection
-    url: https://github.com/ronjunevaldoz/kmm-agent-skills/blob/main/README.md
+    url: https://github.com/ronjunevaldoz/kmp-agent-skills/blob/main/README.md
     about: Check existing skills and commands before filing
   - name: Changelog
-    url: https://github.com/ronjunevaldoz/kmm-agent-skills/blob/main/CHANGELOG.md
+    url: https://github.com/ronjunevaldoz/kmp-agent-skills/blob/main/CHANGELOG.md
     about: See what changed recently — your issue may already be fixed
   - name: "Is this a project bug, not a skill bug?"
-    url: https://github.com/ronjunevaldoz/kmm-agent-skills/blob/main/README.md#when-to-file-here
+    url: https://github.com/ronjunevaldoz/kmp-agent-skills/blob/main/README.md#when-to-file-here
     about: >
       File here only if the skill guidance itself is wrong or incomplete.
       If you applied the guidance correctly and your project code broke,

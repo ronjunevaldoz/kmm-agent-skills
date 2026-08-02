@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 update_design_system_scripts = load_module(
     "update_design_system",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "scripts" / "update_design_system.py",
+    REPO_ROOT / "skills" / "kmp-design-system" / "scripts" / "update_design_system.py",
 )
 
 class UpdateDesignSystemTests(unittest.TestCase):
@@ -195,7 +195,7 @@ class UpdateDesignSystemTests(unittest.TestCase):
             ) else None
             result = subprocess.run(
                 ["python3",
-                 str(REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "scripts" / "update_design_system.py"),
+                 str(REPO_ROOT / "skills" / "kmp-design-system" / "scripts" / "update_design_system.py"),
                  tmp,
                  "--skill-root", tmp],
                 capture_output=True,
@@ -206,12 +206,12 @@ class UpdateDesignSystemTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             skill_root = root / "fake_skills"
-            skill_md_dir = skill_root / "skills" / "kotlin-multiplatform-design-system"
+            skill_md_dir = skill_root / "skills" / "kmp-design-system"
             skill_md_dir.mkdir(parents=True)
             (skill_md_dir / "SKILL.md").write_text(self._SKILL_MD_TEMPLATE, encoding="utf-8")
             result = subprocess.run(
                 ["python3",
-                 str(REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "scripts" / "update_design_system.py"),
+                 str(REPO_ROOT / "skills" / "kmp-design-system" / "scripts" / "update_design_system.py"),
                  str(root),
                  "--skill-root", str(skill_root)],
                 capture_output=True,
@@ -222,7 +222,7 @@ class UpdateDesignSystemTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             skill_root = root / "fake_skills"
-            skill_md_dir = skill_root / "skills" / "kotlin-multiplatform-design-system"
+            skill_md_dir = skill_root / "skills" / "kmp-design-system"
             skill_md_dir.mkdir(parents=True)
             skill_md = skill_md_dir / "SKILL.md"
             self._write_skill_md(skill_md, self._SKILL_MD_TEMPLATE)
@@ -238,7 +238,7 @@ class UpdateDesignSystemTests(unittest.TestCase):
 
             result = subprocess.run(
                 ["python3",
-                 str(REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "scripts" / "update_design_system.py"),
+                 str(REPO_ROOT / "skills" / "kmp-design-system" / "scripts" / "update_design_system.py"),
                  str(root),
                  "--skill-root", str(skill_root)],
                 capture_output=True,

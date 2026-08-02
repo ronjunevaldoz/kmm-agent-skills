@@ -6,11 +6,11 @@
 
 | Goal | Status | Skill |
 |---|---|---|
-| Multi-module feature split (`api/domain/data/ui`) | covered | `kotlin-multiplatform-feature-scaffold` |
+| Multi-module feature split (`api/domain/data/ui`) | covered | `kmp-feature-scaffold` |
 | `:model` module — pure domain types separate from `:api` | **missing** | — |
 | `:presenter` module — ViewModels isolated from Compose | **missing** | — |
-| Design system — custom tokens, no Material UI | covered | `kotlin-multiplatform-design-system` + extended |
-| Environment config | covered | `kotlin-multiplatform-flavor-environment` |
+| Design system — custom tokens, no Material UI | covered | `kmp-design-system` + extended |
+| Environment config | covered | `kmp-flavor-environment` |
 | Preview-driven development | **missing** | — |
 | Unit testing patterns | **missing** | — |
 | Roborazzi UI screenshot testing | **missing** | — |
@@ -71,7 +71,7 @@ Runs `@Preview` composables on JVM, captures bitmaps, diffs them in CI. Requires
 - Golden images committed to the repo or stored in CI artifacts
 - CI job that fails on visual diff
 
-Zero coverage today. Not in roadmap. Should replace `kotlin-multiplatform-testing-robot`.
+Zero coverage today. Not in roadmap. Should replace `kmp-testing-robot`.
 
 ### Unit testing
 
@@ -105,12 +105,12 @@ Ktlint is the easier win. Add it today. Detekt's architecture rule set is the mo
 
 | # | Skill | Unlocks |
 |---|---|---|
-| 1 | `kotlin-multiplatform-clean-architecture` | Layer contract, `:model` split, `internal` rules |
-| 2 | `kotlin-multiplatform-presenter-module` | `:presenter` isolated from Compose; scaffold update |
-| 3 | `kotlin-multiplatform-unit-testing` | `runTest`, Turbine, fakes, `:core:testing` module |
-| 4 | `kotlin-multiplatform-preview-driven-development` | `@Preview` workflow, `PreviewParameterProvider`, PDD cycle |
-| 5 | `kotlin-multiplatform-roborazzi` | Screenshot tests from previews, CI diff job |
-| 6 | `kotlin-multiplatform-code-quality` | Ktlint + Detekt, architecture rule set, CI gates |
-| 7 | `kotlin-multiplatform-logging` | Kermit, log levels, crash boundary |
+| 1 | `kmp-clean-architecture` | Layer contract, `:model` split, `internal` rules |
+| 2 | `kmp-presenter-module` | `:presenter` isolated from Compose; scaffold update |
+| 3 | `kmp-unit-testing` | `runTest`, Turbine, fakes, `:core:testing` module |
+| 4 | `kmp-preview-driven-development` | `@Preview` workflow, `PreviewParameterProvider`, PDD cycle |
+| 5 | `kmp-roborazzi` | Screenshot tests from previews, CI diff job |
+| 6 | `kmp-code-quality` | Ktlint + Detekt, architecture rule set, CI gates |
+| 7 | `kmp-logging` | Kermit, log levels, crash boundary |
 
-Roadmap reprioritization: retire `kotlin-multiplatform-testing-robot`, replace with skills 3–5 above.
+Roadmap reprioritization: retire `kmp-testing-robot`, replace with skills 3–5 above.

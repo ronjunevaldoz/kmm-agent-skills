@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 mongodb_scripts = load_module(
     "scaffold_mongodb_database",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-mongodb-database" / "scripts" / "scaffold_mongodb_database.py",
+    REPO_ROOT / "skills" / "kmp-mongodb-database" / "scripts" / "scaffold_mongodb_database.py",
 )
 
 class ScaffoldMongoDatabaseTests(unittest.TestCase):

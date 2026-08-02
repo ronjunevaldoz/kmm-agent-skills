@@ -1,6 +1,6 @@
 # Support This Project
 
-KMM Agent Skills is free, open source, and maintained by volunteers. If these skills have saved you time or helped your team ship better KMP apps, consider supporting the project.
+KMP Agent Skills is free, open source, and maintained by volunteers. If these skills have saved you time or helped your team ship better KMP apps, consider supporting the project.
 
 ## Cryptocurrency (Instant)
 
@@ -27,7 +27,7 @@ KMM Agent Skills is free, open source, and maintained by volunteers. If these sk
 - 📢 **Share with your team** — link them to [GETTING_STARTED.md](GETTING_STARTED.md)
 - 💬 **Give feedback** — file issues on what's missing or unclear
 
-Every contribution (code, issues, shares, donations) helps keep KMM skills current and useful for the entire Kotlin Multiplatform community.
+Every contribution (code, issues, shares, donations) helps keep KMP skills current and useful for the entire Kotlin Multiplatform community.
 
 ---
 

@@ -42,7 +42,7 @@ class ScanSkillIssuesTests(unittest.TestCase):
             root = Path(tmp)
             self._make_skill(
                 root,
-                "kotlin-multiplatform-foo",
+                "kmp-foo",
                 "---\nname: foo\ndescription: Foo skill\nlast-updated: '2026-06-21'\n---\n\n"
                 "## Recommendation First\n\nUse Foo.\n\nFreshness rule: check monthly\n\n"
                 "## Common Anti-Patterns\n\nDont do X.\n\n## Related Skills\n\nBar.\n\n"
@@ -60,7 +60,7 @@ class ScanSkillIssuesTests(unittest.TestCase):
             root = Path(tmp)
             self._make_skill(
                 root,
-                "kotlin-multiplatform-bar",
+                "kmp-bar",
                 "---\nname: bar\ndescription: Bar skill\nlast-updated: '2026-06-21'\n---\n\n"
                 "## Recommendation First\n\nUse Bar.\n\nFreshness rule: check monthly\n\n"
                 "## Common Anti-Patterns\n\nDont do X.\n\n## Related Skills\n\nFoo.\n\n"
@@ -76,7 +76,7 @@ class ScanSkillIssuesTests(unittest.TestCase):
             root = Path(tmp)
             self._make_skill(
                 root,
-                "kotlin-multiplatform-baz",
+                "kmp-baz",
                 # missing: anti_patterns, freshness_rule, recommendation
                 "---\nname: baz\ndescription: Baz\nlast-updated: '2026-06-21'\n---\n\n"
                 "## Related Skills\n\nFoo.\n\n## Output Style\n\nBe concise.\n\n"
@@ -93,7 +93,7 @@ class ScanSkillIssuesTests(unittest.TestCase):
             root = Path(tmp)
             self._make_skill(
                 root,
-                "kotlin-multiplatform-expert",
+                "kmp-expert",
                 "---\nname: expert\ndescription: Orchestrator\nlast-updated: '2026-06-21'\n---\n\n"
                 "## Recommendation First\n\nLoad skills.\n\nFreshness rule: check monthly\n\n"
                 "## Common Anti-Patterns\n\nNone.\n\n## Related Skills\n\nAll.\n\n"
@@ -106,12 +106,12 @@ class ScanSkillIssuesTests(unittest.TestCase):
 
     def test_android_cli_skipped_for_missing_testing(self) -> None:
         # CLI tool wrapper, no Kotlin API surface to unit test — same rationale as
-        # kotlin-multiplatform-ci-github-actions (CI YAML config).
+        # kmp-ci-github-actions (CI YAML config).
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._make_skill(
                 root,
-                "kotlin-multiplatform-android-cli",
+                "kmp-android-cli",
                 "---\nname: android-cli\ndescription: Android CLI wiring\nlast-updated: '2026-07-19'\n---\n\n"
                 "## Recommendation First\n\nUse the stable command surface.\n\n"
                 "## Common Anti-Patterns\n\nNone.\n\n## Related Skills\n\nAll.\n\n"
@@ -192,8 +192,8 @@ class AgentSkillsSpecTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._make_skill(
-                root, "kotlin-multiplatform-Foo",
-                "---\nname: kotlin-multiplatform-Foo\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
+                root, "kmp-Foo",
+                "---\nname: kmp-Foo\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
                 + self._minimal_skill_body(),
             )
             report = self._run_scan(root)
@@ -203,8 +203,8 @@ class AgentSkillsSpecTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._make_skill(
-                root, "kotlin-multiplatform-foo",
-                "---\nname: kotlin-multiplatform-bar\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
+                root, "kmp-foo",
+                "---\nname: kmp-bar\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
                 + self._minimal_skill_body(),
             )
             report = self._run_scan(root)
@@ -215,8 +215,8 @@ class AgentSkillsSpecTests(unittest.TestCase):
             root = Path(tmp)
             long_desc = "x" * 1100
             self._make_skill(
-                root, "kotlin-multiplatform-foo",
-                f"---\nname: kotlin-multiplatform-foo\ndescription: {long_desc}\nlast-updated: '2026-07-26'\n---\n\n"
+                root, "kmp-foo",
+                f"---\nname: kmp-foo\ndescription: {long_desc}\nlast-updated: '2026-07-26'\n---\n\n"
                 + self._minimal_skill_body(),
             )
             report = self._run_scan(root)
@@ -228,13 +228,13 @@ class AgentSkillsSpecTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._make_skill(
-                root, "kotlin-multiplatform-foo",
-                "---\nname: kotlin-multiplatform-foo\ndescription: >\n"
+                root, "kmp-foo",
+                "---\nname: kmp-foo\ndescription: >\n"
                 "  This is a folded description that spans\n  multiple lines.\n"
                 "last-updated: '2026-07-26'\n---\n\n" + self._minimal_skill_body(),
             )
             report = self._run_scan(root)
-        matching = [i for i in report["issues"] if i["skill_dir"] == "kotlin-multiplatform-foo"]
+        matching = [i for i in report["issues"] if i["skill_dir"] == "kmp-foo"]
         for issue in matching:
             self.assertNotEqual(issue["description"], ">")
 
@@ -243,8 +243,8 @@ class AgentSkillsSpecTests(unittest.TestCase):
             root = Path(tmp)
             padding = "\n".join(f"Line {i} of filler content." for i in range(600))
             self._make_skill(
-                root, "kotlin-multiplatform-foo",
-                "---\nname: kotlin-multiplatform-foo\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
+                root, "kmp-foo",
+                "---\nname: kmp-foo\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
                 + self._minimal_skill_body(padding),
             )
             report = self._run_scan(root)
@@ -258,8 +258,8 @@ class AgentSkillsSpecTests(unittest.TestCase):
             root = Path(tmp)
             padding = "\n".join(f"Line {i} of filler content." for i in range(600))
             self._make_skill(
-                root, "kotlin-multiplatform-mvi",
-                "---\nname: kotlin-multiplatform-mvi\ndescription: Test\n"
+                root, "kmp-mvi",
+                "---\nname: kmp-mvi\ndescription: Test\n"
                 "last-updated: '2026-07-26'\n---\n\n" + self._minimal_skill_body(padding),
             )
             report = self._run_scan(root)
@@ -280,8 +280,8 @@ class AgentSkillsSpecTests(unittest.TestCase):
             root = Path(tmp)
             padding = "\n".join(f"Line {i} of filler content." for i in range(600))
             self._make_skill(
-                root, "kotlin-multiplatform-brand-new-skill",
-                "---\nname: kotlin-multiplatform-brand-new-skill\ndescription: Test\n"
+                root, "kmp-brand-new-skill",
+                "---\nname: kmp-brand-new-skill\ndescription: Test\n"
                 "last-updated: '2026-07-26'\n---\n\n" + self._minimal_skill_body(padding),
             )
             report = self._run_scan(root)
@@ -291,8 +291,8 @@ class AgentSkillsSpecTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._make_skill(
-                root, "kotlin-multiplatform-foo",
-                "---\nname: kotlin-multiplatform-foo\ndescription: A short valid description.\n"
+                root, "kmp-foo",
+                "---\nname: kmp-foo\ndescription: A short valid description.\n"
                 "last-updated: '2026-07-26'\n---\n\n" + self._minimal_skill_body(),
             )
             report = self._run_scan(root)

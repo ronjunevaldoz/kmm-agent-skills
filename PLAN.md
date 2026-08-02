@@ -22,83 +22,83 @@ Update when skills are added, revised, or completed.
 ### Layer 0 — Architecture Contract
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-feature-scaffold` | ✅ | AGP 9, build-logic, version catalog, Koin 4, 6-layer model |
-| `kotlin-multiplatform-clean-architecture` | ✅ | 6-layer contract, :model vs :api, internal visibility, Detekt rules |
-| `kotlin-multiplatform-presenter-module` | ✅ | Pure Kotlin ViewModel, MVI contracts, no Compose dep, Koin wiring |
+| `kmp-feature-scaffold` | ✅ | AGP 9, build-logic, version catalog, Koin 4, 6-layer model |
+| `kmp-clean-architecture` | ✅ | 6-layer contract, :model vs :api, internal visibility, Detekt rules |
+| `kmp-presenter-module` | ✅ | Pure Kotlin ViewModel, MVI contracts, no Compose dep, Koin wiring |
 
 ### Layer 1 — Project Foundation
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-dependency-injection` | ✅ | Koin manual + annotated modes, scope rules, test overrides |
-| `kotlin-multiplatform-flavor-environment` | ✅ | BuildKonfig, AppConfig, Android product flavors |
-| `kotlin-multiplatform-ci-github-actions` | ✅ | Android/iOS/Desktop/Web matrix, XCFramework release |
-| `kotlin-multiplatform-audit` | ✅ | Architecture review, boundary check, skills repo hygiene, issue drafts |
+| `kmp-dependency-injection` | ✅ | Koin manual + annotated modes, scope rules, test overrides |
+| `kmp-flavor-environment` | ✅ | BuildKonfig, AppConfig, Android product flavors |
+| `kmp-ci-github-actions` | ✅ | Android/iOS/Desktop/Web matrix, XCFramework release |
+| `kmp-audit` | ✅ | Architecture review, boundary check, skills repo hygiene, issue drafts |
 
 ### Layer 2 — Core Infrastructure
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-ktor-auth-service` | ✅ | Bearer + JWT, sessions, Ktor RPC auth, login/refresh/logout |
-| `kotlin-multiplatform-mongodb-database` | ✅ | Coroutine driver, repository boundary, typed errors, change streams |
-| `kotlin-multiplatform-kotlin-rpc` | ✅ | Kotlin RPC vs REST decision, shared contract, Ktor auth integration |
-| `kotlin-multiplatform-network-layer` | ✅ | Ktor 3, NetworkResult<T>, safeRequest, token refresh interceptor |
-| `kotlin-multiplatform-sqldelight-setup` | ✅ | SQLDelight 2, platform drivers, schema, migrations, Flow queries |
-| `kotlin-multiplatform-datastore` | ✅ | Preferences + Proto DataStore, expect/actual factory, Koin wiring |
-| `kotlin-multiplatform-xcframework-spm` | ✅ | XCFramework build, SPM binary target, CI release |
-| `kotlin-multiplatform-logging` | ✅ | logger wrapper, kotlin-logging or Kermit, log levels, logger factory, crash boundary, Koin wiring |
+| `kmp-ktor-auth-service` | ✅ | Bearer + JWT, sessions, Ktor RPC auth, login/refresh/logout |
+| `kmp-mongodb-database` | ✅ | Coroutine driver, repository boundary, typed errors, change streams |
+| `kmp-kotlin-rpc` | ✅ | Kotlin RPC vs REST decision, shared contract, Ktor auth integration |
+| `kmp-network-layer` | ✅ | Ktor 3, NetworkResult<T>, safeRequest, token refresh interceptor |
+| `kmp-sqldelight-setup` | ✅ | SQLDelight 2, platform drivers, schema, migrations, Flow queries |
+| `kmp-datastore` | ✅ | Preferences + Proto DataStore, expect/actual factory, Koin wiring |
+| `kmp-xcframework-spm` | ✅ | XCFramework build, SPM binary target, CI release |
+| `kmp-logging` | ✅ | logger wrapper, kotlin-logging or Kermit, log levels, logger factory, crash boundary, Koin wiring |
 
 ### Layer 3 — Platform Patterns
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-expect-actual` | ✅ | 4 categories, typealias actual, @ObjCName, Kotlin/Native memory |
-| `kotlin-multiplatform-repository-pattern` | ✅ | Interface/:data impl, mapper pattern, 3 fetch strategies, optimistic updates |
-| `kotlin-multiplatform-jni-pro` | ✅ | JVM JNI bridge, @JvmStatic entry points, wrapper/C-shim discipline, memory-safe interop |
+| `kmp-expect-actual` | ✅ | 4 categories, typealias actual, @ObjCName, Kotlin/Native memory |
+| `kmp-repository-pattern` | ✅ | Interface/:data impl, mapper pattern, 3 fetch strategies, optimistic updates |
+| `kmp-jni-pro` | ✅ | JVM JNI bridge, @JvmStatic entry points, wrapper/C-shim discipline, memory-safe interop |
 
 ### Layer 4 — Feature Building Blocks
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-navigation` | ✅ | JetBrains Nav Compose, type-safe routes, nested graphs, bottom nav |
-| `kotlin-multiplatform-shared-resources` | ✅ | CMP Resources, strings/images/fonts, plurals, localization |
-| `kotlin-multiplatform-mvi` | ✅ | Contract pattern, MviViewModel, Channel<Effect>, Turbine testing |
-| `kotlin-multiplatform-paging` | ✅ | Paging 3, PagingSource, RemoteMediator, cursor/offset, load-state |
-| `kotlin-multiplatform-analytics` | ✅ | Sealed AnalyticsEvent, Firebase/Amplitude impls, screen tracking, FakeAnalytics |
-| `kotlin-multiplatform-form-validation` | ✅ | ValidationResult, FieldState, async debounce, ValidatedTextField, submit gate |
-| `kotlin-multiplatform-image-loading` | ✅ | Coil 3, single ImageLoader, AsyncImage, AvatarImage, HeroImage |
-| `kotlin-multiplatform-permissions` | ✅ | PermissionState, expect/actual PermissionController, Android + iOS |
-| `kotlin-multiplatform-deep-linking` | ✅ | App Links + Universal Links, DeepLinkParser, NavHost navDeepLink, AASA |
-| `kotlin-multiplatform-biometric-auth` | ✅ | BiometricResult, expect/actual BiometricAuthenticator, BiometricPrompt, LAContext |
-| `kotlin-multiplatform-push-notifications` | ✅ | FCM + APNs, PushToken, FirebaseMessagingService, NotificationHandler expect/actual |
-| `kotlin-multiplatform-workmanager` | ✅ | CoroutineWorker, BGTaskScheduler, expect/actual BackgroundScheduler, retry |
-| `kotlin-multiplatform-feature-flags` | ✅ | FeatureFlag enum, Firebase Remote Config, A/B variants, kill switch |
-| `kotlin-multiplatform-offline-first` | ✅ | SyncState, SyncManager, optimistic updates with rollback, conflict resolution |
-| `kotlin-multiplatform-crash-reporting` | ✅ | CrashReporter interface, Firebase Crashlytics + Sentry, dSYM symbolication |
+| `kmp-navigation` | ✅ | JetBrains Nav Compose, type-safe routes, nested graphs, bottom nav |
+| `kmp-shared-resources` | ✅ | CMP Resources, strings/images/fonts, plurals, localization |
+| `kmp-mvi` | ✅ | Contract pattern, MviViewModel, Channel<Effect>, Turbine testing |
+| `kmp-paging` | ✅ | Paging 3, PagingSource, RemoteMediator, cursor/offset, load-state |
+| `kmp-analytics` | ✅ | Sealed AnalyticsEvent, Firebase/Amplitude impls, screen tracking, FakeAnalytics |
+| `kmp-form-validation` | ✅ | ValidationResult, FieldState, async debounce, ValidatedTextField, submit gate |
+| `kmp-image-loading` | ✅ | Coil 3, single ImageLoader, AsyncImage, AvatarImage, HeroImage |
+| `kmp-permissions` | ✅ | PermissionState, expect/actual PermissionController, Android + iOS |
+| `kmp-deep-linking` | ✅ | App Links + Universal Links, DeepLinkParser, NavHost navDeepLink, AASA |
+| `kmp-biometric-auth` | ✅ | BiometricResult, expect/actual BiometricAuthenticator, BiometricPrompt, LAContext |
+| `kmp-push-notifications` | ✅ | FCM + APNs, PushToken, FirebaseMessagingService, NotificationHandler expect/actual |
+| `kmp-workmanager` | ✅ | CoroutineWorker, BGTaskScheduler, expect/actual BackgroundScheduler, retry |
+| `kmp-feature-flags` | ✅ | FeatureFlag enum, Firebase Remote Config, A/B variants, kill switch |
+| `kmp-offline-first` | ✅ | SyncState, SyncManager, optimistic updates with rollback, conflict resolution |
+| `kmp-crash-reporting` | ✅ | CrashReporter interface, Firebase Crashlytics + Sentry, dSYM symbolication |
 
 ### Layer 5 — UI System
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-design-system` | ✅ | Tokens, AppTheme, dark mode, 6 core components (Stable tier), ownership model, `scripts/update_design_system.py`, `scripts/scan_design_violations.py` |
-| `kotlin-multiplatform-design-system-extended` | ✅ | 27 additional components with stability tiers (Stable / Experimental) |
-| `kotlin-multiplatform-adaptive-layout` | ✅ | WindowSizeClass, Compact/Medium/Expanded, list-detail split, migration mode |
-| `kotlin-multiplatform-compose-animation` | ✅ | AnimatedVisibility, Crossfade, AnimatedContent, animateXAsState, shared elements |
-| `kotlin-multiplatform-compose-slot-api` | ✅ | Slot patterns, scoped slots, CompositionLocal, component API shape |
-| `kotlin-multiplatform-compose-state-hoisting` | ✅ | Hoist-until-shared rule, controlled components, stateless vs stateful |
-| `kotlin-multiplatform-compose-state-container` | ✅ | remember/rememberSaveable/ViewModel survival matrix, custom Saver |
-| `kotlin-multiplatform-graphics-modifiers` | ✅ | graphicsLayer, Canvas, drawBehind, drawWithCache, workflow node shells |
-| `kotlin-multiplatform-preview-driven-development` | ✅ | Desktop-first @Preview, PreviewParameterProvider, PDD cycle |
+| `kmp-design-system` | ✅ | Tokens, AppTheme, dark mode, 6 core components (Stable tier), ownership model, `scripts/update_design_system.py`, `scripts/scan_design_violations.py` |
+| `kmp-design-system-extended` | ✅ | 27 additional components with stability tiers (Stable / Experimental) |
+| `kmp-adaptive-layout` | ✅ | WindowSizeClass, Compact/Medium/Expanded, list-detail split, migration mode |
+| `kmp-compose-animation` | ✅ | AnimatedVisibility, Crossfade, AnimatedContent, animateXAsState, shared elements |
+| `kmp-compose-slot-api` | ✅ | Slot patterns, scoped slots, CompositionLocal, component API shape |
+| `kmp-compose-state-hoisting` | ✅ | Hoist-until-shared rule, controlled components, stateless vs stateful |
+| `kmp-compose-state-container` | ✅ | remember/rememberSaveable/ViewModel survival matrix, custom Saver |
+| `kmp-graphics-modifiers` | ✅ | graphicsLayer, Canvas, drawBehind, drawWithCache, workflow node shells |
+| `kmp-preview-driven-development` | ✅ | Desktop-first @Preview, PreviewParameterProvider, PDD cycle |
 
 ### Layer 6 — Testing & Quality
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-unit-testing` | ✅ | runTest, Turbine, fake-over-mock, :core:testing fixtures, JVM ViewModel tests |
-| `kotlin-multiplatform-roborazzi` | ✅ | Screenshot tests from @Preview on JVM, golden images, CI diff |
-| `kotlin-multiplatform-code-quality` | ✅ | Ktlint + Detekt, CI gates, pre-commit hook |
-| `kotlin-multiplatform-accessibility` | ✅ | Semantic roles, contentDescription, touch targets, Roborazzi a11y snapshots |
+| `kmp-unit-testing` | ✅ | runTest, Turbine, fake-over-mock, :core:testing fixtures, JVM ViewModel tests |
+| `kmp-roborazzi` | ✅ | Screenshot tests from @Preview on JVM, golden images, CI diff |
+| `kmp-code-quality` | ✅ | Ktlint + Detekt, CI gates, pre-commit hook |
+| `kmp-accessibility` | ✅ | Semantic roles, contentDescription, touch targets, Roborazzi a11y snapshots |
 
 ### Meta
 | Skill | Status | Notes |
 |---|---|---|
-| `kotlin-multiplatform-legal-docs` | ✅ | Privacy Policy + T&C templates, auto-detect scanner, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, consent gate, CI gate |
-| `kotlin-multiplatform-expert` | ✅ | 54-skill routing map, dependency graph, invocation map, build order |
-| `kotlin-multiplatform-migration` | ✅ | Incremental adoption: assess current state, MVVM→MVI, monolith→multi-module, Hilt→Koin migration paths |
+| `kmp-legal-docs` | ✅ | Privacy Policy + T&C templates, auto-detect scanner, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, consent gate, CI gate |
+| `kmp-expert` | ✅ | 54-skill routing map, dependency graph, invocation map, build order |
+| `kmp-migration` | ✅ | Incremental adoption: assess current state, MVVM→MVI, monolith→multi-module, Hilt→Koin migration paths |
 
 ---
 
@@ -124,7 +124,7 @@ None. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for tracked open items.
 |---|---|---|
 | `## Changelog` in all 47 skills | ✅ Shipped | Consumer-facing release note table in every SKILL.md; travels with the skill on install |
 | `agents/changelog.md` | ✅ Shipped | Changelog agent: categorizes git + skill diff into Breaking/New/Improved/Fixed, writes consumer release notes |
-| `commands/kmm-release-notes.md` | ✅ Shipped | `/kmm-release-notes` command: per-skill or collection release notes from git history |
+| `commands/kmp-release-notes.md` | ✅ Shipped | `/kmp-release-notes` command: per-skill or collection release notes from git history |
 | `scripts/generate_release_notes.py` | ✅ Shipped | Reads git log + per-skill `## Changelog` tables, outputs structured JSON for the changelog agent |
 | App versioning pattern | ✅ Shipped | `gradle.properties` as single source of truth for `VERSION_NAME`/`VERSION_CODE`; `BuildKonfig` exposes `APP_VERSION` to `commonMain` |
 | `CONTRIBUTING.md` | ✅ Shipped | Full contribution guide: skill authoring, commit format, PR checklist, release process |
@@ -135,7 +135,7 @@ None. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for tracked open items.
 
 | Item | Status | Description |
 |---|---|---|
-| `/kmm-new-project` command | ✅ Shipped | Natural language → full KMP project scaffold. Drives full pipeline: feature-scaffold → clean-arch → infrastructure → design system → features → verify |
+| `/kmp-new-project` command | ✅ Shipped | Natural language → full KMP project scaffold. Drives full pipeline: feature-scaffold → clean-arch → infrastructure → design system → features → verify |
 | `samples/todo-app.md` | ✅ Shipped | E2E test spec: 12 skills, local persistence, form validation, MVI, Roborazzi. Pass/fail is objective (audit + jvmTest + screenshot audit) |
 | More sample specs | 📋 Planned | `samples/social-feed.md` (paging, image loading, kRPC), `samples/settings-app.md` (DataStore, biometric auth) |
 
@@ -156,8 +156,8 @@ Require coordination across multiple files or introduce breaking changes to exis
 | Kotlin 2.x / K2 verification pass | HIGH | Audit every skill's code snippets against K2 — some `expect/actual` and annotation patterns changed. Update minimum Kotlin version across all TOML snippets. |
 | AGP 10 migration | MEDIUM | AGP 10 changes module graph declaration API. Update `feature-scaffold` and `clean-architecture` skills when AGP 10 stable ships. |
 | Compose Multiplatform 2.x readiness | MEDIUM | CMP 2.x expected to stabilize shared navigation and resources API. `navigation`, `shared-resources`, and `adaptive-layout` skills will need version bumps and pattern updates. |
-| Skill freshness CI gate | LOW | `/kmm-setup-hooks Option C` describes a weekly cron. Post-v2.0 add it to the repo's own `.github/workflows/` so freshness warnings surface without a local install. |
-| `kotlin-multiplatform-testing-robot` | 💡 Deferred | UI test robot pattern (Page Object Model for Compose). Deferred until Roborazzi + compose-test-rule coverage feels insufficient in practice. |
+| Skill freshness CI gate | LOW | `/kmp-setup-hooks Option C` describes a weekly cron. Post-v2.0 add it to the repo's own `.github/workflows/` so freshness warnings surface without a local install. |
+| `kmp-testing-robot` | 💡 Deferred | UI test robot pattern (Page Object Model for Compose). Deferred until Roborazzi + compose-test-rule coverage feels insufficient in practice. |
 
 ---
 
@@ -178,11 +178,11 @@ Require coordination across multiple files or introduce breaking changes to exis
 
 - Every skill must follow the "real skill" principle: 80% patterns/decisions/pitfalls, ≤20% dependency setup
 - Skill descriptions must be specific enough to trigger correctly — test against the keyword list before shipping
-- Use `/kmm-new-skill` to scaffold — it enforces all required sections at creation time
-- Use `/kmm-modify-skill` to edit — it prevents accidental removal of required sections
+- Use `/kmp-new-skill` to scaffold — it enforces all required sections at creation time
+- Use `/kmp-modify-skill` to edit — it prevents accidental removal of required sections
 - Run `python3 scripts/scan_skill_issues.py` after any SKILL.md change to verify zero HIGH findings
-- Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .` after adding a skill to confirm README, expert, and planner are all updated
-- Run `python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py` after adding invocation map rows to confirm every skill has keyword routing coverage
-- Run `/kmm-audit-screenshots` after recording Roborazzi goldens to verify design-system compliance visually
-- Use `/kmm-new-project <description or samples/*.md>` to bootstrap a full KMP project from scratch
-- To run E2E tests against a sample spec: clone a clean sandbox repo, then run `/kmm-new-project samples/todo-app.md`
+- Run `python3 skills/kmp-expert/scripts/validate_skill_map.py --repo-root .` after adding a skill to confirm README, expert, and planner are all updated
+- Run `python3 skills/kmp-expert/scripts/validate_keyword_routing.py` after adding invocation map rows to confirm every skill has keyword routing coverage
+- Run `/kmp-audit-screenshots` after recording Roborazzi goldens to verify design-system compliance visually
+- Use `/kmp-new-project <description or samples/*.md>` to bootstrap a full KMP project from scratch
+- To run E2E tests against a sample spec: clone a clean sandbox repo, then run `/kmp-new-project samples/todo-app.md`

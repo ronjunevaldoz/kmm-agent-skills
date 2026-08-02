@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 audit_scripts = load_module(
     "audit_project",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_project.py",
+    REPO_ROOT / "skills" / "kmp-audit" / "scripts" / "audit_project.py",
 )
 
 class AuditProjectTests(unittest.TestCase):
@@ -246,7 +246,7 @@ class AuditProjectTests(unittest.TestCase):
             (claude / "commands").mkdir(parents=True)
             (claude / "skills" / "demo").mkdir(parents=True)
             (claude / "AGENTS.md").write_text("# AGENTS\n", encoding="utf-8")
-            (claude / "commands" / "kmm-run-audit.md").write_text("# cmd\n", encoding="utf-8")
+            (claude / "commands" / "kmp-run-audit.md").write_text("# cmd\n", encoding="utf-8")
 
             findings = audit_scripts.audit_project(root)
 
@@ -268,7 +268,7 @@ class AuditProjectTests(unittest.TestCase):
             (claude / "commands").mkdir(parents=True)
             (claude / "skills" / "demo").mkdir(parents=True)
             (claude / "AGENTS.md").write_text("# AGENTS\n", encoding="utf-8")
-            (claude / "commands" / "kmm-run-audit.md").write_text("# cmd\n", encoding="utf-8")
+            (claude / "commands" / "kmp-run-audit.md").write_text("# cmd\n", encoding="utf-8")
 
             findings = audit_scripts.audit_project(root)
 
@@ -778,7 +778,7 @@ class FocusedStateBorderWidthTests(unittest.TestCase):
 
 class CombinedOneFilePerXTests(unittest.TestCase):
     _LESSON_FRONTMATTER = (
-        "---\nskill: kotlin-multiplatform-mvi\ndate: 2026-06-20\n"
+        "---\nskill: kmp-mvi\ndate: 2026-06-20\n"
         "severity: high\ntype: correction\n---\n\n"
     )
 
@@ -1482,7 +1482,7 @@ class HasAndCountFilesAlwaysTrueRegressionTests(unittest.TestCase):
     def test_has_ignores_a_deployed_skill_template_libs_versions_toml(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            d = root / ".claude" / "skills" / "kotlin-multiplatform-feature-scaffold" / "templates" / "gradle"
+            d = root / ".claude" / "skills" / "kmp-feature-scaffold" / "templates" / "gradle"
             d.mkdir(parents=True)
             (d / "libs.versions.toml").write_text('[versions]\nkotlin = "2.4.0"\n', encoding="utf-8")
             self.assertEqual(audit_scripts._detect_version_catalog(root), "missing")
@@ -1491,7 +1491,7 @@ class HasAndCountFilesAlwaysTrueRegressionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             d = (
-                root / ".claude" / "skills" / "kotlin-multiplatform-design-system"
+                root / ".claude" / "skills" / "kmp-design-system"
                 / "detekt-rules" / "src" / "test" / "kotlin"
             )
             d.mkdir(parents=True)
@@ -1501,7 +1501,7 @@ class HasAndCountFilesAlwaysTrueRegressionTests(unittest.TestCase):
 
 class DeployedSkillsBundleExclusionTests(unittest.TestCase):
     """A real bug: a consumer project with skills deployed to .claude/skills/ got a
-    'hardcoded android versioncode' false positive from kotlin-multiplatform-feature-scaffold's
+    'hardcoded android versioncode' false positive from kmp-feature-scaffold's
     own templates/androidApp/build.gradle.kts (versionCode = 1 is a legitimate scaffold
     placeholder, not the user's real app config). _EXCLUDED_DIRS now excludes deployed
     agent skills bundle directories entirely.
@@ -1517,7 +1517,7 @@ class DeployedSkillsBundleExclusionTests(unittest.TestCase):
             root = Path(tmp)
             self._write(
                 root,
-                ".claude/skills/kotlin-multiplatform-feature-scaffold/templates/androidApp/build.gradle.kts",
+                ".claude/skills/kmp-feature-scaffold/templates/androidApp/build.gradle.kts",
                 'plugins { id("com.android.application") }\n'
                 "android {\n    defaultConfig {\n"
                 '        applicationId = "com.example.app"\n'
@@ -1531,7 +1531,7 @@ class DeployedSkillsBundleExclusionTests(unittest.TestCase):
             root = Path(tmp)
             self._write(
                 root,
-                ".claude/skills/kotlin-multiplatform-feature-scaffold/templates/androidApp/build.gradle.kts",
+                ".claude/skills/kmp-feature-scaffold/templates/androidApp/build.gradle.kts",
                 "android {\n    defaultConfig {\n        versionCode = 1\n    }\n}\n",
             )
             self._write(
@@ -1549,7 +1549,7 @@ class DeployedSkillsBundleExclusionTests(unittest.TestCase):
                 root = Path(tmp)
                 self._write(
                     root,
-                    f"{agent_dir}/skills/kotlin-multiplatform-feature-scaffold/templates/androidApp/build.gradle.kts",
+                    f"{agent_dir}/skills/kmp-feature-scaffold/templates/androidApp/build.gradle.kts",
                     "android {\n    defaultConfig {\n        versionCode = 1\n    }\n}\n",
                 )
                 findings = audit_scripts.audit_project(root)
@@ -1563,7 +1563,7 @@ class DeployedSkillsBundleExclusionTests(unittest.TestCase):
             root = Path(tmp)
             self._write(
                 root,
-                ".claude/skills/kotlin-multiplatform-mvi/templates/MviViewModel.kt",
+                ".claude/skills/kmp-mvi/templates/MviViewModel.kt",
                 "abstract class MviViewModel<State, Intent, Effect>",
             )
             findings = audit_scripts._detect_mvi_placement(root)
@@ -1574,7 +1574,7 @@ class DeployedSkillsBundleExclusionTests(unittest.TestCase):
             root = Path(tmp)
             self._write(
                 root,
-                ".claude/skills/kotlin-multiplatform-design-system/templates/AppTheme.kt",
+                ".claude/skills/kmp-design-system/templates/AppTheme.kt",
                 "@Composable\nfun AppTheme(content: @Composable () -> Unit) {\n"
                 "    MaterialTheme(content = content)\n}\n",
             )
@@ -1788,7 +1788,7 @@ class ShadcnRawComponentBypassTests(unittest.TestCase):
             )
 
     def test_does_not_flag_scaffold_or_topappbar_in_shadcn_project(self) -> None:
-        # shadcn/ui has no Scaffold/TopAppBar concept — /kmm-migrate-to-shadcn's own
+        # shadcn/ui has no Scaffold/TopAppBar concept — /kmp-migrate-to-shadcn's own
         # mapping table says keep raw Compose Scaffold/TopAppBar; flagging it would be wrong.
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -2237,7 +2237,7 @@ class HarvestProjectTests(unittest.TestCase):
     def test_harvest_cli_outputs_json(self) -> None:
         import subprocess, json as _json
         with tempfile.TemporaryDirectory() as tmp:
-            audit_script = REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_project.py"
+            audit_script = REPO_ROOT / "skills" / "kmp-audit" / "scripts" / "audit_project.py"
             result = subprocess.run(
                 ["python3", str(audit_script), "--harvest", tmp],
                 capture_output=True,
@@ -2445,7 +2445,7 @@ class ProjectSkillStandardsTests(unittest.TestCase):
 
 
 class LongStackedCommentBlockTests(unittest.TestCase):
-    """kotlin-multiplatform-code-quality's own rule says a // block growing past ~4
+    """kmp-code-quality's own rule says a // block growing past ~4
     lines should split off to docs/reference/ — documented but never mechanically
     checked anywhere until this detector. Verified against a real false-positive
     risk: a license/copyright header at the top of a file is also a long stacked //
@@ -2591,7 +2591,7 @@ class DestructiveReadAccessorTests(unittest.TestCase):
 
 
 class ValueClassOpportunityTests(unittest.TestCase):
-    """kotlin-multiplatform-clean-architecture's Typed Domain IDs rule: nothing stops
+    """kmp-clean-architecture's Typed Domain IDs rule: nothing stops
     getOrder(userId, orderId) from compiling when both are raw String. This is an
     opportunity nudge, not a misuse flag.
     """
@@ -2643,7 +2643,7 @@ class ValueClassOpportunityTests(unittest.TestCase):
 
 
 class ContextParameterOpportunityTests(unittest.TestCase):
-    """kotlin-multiplatform-dependency-injection's Context Parameters section: a value
+    """kmp-dependency-injection's Context Parameters section: a value
     threaded through many function signatures in the same file is a candidate for
     context(...) instead of an explicit parameter on every function.
     """
@@ -2946,7 +2946,7 @@ class UndocumentedPublicApiTests(unittest.TestCase):
 
 
 class CombinedComponentFileTests(unittest.TestCase):
-    """kotlin-multiplatform-design-system's own generated templates always put one
+    """kmp-design-system's own generated templates always put one
     component per file — never stated as a rule, never mechanically checked for a
     real project's own component files, until now.
     """
@@ -3133,7 +3133,7 @@ class ViewModelMultipleStateFlowsTests(unittest.TestCase):
 
 
 class ViewModelInjectsRepositoryTests(unittest.TestCase):
-    """kotlin-multiplatform-mvi's own changelog calls the ViewModel-depends-only-on-
+    """kmp-mvi's own changelog calls the ViewModel-depends-only-on-
     :domain rule 'bright-line and mechanically checkable' — it wasn't actually checked.
     _detect_module_layer_violation can't catch it either since presenter -> api is an
     allowed module-level edge; this is a file-level constructor-param check instead.
@@ -3218,8 +3218,8 @@ class BareCoreModuleTests(unittest.TestCase):
 
 
 class MixedDesignSystemUsageTests(unittest.TestCase):
-    """kotlin-multiplatform-shadcn-compose says "Never combine with
-    kotlin-multiplatform-design-system" - documented but never mechanically checked.
+    """kmp-shadcn-compose says "Never combine with
+    kmp-design-system" - documented but never mechanically checked.
     Scoped to both theme wrappers coexisting (ShadcnTheme(/AppTheme() rather than
     individual App*-prefixed component names, to avoid a false positive on an
     unrelated real identifier like AppConfig(...) or AppDatabase(...).
@@ -3760,7 +3760,7 @@ class AgentsSkillsCrossClientTests(unittest.TestCase):
         (claude / "commands").mkdir(parents=True)
         (claude / "commands" / "x.md").write_text("", encoding="utf-8")
         (claude / "AGENTS.md").write_text("", encoding="utf-8")
-        skill_dir = claude / "skills" / "kotlin-multiplatform-mvi"
+        skill_dir = claude / "skills" / "kmp-mvi"
         skill_dir.mkdir(parents=True)
         (skill_dir / "SKILL.md").write_text("", encoding="utf-8")
         return claude
@@ -3776,7 +3776,7 @@ class AgentsSkillsCrossClientTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._base_claude_setup(root)
-            agents_skill = root / ".agents" / "skills" / "kotlin-multiplatform-mvi"
+            agents_skill = root / ".agents" / "skills" / "kmp-mvi"
             agents_skill.mkdir(parents=True)
             (agents_skill / "SKILL.md").write_text("", encoding="utf-8")
             findings = audit_scripts._detect_agent_setup(root)
@@ -3787,11 +3787,11 @@ class AgentsSkillsCrossClientTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             claude = self._base_claude_setup(root)
-            agents_skill = root / ".agents" / "skills" / "kotlin-multiplatform-mvi"
+            agents_skill = root / ".agents" / "skills" / "kmp-mvi"
             agents_skill.mkdir(parents=True)
             (agents_skill / "SKILL.md").write_text("", encoding="utf-8")
             # Extra skill only in .claude/skills/ — a real drift.
-            extra = claude / "skills" / "kotlin-multiplatform-audit"
+            extra = claude / "skills" / "kmp-audit"
             extra.mkdir(parents=True)
             (extra / "SKILL.md").write_text("", encoding="utf-8")
             findings = audit_scripts._detect_agent_setup(root)
@@ -3801,22 +3801,22 @@ class AgentsSkillsCrossClientTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._base_claude_setup(root)
-            agents_skill = root / ".agents" / "skills" / "kotlin-multiplatform-mvi"
+            agents_skill = root / ".agents" / "skills" / "kmp-mvi"
             agents_skill.mkdir(parents=True)
             (agents_skill / "SKILL.md").write_text("", encoding="utf-8")
-            bundled_looking = root / "skills" / "kotlin-multiplatform-fake"
+            bundled_looking = root / "skills" / "kmp-fake"
             bundled_looking.mkdir(parents=True)
             (bundled_looking / "SKILL.md").write_text("", encoding="utf-8")
             findings = audit_scripts._detect_agent_setup(root)
             self.assertTrue(
-                any("bundled-looking skill name" in f and "kotlin-multiplatform-fake" in f for f in findings)
+                any("bundled-looking skill name" in f and "kmp-fake" in f for f in findings)
             )
 
     def test_ignores_genuine_custom_skill_under_project_root(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._base_claude_setup(root)
-            agents_skill = root / ".agents" / "skills" / "kotlin-multiplatform-mvi"
+            agents_skill = root / ".agents" / "skills" / "kmp-mvi"
             agents_skill.mkdir(parents=True)
             (agents_skill / "SKILL.md").write_text("", encoding="utf-8")
             custom = root / "skills" / "my-app-custom-widget"

@@ -11,11 +11,11 @@ from _helpers import REPO_ROOT, load_module
 
 create_wireframe_scripts = load_module(
     "create_wireframe",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-layout-system" / "scripts" / "create_wireframe.py",
+    REPO_ROOT / "skills" / "kmp-layout-system" / "scripts" / "create_wireframe.py",
 )
 slot_scaffold_scripts = load_module(
     "generate_slot_scaffold",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-layout-system" / "scripts" / "generate_slot_scaffold.py",
+    REPO_ROOT / "skills" / "kmp-layout-system" / "scripts" / "generate_slot_scaffold.py",
 )
 
 class SlotScaffoldTests(unittest.TestCase):

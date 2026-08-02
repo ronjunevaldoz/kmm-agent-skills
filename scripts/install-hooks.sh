@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Installs KMM Agent Skills hooks into the consumer project's .git/hooks/.
+# Installs KMP Agent Skills hooks into the consumer project's .git/hooks/.
 #
 # Run from the ROOT of the project you want to protect (not from this repo):
-#   bash path/to/kmm-agent-skills/scripts/install-hooks.sh
+#   bash path/to/kmp-agent-skills/scripts/install-hooks.sh
 #
 # Or, if you've copied/symlinked the skills repo into your project:
 #   bash skills/scripts/install-hooks.sh
@@ -33,7 +33,7 @@ install_hook() {
 }
 
 echo ""
-echo "Installing KMM Agent Skills hooks..."
+echo "Installing KMP Agent Skills hooks..."
 echo ""
 
 install_hook "pre-commit-audit.sh"       "pre-commit"

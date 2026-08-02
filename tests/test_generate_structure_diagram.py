@@ -8,7 +8,7 @@ from _helpers import REPO_ROOT, load_module
 
 diagram_scripts = load_module(
     "generate_structure_diagram",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "generate_structure_diagram.py",
+    REPO_ROOT / "skills" / "kmp-audit" / "scripts" / "generate_structure_diagram.py",
 )
 
 

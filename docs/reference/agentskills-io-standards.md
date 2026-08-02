@@ -14,7 +14,7 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
 
 # Run against every skill in this repo
-cd /path/to/kmm-agent-skills
+cd /path/to/kmp-agent-skills
 for d in skills/*/; do skills-ref validate "$d" || echo "FAIL: $d"; done
 ```
 
@@ -82,7 +82,7 @@ gate, it's part of the same one.
 ## Known gaps
 
 **22 of 64 skills exceed the 500-line guideline** — up to 6.2x over
-(`kotlin-multiplatform-design-system-extended` at 3101 lines). Tracked as
+(`kmp-design-system-extended` at 3101 lines). Tracked as
 [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body).
 Not a hard-spec failure (`skills-ref validate` still passes all 64) — but it means the
 full body loads into context every time these skills activate, instead of the core
@@ -111,7 +111,7 @@ From `agentskills.io/skill-creation/best-practices.md` and `optimizing-descripti
 
 ## Related
 
-- `kotlin-multiplatform-audit`'s `_detect_project_skill_standards` already enforces a
+- `kmp-audit`'s `_detect_project_skill_standards` already enforces a
   version of this 500-line rule (with a `references/` escape hatch) on *consumer
   projects'* own project-owned skills — this doc is this repo holding its own 66 skills
   to the same real standard, not inventing a new one.

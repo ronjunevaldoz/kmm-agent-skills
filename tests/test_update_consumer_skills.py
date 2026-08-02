@@ -74,11 +74,11 @@ class UpdateConsumerSkillsScriptTests(unittest.TestCase):
             self.assertTrue((project / ".agents" / "skills" / "demo-skill" / "SKILL.md").is_file())
             self.assertTrue((project / ".agents" / "pipeline-context.json").is_file())
             agents_md = (project / ".claude" / "AGENTS.md").read_text(encoding="utf-8")
-            self.assertIn("kotlin-multiplatform-code-quality", agents_md)
-            self.assertIn("kotlin-multiplatform-unit-testing", agents_md)
-            self.assertIn("kotlin-multiplatform-android-cli", agents_md)
-            self.assertIn("kotlin-multiplatform-project-docs-maintainer", agents_md)
-            self.assertIn("/kmm-setup-hooks", result.stdout)
+            self.assertIn("kmp-code-quality", agents_md)
+            self.assertIn("kmp-unit-testing", agents_md)
+            self.assertIn("kmp-android-cli", agents_md)
+            self.assertIn("kmp-project-docs-maintainer", agents_md)
+            self.assertIn("/kmp-setup-hooks", result.stdout)
 
     def test_agents_skills_mirror_skipped_when_agent_dir_is_already_agents_skills(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

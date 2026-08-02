@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 check_updates.py — compare local skills against origin/main
-(https://github.com/ronjunevaldoz/kmm-agent-skills)
+(https://github.com/ronjunevaldoz/kmp-agent-skills)
 
 Exit codes:
   0 — up to date
@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 REMOTE = "origin"
 BRANCH = "main"
-REPO_URL = "https://github.com/ronjunevaldoz/kmm-agent-skills"
+REPO_URL = "https://github.com/ronjunevaldoz/kmp-agent-skills"
 
 
 def run(cmd: str) -> tuple[str, int]:

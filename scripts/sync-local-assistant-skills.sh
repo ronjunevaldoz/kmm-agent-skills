@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# sync-local-assistant-skills.sh — sync the latest kmm-agent-skills release
+# sync-local-assistant-skills.sh — sync the latest kmp-agent-skills release
 # into local assistant skill bundles on this machine.
 #
 # This updates user-level installs only:
@@ -18,7 +18,7 @@
 # Commands are not copied. They stay project-local and require explicit review.
 #
 # Options:
-#   --source PATH   Path to kmm-agent-skills clone (auto-detected if omitted)
+#   --source PATH   Path to kmp-agent-skills clone (auto-detected if omitted)
 #   --dry-run       Show what would change without writing anything
 
 set -euo pipefail
@@ -45,20 +45,20 @@ resolve_source() {
     SKILLS_SOURCE="$candidate"
     return 0
   fi
-  if [[ -f "../kmm-agent-skills/skills.json" ]]; then
-    SKILLS_SOURCE="$(cd ../kmm-agent-skills && pwd)"
+  if [[ -f "../kmp-agent-skills/skills.json" ]]; then
+    SKILLS_SOURCE="$(cd ../kmp-agent-skills && pwd)"
     return 0
   fi
-  if [[ -f "$HOME/dev/kmm-agent-skills/skills.json" ]]; then
-    SKILLS_SOURCE="$HOME/dev/kmm-agent-skills"
+  if [[ -f "$HOME/dev/kmp-agent-skills/skills.json" ]]; then
+    SKILLS_SOURCE="$HOME/dev/kmp-agent-skills"
     return 0
   fi
-  if [[ -f "$HOME/Documents/kmm-agent-skills/skills.json" ]]; then
-    SKILLS_SOURCE="$HOME/Documents/kmm-agent-skills"
+  if [[ -f "$HOME/Documents/kmp-agent-skills/skills.json" ]]; then
+    SKILLS_SOURCE="$HOME/Documents/kmp-agent-skills"
     return 0
   fi
 
-  echo "❌ Could not find kmm-agent-skills. Pass --source PATH." >&2
+  echo "❌ Could not find kmp-agent-skills. Pass --source PATH." >&2
   exit 1
 }
 
@@ -103,20 +103,20 @@ for target in "${TARGETS[@]}"; do
   fi
 
   if [[ -d "$target" ]] && [[ -n "$(find "$target" -mindepth 1 -maxdepth 1 2>/dev/null | head -1)" ]]; then
-    backup_dir="${target}-backup-kmm-agent-skills-$(date +%Y%m%d%H%M%S)"
+    backup_dir="${target}-backup-kmp-agent-skills-$(date +%Y%m%d%H%M%S)"
     cp -a "$target" "$backup_dir"
     echo "  Backed up existing install to $backup_dir"
   fi
 
   rsync -a --delete --exclude '.git' --exclude '.DS_Store' --exclude '.pytest_cache' \
-    --exclude '.kmm-agent-skills-version' \
+    --exclude '.kmp-agent-skills-version' \
     "$SKILLS_SOURCE/skills/" "$target/"
 
   # A global (non-git) install otherwise has no record of what version it's on,
   # making "is this stale?" unanswerable without diffing file contents by hand —
   # the exact pain that motivated adding this marker. Written after rsync and
   # excluded from it above, so --delete never removes it.
-  echo "$SOURCE_VERSION" > "$target/.kmm-agent-skills-version"
+  echo "$SOURCE_VERSION" > "$target/.kmp-agent-skills-version"
 
   echo "  ✅  Synced"
 done

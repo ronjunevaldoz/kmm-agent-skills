@@ -12,7 +12,7 @@ from _helpers import load_module_registered
 
 detect_data_collection_scripts = load_module_registered(
     "detect_data_collection",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-legal-docs" / "scripts" / "detect_data_collection.py",
+    REPO_ROOT / "skills" / "kmp-legal-docs" / "scripts" / "detect_data_collection.py",
 )
 
 class DetectDataCollectionTests(unittest.TestCase):

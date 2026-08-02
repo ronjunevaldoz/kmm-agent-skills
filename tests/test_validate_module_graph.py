@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 scaffold_scripts = load_module(
     "validate_module_graph",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-feature-scaffold" / "scripts" / "validate_module_graph.py",
+    REPO_ROOT / "skills" / "kmp-feature-scaffold" / "scripts" / "validate_module_graph.py",
 )
 
 class ValidateModuleGraphTests(unittest.TestCase):

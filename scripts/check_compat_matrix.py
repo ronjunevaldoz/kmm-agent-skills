@@ -26,21 +26,21 @@ from pathlib import Path
 # Skill dir is relative to skills/
 LIBRARY_MAP: dict[str, list[tuple[str, str]]] = {
     "Kotlin": [
-        ("kotlin-multiplatform-feature-scaffold", "kotlin"),
-        ("kotlin-multiplatform-library-publishing", "kotlin"),
+        ("kmp-feature-scaffold", "kotlin"),
+        ("kmp-library-publishing", "kotlin"),
     ],
-    "AGP":                    [("kotlin-multiplatform-feature-scaffold", "agp")],
-    "KSP":                    [("kotlin-multiplatform-feature-scaffold", "ksp")],
-    "Compose Multiplatform":  [("kotlin-multiplatform-feature-scaffold", "compose-multiplatform")],
-    "Coroutines":             [("kotlin-multiplatform-feature-scaffold", "coroutines")],
-    "AndroidX Lifecycle":     [("kotlin-multiplatform-feature-scaffold", "androidx-lifecycle")],
-    "Koin":                   [("kotlin-multiplatform-feature-scaffold", "koin")],
-    "Ktor":                   [("kotlin-multiplatform-feature-scaffold", "ktor")],
-    "SQLDelight":             [("kotlin-multiplatform-feature-scaffold", "sqldelight")],
-    "BuildKonfig":            [("kotlin-multiplatform-feature-scaffold", "buildkonfig")],
-    "Roborazzi":              [("kotlin-multiplatform-feature-scaffold", "roborazzi")],
-    "Navigation Compose (KMP)": [("kotlin-multiplatform-navigation",    "navigation-compose")],
-    "Decompose":              [("kotlin-multiplatform-navigation",        "decompose")],
+    "AGP":                    [("kmp-feature-scaffold", "agp")],
+    "KSP":                    [("kmp-feature-scaffold", "ksp")],
+    "Compose Multiplatform":  [("kmp-feature-scaffold", "compose-multiplatform")],
+    "Coroutines":             [("kmp-feature-scaffold", "coroutines")],
+    "AndroidX Lifecycle":     [("kmp-feature-scaffold", "androidx-lifecycle")],
+    "Koin":                   [("kmp-feature-scaffold", "koin")],
+    "Ktor":                   [("kmp-feature-scaffold", "ktor")],
+    "SQLDelight":             [("kmp-feature-scaffold", "sqldelight")],
+    "BuildKonfig":            [("kmp-feature-scaffold", "buildkonfig")],
+    "Roborazzi":              [("kmp-feature-scaffold", "roborazzi")],
+    "Navigation Compose (KMP)": [("kmp-navigation",    "navigation-compose")],
+    "Decompose":              [("kmp-navigation",        "decompose")],
 }
 
 

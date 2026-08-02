@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 create_wireframe_scripts = load_module(
     "create_wireframe",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-layout-system" / "scripts" / "create_wireframe.py",
+    REPO_ROOT / "skills" / "kmp-layout-system" / "scripts" / "create_wireframe.py",
 )
 
 class CreateWireframeTests(unittest.TestCase):

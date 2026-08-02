@@ -1,6 +1,6 @@
 # Design Handoff Template
 
-Use this template for screen, component, or flow handoffs in KMM and Compose projects.
+Use this template for screen, component, or flow handoffs in KMP and Compose projects.
 Keep the doc short enough to scan, but complete enough that implementation does not have
 to guess.
 

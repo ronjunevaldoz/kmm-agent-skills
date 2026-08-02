@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 keyword_routing_scripts = load_module(
     "validate_keyword_routing",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_keyword_routing.py",
+    REPO_ROOT / "skills" / "kmp-expert" / "scripts" / "validate_keyword_routing.py",
 )
 
 class ValidateKeywordRoutingTests(unittest.TestCase):
@@ -25,7 +25,7 @@ class ValidateKeywordRoutingTests(unittest.TestCase):
             (skills_dir / name).mkdir(parents=True)
             (skills_dir / name / "SKILL.md").write_text("", encoding="utf-8")
         # expert SKILL.md with a Skill Invocation Map section
-        expert_dir = skills_dir / "kotlin-multiplatform-expert"
+        expert_dir = skills_dir / "kmp-expert"
         expert_dir.mkdir(parents=True, exist_ok=True)
         (expert_dir / "SKILL.md").write_text(
             self.EXPERT_HEADER + map_rows + self.EXPERT_FOOTER,
@@ -37,9 +37,9 @@ class ValidateKeywordRoutingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._make_repo(
                 tmp,
-                ["kotlin-multiplatform-a", "kotlin-multiplatform-b", "kotlin-multiplatform-expert"],
-                "| keyword-a | `kotlin-multiplatform-a` |\n"
-                "| keyword-b | `kotlin-multiplatform-b` |\n",
+                ["kmp-a", "kmp-b", "kmp-expert"],
+                "| keyword-a | `kmp-a` |\n"
+                "| keyword-b | `kmp-b` |\n",
             )
             self.assertEqual(keyword_routing_scripts.validate_keyword_routing(root), [])
 
@@ -47,17 +47,17 @@ class ValidateKeywordRoutingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._make_repo(
                 tmp,
-                ["kotlin-multiplatform-a", "kotlin-multiplatform-b", "kotlin-multiplatform-expert"],
-                "| keyword-a | `kotlin-multiplatform-a` |\n",
+                ["kmp-a", "kmp-b", "kmp-expert"],
+                "| keyword-a | `kmp-a` |\n",
             )
             errors = keyword_routing_scripts.validate_keyword_routing(root)
-            self.assertTrue(any("kotlin-multiplatform-b" in e for e in errors))
+            self.assertTrue(any("kmp-b" in e for e in errors))
 
     def test_meta_skills_are_skipped(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = self._make_repo(
                 tmp,
-                ["kotlin-multiplatform-audit", "kotlin-multiplatform-expert"],
+                ["kmp-audit", "kmp-expert"],
                 "",
             )
             # audit and expert are in SKIP_INVOCATION — no map rows needed
@@ -66,7 +66,7 @@ class ValidateKeywordRoutingTests(unittest.TestCase):
     def test_missing_map_section_returns_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            expert_dir = root / "skills" / "kotlin-multiplatform-expert"
+            expert_dir = root / "skills" / "kmp-expert"
             expert_dir.mkdir(parents=True)
             (expert_dir / "SKILL.md").write_text("no section here", encoding="utf-8")
             errors = keyword_routing_scripts.validate_keyword_routing(root)
@@ -85,18 +85,18 @@ class ValidateKeywordRoutingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._make_repo(
                 tmp,
-                ["kotlin-multiplatform-a", "kotlin-multiplatform-b", "kotlin-multiplatform-expert"],
-                "| keyword-a | `kotlin-multiplatform-a` |\n"
-                "| keyword-b | `kotlin-multiplatform-b` |\n",
+                ["kmp-a", "kmp-b", "kmp-expert"],
+                "| keyword-a | `kmp-a` |\n"
+                "| keyword-b | `kmp-b` |\n",
             )
             self._write_skill(
-                root, "kotlin-multiplatform-a",
+                root, "kmp-a",
                 "---\ndescription: >\n  Some skill.\n---\n\n"
                 "**Trigger keywords:** widget, shared thing\n",
             )
             self._write_skill(
-                root, "kotlin-multiplatform-b",
-                "---\ndescription: >\n  Alternative to `kotlin-multiplatform-a` — not both in the same project.\n---\n\n"
+                root, "kmp-b",
+                "---\ndescription: >\n  Alternative to `kmp-a` — not both in the same project.\n---\n\n"
                 "**Trigger keywords:** gadget, shared thing\n",
             )
             errors = keyword_routing_scripts.validate_keyword_routing(root)
@@ -106,18 +106,18 @@ class ValidateKeywordRoutingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = self._make_repo(
                 tmp,
-                ["kotlin-multiplatform-a", "kotlin-multiplatform-b", "kotlin-multiplatform-expert"],
-                "| keyword-a | `kotlin-multiplatform-a` |\n"
-                "| keyword-b | `kotlin-multiplatform-b` |\n",
+                ["kmp-a", "kmp-b", "kmp-expert"],
+                "| keyword-a | `kmp-a` |\n"
+                "| keyword-b | `kmp-b` |\n",
             )
             self._write_skill(
-                root, "kotlin-multiplatform-a",
+                root, "kmp-a",
                 "---\ndescription: >\n  Some skill, no alternative relationship.\n---\n\n"
                 "**Trigger keywords:** widget, shared thing\n",
             )
             self._write_skill(
-                root, "kotlin-multiplatform-b",
-                "---\ndescription: >\n  A companion skill, complements kotlin-multiplatform-a.\n---\n\n"
+                root, "kmp-b",
+                "---\ndescription: >\n  A companion skill, complements kmp-a.\n---\n\n"
                 "**Trigger keywords:** gadget, shared thing\n",
             )
             errors = keyword_routing_scripts.validate_keyword_routing(root)

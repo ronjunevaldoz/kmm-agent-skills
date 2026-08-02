@@ -12,7 +12,7 @@ from _helpers import REPO_ROOT, load_module
 
 imagevector_scripts = load_module(
     "convert_image_to_imagevector",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-imagevector-generator" / "scripts" / "convert_image_to_imagevector.py",
+    REPO_ROOT / "skills" / "kmp-imagevector-generator" / "scripts" / "convert_image_to_imagevector.py",
 )
 
 _SAMPLE_SVG = """\

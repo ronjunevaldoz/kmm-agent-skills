@@ -11,14 +11,14 @@ from _helpers import REPO_ROOT, load_module
 
 governance_scripts = load_module(
     "governance_check",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "governance_check.py",
+    REPO_ROOT / "skills" / "kmp-audit" / "scripts" / "governance_check.py",
 )
 
 class GovernanceCheckTests(unittest.TestCase):
     def _project(self, tmp: str) -> Path:
         root = Path(tmp)
-        (root / ".kmm-skills").write_text(
-            '{"skills_repo": "ronjunevaldoz/kmm-agent-skills", "version": "1.25.11"}',
+        (root / ".kmp-skills").write_text(
+            '{"skills_repo": "ronjunevaldoz/kmp-agent-skills", "version": "1.25.11"}',
             encoding="utf-8",
         )
         ui_src = root / "feature" / "auth" / "ui" / "src" / "commonMain" / "kotlin" / "com" / "example" / "feature" / "auth" / "ui"
@@ -281,8 +281,8 @@ class ProfileContentScreenshotTest {
     def test_reads_kmm_skills_version(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / ".kmm-skills").write_text(
-                '{"skills_repo": "ronjunevaldoz/kmm-agent-skills", "version": "1.24.1"}',
+            (root / ".kmp-skills").write_text(
+                '{"skills_repo": "ronjunevaldoz/kmp-agent-skills", "version": "1.24.1"}',
                 encoding="utf-8",
             )
             version = governance_scripts.read_skills_version(root)
@@ -296,7 +296,7 @@ class ProfileContentScreenshotTest {
     def test_missing_kmm_skills_file_fails_guard(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = self._project(tmp)
-            (root / ".kmm-skills").unlink()
+            (root / ".kmp-skills").unlink()
             findings = governance_scripts.validate_skills_version_pin(root)
         self.assertEqual(findings[0]["type"], "missing_version_pin")
         self.assertEqual(findings[0]["severity"], "HIGH")
@@ -304,8 +304,8 @@ class ProfileContentScreenshotTest {
     def test_branch_version_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = self._project(tmp)
-            (root / ".kmm-skills").write_text(
-                '{"skills_repo": "ronjunevaldoz/kmm-agent-skills", "version": "main"}',
+            (root / ".kmp-skills").write_text(
+                '{"skills_repo": "ronjunevaldoz/kmp-agent-skills", "version": "main"}',
                 encoding="utf-8",
             )
             findings = governance_scripts.validate_skills_version_pin(root)
@@ -315,8 +315,8 @@ class ProfileContentScreenshotTest {
     def test_tag_version_is_accepted(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = self._project(tmp)
-            (root / ".kmm-skills").write_text(
-                '{"skills_repo": "ronjunevaldoz/kmm-agent-skills", "version": "v1.25.11"}',
+            (root / ".kmp-skills").write_text(
+                '{"skills_repo": "ronjunevaldoz/kmp-agent-skills", "version": "v1.25.11"}',
                 encoding="utf-8",
             )
             findings = governance_scripts.validate_skills_version_pin(root)
@@ -325,7 +325,7 @@ class ProfileContentScreenshotTest {
     def test_cli_exit_0_on_clean_project(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = self._project(tmp)
-            script = REPO_ROOT / "skills/kotlin-multiplatform-audit/scripts/governance_check.py"
+            script = REPO_ROOT / "skills/kmp-audit/scripts/governance_check.py"
             result = subprocess.run(
                 ["python3", str(script), str(root)],
                 capture_output=True, text=True,
@@ -335,11 +335,11 @@ class ProfileContentScreenshotTest {
     def test_cli_exit_1_on_unpinned_skills_version(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = self._project(tmp)
-            (root / ".kmm-skills").write_text(
-                '{"skills_repo": "ronjunevaldoz/kmm-agent-skills", "version": "main"}',
+            (root / ".kmp-skills").write_text(
+                '{"skills_repo": "ronjunevaldoz/kmp-agent-skills", "version": "main"}',
                 encoding="utf-8",
             )
-            script = REPO_ROOT / "skills/kotlin-multiplatform-audit/scripts/governance_check.py"
+            script = REPO_ROOT / "skills/kmp-audit/scripts/governance_check.py"
             result = subprocess.run(
                 ["python3", str(script), str(root)],
                 capture_output=True,
@@ -348,7 +348,7 @@ class ProfileContentScreenshotTest {
         self.assertEqual(result.returncode, 1)
 
     def test_cli_exit_2_on_missing_root(self) -> None:
-        script = REPO_ROOT / "skills/kotlin-multiplatform-audit/scripts/governance_check.py"
+        script = REPO_ROOT / "skills/kmp-audit/scripts/governance_check.py"
         result = subprocess.run(
             ["python3", str(script), "/nonexistent/path/xyz"],
             capture_output=True, text=True,
@@ -358,7 +358,7 @@ class ProfileContentScreenshotTest {
     def test_cli_json_output_is_valid(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = self._project(tmp)
-            script = REPO_ROOT / "skills/kotlin-multiplatform-audit/scripts/governance_check.py"
+            script = REPO_ROOT / "skills/kmp-audit/scripts/governance_check.py"
             result = subprocess.run(
                 ["python3", str(script), str(root), "--json"],
                 capture_output=True, text=True,

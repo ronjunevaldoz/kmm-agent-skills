@@ -1,6 +1,6 @@
 # Skills audit — 2026-06-18
 
-Run against 23 skills using `skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py`
+Run against 23 skills using `skills/kmp-audit/scripts/audit_skills_repo.py`
 and a manual pass against the skill creation standards.
 
 ---
@@ -25,20 +25,20 @@ and a manual pass against the skill creation standards.
 touches fast-moving APIs (Compose, Koin, Ktor, MVI, SQLDelight, Navigation, Graphics).
 
 Affected:
-- `kotlin-multiplatform-compose-slot-api`
-- `kotlin-multiplatform-compose-state-container`
-- `kotlin-multiplatform-compose-state-hoisting`
-- `kotlin-multiplatform-dependency-injection`
-- `kotlin-multiplatform-design-system`
-- `kotlin-multiplatform-design-system-extended`
-- `kotlin-multiplatform-expect-actual`
-- `kotlin-multiplatform-feature-scaffold`
-- `kotlin-multiplatform-flavor-environment`
-- `kotlin-multiplatform-graphics-modifiers`
-- `kotlin-multiplatform-ktor-auth-service`
-- `kotlin-multiplatform-mongodb-database`
-- `kotlin-multiplatform-mvi`
-- `kotlin-multiplatform-repository-pattern`
+- `kmp-compose-slot-api`
+- `kmp-compose-state-container`
+- `kmp-compose-state-hoisting`
+- `kmp-dependency-injection`
+- `kmp-design-system`
+- `kmp-design-system-extended`
+- `kmp-expect-actual`
+- `kmp-feature-scaffold`
+- `kmp-flavor-environment`
+- `kmp-graphics-modifiers`
+- `kmp-ktor-auth-service`
+- `kmp-mongodb-database`
+- `kmp-mvi`
+- `kmp-repository-pattern`
 
 Fix: add a `**Freshness rule:**` line near Prerequisites or the dependency catalog
 in each skill.
@@ -49,7 +49,7 @@ in each skill.
 
 ### Missing `## Output Style` section (21 skills)
 
-Only `kotlin-multiplatform-audit` and `kotlin-multiplatform-dependency-injection`
+Only `kmp-audit` and `kmp-dependency-injection`
 define response ordering. Every skill should tell the agent how to structure output
 (recommendation → structure → snippet → why → alternative). Without it, agents
 ignore the format standard.
@@ -62,12 +62,12 @@ These skills exist in the repo but are absent from PLAN.md. The file claims 17
 shipped skills; the repo has 23.
 
 Untracked:
-- `kotlin-multiplatform-audit`
-- `kotlin-multiplatform-dependency-injection`
-- `kotlin-multiplatform-graphics-modifiers`
-- `kotlin-multiplatform-kotlin-rpc`
-- `kotlin-multiplatform-ktor-auth-service`
-- `kotlin-multiplatform-mongodb-database`
+- `kmp-audit`
+- `kmp-dependency-injection`
+- `kmp-graphics-modifiers`
+- `kmp-kotlin-rpc`
+- `kmp-ktor-auth-service`
+- `kmp-mongodb-database`
 
 ---
 
@@ -86,18 +86,18 @@ Fix: configure a `PostToolUse` hook on `Write`/`Edit` targeting `SKILL.md` files
 Only 5 skills have scripts: `audit`, `expert`, `feature-scaffold`, `ktor-auth-service`,
 `kotlin-rpc`, `mongodb-database`. High-value candidates without scripts:
 
-- `kotlin-multiplatform-navigation`
-- `kotlin-multiplatform-mvi`
-- `kotlin-multiplatform-repository-pattern`
-- `kotlin-multiplatform-network-layer`
-- `kotlin-multiplatform-design-system`
-- `kotlin-multiplatform-dependency-injection`
-- `kotlin-multiplatform-expect-actual`
-- `kotlin-multiplatform-compose-slot-api`
+- `kmp-navigation`
+- `kmp-mvi`
+- `kmp-repository-pattern`
+- `kmp-network-layer`
+- `kmp-design-system`
+- `kmp-dependency-injection`
+- `kmp-expect-actual`
+- `kmp-compose-slot-api`
 
 ### No visual references (22 skills)
 
-Only `kotlin-multiplatform-graphics-modifiers` has a `references/` folder. Prime
+Only `kmp-graphics-modifiers` has a `references/` folder. Prime
 candidates: `design-system`, `design-system-extended`, `mvi`, `navigation`,
 `feature-scaffold`, `repository-pattern`.
 
@@ -118,14 +118,14 @@ anti-pattern guidance. This is high-signal for agents preventing pattern misuse.
 ### Sparse cross-skill references (8 skills)
 
 These skills reference at most one other skill, missing routing guidance:
-- `kotlin-multiplatform-compose-slot-api`
-- `kotlin-multiplatform-dependency-injection`
-- `kotlin-multiplatform-expect-actual`
-- `kotlin-multiplatform-feature-scaffold`
-- `kotlin-multiplatform-graphics-modifiers`
-- `kotlin-multiplatform-kotlin-rpc`
-- `kotlin-multiplatform-ktor-auth-service`
-- `kotlin-multiplatform-mongodb-database`
+- `kmp-compose-slot-api`
+- `kmp-dependency-injection`
+- `kmp-expect-actual`
+- `kmp-feature-scaffold`
+- `kmp-graphics-modifiers`
+- `kmp-kotlin-rpc`
+- `kmp-ktor-auth-service`
+- `kmp-mongodb-database`
 
 ---
 

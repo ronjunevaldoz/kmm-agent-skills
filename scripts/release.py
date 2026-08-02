@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Release script for kmm-agent-skills.
+Release script for kmp-agent-skills.
 
 Usage:
     python3 scripts/release.py patch          # stable release — bug fixes, version bumps
@@ -70,11 +70,11 @@ SKILLS_JSON = REPO_ROOT / "skills.json"
 PLAN_MD = REPO_ROOT / "PLAN.md"
 CHANGELOG_MD = REPO_ROOT / "CHANGELOG.md"
 SKILLS_DIR = REPO_ROOT / "skills"
-AUDIT_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_skills_repo.py"
+AUDIT_SCRIPT = REPO_ROOT / "skills" / "kmp-audit" / "scripts" / "audit_skills_repo.py"
 SCAN_ISSUES_SCRIPT = REPO_ROOT / "scripts" / "scan_skill_issues.py"
 SCAN_COMMAND_SHELL_PORTABILITY_SCRIPT = REPO_ROOT / "scripts" / "scan_command_shell_portability.py"
-VALIDATE_SKILL_MAP_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_skill_map.py"
-VALIDATE_KEYWORD_ROUTING_SCRIPT = REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_keyword_routing.py"
+VALIDATE_SKILL_MAP_SCRIPT = REPO_ROOT / "skills" / "kmp-expert" / "scripts" / "validate_skill_map.py"
+VALIDATE_KEYWORD_ROUTING_SCRIPT = REPO_ROOT / "skills" / "kmp-expert" / "scripts" / "validate_keyword_routing.py"
 CHECK_COMPAT_MATRIX_SCRIPT = REPO_ROOT / "scripts" / "check_compat_matrix.py"
 TESTS_DIR = REPO_ROOT / "tests"
 
@@ -409,7 +409,7 @@ def generate_changelog_section(new_version: str, prev_tag: str) -> str:
 
 
 def update_changelog(new_version: str, prev_tag: str, dry_run: bool) -> str:
-    header = "# Changelog\n\nAll notable changes to kmm-agent-skills are documented here.\n\n"
+    header = "# Changelog\n\nAll notable changes to kmp-agent-skills are documented here.\n\n"
     existing = CHANGELOG_MD.read_text(encoding="utf-8") if CHANGELOG_MD.exists() else header
 
     # Skip git log + prepend if a detailed entry was already written manually.
@@ -529,7 +529,7 @@ def main() -> int:
         tag = sys.argv[2] if len(sys.argv) >= 3 else None
         return cmd_publish(tag)
 
-    parser = argparse.ArgumentParser(description="Release kmm-agent-skills")
+    parser = argparse.ArgumentParser(description="Release kmp-agent-skills")
     parser.add_argument(
         "bump",
         choices=["major", "minor", "patch", "auto"],
@@ -546,7 +546,7 @@ def main() -> int:
     args = parser.parse_args()
 
     tier = "RC" if args.rc else "STABLE"
-    print(f"\n{'[DRY RUN] ' if args.dry_run else ''}kmm-agent-skills release — bump: {args.bump}, tier: {tier}\n")
+    print(f"\n{'[DRY RUN] ' if args.dry_run else ''}kmp-agent-skills release — bump: {args.bump}, tier: {tier}\n")
 
     if not args.dry_run:
         check_clean_tree()

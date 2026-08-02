@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 rpc_scripts = load_module(
     "scaffold_kotlin_rpc",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-kotlin-rpc" / "scripts" / "scaffold_kotlin_rpc.py",
+    REPO_ROOT / "skills" / "kmp-kotlin-rpc" / "scripts" / "scaffold_kotlin_rpc.py",
 )
 
 class ScaffoldKotlinRpcTests(unittest.TestCase):

@@ -7,7 +7,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-AUDIT_SCRIPT="$REPO_ROOT/skills/kotlin-multiplatform-audit/scripts/audit_project.py"
+AUDIT_SCRIPT="$REPO_ROOT/skills/kmp-audit/scripts/audit_project.py"
 # tests/ was split from one monolithic test_skill_scripts.py into one file per
 # script (tests/test_<script-name>.py, plus a shared tests/_helpers.py) — match any
 # test file, not one hardcoded name.
@@ -24,7 +24,7 @@ if [[ -n "$STAGED_KT" ]]; then
   if [[ $STATUS -ne 0 ]]; then
     echo ""
     echo "Commit blocked: architecture audit found issues."
-    echo "Run: python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py ."
+    echo "Run: python3 skills/kmp-audit/scripts/audit_project.py ."
     echo "Or: /run-audit to see findings with remediation steps."
     exit 1
   fi

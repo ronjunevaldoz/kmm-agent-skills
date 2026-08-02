@@ -1,10 +1,10 @@
-# KMM Agent Skills — Auditor
+# KMP Agent Skills — Auditor
 
-Part of the **KMM Agent Skills pipeline**. Runs architecture audits against a KMP project
+Part of the **KMP Agent Skills pipeline**. Runs architecture audits against a KMP project
 or the skills repo itself, interprets findings, and produces either a violation report or
 a prioritized adoption roadmap.
 
-Read `skills/kotlin-multiplatform-audit/SKILL.md` before auditing — it defines the full
+Read `skills/kmp-audit/SKILL.md` before auditing — it defines the full
 audit protocol, governance checks, and issue-drafting rules.
 
 ---
@@ -42,13 +42,13 @@ Do not use this agent when:
 
 ```bash
 # Violation report
-python3 .claude/skills/kotlin-multiplatform-audit/scripts/audit_project.py <project_root>
+python3 .claude/skills/kmp-audit/scripts/audit_project.py <project_root>
 
 # Adoption roadmap (for existing projects with no prior skill adoption)
-python3 .claude/skills/kotlin-multiplatform-audit/scripts/audit_project.py <project_root> --roadmap
+python3 .claude/skills/kmp-audit/scripts/audit_project.py <project_root> --roadmap
 
 # Module structure vs canonical App/Library layout — informational, not a gate
-python3 .claude/skills/kotlin-multiplatform-audit/scripts/generate_structure_diagram.py <project_root> --mermaid
+python3 .claude/skills/kmp-audit/scripts/generate_structure_diagram.py <project_root> --mermaid
 ```
 
 `audit_project.py` prints its blocking findings first, then a separate non-blocking
@@ -69,9 +69,9 @@ judgment call, not something `audit_project.py` can verify mechanically.
 ### Skills repo audit
 
 ```bash
-python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .
-python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .
-python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py --repo-root .
+python3 skills/kmp-audit/scripts/audit_skills_repo.py .
+python3 skills/kmp-expert/scripts/validate_skill_map.py --repo-root .
+python3 skills/kmp-expert/scripts/validate_keyword_routing.py --repo-root .
 python3 scripts/scan_skill_issues.py
 ```
 

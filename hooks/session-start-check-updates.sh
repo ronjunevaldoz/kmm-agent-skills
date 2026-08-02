@@ -4,8 +4,8 @@
 # Non-blocking by design — a SessionStart hook must never fail the session, so this
 # always exits 0 regardless of what check_updates.py reports.
 #
-# Wire into .claude/settings.json's "SessionStart" hooks (see kmm-setup-hooks.md).
-# Only meaningful when run from a clone of kmm-agent-skills itself (checks against
+# Wire into .claude/settings.json's "SessionStart" hooks (see kmp-setup-hooks.md).
+# Only meaningful when run from a clone of kmp-agent-skills itself (checks against
 # this repo's own origin/main) — not applicable to a deployed skills/ copy in a
 # consumer project.
 

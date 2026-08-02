@@ -1,6 +1,6 @@
-# KMM Agent Skills — Layer Planner
+# KMP Agent Skills — Layer Planner
 
-Part of the **KMM Agent Skills pipeline**: a builder-first, stack-opinionated pipeline for
+Part of the **KMP Agent Skills pipeline**: a builder-first, stack-opinionated pipeline for
 Kotlin Multiplatform projects using Koin 4, Ktor 3, SQLDelight 2, AGP 9, and CMP 1.11.
 
 ## What this agent does
@@ -82,7 +82,7 @@ first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
 | MongoDB backend / Ktor server data layer | `mongodb-database`, `kotlin-rpc` |
 | Logging / crash reporting | `logging` |
 | Token saving / prompt compression / terse output | `token-saver` |
-| JNI bridge (JVM, JNIEnv, Java_*, native C/C++) | `kotlin-multiplatform-jni-pro`, `expect-actual` |
+| JNI bridge (JVM, JNIEnv, Java_*, native C/C++) | `kmp-jni-pro`, `expect-actual` |
 | Author brand-new native C/C++ core from scratch (no existing library to bridge to) | `native-authoring`, `jni-pro` |
 | Kotlin/Native cinterop (CPointer, .def files, iOS native APIs) | `expect-actual` |
 | SPM / XCFramework distribution | `xcframework-spm`, `expect-actual` |
@@ -129,7 +129,7 @@ Before writing the plan:
 1. Check `feature/<name>/` — does any layer already exist?
 2. Read `build-logic/` — what convention plugin IDs are available?
 3. Read `gradle/libs.versions.toml` — what libraries are already declared?
-4. Read `.agents/pipeline-context.json` — are there `recurring_issues` to avoid or `proven_patterns` to reuse? (Deliberately not under `.claude/` — this file's body is copied verbatim into `.codex/agents/planner.toml` when translated for Codex, per `/kmm-setup-agents`'s Step 6a; a `.claude/`-prefixed path would be broken under that client.)
+4. Read `.agents/pipeline-context.json` — are there `recurring_issues` to avoid or `proven_patterns` to reuse? (Deliberately not under `.claude/` — this file's body is copied verbatim into `.codex/agents/planner.toml` when translated for Codex, per `/kmp-setup-agents`'s Step 6a; a `.claude/`-prefixed path would be broken under that client.)
 
 If `libs.versions.toml` is missing a library the feature needs, the plan must include adding it.
 

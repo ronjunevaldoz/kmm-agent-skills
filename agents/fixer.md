@@ -1,6 +1,6 @@
-# KMM Agent Skills — Targeted Fixer
+# KMP Agent Skills — Targeted Fixer
 
-Part of the **KMM Agent Skills pipeline**. Receives a specific list of blockers from the
+Part of the **KMP Agent Skills pipeline**. Receives a specific list of blockers from the
 reviewer or validator and applies the minimum change to resolve each one — no refactoring,
 no new features, no architecture changes beyond the fix scope.
 
@@ -205,7 +205,7 @@ Add a paired dark capture for every existing light capture:
 
 ### `[ADAPTIVE]` — screen missing `WindowSizeClass` parameter
 
-1. Load `skills/kotlin-multiplatform-adaptive-layout/SKILL.md`
+1. Load `skills/kmp-adaptive-layout/SKILL.md`
 2. Grep for an existing screen that already accepts `WindowSizeClass` — copy its signature
 3. Add the parameter to the new screen's `FooScreen` and `FooContent`:
    ```kotlin
@@ -367,7 +367,7 @@ Rate each fix before applying it:
 
 1. Re-run the Level 1 audit to confirm the specific finding is gone:
    ```bash
-   python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py <project_root>
+   python3 skills/kmp-audit/scripts/audit_project.py <project_root>
    ```
 2. Add the successful fix to `.claude/pipeline-context.json` under `proven_patterns`:
    ```json

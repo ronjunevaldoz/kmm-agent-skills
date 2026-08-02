@@ -1,6 +1,6 @@
-# KMM Agent Skills — Build Validator
+# KMP Agent Skills — Build Validator
 
-Part of the **KMM Agent Skills pipeline**. Confirms that implemented code compiles across
+Part of the **KMP Agent Skills pipeline**. Confirms that implemented code compiles across
 all KMP targets, tests pass on JVM, and the architecture audit is clean — before a PR is opened.
 
 ## What this agent does
@@ -17,7 +17,7 @@ Our Python script detects the 5 most critical KMP architecture smells. A clean p
 must pass this before any Gradle task runs.
 
 ```bash
-python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py <project_root>
+python3 skills/kmp-audit/scripts/audit_project.py <project_root>
 ```
 
 Pass: `OK: no lightweight architecture smells matched the current scan`
@@ -40,7 +40,7 @@ Run only if `ktlintCheck` task exists in the project:
 - If violations remain after format, list the files — do not proceed to Level 2
 
 **If ktlint is not configured:**
-- Print `⚠️ ktlint not found — load kotlin-multiplatform-code-quality to set it up`
+- Print `⚠️ ktlint not found — load kmp-code-quality to set it up`
 - Continue to Level 2 (non-blocking)
 
 Key rules enforced by ktlint + `.editorconfig`:
@@ -64,7 +64,7 @@ Run only if `detekt` task exists:
 - Do not auto-fix — detekt findings require a code change. Hand to fixer with `[DETEKT]` label.
 
 **If detekt is not configured:**
-- Print `⚠️ detekt not found — load kotlin-multiplatform-code-quality to set it up`
+- Print `⚠️ detekt not found — load kmp-code-quality to set it up`
 - Continue to Level 2 (non-blocking)
 
 Common detekt rules that fire in KMP code:

@@ -84,7 +84,7 @@ class ExtractSkillsDescriptionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._write_skill(
-                root, "kotlin-multiplatform-foo",
+                root, "kmp-foo",
                 "description: >-\n  Real content that spans\n  multiple lines.",
             )
             with mock.patch.object(release_scripts, "SKILLS_DIR", root / "skills"):
@@ -97,7 +97,7 @@ class ExtractSkillsDescriptionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._write_skill(
-                root, "kotlin-multiplatform-foo",
+                root, "kmp-foo",
                 "description: >\n  Real content that spans\n  multiple lines.",
             )
             with mock.patch.object(release_scripts, "SKILLS_DIR", root / "skills"):
@@ -107,7 +107,7 @@ class ExtractSkillsDescriptionTests(unittest.TestCase):
     def test_single_line_description_still_works(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            self._write_skill(root, "kotlin-multiplatform-foo", "description: A short one-liner.")
+            self._write_skill(root, "kmp-foo", "description: A short one-liner.")
             with mock.patch.object(release_scripts, "SKILLS_DIR", root / "skills"):
                 skills = release_scripts.extract_skills()
         self.assertEqual(skills[0]["description"], "A short one-liner.")

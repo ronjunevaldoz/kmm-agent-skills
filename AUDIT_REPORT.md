@@ -1,4 +1,4 @@
-# Deep Technical Audit — kmm-agent-skills
+# Deep Technical Audit — kmp-agent-skills
 
 Date: 2026-08-02 · HEAD: `3181873` (v1.118.0) · Mode: **diagnose only, no code changed**
 
@@ -13,7 +13,7 @@ is a template the skill *generates*, not a bundled file).
 - 552 tests pass; all 6 release gates pass (audit, skill scan, shell portability,
   skill map, keyword routing, compat matrix)
 - Every shell script (`bash -n`) and Python script (`ast.parse`) parses clean
-- Zero dangling `kotlin-multiplatform-*` skill references across skills/commands/agents
+- Zero dangling `kmp-*` skill references across skills/commands/agents
 - Zero skills with stale `last-updated` (>60 days)
 - 66 skills indexed consistently across README, expert map, planner
 
@@ -28,11 +28,11 @@ is a template the skill *generates*, not a bundled file).
 ## High
 
 ### H-1 — Version drift: `library-publishing` Step 2 pins Kotlin 2.1.21
-`skills/kotlin-multiplatform-library-publishing/SKILL.md:274` — the Step 2
+`skills/kmp-library-publishing/SKILL.md:274` — the Step 2
 `libs.versions.toml` example pins `kotlin = "2.1.21"` while the collection's canonical
 baseline is 2.4.0 (`feature-scaffold` pins `kotlin = "2.4.0"`, PLAN.md line 169 says
 2.4.0). Same block pins `vanniktech-publish = "0.30.0"` while
-`kotlin-multiplatform-release/SKILL.md:261` pins `0.37.0` — two skills a library author
+`kmp-release/SKILL.md:261` pins `0.37.0` — two skills a library author
 uses *together* disagree by 7 minor versions. A library scaffolded from this block
 starts 3 Kotlin minors behind the rest of its own project.
 
@@ -49,10 +49,10 @@ AGP `9.2.0` (`feature-scaffold:174,323`), Ktor `3.5.0` (`feature-scaffold:179`,
 ## Medium
 
 ### M-1 — Command H1 names don't match installed filenames (19 of 29 files)
-`commands/kmm-verify.md` declares `# /verify`, `kmm-run-audit.md` declares
-`# /run-audit`, etc. Real invocation is by filename (`/kmm-verify`), so 19 headers
+`commands/kmp-verify.md` declares `# /verify`, `kmp-run-audit.md` declares
+`# /run-audit`, etc. Real invocation is by filename (`/kmp-verify`), so 19 headers
 display a command name that doesn't exist as written. 10 files are consistent
-(`kmm-new-project`, `kmm-setup-agents`, `kmm-generate-palette`, …) — the inconsistency
+(`kmp-new-project`, `kmp-setup-agents`, `kmp-generate-palette`, …) — the inconsistency
 is the split itself. Verified by listing every file's first line.
 
 ### M-2 — Stale detached-HEAD git worktree checked into the working dir
@@ -66,11 +66,11 @@ Verified per-script against `tests/` contents (an initial list of 8 shrank to 3 
 checking actual test file references):
 - `scripts/check_compat_matrix.py` — mitigated: runs inside every release gate, so a
   crash is caught, but its *logic* has no regression test
-- `skills/kotlin-multiplatform-design-system/scripts/generate_palette.py`
-- `skills/kotlin-multiplatform-skill-harvester/scripts/harvest_lessons.py`
+- `skills/kmp-design-system/scripts/generate_palette.py`
+- `skills/kmp-skill-harvester/scripts/harvest_lessons.py`
 
 ### M-4 — Audit skill's own checklist contradicts repo reality on exec bits
-`skills/kotlin-multiplatform-audit/SKILL.md:194` says "Check that scripts are
+`skills/kmp-audit/SKILL.md:194` says "Check that scripts are
 executable" — but effectively **no** bundled script has the executable bit set
 (20 checked, all `not executable`). No functional break (everything is invoked via
 `python3 …`/`bash …`), but the skill's own hygiene rule fails against its own repo.
@@ -84,7 +84,7 @@ stable line, so the pin is defensible — but the skill has no freshness note sa
 2.x migration is coming, unlike other fast-moving-dependency skills that carry one.
 
 ### M-6 — `benchmark` skill states "Kotlin 2.2.0+" minimum
-`skills/kotlin-multiplatform-benchmark/SKILL.md:68`. A minimum bound, not a pin, so
+`skills/kmp-benchmark/SKILL.md:68`. A minimum bound, not a pin, so
 not wrong per se — but it reads stale beside the 2.4.0 baseline and was likely copied
 from kotlinx-benchmark docs at writing time. Verify the library's real current minimum
 before bumping the text.

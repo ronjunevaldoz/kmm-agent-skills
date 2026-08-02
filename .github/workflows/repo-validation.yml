@@ -1,4 +1,4 @@
-name: KMM Skills Repo Validation
+name: KMP Skills Repo Validation
 
 on:
   pull_request:
@@ -28,7 +28,7 @@ jobs:
       - name: Run repo validation gates
         run: |
           python3 scripts/scan_skill_issues.py
-          python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .
-          python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .
-          python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py --repo-root .
+          python3 skills/kmp-audit/scripts/audit_skills_repo.py .
+          python3 skills/kmp-expert/scripts/validate_skill_map.py --repo-root .
+          python3 skills/kmp-expert/scripts/validate_keyword_routing.py --repo-root .
           python3 -m pytest tests -v --tb=short

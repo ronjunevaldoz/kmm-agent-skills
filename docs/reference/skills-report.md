@@ -6,72 +6,72 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
-| [`kotlin-multiplatform-design-system-extended`](../../skills/kotlin-multiplatform-design-system-extended/) | 3101 | 2026-07-08 | 🟡 2 known debt |
-| [`kotlin-multiplatform-design-system`](../../skills/kotlin-multiplatform-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
-| [`kotlin-multiplatform-mvi`](../../skills/kotlin-multiplatform-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
-| [`kotlin-multiplatform-feature-scaffold`](../../skills/kotlin-multiplatform-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
-| [`kotlin-multiplatform-code-quality`](../../skills/kotlin-multiplatform-code-quality/) | 983 | 2026-07-31 | 🟡 1 known debt |
-| [`kotlin-multiplatform-library-publishing`](../../skills/kotlin-multiplatform-library-publishing/) | 972 | 2026-07-31 | 🟡 1 known debt |
-| [`kotlin-multiplatform-expert`](../../skills/kotlin-multiplatform-expert/) | 910 | 2026-07-31 | 🟡 1 known debt |
-| [`kotlin-multiplatform-navigation`](../../skills/kotlin-multiplatform-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
-| [`kotlin-multiplatform-legal-docs`](../../skills/kotlin-multiplatform-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
-| [`kotlin-multiplatform-roborazzi`](../../skills/kotlin-multiplatform-roborazzi/) | 769 | 2026-07-10 | 🟡 1 known debt |
-| [`kotlin-multiplatform-network-layer`](../../skills/kotlin-multiplatform-network-layer/) | 690 | 2026-07-31 | 🟡 1 known debt |
-| [`kotlin-multiplatform-clean-architecture`](../../skills/kotlin-multiplatform-clean-architecture/) | 672 | 2026-07-26 | 🟡 1 known debt |
-| [`kotlin-multiplatform-compose-slot-api`](../../skills/kotlin-multiplatform-compose-slot-api/) | 648 | 2026-06-26 | 🟡 1 known debt |
-| [`kotlin-multiplatform-repository-pattern`](../../skills/kotlin-multiplatform-repository-pattern/) | 632 | 2026-07-13 | 🟡 1 known debt |
-| [`kotlin-multiplatform-sqldelight-setup`](../../skills/kotlin-multiplatform-sqldelight-setup/) | 628 | 2026-07-09 | 🟡 1 known debt |
-| [`kotlin-multiplatform-compose-state-hoisting`](../../skills/kotlin-multiplatform-compose-state-hoisting/) | 618 | 2026-07-20 | 🟡 1 known debt |
-| [`kotlin-multiplatform-release`](../../skills/kotlin-multiplatform-release/) | 590 | 2026-07-04 | 🟡 1 known debt |
-| [`kotlin-multiplatform-compose-state-container`](../../skills/kotlin-multiplatform-compose-state-container/) | 589 | 2026-06-06 | 🟡 1 known debt |
-| [`kotlin-multiplatform-shadcn-compose`](../../skills/kotlin-multiplatform-shadcn-compose/) | 583 | 2026-07-31 | 🟡 1 known debt |
-| [`kotlin-multiplatform-layout-system`](../../skills/kotlin-multiplatform-layout-system/) | 532 | 2026-07-17 | 🟡 2 known debt |
-| [`kotlin-multiplatform-expect-actual`](../../skills/kotlin-multiplatform-expect-actual/) | 507 | 2026-07-20 | 🟡 1 known debt |
-| [`kotlin-multiplatform-shared-resources`](../../skills/kotlin-multiplatform-shared-resources/) | 504 | 2026-07-08 | 🟡 1 known debt |
-| [`kotlin-multiplatform-in-app-purchases`](../../skills/kotlin-multiplatform-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
-| [`kotlin-multiplatform-ci-github-actions`](../../skills/kotlin-multiplatform-ci-github-actions/) | 489 | 2026-07-14 | ✅ |
-| [`kotlin-multiplatform-jni-pro`](../../skills/kotlin-multiplatform-jni-pro/) | 465 | 2026-07-31 | ✅ |
-| [`kotlin-multiplatform-desktop-app`](../../skills/kotlin-multiplatform-desktop-app/) | 463 | 2026-06-29 | ✅ |
-| [`kotlin-multiplatform-dependency-injection`](../../skills/kotlin-multiplatform-dependency-injection/) | 453 | 2026-07-20 | ✅ |
-| [`kotlin-multiplatform-adaptive-layout`](../../skills/kotlin-multiplatform-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
-| [`kotlin-multiplatform-flavor-environment`](../../skills/kotlin-multiplatform-flavor-environment/) | 437 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-audit`](../../skills/kotlin-multiplatform-audit/) | 432 | 2026-07-31 | ✅ |
-| [`kotlin-multiplatform-paging`](../../skills/kotlin-multiplatform-paging/) | 432 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-presenter-module`](../../skills/kotlin-multiplatform-presenter-module/) | 419 | 2026-07-20 | ✅ |
-| [`kotlin-multiplatform-datastore`](../../skills/kotlin-multiplatform-datastore/) | 413 | 2026-06-18 | ✅ |
-| [`kotlin-multiplatform-mongodb-database`](../../skills/kotlin-multiplatform-mongodb-database/) | 409 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-compose-animation`](../../skills/kotlin-multiplatform-compose-animation/) | 389 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-migration`](../../skills/kotlin-multiplatform-migration/) | 386 | 2026-07-19 | ✅ |
-| [`kotlin-multiplatform-permissions`](../../skills/kotlin-multiplatform-permissions/) | 386 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-workmanager`](../../skills/kotlin-multiplatform-workmanager/) | 382 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-biometric-auth`](../../skills/kotlin-multiplatform-biometric-auth/) | 373 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-push-notifications`](../../skills/kotlin-multiplatform-push-notifications/) | 372 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-xcframework-spm`](../../skills/kotlin-multiplatform-xcframework-spm/) | 364 | 2026-06-06 | ✅ |
-| [`kotlin-multiplatform-form-validation`](../../skills/kotlin-multiplatform-form-validation/) | 358 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-project-docs-maintainer`](../../skills/kotlin-multiplatform-project-docs-maintainer/) | 358 | 2026-07-11 | ✅ |
-| [`kotlin-multiplatform-lessons`](../../skills/kotlin-multiplatform-lessons/) | 356 | 2026-07-12 | ✅ |
-| [`kotlin-multiplatform-deep-linking`](../../skills/kotlin-multiplatform-deep-linking/) | 351 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-crash-reporting`](../../skills/kotlin-multiplatform-crash-reporting/) | 350 | 2026-06-24 | ✅ |
-| [`kotlin-multiplatform-skill-harvester`](../../skills/kotlin-multiplatform-skill-harvester/) | 337 | 2026-06-26 | ✅ |
-| [`kotlin-multiplatform-api-mimicry`](../../skills/kotlin-multiplatform-api-mimicry/) | 336 | 2026-07-31 | ✅ |
-| [`kotlin-multiplatform-feature-flags`](../../skills/kotlin-multiplatform-feature-flags/) | 334 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-accessibility`](../../skills/kotlin-multiplatform-accessibility/) | 330 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-docs-site`](../../skills/kotlin-multiplatform-docs-site/) | 326 | 2026-07-11 | ✅ |
-| [`kotlin-multiplatform-offline-first`](../../skills/kotlin-multiplatform-offline-first/) | 324 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-image-loading`](../../skills/kotlin-multiplatform-image-loading/) | 317 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-benchmark`](../../skills/kotlin-multiplatform-benchmark/) | 301 | 2026-07-10 | ✅ |
-| [`kotlin-multiplatform-analytics`](../../skills/kotlin-multiplatform-analytics/) | 297 | 2026-06-21 | ✅ |
-| [`kotlin-multiplatform-logging`](../../skills/kotlin-multiplatform-logging/) | 297 | 2026-06-24 | ✅ |
-| [`kotlin-multiplatform-native-authoring`](../../skills/kotlin-multiplatform-native-authoring/) | 292 | 2026-07-31 | ✅ |
-| [`kotlin-multiplatform-kotlin-rpc`](../../skills/kotlin-multiplatform-kotlin-rpc/) | 285 | 2026-07-31 | ✅ |
-| [`kotlin-multiplatform-imagevector-generator`](../../skills/kotlin-multiplatform-imagevector-generator/) | 276 | 2026-07-08 | ✅ |
-| [`kotlin-multiplatform-preview-driven-development`](../../skills/kotlin-multiplatform-preview-driven-development/) | 276 | 2026-07-08 | ✅ |
-| [`kotlin-multiplatform-proguard-r8`](../../skills/kotlin-multiplatform-proguard-r8/) | 269 | 2026-06-29 | ✅ |
-| [`kotlin-multiplatform-unit-testing`](../../skills/kotlin-multiplatform-unit-testing/) | 269 | 2026-06-18 | ✅ |
-| [`kotlin-multiplatform-graphics-modifiers`](../../skills/kotlin-multiplatform-graphics-modifiers/) | 266 | 2026-06-13 | ✅ |
-| [`kotlin-multiplatform-ktor-auth-service`](../../skills/kotlin-multiplatform-ktor-auth-service/) | 242 | 2026-06-13 | ✅ |
-| [`kotlin-multiplatform-android-cli`](../../skills/kotlin-multiplatform-android-cli/) | 210 | 2026-07-19 | ✅ |
-| [`kotlin-multiplatform-token-saver`](../../skills/kotlin-multiplatform-token-saver/) | 186 | 2026-07-13 | ✅ |
+| [`kmp-design-system-extended`](../../skills/kmp-design-system-extended/) | 3101 | 2026-07-08 | 🟡 2 known debt |
+| [`kmp-design-system`](../../skills/kmp-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
+| [`kmp-mvi`](../../skills/kmp-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
+| [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
+| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 983 | 2026-07-31 | 🟡 1 known debt |
+| [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 972 | 2026-07-31 | 🟡 1 known debt |
+| [`kmp-expert`](../../skills/kmp-expert/) | 910 | 2026-07-31 | 🟡 1 known debt |
+| [`kmp-navigation`](../../skills/kmp-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
+| [`kmp-legal-docs`](../../skills/kmp-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
+| [`kmp-roborazzi`](../../skills/kmp-roborazzi/) | 769 | 2026-07-10 | 🟡 1 known debt |
+| [`kmp-network-layer`](../../skills/kmp-network-layer/) | 690 | 2026-07-31 | 🟡 1 known debt |
+| [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 672 | 2026-07-26 | 🟡 1 known debt |
+| [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 648 | 2026-06-26 | 🟡 1 known debt |
+| [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 632 | 2026-07-13 | 🟡 1 known debt |
+| [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 628 | 2026-07-09 | 🟡 1 known debt |
+| [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 618 | 2026-07-20 | 🟡 1 known debt |
+| [`kmp-release`](../../skills/kmp-release/) | 590 | 2026-07-04 | 🟡 1 known debt |
+| [`kmp-compose-state-container`](../../skills/kmp-compose-state-container/) | 589 | 2026-06-06 | 🟡 1 known debt |
+| [`kmp-shadcn-compose`](../../skills/kmp-shadcn-compose/) | 583 | 2026-07-31 | 🟡 1 known debt |
+| [`kmp-layout-system`](../../skills/kmp-layout-system/) | 532 | 2026-07-17 | 🟡 2 known debt |
+| [`kmp-expect-actual`](../../skills/kmp-expect-actual/) | 507 | 2026-07-20 | 🟡 1 known debt |
+| [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 504 | 2026-07-08 | 🟡 1 known debt |
+| [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
+| [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 489 | 2026-07-14 | ✅ |
+| [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
+| [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
+| [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
+| [`kmp-adaptive-layout`](../../skills/kmp-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
+| [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 432 | 2026-07-31 | ✅ |
+| [`kmp-paging`](../../skills/kmp-paging/) | 432 | 2026-06-21 | ✅ |
+| [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
+| [`kmp-datastore`](../../skills/kmp-datastore/) | 413 | 2026-06-18 | ✅ |
+| [`kmp-mongodb-database`](../../skills/kmp-mongodb-database/) | 409 | 2026-06-21 | ✅ |
+| [`kmp-compose-animation`](../../skills/kmp-compose-animation/) | 389 | 2026-06-21 | ✅ |
+| [`kmp-migration`](../../skills/kmp-migration/) | 386 | 2026-07-19 | ✅ |
+| [`kmp-permissions`](../../skills/kmp-permissions/) | 386 | 2026-06-21 | ✅ |
+| [`kmp-workmanager`](../../skills/kmp-workmanager/) | 382 | 2026-06-21 | ✅ |
+| [`kmp-biometric-auth`](../../skills/kmp-biometric-auth/) | 373 | 2026-06-21 | ✅ |
+| [`kmp-push-notifications`](../../skills/kmp-push-notifications/) | 372 | 2026-06-21 | ✅ |
+| [`kmp-xcframework-spm`](../../skills/kmp-xcframework-spm/) | 364 | 2026-06-06 | ✅ |
+| [`kmp-form-validation`](../../skills/kmp-form-validation/) | 358 | 2026-06-21 | ✅ |
+| [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 358 | 2026-07-11 | ✅ |
+| [`kmp-lessons`](../../skills/kmp-lessons/) | 356 | 2026-07-12 | ✅ |
+| [`kmp-deep-linking`](../../skills/kmp-deep-linking/) | 351 | 2026-06-21 | ✅ |
+| [`kmp-crash-reporting`](../../skills/kmp-crash-reporting/) | 350 | 2026-06-24 | ✅ |
+| [`kmp-skill-harvester`](../../skills/kmp-skill-harvester/) | 337 | 2026-06-26 | ✅ |
+| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 336 | 2026-07-31 | ✅ |
+| [`kmp-feature-flags`](../../skills/kmp-feature-flags/) | 334 | 2026-06-21 | ✅ |
+| [`kmp-accessibility`](../../skills/kmp-accessibility/) | 330 | 2026-06-21 | ✅ |
+| [`kmp-docs-site`](../../skills/kmp-docs-site/) | 326 | 2026-07-11 | ✅ |
+| [`kmp-offline-first`](../../skills/kmp-offline-first/) | 324 | 2026-06-21 | ✅ |
+| [`kmp-image-loading`](../../skills/kmp-image-loading/) | 317 | 2026-06-21 | ✅ |
+| [`kmp-benchmark`](../../skills/kmp-benchmark/) | 301 | 2026-07-10 | ✅ |
+| [`kmp-analytics`](../../skills/kmp-analytics/) | 297 | 2026-06-21 | ✅ |
+| [`kmp-logging`](../../skills/kmp-logging/) | 297 | 2026-06-24 | ✅ |
+| [`kmp-native-authoring`](../../skills/kmp-native-authoring/) | 292 | 2026-07-31 | ✅ |
+| [`kmp-kotlin-rpc`](../../skills/kmp-kotlin-rpc/) | 285 | 2026-07-31 | ✅ |
+| [`kmp-imagevector-generator`](../../skills/kmp-imagevector-generator/) | 276 | 2026-07-08 | ✅ |
+| [`kmp-preview-driven-development`](../../skills/kmp-preview-driven-development/) | 276 | 2026-07-08 | ✅ |
+| [`kmp-proguard-r8`](../../skills/kmp-proguard-r8/) | 269 | 2026-06-29 | ✅ |
+| [`kmp-unit-testing`](../../skills/kmp-unit-testing/) | 269 | 2026-06-18 | ✅ |
+| [`kmp-graphics-modifiers`](../../skills/kmp-graphics-modifiers/) | 266 | 2026-06-13 | ✅ |
+| [`kmp-ktor-auth-service`](../../skills/kmp-ktor-auth-service/) | 242 | 2026-06-13 | ✅ |
+| [`kmp-android-cli`](../../skills/kmp-android-cli/) | 210 | 2026-07-19 | ✅ |
+| [`kmp-token-saver`](../../skills/kmp-token-saver/) | 186 | 2026-07-13 | ✅ |
 
 **Status legend:** ✅ no issues · 🟡 known, tracked debt (doesn't block a release — see KI-008) · 🔴 blocking (would fail `scan_skill_issues.py`, a new regression, not tracked debt)
 

@@ -18,7 +18,7 @@ body:
     attributes:
       label: Skill or topic name
       description: Existing skill name, or a proposed name for a new one.
-      placeholder: "kotlin-multiplatform-..."
+      placeholder: "kmp-..."
     validations:
       required: true
   - type: textarea

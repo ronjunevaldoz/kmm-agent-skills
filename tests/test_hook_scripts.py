@@ -80,7 +80,7 @@ class HookScriptTests(unittest.TestCase):
 
     def test_freshness_exits_0_when_all_skills_fresh(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            skills_dir = self._make_skill_dir(tmp, "kotlin-multiplatform-foo", "2026-06-21")
+            skills_dir = self._make_skill_dir(tmp, "kmp-foo", "2026-06-21")
             result = subprocess.run(
                 ["bash", str(HOOKS_DIR / "check-skill-freshness.sh"), str(skills_dir)],
                 capture_output=True,
@@ -92,7 +92,7 @@ class HookScriptTests(unittest.TestCase):
 
     def test_freshness_exits_1_when_skill_is_stale(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            skills_dir = self._make_skill_dir(tmp, "kotlin-multiplatform-old", "2020-01-01")
+            skills_dir = self._make_skill_dir(tmp, "kmp-old", "2020-01-01")
             result = subprocess.run(
                 ["bash", str(HOOKS_DIR / "check-skill-freshness.sh"), str(skills_dir)],
                 capture_output=True,
@@ -106,10 +106,10 @@ class HookScriptTests(unittest.TestCase):
     def test_freshness_warns_on_missing_date(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             skills_dir = Path(tmp) / "skills"
-            skill_dir = skills_dir / "kotlin-multiplatform-nodates"
+            skill_dir = skills_dir / "kmp-nodates"
             skill_dir.mkdir(parents=True)
             (skill_dir / "SKILL.md").write_text(
-                "---\nname: kotlin-multiplatform-nodates\n---\n",
+                "---\nname: kmp-nodates\n---\n",
                 encoding="utf-8",
             )
             result = subprocess.run(

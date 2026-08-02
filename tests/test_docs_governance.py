@@ -15,8 +15,8 @@ class DocsScopeBoundaryTests(unittest.TestCase):
 
         docs_maintainer = normalize((REPO_ROOT / "agents" / "docs-maintainer.md").read_text(encoding="utf-8"))
         planner = normalize((REPO_ROOT / "agents" / "planner.md").read_text(encoding="utf-8"))
-        expert = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "SKILL.md").read_text(encoding="utf-8"))
-        project_docs = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-project-docs-maintainer" / "SKILL.md").read_text(encoding="utf-8"))
+        expert = normalize((REPO_ROOT / "skills" / "kmp-expert" / "SKILL.md").read_text(encoding="utf-8"))
+        project_docs = normalize((REPO_ROOT / "skills" / "kmp-project-docs-maintainer" / "SKILL.md").read_text(encoding="utf-8"))
         readme = normalize((REPO_ROOT / "README.md").read_text(encoding="utf-8"))
 
         self.assertIn("repo-internal docs", docs_maintainer)
@@ -37,15 +37,15 @@ class DocsScopeBoundaryTests(unittest.TestCase):
 
         readme = normalize((REPO_ROOT / "README.md").read_text(encoding="utf-8"))
         install = normalize((REPO_ROOT / "INSTALL.md").read_text(encoding="utf-8"))
-        command = normalize((REPO_ROOT / "commands" / "kmm-sync-local-skills.md").read_text(encoding="utf-8"))
+        command = normalize((REPO_ROOT / "commands" / "kmp-sync-local-skills.md").read_text(encoding="utf-8"))
 
-        self.assertIn("kmm-sync-local-skills", readme)
+        self.assertIn("kmp-sync-local-skills", readme)
         self.assertIn("local claude / codex / gemini installs on this mac", install)
-        self.assertIn("sync the latest kmm-agent-skills release into the local assistant skill bundles", command)
+        self.assertIn("sync the latest kmp-agent-skills release into the local assistant skill bundles", command)
         self.assertIn("does not copy commands/", command)
 
     def test_benchmark_tables_have_a_canonical_reference_home(self) -> None:
-        docs = (REPO_ROOT / "skills" / "kotlin-multiplatform-project-docs-maintainer" / "SKILL.md").read_text(encoding="utf-8").lower()
+        docs = (REPO_ROOT / "skills" / "kmp-project-docs-maintainer" / "SKILL.md").read_text(encoding="utf-8").lower()
 
         self.assertIn("benchmark or performance comparison tables", docs)
         self.assertIn("docs/reference/benchmark-matrix.md", docs)
@@ -53,9 +53,9 @@ class DocsScopeBoundaryTests(unittest.TestCase):
     def test_claude_scaffold_contract_is_documented_as_project_owned_plus_runtime(self) -> None:
         normalize = lambda text: " ".join(text.lower().replace("`", "").split())
 
-        expert = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "SKILL.md").read_text(encoding="utf-8"))
-        setup_agents = normalize((REPO_ROOT / "commands" / "kmm-setup-agents.md").read_text(encoding="utf-8"))
-        new_project = normalize((REPO_ROOT / "commands" / "kmm-new-project.md").read_text(encoding="utf-8"))
+        expert = normalize((REPO_ROOT / "skills" / "kmp-expert" / "SKILL.md").read_text(encoding="utf-8"))
+        setup_agents = normalize((REPO_ROOT / "commands" / "kmp-setup-agents.md").read_text(encoding="utf-8"))
+        new_project = normalize((REPO_ROOT / "commands" / "kmp-new-project.md").read_text(encoding="utf-8"))
 
         for text in (expert, setup_agents, new_project):
             self.assertIn("rules/", text)
@@ -84,9 +84,9 @@ class CommonFirstSharedCodeTests(unittest.TestCase):
     def test_common_first_formatting_rule_is_explicit(self) -> None:
         normalize = lambda text: " ".join(text.lower().replace("`", "").split())
 
-        expert = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "SKILL.md").read_text(encoding="utf-8"))
-        expect_actual = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-expect-actual" / "SKILL.md").read_text(encoding="utf-8"))
-        audit = normalize((REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "SKILL.md").read_text(encoding="utf-8"))
+        expert = normalize((REPO_ROOT / "skills" / "kmp-expert" / "SKILL.md").read_text(encoding="utf-8"))
+        expect_actual = normalize((REPO_ROOT / "skills" / "kmp-expect-actual" / "SKILL.md").read_text(encoding="utf-8"))
+        audit = normalize((REPO_ROOT / "skills" / "kmp-audit" / "SKILL.md").read_text(encoding="utf-8"))
 
         self.assertIn("string.format", expert)
         self.assertIn("shared formatter", expert)

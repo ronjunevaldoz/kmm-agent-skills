@@ -15,7 +15,7 @@ class SyncLocalAssistantSkillsTests(unittest.TestCase):
     """Dry-run only — never touches real ~/.claude, ~/.codex, ~/.gemini, ~/.agents."""
 
     def _fake_source(self, tmp: str) -> Path:
-        source = Path(tmp) / "kmm-agent-skills"
+        source = Path(tmp) / "kmp-agent-skills"
         (source / "skills").mkdir(parents=True)
         (source / "skills.json").write_text(json.dumps({"version": "0.0.0-test"}), encoding="utf-8")
         return source

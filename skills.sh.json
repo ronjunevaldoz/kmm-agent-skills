@@ -6,79 +6,79 @@
       "title": "Architecture",
       "description": "Layer contract, module structure, presenter isolation, and code quality gates for KMP projects.",
       "skills": [
-        "kotlin-multiplatform-clean-architecture",
-        "kotlin-multiplatform-feature-scaffold",
-        "kotlin-multiplatform-presenter-module",
-        "kotlin-multiplatform-dependency-injection",
-        "kotlin-multiplatform-code-quality"
+        "kmp-clean-architecture",
+        "kmp-feature-scaffold",
+        "kmp-presenter-module",
+        "kmp-dependency-injection",
+        "kmp-code-quality"
       ]
     },
     {
       "title": "Foundation",
       "description": "Project setup, environment config, CI, and logging for a new KMP project.",
       "skills": [
-        "kotlin-multiplatform-flavor-environment",
-        "kotlin-multiplatform-ci-github-actions",
-        "kotlin-multiplatform-logging",
-        "kotlin-multiplatform-xcframework-spm"
+        "kmp-flavor-environment",
+        "kmp-ci-github-actions",
+        "kmp-logging",
+        "kmp-xcframework-spm"
       ]
     },
     {
       "title": "Data & Networking",
       "description": "Ktor client, SQLDelight, repository pattern, and offline-first data strategies.",
       "skills": [
-        "kotlin-multiplatform-network-layer",
-        "kotlin-multiplatform-sqldelight-setup",
-        "kotlin-multiplatform-repository-pattern",
-        "kotlin-multiplatform-datastore"
+        "kmp-network-layer",
+        "kmp-sqldelight-setup",
+        "kmp-repository-pattern",
+        "kmp-datastore"
       ]
     },
     {
       "title": "Backend",
       "description": "Ktor auth service, MongoDB repositories, and Kotlin RPC shared service contracts.",
       "skills": [
-        "kotlin-multiplatform-ktor-auth-service",
-        "kotlin-multiplatform-mongodb-database",
-        "kotlin-multiplatform-kotlin-rpc"
+        "kmp-ktor-auth-service",
+        "kmp-mongodb-database",
+        "kmp-kotlin-rpc"
       ]
     },
     {
       "title": "UI System",
       "description": "No-Material design tokens, Compose components, state management, and preview-driven development.",
       "skills": [
-        "kotlin-multiplatform-design-system",
-        "kotlin-multiplatform-design-system-extended",
-        "kotlin-multiplatform-mvi",
-        "kotlin-multiplatform-preview-driven-development",
-        "kotlin-multiplatform-compose-slot-api",
-        "kotlin-multiplatform-compose-state-hoisting",
-        "kotlin-multiplatform-compose-state-container",
-        "kotlin-multiplatform-graphics-modifiers"
+        "kmp-design-system",
+        "kmp-design-system-extended",
+        "kmp-mvi",
+        "kmp-preview-driven-development",
+        "kmp-compose-slot-api",
+        "kmp-compose-state-hoisting",
+        "kmp-compose-state-container",
+        "kmp-graphics-modifiers"
       ]
     },
     {
       "title": "Testing",
       "description": "Unit tests with runTest + Turbine, Roborazzi screenshot tests from @Preview, and shared fakes.",
       "skills": [
-        "kotlin-multiplatform-unit-testing",
-        "kotlin-multiplatform-roborazzi"
+        "kmp-unit-testing",
+        "kmp-roborazzi"
       ]
     },
     {
       "title": "Platform",
       "description": "expect/actual patterns, shared resources, navigation, and iOS XCFramework.",
       "skills": [
-        "kotlin-multiplatform-expect-actual",
-        "kotlin-multiplatform-navigation",
-        "kotlin-multiplatform-shared-resources"
+        "kmp-expect-actual",
+        "kmp-navigation",
+        "kmp-shared-resources"
       ]
     },
     {
       "title": "Meta",
       "description": "Expert routing skill and audit tooling for navigating and reviewing the full skill set.",
       "skills": [
-        "kotlin-multiplatform-expert",
-        "kotlin-multiplatform-audit"
+        "kmp-expert",
+        "kmp-audit"
       ]
     }
   ]

@@ -15,7 +15,7 @@ command_shell_portability_scripts = load_module(
 )
 
 class CommandShellPortabilityTests(unittest.TestCase):
-    """A find ... -not ... predicate in commands/kmm-audit-screenshots.md broke under
+    """A find ... -not ... predicate in commands/kmp-audit-screenshots.md broke under
     a real user's RTK proxy hook (2026-07-10) — this scanner catches that pattern
     anywhere it recurs in commands/*.md.
     """

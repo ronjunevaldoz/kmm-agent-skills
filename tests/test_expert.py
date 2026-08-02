@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 expert_scripts = load_module(
     "validate_skill_map",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-expert" / "scripts" / "validate_skill_map.py",
+    REPO_ROOT / "skills" / "kmp-expert" / "scripts" / "validate_skill_map.py",
 )
 
 class ValidateSkillMapTests(unittest.TestCase):
@@ -20,9 +20,9 @@ class ValidateSkillMapTests(unittest.TestCase):
             root = Path(tmp)
             (root / "README.md").write_text(
                 """
-                kotlin-multiplatform-a
-                kotlin-multiplatform-b
-                kotlin-multiplatform-expert
+                kmp-a
+                kmp-b
+                kmp-expert
                 """.strip(),
                 encoding="utf-8",
             )
@@ -33,13 +33,13 @@ class ValidateSkillMapTests(unittest.TestCase):
                 encoding="utf-8",
             )
             skills_dir = root / "skills"
-            for name in ("kotlin-multiplatform-a", "kotlin-multiplatform-b", "kotlin-multiplatform-expert"):
+            for name in ("kmp-a", "kmp-b", "kmp-expert"):
                 (skills_dir / name).mkdir(parents=True)
                 (skills_dir / name / "SKILL.md").write_text(
                     "## The 3 Skills and What They Own\n"
-                    "kotlin-multiplatform-a\n"
-                    "kotlin-multiplatform-b\n"
-                    "kotlin-multiplatform-expert\n",
+                    "kmp-a\n"
+                    "kmp-b\n"
+                    "kmp-expert\n",
                     encoding="utf-8",
                 )
 
@@ -48,16 +48,16 @@ class ValidateSkillMapTests(unittest.TestCase):
     def test_validate_skill_map_reports_missing_skill(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            (root / "README.md").write_text("kotlin-multiplatform-a", encoding="utf-8")
+            (root / "README.md").write_text("kmp-a", encoding="utf-8")
             skills_dir = root / "skills"
-            (skills_dir / "kotlin-multiplatform-a").mkdir(parents=True)
-            (skills_dir / "kotlin-multiplatform-a" / "SKILL.md").write_text(
-                "## The 1 Skills and What They Own\nkotlin-multiplatform-a\n",
+            (skills_dir / "kmp-a").mkdir(parents=True)
+            (skills_dir / "kmp-a" / "SKILL.md").write_text(
+                "## The 1 Skills and What They Own\nkmp-a\n",
                 encoding="utf-8",
             )
-            (skills_dir / "kotlin-multiplatform-expert").mkdir(parents=True)
-            (skills_dir / "kotlin-multiplatform-expert" / "SKILL.md").write_text(
-                "## The 1 Skills and What They Own\nkotlin-multiplatform-a\n",
+            (skills_dir / "kmp-expert").mkdir(parents=True)
+            (skills_dir / "kmp-expert" / "SKILL.md").write_text(
+                "## The 1 Skills and What They Own\nkmp-a\n",
                 encoding="utf-8",
             )
             errors = expert_scripts.validate_skill_map(root)

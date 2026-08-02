@@ -1,10 +1,10 @@
-# kmm-agent-skills
+# kmp-agent-skills
 
-[![skills.sh](https://skills.sh/b/ronjunevaldoz/kmm-agent-skills)](https://skills.sh/ronjunevaldoz/kmm-agent-skills)
+[![skills.sh](https://skills.sh/b/ronjunevaldoz/kmp-agent-skills)](https://skills.sh/ronjunevaldoz/kmp-agent-skills)
 [![Agent Skills spec](https://img.shields.io/badge/Agent%20Skills-spec%20compliant-brightgreen)](docs/reference/agentskills-io-standards.md)
-[![License](https://img.shields.io/github/license/ronjunevaldoz/kmm-agent-skills)](LICENSE)
-[![Repo size](https://img.shields.io/github/repo-size/ronjunevaldoz/kmm-agent-skills)](https://github.com/ronjunevaldoz/kmm-agent-skills)
-[![Last commit](https://img.shields.io/github/last-commit/ronjunevaldoz/kmm-agent-skills)](https://github.com/ronjunevaldoz/kmm-agent-skills)
+[![License](https://img.shields.io/github/license/ronjunevaldoz/kmp-agent-skills)](LICENSE)
+[![Repo size](https://img.shields.io/github/repo-size/ronjunevaldoz/kmp-agent-skills)](https://github.com/ronjunevaldoz/kmp-agent-skills)
+[![Last commit](https://img.shields.io/github/last-commit/ronjunevaldoz/kmp-agent-skills)](https://github.com/ronjunevaldoz/kmp-agent-skills)
 
 AI agent skills for **Kotlin Multiplatform (KMP)** development — clean module boundaries,
 version catalogs, build-logic convention plugins, and explicit review loops before code is generated.
@@ -20,12 +20,12 @@ for what was checked and how.
 
 ### Start a new KMP project
 
-Run `/kmm-new-project` with a natural language description. The agent asks for your group ID, project
+Run `/kmp-new-project` with a natural language description. The agent asks for your group ID, project
 name, and what the app does — then scaffolds a full multi-module KMP project with clean architecture,
 a design system, and a ready-to-use `.claude/` agent setup.
 
 ```
-/kmm-new-project "A shopping app with auth, product listing, and orders"
+/kmp-new-project "A shopping app with auth, product listing, and orders"
 ```
 
 The 9-step pipeline handles everything: module graph → clean-arch layers → Koin/Ktor/SQLDelight
@@ -33,16 +33,16 @@ wiring → design system → feature scaffolds → `.claude/AGENTS.md` tailored 
 
 ### Set up agents in an existing project
 
-Run `/kmm-setup-agents` in any existing KMP project. It reads your `settings.gradle.kts` and
+Run `/kmp-setup-agents` in any existing KMP project. It reads your `settings.gradle.kts` and
 `libs.versions.toml`, then generates a custom `AGENTS.md` routing table based on the libraries
 and feature modules it finds.
 
 ```
-/kmm-setup-agents
+/kmp-setup-agents
 ```
 
 Writes: `.claude/AGENTS.md` (tailored skill routing), `CLAUDE.md` (CLI flags), all consumer
-commands (`kmm-*.md`), deployed skills, and a `settings.json` Bash allowlist.
+commands (`kmp-*.md`), deployed skills, and a `settings.json` Bash allowlist.
 
 ### Cross-agent repo policy
 
@@ -58,29 +58,29 @@ thin and pointer-based instead of turning them into the only source of truth.
 ### Audit an existing project
 
 ```
-/kmm-run-audit
+/kmp-run-audit
 ```
 
 Runs `audit_project.py` across your project and produces per-finding remediation steps using
 the relevant skill. Catches architecture boundary violations, missing Koin bindings, layer leaks,
-hardcoded colors, and Material theme usage. See [`kotlin-multiplatform-audit`](skills/kotlin-multiplatform-audit/) for what it checks.
+hardcoded colors, and Material theme usage. See [`kmp-audit`](skills/kmp-audit/) for what it checks.
 
 ---
 
 ## Quick Start
 
 ```bash
-npx skills add ronjunevaldoz/kmm-agent-skills
+npx skills add ronjunevaldoz/kmp-agent-skills
 ```
 
 Then in Claude Code:
 
-1. **New project** → `/kmm-new-project <description>`
-2. **Existing project** → `/kmm-setup-agents`
-3. **Audit** → `/kmm-run-audit`
-4. **Implement a feature** → `/kmm-implement-feature <name>`
+1. **New project** → `/kmp-new-project <description>`
+2. **Existing project** → `/kmp-setup-agents`
+3. **Audit** → `/kmp-run-audit`
+4. **Implement a feature** → `/kmp-implement-feature <name>`
 
-**Start here:** not sure which skill to use? Ask `kotlin-multiplatform-expert` — it routes you
+**Start here:** not sure which skill to use? Ask `kmp-expert` — it routes you
 to the smallest relevant skill set.
 
 ---
@@ -88,17 +88,17 @@ to the smallest relevant skill set.
 ## Key Features
 
 ### Auto-reporting — consumer side
-Every consumer project running `/kmm-run-audit` or `/kmm-harvest-lessons` can now surface
+Every consumer project running `/kmp-run-audit` or `/kmp-harvest-lessons` can now surface
 issues back to this repo without leaving the terminal:
 
-- `/kmm-run-audit` **Step 7**: detects when a finding points to a *skill gap* (not just bad
+- `/kmp-run-audit` **Step 7**: detects when a finding points to a *skill gap* (not just bad
   consumer code) and prompts `[y] Submit / [n] Skip / [v] View draft` — submits via `gh` or
   falls back to a browser URL
-- `/kmm-harvest-lessons` **Step 6**: after every harvest, each positive pattern that the
+- `/kmp-harvest-lessons` **Step 6**: after every harvest, each positive pattern that the
   skills don't yet teach triggers the same interactive prompt to file an improvement proposal
-- Both flows use `draft_issue.py --submit --repo ronjunevaldoz/kmm-agent-skills`
+- Both flows use `draft_issue.py --submit --repo ronjunevaldoz/kmp-agent-skills`
 
-**Who runs it:** the consumer (any project using kmm-agent-skills).
+**Who runs it:** the consumer (any project using kmp-agent-skills).
 **Where it goes:** issues land in this repo's GitHub Issues for the skills team to act on.
 
 ### Smart versioning — skills-repo side
@@ -116,7 +116,7 @@ python3 scripts/release.py auto --dry-run # preview first
 | `feat` | minor |
 | `fix`, `chore`, `docs`, `refactor` | patch |
 
-**Who runs it:** only the kmm-agent-skills maintainer when cutting a release.
+**Who runs it:** only the kmp-agent-skills maintainer when cutting a release.
 
 ---
 
@@ -139,82 +139,82 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 <summary>Full skill list (click to expand)</summary>
 
 ### Foundation
-- [`feature-scaffold`](skills/kotlin-multiplatform-feature-scaffold/) — 6-layer module structure, build-logic, TOML catalog, Koin
-- [`clean-architecture`](skills/kotlin-multiplatform-clean-architecture/) — layer contract, `:model` vs `:api`, `internal` rules
-- [`presenter-module`](skills/kotlin-multiplatform-presenter-module/) — pure-Kotlin ViewModel, MVI contracts, no Compose dep
-- [`dependency-injection`](skills/kotlin-multiplatform-dependency-injection/) — Koin wiring and scopes
-- [`flavor-environment`](skills/kotlin-multiplatform-flavor-environment/) — BuildKonfig, secrets, env setup
-- [`ci-github-actions`](skills/kotlin-multiplatform-ci-github-actions/) — CI matrix and release workflow
-- [`android-cli`](skills/kotlin-multiplatform-android-cli/) — Google's `android` CLI: emulator, build/deploy, SDK installs, agent bootstrap
+- [`feature-scaffold`](skills/kmp-feature-scaffold/) — 6-layer module structure, build-logic, TOML catalog, Koin
+- [`clean-architecture`](skills/kmp-clean-architecture/) — layer contract, `:model` vs `:api`, `internal` rules
+- [`presenter-module`](skills/kmp-presenter-module/) — pure-Kotlin ViewModel, MVI contracts, no Compose dep
+- [`dependency-injection`](skills/kmp-dependency-injection/) — Koin wiring and scopes
+- [`flavor-environment`](skills/kmp-flavor-environment/) — BuildKonfig, secrets, env setup
+- [`ci-github-actions`](skills/kmp-ci-github-actions/) — CI matrix and release workflow
+- [`android-cli`](skills/kmp-android-cli/) — Google's `android` CLI: emulator, build/deploy, SDK installs, agent bootstrap
 
 ### Infrastructure
-- [`ktor-auth-service`](skills/kotlin-multiplatform-ktor-auth-service/) — auth service, bearer/JWT, sessions
-- [`network-layer`](skills/kotlin-multiplatform-network-layer/) — Ktor client, auth refresh, result mapping
-- [`sqldelight-setup`](skills/kotlin-multiplatform-sqldelight-setup/) — SQLDelight schema, drivers, migrations
-- [`datastore`](skills/kotlin-multiplatform-datastore/) — Preferences DataStore + Proto DataStore
-- [`xcframework-spm`](skills/kotlin-multiplatform-xcframework-spm/) — XCFramework and SPM export
-- [`library-publishing`](skills/kotlin-multiplatform-library-publishing/) — Maven Central, GitHub Packages, BOM, binary-compat-validator, GPG signing
-- [`docs-site`](skills/kotlin-multiplatform-docs-site/) — GitHub Pages developer guide, MkDocs Material, Dokka HTML API reference, compiler-verified code examples
-- [`api-mimicry`](skills/kotlin-multiplatform-api-mimicry/) — mimic a reference API's shape (Modifier chains, slot DSLs) for a from-scratch library on a non-standard runtime
-- [`mongodb-database`](skills/kotlin-multiplatform-mongodb-database/) — MongoDB coroutine driver and repositories
-- [`kotlin-rpc`](skills/kotlin-multiplatform-kotlin-rpc/) — Kotlin RPC boundaries and scaffolding
-- [`jni-pro`](skills/kotlin-multiplatform-jni-pro/) — JVM JNI bridge to native C/C++
-- [`native-authoring`](skills/kotlin-multiplatform-native-authoring/) — author brand-new first-party C/C++ source for a native core, before any JNI bridge exists
+- [`ktor-auth-service`](skills/kmp-ktor-auth-service/) — auth service, bearer/JWT, sessions
+- [`network-layer`](skills/kmp-network-layer/) — Ktor client, auth refresh, result mapping
+- [`sqldelight-setup`](skills/kmp-sqldelight-setup/) — SQLDelight schema, drivers, migrations
+- [`datastore`](skills/kmp-datastore/) — Preferences DataStore + Proto DataStore
+- [`xcframework-spm`](skills/kmp-xcframework-spm/) — XCFramework and SPM export
+- [`library-publishing`](skills/kmp-library-publishing/) — Maven Central, GitHub Packages, BOM, binary-compat-validator, GPG signing
+- [`docs-site`](skills/kmp-docs-site/) — GitHub Pages developer guide, MkDocs Material, Dokka HTML API reference, compiler-verified code examples
+- [`api-mimicry`](skills/kmp-api-mimicry/) — mimic a reference API's shape (Modifier chains, slot DSLs) for a from-scratch library on a non-standard runtime
+- [`mongodb-database`](skills/kmp-mongodb-database/) — MongoDB coroutine driver and repositories
+- [`kotlin-rpc`](skills/kmp-kotlin-rpc/) — Kotlin RPC boundaries and scaffolding
+- [`jni-pro`](skills/kmp-jni-pro/) — JVM JNI bridge to native C/C++
+- [`native-authoring`](skills/kmp-native-authoring/) — author brand-new first-party C/C++ source for a native core, before any JNI bridge exists
 
 ### Patterns
-- [`mvi`](skills/kotlin-multiplatform-mvi/) — State / Intent / Effect, Channel effects, MviViewModel base
-- [`expect-actual`](skills/kotlin-multiplatform-expect-actual/) — platform-specific implementations
-- [`repository-pattern`](skills/kotlin-multiplatform-repository-pattern/) — repository boundary, fetch strategy
-- [`navigation`](skills/kotlin-multiplatform-navigation/) — type-safe navigation, auth gate
-- [`deep-linking`](skills/kotlin-multiplatform-deep-linking/) — App Links, Universal Links, URI schemes
-- [`offline-first`](skills/kotlin-multiplatform-offline-first/) — SyncState, optimistic updates, conflict resolution
-- [`paging`](skills/kotlin-multiplatform-paging/) — Paging 3, PagingSource, RemoteMediator
-- [`logging`](skills/kotlin-multiplatform-logging/) — logger wrapper, kotlin-logging or Kermit
-- [`crash-reporting`](skills/kotlin-multiplatform-crash-reporting/) — Crashlytics + Sentry, dSYM symbolication
-- [`analytics`](skills/kotlin-multiplatform-analytics/) — sealed AnalyticsEvent, Firebase/Amplitude
-- [`feature-flags`](skills/kotlin-multiplatform-feature-flags/) — FeatureFlag enum, Remote Config, A/B variants
-- [`form-validation`](skills/kotlin-multiplatform-form-validation/) — ValidationResult, FieldState, submit gating
-- [`permissions`](skills/kotlin-multiplatform-permissions/) — PermissionState, expect/actual PermissionController
-- [`push-notifications`](skills/kotlin-multiplatform-push-notifications/) — FCM + APNs, PushToken expect/actual
-- [`workmanager`](skills/kotlin-multiplatform-workmanager/) — CoroutineWorker, BGTaskScheduler
-- [`biometric-auth`](skills/kotlin-multiplatform-biometric-auth/) — BiometricResult, expect/actual BiometricAuthenticator
-- [`image-loading`](skills/kotlin-multiplatform-image-loading/) — Coil 3, AsyncImage, image cache
-- [`shared-resources`](skills/kotlin-multiplatform-shared-resources/) — shared resources and localization
-- [`in-app-purchases`](skills/kotlin-multiplatform-in-app-purchases/) — Play Billing + StoreKit 2, PurchaseState, MVI paywall
-- [`proguard-r8`](skills/kotlin-multiplatform-proguard-r8/) — R8 keep rules for KMP libraries, release build validation
-- [`desktop-app`](skills/kotlin-multiplatform-desktop-app/) — window management, tray, file picker, packaging
+- [`mvi`](skills/kmp-mvi/) — State / Intent / Effect, Channel effects, MviViewModel base
+- [`expect-actual`](skills/kmp-expect-actual/) — platform-specific implementations
+- [`repository-pattern`](skills/kmp-repository-pattern/) — repository boundary, fetch strategy
+- [`navigation`](skills/kmp-navigation/) — type-safe navigation, auth gate
+- [`deep-linking`](skills/kmp-deep-linking/) — App Links, Universal Links, URI schemes
+- [`offline-first`](skills/kmp-offline-first/) — SyncState, optimistic updates, conflict resolution
+- [`paging`](skills/kmp-paging/) — Paging 3, PagingSource, RemoteMediator
+- [`logging`](skills/kmp-logging/) — logger wrapper, kotlin-logging or Kermit
+- [`crash-reporting`](skills/kmp-crash-reporting/) — Crashlytics + Sentry, dSYM symbolication
+- [`analytics`](skills/kmp-analytics/) — sealed AnalyticsEvent, Firebase/Amplitude
+- [`feature-flags`](skills/kmp-feature-flags/) — FeatureFlag enum, Remote Config, A/B variants
+- [`form-validation`](skills/kmp-form-validation/) — ValidationResult, FieldState, submit gating
+- [`permissions`](skills/kmp-permissions/) — PermissionState, expect/actual PermissionController
+- [`push-notifications`](skills/kmp-push-notifications/) — FCM + APNs, PushToken expect/actual
+- [`workmanager`](skills/kmp-workmanager/) — CoroutineWorker, BGTaskScheduler
+- [`biometric-auth`](skills/kmp-biometric-auth/) — BiometricResult, expect/actual BiometricAuthenticator
+- [`image-loading`](skills/kmp-image-loading/) — Coil 3, AsyncImage, image cache
+- [`shared-resources`](skills/kmp-shared-resources/) — shared resources and localization
+- [`in-app-purchases`](skills/kmp-in-app-purchases/) — Play Billing + StoreKit 2, PurchaseState, MVI paywall
+- [`proguard-r8`](skills/kmp-proguard-r8/) — R8 keep rules for KMP libraries, release build validation
+- [`desktop-app`](skills/kmp-desktop-app/) — window management, tray, file picker, packaging
 
 ### UI System
-- [`design-system`](skills/kotlin-multiplatform-design-system/) — tokens and core components
-- [`design-system-extended`](skills/kotlin-multiplatform-design-system-extended/) — bottom sheet, dialog, snackbar, skeleton
-- [`shadcn-compose`](skills/kotlin-multiplatform-shadcn-compose/) — published library alternative to `design-system` — 70+ components, real experimental-API dependency risk
-- [`compose-state-hoisting`](skills/kotlin-multiplatform-compose-state-hoisting/) — hoisting rules, `@Stable`, `@Immutable`
-- [`compose-state-container`](skills/kotlin-multiplatform-compose-state-container/) — `remember` vs `ViewModel`, `rememberUpdatedState`
-- [`compose-animation`](skills/kotlin-multiplatform-compose-animation/) — AnimatedVisibility, Crossfade, shared elements
-- [`compose-slot-api`](skills/kotlin-multiplatform-compose-slot-api/) — slot-based component APIs, CompositionLocal
-- [`adaptive-layout`](skills/kotlin-multiplatform-adaptive-layout/) — WindowSizeClass, list-detail split
-- [`graphics-modifiers`](skills/kotlin-multiplatform-graphics-modifiers/) — Canvas, graphicsLayer
-- [`preview-driven-development`](skills/kotlin-multiplatform-preview-driven-development/) — Desktop-first `@Preview` workflow, PDD cycle
-- [`layout-system`](skills/kotlin-multiplatform-layout-system/) — ASCII wireframe docs per screen + slot-grid layout contracts
-- [`imagevector-generator`](skills/kotlin-multiplatform-imagevector-generator/) — raster/SVG → compiled Kotlin ImageVector; no hand-written paths, no PNG icons
+- [`design-system`](skills/kmp-design-system/) — tokens and core components
+- [`design-system-extended`](skills/kmp-design-system-extended/) — bottom sheet, dialog, snackbar, skeleton
+- [`shadcn-compose`](skills/kmp-shadcn-compose/) — published library alternative to `design-system` — 70+ components, real experimental-API dependency risk
+- [`compose-state-hoisting`](skills/kmp-compose-state-hoisting/) — hoisting rules, `@Stable`, `@Immutable`
+- [`compose-state-container`](skills/kmp-compose-state-container/) — `remember` vs `ViewModel`, `rememberUpdatedState`
+- [`compose-animation`](skills/kmp-compose-animation/) — AnimatedVisibility, Crossfade, shared elements
+- [`compose-slot-api`](skills/kmp-compose-slot-api/) — slot-based component APIs, CompositionLocal
+- [`adaptive-layout`](skills/kmp-adaptive-layout/) — WindowSizeClass, list-detail split
+- [`graphics-modifiers`](skills/kmp-graphics-modifiers/) — Canvas, graphicsLayer
+- [`preview-driven-development`](skills/kmp-preview-driven-development/) — Desktop-first `@Preview` workflow, PDD cycle
+- [`layout-system`](skills/kmp-layout-system/) — ASCII wireframe docs per screen + slot-grid layout contracts
+- [`imagevector-generator`](skills/kmp-imagevector-generator/) — raster/SVG → compiled Kotlin ImageVector; no hand-written paths, no PNG icons
 
 ### Testing & Quality
-- [`unit-testing`](skills/kotlin-multiplatform-unit-testing/) — `runTest`, Turbine, fake-over-mock
-- [`roborazzi`](skills/kotlin-multiplatform-roborazzi/) — screenshot tests from `@Preview` on JVM
-- [`code-quality`](skills/kotlin-multiplatform-code-quality/) — Ktlint + Detekt, CI gates
-- [`accessibility`](skills/kotlin-multiplatform-accessibility/) — semantic roles, contentDescription, WCAG
-- [`benchmark`](skills/kotlin-multiplatform-benchmark/) — kotlinx-benchmark setup, @Benchmark conventions, per-target registration
+- [`unit-testing`](skills/kmp-unit-testing/) — `runTest`, Turbine, fake-over-mock
+- [`roborazzi`](skills/kmp-roborazzi/) — screenshot tests from `@Preview` on JVM
+- [`code-quality`](skills/kmp-code-quality/) — Ktlint + Detekt, CI gates
+- [`accessibility`](skills/kmp-accessibility/) — semantic roles, contentDescription, WCAG
+- [`benchmark`](skills/kmp-benchmark/) — kotlinx-benchmark setup, @Benchmark conventions, per-target registration
 
 ### Meta
-- [`expert`](skills/kotlin-multiplatform-expert/) — skill routing and build order
-- [`audit`](skills/kotlin-multiplatform-audit/) — repo review, fix sequencing, CI governance gate
-- [`migration`](skills/kotlin-multiplatform-migration/) — MVVM→MVI, monolith→multi-module, incremental adoption
-- [`project-docs-maintainer`](skills/kotlin-multiplatform-project-docs-maintainer/) — consumer-facing project docs and onboarding
-- [`legal-docs`](skills/kotlin-multiplatform-legal-docs/) — privacy policy, terms, GDPR, data-safety labels
-- [`lessons`](skills/kotlin-multiplatform-lessons/) — structured lesson files for pattern mismatches
-- [`skill-harvester`](skills/kotlin-multiplatform-skill-harvester/) — reads lessons, proposes skill amendments
-- [`token-saver`](skills/kotlin-multiplatform-token-saver/) — terse replies, output compression, and smallest-correct-solution checks
-- [`release`](skills/kotlin-multiplatform-release/) — versioning, Maven Central, git-cliff, GitHub Release
+- [`expert`](skills/kmp-expert/) — skill routing and build order
+- [`audit`](skills/kmp-audit/) — repo review, fix sequencing, CI governance gate
+- [`migration`](skills/kmp-migration/) — MVVM→MVI, monolith→multi-module, incremental adoption
+- [`project-docs-maintainer`](skills/kmp-project-docs-maintainer/) — consumer-facing project docs and onboarding
+- [`legal-docs`](skills/kmp-legal-docs/) — privacy policy, terms, GDPR, data-safety labels
+- [`lessons`](skills/kmp-lessons/) — structured lesson files for pattern mismatches
+- [`skill-harvester`](skills/kmp-skill-harvester/) — reads lessons, proposes skill amendments
+- [`token-saver`](skills/kmp-token-saver/) — terse replies, output compression, and smallest-correct-solution checks
+- [`release`](skills/kmp-release/) — versioning, Maven Central, git-cliff, GitHub Release
 
 </details>
 
@@ -222,53 +222,53 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 
 ## Commands
 
-All commands are `kmm-` prefixed so they don't collide with your own `.claude/commands/`.
+All commands are `kmp-` prefixed so they don't collide with your own `.claude/commands/`.
 
 ### Consumer commands — install these in your project
 
 | Command | What it does |
 |---|---|
-| `/kmm-new-project <description>` | Scaffold a full KMP project from a description |
-| `/kmm-setup-agents [path]` | Initialize `.claude/` agent setup in an existing project |
-| `/kmm-implement-feature <name>` | Plan → Implement → Validate → Review a feature |
-| `/kmm-execute-ticket <id>` | Implement a GitHub Issue end-to-end |
-| `/kmm-run-audit [path]` | Architecture audit with per-finding remediation + auto skill-gap reporting |
-| `/kmm-harvest-lessons [path]` | Collect positive patterns from consumer project; auto-propose GitHub issues |
-| `/kmm-audit-adaptive [path]` | Adaptive layout coverage + redundant title check across Compact/Medium/Expanded |
-| `/kmm-verify [path]` | Full pipeline: build, tests, audit, screenshots, design |
-| `/kmm-review-changes` | Review git diff against 6-layer rules and anti-patterns |
-| `/kmm-generate-palette <name=#HEX ...>` | Generate `AppColors.kt` + Compose palette preview from N brand seed colors |
-| `/kmm-vectorize <image>` | Compile a raster/SVG into a Kotlin `ImageVector` — replaces PNG icons and hand-written paths |
-| `/kmm-fix-design [path]` | Scan and fix design system violations |
-| `/kmm-migrate-to-shadcn [path]` | Migrate a project from the owned design-system to shadcn-compose, file-by-file with confirmation |
-| `/kmm-clean-comments [path]` | Refactor documentation by architectural level (class/function/extension/inline) |
-| `/kmm-update-design-system [path]` | Pull latest design system components |
-| `/kmm-record-design-baselines [path]` | Record Roborazzi golden PNGs |
-| `/kmm-audit-screenshots [path]` | Vision audit of screenshot goldens |
-| `/kmm-audit-design-visual [path]` | Cross-screen visual consistency check |
-| `/kmm-update-skills` | Pull latest skills and re-deploy to `.claude/skills/` |
-| `/kmm-check-updates` | Check for a newer version of kmm-agent-skills |
-| `/kmm-report-skill-issue` | File a structured skill bug report |
+| `/kmp-new-project <description>` | Scaffold a full KMP project from a description |
+| `/kmp-setup-agents [path]` | Initialize `.claude/` agent setup in an existing project |
+| `/kmp-implement-feature <name>` | Plan → Implement → Validate → Review a feature |
+| `/kmp-execute-ticket <id>` | Implement a GitHub Issue end-to-end |
+| `/kmp-run-audit [path]` | Architecture audit with per-finding remediation + auto skill-gap reporting |
+| `/kmp-harvest-lessons [path]` | Collect positive patterns from consumer project; auto-propose GitHub issues |
+| `/kmp-audit-adaptive [path]` | Adaptive layout coverage + redundant title check across Compact/Medium/Expanded |
+| `/kmp-verify [path]` | Full pipeline: build, tests, audit, screenshots, design |
+| `/kmp-review-changes` | Review git diff against 6-layer rules and anti-patterns |
+| `/kmp-generate-palette <name=#HEX ...>` | Generate `AppColors.kt` + Compose palette preview from N brand seed colors |
+| `/kmp-vectorize <image>` | Compile a raster/SVG into a Kotlin `ImageVector` — replaces PNG icons and hand-written paths |
+| `/kmp-fix-design [path]` | Scan and fix design system violations |
+| `/kmp-migrate-to-shadcn [path]` | Migrate a project from the owned design-system to shadcn-compose, file-by-file with confirmation |
+| `/kmp-clean-comments [path]` | Refactor documentation by architectural level (class/function/extension/inline) |
+| `/kmp-update-design-system [path]` | Pull latest design system components |
+| `/kmp-record-design-baselines [path]` | Record Roborazzi golden PNGs |
+| `/kmp-audit-screenshots [path]` | Vision audit of screenshot goldens |
+| `/kmp-audit-design-visual [path]` | Cross-screen visual consistency check |
+| `/kmp-update-skills` | Pull latest skills and re-deploy to `.claude/skills/` |
+| `/kmp-check-updates` | Check for a newer version of kmp-agent-skills |
+| `/kmp-report-skill-issue` | File a structured skill bug report |
 
 ### Repo-internal commands
 
 | Command | What it does |
 |---|---|
-| `/kmm-new-skill <name>` | Scaffold a new skill with all required sections |
-| `/kmm-modify-skill <name>` | Safely edit an existing skill |
-| `/kmm-summarize-issues` | Scan all skills for quality gaps |
-| `/kmm-submit-issue` | File a structured GitHub issue |
-| `/kmm-maintain-docs [scope]` | Reconcile repo docs and routing text |
-| `/kmm-release-notes` | Draft release notes for a version bump |
-| `/kmm-setup-hooks` | Install git hooks for architecture hygiene |
-| `/kmm-sync-local-skills` | Sync this repo release into local Claude / Codex / Gemini skill bundles on this Mac |
+| `/kmp-new-skill <name>` | Scaffold a new skill with all required sections |
+| `/kmp-modify-skill <name>` | Safely edit an existing skill |
+| `/kmp-summarize-issues` | Scan all skills for quality gaps |
+| `/kmp-submit-issue` | File a structured GitHub issue |
+| `/kmp-maintain-docs [scope]` | Reconcile repo docs and routing text |
+| `/kmp-release-notes` | Draft release notes for a version bump |
+| `/kmp-setup-hooks` | Install git hooks for architecture hygiene |
+| `/kmp-sync-local-skills` | Sync this repo release into local Claude / Codex / Gemini skill bundles on this Mac |
 
 ---
 
 ## Installation
 
 ```bash
-npx skills add ronjunevaldoz/kmm-agent-skills
+npx skills add ronjunevaldoz/kmp-agent-skills
 ```
 
 See [INSTALL.md](INSTALL.md) for setup instructions for Claude Code, OpenAI Codex CLI,

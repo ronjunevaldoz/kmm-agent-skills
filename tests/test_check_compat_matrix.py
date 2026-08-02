@@ -62,19 +62,19 @@ class CheckDriftAcrossMultipleSkillsTests(unittest.TestCase):
             "| Library | Version |\n|---|---|\n| Kotlin | `2.4.0` |\n",
         )
         _write(
-            tmp, "skills/kotlin-multiplatform-feature-scaffold/SKILL.md",
+            tmp, "skills/kmp-feature-scaffold/SKILL.md",
             f'kotlin = "{feature_scaffold_kotlin}"\n',
         )
         _write(
-            tmp, "skills/kotlin-multiplatform-library-publishing/SKILL.md",
+            tmp, "skills/kmp-library-publishing/SKILL.md",
             f'kotlin = "{library_publishing_kotlin}"\n',
         )
 
     def _kotlin_only_map(self):
         return {
             "Kotlin": [
-                ("kotlin-multiplatform-feature-scaffold", "kotlin"),
-                ("kotlin-multiplatform-library-publishing", "kotlin"),
+                ("kmp-feature-scaffold", "kotlin"),
+                ("kmp-library-publishing", "kotlin"),
             ],
         }
 

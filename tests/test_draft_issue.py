@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 draft_issue_scripts = load_module(
     "draft_issue",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "draft_issue.py",
+    REPO_ROOT / "skills" / "kmp-audit" / "scripts" / "draft_issue.py",
 )
 
 class DraftIssueTests(unittest.TestCase):
@@ -20,18 +20,18 @@ class DraftIssueTests(unittest.TestCase):
             title="Missing freshness note",
             evidence="skills/foo/SKILL.md lacks a freshness rule.",
             recommendation="Add a freshness rule and re-run the audit.",
-            skill="kotlin-multiplatform-audit",
+            skill="kmp-audit",
             kind="issue",
         )
         self.assertIn("# Missing freshness note", content)
-        self.assertIn("Suggested by kotlin-multiplatform-audit", content)
+        self.assertIn("Suggested by kmp-audit", content)
 
     def test_render_question_uses_question_heading(self) -> None:
         content = draft_issue_scripts.render_issue(
             title="Should X live in :model or :api?",
             evidence="Ambiguous placement.",
             recommendation="Confirm with the team.",
-            skill="kotlin-multiplatform-clean-architecture",
+            skill="kmp-clean-architecture",
             kind="question",
         )
         self.assertIn("## Type\nQuestion", content)
@@ -62,7 +62,7 @@ class DraftIssueTests(unittest.TestCase):
         with redirect_stdout(buf):
             rc = draft_issue_scripts.submit_issue(
                 title="T", body="B",
-                repo="ronjunevaldoz/kmm-agent-skills",
+                repo="ronjunevaldoz/kmp-agent-skills",
                 labels=["skill-bug"],
                 dry_run=True,
             )
@@ -70,12 +70,12 @@ class DraftIssueTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertIn("DRY RUN", output)
         self.assertIn("gh issue create", output)
-        self.assertIn("ronjunevaldoz/kmm-agent-skills", output)
+        self.assertIn("ronjunevaldoz/kmp-agent-skills", output)
 
     def test_default_repo_constant(self) -> None:
         self.assertEqual(
             draft_issue_scripts.DEFAULT_REPO,
-            "ronjunevaldoz/kmm-agent-skills",
+            "ronjunevaldoz/kmp-agent-skills",
         )
 
 

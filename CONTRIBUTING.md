@@ -1,4 +1,4 @@
-# Contributing to kmm-agent-skills
+# Contributing to kmp-agent-skills
 
 Thank you for contributing. This guide covers everything needed to add skills,
 fix bugs, run validation, and cut a release.
@@ -37,9 +37,9 @@ pip install pytest
 ## Repo structure
 
 ```
-kmm-agent-skills/
+kmp-agent-skills/
 ├── agents/              # Pipeline agent definitions (planner, implementer, etc.)
-├── commands/            # Slash commands (/kmm-new-project, /kmm-verify, /kmm-audit-screenshots, …)
+├── commands/            # Slash commands (/kmp-new-project, /kmp-verify, /kmp-audit-screenshots, …)
 ├── samples/             # E2E test specs (e.g. samples/todo-app.md)
 ├── scripts/             # Shared scripts (release.py, validate_keyword_routing.py, …)
 ├── skills/              # One directory per skill
@@ -67,7 +67,7 @@ Use this rule before creating anything new:
 - `agents/`, `commands/`, and `scripts/` are for repo-internal workflow, validation,
   and maintenance.
 - Consumer release notes and per-skill changelog updates belong to
-  `agents/changelog.md` and `/kmm-release-notes`, not a new skill.
+  `agents/changelog.md` and `/kmp-release-notes`, not a new skill.
 - If a request is repo-internal, do not scaffold a skill; update the relevant agent,
   command, or repo doc instead.
 
@@ -86,7 +86,7 @@ separate optional updates.
 |---|---|---|
 | Root-level docs | `SCREAMING_CASE.md` | `README.md`, `CHANGELOG.md`, `PLAN.md` |
 | `agents/` | `kebab-case.md` | `planner.md`, `changelog.md` |
-| `commands/` | `kmm-kebab-case.md` | `kmm-new-project.md`, `kmm-run-audit.md` |
+| `commands/` | `kmp-kebab-case.md` | `kmp-new-project.md`, `kmp-run-audit.md` |
 | `docs/` | `kebab-case.md` | `goal-gap-analysis.md` |
 | `samples/` | `kebab-case.md` | `todo-app.md` |
 | `skills/<name>/` | `SKILL.md` (fixed) | Same reasoning as `README.md` — primary entry file |
@@ -109,7 +109,7 @@ repo-internal maintenance or consumer changelog work.
 mkdir skills/<skill-name>
 ```
 
-Skill names use `kebab-case` and are prefixed with `kotlin-multiplatform-` for KMP skills.
+Skill names use `kebab-case` and are prefixed with `kmp-` for KMP skills.
 
 ### 2. Write `SKILL.md`
 
@@ -151,16 +151,16 @@ update this file — you must add it manually before releasing.
 
 ### 4. Add a keyword routing entry
 
-Open `skills/kotlin-multiplatform-expert/SKILL.md` and add at least one invocation
+Open `skills/kmp-expert/SKILL.md` and add at least one invocation
 map row for the new skill. This is tested in CI.
 
 ### 5. Run validation
 
 ```bash
-python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .
+python3 skills/kmp-audit/scripts/audit_skills_repo.py .
 python3 scripts/scan_skill_issues.py
-python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .
-python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py --repo-root .
+python3 skills/kmp-expert/scripts/validate_skill_map.py --repo-root .
+python3 skills/kmp-expert/scripts/validate_keyword_routing.py --repo-root .
 python3 -m pytest tests/ -v
 ```
 
@@ -184,22 +184,22 @@ All validation commands must pass with zero findings before opening a PR.
 
 ```bash
 # Architecture audit — checks all skills for required sections and cross-references
-python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .
+python3 skills/kmp-audit/scripts/audit_skills_repo.py .
 
 # Skill issue scan — checks Testing sections, freshness, and required guidance
 python3 scripts/scan_skill_issues.py
 
 # Skill map coverage — keeps README, expert map, and planner routing synchronized
-python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .
+python3 skills/kmp-expert/scripts/validate_skill_map.py --repo-root .
 
 # Keyword routing coverage — ensures every skill has at least one trigger
-python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py --repo-root .
+python3 skills/kmp-expert/scripts/validate_keyword_routing.py --repo-root .
 
 # Full test suite
 python3 -m pytest tests/ -v
 
 # Module graph validator (for KMP project validation, not skills repo)
-python3 skills/kotlin-multiplatform-audit/scripts/audit_project.py <project-path>
+python3 skills/kmp-audit/scripts/audit_project.py <project-path>
 ```
 
 All skills-repo validation commands must be clean before a PR is opened or a release is cut.

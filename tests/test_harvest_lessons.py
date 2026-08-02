@@ -8,7 +8,7 @@ from _helpers import REPO_ROOT, load_module_registered
 
 harvest_lessons = load_module_registered(
     "harvest_lessons",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-skill-harvester" / "scripts" / "harvest_lessons.py",
+    REPO_ROOT / "skills" / "kmp-skill-harvester" / "scripts" / "harvest_lessons.py",
 )
 
 
@@ -28,12 +28,12 @@ class ParseFrontmatterTests(unittest.TestCase):
             tmp = Path(tmp_str)
             path = _write_lesson(
                 tmp, "l1.md",
-                {"skill": "kotlin-multiplatform-mvi", "date": "2026-01-01",
+                {"skill": "kmp-mvi", "date": "2026-01-01",
                  "severity": "high", "type": "correction"},
                 "# Heading\n\nChannel effects were dropped on rotation.",
             )
             lesson = harvest_lessons.parse_lesson(path)
-            self.assertEqual(lesson.skill, "kotlin-multiplatform-mvi")
+            self.assertEqual(lesson.skill, "kmp-mvi")
             self.assertEqual(lesson.severity, "high")
             self.assertEqual(lesson.type, "correction")
             self.assertEqual(lesson.summary, "Channel effects were dropped on rotation.")

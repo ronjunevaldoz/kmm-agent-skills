@@ -2,8 +2,8 @@
   "version": "1.120.0",
   "skills": [
     {
-      "name": "kotlin-multiplatform-accessibility",
-      "path": "skills/kotlin-multiplatform-accessibility",
+      "name": "kmp-accessibility",
+      "path": "skills/kmp-accessibility",
       "description": "Accessibility (a11y) for Kotlin Multiplatform Compose \u2014 semantic roles and mergeDescendants, contentDescription on interactive and image elements, screen reader traversal order, minimum touch target size, Roborazzi accessibility snapshot tests, reduced-motion support, and a Compose a11y audit checklist.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -54,8 +54,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-adaptive-layout",
-      "path": "skills/kotlin-multiplatform-adaptive-layout",
+      "name": "kmp-adaptive-layout",
+      "path": "skills/kmp-adaptive-layout",
       "description": "Adaptive UI for Kotlin Multiplatform \u2014 WindowSizeClass-driven layouts that respond correctly to Compact (phone), Medium (tablet), and Expanded (desktop) breakpoints. Covers list-detail splits, adaptive navigation (bottom bar \u2192 rail \u2192 drawer), single-source WindowSizeClass propagation, and Roborazzi tests for each breakpoint. Enforces cross-session pattern consistency so every screen in the project uses the same adaptive strategy.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-07",
@@ -133,8 +133,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-analytics",
-      "path": "skills/kotlin-multiplatform-analytics",
+      "name": "kmp-analytics",
+      "path": "skills/kmp-analytics",
       "description": "Shared Analytics interface for Kotlin Multiplatform \u2014 sealed event types in commonMain, platform implementations for Firebase Analytics (Android) and equivalent (iOS/Desktop), automatic screen tracking, Koin wiring with platform modules, and testing with a fake analytics recorder.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -169,9 +169,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-android-cli",
-      "path": "skills/kotlin-multiplatform-android-cli",
-      "description": "KMP-specific integration guide for Google's official `android` CLI. The CLI's own command reference already exists as a real, officially maintained skill at github.com/android/skills/tree/main/devtools/android-cli (installable via `android skills add android-cli`) \u2014 this skill does not re-document that surface. It covers what's specific to a Kotlin Multiplatform project: locating the Android target inside a multi-module 6-layer graph, why `android create` doesn't apply once `kotlin-multiplatform-feature-scaffold` has run, and CI wiring alongside the existing Android/iOS/Desktop/Web matrix.",
+      "name": "kmp-android-cli",
+      "path": "skills/kmp-android-cli",
+      "description": "KMP-specific integration guide for Google's official `android` CLI. The CLI's own command reference already exists as a real, officially maintained skill at github.com/android/skills/tree/main/devtools/android-cli (installable via `android skills add android-cli`) \u2014 this skill does not re-document that surface. It covers what's specific to a Kotlin Multiplatform project: locating the Android target inside a multi-module 6-layer graph, why `android create` doesn't apply once `kmp-feature-scaffold` has run, and CI wiring alongside the existing Android/iOS/Desktop/Web matrix.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-19",
       "keywords": [
@@ -206,8 +206,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-api-mimicry",
-      "path": "skills/kotlin-multiplatform-api-mimicry",
+      "name": "kmp-api-mimicry",
+      "path": "skills/kmp-api-mimicry",
       "description": "Mimics the public API *shape* (DSL entry points, chainable modifier objects, slot lambdas, marker annotations, scoped builders) of a well-known reference API \u2014 Jetpack Compose, SwiftUI, Retrofit, Room, etc. \u2014 when building a from-scratch Kotlin Multiplatform library on a different runtime (a custom Vulkan/Metal renderer, a custom RPC engine, a custom persistence engine). Does NOT cover consuming or wrapping the real reference library \u2014 that is normal dependency usage. Does NOT cover building a real Compose-compiler-style plugin; explicitly scopes to plain-function DSL mimicry and documents what real recomposition/skipping you give up by not writing one.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
@@ -246,9 +246,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-audit",
-      "path": "skills/kotlin-multiplatform-audit",
-      "description": "KMP project audit skill for reviewing an existing Kotlin Multiplatform codebase. Use this skill to inspect architecture, module boundaries, state handling, repository and network layering, Compose patterns, expect/actual usage, shared resources, design system usage, test coverage, platform readiness, and the skills repo itself. Produces findings, risk levels, and a fix sequence instead of implementation code. Pair with kotlin-multiplatform-expert to route any follow-up work to the right domain skills.",
+      "name": "kmp-audit",
+      "path": "skills/kmp-audit",
+      "description": "KMP project audit skill for reviewing an existing Kotlin Multiplatform codebase. Use this skill to inspect architecture, module boundaries, state handling, repository and network layering, Compose patterns, expect/actual usage, shared resources, design system usage, test coverage, platform readiness, and the skills repo itself. Produces findings, risk levels, and a fix sequence instead of implementation code. Pair with kmp-expert to route any follow-up work to the right domain skills.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
       "keywords": [
@@ -272,9 +272,9 @@
         "skills repo audit",
         "issue draft",
         "question draft",
-        "kmm-agent-skills",
-        "kmm-skills",
-        "KMM agent skills",
+        "kmp-agent-skills",
+        "kmp-skills",
+        "KMP agent skills",
         "skill collection",
         "skills index"
       ],
@@ -301,7 +301,7 @@
         "enforce skills",
         "compliance",
         "fail on violation",
-        "kmm-skills"
+        "kmp-skills"
       ],
       "scripts": [
         "audit_project.py",
@@ -312,9 +312,9 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-benchmark",
-      "path": "skills/kotlin-multiplatform-benchmark",
-      "description": "Sets up kotlinx-benchmark for Kotlin Multiplatform performance measurement. Covers: Gradle plugin + allopen wiring, a separate benchmark source set (never mixed into commonMain/commonTest), @State/@Benchmark/@Setup/@TearDown conventions, per-target registration (JVM/Native/JS/Wasm), running benchmarks, and reading JSON/CSV output. Use this whenever a performance claim needs a real number instead of a guess \u2014 this is the \"profile first\" step the kotlin-multiplatform-expert performance decision tree routes to when a request is unnamed or needs a concrete target before further routing.",
+      "name": "kmp-benchmark",
+      "path": "skills/kmp-benchmark",
+      "description": "Sets up kotlinx-benchmark for Kotlin Multiplatform performance measurement. Covers: Gradle plugin + allopen wiring, a separate benchmark source set (never mixed into commonMain/commonTest), @State/@Benchmark/@Setup/@TearDown conventions, per-target registration (JVM/Native/JS/Wasm), running benchmarks, and reading JSON/CSV output. Use this whenever a performance claim needs a real number instead of a guess \u2014 this is the \"profile first\" step the kmp-expert performance decision tree routes to when a request is unnamed or needs a concrete target before further routing.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-10",
       "keywords": [
@@ -345,8 +345,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-biometric-auth",
-      "path": "skills/kotlin-multiplatform-biometric-auth",
+      "name": "kmp-biometric-auth",
+      "path": "skills/kmp-biometric-auth",
       "description": "Biometric authentication for Kotlin Multiplatform \u2014 a sealed BiometricResult type in commonMain, expect/actual BiometricAuthenticator, Android BiometricPrompt with CryptoObject, iOS LocalAuthentication (LAContext.evaluatePolicy), Koin wiring, and graceful fallback to device PIN/password when biometrics are unavailable.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -385,9 +385,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-ci-github-actions",
-      "path": "skills/kotlin-multiplatform-ci-github-actions",
-      "description": "Sets up GitHub Actions CI for a Kotlin Multiplatform (KMP) project. Produces two workflow files: ci.yml (lint, Android tests, iOS tests, Desktop JVM tests, Web JS + WasmJs tests, Gradle cache) and release.yml (XCFramework build + upload artifact). All target platforms are covered. Assumes AGP 9+ and the project structure from kotlin-multiplatform-feature-scaffold.",
+      "name": "kmp-ci-github-actions",
+      "path": "skills/kmp-ci-github-actions",
+      "description": "Sets up GitHub Actions CI for a Kotlin Multiplatform (KMP) project. Produces two workflow files: ci.yml (lint, Android tests, iOS tests, Desktop JVM tests, Web JS + WasmJs tests, Gradle cache) and release.yml (XCFramework build + upload artifact). All target platforms are covered. Assumes AGP 9+ and the project structure from kmp-feature-scaffold.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-14",
       "keywords": [
@@ -435,8 +435,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-clean-architecture",
-      "path": "skills/kotlin-multiplatform-clean-architecture",
+      "name": "kmp-clean-architecture",
+      "path": "skills/kmp-clean-architecture",
       "description": "Defines the 6-layer clean architecture contract for KMP feature modules: :model / :api / :domain / :data / :presenter / :ui. Covers layer dependency rules, :model vs :api split, internal visibility enforcement, and Detekt architecture fitness functions that make violations fail the build.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-26",
@@ -505,9 +505,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-code-quality",
-      "path": "skills/kotlin-multiplatform-code-quality",
-      "description": "Sets up Ktlint (formatting) and Detekt (code smells + architecture rules) for a KMP project. Both run as CI gates. Ktlint is near-zero config. Detekt architecture rules enforce the 6-layer module boundary contract from kotlin-multiplatform-clean-architecture.",
+      "name": "kmp-code-quality",
+      "path": "skills/kmp-code-quality",
+      "description": "Sets up Ktlint (formatting) and Detekt (code smells + architecture rules) for a KMP project. Both run as CI gates. Ktlint is near-zero config. Detekt architecture rules enforce the 6-layer module boundary contract from kmp-clean-architecture.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
       "keywords": [
@@ -558,8 +558,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-compose-animation",
-      "path": "skills/kotlin-multiplatform-compose-animation",
+      "name": "kmp-compose-animation",
+      "path": "skills/kmp-compose-animation",
       "description": "Compose Multiplatform animation patterns \u2014 AnimatedVisibility with enter/exit transitions, animateContentSize, Crossfade for screen-level transitions, animateFloatAsState / animateDpAsState for property animations, and shared element transitions (Compose 1.7+). Covers when to use each API and how to keep animations accessible with reduced-motion support.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -614,8 +614,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-compose-slot-api",
-      "path": "skills/kotlin-multiplatform-compose-slot-api",
+      "name": "kmp-compose-slot-api",
+      "path": "skills/kmp-compose-slot-api",
       "description": "The Slot API pattern in Compose Multiplatform \u2014 designing components with composable lambda parameters (slots) instead of data parameters. Covers: single and named slots, scoped slots with receiver types (RowScope, ColumnScope), trailing lambda convention, slot-based component library design, CompositionLocal as a deep-slot alternative, performance characteristics, and when NOT to use slots. Zero new dependencies.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-26",
@@ -658,8 +658,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-compose-state-container",
-      "path": "skills/kotlin-multiplatform-compose-state-container",
+      "name": "kmp-compose-state-container",
+      "path": "skills/kmp-compose-state-container",
       "description": "Choosing the right state container in Compose Multiplatform: remember vs rememberSaveable vs ViewModel vs rememberCoroutineScope. Covers: what survives recomposition, config changes, and process death; when each container applies; rememberSaveable with custom Saver for complex types; ViewModel scoping to nav back-stack entries; and the most common wrong choices (ViewModel for dropdown state, remember for form data that must survive rotation). Zero new dependencies.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-06",
@@ -697,8 +697,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-compose-state-hoisting",
-      "path": "skills/kotlin-multiplatform-compose-state-hoisting",
+      "name": "kmp-compose-state-hoisting",
+      "path": "skills/kmp-compose-state-hoisting",
       "description": "State hoisting in Compose Multiplatform \u2014 the pattern of moving state up to the lowest common ancestor that needs it. Covers: stateful vs stateless composables, the controlled component pattern (value + onValueChange), the hoist-until-shared rule, UI state vs business state distinction, when to stop hoisting, and the common mistakes of over-hoisting (everything in ViewModel) and under-hoisting (buried state that can't be tested). Zero new dependencies.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-20",
@@ -735,8 +735,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-crash-reporting",
-      "path": "skills/kotlin-multiplatform-crash-reporting",
+      "name": "kmp-crash-reporting",
+      "path": "skills/kmp-crash-reporting",
       "description": "Crash reporting for Kotlin Multiplatform apps \u2014 Firebase Crashlytics on Android/iOS, Sentry as a cross-platform alternative, custom non-fatal event recording, and breadcrumb logging. Covers: logger breadcrumb bridges, symbolication setup for Kotlin/Native dSYMs, and a CrashReporter expect/actual interface that keeps commonMain free of platform SDKs. Does NOT cover general structured logging (see logging skill) or app analytics/events (see analytics skill).",
       "license": "Apache-2.0",
       "last_updated": "2026-06-24",
@@ -779,8 +779,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-datastore",
-      "path": "skills/kotlin-multiplatform-datastore",
+      "name": "kmp-datastore",
+      "path": "skills/kmp-datastore",
       "description": "Sets up Multiplatform DataStore for KMP: Preferences (key-value) and Proto (typed, schema-driven) variants. Covers createDataStore {} expect/actual per platform, Flow-based reads, coroutine writes, migration from SharedPreferences, and Koin wiring so feature modules never construct DataStore directly.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-18",
@@ -821,8 +821,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-deep-linking",
-      "path": "skills/kotlin-multiplatform-deep-linking",
+      "name": "kmp-deep-linking",
+      "path": "skills/kmp-deep-linking",
       "description": "Deep linking for Kotlin Multiplatform \u2014 Android App Links (Digital Asset Links), iOS Universal Links (Apple App Site Association), NavHost route integration, deep-link route parsing in commonMain, intent handling in AndroidActivity, and NSUserActivity/openURL handling in the iOS app delegate.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -863,8 +863,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-dependency-injection",
-      "path": "skills/kotlin-multiplatform-dependency-injection",
+      "name": "kmp-dependency-injection",
+      "path": "skills/kmp-dependency-injection",
       "description": "KMP dependency injection with Koin \u2014 recommend manual modules first, then annotated mode when less wiring is preferred. Covers app/feature scope boundaries, constructor injection, module organization, platform startup, test overrides, and the anti-patterns that hide architecture problems behind DI. Use this when deciding how to wire KMP dependencies instead of repeating Koin setup across other skills.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-20",
@@ -910,8 +910,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-design-system",
-      "path": "skills/kotlin-multiplatform-design-system",
+      "name": "kmp-design-system",
+      "path": "skills/kmp-design-system",
       "description": "Scaffolds a custom Compose Multiplatform design system in :core:designsystem using the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles, @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates: color/typography/shape/spacing tokens, AppTheme with light/dark support, StyleScope extensions for token access, shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant, ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision), and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText) built on BasicXxx CMP primitives. \"App\" is a placeholder prefix derived from the project's actual name (scripts/derive_component_prefix.py), not a hardcoded literal. No Material dependency \u2014 fully custom, fully owned.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-26",
@@ -1008,9 +1008,9 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-design-system-extended",
-      "path": "skills/kotlin-multiplatform-design-system-extended",
-      "description": "Extends :core:designsystem (from kotlin-multiplatform-design-system) with 28 production-ready components using the Compose Styles API. Covers: Icon, IconButton, Label, Separator, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton, Switch, Slider, Select/Dropdown, Progress (linear + circular), Skeleton, Spinner, Alert, Toast/Snackbar system (AppToastHostState + Scaffold slot), Dialog, AlertDialog, Sheet (BottomSheet), Tooltip, Popover, Accordion/Collapsible, ScrollArea (Desktop-only scrollbar via expect/actual), ResizablePanelGroup (draggable divider). All components built on CMP primitives (no Material3). \"App\" is a placeholder prefix \u2014 see the base skill's Step 0 for how it is resolved from the project name (scripts/derive_component_prefix.py). Requires kotlin-multiplatform-design-system skill.",
+      "name": "kmp-design-system-extended",
+      "path": "skills/kmp-design-system-extended",
+      "description": "Extends :core:designsystem (from kmp-design-system) with 28 production-ready components using the Compose Styles API. Covers: Icon, IconButton, Label, Separator, Avatar, TopAppBar, NavigationBar, Tabs, Checkbox, RadioButton, Switch, Slider, Select/Dropdown, Progress (linear + circular), Skeleton, Spinner, Alert, Toast/Snackbar system (AppToastHostState + Scaffold slot), Dialog, AlertDialog, Sheet (BottomSheet), Tooltip, Popover, Accordion/Collapsible, ScrollArea (Desktop-only scrollbar via expect/actual), ResizablePanelGroup (draggable divider). All components built on CMP primitives (no Material3). \"App\" is a placeholder prefix \u2014 see the base skill's Step 0 for how it is resolved from the project name (scripts/derive_component_prefix.py). Requires kmp-design-system skill.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-08",
       "keywords": [
@@ -1104,8 +1104,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-desktop-app",
-      "path": "skills/kotlin-multiplatform-desktop-app",
+      "name": "kmp-desktop-app",
+      "path": "skills/kmp-desktop-app",
       "description": "Desktop-specific concerns for KMP Compose Multiplatform apps \u2014 window management, system tray, file picker, keyboard shortcuts, native menu bar, drag-and-drop, and packaging. Covers the Desktop target's deviations from Android/iOS: synchronous file I/O on the main thread is safe on Desktop, `LocalContext` does not exist, and window state must be managed differently than Android Activity state.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-29",
@@ -1156,9 +1156,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-docs-site",
-      "path": "skills/kotlin-multiplatform-docs-site",
-      "description": "Sets up a public developer-guide website (getting started, guides, code examples, API reference) for a published Kotlin Multiplatform library, deployed to GitHub Pages. Covers MkDocs Material for hand-written guide content, Dokka HTML for auto-generated API reference, a compiler-verified snippet-extraction technique so code examples can't drift stale, and the CI deploy workflow. Library-only \u2014 does not apply to app projects, which have no external consumers to write a developer guide for. Distinct from kotlin-multiplatform-library-publishing (owns the Maven Central pipeline) and kotlin-multiplatform-project-docs-maintainer (owns internal, non-public planning docs).",
+      "name": "kmp-docs-site",
+      "path": "skills/kmp-docs-site",
+      "description": "Sets up a public developer-guide website (getting started, guides, code examples, API reference) for a published Kotlin Multiplatform library, deployed to GitHub Pages. Covers MkDocs Material for hand-written guide content, Dokka HTML for auto-generated API reference, a compiler-verified snippet-extraction technique so code examples can't drift stale, and the CI deploy workflow. Library-only \u2014 does not apply to app projects, which have no external consumers to write a developer guide for. Distinct from kmp-library-publishing (owns the Maven Central pipeline) and kmp-project-docs-maintainer (owns internal, non-public planning docs).",
       "license": "Apache-2.0",
       "last_updated": "2026-07-11",
       "keywords": [
@@ -1193,8 +1193,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-expect-actual",
-      "path": "skills/kotlin-multiplatform-expect-actual",
+      "name": "kmp-expect-actual",
+      "path": "skills/kmp-expect-actual",
       "description": "The expect/actual mechanism in Kotlin Multiplatform \u2014 when to use it, when NOT to, and how to do it correctly. Covers: the four categories that genuinely warrant expect/actual (platform APIs, platform types, performance-critical code, SDK integration), the common-first rule that prefers a pure `commonMain` implementation before abstractions, the interface-injection alternative that handles most cases better, the \"actual everywhere\" anti-pattern, typealias actual for platform types, @ObjCName for clean Swift API surfaces, and Kotlin/Native memory considerations. Zero new dependencies.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-20",
@@ -1240,9 +1240,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-expert",
-      "path": "skills/kotlin-multiplatform-expert",
-      "description": "KMP Expert Orchestrator \u2014 maps all skills in this collection, their dependency order, and how to sequence them for any Kotlin Multiplatform project. Use this skill first to decide which other skill to invoke, in what order, for a given task. Covers: skill dependency graph, layer-by-layer build order, feature-slice assembly sequence, decision trees for the most common \"what do I use here?\" questions, and when to hand off to the project audit skill. This is a meta-skill; it delegates to domain skills for implementation and review, and it can turn confirmed audit findings into issue drafts or question drafts when the repo needs tracking. The long-term goal is to keep this skills collection aligned with the cleanest KMM architecture patterns possible.",
+      "name": "kmp-expert",
+      "path": "skills/kmp-expert",
+      "description": "KMP Expert Orchestrator \u2014 maps all skills in this collection, their dependency order, and how to sequence them for any Kotlin Multiplatform project. Use this skill first to decide which other skill to invoke, in what order, for a given task. Covers: skill dependency graph, layer-by-layer build order, feature-slice assembly sequence, decision trees for the most common \"what do I use here?\" questions, and when to hand off to the project audit skill. This is a meta-skill; it delegates to domain skills for implementation and review, and it can turn confirmed audit findings into issue drafts or question drafts when the repo needs tracking. The long-term goal is to keep this skills collection aligned with the cleanest KMP architecture patterns possible.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
       "keywords": [
@@ -1251,7 +1251,7 @@
         "skill sequencing",
         "dependency graph",
         "project setup order",
-        "KMM architecture",
+        "KMP architecture",
         "Kotlin Multiplatform expert",
         "what skill should I use",
         "skill map",
@@ -1263,9 +1263,9 @@
         "architecture review",
         "issue draft",
         "question draft",
-        "kmm-agent-skills",
-        "kmm-skills",
-        "KMM agent skills",
+        "kmp-agent-skills",
+        "kmp-skills",
+        "KMP agent skills",
         "skill collection",
         "skills index"
       ],
@@ -1276,7 +1276,7 @@
         "which skill",
         "skill order",
         "KMP architecture decision",
-        "KMM expert",
+        "KMP expert",
         "KMP project plan",
         "which pattern KMP",
         "KMP checklist",
@@ -1293,8 +1293,8 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-feature-flags",
-      "path": "skills/kotlin-multiplatform-feature-flags",
+      "name": "kmp-feature-flags",
+      "path": "skills/kmp-feature-flags",
       "description": "Feature flag evaluation for Kotlin Multiplatform \u2014 a FeatureFlag enum and FeatureFlagProvider interface in commonMain, Firebase Remote Config as the default backend, A/B variant types, offline fallback defaults, flag evaluation in the :domain layer, and kill-switch support for fast disablement.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -1334,15 +1334,15 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-feature-scaffold",
-      "path": "skills/kotlin-multiplatform-feature-scaffold",
+      "name": "kmp-feature-scaffold",
+      "path": "skills/kmp-feature-scaffold",
       "description": "Scaffolds a production-ready Kotlin Multiplatform (KMP) multi-feature module architecture. Creates a full project by generating from the official Kotlin/kmp-wizard AGP 9 baseline, usually the `all-targets` branch for Android, iOS, Web, Desktop, and Server, or adds a new feature module group (:model/:api/:domain/:data/:presenter/:ui) to an existing KMP project. Uses AGP 9+, build-logic convention plugins, a TOML version catalog (`gradle/libs.versions.toml`), Compose Multiplatform, and Koin 4 (annotated or manual DI).",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
       "keywords": [
         "Kotlin Multiplatform",
         "KMP",
-        "KMM",
+        "KMP",
         "multi-module",
         "feature module",
         "AGP 9",
@@ -1383,9 +1383,9 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-flavor-environment",
-      "path": "skills/kotlin-multiplatform-flavor-environment",
-      "description": "Sets up multi-environment configuration (dev/staging/prod) in a Kotlin Multiplatform project using BuildKonfig. Covers: environment-specific BuildKonfig values, Android product flavors wired to BuildKonfig, a shared AppConfig object in commonMain, secret management, and switching environments at build time. Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
+      "name": "kmp-flavor-environment",
+      "path": "skills/kmp-flavor-environment",
+      "description": "Sets up multi-environment configuration (dev/staging/prod) in a Kotlin Multiplatform project using BuildKonfig. Covers: environment-specific BuildKonfig values, Android product flavors wired to BuildKonfig, a shared AppConfig object in commonMain, secret management, and switching environments at build time. Assumes the project was scaffolded with kmp-feature-scaffold.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
       "keywords": [
@@ -1421,8 +1421,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-form-validation",
-      "path": "skills/kotlin-multiplatform-form-validation",
+      "name": "kmp-form-validation",
+      "path": "skills/kmp-form-validation",
       "description": "Declarative form validation for Kotlin Multiplatform \u2014 field-level validation rules in commonMain, synchronous and async validators, error state integrated into MVI UiState, submit gating, and reusable field components that display inline errors. No third-party validation library required.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -1468,8 +1468,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-graphics-modifiers",
-      "path": "skills/kotlin-multiplatform-graphics-modifiers",
+      "name": "kmp-graphics-modifiers",
+      "path": "skills/kmp-graphics-modifiers",
       "description": "Jetpack Compose graphics modifiers for KMP and CMP \u2014 use graphicsLayer for transforms, clipping, alpha, elevation, and layer effects; use Canvas, drawBehind, and drawWithCache for actual custom drawing. Recommended for workflow editors, node-based UIs, and other surfaces where a composable needs a transformable shell around a custom-drawn interior.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-13",
@@ -1502,8 +1502,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-image-loading",
-      "path": "skills/kotlin-multiplatform-image-loading",
+      "name": "kmp-image-loading",
+      "path": "skills/kmp-image-loading",
       "description": "Image loading for Kotlin Multiplatform using Coil 3 \u2014 AsyncImage, cache policy, placeholder and error states, circular/rounded clipping, local resource images, Koin wiring of ImageLoader, and memory/disk cache tuning. Coil 3 is KMP-ready for Android, iOS, Desktop, and WASM targets.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -1544,8 +1544,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-imagevector-generator",
-      "path": "skills/kotlin-multiplatform-imagevector-generator",
+      "name": "kmp-imagevector-generator",
+      "path": "skills/kmp-imagevector-generator",
       "description": "Eliminates raw pixel assets and hand-written vector paths from KMP Compose projects. Compiles raster images (PNG/JPG) and SVGs into Kotlin ImageVector code via a local, deterministic toolchain (quantize \u2192 trace \u2192 normalize \u2192 codegen). Agents are forbidden from writing path coordinates by hand \u2014 all vector generation is delegated to scripts/convert_image_to_imagevector.py. Use whenever a project needs an icon, logo, or flat illustration as a Compose asset, or when replacing PNG icons with vectors.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-08",
@@ -1605,8 +1605,8 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-in-app-purchases",
-      "path": "skills/kotlin-multiplatform-in-app-purchases",
+      "name": "kmp-in-app-purchases",
+      "path": "skills/kmp-in-app-purchases",
       "description": "In-app purchases and subscriptions in KMP \u2014 shared domain model for purchase state, platform implementations via expect/actual, Play Billing (Android) and StoreKit 2 (iOS), entitlement verification, and the MVI integration pattern for gating premium features. Covers: one-time purchases, auto-renewing subscriptions, receipt validation, and restore purchases. Zero server required for basic validation; server-side validation guidance included.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-29",
@@ -1654,8 +1654,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-jni-pro",
-      "path": "skills/kotlin-multiplatform-jni-pro",
+      "name": "kmp-jni-pro",
+      "path": "skills/kmp-jni-pro",
       "description": "Expert in JNI bridge engineering between Kotlin/JVM and native C++ libraries. Specializes in memory safety across the JVM boundary, shared-library symbol isolation, type mapping, GPU-sync correctness, algorithm porting discipline, and stable-feature protection. Language and library agnostic \u2014 applies to any Kotlin \u2194 native pipeline.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
@@ -1704,8 +1704,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-kotlin-rpc",
-      "path": "skills/kotlin-multiplatform-kotlin-rpc",
+      "name": "kmp-kotlin-rpc",
+      "path": "skills/kmp-kotlin-rpc",
       "description": "Kotlin RPC for Kotlin Multiplatform full-stack apps. Covers when to use Kotlin RPC instead of REST or gRPC, shared request/response contracts, client/server module layout, auth boundaries, service interface design, and a scaffold script for initial RPC project setup. Use this for Kotlin-to-Kotlin service boundaries, especially when the client and server both live in the same KMP ecosystem.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
@@ -1740,8 +1740,8 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-ktor-auth-service",
-      "path": "skills/kotlin-multiplatform-ktor-auth-service",
+      "name": "kmp-ktor-auth-service",
+      "path": "skills/kmp-ktor-auth-service",
       "description": "Ktor-based auth service pattern for Kotlin Multiplatform full-stack apps. Covers: bearer and JWT auth, sessions when stateful browser-style sessions are a better fit, Ktor RPC when the client and server are both Kotlin-first, typed auth errors, route guards, refresh/logout flows, and a small scaffold script for repeated auth module setup. Use this for server-side auth, not shared UI auth state.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-13",
@@ -1790,8 +1790,8 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-layout-system",
-      "path": "skills/kotlin-multiplatform-layout-system",
+      "name": "kmp-layout-system",
+      "path": "skills/kmp-layout-system",
       "description": "Drafts and documents screen layouts for any KMP consumer project. Creates docs/layout-system/ with one markdown file per screen \u2014 each file has a component table and an ASCII wireframe. A shared _components.md holds the project-wide component registry. Use this skill whenever a new screen is being designed, an existing screen changes, a layout review is requested, or a project has no layout-system docs yet. Trigger proactively on any new project or new screen \u2014 layout-system docs should exist before or alongside implementation, not after. Trigger keywords: layout system, screen layout, wireframe, layout spec, layout docs, draft screen, add screen layout, document layout, layout-system, component layout, screen wireframe, layout diagram, screen structure, layout missing, no layout docs, create layout, update layout, design screen, sketch layout, plan screen, html wireframe, html to compose, implement wireframe, html mockup to jetpack compose.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-17",
@@ -1818,8 +1818,8 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-legal-docs",
-      "path": "skills/kotlin-multiplatform-legal-docs",
+      "name": "kmp-legal-docs",
+      "path": "skills/kmp-legal-docs",
       "description": "Lawyer agent for KMP apps: generates Privacy Policy and Terms & Conditions tailored to the data your app actually collects. Covers Google Play data safety section, App Store privacy nutrition labels, GDPR (EU), CCPA (California), and in-app display via a CMP composable. Produces web-ready markdown and a KMP WebView/ScrollView screen for showing the docs inside the app. Does NOT provide legal advice \u2014 output is a best-practice template that must be reviewed by a qualified lawyer before publishing.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -1859,8 +1859,8 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-lessons",
-      "path": "skills/kotlin-multiplatform-lessons",
+      "name": "kmp-lessons",
+      "path": "skills/kmp-lessons",
       "description": "Consumer-side skill for capturing lessons learned from real KMP project work. Writes structured lesson files to docs/lessons/ whenever a skill's guidance was wrong, incomplete, or led to a bug \u2014 so that knowledge flows back into the skills collection. Use this skill whenever you fix a bug caused by following skill guidance, discover a better pattern than what the skill teaches, find a gap in skill coverage, or notice that a skill's dependency reference is stale. Trigger it proactively after any non-trivial fix \u2014 don't wait for the user to ask.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-12",
@@ -1896,9 +1896,9 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-library-publishing",
-      "path": "skills/kotlin-multiplatform-library-publishing",
-      "description": "Publish a Kotlin Multiplatform library to Maven Central, GitHub Packages, or both. Covers: vanniktech maven-publish plugin setup, POM metadata, Sonatype OSSRH staging, multi-artifact BOM, kotlinx-binary-compatibility-validator API tracking, SNAPSHOT vs stable channels, and a release checklist. Pairs with kotlin-multiplatform-xcframework-spm for iOS/SPM distribution.",
+      "name": "kmp-library-publishing",
+      "path": "skills/kmp-library-publishing",
+      "description": "Publish a Kotlin Multiplatform library to Maven Central, GitHub Packages, or both. Covers: vanniktech maven-publish plugin setup, POM metadata, Sonatype OSSRH staging, multi-artifact BOM, kotlinx-binary-compatibility-validator API tracking, SNAPSHOT vs stable channels, and a release checklist. Pairs with kmp-xcframework-spm for iOS/SPM distribution.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
       "keywords": [
@@ -1979,8 +1979,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-logging",
-      "path": "skills/kotlin-multiplatform-logging",
+      "name": "kmp-logging",
+      "path": "skills/kmp-logging",
       "description": "Sets up kotlin-logging or Kermit for KMP projects: log levels, logger factories per target, crash boundary integration (Firebase Crashlytics, Sentry), and Koin wiring so every layer gets a logger without constructing it directly.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-24",
@@ -2014,9 +2014,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-migration",
-      "path": "skills/kotlin-multiplatform-migration",
-      "description": "Incremental adoption guide for teams moving an existing Android or KMP project toward the kmm-agent-skills architecture. Covers assessment of current state, prioritized skill adoption order, migration paths from MVVM+LiveData to MVI, monolith to multi-module, and how to migrate without breaking a live app. Use this skill when a project already exists and the team wants to adopt KMP skills one feature or one layer at a time.",
+      "name": "kmp-migration",
+      "path": "skills/kmp-migration",
+      "description": "Incremental adoption guide for teams moving an existing Android or KMP project toward the kmp-agent-skills architecture. Covers assessment of current state, prioritized skill adoption order, migration paths from MVVM+LiveData to MVI, monolith to multi-module, and how to migrate without breaking a live app. Use this skill when a project already exists and the team wants to adopt KMP skills one feature or one layer at a time.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-19",
       "keywords": [
@@ -2057,8 +2057,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-mongodb-database",
-      "path": "skills/kotlin-multiplatform-mongodb-database",
+      "name": "kmp-mongodb-database",
+      "path": "skills/kmp-mongodb-database",
       "description": "MongoDB Kotlin Coroutine Driver pattern for Kotlin Multiplatform full-stack apps. Covers: server-side MongoDB access, document mapping, repository boundaries, typed database errors, reactive reads with Flow, change streams, and a scaffold script for repeated database setup. Use this for the backend data layer, not shared client persistence.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -2093,8 +2093,8 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-mvi",
-      "path": "skills/kotlin-multiplatform-mvi",
+      "name": "kmp-mvi",
+      "path": "skills/kmp-mvi",
       "description": "MVI (Model-View-Intent) architecture pattern for Kotlin Multiplatform + Compose Multiplatform. Covers: the Contract pattern (State/Intent/Effect per screen), MviViewModel base class with StateFlow for state and Channel for one-shot effects, atomic state updates, Compose screen/content split, testing ViewModels with Turbine, and the most common MVI pitfalls in KMP. Zero new dependencies \u2014 builds on androidx.lifecycle.ViewModel and kotlinx.coroutines already present in feature-scaffold.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-26",
@@ -2178,9 +2178,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-native-authoring",
-      "path": "skills/kotlin-multiplatform-native-authoring",
-      "description": "Scaffolds and structures brand-new, first-party C/C++ source for a Kotlin Multiplatform library's native core (a custom renderer, codec, or engine you are writing yourself) \u2014 directory layout, CMake setup, public C-ABI header design, and native-side testing. Produces the artifact kotlin-multiplatform-jni-pro's Phase 0 discovery expects to find. Does NOT cover bridging Kotlin to native code \u2014 that is kotlin-multiplatform-jni-pro's job, always used after this skill, never instead of it. Does NOT cover wrapping an existing 3rd-party C/C++ library \u2014 that is also jni-pro's job (its Phase 0 library-first discovery), not this skill's.",
+      "name": "kmp-native-authoring",
+      "path": "skills/kmp-native-authoring",
+      "description": "Scaffolds and structures brand-new, first-party C/C++ source for a Kotlin Multiplatform library's native core (a custom renderer, codec, or engine you are writing yourself) \u2014 directory layout, CMake setup, public C-ABI header design, and native-side testing. Produces the artifact kmp-jni-pro's Phase 0 discovery expects to find. Does NOT cover bridging Kotlin to native code \u2014 that is kmp-jni-pro's job, always used after this skill, never instead of it. Does NOT cover wrapping an existing 3rd-party C/C++ library \u2014 that is also jni-pro's job (its Phase 0 library-first discovery), not this skill's.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
       "keywords": [
@@ -2212,9 +2212,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-navigation",
-      "path": "skills/kotlin-multiplatform-navigation",
-      "description": "Sets up type-safe navigation in a Kotlin Multiplatform Compose project using Jetpack Navigation Compose for KMP (org.jetbrains.androidx.navigation). Covers: route definitions with kotlinx.serialization, NavHost setup in a :app:shared or :feature:*:ui nav graph, type-safe arguments, deep links, and bottom navigation wiring. Works on Android, iOS, Desktop (JVM), and Web (JS/WasmJs). Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
+      "name": "kmp-navigation",
+      "path": "skills/kmp-navigation",
+      "description": "Sets up type-safe navigation in a Kotlin Multiplatform Compose project using Jetpack Navigation Compose for KMP (org.jetbrains.androidx.navigation). Covers: route definitions with kotlinx.serialization, NavHost setup in a :app:shared or :feature:*:ui nav graph, type-safe arguments, deep links, and bottom navigation wiring. Works on Android, iOS, Desktop (JVM), and Web (JS/WasmJs). Assumes the project was scaffolded with kmp-feature-scaffold.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-29",
       "keywords": [
@@ -2270,9 +2270,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-network-layer",
-      "path": "skills/kotlin-multiplatform-network-layer",
-      "description": "Scaffolds a production-ready Ktor 3 network layer inside :core:network for a Kotlin Multiplatform project. Covers: platform engines (OkHttp/Darwin/CIO/Js) for Android, iOS, Desktop (JVM), and Web (JS + WasmJs), ContentNegotiation, Bearer auth with automatic token refresh (race-condition-safe), structured error mapping to a NetworkResult<T> sealed type, request/response logging, and Koin wiring. Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
+      "name": "kmp-network-layer",
+      "path": "skills/kmp-network-layer",
+      "description": "Scaffolds a production-ready Ktor 3 network layer inside :core:network for a Kotlin Multiplatform project. Covers: platform engines (OkHttp/Darwin/CIO/Js) for Android, iOS, Desktop (JVM), and Web (JS + WasmJs), ContentNegotiation, Bearer auth with automatic token refresh (race-condition-safe), structured error mapping to a NetworkResult<T> sealed type, request/response logging, and Koin wiring. Assumes the project was scaffolded with kmp-feature-scaffold.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
       "keywords": [
@@ -2335,8 +2335,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-offline-first",
-      "path": "skills/kotlin-multiplatform-offline-first",
+      "name": "kmp-offline-first",
+      "path": "skills/kmp-offline-first",
       "description": "Offline-first architecture for Kotlin Multiplatform apps \u2014 local-first reads, background sync, optimistic updates, conflict resolution, and sync state tracking. Covers: single-source-of-truth via SQLDelight, a SyncManager pattern using WorkManager/BGTaskScheduler, optimistic mutation with rollback, and a SyncState sealed class surfaced to the UI via MVI. Does NOT cover FCM-triggered sync (see push-notifications) or RPC streaming (see kotlin-rpc).",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -2368,8 +2368,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-paging",
-      "path": "skills/kotlin-multiplatform-paging",
+      "name": "kmp-paging",
+      "path": "skills/kmp-paging",
       "description": "Paging 3 in Kotlin Multiplatform \u2014 PagingSource, Pager, PagingData, and collectAsLazyPagingItems for cursor-based and offset-based list loading. Covers layer placement (PagingSource in :data, Pager in :presenter, LazyPagingItems in :ui), load-state handling, RemoteMediator for network+DB, Koin wiring, and testing PagingSource in isolation. Keeps PagingData out of UiState.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -2413,8 +2413,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-permissions",
-      "path": "skills/kotlin-multiplatform-permissions",
+      "name": "kmp-permissions",
+      "path": "skills/kmp-permissions",
       "description": "Runtime permission handling for Kotlin Multiplatform \u2014 a sealed PermissionState type in commonMain, expect/actual PermissionController, Android Activity-based launcher, iOS Info.plist keys and AVFoundation/CoreLocation usage, and cross-platform Compose UI for rationale dialogs.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -2451,8 +2451,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-presenter-module",
-      "path": "skills/kotlin-multiplatform-presenter-module",
+      "name": "kmp-presenter-module",
+      "path": "skills/kmp-presenter-module",
       "description": "Sets up the :presenter module in a KMP feature \u2014 pure Kotlin ViewModels, MVI UiState/UiIntent contracts, Koin wiring, and convention plugin. No Compose dependency so ViewModels are testable on plain JVM without an Android device or emulator.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-20",
@@ -2495,8 +2495,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-preview-driven-development",
-      "path": "skills/kotlin-multiplatform-preview-driven-development",
+      "name": "kmp-preview-driven-development",
+      "path": "skills/kmp-preview-driven-development",
       "description": "Preview-Driven Development (PDD) workflow for KMP: write Content composables first, iterate on Desktop JVM previews (3-5x faster than Android), cover all states with @PreviewParameterProvider, then promote previews directly to Roborazzi screenshot tests.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-08",
@@ -2527,8 +2527,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-proguard-r8",
-      "path": "skills/kotlin-multiplatform-proguard-r8",
+      "name": "kmp-proguard-r8",
+      "path": "skills/kmp-proguard-r8",
       "description": "ProGuard and R8 obfuscation for KMP Android builds \u2014 keep rules for KMP artifacts, Koin, Ktor, SQLDelight, kotlinx.serialization, and Compose. Covers: when to enable minification, writing keep rules without breaking KMP shared code, validating the release APK, and the most common shrinking crashes in KMP projects.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-29",
@@ -2572,8 +2572,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-project-docs-maintainer",
-      "path": "skills/kotlin-multiplatform-project-docs-maintainer",
+      "name": "kmp-project-docs-maintainer",
+      "path": "skills/kmp-project-docs-maintainer",
       "description": "Maintains downstream consumer-facing KMP project documentation only: README, GETTING_STARTED, INSTALL, RELEASING, docs/reference pages, onboarding guides, architecture notes, and architecture diagrams. Use this skill when project docs need to match the actual code, commands, config, folder layout, or app/library structure. Does NOT cover consumer release-note generation, per-skill changelogs, or skills-repo documentation.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-11",
@@ -2630,8 +2630,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-push-notifications",
-      "path": "skills/kotlin-multiplatform-push-notifications",
+      "name": "kmp-push-notifications",
+      "path": "skills/kmp-push-notifications",
       "description": "Push notification handling for Kotlin Multiplatform \u2014 a shared PushToken and NotificationPayload domain type in commonMain, Android FCM token registration and FirebaseMessagingService, iOS APNs token bridging to FCM, NotificationHandler expect/actual for foreground display and tap routing, and deep-link navigation from a notification tap.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -2671,8 +2671,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-release",
-      "path": "skills/kotlin-multiplatform-release",
+      "name": "kmp-release",
+      "path": "skills/kmp-release",
       "description": "End-to-end KMP library and app release pipeline. Covers versioning strategy (gradle.properties as source of truth), Maven Central publishing via the vanniktech plugin, GPG signing, Sonatype Central Portal, changelog generation with git-cliff and Conventional Commits, GitHub Release creation, secrets management patterns, and \u2014 for app targets \u2014 deriving platform-native version fields (Android versionCode, iOS CFBundleVersion) from a single semver source. Distinct from the CI skill (which owns workflow YAML) and the xcframework-spm skill (which owns SPM binary distribution).",
       "license": "Apache-2.0",
       "last_updated": "2026-07-04",
@@ -2737,9 +2737,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-repository-pattern",
-      "path": "skills/kotlin-multiplatform-repository-pattern",
-      "description": "Repository pattern in Kotlin Multiplatform \u2014 the data layer between domain logic and storage/network. Covers: repository interface in :feature:x:api, implementation in :feature:x:data, single source of truth via SQLDelight Flow, the three fetch strategies (network-first, cache-first, offline-first), NetworkResult-to-domain mapping at the repository boundary, optimistic updates, and the common mistakes of leaking network types into domain and skipping local cache. Requires kotlin-multiplatform-network-layer and kotlin-multiplatform-sqldelight-setup.",
+      "name": "kmp-repository-pattern",
+      "path": "skills/kmp-repository-pattern",
+      "description": "Repository pattern in Kotlin Multiplatform \u2014 the data layer between domain logic and storage/network. Covers: repository interface in :feature:x:api, implementation in :feature:x:data, single source of truth via SQLDelight Flow, the three fetch strategies (network-first, cache-first, offline-first), NetworkResult-to-domain mapping at the repository boundary, optimistic updates, and the common mistakes of leaking network types into domain and skipping local cache. Requires kmp-network-layer and kmp-sqldelight-setup.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-13",
       "keywords": [
@@ -2791,9 +2791,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-roborazzi",
-      "path": "skills/kotlin-multiplatform-roborazzi",
-      "description": "Complete UI layer testing for KMP: semantic test tags on composables, Compose UI interaction tests in commonTest (runComposeUiTest, onNodeWithTag, performClick, assertIsDisplayed) that run on every target \u2014 JVM, Android instrumented, iOS simulator, Wasm \u2014 and Roborazzi screenshot tests that capture @Preview composables on JVM/Desktop for visual regression detection. Covers the full stack from testTag conventions to CI golden image diffs. Replaces kotlin-multiplatform-testing-robot for UI regression testing.",
+      "name": "kmp-roborazzi",
+      "path": "skills/kmp-roborazzi",
+      "description": "Complete UI layer testing for KMP: semantic test tags on composables, Compose UI interaction tests in commonTest (runComposeUiTest, onNodeWithTag, performClick, assertIsDisplayed) that run on every target \u2014 JVM, Android instrumented, iOS simulator, Wasm \u2014 and Roborazzi screenshot tests that capture @Preview composables on JVM/Desktop for visual regression detection. Covers the full stack from testTag conventions to CI golden image diffs. Replaces kmp-testing-robot for UI regression testing.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-10",
       "keywords": [
@@ -2880,9 +2880,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-shadcn-compose",
-      "path": "skills/kotlin-multiplatform-shadcn-compose",
-      "description": "Consumes the published shadcn-compose library (io.github.ronjunevaldoz:shadcn-compose) \u2014 a shadcn/ui-inspired Compose Multiplatform component library with 70+ components. Covers Maven Central setup, the required @OptIn(ExperimentalFoundationStyleApi::class), the ShadcnTheme wrapper and its preset/baseColor/accent/isDark/baseRadius/ring parameters, and real component usage (ShadcnButton, ShadcnCard, etc.) verified against the library's own source. Alternative to kotlin-multiplatform-design-system's generated/owned approach \u2014 not both in the same project. Carries a real risk this skill exists specifically to disclose: a hard dependency on the experimental Compose Foundation Styles API that can break on any CMP upgrade, with no fix available except an upstream shadcn-compose release.",
+      "name": "kmp-shadcn-compose",
+      "path": "skills/kmp-shadcn-compose",
+      "description": "Consumes the published shadcn-compose library (io.github.ronjunevaldoz:shadcn-compose) \u2014 a shadcn/ui-inspired Compose Multiplatform component library with 70+ components. Covers Maven Central setup, the required @OptIn(ExperimentalFoundationStyleApi::class), the ShadcnTheme wrapper and its preset/baseColor/accent/isDark/baseRadius/ring parameters, and real component usage (ShadcnButton, ShadcnCard, etc.) verified against the library's own source. Alternative to kmp-design-system's generated/owned approach \u2014 not both in the same project. Carries a real risk this skill exists specifically to disclose: a hard dependency on the experimental Compose Foundation Styles API that can break on any CMP upgrade, with no fix available except an upstream shadcn-compose release.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-31",
       "keywords": [
@@ -2975,9 +2975,9 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-shared-resources",
-      "path": "skills/kotlin-multiplatform-shared-resources",
-      "description": "Sets up Compose Multiplatform Resources (compose-resources) for sharing strings, plurals, images, fonts, and raw files across all KMP targets (Android, iOS, Desktop, Web). Covers: resource directory structure, string localization, plurals, image assets, custom fonts, accessing resources from Composables and non-Composable code, and resource module setup. Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
+      "name": "kmp-shared-resources",
+      "path": "skills/kmp-shared-resources",
+      "description": "Sets up Compose Multiplatform Resources (compose-resources) for sharing strings, plurals, images, fonts, and raw files across all KMP targets (Android, iOS, Desktop, Web). Covers: resource directory structure, string localization, plurals, image assets, custom fonts, accessing resources from Composables and non-Composable code, and resource module setup. Assumes the project was scaffolded with kmp-feature-scaffold.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-08",
       "keywords": [
@@ -3029,9 +3029,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-skill-harvester",
-      "path": "skills/kotlin-multiplatform-skill-harvester",
-      "description": "Reads docs/lessons/*.md files from one or more consumer KMP projects and proposes concrete amendments to the source skills in kmm-agent-skills. Use this skill when the user wants to incorporate consumer feedback into the skills collection, when lessons have accumulated in a project and need upstreaming, or when running a skills governance review. Produces a structured amendment report and optionally drafts the actual skill diffs. Trigger when the user says \"harvest lessons\", \"upstream the lessons\", \"incorporate feedback\", \"update skills from consumer projects\", or \"skills review\". Also trigger proactively when you see a docs/lessons/ directory with unprocessed files.",
+      "name": "kmp-skill-harvester",
+      "path": "skills/kmp-skill-harvester",
+      "description": "Reads docs/lessons/*.md files from one or more consumer KMP projects and proposes concrete amendments to the source skills in kmp-agent-skills. Use this skill when the user wants to incorporate consumer feedback into the skills collection, when lessons have accumulated in a project and need upstreaming, or when running a skills governance review. Produces a structured amendment report and optionally drafts the actual skill diffs. Trigger when the user says \"harvest lessons\", \"upstream the lessons\", \"incorporate feedback\", \"update skills from consumer projects\", or \"skills review\". Also trigger proactively when you see a docs/lessons/ directory with unprocessed files.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-26",
       "keywords": [
@@ -3064,9 +3064,9 @@
       ]
     },
     {
-      "name": "kotlin-multiplatform-sqldelight-setup",
-      "path": "skills/kotlin-multiplatform-sqldelight-setup",
-      "description": "Sets up SQLDelight 2 in a Kotlin Multiplatform project. Covers: Gradle plugin configuration, schema (.sq) files, migrations, type adapters, platform-specific drivers via expect/actual (Android, iOS, Desktop/JVM, Web/JS), coroutines Flow queries, and Koin wiring inside :core:database. Assumes the project was scaffolded with kotlin-multiplatform-feature-scaffold.",
+      "name": "kmp-sqldelight-setup",
+      "path": "skills/kmp-sqldelight-setup",
+      "description": "Sets up SQLDelight 2 in a Kotlin Multiplatform project. Covers: Gradle plugin configuration, schema (.sq) files, migrations, type adapters, platform-specific drivers via expect/actual (Android, iOS, Desktop/JVM, Web/JS), coroutines Flow queries, and Koin wiring inside :core:database. Assumes the project was scaffolded with kmp-feature-scaffold.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-09",
       "keywords": [
@@ -3116,8 +3116,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-token-saver",
-      "path": "skills/kotlin-multiplatform-token-saver",
+      "name": "kmp-token-saver",
+      "path": "skills/kmp-token-saver",
       "description": "Token-saving workflow for KMP agent work. Use when the user asks to reduce token usage, shorten replies, compress noisy tool output, or choose the smallest correct solution. Covers Ponytail for YAGNI and overengineering checks, Caveman for terse replies, RTK for shell output compression, and Headroom for tool/log/file/RAG compression when the host is already configured. Headroom stays optional until setup exists; do not block the task on it.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-13",
@@ -3149,8 +3149,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-unit-testing",
-      "path": "skills/kotlin-multiplatform-unit-testing",
+      "name": "kmp-unit-testing",
+      "path": "skills/kmp-unit-testing",
       "description": "Unit testing patterns for KMP: runTest + Turbine for Flow assertions, fake-over-mock rule, :core:testing shared fixtures module, and ViewModel tests that run on plain JVM via the :presenter module with no Android dependency.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-18",
@@ -3196,8 +3196,8 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-workmanager",
-      "path": "skills/kotlin-multiplatform-workmanager",
+      "name": "kmp-workmanager",
+      "path": "skills/kmp-workmanager",
       "description": "Background task scheduling for Kotlin Multiplatform \u2014 WorkManager (Android) and BGTaskScheduler / BGProcessingTask (iOS) behind an expect/actual BackgroundScheduler. Covers one-time work, periodic work, retry with backoff, input/output data, and chained work on Android. iOS uses BGAppRefreshTask for short frequent tasks and BGProcessingTask for long network or maintenance jobs.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-21",
@@ -3239,9 +3239,9 @@
       "scripts": []
     },
     {
-      "name": "kotlin-multiplatform-xcframework-spm",
-      "path": "skills/kotlin-multiplatform-xcframework-spm",
-      "description": "Builds an XCFramework from a Kotlin Multiplatform shared module and publishes it as a Swift Package Manager (SPM) binary target. Covers: Gradle XCFramework configuration, assembleReleaseXCFramework task, local SPM Package.swift for development, remote binary SPM target for distribution (GitHub Releases), and Xcode project integration. Assumes AGP 9+ and the project structure from kotlin-multiplatform-feature-scaffold.",
+      "name": "kmp-xcframework-spm",
+      "path": "skills/kmp-xcframework-spm",
+      "description": "Builds an XCFramework from a Kotlin Multiplatform shared module and publishes it as a Swift Package Manager (SPM) binary target. Covers: Gradle XCFramework configuration, assembleReleaseXCFramework task, local SPM Package.swift for development, remote binary SPM target for distribution (GitHub Releases), and Xcode project integration. Assumes AGP 9+ and the project structure from kmp-feature-scaffold.",
       "license": "Apache-2.0",
       "last_updated": "2026-06-06",
       "keywords": [

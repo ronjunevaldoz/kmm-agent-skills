@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# update-consumer-skills.sh — pull the latest kmm-agent-skills and re-deploy
+# update-consumer-skills.sh — pull the latest kmp-agent-skills and re-deploy
 # to the current consumer project.
 #
 # Skills (skills/) are copied automatically — they are passive reference docs.
@@ -7,10 +7,10 @@
 # agent-executable slash command and must be reviewed and approved explicitly.
 #
 # Run from your KMP project root:
-#   bash path/to/kmm-agent-skills/scripts/update-consumer-skills.sh
+#   bash path/to/kmp-agent-skills/scripts/update-consumer-skills.sh
 #
 # Options:
-#   --source PATH        Path to kmm-agent-skills clone (auto-detected if omitted).
+#   --source PATH        Path to kmp-agent-skills clone (auto-detected if omitted).
 #                         Auto-detect checks $KMM_AGENT_SKILLS_SOURCE first — set it
 #                         once in your shell profile so every consumer project on this
 #                         machine finds the clone without re-prompting.
@@ -52,16 +52,16 @@ if [[ -z "$SKILLS_SOURCE" ]]; then
     SKILLS_SOURCE="$CANDIDATE"
   elif [[ -f "skills/skills.json" ]]; then
     SKILLS_SOURCE="$(cd skills && pwd)"
-  elif [[ -f "../kmm-agent-skills/skills.json" ]]; then
-    SKILLS_SOURCE="$(cd ../kmm-agent-skills && pwd)"
-  elif [[ -f "$HOME/dev/kmm-agent-skills/skills.json" ]]; then
-    SKILLS_SOURCE="$HOME/dev/kmm-agent-skills"
+  elif [[ -f "../kmp-agent-skills/skills.json" ]]; then
+    SKILLS_SOURCE="$(cd ../kmp-agent-skills && pwd)"
+  elif [[ -f "$HOME/dev/kmp-agent-skills/skills.json" ]]; then
+    SKILLS_SOURCE="$HOME/dev/kmp-agent-skills"
   else
     echo "" >&2
-    echo "  ❌  Could not find kmm-agent-skills." >&2
+    echo "  ❌  Could not find kmp-agent-skills." >&2
     echo "  Pass --source PATH, or set \$KMM_AGENT_SKILLS_SOURCE once in your shell" >&2
     echo "  profile so every consumer project auto-detects it:" >&2
-    echo "    export KMM_AGENT_SKILLS_SOURCE=/path/to/your/kmm-agent-skills" >&2
+    echo "    export KMM_AGENT_SKILLS_SOURCE=/path/to/your/kmp-agent-skills" >&2
     echo "" >&2
     exit 1
   fi
@@ -186,7 +186,7 @@ if [[ -d "skills" ]]; then
     CUSTOM_SKILLS_COUNT=$((CUSTOM_SKILLS_COUNT + 1))
 
     if [[ -d "$SKILLS_SOURCE/skills/$skill_name" ]]; then
-      echo "  ❌  project-owned skill '$skill_name' collides with a bundled kmm-agent-skills skill."
+      echo "  ❌  project-owned skill '$skill_name' collides with a bundled kmp-agent-skills skill."
       echo "      Rename the project-owned skill (for example, make it app-specific) and run again."
       exit 1
     fi
@@ -454,7 +454,7 @@ EOF
   fi
 
   if [[ -f "$AGENTS_MD" ]]; then
-    echo "  ⚠️  $AGENTS_MD already exists — skipping (run /kmm-setup-agents to regenerate)."
+    echo "  ⚠️  $AGENTS_MD already exists — skipping (run /kmp-setup-agents to regenerate)."
   else
     # Detect project name from settings.gradle.kts
     PROJECT_NAME="KMP Project"
@@ -471,37 +471,37 @@ EOF
       cat > "$AGENTS_MD" <<AGENTS_EOF
 # AGENTS.md — $PROJECT_NAME
 
-This project uses [kmm-agent-skills](https://github.com/ronjunevaldoz/kmm-agent-skills).
+This project uses [kmp-agent-skills](https://github.com/ronjunevaldoz/kmp-agent-skills).
 Skills are installed in \`.claude/skills/\`.
 
 ## Skill routing
 
 | Topic | Skill |
 |---|---|
-| New feature end-to-end | \`kotlin-multiplatform-feature-scaffold\` → \`kotlin-multiplatform-clean-architecture\` → \`kotlin-multiplatform-mvi\` |
-| ViewModel / screen state | \`kotlin-multiplatform-mvi\` |
-| Navigation | \`kotlin-multiplatform-navigation\` |
-| Dependency injection | \`kotlin-multiplatform-dependency-injection\` |
-| Design system | \`kotlin-multiplatform-design-system\` |
-| Code quality / linting | \`kotlin-multiplatform-code-quality\` |
-| Unit tests | \`kotlin-multiplatform-unit-testing\` |
-| Android CLI / emulator / deploy | \`kotlin-multiplatform-android-cli\` |
-| Project docs / onboarding | \`kotlin-multiplatform-project-docs-maintainer\` |
-| Architecture audit | \`kotlin-multiplatform-audit\` |
+| New feature end-to-end | \`kmp-feature-scaffold\` → \`kmp-clean-architecture\` → \`kmp-mvi\` |
+| ViewModel / screen state | \`kmp-mvi\` |
+| Navigation | \`kmp-navigation\` |
+| Dependency injection | \`kmp-dependency-injection\` |
+| Design system | \`kmp-design-system\` |
+| Code quality / linting | \`kmp-code-quality\` |
+| Unit tests | \`kmp-unit-testing\` |
+| Android CLI / emulator / deploy | \`kmp-android-cli\` |
+| Project docs / onboarding | \`kmp-project-docs-maintainer\` |
+| Architecture audit | \`kmp-audit\` |
 
 ## Commands installed
 
-See \`.claude/commands/kmm-*.md\` for available slash commands.
+See \`.claude/commands/kmp-*.md\` for available slash commands.
 Key commands:
-- \`/kmm-implement-feature <name>\` — plan → implement → validate → review a new feature
-- \`/kmm-run-audit\` — run architecture audit with per-finding remediation
-- \`/kmm-verify\` — full validation pipeline (tests, audit, design, screenshots)
-- \`/kmm-execute-ticket <id>\` — implement a GitHub issue end-to-end
-- \`/kmm-fix-design\` — scan and fix design system violations
-- \`/kmm-update-skills\` — pull latest skills and re-deploy
+- \`/kmp-implement-feature <name>\` — plan → implement → validate → review a new feature
+- \`/kmp-run-audit\` — run architecture audit with per-finding remediation
+- \`/kmp-verify\` — full validation pipeline (tests, audit, design, screenshots)
+- \`/kmp-execute-ticket <id>\` — implement a GitHub issue end-to-end
+- \`/kmp-fix-design\` — scan and fix design system violations
+- \`/kmp-update-skills\` — pull latest skills and re-deploy
 AGENTS_EOF
       echo "  ✅  $AGENTS_MD generated"
-      echo "  ℹ️   Run /kmm-setup-agents for a version tailored to your module graph"
+      echo "  ℹ️   Run /kmp-setup-agents for a version tailored to your module graph"
     fi
   fi
 
@@ -556,7 +556,7 @@ EOF
       "Bash(git status)",
       "Bash(git diff*)",
       "Bash(git log*)",
-      "Bash(python3 .claude/skills/kotlin-multiplatform-audit/scripts/*)",
+      "Bash(python3 .claude/skills/kmp-audit/scripts/*)",
       "Bash(find . -name *.kt*)",
       "Bash(grep *)"
     ]
@@ -588,14 +588,14 @@ EOF
   "proven_patterns": []
 }
 PIPELINE_EOF
-      echo "  ✅  $PIPELINE_CONTEXT seeded (empty — fill in as the project evolves, or run /kmm-setup-agents for a version populated from the actual module graph)"
+      echo "  ✅  $PIPELINE_CONTEXT seeded (empty — fill in as the project evolves, or run /kmp-setup-agents for a version populated from the actual module graph)"
     fi
   fi
 fi
 
 echo "  Done. Run your audit to verify:"
-echo "  python3 $AGENT_DIR/kotlin-multiplatform-audit/scripts/audit_project.py ."
+echo "  python3 $AGENT_DIR/kmp-audit/scripts/audit_project.py ."
 echo ""
 echo "  Not yet wired: git/CI architecture hooks (pre-commit audit, PostToolUse"
-echo "  validation). Run /kmm-setup-hooks to add them."
+echo "  validation). Run /kmp-setup-hooks to add them."
 echo ""

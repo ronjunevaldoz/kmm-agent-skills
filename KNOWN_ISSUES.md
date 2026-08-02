@@ -13,7 +13,7 @@ Resolved issues stay here for reference — they explain *why* a rule exists.
 just blocked on repo access as originally filed.
 
 **Symptom:** The cross-skill audit (v1.21.6) identified four external skills referenced
-in `skills/kotlin-multiplatform-jni-pro/SKILL.md` — `cpp-pro`, `kotlin-specialist`, `compose-expert`,
+in `skills/kmp-jni-pro/SKILL.md` — `cpp-pro`, `kotlin-specialist`, `compose-expert`,
 and `android-cli`. Re-checked 2026-07-10: **only `cpp-pro` and `kotlin-specialist` are
 still referenced** (see `SKILL.md`'s Related Skills); `compose-expert` and `android-cli`
 no longer appear anywhere in the repo, so the original 4-skill list is stale.
@@ -28,7 +28,7 @@ trigger vocabulary a user gets depends entirely on which collection they install
 This makes the original "Fix" (read the four repos, compare triggers) impossible in
 principle, not just impractical: there's nothing singular to read.
 
-**Mitigation already in place:** `kotlin-multiplatform-jni-pro`'s Related Skills section
+**Mitigation already in place:** `kmp-jni-pro`'s Related Skills section
 already disambiguates the one overlap that's plausible in practice — `cpp-pro`'s generic
 "C++ performance/algorithm work" scope vs. `wrapper.cpp` files that JNI-pro also owns:
 > `/cpp-pro` *(external skill)* — algorithm-level C++ work inside `*-wrapper.cpp`; pair
@@ -62,12 +62,12 @@ the spec's progressive-disclosure guideline — "Keep your main `SKILL.md` under
 
 | Skill | Lines | Over by |
 |---|---|---|
-| `kotlin-multiplatform-design-system-extended` | 3101 | 6.2x |
-| `kotlin-multiplatform-design-system` | 2674 | 5.3x |
-| `kotlin-multiplatform-mvi` | 1626 | 3.3x |
-| `kotlin-multiplatform-feature-scaffold` | 1219 | 2.4x |
-| `kotlin-multiplatform-expert` | 886 | 1.8x |
-| `kotlin-multiplatform-navigation` | 828 | 1.7x |
+| `kmp-design-system-extended` | 3101 | 6.2x |
+| `kmp-design-system` | 2674 | 5.3x |
+| `kmp-mvi` | 1626 | 3.3x |
+| `kmp-feature-scaffold` | 1219 | 2.4x |
+| `kmp-expert` | 886 | 1.8x |
+| `kmp-navigation` | 828 | 1.7x |
 | ...16 more, 501–796 lines | | |
 
 **Why it matters:** the spec's progressive-disclosure model assumes `SKILL.md`'s full
@@ -124,7 +124,7 @@ theme files. Fixer has concrete before/after fixes for all three violations.
 **Was:** When one session implemented an adaptive layout (WindowSizeClass, list-detail
 split), a subsequent session had no way to know the pattern was established. New screens
 were generated without `WindowSizeClass` parameters, breaking layout consistency.  
-**Fix:** New `kotlin-multiplatform-adaptive-layout` skill documents the canonical
+**Fix:** New `kmp-adaptive-layout` skill documents the canonical
 pattern. Implementer agent runs a grep pre-check before any `:ui` layer —
 `grep -r "WindowSizeClass" */src --include="*.kt"` — and replicates the existing
 pattern if found. Reviewer Check 7 blocks new screens that omit `WindowSizeClass` when
@@ -153,8 +153,8 @@ gains `[LAYOUT]` before/after fixes.
 
 **Resolved:** `v1.2.3` — keyword expansion pass  
 **Was:** Queries like "test canvas layout", "visual accuracy", "pixel-perfect test"
-routed to `kotlin-multiplatform-graphics-modifiers` instead of
-`kotlin-multiplatform-roborazzi`. Several other skills had narrow keyword vocabularies
+routed to `kmp-graphics-modifiers` instead of
+`kmp-roborazzi`. Several other skills had narrow keyword vocabularies
 that caused misrouting on natural-language queries.  
 **Fix:** Added 14 skills with expanded trigger keyword lines. Added a new routing row
 to the expert skill for canvas/layout testing vocabulary.
@@ -219,7 +219,7 @@ routing rows were never added to the planner. The planner routed correctly for t
 No script caught the drift because validation only covered two of the three indexes.  
 **Fix:** `validate_skill_map.py` now validates all three indexes — README, expert
 SKILL.md, and `agents/planner.md` — using a short-name lookup (strips the
-`kotlin-multiplatform-` prefix) with a `SKIP_PLANNER` set for meta-skills that
+`kmp-` prefix) with a `SKIP_PLANNER` set for meta-skills that
 intentionally have no routing rows. The check runs on every `release.py` call, blocking
 a release if any skill directory is missing from the planner.
 
@@ -235,7 +235,7 @@ test coverage for exit codes 0/1/2 until manually identified and fixed).
 **Fix:** `hooks/pre-commit-audit.sh` now blocks any commit that stages a `.py` file
 under `scripts/` or `skills/*/scripts/` without also staging `tests/test_skill_scripts.py`.
 The pre-commit message names the changed scripts and explains the requirement.
-Reviewer Check 12, implementer Script test maintenance section, and `/kmm-modify-skill` Rule 8
+Reviewer Check 12, implementer Script test maintenance section, and `/kmp-modify-skill` Rule 8
 all mirror the same rule so the enforcement is layered — the hook is the hard gate,
 but agents enforce it before a commit is ever attempted.
 
@@ -267,10 +267,10 @@ but agents enforce it before a commit is ever attempted.
 
 ---
 
-### KI-R14 — Keyword routing gaps for `datastore` and `kotlin-multiplatform-jni-pro`
+### KI-R14 — Keyword routing gaps for `datastore` and `kmp-jni-pro`
 
 **Resolved:** `v1.13.0` — `feat(expert+tests): keyword routing coverage, validate_keyword_routing.py, visual design audit`  
-**Was:** Both skills were fully registered (README, expert table, planner routing) but had no rows in the Skill Invocation Map in `kotlin-multiplatform-expert/SKILL.md`. The invocation map is the table the expert uses for real-time keyword routing — without rows, queries like "DataStore", "save settings", or "JNI bridge" would not activate the correct skill.  
+**Was:** Both skills were fully registered (README, expert table, planner routing) but had no rows in the Skill Invocation Map in `kmp-expert/SKILL.md`. The invocation map is the table the expert uses for real-time keyword routing — without rows, queries like "DataStore", "save settings", or "JNI bridge" would not activate the correct skill.  
 **Fix:**
 - Added two invocation map rows to the expert SKILL.md
 - Created `validate_keyword_routing.py` — validates every skill (excluding meta-skills) has at least one invocation map row; returns `OK: N skills` or errors per missing skill
@@ -283,10 +283,10 @@ but agents enforce it before a commit is ever attempted.
 **Resolved:** `v1.13.0` — `feat(expert+tests): keyword routing coverage, validate_keyword_routing.py, visual design audit`  
 **Was:** Roborazzi golden diffs catch pixel-level regressions but could not detect whether a committed golden was design-system-compliant. A developer could record a new golden with a missing TopAppBar, broken dark mode, or hardcoded colors — the screenshot tests would pass, but the screen would violate the design contract.  
 **Fix:**
-- Created `commands/kmm-audit-screenshots.md` — a `/kmm-audit-screenshots` command that uses Claude vision to analyze light/dark PNG pairs against design-system rules (color tokens, AppScaffold structure, dark mode parity, spacing, typography, contrast)
-- Wired as Step 5 of `commands/kmm-verify.md` — runs automatically after `jvmTest` if new/modified PNGs are present
+- Created `commands/kmp-audit-screenshots.md` — a `/kmp-audit-screenshots` command that uses Claude vision to analyze light/dark PNG pairs against design-system rules (color tokens, AppScaffold structure, dark mode parity, spacing, typography, contrast)
+- Wired as Step 5 of `commands/kmp-verify.md` — runs automatically after `jvmTest` if new/modified PNGs are present
 - Wired as Check 13 of `agents/reviewer.md` — reviewer invokes the audit on screenshot goldens modified in the session
-- Added Visual Design Audit section to `skills/kotlin-multiplatform-roborazzi/SKILL.md`
+- Added Visual Design Audit section to `skills/kmp-roborazzi/SKILL.md`
 
 ---
 
@@ -294,12 +294,12 @@ but agents enforce it before a commit is ever attempted.
 
 ### KI-R16 — Design system had no update path once code was copied to a project
 
-**Resolved:** `v1.17.0` — `feat(design-system): ownership model, stability tiers, /kmm-update-design-system command`  
+**Resolved:** `v1.17.0` — `feat(design-system): ownership model, stability tiers, /kmp-update-design-system command`  
 **Was:** The design-system skill generated code by copying snippets from SKILL.md into the project. Once copied, there was no way for the agent to know whether a project's component had drifted from the skill reference, so bug fixes and improvements in the skill were silently ignored by all existing projects.  
 **Fix:**
 - Added `## Ownership Model` section to base and extended SKILL.md — splits files into project-owned (tokens, theme) and skill-owned (components)
 - Created `scripts/update_design_system.py` — parses `### components/AppXxx.kt` blocks from SKILL.md, MD5-compares against project files, reports CURRENT / MODIFIED / MISSING; `--diff AppButton` shows unified diff
-- Created `commands/kmm-update-design-system.md` — 5-step command: run script, present report, diff modified files one at a time, apply approved changes, compile
+- Created `commands/kmp-update-design-system.md` — 5-step command: run script, present report, diff modified files one at a time, apply approved changes, compile
 - Added stability tiers (Stable / Experimental) to all 33 components across base and extended skills
 - Added routing keywords to expert Skill Invocation Map ("update design system", "sync components", etc.)
 - Added 13 tests for `update_design_system.py` (total test suite: 98 tests)
@@ -310,11 +310,11 @@ but agents enforce it before a commit is ever attempted.
 
 ### KI-R17 — No automated way to find design violations in existing project code
 
-**Resolved:** `v1.18.0` — `feat(design-system): add /kmm-fix-design command with Roborazzi vision verification`  
+**Resolved:** `v1.18.0` — `feat(design-system): add /kmp-fix-design command with Roborazzi vision verification`  
 **Was:** The agent had no systematic way to find hardcoded colors, literal dp values, `MaterialTheme.*` access, `TextStyle()` construction, or nested Card/Surface containers in an existing project. When asked to "fix the design," it improvised — reading a few files and guessing, with no ordered priority and no safety guard.  
 **Fix:**
 - Created `scripts/scan_design_violations.py` — scans `*.kt` files for 5 violation categories, skips design-system source files, outputs JSON with file/line/severity; exit 0=clean, 1=violations, 2=not found
-- Created `commands/kmm-fix-design.md` — 5-step command: scan → summarize → fix each file with per-file diff+confirmation → regenerate Roborazzi screenshots → vision verify
+- Created `commands/kmp-fix-design.md` — 5-step command: scan → summarize → fix each file with per-file diff+confirmation → regenerate Roborazzi screenshots → vision verify
 - Vision verification step reads light+dark PNGs with Claude vision and checks: brand color on primary actions, spacing consistency, no nested-card double-shadow, dark mode background, typography hierarchy
 - Added routing keywords to expert Skill Invocation Map
 - Added 22 tests for `scan_design_violations.py` (total: 120 tests passing)

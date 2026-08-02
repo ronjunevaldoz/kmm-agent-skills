@@ -11,11 +11,11 @@ from _helpers import REPO_ROOT, load_module
 
 scan_design_violations_scripts = load_module(
     "scan_design_violations",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "scripts" / "scan_design_violations.py",
+    REPO_ROOT / "skills" / "kmp-design-system" / "scripts" / "scan_design_violations.py",
 )
 scaffold_preview_coverage_scripts = load_module(
     "scaffold_preview_coverage",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "scripts" / "scaffold_preview_coverage.py",
+    REPO_ROOT / "skills" / "kmp-design-system" / "scripts" / "scaffold_preview_coverage.py",
 )
 
 class ScanDesignViolationsTests(unittest.TestCase):
@@ -399,7 +399,7 @@ fun LoginContent(
         with tempfile.TemporaryDirectory() as tmp:
             result = subprocess.run(
                 ["python3",
-                 str(REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+                 str(REPO_ROOT / "skills" / "kmp-design-system"
                      / "scripts" / "scan_design_violations.py"),
                  tmp],
                 capture_output=True,
@@ -412,7 +412,7 @@ fun LoginContent(
             (root / "Foo.kt").write_text("val c = Color(0xFF1A73E8)\n", encoding="utf-8")
             result = subprocess.run(
                 ["python3",
-                 str(REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+                 str(REPO_ROOT / "skills" / "kmp-design-system"
                      / "scripts" / "scan_design_violations.py"),
                  tmp],
                 capture_output=True,
@@ -422,7 +422,7 @@ fun LoginContent(
     def test_cli_exit_2_on_missing_root(self) -> None:
         result = subprocess.run(
             ["python3",
-             str(REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+             str(REPO_ROOT / "skills" / "kmp-design-system"
                  / "scripts" / "scan_design_violations.py"),
              "/nonexistent/path/that/does/not/exist"],
             capture_output=True,
@@ -435,7 +435,7 @@ fun LoginContent(
             (root / "Foo.kt").write_text("val c = Color(0xFF1A73E8)\n", encoding="utf-8")
             result = subprocess.run(
                 ["python3",
-                 str(REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+                 str(REPO_ROOT / "skills" / "kmp-design-system"
                      / "scripts" / "scan_design_violations.py"),
                  tmp, "--json"],
                 capture_output=True,
@@ -450,7 +450,7 @@ fun LoginContent(
 
 
 class ScanDesignViolationsDeployedSkillsExclusionTests(unittest.TestCase):
-    """The same false-positive class found in kotlin-multiplatform-audit's
+    """The same false-positive class found in kmp-audit's
     audit_project.py (deployed skill reference/template content scanned as if it were
     the consumer's own source) also existed here: _SKIP_DIR_FRAGMENTS only knew about
     designsystem/design_system/theme, so a real project with skills deployed to
@@ -464,7 +464,7 @@ class ScanDesignViolationsDeployedSkillsExclusionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             d = (
-                root / ".claude" / "skills" / "kotlin-multiplatform-design-system"
+                root / ".claude" / "skills" / "kmp-design-system"
                 / "detekt-rules" / "src" / "test" / "kotlin"
             )
             d.mkdir(parents=True)
@@ -479,7 +479,7 @@ class ScanDesignViolationsDeployedSkillsExclusionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             d = (
-                root / ".claude" / "skills" / "kotlin-multiplatform-design-system"
+                root / ".claude" / "skills" / "kmp-design-system"
                 / "detekt-rules" / "src" / "test" / "kotlin"
             )
             d.mkdir(parents=True)
@@ -556,7 +556,7 @@ class LayoutConsistencyTests(unittest.TestCase):
             findings = scan_design_violations_scripts.scan_layout_consistency(Path(tmp))
         messages = " ".join(f["message"] for f in findings if f["type"] == "layout_inconsistency")
         self.assertIn("ShadcnTabsList", messages)
-        self.assertIn("kotlin-multiplatform-shadcn-compose", messages)
+        self.assertIn("kmp-shadcn-compose", messages)
         self.assertIn("experimental-API risk", messages)
 
     def test_single_content_file_not_flagged(self) -> None:

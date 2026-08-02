@@ -34,13 +34,13 @@ class GenerateSkillsReportTests(unittest.TestCase):
     def test_report_lists_all_skills_sorted_by_size(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            self._make_skill(root, "kotlin-multiplatform-small", 10, "2026-07-31")
-            self._make_skill(root, "kotlin-multiplatform-big", 600, "2026-07-31")
+            self._make_skill(root, "kmp-small", 10, "2026-07-31")
+            self._make_skill(root, "kmp-big", 600, "2026-07-31")
             manifest = {
                 "version": "0.0.0-test",
                 "skills": [
-                    {"name": "kotlin-multiplatform-small", "description": "d", "last_updated": "2026-07-31"},
-                    {"name": "kotlin-multiplatform-big", "description": "d", "last_updated": "2026-07-31"},
+                    {"name": "kmp-small", "description": "d", "last_updated": "2026-07-31"},
+                    {"name": "kmp-big", "description": "d", "last_updated": "2026-07-31"},
                 ],
             }
             (root / "skills.json").write_text(json.dumps(manifest), encoding="utf-8")
@@ -51,20 +51,20 @@ class GenerateSkillsReportTests(unittest.TestCase):
             ):
                 text = report_scripts.build_report()
 
-        self.assertIn("kotlin-multiplatform-small", text)
-        self.assertIn("kotlin-multiplatform-big", text)
+        self.assertIn("kmp-small", text)
+        self.assertIn("kmp-big", text)
         # Larger skill (over 500 lines) must be listed before the smaller one —
         # same "biggest offenders first" ordering that surfaced KI-008.
-        self.assertLess(text.index("kotlin-multiplatform-big"), text.index("kotlin-multiplatform-small"))
+        self.assertLess(text.index("kmp-big"), text.index("kmp-small"))
 
     def test_report_flags_status_correctly(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            self._make_skill(root, "kotlin-multiplatform-oversized", 600, "2026-07-31")
+            self._make_skill(root, "kmp-oversized", 600, "2026-07-31")
             manifest = {
                 "version": "0.0.0-test",
                 "skills": [
-                    {"name": "kotlin-multiplatform-oversized", "description": "d", "last_updated": "2026-07-31"},
+                    {"name": "kmp-oversized", "description": "d", "last_updated": "2026-07-31"},
                 ],
             }
             (root / "skills.json").write_text(json.dumps(manifest), encoding="utf-8")

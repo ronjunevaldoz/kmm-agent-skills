@@ -1,6 +1,6 @@
 # Release Guide
 
-This document is the authoritative source for releasing kmm-agent-skills.
+This document is the authoritative source for releasing kmp-agent-skills.
 It is written for both humans and AI agents — any agent that touches this
 repo should read this before making release-related changes.
 
@@ -84,7 +84,7 @@ The script does the following automatically:
 A successful release looks like:
 
 ```
-kmm-agent-skills release — bump: minor
+kmp-agent-skills release — bump: minor
 
 ✅  Working tree is clean
 ✅  Audit clean — zero findings
@@ -114,16 +114,16 @@ If `scripts/release.py` cannot be run, follow these steps exactly:
 git status   # must show nothing to commit
 
 # 2. Audit — must print nothing (zero findings)
-python3 skills/kotlin-multiplatform-audit/scripts/audit_skills_repo.py .
+python3 skills/kmp-audit/scripts/audit_skills_repo.py .
 
 # 3. Skill issue scan — must report zero issues
 python3 scripts/scan_skill_issues.py
 
 # 4. Skill map validation — must pass
-python3 skills/kotlin-multiplatform-expert/scripts/validate_skill_map.py --repo-root .
+python3 skills/kmp-expert/scripts/validate_skill_map.py --repo-root .
 
 # 5. Keyword routing validation — must pass
-python3 skills/kotlin-multiplatform-expert/scripts/validate_keyword_routing.py --repo-root .
+python3 skills/kmp-expert/scripts/validate_keyword_routing.py --repo-root .
 
 # 6. Tests — must show N passed, 0 failed
 python3 -m pytest tests/ -v
@@ -205,7 +205,7 @@ the registry in an inconsistent state.
 
 Once pushed:
 
-1. **Verify the tag is visible on GitHub**: `https://github.com/ronjunevaldoz/kmm-agent-skills/releases`
+1. **Verify the tag is visible on GitHub**: `https://github.com/ronjunevaldoz/kmp-agent-skills/releases`
 2. **Submit to skills.sh** (if not yet submitted): point the registry to the repo and the new tag
 3. **Update downstream projects**: projects that pinned a previous tag can upgrade by pulling
    the new `skills.json` and re-copying the updated skill directories

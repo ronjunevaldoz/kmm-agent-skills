@@ -22,15 +22,15 @@ STALE_MONTHS = 6
 
 # Skills where a "Testing" section is not applicable
 SKIP_TESTING = {
-    "kotlin-multiplatform-clean-architecture",   # contract doc
-    "kotlin-multiplatform-audit",                # meta review tool
-    "kotlin-multiplatform-ci-github-actions",    # CI YAML config
-    "kotlin-multiplatform-android-cli",          # CLI tool wrapper, no Kotlin API surface
-    "kotlin-multiplatform-xcframework-spm",      # binary distribution
-    "kotlin-multiplatform-library-publishing",   # Maven Central / GitHub Packages / BOM / binary-compat
-    "kotlin-multiplatform-code-quality",         # linting/formatting config
-    "kotlin-multiplatform-preview-driven-development",  # workflow guide
-    "kotlin-multiplatform-expert",               # meta orchestrator
+    "kmp-clean-architecture",   # contract doc
+    "kmp-audit",                # meta review tool
+    "kmp-ci-github-actions",    # CI YAML config
+    "kmp-android-cli",          # CLI tool wrapper, no Kotlin API surface
+    "kmp-xcframework-spm",      # binary distribution
+    "kmp-library-publishing",   # Maven Central / GitHub Packages / BOM / binary-compat
+    "kmp-code-quality",         # linting/formatting config
+    "kmp-preview-driven-development",  # workflow guide
+    "kmp-expert",               # meta orchestrator
     "jni-kotlin-pro",                            # separate domain
 }
 
@@ -61,31 +61,31 @@ _AGENTSKILLS_MAX_RECOMMENDED_LINES = 500
 # exemption for the two checks. Update via `python3 scripts/scan_skill_issues.py`
 # only after actually fixing the corresponding skill, never to silence a new one.
 KNOWN_DEBT: set[tuple[str, str]] = {
-    ("kotlin-multiplatform-clean-architecture", "oversized_skill_md"),
-    ("kotlin-multiplatform-code-quality", "oversized_skill_md"),
-    ("kotlin-multiplatform-compose-slot-api", "oversized_skill_md"),
-    ("kotlin-multiplatform-compose-state-container", "oversized_skill_md"),
-    ("kotlin-multiplatform-compose-state-hoisting", "oversized_skill_md"),
-    ("kotlin-multiplatform-design-system", "description_approaching_limit"),
-    ("kotlin-multiplatform-design-system", "oversized_skill_md"),
-    ("kotlin-multiplatform-design-system-extended", "description_approaching_limit"),
-    ("kotlin-multiplatform-design-system-extended", "oversized_skill_md"),
-    ("kotlin-multiplatform-expect-actual", "oversized_skill_md"),
-    ("kotlin-multiplatform-expert", "oversized_skill_md"),
-    ("kotlin-multiplatform-feature-scaffold", "oversized_skill_md"),
-    ("kotlin-multiplatform-layout-system", "description_approaching_limit"),
-    ("kotlin-multiplatform-layout-system", "oversized_skill_md"),
-    ("kotlin-multiplatform-legal-docs", "oversized_skill_md"),
-    ("kotlin-multiplatform-library-publishing", "oversized_skill_md"),
-    ("kotlin-multiplatform-mvi", "oversized_skill_md"),
-    ("kotlin-multiplatform-navigation", "oversized_skill_md"),
-    ("kotlin-multiplatform-network-layer", "oversized_skill_md"),
-    ("kotlin-multiplatform-release", "oversized_skill_md"),
-    ("kotlin-multiplatform-repository-pattern", "oversized_skill_md"),
-    ("kotlin-multiplatform-roborazzi", "oversized_skill_md"),
-    ("kotlin-multiplatform-shadcn-compose", "oversized_skill_md"),
-    ("kotlin-multiplatform-shared-resources", "oversized_skill_md"),
-    ("kotlin-multiplatform-sqldelight-setup", "oversized_skill_md"),
+    ("kmp-clean-architecture", "oversized_skill_md"),
+    ("kmp-code-quality", "oversized_skill_md"),
+    ("kmp-compose-slot-api", "oversized_skill_md"),
+    ("kmp-compose-state-container", "oversized_skill_md"),
+    ("kmp-compose-state-hoisting", "oversized_skill_md"),
+    ("kmp-design-system", "description_approaching_limit"),
+    ("kmp-design-system", "oversized_skill_md"),
+    ("kmp-design-system-extended", "description_approaching_limit"),
+    ("kmp-design-system-extended", "oversized_skill_md"),
+    ("kmp-expect-actual", "oversized_skill_md"),
+    ("kmp-expert", "oversized_skill_md"),
+    ("kmp-feature-scaffold", "oversized_skill_md"),
+    ("kmp-layout-system", "description_approaching_limit"),
+    ("kmp-layout-system", "oversized_skill_md"),
+    ("kmp-legal-docs", "oversized_skill_md"),
+    ("kmp-library-publishing", "oversized_skill_md"),
+    ("kmp-mvi", "oversized_skill_md"),
+    ("kmp-navigation", "oversized_skill_md"),
+    ("kmp-network-layer", "oversized_skill_md"),
+    ("kmp-release", "oversized_skill_md"),
+    ("kmp-repository-pattern", "oversized_skill_md"),
+    ("kmp-roborazzi", "oversized_skill_md"),
+    ("kmp-shadcn-compose", "oversized_skill_md"),
+    ("kmp-shared-resources", "oversized_skill_md"),
+    ("kmp-sqldelight-setup", "oversized_skill_md"),
 }
 
 # Required quality sections (as headings or inline markers)

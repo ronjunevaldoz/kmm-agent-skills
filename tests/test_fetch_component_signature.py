@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 fetch_component_signature_scripts = load_module(
     "fetch_component_signature",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-shadcn-compose" / "scripts" / "fetch_component_signature.py",
+    REPO_ROOT / "skills" / "kmp-shadcn-compose" / "scripts" / "fetch_component_signature.py",
 )
 
 class FetchComponentSignatureTests(unittest.TestCase):

@@ -11,7 +11,7 @@ from _helpers import REPO_ROOT, load_module
 
 audit_repo_scripts = load_module(
     "audit_skills_repo",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-audit" / "scripts" / "audit_skills_repo.py",
+    REPO_ROOT / "skills" / "kmp-audit" / "scripts" / "audit_skills_repo.py",
 )
 
 class AuditSkillsRepoTests(unittest.TestCase):
@@ -32,10 +32,10 @@ class AuditSkillsRepoTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
-            scaffold_dir = root / "skills" / "kotlin-multiplatform-feature-scaffold"
+            scaffold_dir = root / "skills" / "kmp-feature-scaffold"
             scaffold_dir.mkdir(parents=True)
             (scaffold_dir / "SKILL.md").write_text(
-                "---\nname: kotlin-multiplatform-feature-scaffold\ndescription: scaffold\n---\n\n## When to Use This Skill\n\nall-frontends-shared\n",
+                "---\nname: kmp-feature-scaffold\ndescription: scaffold\n---\n\n## When to Use This Skill\n\nall-frontends-shared\n",
                 encoding="utf-8",
             )
             findings = audit_repo_scripts.audit_skills_repo(root)
@@ -45,10 +45,10 @@ class AuditSkillsRepoTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
-            scaffold_dir = root / "skills" / "kotlin-multiplatform-feature-scaffold"
+            scaffold_dir = root / "skills" / "kmp-feature-scaffold"
             scaffold_dir.mkdir(parents=True)
             (scaffold_dir / "SKILL.md").write_text(
-                "---\nname: kotlin-multiplatform-feature-scaffold\ndescription: scaffold\n---\n\n## When to Use This Skill\n\nbuild-logic only\n",
+                "---\nname: kmp-feature-scaffold\ndescription: scaffold\n---\n\n## When to Use This Skill\n\nbuild-logic only\n",
                 encoding="utf-8",
             )
             findings = audit_repo_scripts.audit_skills_repo(root)
@@ -115,7 +115,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
             (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
             # AppTextField omitted
             content = self._DS_GOOD_CONTENT.replace("fun AppTextField(\n", "")
-            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            self._make_ds_skill(root, "kmp-design-system", content)
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertTrue(any("fun AppTextField" in f for f in findings))
 
@@ -124,7 +124,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
             root = Path(tmp)
             (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
             content = self._DS_GOOD_CONTENT + "enum class TextStyle {\n  BodyMedium\n}\n"
-            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            self._make_ds_skill(root, "kmp-design-system", content)
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertTrue(any("enum class TextStyle" in f for f in findings))
 
@@ -133,7 +133,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
             root = Path(tmp)
             (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
             content = self._DS_GOOD_CONTENT.replace("OptIn(ExperimentalStylesApi\n", "ExperimentalStylesApi\n")
-            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            self._make_ds_skill(root, "kmp-design-system", content)
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertTrue(any("ExperimentalStylesApi" in f and "@OptIn" in f for f in findings))
 
@@ -142,7 +142,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
             root = Path(tmp)
             (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
             content = self._DS_GOOD_CONTENT + "padding(AppTheme.spacing.lg)\n"
-            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            self._make_ds_skill(root, "kmp-design-system", content)
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertTrue(any("AppTheme" in f and "static" in f for f in findings))
 
@@ -151,7 +151,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
             root = Path(tmp)
             (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
             content = self._DS_GOOD_CONTENT + "override val contentPadding = 24.dp\n"
-            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            self._make_ds_skill(root, "kmp-design-system", content)
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertTrue(any("override val" in f and "N.dp" in f for f in findings))
 
@@ -161,7 +161,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
             (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
             # `override val dp = 24.dp` is an IconSize/AvatarSize enum — exempt
             content = self._DS_GOOD_CONTENT + "override val dp = 24.dp\n"
-            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            self._make_ds_skill(root, "kmp-design-system", content)
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertFalse(any("override val" in f and "N.dp" in f for f in findings))
 
@@ -169,7 +169,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "README.md").write_text("# r\n\nStart here\n\nRoadmap\n", encoding="utf-8")
-            self._make_ds_skill(root, "kotlin-multiplatform-design-system", self._DS_GOOD_CONTENT)
+            self._make_ds_skill(root, "kmp-design-system", self._DS_GOOD_CONTENT)
             findings = audit_repo_scripts.audit_skills_repo(root)
             ds_findings = [f for f in findings if "design-system" in f]
             self.assertEqual([], ds_findings)
@@ -182,7 +182,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
                 "## Component Previews\n\n### `previews/AppButtonPreview.kt`\n```kotlin\n// preview\n```\n\n",
                 "",
             )
-            self._make_ds_skill(root, "kotlin-multiplatform-design-system", content)
+            self._make_ds_skill(root, "kmp-design-system", content)
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertTrue(any("Component Previews" in f for f in findings))
 
@@ -191,13 +191,13 @@ class AuditSkillsRepoTests(unittest.TestCase):
     def test_detekt_rules_directory_exists(self) -> None:
         """detekt-rules/ directory must exist in the design-system skill."""
         detekt_dir = (
-            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system" / "detekt-rules"
+            REPO_ROOT / "skills" / "kmp-design-system" / "detekt-rules"
         )
         self.assertTrue(detekt_dir.is_dir(), "detekt-rules/ directory missing")
 
     def test_detekt_rules_contains_all_rule_files(self) -> None:
         rules_dir = (
-            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            REPO_ROOT / "skills" / "kmp-design-system"
             / "detekt-rules" / "src" / "main" / "kotlin"
             / "GROUP_ID" / "designsystem" / "detekt"
         )
@@ -218,7 +218,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
 
     def test_detekt_rules_build_gradle_exists(self) -> None:
         build_file = (
-            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            REPO_ROOT / "skills" / "kmp-design-system"
             / "detekt-rules" / "build.gradle.kts"
         )
         self.assertTrue(build_file.exists())
@@ -227,7 +227,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
 
     def test_detekt_rules_config_exists(self) -> None:
         config_file = (
-            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            REPO_ROOT / "skills" / "kmp-design-system"
             / "detekt-rules" / "config" / "detekt-design-system.yml"
         )
         self.assertTrue(config_file.exists())
@@ -240,7 +240,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
 
     def test_detekt_rules_service_loader_file_exists(self) -> None:
         svc_file = (
-            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            REPO_ROOT / "skills" / "kmp-design-system"
             / "detekt-rules" / "src" / "main" / "resources"
             / "META-INF" / "services"
             / "io.gitlab.arturbosch.detekt.api.RuleSetProvider"
@@ -250,7 +250,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
 
     def test_detekt_rule_set_provider_has_all_9_rules(self) -> None:
         provider_kt = (
-            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            REPO_ROOT / "skills" / "kmp-design-system"
             / "detekt-rules" / "src" / "main" / "kotlin"
             / "GROUP_ID" / "designsystem" / "detekt"
             / "DesignSystemRuleSetProvider.kt"
@@ -264,7 +264,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
 
     def test_redundant_screen_title_rule_exists(self) -> None:
         rule_kt = (
-            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            REPO_ROOT / "skills" / "kmp-design-system"
             / "detekt-rules" / "src" / "main" / "kotlin"
             / "GROUP_ID" / "designsystem" / "detekt"
             / "RedundantScreenTitleRule.kt"
@@ -276,7 +276,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
 
     def test_hardcoded_grid_columns_rule_exists(self) -> None:
         rule_kt = (
-            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            REPO_ROOT / "skills" / "kmp-design-system"
             / "detekt-rules" / "src" / "main" / "kotlin"
             / "GROUP_ID" / "designsystem" / "detekt"
             / "HardcodedGridColumnsRule.kt"
@@ -288,7 +288,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
 
     def test_component_registry_rule_uses_configurable_prefix(self) -> None:
         rule_kt = (
-            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            REPO_ROOT / "skills" / "kmp-design-system"
             / "detekt-rules" / "src" / "main" / "kotlin"
             / "GROUP_ID" / "designsystem" / "detekt"
             / "ComponentRegistryRule.kt"
@@ -299,7 +299,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
 
     def test_import_boundary_rule_scoped_to_feature_ui(self) -> None:
         rule_kt = (
-            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            REPO_ROOT / "skills" / "kmp-design-system"
             / "detekt-rules" / "src" / "main" / "kotlin"
             / "GROUP_ID" / "designsystem" / "detekt"
             / "ImportBoundaryRule.kt"
@@ -312,7 +312,7 @@ class AuditSkillsRepoTests(unittest.TestCase):
 
     def test_design_system_template_exists(self) -> None:
         template = (
-            REPO_ROOT / "skills" / "kotlin-multiplatform-design-system"
+            REPO_ROOT / "skills" / "kmp-design-system"
             / "references" / "design-system-template.md"
         )
         self.assertTrue(template.exists(), "design-system-template.md missing from references/")
@@ -324,21 +324,21 @@ class AuditSkillsRepoTests(unittest.TestCase):
             self.assertIn(section, content, f"Template missing section: {section}")
 
     def test_record_design_baselines_command_exists(self) -> None:
-        cmd = REPO_ROOT / "commands" / "kmm-record-design-baselines.md"
+        cmd = REPO_ROOT / "commands" / "kmp-record-design-baselines.md"
         self.assertTrue(cmd.exists())
         content = cmd.read_text()
         self.assertIn("roborazzi.record=true", content)
         self.assertIn("roborazzi.verify=true", content)
 
     def test_audit_design_visual_command_exists(self) -> None:
-        cmd = REPO_ROOT / "commands" / "kmm-audit-design-visual.md"
+        cmd = REPO_ROOT / "commands" / "kmp-audit-design-visual.md"
         self.assertTrue(cmd.exists())
         content = cmd.read_text()
         self.assertIn("snapshots", content)
         self.assertIn("vision", content.lower())
 
     def test_fix_design_references_detekt_as_primary(self) -> None:
-        cmd = REPO_ROOT / "commands" / "kmm-fix-design.md"
+        cmd = REPO_ROOT / "commands" / "kmp-fix-design.md"
         content = cmd.read_text()
         self.assertIn("detekt", content)
         self.assertIn("detekt-design-system.yml", content)

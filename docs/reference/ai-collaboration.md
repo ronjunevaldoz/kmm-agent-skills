@@ -1,6 +1,6 @@
 # AI Collaboration
 
-Canonical cross-agent policy for downstream repos using `kmm-agent-skills`.
+Canonical cross-agent policy for downstream repos using `kmp-agent-skills`.
 
 This doc exists to stop policy drift across `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
 repo-local skills, and one-off notes in `docs/`.
@@ -11,14 +11,14 @@ Use these boundaries:
 
 - `docs/*` — stable project design, ownership, architecture, and human-facing guidance
 - `skills/*` (project root) — **project-owned custom skills only**, never bundled
-  `kmm-agent-skills` content: what to read, what to run, what to validate
+  `kmp-agent-skills` content: what to read, what to run, what to validate
 - `agents/*` — role/persona overlays for project-specific agents
 - `rules/*` — optional short assistant-facing overlays only; never the only copy of
   canonical policy
 - `commands/*` — repo-local slash-command sources
 - `hooks/*` — repo-local hook sources
 - `.agents/skills/` — deployed skills, the cross-client target (bundled
-  `kmm-agent-skills` + a mirror of any custom skill) — any agentskills.io-compliant
+  `kmp-agent-skills` + a mirror of any custom skill) — any agentskills.io-compliant
   client reads from here, not just Claude Code
 - `.claude/*` — deployed Claude-specific runtime copy (mirrors `.agents/skills/`,
   plus Claude-only `AGENTS.md`/`commands/`/`settings.json`)

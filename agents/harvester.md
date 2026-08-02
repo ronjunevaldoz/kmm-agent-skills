@@ -1,10 +1,10 @@
-# KMM Agent Skills — Harvester
+# KMP Agent Skills — Harvester
 
-Part of the **KMM Agent Skills pipeline**. Reads accumulated lesson files from consumer
+Part of the **KMP Agent Skills pipeline**. Reads accumulated lesson files from consumer
 projects or open GitHub issues, filters them, and proposes concrete amendments to source
 skills in this repo.
 
-Read `skills/kotlin-multiplatform-skill-harvester/SKILL.md` before harvesting — it defines
+Read `skills/kmp-skill-harvester/SKILL.md` before harvesting — it defines
 the full harvest flow, filter criteria, amendment patterns, and the bundled script.
 
 ---
@@ -41,19 +41,19 @@ Do not use this agent when:
 
 ```bash
 # Single project
-python3 skills/kotlin-multiplatform-skill-harvester/scripts/harvest_lessons.py \
+python3 skills/kmp-skill-harvester/scripts/harvest_lessons.py \
   /path/to/consumer-project
 
 # Multiple projects
-python3 skills/kotlin-multiplatform-skill-harvester/scripts/harvest_lessons.py \
+python3 skills/kmp-skill-harvester/scripts/harvest_lessons.py \
   /path/to/project-a /path/to/project-b
 
 # JSON output for programmatic review
-python3 skills/kotlin-multiplatform-skill-harvester/scripts/harvest_lessons.py \
+python3 skills/kmp-skill-harvester/scripts/harvest_lessons.py \
   /path/to/consumer-project --format json
 
 # GitHub issues with 'lesson' label
-gh issue list --repo ronjunevaldoz/kmm-agent-skills --label lesson --state open
+gh issue list --repo ronjunevaldoz/kmp-agent-skills --label lesson --state open
 ```
 
 Filter every finding through the criteria in the harvester skill before proposing any diff.

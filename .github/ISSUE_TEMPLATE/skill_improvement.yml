@@ -8,21 +8,21 @@ body:
       label: Affected skill
       options:
         - jni-kotlin-pro
-        - kotlin-multiplatform-mvi
-        - kotlin-multiplatform-design-system
-        - kotlin-multiplatform-design-system-extended
-        - kotlin-multiplatform-feature-scaffold
-        - kotlin-multiplatform-clean-architecture
-        - kotlin-multiplatform-presenter-module
-        - kotlin-multiplatform-network-layer
-        - kotlin-multiplatform-repository-pattern
-        - kotlin-multiplatform-navigation
-        - kotlin-multiplatform-sqldelight-setup
-        - kotlin-multiplatform-expect-actual
-        - kotlin-multiplatform-unit-testing
-        - kotlin-multiplatform-roborazzi
-        - kotlin-multiplatform-code-quality
-        - kotlin-multiplatform-audit
+        - kmp-mvi
+        - kmp-design-system
+        - kmp-design-system-extended
+        - kmp-feature-scaffold
+        - kmp-clean-architecture
+        - kmp-presenter-module
+        - kmp-network-layer
+        - kmp-repository-pattern
+        - kmp-navigation
+        - kmp-sqldelight-setup
+        - kmp-expect-actual
+        - kmp-unit-testing
+        - kmp-roborazzi
+        - kmp-code-quality
+        - kmp-audit
         - Other (specify below)
     validations:
       required: true
@@ -30,7 +30,7 @@ body:
     id: other-skill
     attributes:
       label: Other skill name
-      placeholder: "kotlin-multiplatform-..."
+      placeholder: "kmp-..."
   - type: textarea
     id: current-guidance
     attributes:

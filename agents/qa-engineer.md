@@ -1,6 +1,6 @@
-# KMM Agent Skills — QA Engineer
+# KMP Agent Skills — QA Engineer
 
-Part of the **KMM Agent Skills pipeline**. Verifies a feature actually does what it was
+Part of the **KMP Agent Skills pipeline**. Verifies a feature actually does what it was
 asked to do, by exercising it end to end — distinct from the validator (build/test gates
 pass) and the reviewer (architecture is correct). Both of those can pass on a feature
 that is wrong: tests only assert what someone thought to write, and architecture review

@@ -11,14 +11,14 @@ from _helpers import REPO_ROOT, load_module
 
 create_lesson_scripts = load_module(
     "create_lesson",
-    REPO_ROOT / "skills" / "kotlin-multiplatform-lessons" / "scripts" / "create_lesson.py",
+    REPO_ROOT / "skills" / "kmp-lessons" / "scripts" / "create_lesson.py",
 )
 
 class CreateLessonTests(unittest.TestCase):
     def _run(self, root: Path, title: str, **kw) -> int:
         import argparse
         args = argparse.Namespace(
-            skill=kw.get("skill", "kotlin-multiplatform-mvi"),
+            skill=kw.get("skill", "kmp-mvi"),
             type=kw.get("type", "correction"),
             severity=kw.get("severity", "high"),
             title=title,
@@ -38,7 +38,7 @@ class CreateLessonTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._run(root, "Effect replayed on nav back")
-            self._run(root, "No nested graph guidance", skill="kotlin-multiplatform-navigation", type="gap", severity="medium")
+            self._run(root, "No nested graph guidance", skill="kmp-navigation", type="gap", severity="medium")
             files = sorted((root / "docs" / "lessons").glob("*.md"))
             self.assertEqual(len(files), 2)
 

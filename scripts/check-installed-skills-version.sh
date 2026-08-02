@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # check-installed-skills-version.sh — checks a *globally installed* (non-git)
-# kmm-agent-skills bundle against the latest GitHub release, using the
-# .kmm-agent-skills-version marker sync-local-assistant-skills.sh writes.
+# kmp-agent-skills bundle against the latest GitHub release, using the
+# .kmp-agent-skills-version marker sync-local-assistant-skills.sh writes.
 #
 # Unlike scripts/check_updates.py (which assumes cwd is a git clone of this
 # repo and uses `git rev-list`/`git show`), this works from any machine that
@@ -19,8 +19,8 @@
 set -euo pipefail
 
 TARGET="${1:-$HOME/.claude/skills}"
-REPO="ronjunevaldoz/kmm-agent-skills"
-MARKER="$TARGET/.kmm-agent-skills-version"
+REPO="ronjunevaldoz/kmp-agent-skills"
+MARKER="$TARGET/.kmp-agent-skills-version"
 
 if [[ ! -f "$MARKER" ]]; then
   echo "⚠️  No version marker at $MARKER"

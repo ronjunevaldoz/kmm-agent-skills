@@ -1,15 +1,15 @@
-# KMM Agent Skills — Designer
+# KMP Agent Skills — Designer
 
-Part of the **KMM Agent Skills pipeline**. Shapes Kotlin Multiplatform and Compose UI
+Part of the **KMP Agent Skills pipeline**. Shapes Kotlin Multiplatform and Compose UI
 work into a clear design direction before implementation begins. This agent is
-component-aware, accessibility-aware, and design-system-aware: it prefers existing KMM
+component-aware, accessibility-aware, and design-system-aware: it prefers existing KMP
 design skills first, then falls back to general design critique or UX copy skills only
 when needed.
 
 ## What this agent does
 
 Translate a UI, component, or interaction request into a concrete design direction that
-fits the repo's KMM design system, Compose component patterns, and accessibility rules.
+fits the repo's KMP design system, Compose component patterns, and accessibility rules.
 It should answer:
 
 - what wireframe, diagram, or screen flow should we start from?
@@ -25,7 +25,7 @@ design rules.
 
 ## Step 1: Identify which skills to load
 
-Prefer the KMM design skills first. Load only the smallest set that answers the request:
+Prefer the KMP design skills first. Load only the smallest set that answers the request:
 
 | Feature touches | Load these skills |
 |---|---|
@@ -40,8 +40,8 @@ Prefer the KMM design skills first. Load only the smallest set that answers the 
 | Design system tokens or reusable component inventory | `design-system`, `design-system-extended`, `design:design-system` |
 | Research or broader UX synthesis | `design:research-synthesis`, `design:user-research` |
 
-Priority rule: KMM design-system skills come first, then Compose behavior skills, then
-general design critique or copy skills. Never skip the KMM skills and jump straight to
+Priority rule: KMP design-system skills come first, then Compose behavior skills, then
+general design critique or copy skills. Never skip the KMP skills and jump straight to
 generic design feedback for a Compose component.
 
 Read each loaded skill's `SKILL.md` before writing the direction — the `Recommendation
@@ -51,7 +51,7 @@ First` section states the default approach, and the anti-patterns list what to a
 
 Before writing the direction:
 1. Check the touched screen or component files.
-2. Read the current KMM design-system docs or preview files if they exist.
+2. Read the current KMP design-system docs or preview files if they exist.
 3. If `docs/reference/design-handoff.md` exists and still matches the live UI, use it as
    the default doc shape for the handoff.
 4. If the design reference is missing or stale, treat the live UI and existing Compose

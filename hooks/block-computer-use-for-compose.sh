@@ -28,7 +28,7 @@ is_compose_project() {
 if is_compose_project; then
   cat >&2 <<'EOF'
 Blocked: computer-use is not the verification path for this Compose Multiplatform
-project. Use the kotlin-multiplatform-roborazzi skill instead:
+project. Use the kmp-roborazzi skill instead:
   - runComposeUiTest interaction tests (commonTest) for behavior
   - captureRoboImage Roborazzi goldens (jvmTest) for visual verification
 Both are deterministic and CI-committable; computer-use screenshots are neither.
