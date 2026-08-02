@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.4.2] — 2026-08-02
+
+### Fixed
+
+- fix(audit): stop viewmodel-in-viewmodel false positive on comments and local vals
+
+---
+
 ## [v2.4.1] — 2026-08-02
 
 ### Docs
