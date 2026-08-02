@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v3.2.0] — 2026-08-02
+
+### Added
+
+- feat(skills): add kmp-refactor for rename/move/copy/delete decisions
+
+---
+
 ## [v3.1.0] — 2026-08-02
 
 ### Added

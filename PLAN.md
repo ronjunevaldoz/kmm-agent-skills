@@ -17,7 +17,7 @@ Update when skills are added, revised, or completed.
 
 ---
 
-## Shipped Skills (66) — v1.16.0
+## Shipped Skills (67) — v1.16.0
 
 ### Layer 0 — Architecture Contract
 | Skill | Status | Notes |

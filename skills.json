@@ -1,5 +1,5 @@
 {
-  "version": "3.1.0",
+  "version": "3.2.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -2667,6 +2667,50 @@
         "NotificationPayload",
         "push token refresh",
         "FCM token refresh"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kmp-refactor",
+      "path": "skills/kmp-refactor",
+      "description": "Decides whether a rename/move/copy/delete is safe to do as a textual sweep (markdown, config, scripts, skill directories) or must be delegated to a real symbol-aware tool (Android Studio / IntelliJ Refactor, for Kotlin source). Covers the verified textual-rename procedure (git mv, frontmatter/header fix, bulk regex sweep, residue check, full test+gate run) and the module-move checklist against this collection's 6-layer clean-architecture contract. Does NOT implement an AST-level Kotlin rename engine \u2014 that is what the IDE's refactor tooling is for.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-08-02",
+      "keywords": [
+        "refactor",
+        "rename",
+        "rename symbol",
+        "move file",
+        "move class",
+        "move package",
+        "move module",
+        "copy class",
+        "safe delete",
+        "rename skill",
+        "rename command",
+        "package rename",
+        "IntelliJ refactor",
+        "Android Studio refactor",
+        "extract module",
+        "dangling reference"
+      ],
+      "triggers": [
+        "refactor",
+        "rename",
+        "rename symbol",
+        "move file",
+        "move class",
+        "move package",
+        "move module",
+        "copy class",
+        "safe delete",
+        "rename skill",
+        "rename command",
+        "package rename",
+        "IntelliJ refactor",
+        "Android Studio refactor",
+        "extract module",
+        "dangling reference"
       ],
       "scripts": []
     },
