@@ -74,6 +74,7 @@ The script also prints a separate, non-blocking `HINTS` section:
 |---|---|
 | `name-behavior drift` | A `*ViewModel` whose name shares no word with any of its own Intent variants (e.g. `AuthViewModel` handling only `RefreshTapped`/`LogoutClicked`) — a nudge to verify the name still describes the screen, never a blocker |
 | `vague class name suffix` | A `class`/`interface`/`object` named with a filler suffix (`Manager`/`Processor`/`Helper`/`Info`/`Data`) that says what the class *is*, not what it *does* — per Clean Code's naming guidance; a well-scoped small class with this suffix can still be the right call, so this is a nudge, not a rule |
+| `patch not root-cause fix` | An empty/log-only catch block, or an unjustified `@Suppress` with no comment explaining why — a nudge to verify it's a real fix, not a band-aid; a `TODO`/`FIXME` found nearby is noted as corroborating evidence |
 
 ---
 
@@ -180,6 +181,7 @@ For every finding, load the relevant skill and give a concrete fix:
 | `context leak in singleton` | `code-quality` | Replace the cached `Context`/`Activity` with `applicationContext`, or stop caching the reference and pass it explicitly where needed |
 | `name-behavior drift` (hint) | `mvi` | Read the ViewModel and its Contract — if the name genuinely no longer fits, rename it and update its Koin binding + composable references. If it's a false positive (generic name is fine), no action needed — this is a manual call, not a rule |
 | `vague class name suffix` (hint) | `clean-architecture` | Rename to describe the actual responsibility (`SyncCoordinator`, `AuthService`, `TokenStore`, ...) — or leave it if the name genuinely fits a small, well-scoped concern; this is a manual call, not a rule |
+| `patch not root-cause fix` (hint) | `code-quality` | Read the catch block/`@Suppress` and decide: fix the underlying issue, add a real recovery path, or leave a justification comment explaining why the current form is correct |
 
 ---
 

@@ -862,6 +862,50 @@ Applies equally to a KMP library's Android `actual` implementation and an app �
 `AppCompatActivity`/`ComponentActivity`-typed property inside a `companion object`/
 singleton scope.
 
+### `TODO`/`FIXME` — already flagged, verify it's not silently off
+
+Detekt's own `ForbiddenComment` rule (Style ruleset) flags `TODO:`/`FIXME:`/`STOPSHIP:`
+comments **by default, active since Detekt 1.0.0** — verified against Detekt's own
+docs, not assumed. Because this skill's `detekt.yml` uses `buildUponDefaultConfig =
+true`, that default stays active automatically; nothing extra to enable. Worth stating
+explicitly here since it was otherwise invisible — a project could have this running
+the whole time with no one aware of it. Only touch it if you want to customize the
+prefix list or add `allowedPatterns` exceptions.
+
+### Patch-up fix instead of root-cause fix (hints)
+
+"Is this a real fix or a band-aid" is a judgment call — but two specific, well-known
+shapes of the pattern are mechanically detectable, as non-blocking hints (same tier as
+the naming hints above):
+
+- **Empty or log-only catch block** — silences the symptom without addressing why the
+  exception was thrown. A deliberate best-effort no-op is sometimes genuinely correct
+  (rare), so this stays a hint, not a blocker.
+- **`@Suppress("Rule")` with no nearby comment** explaining why it's a false positive
+  vs. silencing a real finding — legitimate suppressions are common, the missing
+  justification is the actual signal, not the suppression itself.
+
+```kotlin
+// ❌ — hint fires: swallows the exception, no comment explaining why
+try {
+    risky()
+} catch (e: Exception) {
+}
+
+// ✓ — real recovery, not flagged
+try {
+    risky()
+} catch (e: IOException) {
+    retryWithBackoff()
+    logFailure(e)
+}
+```
+
+A `TODO`/`FIXME` found in or near the flagged block is corroborating evidence, not a
+requirement to fire — `_detect_empty_catch_block` and `_detect_unjustified_suppress`
+both note it in the finding text when present, since a "TODO: fix properly" sitting
+right next to the patch is a strong tell it's a known gap, not a considered decision.
+
 ---
 
 ## Output Style
@@ -879,6 +923,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-08-02 | Documented Detekt's own `ForbiddenComment` rule (Style ruleset, active by default since 1.0.0, flags `TODO:`/`FIXME:`/`STOPSHIP:`) — already effectively running via `buildUponDefaultConfig = true`, but never stated anywhere, so no one knew it was there. Added "Patch-up fix instead of root-cause fix" — empty/log-only catch blocks and unjustified `@Suppress`, both non-blocking hints backed by `kotlin-multiplatform-audit`'s two new detectors, with `TODO`/`FIXME` adjacency woven in as corroborating evidence rather than a separate check. |
 | 2026-08-02 | Added "Android Context/Activity leak in a singleton" — the classic Android memory leak, uncovered until now. Applies to both App and Library projects (a KMP library's Android `actual` code is exactly as leak-prone). Backed by `kotlin-multiplatform-audit`'s new `_detect_context_leak_in_singleton`. |
 | 2026-08-01 | Enabled Detekt's own Performance ruleset (verified against detekt.dev — 8 real rules: `ArrayPrimitive`, `CouldBeSequence`, `ForEachOnRange`, `SpreadOperator`, `UnnecessaryInitOnArray`, `UnnecessaryPartOfBinaryExpression`, `UnnecessaryTemporaryInstantiation`, `UnnecessaryTypeCasting`), previously off entirely. Added "Performance killers" (object constructed inside a loop, the one real gap Detekt's ruleset doesn't cover) and "Public mutable collection exposure" (an encapsulation concern distinct from the existing Compose-only unstable-collection-param check). Backed by `kotlin-multiplatform-audit`'s two new detectors. |
 | 2026-07-31 | Added "Kotlin Library & Pattern Choices" — `kotlin-reflect` (avoid in `commonMain`, JVM-primary and limited/absent on Native/JS), util/extension file organization (a god `Utils.kt` grab-bag is a real smell distinct from a single-receiver extension file), and regex readability (bind to a named `val`, never inline; named capture groups over positional for 2+ groups). Backed by `kotlin-multiplatform-audit`'s three new detectors. Also added the Alpha-stability caveat kotlinx.collections.immutable was missing wherever this skill referenced it. |

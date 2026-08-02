@@ -2265,6 +2265,90 @@ def _detect_vague_class_name_suffix(root: Path) -> list[str]:
     return findings
 
 
+# ── Patch-up fix instead of root-cause fix (hints) ──────────────────────────
+# Non-blocking by design, same reasoning as the two hints above: "is this a real fix
+# or a band-aid" is fundamentally a judgment call a regex can't fully make. What's
+# mechanically detectable is two specific, well-known shapes of the pattern — an
+# empty/log-only catch block (silences the symptom, never addresses why it threw) and
+# an unjustified @Suppress (silences a real finding with no comment saying why it's a
+# false positive vs a known, accepted gap). A TODO/FIXME/STOPSHIP left nearby (Detekt's
+# own ForbiddenComment rule already flags these separately, active by default) is a
+# real corroborating signal — noted in the finding when present, not required to fire.
+
+_CATCH_BLOCK_RE = re.compile(r"\bcatch\s*\([^)]*\)\s*\{")
+_LOG_ONLY_STATEMENT_RE = re.compile(r"^\s*(?:Log\.\w+|logger\.\w+|println|print)\s*\(")
+_TODO_MARKER_RE = re.compile(r"\b(?:TODO|FIXME|STOPSHIP)\b")
+_SUPPRESS_RE = re.compile(r'@Suppress\(\s*"([^"]+)"')
+
+
+def _detect_empty_catch_block(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for match in _CATCH_BLOCK_RE.finditer(text):
+            brace_open = text.index("{", match.start())
+            brace_close = _find_matching_brace(text, brace_open)
+            if brace_close is None:
+                continue
+            body = text[brace_open + 1: brace_close]
+            body_lines = [ln for ln in body.splitlines() if ln.strip()]
+            non_comment_lines = [ln for ln in body_lines if not ln.strip().startswith("//")]
+            is_swallowed = not non_comment_lines or (
+                len(non_comment_lines) == 1 and _LOG_ONLY_STATEMENT_RE.match(non_comment_lines[0])
+            )
+            if not is_swallowed:
+                continue
+            line_no, snippet = _at(text, match.start())
+            todo_note = ""
+            if _TODO_MARKER_RE.search(body):
+                todo_note = " — a TODO/FIXME left in the block corroborates this is a known gap, not handled"
+            findings.append(
+                f"patch not root-cause fix (hint) [INFO]: {path.relative_to(root)}:{line_no} "
+                f"— empty or log-only catch block; silences the symptom without "
+                f"addressing why the exception was thrown{todo_note}. Non-blocking — a "
+                f"deliberate best-effort no-op is sometimes genuinely correct, verify "
+                f"manually\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
+def _detect_unjustified_suppress(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        for i, line in enumerate(lines):
+            match = _SUPPRESS_RE.search(line)
+            if not match:
+                continue
+            same_line_comment = "//" in line[match.end():]
+            prev_line_comment = i > 0 and lines[i - 1].strip().startswith("//")
+            if same_line_comment or prev_line_comment:
+                continue  # has a nearby justification comment
+            todo_note = ""
+            if (i > 0 and _TODO_MARKER_RE.search(lines[i - 1])) or _TODO_MARKER_RE.search(line):
+                todo_note = " — a nearby TODO/FIXME corroborates this is a known gap, not a verified false positive"
+            findings.append(
+                f"patch not root-cause fix (hint) [INFO]: {path.relative_to(root)}:{i + 1} "
+                f"— @Suppress(\"{match.group(1)}\") with no comment explaining why it's a "
+                f"false positive (vs silencing a real finding){todo_note}. Non-blocking — "
+                f"add a one-line justification comment, or fix the underlying issue "
+                f"instead of suppressing it\n"
+                f"    {i + 1} | {line.strip()}"
+            )
+    return findings
+
+
 # ── Raw HTTP bypassing an established Ktor client ──────────────────────────────
 # Real bug: kotlin-multiplatform-network-layer only checked for a module literally
 # named :core:network. A new server module or feature under a different name found no
@@ -4351,7 +4435,12 @@ def main() -> int:
         return 1 if has_high else 0
 
     findings = audit_project(root)
-    hints = _detect_name_behavior_drift(root) + _detect_vague_class_name_suffix(root)
+    hints = (
+        _detect_name_behavior_drift(root)
+        + _detect_vague_class_name_suffix(root)
+        + _detect_empty_catch_block(root)
+        + _detect_unjustified_suppress(root)
+    )
 
     if findings:
         print("FINDINGS:")

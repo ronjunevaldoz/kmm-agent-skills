@@ -4121,5 +4121,96 @@ class VagueClassNameSuffixTests(unittest.TestCase):
             self.assertFalse(any("vague class name suffix" in f for f in findings))
 
 
+class EmptyCatchBlockTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_fully_empty_catch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Sample.kt",
+                "fun a() {\n    try {\n        risky()\n    } catch (e: Exception) {\n    }\n}\n",
+            )
+            hints = audit_scripts._detect_empty_catch_block(root)
+            self.assertTrue(any("patch not root-cause fix" in h for h in hints))
+
+    def test_flags_log_only_catch_and_notes_todo(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Sample.kt",
+                "fun c() {\n"
+                "    try {\n        risky()\n    } catch (e: Exception) {\n"
+                "        // TODO: handle this properly\n"
+                "        Log.e(\"tag\", \"failed\", e)\n"
+                "    }\n"
+                "}\n",
+            )
+            hints = audit_scripts._detect_empty_catch_block(root)
+            self.assertTrue(any("TODO/FIXME" in h for h in hints))
+
+    def test_ignores_catch_with_real_recovery(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Sample.kt",
+                "fun d() {\n"
+                "    try {\n        risky()\n    } catch (e: IOException) {\n"
+                "        retryWithBackoff()\n        logFailure(e)\n"
+                "    }\n"
+                "}\n",
+            )
+            hints = audit_scripts._detect_empty_catch_block(root)
+            self.assertFalse(hints)
+
+    def test_hints_are_excluded_from_blocking_audit_project_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Sample.kt",
+                "fun a() {\n    try {\n        risky()\n    } catch (e: Exception) {\n    }\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("patch not root-cause fix" in f for f in findings))
+
+
+class UnjustifiedSuppressTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_suppress_with_no_comment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "core/Sample.kt", "@Suppress(\"MagicNumber\")\nfun e() = 42\n")
+            hints = audit_scripts._detect_unjustified_suppress(root)
+            self.assertTrue(any("patch not root-cause fix" in h for h in hints))
+
+    def test_ignores_suppress_with_comment_above(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Sample.kt",
+                "// Detekt false positive: threshold is intentionally 42 for the checksum spec\n"
+                "@Suppress(\"MagicNumber\")\nfun f() = 42\n",
+            )
+            hints = audit_scripts._detect_unjustified_suppress(root)
+            self.assertFalse(hints)
+
+    def test_ignores_suppress_with_trailing_comment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Sample.kt",
+                "@Suppress(\"MagicNumber\") // checksum spec requires exactly 42\nfun g() = 42\n",
+            )
+            hints = audit_scripts._detect_unjustified_suppress(root)
+            self.assertFalse(hints)
+
+
 if __name__ == "__main__":
     unittest.main()
