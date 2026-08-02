@@ -271,8 +271,8 @@ that's Step 1's internal 6-layer split, inside one module, no extra published ar
 
 ```toml
 [versions]
-kotlin = "2.1.21"
-vanniktech-publish = "0.30.0"
+kotlin = "2.4.0"
+vanniktech-publish = "0.37.0"
 binary-compat = "0.17.0"
 dokka = "2.0.0"
 

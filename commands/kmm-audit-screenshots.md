@@ -1,4 +1,4 @@
-# /audit-screenshots $ARGUMENTS
+# /kmm-audit-screenshots $ARGUMENTS
 
 **KMM Agent Skills** — analyze Roborazzi golden screenshots for design consistency.
 Uses Claude's vision capability to inspect committed PNG files against the design

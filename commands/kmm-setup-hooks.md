@@ -1,4 +1,4 @@
-# /setup-hooks
+# /kmm-setup-hooks
 
 **KMM Agent Skills** — wire the provided hooks into your project so the pipeline
 enforces architecture rules automatically, without requiring you to remember to run them.

@@ -1,4 +1,4 @@
-# /modify-skill $ARGUMENTS
+# /kmm-modify-skill $ARGUMENTS
 
 **KMM Agent Skills** — modify an existing skill safely: add or update a section, fix a
 pattern, bump library versions, or resolve a flagged quality gap.

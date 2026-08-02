@@ -66,7 +66,7 @@ loading, skeleton, spinner, tooltip, popover, accordion, collapsible, avatar,
 divider, separator, icon button, form label, extended design system,
 redesign, visual consistency, UI components, component library, page components,
 add components, component set, UI kit, component design, redesign page,
-button, dialog, component, use component, add button, create component,
+button, component, use component, add button, create component,
 show dialog, show toast, loading state, empty state, error state,
 circular progress, progress ring, determinate progress, indeterminate progress.
 

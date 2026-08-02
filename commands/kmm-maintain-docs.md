@@ -1,4 +1,4 @@
-# /maintain-docs $ARGUMENTS
+# /kmm-maintain-docs $ARGUMENTS
 
 **KMM Agent Skills** — keep repo documentation, `docs/` reference material, agent docs,
 command docs, and skill routing text aligned with the actual repository.

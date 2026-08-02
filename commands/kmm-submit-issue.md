@@ -1,4 +1,4 @@
-# /submit-issue $ARGUMENTS
+# /kmm-submit-issue $ARGUMENTS
 
 **KMM Agent Skills** — raise a well-formed GitHub issue for a skill gap, bug, pattern
 improvement, or new skill request. Applies structured rules so every issue is immediately

@@ -1,4 +1,4 @@
-# /record-design-baselines
+# /kmm-record-design-baselines
 
 Records Roborazzi golden screenshot baselines for the design system and all
 feature screens. Run this once after the design system is stable, then on CI

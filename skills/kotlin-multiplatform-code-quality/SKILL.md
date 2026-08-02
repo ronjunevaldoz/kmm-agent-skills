@@ -136,6 +136,10 @@ ktlint_standard_import-ordering = disabled
 
 ## Detekt Setup
 
+**Freshness rule:** pinned to the 1.23.x stable line below. Detekt's 2.0.0-alpha.x line is
+in active development on [detekt.dev](https://detekt.dev) — recheck before migrating, since
+rule-set names and config keys can change between the 1.x and 2.x major lines.
+
 ### `libs.versions.toml`
 
 ```toml

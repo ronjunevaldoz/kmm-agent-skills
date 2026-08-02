@@ -33,7 +33,7 @@ Use when:
 **Trigger keywords:** form validation, field validation, required field, email validation,
 inline error, validation rule, form error, submit disabled, async validation, validate form,
 ValidationResult, FieldState, form state KMP, input validation, field error message,
-form, validate, validation, form field, input validation, form handling, form state,
+form, validate, validation, form field, form handling, form state,
 error message, check input, validate input, form submission.
 
 **Freshness rule:** No external library is required — this pattern uses only `kotlinx.coroutines`

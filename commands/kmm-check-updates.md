@@ -1,4 +1,4 @@
-# /check-updates
+# /kmm-check-updates
 
 **KMM Agent Skills** — check whether the local skills collection is behind
 `origin/main` on [github.com/ronjunevaldoz/kmm-agent-skills](https://github.com/ronjunevaldoz/kmm-agent-skills).

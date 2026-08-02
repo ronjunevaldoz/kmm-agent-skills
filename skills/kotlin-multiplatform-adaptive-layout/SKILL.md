@@ -49,7 +49,7 @@ multi-pane layout, master detail KMP, pane layout, screen size breakpoint,
 layout per screen size, detect all screen layouts, all screen sizes,
 page layout, layout consistency, consistent layout, screen consistency,
 redesign page, layout redesign, page consistency, uniform layout, layout patterns,
-FlexBox, flexbox, CSS flexbox, flex container, flex item, flex wrap, flex grow,
+FlexBox, CSS flexbox, flex container, flex item, flex wrap, flex grow,
 flex shrink, flex basis, justifyContent, alignItems, alignContent, Modifier.flex,
 wrapping row, wrapping layout, chip wrap layout.
 

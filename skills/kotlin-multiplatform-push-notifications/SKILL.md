@@ -38,7 +38,8 @@ Use when:
 
 **Trigger keywords:** push notifications, FCM, APNs, Firebase Messaging, push token,
 notification handler, FirebaseMessagingService, foreground notification, notification tap,
-deep link from notification, remote notification, KMP push, NotificationPayload, token refresh.
+deep link from notification, remote notification, KMP push, NotificationPayload,
+push token refresh, FCM token refresh.
 
 **Freshness rule:** Firebase Messaging depends on the Firebase BoM — always use
 `platform("com.google.firebase:firebase-bom:...")` and let BoM manage individual versions.

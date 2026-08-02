@@ -165,11 +165,11 @@ Require coordination across multiple files or introduce breaking changes to exis
 
 | Tool | Current | Next target |
 |---|---|---|
-| AGP | 9.0.1 | AGP 10 stable |
+| AGP | 9.2.0 | AGP 10 stable |
 | Kotlin | 2.4.0 | Track K2 stable |
 | Compose Multiplatform | 1.11.1 | CMP 2.x stable |
 | Koin | 4.2.1 | — |
-| Ktor | 3.1.3 | — |
+| Ktor | 3.5.0 | — |
 | SQLDelight | 2.0.2 | — |
 
 ---

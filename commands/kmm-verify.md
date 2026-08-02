@@ -1,4 +1,4 @@
-# /verify $ARGUMENTS
+# /kmm-verify $ARGUMENTS
 
 **KMM Agent Skills** — verify that a KMP change is correct by running the full
 validation pipeline: architecture audit, style, static analysis, unit tests, and

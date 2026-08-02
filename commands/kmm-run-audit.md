@@ -1,4 +1,4 @@
-# /run-audit $ARGUMENTS
+# /kmm-run-audit $ARGUMENTS
 
 **KMM Agent Skills** — run the architecture audit on a KMP project and get
 per-finding remediation steps from the matching skill.

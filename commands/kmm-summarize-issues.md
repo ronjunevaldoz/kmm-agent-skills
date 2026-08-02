@@ -1,4 +1,4 @@
-# /summarize-issues
+# /kmm-summarize-issues
 
 **KMM Agent Skills** — scan all skills for quality gaps and generate a numbered list
 of actionable fix prompts you can paste directly into the chat to trigger each fix.

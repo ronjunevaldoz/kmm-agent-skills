@@ -1,4 +1,4 @@
-# /update-skills
+# /kmm-update-skills
 
 Pull the latest kmm-agent-skills release and re-deploy skills to the current consumer project.
 

@@ -191,7 +191,9 @@ the user and the other skills what to do next.
 - Ensure every skill has `name`, `description`, and `metadata.last-updated`
 - Ensure trigger guidance is explicit enough to fire in practice
 - Prefer references for fast-moving topics and keep examples only when they clarify
-- Check that scripts are executable, deterministic, and covered by tests when practical
+- Check that scripts are deterministic and covered by tests when practical — this repo's
+  convention is explicit `python3 scripts/x.py` / `bash scripts/x.sh` invocation, not `./x.py`,
+  so the executable bit itself is not a hygiene signal here
 - Flag skills that depend on fast-moving libraries without a freshness note or docs link
 - Flag scripts that encode assumptions about deprecated or unstable APIs
 - Ensure new-project scaffold guidance names the `Kotlin/kmp-wizard` `all-targets`

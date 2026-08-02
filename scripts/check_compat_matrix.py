@@ -18,22 +18,29 @@ import sys
 from pathlib import Path
 
 
-# Maps matrix "Library" column → (skill-relative-dir, toml-key-in-versions-block)
+# Maps matrix "Library" column → list of (skill-relative-dir, toml-key-in-versions-block)
+# checked against it. Every skill that pins the same library must agree with the
+# matrix AND with each other — this is what catches cross-skill drift like a library
+# scaffold pinning an older Kotlin than the rest of the collection (see PR history:
+# library-publishing pinned kotlin=2.1.21 while feature-scaffold had moved to 2.4.0).
 # Skill dir is relative to skills/
-LIBRARY_MAP: dict[str, tuple[str, str]] = {
-    "Kotlin":                 ("kotlin-multiplatform-feature-scaffold", "kotlin"),
-    "AGP":                    ("kotlin-multiplatform-feature-scaffold", "agp"),
-    "KSP":                    ("kotlin-multiplatform-feature-scaffold", "ksp"),
-    "Compose Multiplatform":  ("kotlin-multiplatform-feature-scaffold", "compose-multiplatform"),
-    "Coroutines":             ("kotlin-multiplatform-feature-scaffold", "coroutines"),
-    "AndroidX Lifecycle":     ("kotlin-multiplatform-feature-scaffold", "androidx-lifecycle"),
-    "Koin":                   ("kotlin-multiplatform-feature-scaffold", "koin"),
-    "Ktor":                   ("kotlin-multiplatform-feature-scaffold", "ktor"),
-    "SQLDelight":             ("kotlin-multiplatform-feature-scaffold", "sqldelight"),
-    "BuildKonfig":            ("kotlin-multiplatform-feature-scaffold", "buildkonfig"),
-    "Roborazzi":              ("kotlin-multiplatform-feature-scaffold", "roborazzi"),
-    "Navigation Compose (KMP)": ("kotlin-multiplatform-navigation",    "navigation-compose"),
-    "Decompose":              ("kotlin-multiplatform-navigation",        "decompose"),
+LIBRARY_MAP: dict[str, list[tuple[str, str]]] = {
+    "Kotlin": [
+        ("kotlin-multiplatform-feature-scaffold", "kotlin"),
+        ("kotlin-multiplatform-library-publishing", "kotlin"),
+    ],
+    "AGP":                    [("kotlin-multiplatform-feature-scaffold", "agp")],
+    "KSP":                    [("kotlin-multiplatform-feature-scaffold", "ksp")],
+    "Compose Multiplatform":  [("kotlin-multiplatform-feature-scaffold", "compose-multiplatform")],
+    "Coroutines":             [("kotlin-multiplatform-feature-scaffold", "coroutines")],
+    "AndroidX Lifecycle":     [("kotlin-multiplatform-feature-scaffold", "androidx-lifecycle")],
+    "Koin":                   [("kotlin-multiplatform-feature-scaffold", "koin")],
+    "Ktor":                   [("kotlin-multiplatform-feature-scaffold", "ktor")],
+    "SQLDelight":             [("kotlin-multiplatform-feature-scaffold", "sqldelight")],
+    "BuildKonfig":            [("kotlin-multiplatform-feature-scaffold", "buildkonfig")],
+    "Roborazzi":              [("kotlin-multiplatform-feature-scaffold", "roborazzi")],
+    "Navigation Compose (KMP)": [("kotlin-multiplatform-navigation",    "navigation-compose")],
+    "Decompose":              [("kotlin-multiplatform-navigation",        "decompose")],
 }
 
 
@@ -88,32 +95,34 @@ def check(repo_root: Path) -> list[str]:
 
     findings: list[str] = []
 
-    for library, (skill_dir, toml_key) in LIBRARY_MAP.items():
-        if skill_dir not in skill_versions_cache:
-            skill_md = repo_root / "skills" / skill_dir / "SKILL.md"
-            if skill_md.exists():
-                skill_versions_cache[skill_dir] = parse_toml_versions(
-                    skill_md.read_text(encoding="utf-8")
-                )
-            else:
-                skill_versions_cache[skill_dir] = {}
-
-        skill_vers = skill_versions_cache[skill_dir]
+    for library, pins in LIBRARY_MAP.items():
         matrix_ver = matrix_versions.get(library)
-        skill_ver  = skill_vers.get(toml_key)
-
         if matrix_ver is None:
             findings.append(f"compat-matrix: '{library}' missing from Pinned Versions table")
-        elif skill_ver is None:
-            findings.append(
-                f"compat-matrix: '{library}' in matrix ({matrix_ver}) but "
-                f"'{toml_key}' not found in {skill_dir}/SKILL.md"
-            )
-        elif matrix_ver != skill_ver:
-            findings.append(
-                f"compat-matrix drift: {library} — matrix={matrix_ver}, "
-                f"{skill_dir}={skill_ver} — update compatibility-matrix.md"
-            )
+            continue
+
+        for skill_dir, toml_key in pins:
+            if skill_dir not in skill_versions_cache:
+                skill_md = repo_root / "skills" / skill_dir / "SKILL.md"
+                if skill_md.exists():
+                    skill_versions_cache[skill_dir] = parse_toml_versions(
+                        skill_md.read_text(encoding="utf-8")
+                    )
+                else:
+                    skill_versions_cache[skill_dir] = {}
+
+            skill_ver = skill_versions_cache[skill_dir].get(toml_key)
+
+            if skill_ver is None:
+                findings.append(
+                    f"compat-matrix: '{library}' in matrix ({matrix_ver}) but "
+                    f"'{toml_key}' not found in {skill_dir}/SKILL.md"
+                )
+            elif matrix_ver != skill_ver:
+                findings.append(
+                    f"compat-matrix drift: {library} — matrix={matrix_ver}, "
+                    f"{skill_dir}={skill_ver} — update compatibility-matrix.md or {skill_dir}/SKILL.md"
+                )
 
     return findings
 

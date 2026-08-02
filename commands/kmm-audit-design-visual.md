@@ -1,4 +1,4 @@
-# /audit-design-visual
+# /kmm-audit-design-visual
 
 Runs a visual-only audit of your app's Roborazzi screenshots using Claude vision.
 Detects design inconsistencies that have no code-level signal: spacing rhythm,

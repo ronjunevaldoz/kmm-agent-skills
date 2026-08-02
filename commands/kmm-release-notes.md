@@ -1,4 +1,4 @@
-# /release-notes $ARGUMENTS
+# /kmm-release-notes $ARGUMENTS
 
 **KMM Agent Skills** — generate consumer-facing release notes and update per-skill
 `## Changelog` sections.

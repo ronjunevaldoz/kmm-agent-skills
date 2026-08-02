@@ -1,4 +1,4 @@
-# /clean-comments
+# /kmm-clean-comments
 
 Refactors code documentation across all architectural levels — classes, functions,
 extension functions, and inline blocks — per `kotlin-multiplatform-code-quality`'s

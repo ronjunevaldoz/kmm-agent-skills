@@ -1,4 +1,4 @@
-# /report-skill-issue $ARGUMENTS
+# /kmm-report-skill-issue $ARGUMENTS
 
 **KMM Agent Skills** — file a bug, improvement request, or feature request against the
 `ronjunevaldoz/kmm-agent-skills` repo directly from your current session.

@@ -1,4 +1,4 @@
-# /fix-design
+# /kmm-fix-design
 
 Scans an existing KMP project for design-system usage violations, fixes them
 file-by-file with per-file confirmation, then re-runs Roborazzi screenshot tests

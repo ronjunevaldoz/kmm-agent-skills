@@ -1,4 +1,4 @@
-# /implement-feature $ARGUMENTS
+# /kmm-implement-feature $ARGUMENTS
 
 **KMM Agent Skills** — build a new KMP feature end-to-end, layer by layer, with the full
 Koin 4 / Ktor 3 / SQLDelight 2 / CMP 1.11 stack wired correctly from the start.

@@ -1,4 +1,4 @@
-# /execute-ticket $ARGUMENTS
+# /kmm-execute-ticket $ARGUMENTS
 
 **KMM Agent Skills** — take a ticket from GitHub Issues (or any tracker) and ship a
 complete KMP feature implementation: branched, layered, Koin-wired, tested, and committed.
