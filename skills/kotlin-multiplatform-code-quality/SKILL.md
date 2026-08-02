@@ -209,6 +209,24 @@ coupling:
     active: true
     threshold: 12
 
+performance:
+  ArrayPrimitive:
+    active: true
+  CouldBeSequence:
+    active: true
+  ForEachOnRange:
+    active: true
+  SpreadOperator:
+    active: true
+  UnnecessaryTemporaryInstantiation:
+    active: true
+  UnnecessaryPartOfBinaryExpression:
+    active: true
+  UnnecessaryTypeCasting:
+    active: true
+  UnnecessaryInitOnArray:
+    active: true
+
 naming:
   FunctionNaming:
     active: true
@@ -760,6 +778,60 @@ mentally executing the regex. `_detect_inline_unnamed_regex` flags a `Regex(...)
 `toRegex()` call inlined directly as a function-call argument instead of bound to a
 `val`.
 
+### Performance killers — Detekt's Performance ruleset, plus two real gaps it doesn't cover
+
+Verified against Detekt's own docs before writing this: enable its **Performance**
+ruleset (8 real rules) in `detekt.yml` alongside the sections in Detekt Setup above —
+`ArrayPrimitive`, `CouldBeSequence`, `ForEachOnRange`, `SpreadOperator`,
+`UnnecessaryInitOnArray`, `UnnecessaryPartOfBinaryExpression`,
+`UnnecessaryTemporaryInstantiation`, `UnnecessaryTypeCasting`. None of these cover an
+object constructed inside a loop with no dependency on the loop variable — a real,
+common killer Detekt's own ruleset doesn't check:
+
+```kotlin
+// ❌ — SimpleDateFormat rebuilt every iteration
+for (item in items) {
+    val fmt = SimpleDateFormat("yyyy-MM-dd")
+    results.add(fmt.format(item))
+}
+
+// ✓ — built once, before the loop
+val fmt = SimpleDateFormat("yyyy-MM-dd")
+for (item in items) {
+    results.add(fmt.format(item))
+}
+```
+
+`kotlin-multiplatform-audit`'s `_detect_object_creation_in_loop` flags a known-expensive
+constructor (`SimpleDateFormat`, `DateTimeFormatter`, `HttpClient`, `MessageDigest`,
+`Gson`, `ObjectMapper`) built inside a `for`/`while` body whose arguments don't
+reference the loop variable — a legitimate per-item construction (the constructor
+genuinely uses the loop variable) is not flagged.
+
+### Public mutable collection exposure
+
+Distinct from the Compose-only unstable-collection-param check above — this is an
+encapsulation concern, not a recomposition one. A public `MutableList`/`MutableMap`/
+`MutableSet` property or return type lets any caller mutate your internal state through
+the reference, regardless of whether Compose is involved at all:
+
+```kotlin
+// ❌ — a caller can add/remove/clear through this reference
+class ItemStore {
+    val items: MutableList<Item> = mutableListOf()
+}
+
+// ✓ — read-only surface, backed by a private mutable copy
+class ItemStore {
+    private val _items = mutableListOf<Item>()
+    val items: List<Item> get() = _items
+}
+```
+
+Especially relevant on an `explicitApi()` library's public surface, where this becomes
+a permanent part of the contract. `_detect_public_mutable_collection` flags a
+non-`private`/non-`internal` declaration exposing a `Mutable*` type directly.
+
 ---
 
 ## Output Style
@@ -777,6 +849,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-08-01 | Enabled Detekt's own Performance ruleset (verified against detekt.dev — 8 real rules: `ArrayPrimitive`, `CouldBeSequence`, `ForEachOnRange`, `SpreadOperator`, `UnnecessaryInitOnArray`, `UnnecessaryPartOfBinaryExpression`, `UnnecessaryTemporaryInstantiation`, `UnnecessaryTypeCasting`), previously off entirely. Added "Performance killers" (object constructed inside a loop, the one real gap Detekt's ruleset doesn't cover) and "Public mutable collection exposure" (an encapsulation concern distinct from the existing Compose-only unstable-collection-param check). Backed by `kotlin-multiplatform-audit`'s two new detectors. |
 | 2026-07-31 | Added "Kotlin Library & Pattern Choices" — `kotlin-reflect` (avoid in `commonMain`, JVM-primary and limited/absent on Native/JS), util/extension file organization (a god `Utils.kt` grab-bag is a real smell distinct from a single-receiver extension file), and regex readability (bind to a named `val`, never inline; named capture groups over positional for 2+ groups). Backed by `kotlin-multiplatform-audit`'s three new detectors. Also added the Alpha-stability caveat kotlinx.collections.immutable was missing wherever this skill referenced it. |
 | 2026-07-31 | Added a completeness rule to `@param`/`@return` guidance: the existing "avoid these tags, weave into prose" advice was about *form*, never about whether every parameter gets addressed — a user reported seeing generated KDoc that documented 1 of several parameters. Coverage is now explicit: all parameters or none, never partial. Backed by `kotlin-multiplatform-audit`'s new `_detect_partial_param_documentation`. |
 | 2026-07-31 | Added "Naming Conventions (Android Kotlin Style Guide)" — real gap: this skill covered formatting (Ktlint/Detekt, mechanical) and comment/KDoc conventions, but never naming *semantics* — verified against the real, current [Android Kotlin style guide](https://developer.android.com/kotlin/style-guide). Covers file/package naming, the type/function/constant naming table (including the `@Composable`-returning-`Unit`-must-be-PascalCase rule this repo's own generated components already followed by convention but never stated explicitly), acronym casing (`XmlHttpRequest` not `XMLHTTPRequest`), backing property `_x` convention, type variable naming, and the required KDoc block-tag order. Also flagged a real, deliberate conflict: the guide sets a 100-char line limit, this repo's `.editorconfig` sets 120 (matching kotlinlang.org's own convention instead) — documented as an acknowledged deviation, not silently changed. Added `kotlin-multiplatform-audit`'s `_detect_lowercase_unit_composable` as the mechanical enforcement for the Composable-naming rule. |

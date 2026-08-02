@@ -3402,6 +3402,115 @@ class AgentFileStandardsTests(unittest.TestCase):
             self.assertFalse(any(f.startswith("project agent") for f in findings))
 
 
+class ObjectCreationInLoopTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_ctor_inside_for_loop_not_using_loop_var(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Formatter.kt",
+                "fun formatAll(items: List<Long>): List<String> {\n"
+                "    val results = mutableListOf<String>()\n"
+                "    for (item in items) {\n"
+                "        val fmt = SimpleDateFormat(\"yyyy-MM-dd\")\n"
+                "        results.add(fmt.format(item))\n"
+                "    }\n"
+                "    return results\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("object creation in loop" in f for f in findings))
+
+    def test_ignores_ctor_hoisted_before_loop(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Formatter.kt",
+                "fun formatAll(items: List<Long>): List<String> {\n"
+                "    val fmt = SimpleDateFormat(\"yyyy-MM-dd\")\n"
+                "    val results = mutableListOf<String>()\n"
+                "    for (item in items) {\n"
+                "        results.add(fmt.format(item))\n"
+                "    }\n"
+                "    return results\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("object creation in loop" in f for f in findings))
+
+    def test_ignores_ctor_that_depends_on_loop_variable(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Formatter.kt",
+                "fun perItem(codes: List<String>) {\n"
+                "    for (code in codes) {\n"
+                "        val fmt = SimpleDateFormat(code)\n"
+                "        println(fmt)\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("object creation in loop" in f for f in findings))
+
+
+class PublicMutableCollectionTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_public_mutable_list_property(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Repo.kt",
+                "class ItemStore {\n    val items: MutableList<String> = mutableListOf()\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("public mutable collection exposure" in f for f in findings))
+
+    def test_flags_public_function_returning_mutable_list(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Repo.kt",
+                "class ItemStore {\n"
+                "    private val items = mutableListOf<String>()\n"
+                "    fun getRaw(): MutableList<String> = items\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("public mutable collection exposure" in f for f in findings))
+
+    def test_ignores_private_mutable_collection(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Repo.kt",
+                "class ItemStore {\n    private val cache: MutableMap<String, Int> = mutableMapOf()\n}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("public mutable collection exposure" in f for f in findings))
+
+    def test_ignores_read_only_return_type(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/Repo.kt",
+                "class ItemStore {\n"
+                "    private val items = mutableListOf<String>()\n"
+                "    fun getAll(): List<String> = items\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("public mutable collection exposure" in f for f in findings))
+
+
 class HardcodedUiStringTests(unittest.TestCase):
     def _write(self, root: Path, rel_path: str, content: str) -> None:
         path = root / rel_path

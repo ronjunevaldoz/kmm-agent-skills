@@ -64,6 +64,8 @@ The script detects architectural and design smells:
 | `god utils file` | A `*Utils.kt`/`*Helpers.kt` file with 10+ top-level functions spanning 3+ distinct receiver types — a grab-bag with no single responsibility |
 | `inline unnamed regex` | A `Regex(...)`/`.toRegex()` constructed inline inside an expression instead of bound to a named `val` — unreadable at the call site, recompiled on every call |
 | `hardcoded ui string` | A literal string in a `Text`/`AppText`/`ShadcnText` call or `contentDescription` — not localizable; route through `stringResource(Res.string.x)` |
+| `object creation in loop` | A known-expensive constructor (`SimpleDateFormat`, `HttpClient`, `MessageDigest`, ...) built inside a `for`/`while` body with no apparent dependency on the loop variable — hoist it before the loop |
+| `public mutable collection exposure` | A public `val`/`fun` exposes `MutableList`/`MutableMap`/`MutableSet` directly — a caller can mutate internal state through the reference; expose the read-only type instead |
 
 The script also prints a separate, non-blocking `HINTS` section:
 
@@ -172,6 +174,8 @@ For every finding, load the relevant skill and give a concrete fix:
 | `god utils file` | `code-quality` | Split into files named for what each function is for (`StringExtensions.kt`, ...), or move each function into the module that owns its domain |
 | `inline unnamed regex` | `code-quality` | Bind the pattern to a `private val <NAME>_RE = Regex(...)` constant and reference it by name at the call site |
 | `hardcoded ui string` | `shared-resources` | Move the literal to `values/strings.xml`, wrap with `stringResource(Res.string.x)` |
+| `object creation in loop` | `code-quality` | Move the constructor call to a `val` declared before the loop |
+| `public mutable collection exposure` | `code-quality` | Change the declared type to `List`/`Map`/`Set`, back it with a private `Mutable*` |
 | `name-behavior drift` (hint) | `mvi` | Read the ViewModel and its Contract — if the name genuinely no longer fits, rename it and update its Koin binding + composable references. If it's a false positive (generic name is fine), no action needed — this is a manual call, not a rule |
 | `vague class name suffix` (hint) | `clean-architecture` | Rename to describe the actual responsibility (`SyncCoordinator`, `AuthService`, `TokenStore`, ...) — or leave it if the name genuinely fits a small, well-scoped concern; this is a manual call, not a rule |
 

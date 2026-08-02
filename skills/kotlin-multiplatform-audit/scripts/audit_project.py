@@ -1248,6 +1248,105 @@ def _detect_inline_unnamed_regex(root: Path) -> list[str]:
     return findings
 
 
+# ── Expensive object instantiated inside a loop ──────────────────────────────
+# Verified against Detekt's own Performance ruleset (detekt.dev/docs/rules/performance)
+# before writing this — none of its 8 rules cover an object constructed inside a loop
+# body that doesn't depend on the loop variable. Real, common perf killer: a formatter/
+# client/parser rebuilt every iteration instead of hoisted once before the loop.
+
+_EXPENSIVE_CTOR_RE = re.compile(
+    r"\b(SimpleDateFormat|DateTimeFormatter|HttpClient|MessageDigest|Gson|ObjectMapper)\s*\("
+)
+_FOR_IN_LOOP_RE = re.compile(r"\bfor\s*\(\s*(\w+)\s+in\s+[^)]*\)\s*\{")
+_WHILE_LOOP_RE = re.compile(r"\bwhile\s*\([^)]*\)\s*\{")
+
+
+def _find_matching_brace(text: str, open_idx: int) -> int | None:
+    depth = 0
+    for i in range(open_idx, len(text)):
+        if text[i] == "{":
+            depth += 1
+        elif text[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return i
+    return None
+
+
+def _detect_object_creation_in_loop(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        loop_matches = [
+            (m, m.group(1)) for m in _FOR_IN_LOOP_RE.finditer(text)
+        ] + [
+            (m, None) for m in _WHILE_LOOP_RE.finditer(text)
+        ]
+        for loop_match, loop_var in loop_matches:
+            brace_open = text.index("{", loop_match.start())
+            brace_close = _find_matching_brace(text, brace_open)
+            if brace_close is None:
+                continue
+            body = text[brace_open + 1: brace_close]
+            for ctor_match in _EXPENSIVE_CTOR_RE.finditer(body):
+                ctor_name = ctor_match.group(1)
+                paren_open = ctor_match.end() - 1
+                paren_close = _find_matching_paren(body, paren_open)
+                args = body[paren_open + 1: paren_close] if paren_close is not None else ""
+                if loop_var and re.search(rf"\b{re.escape(loop_var)}\b", args):
+                    continue  # constructor genuinely depends on the loop variable
+                abs_pos = brace_open + 1 + ctor_match.start()
+                line_no, snippet = _at(text, abs_pos)
+                findings.append(
+                    f"object creation in loop [MEDIUM]: {path.relative_to(root)}:{line_no} "
+                    f"— '{ctor_name}' constructed inside the loop body with no apparent "
+                    f"dependency on the loop variable; hoist it to a val before the loop "
+                    f"so it's built once, not once per iteration\n"
+                    f"    {line_no} | {snippet}"
+                )
+    return findings
+
+
+# ── Public mutable collection exposure ───────────────────────────────────────
+# Distinct from _detect_compose_unstable_collection_param, which is scoped to
+# @Composable function parameters (a recomposition-stability concern). This is an
+# encapsulation concern: a public MutableList/MutableMap/MutableSet property or return
+# type lets any caller mutate internal state through the reference — real regardless of
+# Compose, and especially relevant on an explicitApi() library's public surface.
+
+_PUBLIC_MUTABLE_COLLECTION_RE = re.compile(
+    r"(?m)^(?!.*\bprivate\b)(?!.*\binternal\b).*\b(?:val|var|fun)\s+\w+\s*"
+    r"(?::\s*Mutable(List|Map|Set)<|\([^)]*\)\s*:\s*Mutable(List|Map|Set)<)"
+)
+
+
+def _detect_public_mutable_collection(root: Path) -> list[str]:
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for match in _PUBLIC_MUTABLE_COLLECTION_RE.finditer(text):
+            kind = match.group(1) or match.group(2)
+            line_no, snippet = _at(text, match.start())
+            findings.append(
+                f"public mutable collection exposure [MEDIUM]: {path.relative_to(root)}:{line_no} "
+                f"— a public declaration exposes Mutable{kind} directly; a caller holding "
+                f"this reference can mutate your internal state. Expose {kind} (read-only) "
+                f"instead, backed by a private Mutable{kind}\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
 # ── Hardcoded user-facing string in Compose UI ───────────────────────────────
 # Documented in this skill's own "What to Inspect" checklist since the beginning
 # ("flag hardcoded user-facing strings, route to kotlin-multiplatform-shared-resources")
@@ -4074,6 +4173,8 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_god_utils_file(root))
     findings.extend(_detect_inline_unnamed_regex(root))
     findings.extend(_detect_hardcoded_ui_string(root))
+    findings.extend(_detect_object_creation_in_loop(root))
+    findings.extend(_detect_public_mutable_collection(root))
 
     # ── Combined design-system component file ────────────────────────────────────
     findings.extend(_detect_combined_component_file(root))
