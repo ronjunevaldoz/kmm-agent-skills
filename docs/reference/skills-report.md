@@ -64,8 +64,8 @@ Generated 2026-08-02 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-logging`](../../skills/kmp-logging/) | 297 | 2026-06-24 | ✅ |
 | [`kmp-native-authoring`](../../skills/kmp-native-authoring/) | 292 | 2026-07-31 | ✅ |
 | [`kmp-kotlin-rpc`](../../skills/kmp-kotlin-rpc/) | 285 | 2026-07-31 | ✅ |
-| [`kmp-imagevector-generator`](../../skills/kmp-imagevector-generator/) | 276 | 2026-07-08 | ✅ |
 | [`kmp-compose-preview-driven-development`](../../skills/kmp-compose-preview-driven-development/) | 276 | 2026-07-08 | ✅ |
+| [`kmp-imagevector-generator`](../../skills/kmp-imagevector-generator/) | 276 | 2026-07-08 | ✅ |
 | [`kmp-proguard-r8`](../../skills/kmp-proguard-r8/) | 269 | 2026-06-29 | ✅ |
 | [`kmp-unit-testing`](../../skills/kmp-unit-testing/) | 269 | 2026-06-18 | ✅ |
 | [`kmp-compose-graphics-modifiers`](../../skills/kmp-compose-graphics-modifiers/) | 266 | 2026-06-13 | ✅ |

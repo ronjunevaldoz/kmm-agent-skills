@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v3.0.0] — 2026-08-02
+
+### Other
+
+- refactor: rename Compose-only skills to kmp-compose-* prefix
+
+---
+
 ## [v2.1.1] — 2026-08-02
 
 ### Fixed
