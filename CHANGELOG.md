@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v3.1.0] — 2026-08-02
+
+### Added
+
+- feat: add migrate-kmm-to-kmp.sh to clean up stale pre-v3.0.0 skill copies
+
+---
+
 ## [v3.0.0] — 2026-08-02
 
 ### Other
