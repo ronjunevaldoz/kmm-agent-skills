@@ -30,12 +30,33 @@ bash .claude/skills/scripts/update-consumer-skills.sh --source /path/to/kmp-agen
 ```
 
 If this happens across multiple consumer projects on the same machine, suggest setting
-`$KMM_AGENT_SKILLS_SOURCE` once instead of passing `--source` every time — auto-detect
-checks it first, before falling back to guessed paths:
+`$KMP_AGENT_SKILLS_SOURCE` once instead of passing `--source` every time — auto-detect
+checks it first (falling back to the legacy `$KMM_AGENT_SKILLS_SOURCE` name, then to
+guessed paths):
 
 ```bash
-export KMM_AGENT_SKILLS_SOURCE=/path/to/kmp-agent-skills   # add to shell profile
+export KMP_AGENT_SKILLS_SOURCE=/path/to/kmp-agent-skills   # add to shell profile
 ```
+
+---
+
+## Step 1b — Migrating a project last updated before v3.0.0
+
+If the project was last synced before the kotlin-multiplatform-* → kmp-* (v2.0.0) or
+kmp-design-system-etc → kmp-compose-* (v3.0.0) renames, `update-consumer-skills.sh`'s
+rsync alone won't remove the now-orphaned old-named directories — it only cleans files
+*inside* a matched target, not a dir whose source no longer exists under that name. Run
+the cleanup once, after Step 1's update completes:
+
+```bash
+bash .claude/skills/scripts/migrate-kmm-to-kmp.sh --dry-run   # preview
+bash .claude/skills/scripts/migrate-kmm-to-kmp.sh              # remove stale copies
+```
+
+Removes: leftover `kotlin-multiplatform-*` skill dirs, the 6 pre-v3.0.0-named Compose
+skill dirs, old `commands/kmm-*.md` slash commands, and renames `.kmm-skills` →
+`.kmp-skills`. Safe to run even if nothing is stale — it reports "Nothing stale found"
+and exits 0.
 
 ---
 
