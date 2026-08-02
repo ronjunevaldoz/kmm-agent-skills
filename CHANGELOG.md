@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.1.1] — 2026-08-02
+
+### Fixed
+
+- fix(audit): archive stale AUDIT_REPORT.md, add Task-vs-Reference doc lifecycle rule
+
+---
+
 ## [v2.1.0] — 2026-08-02
 
 ### Added
