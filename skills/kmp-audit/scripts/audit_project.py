@@ -1094,6 +1094,109 @@ def _detect_compose_unstable_collection_param(root: Path) -> list[str]:
     return findings
 
 
+# ── Library project structure (kmp-library-publishing conformance) ──────────────
+# No existing check verified whether a library project actually followed
+# kmp-library-publishing's own documented setup (vanniktech-mavenPublish,
+# binary-compatibility-validator, explicitApi(), and — once split into multiple
+# published modules — a build-logic convention plugin instead of duplicating the
+# same config per module). Gated on vanniktech-mavenPublish actually being applied
+# somewhere in the project — that's the one unambiguous "this is meant to be a
+# published library" signal; a plain internal KMP module (:core:network inside an
+# app) never applies it, so this can't false-trigger on ordinary app-internal code.
+
+_VANNIKTECH_PLUGIN_RE = re.compile(r"\bcom\.vanniktech\.maven\.publish\b")
+_MAVEN_PUBLISHING_COORDINATES_RE = re.compile(r"\bmavenPublishing\s*\{")
+_BINARY_COMPAT_VALIDATOR_RE = re.compile(
+    r"\bbinary-compatibility-validator\b|\borg\.jetbrains\.kotlinx\.binary-compatibility-validator\b"
+)
+
+
+def _vanniktech_modules(root: Path) -> list[Path]:
+    """Return every build.gradle.kts that applies the vanniktech plugin — one
+    per published artifact. Length of this list is the single/multi-module signal."""
+    modules: list[Path] = []
+    for path in root.rglob("build.gradle.kts"):
+        if _is_excluded(path, root):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if _VANNIKTECH_PLUGIN_RE.search(text) or _MAVEN_PUBLISHING_COORDINATES_RE.search(text):
+            modules.append(path)
+    return modules
+
+
+def _detect_library_missing_binary_compat_validator(root: Path) -> list[str]:
+    """Flag a library project (vanniktech applied) with no binary-compatibility-validator
+    wired anywhere and no committed `.api` dump — Step 5's tracked-API-surface gate.
+    """
+    modules = _vanniktech_modules(root)
+    if not modules:
+        return []
+    for path in root.rglob("*.gradle.kts"):
+        if _is_excluded(path, root):
+            continue
+        try:
+            if _BINARY_COMPAT_VALIDATOR_RE.search(path.read_text(encoding="utf-8", errors="ignore")):
+                return []
+        except OSError:
+            continue
+    if any(root.rglob("*.api")):
+        return []
+    line_no, snippet = _at(modules[0].read_text(encoding="utf-8", errors="ignore"), 0)
+    return [
+        f"library missing binary-compat validator [MEDIUM]: {modules[0].relative_to(root)}:1 "
+        f"— vanniktech-mavenPublish is applied but no binary-compatibility-validator plugin "
+        f"or committed .api file was found; a public API change can ship unreviewed and break "
+        f"consumers silently (see kmp-library-publishing Step 5)\n"
+        f"    1 | {snippet}"
+    ]
+
+
+def _detect_library_missing_explicit_api(root: Path) -> list[str]:
+    """Flag a library project (vanniktech applied) with no explicitApi()/
+    explicitApiWarning() anywhere — Step 3's library-only visibility discipline.
+    """
+    modules = _vanniktech_modules(root)
+    if not modules or _project_uses_explicit_api(root):
+        return []
+    line_no, snippet = _at(modules[0].read_text(encoding="utf-8", errors="ignore"), 0)
+    return [
+        f"library missing explicitApi() [MEDIUM]: {modules[0].relative_to(root)}:1 "
+        f"— vanniktech-mavenPublish is applied but no module calls explicitApi(); without it, "
+        f"every internal type Kotlin defaults to public leaks into the published API surface "
+        f"(see kmp-library-publishing Step 3)\n"
+        f"    1 | {snippet}"
+    ]
+
+
+def _detect_library_multimodule_missing_build_logic(root: Path) -> list[str]:
+    """Classify single- vs multi-module library structure, and flag the real
+    duplication problem multi-module introduces: 2+ published modules each
+    re-applying vanniktech/explicitApi directly instead of sharing one convention
+    plugin (kmp-library-publishing Step 1a — build-logic only earns its keep once
+    a library splits past one :library module).
+    """
+    modules = _vanniktech_modules(root)
+    if len(modules) < 2:
+        return []  # single-module: build-logic adds nothing, per Step 1
+    has_build_logic = (root / "build-logic").exists() and any(
+        (root / "build-logic").rglob("*.gradle.kts")
+    )
+    if has_build_logic:
+        return []
+    module_names = ", ".join(sorted(m.parent.name for m in modules))
+    line_no, snippet = _at(modules[0].read_text(encoding="utf-8", errors="ignore"), 0)
+    return [
+        f"library multi-module missing build-logic [MEDIUM]: {modules[0].relative_to(root)}:1 "
+        f"— {len(modules)} published modules ({module_names}) each apply "
+        f"vanniktech/explicitApi directly with no build-logic convention plugin; that's real, "
+        f"growing duplication a shared plugin removes (see kmp-library-publishing Step 1a)\n"
+        f"    1 | {snippet}"
+    ]
+
+
 # ── Undocumented public API (library projects only) ─────────────────────────────
 # kmp-library-publishing's explicitApi() forces every public
 # declaration to state its visibility explicitly — once "public" is a deliberate
@@ -4434,6 +4537,11 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_runblocking_in_shared_code(root))
     findings.extend(_detect_koin_circular_dependency(root))
     findings.extend(_detect_compose_unstable_collection_param(root))
+
+    # ── Library project structure conformance (kmp-library-publishing) ──────────
+    findings.extend(_detect_library_missing_binary_compat_validator(root))
+    findings.extend(_detect_library_missing_explicit_api(root))
+    findings.extend(_detect_library_multimodule_missing_build_logic(root))
 
     # ── Undocumented public API (library projects only) ──────────────────────────
     findings.extend(_detect_undocumented_public_api(root))

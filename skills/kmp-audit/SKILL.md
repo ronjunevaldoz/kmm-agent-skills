@@ -149,6 +149,16 @@ the user and the other skills what to do next.
   the platform that owns it
 - Check platform target coverage against the product goal
 
+### 4b) Library project structure (gated on vanniktech-mavenPublish being applied)
+- `explicitApi()` present somewhere — without it, every internal type Kotlin defaults
+  to public leaks into the published API surface (kmp-library-publishing Step 3)
+- A binary-compatibility-validator plugin or committed `.api` file present — without
+  it, a public API change ships unreviewed and can break consumers silently (Step 5)
+- Once split into 2+ published modules, a `build-logic/` convention plugin actually
+  applied — 2+ modules each hand-rolling the same vanniktech/explicitApi config is
+  real, growing duplication (Step 1a). A single `:library` module needs none of this —
+  `build-logic/` adds nothing until the multi-module split happens
+
 ### 5) Design system
 - Verify tokens, palette rules, and typography are consistent
 - Check whether components use the right pattern for the repo's chosen UI system
@@ -394,6 +404,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-08-03 | Added library project structure conformance, gated on vanniktech-mavenPublish actually being applied (the one unambiguous "this is a published library" signal — a plain internal KMP module never applies it): `_detect_library_missing_explicit_api`, `_detect_library_missing_binary_compat_validator`, and `_detect_library_multimodule_missing_build_logic` (counts published modules to classify single- vs multi-module structure — a single `:library` module is correctly never flagged for missing build-logic, per kmp-library-publishing Step 1a's own "adds nothing until the split happens" guidance). Real gap: nothing previously checked whether a library project actually followed kmp-library-publishing's own documented setup. 8 new regression tests. |
 | 2026-08-02 | Added two "patch not root-cause fix" hints (same non-blocking tier as `name-behavior drift`/`vague class name suffix`): `_detect_empty_catch_block` (empty or log-only catch, no real recovery) and `_detect_unjustified_suppress` (`@Suppress` with no nearby comment explaining why). Both note a nearby `TODO`/`FIXME` in the finding text as corroborating evidence when present. Verified first that Detekt's own `ForbiddenComment` rule already flags `TODO:`/`FIXME:`/`STOPSHIP:` by default — no separate TODO detector needed. 7 new regression tests. |
 | 2026-08-02 | Added `_detect_context_leak_in_singleton` — the classic Android memory leak, a `companion object`/singleton caching a `Context`/`Activity` reference. Applies to both App and Library projects with no project-type gating (a KMP library's Android `actual` implementation is exactly as leak-prone as an app). Fixed a real bug found during testing: the first version required the *property name* to contain "context," missing `Activity`-named properties even though the type check would have caught them — the type annotation is the real signal, not the name. Correctly exempts `applicationContext`/`Application` (safe to hold long-term). 4 new regression tests. |
 | 2026-08-01 | Added two performance/encapsulation detectors from a Kotlin performance-killer survey: `_detect_object_creation_in_loop` (a known-expensive constructor built inside a `for`/`while` body with no dependency on the loop variable — verified against Detekt's own Performance ruleset first, which doesn't cover this) and `_detect_public_mutable_collection` (a public `Mutable*` property/return type — distinct from the Compose-only unstable-collection-param check, this is an encapsulation concern). 7 new regression tests. |

@@ -949,7 +949,7 @@ missing fields cause Maven Central validation failures that are hard to debug.
 | `kmp-project-docs-maintainer` | `docs/libraries.md` catalogs every published coordinate/version — point the release checklist there |
 | `kmp-docs-site` | Public GitHub Pages developer guide + Dokka HTML API reference; reuses this skill's Dokka setup for the separate HTML output, not the Javadoc jar |
 | `kmp-dependency-injection` | That skill's Koin recommendation is scoped to app code — see "No forced framework coupling in library internals" above for why a library's own classes shouldn't hard-depend on it |
-| `kmp-audit` | `_detect_undocumented_public_api` flags a public declaration with no KDoc, scoped to projects using `explicitApi()` |
+| `kmp-audit` | `_detect_undocumented_public_api` flags a public declaration with no KDoc, scoped to projects using `explicitApi()`; `_detect_library_missing_explicit_api`/`_detect_library_missing_binary_compat_validator`/`_detect_library_multimodule_missing_build_logic` check whether this skill's own Steps 1a/3/5 were actually followed, gated on vanniktech-mavenPublish being applied |
 | `kmp-clean-architecture` | The 6-layer contract applies to a library's own `:library` internals too, once it outgrows a single module — see Step 1 |
 
 ---

@@ -5,8 +5,9 @@ import org.jetbrains.kotlin.psi.*
 
 /**
  * Flags @Composable functions in feature modules whose names end with a known
- * design system component suffix — these are likely reimplementations of a design
- * system component rather than extensions of it.
+ * design system component suffix AND whose body never actually calls the matching
+ * design system component — these are likely reimplementations from raw primitives
+ * rather than extensions of the design system.
  *
  * Configure `componentPrefix` in detekt-design-system.yml to match your project's
  * prefix (default: "App").
@@ -14,18 +15,24 @@ import org.jetbrains.kotlin.psi.*
  * NOT flagged:
  *   - Functions whose name starts with the componentPrefix (e.g. AppButton)
  *   - Functions in core/designsystem/ or files ending in Preview.kt
- *   - Functions with fewer than 1 parameter (likely non-interactive wrappers)
+ *   - Functions with 0 parameters (likely a decorative/section wrapper, not a
+ *     reimplementation of an interactive component)
+ *   - Functions whose body calls the matching design system component
+ *     (e.g. `fun ProductCard(title: String) { AppCard { AppText(title) } }` —
+ *     this is composing the design system correctly, not reimplementing it)
  *
  * FLAGGED:
- *   - `fun MyButton(...)` in feature/*/ui/  — ends in "Button" outside DS module
- *   - `fun CustomCard(...)` in feature/*/   — ends in "Card" outside DS module
+ *   - `fun MyButton(label: String) { Button(onClick = {}) { Text(label) } }` in
+ *     feature/*/ui/ — ends in "Button", body never calls AppButton
+ *   - `fun CustomCard(title: String) { Card { Text(title) } }` in feature/*/ —
+ *     ends in "Card", body never calls AppCard
  */
 class ComponentRegistryRule(config: Config) : Rule(config) {
 
     override val issue = Issue(
         id = "ComponentRegistryViolation",
         severity = Severity.Warning,
-        description = "Custom composable name matches a design system component. Prefer using the design system component or extending it via the variant system.",
+        description = "Custom composable name matches a design system component, and its body never calls that component. Prefer using the design system component or extending it via the variant system.",
         debt = Debt.TWENTY_MINS,
     )
 
@@ -50,14 +57,24 @@ class ComponentRegistryRule(config: Config) : Rule(config) {
         if (filePath.contains("/designsystem/")) return
         if (filePath.endsWith("Preview.kt")) return
 
+        if (function.valueParameters.isEmpty()) return  // likely a decorative/section wrapper
+
         val name = function.name ?: return
         if (name.startsWith(componentPrefix)) return  // proper DS component or Preview
 
         val matched = dsComponentSuffixes.firstOrNull { name.endsWith(it) } ?: return
 
+        val expectedCall = "$componentPrefix$matched"
+        val bodyCallsDsComponent = function.bodyExpression
+            ?.text
+            ?.let { body -> Regex("\\b${Regex.escape(expectedCall)}\\s*[(<{]").containsMatchIn(body) }
+            ?: false
+        if (bodyCallsDsComponent) return  // composes the design system correctly
+
         report(CodeSmell(issue, Entity.from(function),
-            "'$name' reimplements a ${componentPrefix}$matched-shaped component outside the design system. " +
-            "Use '${componentPrefix}$matched' directly, or add a new variant to the design system " +
-            "rather than creating a parallel component."))
+            "'$name' reimplements a $expectedCall-shaped component from raw primitives outside " +
+            "the design system — its body never calls '$expectedCall'. Use '$expectedCall' " +
+            "directly, or add a new variant to the design system rather than creating a parallel " +
+            "component."))
     }
 }

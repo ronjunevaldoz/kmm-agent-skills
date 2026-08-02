@@ -3005,6 +3005,98 @@ class ComposeUnstableCollectionParamTests(unittest.TestCase):
             self.assertFalse(any("compose unstable collection param" in f for f in findings))
 
 
+class LibraryProjectStructureTests(unittest.TestCase):
+    """kmp-library-publishing conformance — gated on vanniktech-mavenPublish actually
+    being applied, the one unambiguous 'this is a published library' signal."""
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def _vanniktech_module(self, explicit_api: bool = False) -> str:
+        api_line = "kotlin { explicitApi() }\n" if explicit_api else ""
+        return (
+            "plugins {\n"
+            "    id(\"org.jetbrains.kotlin.multiplatform\")\n"
+            "    id(\"com.vanniktech.maven.publish\")\n"
+            "}\n"
+            f"{api_line}"
+            "mavenPublishing {\n"
+            "    coordinates(\"io.github.me\", \"mylib\", \"0.1.0\")\n"
+            "}\n"
+        )
+
+    def test_flags_missing_binary_compat_validator(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "library/build.gradle.kts", self._vanniktech_module(explicit_api=True))
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("library missing binary-compat validator" in f for f in findings))
+
+    def test_ignores_binary_compat_validator_when_wired(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "library/build.gradle.kts", self._vanniktech_module(explicit_api=True))
+            self._write(
+                root, "build.gradle.kts",
+                'plugins { id("org.jetbrains.kotlinx.binary-compatibility-validator") }\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("library missing binary-compat validator" in f for f in findings))
+
+    def test_flags_missing_explicit_api(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "library/build.gradle.kts", self._vanniktech_module(explicit_api=False))
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("library missing explicitApi()" in f for f in findings))
+
+    def test_ignores_explicit_api_when_present(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "library/build.gradle.kts", self._vanniktech_module(explicit_api=True))
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("library missing explicitApi()" in f for f in findings))
+
+    def test_ignores_non_library_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/network/build.gradle.kts",
+                'plugins { id("org.jetbrains.kotlin.multiplatform") }\n',
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any(
+                f.startswith("library missing") or "library multi-module" in f
+                for f in findings
+            ))
+
+    def test_single_module_library_not_flagged_for_build_logic(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "library/build.gradle.kts", self._vanniktech_module(explicit_api=True))
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("library multi-module missing build-logic" in f for f in findings))
+
+    def test_flags_multimodule_missing_build_logic(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "mylib-core/build.gradle.kts", self._vanniktech_module(explicit_api=True))
+            self._write(root, "mylib-compose/build.gradle.kts", self._vanniktech_module(explicit_api=True))
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("library multi-module missing build-logic" in f for f in findings))
+
+    def test_ignores_multimodule_with_build_logic(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "mylib-core/build.gradle.kts", self._vanniktech_module(explicit_api=True))
+            self._write(root, "mylib-compose/build.gradle.kts", self._vanniktech_module(explicit_api=True))
+            self._write(root, "build-logic/build.gradle.kts", "plugins { `kotlin-dsl` }\n")
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("library multi-module missing build-logic" in f for f in findings))
+
+
 class UndocumentedPublicApiTests(unittest.TestCase):
     """Gated on explicitApi() — once 'public' is a deliberate choice under that
     compiler mode, an undocumented one is a real gap for a library's consumers.
