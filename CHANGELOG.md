@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.119.0] — 2026-08-02
+
+### Added
+
+- feat(hooks): block computer-use for Compose UI verification (Option G)
+
+---
+
 ## [v1.118.1] — 2026-08-02
 
 ### Fixed
