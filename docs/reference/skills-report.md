@@ -7,7 +7,7 @@ Generated 2026-08-03 by `scripts/generate_skills_report.py` — run it after any
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
 | [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 3101 | 2026-07-08 | 🟡 1 known debt |
-| [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 2674 | 2026-07-26 | 🟡 2 known debt |
+| [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 2675 | 2026-07-26 | 🟡 2 known debt |
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 1066 | 2026-07-31 | 🟡 1 known debt |
@@ -34,8 +34,8 @@ Generated 2026-08-03 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 443 | 2026-07-31 | ✅ |
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
-| [`kmp-audit`](../../skills/kmp-audit/) | 432 | 2026-07-31 | ✅ |
 | [`kmp-paging`](../../skills/kmp-paging/) | 432 | 2026-06-21 | ✅ |
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kmp-datastore`](../../skills/kmp-datastore/) | 413 | 2026-06-18 | ✅ |

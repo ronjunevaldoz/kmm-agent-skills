@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.5.2] — 2026-08-03
+
+### Fixed
+
+- fix(design-system): stop ComponentRegistryRule flagging legitimate DS wrappers
+
+---
+
 ## [v2.5.1] — 2026-08-03
 
 ### Docs
