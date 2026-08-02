@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.114.0] — 2026-08-02
+
+### Added
+
+- feat(code-quality): enable Detekt Performance ruleset, add 2 perf/encapsulation detectors
+
+---
+
 ## [v1.113.3] — 2026-08-01
 
 ### Docs
