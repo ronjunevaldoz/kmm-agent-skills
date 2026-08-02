@@ -2,6 +2,14 @@
 
 All notable changes to kmm-agent-skills are documented here.
 
+## [v1.117.0] — 2026-08-02
+
+### Added
+
+- feat(setup-hooks): add Option F — secrets scan before commit (gitleaks)
+
+---
+
 ## [v1.116.0] — 2026-08-02
 
 ### Added
