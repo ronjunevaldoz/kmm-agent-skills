@@ -18,6 +18,7 @@ There are two independent integration points: **git hooks** (for your local repo
 | `hooks/session-start-check-updates.sh` | Wraps `scripts/check_updates.py` — warns the agent up front if this repo's skills are behind `origin/main`. Non-blocking, always exits 0. | Every Claude Code session start (kmm-agent-skills clone only) |
 | `scripts/check-installed-skills-version.sh` | Compares a *deployed* `skills/` copy's version marker against the latest GitHub Release. Non-blocking when wrapped per Option E. | Every Claude Code session start (any consumer project with a deployed copy) |
 | `gitleaks` (via `pre-commit` framework) | Scans staged changes for API keys/passwords/tokens before they're committed. Platform-independent — scans source text, not compiled output. Blocks the commit if a secret is found. | `git commit`, wired per Option F |
+| `hooks/block-computer-use-for-compose.sh` | Blocks `mcp__computer-use__*` tool calls in a Compose Multiplatform project — forces the agent onto Roborazzi/`runComposeUiTest` instead of manually driving the app. | Before any `mcp__computer-use__*` call, wired per Option G |
 
 ---
 
@@ -231,6 +232,56 @@ To remove: `pre-commit uninstall`.
 
 ---
 
+## Option G — Block computer-use for Compose UI verification (Claude Code PreToolUse hook)
+
+Stops the agent from reaching for `mcp__computer-use__*` (manually launching and clicking
+through the app) to "verify this looks right" on a Compose Multiplatform screen — the real
+verification path is Roborazzi + `runComposeUiTest` (see
+[kotlin-multiplatform-roborazzi](../skills/kotlin-multiplatform-roborazzi/SKILL.md)):
+deterministic, runs on plain JVM, produces a committable golden image. Computer-use
+screenshots are none of those things, and they require a running device/emulator the agent
+often doesn't have visual access to in the first place.
+
+Without this hook, avoiding computer-use for Compose UI is advisory only — it depends on the
+agent recalling that guidance for this specific session. This hook makes it structural: the
+tool call is refused before it runs, with the correct alternative in the error message.
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__computer-use__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<path-to-skills-repo>/hooks/block-computer-use-for-compose.sh \"$PWD\""
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Effect:** in a Compose Multiplatform project (detected by `org.jetbrains.compose` /
+`compose-multiplatform` in any `build.gradle.kts` or `libs.versions.toml`), any
+`mcp__computer-use__*` call is blocked and the agent is told to use Roborazzi instead.
+In a non-Compose project (or no Gradle project at all), the hook allows the call through —
+computer-use is still the right tool for native desktop apps, cross-app workflows, or a
+project with no test harness at all.
+
+Test it:
+```bash
+# From a Compose Multiplatform project root — should print "Blocked: ..." and exit 2
+bash <path-to-skills-repo>/hooks/block-computer-use-for-compose.sh .
+echo $?
+```
+
+To remove: delete the `PreToolUse` entry from `settings.json`.
+
+---
+
 ## Recommended setup for most projects
 
 ```
@@ -240,6 +291,7 @@ Option C  (CI freshness) — set up once the skills collection stabilises (v2.0+
 Option D  (SessionStart update check) — kmm-agent-skills clone/fork only, already wired here
 Option E  (SessionStart installed-version check) — any consumer project with a deployed skills/ copy
 Option F  (secrets scan) — always set up; real security risk, zero cost once wired
+Option G  (block computer-use for Compose) — set up for any Compose Multiplatform project
 ```
 
 ---

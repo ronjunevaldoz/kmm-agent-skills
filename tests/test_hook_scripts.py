@@ -178,5 +178,58 @@ class HookScriptTests(unittest.TestCase):
         ))
 
 
+    # --- block-computer-use-for-compose.sh ---
+
+    def test_blocks_computer_use_in_compose_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "build.gradle.kts").write_text(
+                'plugins { id("org.jetbrains.compose") }\n', encoding="utf-8"
+            )
+            result = subprocess.run(
+                ["bash", str(HOOKS_DIR / "block-computer-use-for-compose.sh"), tmp],
+                capture_output=True,
+            )
+        self.assertEqual(result.returncode, 2, (
+            "should exit 2 (block) when the project pins org.jetbrains.compose. "
+            f"stdout: {result.stdout.decode()}"
+        ))
+        self.assertIn(b"Roborazzi", result.stderr)
+
+    def test_blocks_computer_use_via_version_catalog(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            gradle_dir = Path(tmp) / "gradle"
+            gradle_dir.mkdir()
+            (gradle_dir / "libs.versions.toml").write_text(
+                'compose-multiplatform = "1.11.1"\n', encoding="utf-8"
+            )
+            result = subprocess.run(
+                ["bash", str(HOOKS_DIR / "block-computer-use-for-compose.sh"), tmp],
+                capture_output=True,
+            )
+        self.assertEqual(result.returncode, 2)
+
+    def test_allows_computer_use_in_non_compose_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "build.gradle.kts").write_text(
+                'plugins { id("java") }\n', encoding="utf-8"
+            )
+            result = subprocess.run(
+                ["bash", str(HOOKS_DIR / "block-computer-use-for-compose.sh"), tmp],
+                capture_output=True,
+            )
+        self.assertEqual(result.returncode, 0, (
+            "should allow computer-use in a non-Compose project. "
+            f"stderr: {result.stderr.decode()}"
+        ))
+
+    def test_allows_computer_use_when_no_gradle_project(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            result = subprocess.run(
+                ["bash", str(HOOKS_DIR / "block-computer-use-for-compose.sh"), tmp],
+                capture_output=True,
+            )
+        self.assertEqual(result.returncode, 0)
+
+
 if __name__ == "__main__":
     unittest.main()
