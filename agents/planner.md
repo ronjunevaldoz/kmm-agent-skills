@@ -47,6 +47,7 @@ first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
 | Lesson files for pattern mismatches | `lessons` |
 | Harvest lessons and propose skill amendments | `harvester` agent, `skill-harvester`, `lessons` |
 | Migrate existing project / incremental adoption / MVVM→MVI | `migration`, `auditor` agent |
+| Rename/move/copy/delete a symbol, file, skill, or module | `refactor` |
 | Consumer release notes or per-skill changelogs | `changelog` |
 | Release, versioning, or Maven Central publishing | `release`, `ci-github-actions`, `xcframework-spm` |
 | KMP library publishing / Maven Central / GitHub Packages / BOM / apiCheck | `library-publishing`, `xcframework-spm`, `ci-github-actions` |

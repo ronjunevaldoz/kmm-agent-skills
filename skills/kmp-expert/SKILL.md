@@ -212,7 +212,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 66 Skills and What They Own
+## The 67 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -231,6 +231,7 @@ versions when the local repo can be checked directly.
 | `kmp-release` | Versioning (`gradle.properties`), Maven Central (vanniktech), GPG signing, git-cliff changelog, GitHub Release, secrets management, local publish script |
 | `kmp-audit` | Existing project health checks, boundary review, architecture drift, readiness gaps; `--roadmap` for adoption plan |
 | `kmp-migration` | Incremental adoption guide: assess current state, prioritized skill adoption order, MVVM→MVI, monolith→multi-module, Hilt→Koin migration paths |
+| `kmp-refactor` | Rename/move/copy/delete: textual sweep (docs/skills/commands) vs IDE-native refactor (Kotlin symbols), module-move checklist against the 6-layer contract, safe-delete dangling-reference check |
 | `kmp-project-docs-maintainer` | Consumer-facing README, onboarding, and docs/reference sync for downstream KMP projects |
 | `kmp-layout-system` | ASCII wireframe docs for screens — draft and document app layout before or after implementation; lives in `docs/layout-system/` |
 | `kmp-lessons` | Structured lesson files capturing pattern mismatches and fixes; feeds the skill-harvester |
@@ -321,6 +322,7 @@ kmp-feature-scaffold       ← scaffold second (implements the rules)
 ├── kmp-dependency-injection (no deps)
 ├── kmp-audit              (no deps for review work)
 ├── kmp-migration          (depends on: audit, clean-architecture, mvi)
+├── kmp-refactor           (depends on: clean-architecture, code-quality)
 ├── kmp-project-docs-maintainer (depends on: audit)
 ├── kmp-layout-system      (no deps)
 ├── kmp-lessons            (no deps)
@@ -628,6 +630,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "write a lesson", "capture lesson", "document a finding", "pattern mismatch", "lesson file" | `kmp-lessons` |
 | "harvest lessons", "propose skill amendments", "skill harvester", "harvest findings", "update skills from lessons" | `kmp-skill-harvester` |
 | "migrate existing project", "adopt MVI", "LiveData to StateFlow", "migrate to clean architecture", "incremental adoption", "where to start", "brownfield", "refactor architecture", "migration path", "legacy project" | `kmp-migration` |
+| "rename symbol", "rename class", "move file", "move class", "move package", "move module", "copy class", "safe delete", "rename skill", "rename command", "package rename", "IntelliJ refactor", "Android Studio refactor", "extract module", "dangling reference" | `kmp-refactor` |
 | "repo README", "repo docs", "agent docs", "command docs", "routing text", "skills repo docs" | `docs-maintainer` |
 | "wireframes", "screen flows", "layout specs", "design handoff", "component API", "visual direction" | `designer` |
 | "release notes", "consumer release notes", "per-skill changelog", "CHANGELOG.md" | `changelog` |

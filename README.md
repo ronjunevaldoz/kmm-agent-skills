@@ -209,6 +209,7 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 - [`expert`](skills/kmp-expert/) — skill routing and build order
 - [`audit`](skills/kmp-audit/) — repo review, fix sequencing, CI governance gate
 - [`migration`](skills/kmp-migration/) — MVVM→MVI, monolith→multi-module, incremental adoption
+- [`refactor`](skills/kmp-refactor/) — rename/move/copy/delete: textual sweep vs IDE refactor, module-move checklist, safe-delete checks
 - [`project-docs-maintainer`](skills/kmp-project-docs-maintainer/) — consumer-facing project docs and onboarding
 - [`legal-docs`](skills/kmp-legal-docs/) — privacy policy, terms, GDPR, data-safety labels
 - [`lessons`](skills/kmp-lessons/) — structured lesson files for pattern mismatches
