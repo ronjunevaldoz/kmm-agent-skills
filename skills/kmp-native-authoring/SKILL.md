@@ -152,6 +152,33 @@ int         vr_renderer_draw_frame(VrRenderer* renderer);
   types for sizes/indices/array lengths in the header, even though C conventionally does
   for those — Kotlin's own guidance is to keep those signed
 
+### Header vs implementation comments
+
+Same split as `kmp-code-quality`'s Kotlin KDoc-vs-`//` convention, applied to C++ — the
+principle is language-agnostic, only the syntax differs. Verified against the
+[Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)'s own
+Comments section:
+
+- **Header declaration comment** (`native/include/*.h`) — WHAT it does and how to call
+  it, nothing else. Read with an implied subject "This function": lead with a verb
+  phrase ("Finds the window...", not "Real Cocoa call, compiled as..."). Document
+  parameter/return *semantics* the signature alone doesn't convey (what `true`/`false`
+  means, what a sentinel value like `nullptr` or `-1` signals) — but not the internal
+  reasoning for why the function is implemented the way it is.
+- **Implementation comment** (`native/src/*.cpp`/`.mm`) — the tricky HOW/WHY: why this
+  approach and not an alternative, a platform limitation being worked around, the exact
+  OS-level constants/behavior being relied on. This is where a comment explaining *why*
+  Cocoa is being called through `NSApplication.windows` title-matching instead of a raw
+  pointer cast belongs — right above the real call, not in the public header a Kotlin
+  consumer reads.
+- `//` preferred over `/* */`, matching this repo's own header example above and
+  Google's explicit guidance.
+
+Mixing the two — putting implementation rationale in the header — means every consumer
+of the C-ABI (both the JNI bridge and Kotlin/Native cinterop) has to read past
+implementation detail just to see the function's contract, and the header drifts from
+the implementation the moment the *why* changes but the *what* doesn't.
+
 ## Step 3: CMakeLists.txt — one project, every platform
 
 ```cmake
@@ -288,5 +315,6 @@ surface than what was asked for.
 
 | Date | Change |
 |---|---|
+| 2026-08-03 | Added "Header vs implementation comments" — a user's pasted header mixed WHAT (what a function does) with deep implementation WHY (a Compose Desktop pointer-lookup workaround) in the same comment block. Verified against the Google C++ Style Guide's own Comments section: declaration comments should be verb-first WHAT+usage, implementation rationale belongs in the `.cpp`/`.mm` definition instead. Cross-referenced from `kmp-code-quality`'s Kotlin KDoc-vs-`//` section as the same principle, different syntax. |
 | 2026-07-31 | Added a note on C unsigned integer types in the public header — cinterop maps them directly to Kotlin's `UByte`/`UShort`/`UInt`/`ULong`, JNI has no unsigned primitive at all (see `jni-pro`'s type-mapping reference); also flagged that sizes/indices should stay signed even where C convention uses unsigned, per kotlinlang.org's own guidance. |
 | 2026-07-31 | Initial release. |

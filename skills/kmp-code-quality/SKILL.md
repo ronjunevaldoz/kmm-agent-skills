@@ -529,6 +529,11 @@ Android-guide alignment should set `max_line_length = 100` in its own `.editorco
 
 ## Comment & KDoc Conventions
 
+Kotlin-specific — for the C++/CPP side of a JNI or Kotlin/Native bridge (header
+declaration vs `.cpp`/`.mm` implementation comments), see `kmp-native-authoring`'s
+"Header vs implementation comments" section. Same underlying principle (declaration =
+what a caller needs, implementation = what a maintainer needs), different syntax.
+
 ### Whether to write a comment at all
 
 Ask in this order — stop at the first "yes":
@@ -1039,6 +1044,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-08-03 | Added a one-line cross-reference to `kmp-native-authoring`'s new "Header vs implementation comments" section — the WHY-vs-WHAT split this section already documents for Kotlin KDoc/`//` applies identically to C++ header/implementation comments in a JNI or Kotlin/Native bridge, just with different syntax. |
 | 2026-08-02 | Added Detekt's `NamedArguments` rule (complexity ruleset) with `ignoreArgumentsMatchingNames: true` — a user asked whether `Foo(id = id, name = name)` (redundant naming, value already equals param name) is checked; verified the real rule and its exact opt-out flag via a filed Detekt issue (detekt#4591 -> #4613). Also added argument-list wrapping guidance (kotlinlang.org's inline-vs-one-per-line convention, ktlint's `standard:argument-list-wrapping` and its `ktlint_code_style` gating caveat) and a note that Android Studio's IDE formatter and ktlint are separate tools with separate config — setting one does not configure the other. |
 | 2026-08-02 | Added "Compiler Warnings" — a user reported seeing real Kotlin compiler warnings in Android Studio (deprecated calls, unchecked casts) that neither Ktlint nor Detekt catch, since neither invokes the actual compiler. Documented `allWarningsAsErrors` as an opt-in gate (never a day-one default — a big-bang change on a codebase with existing warnings) and cross-referenced `ci-github-actions`'s new CI step that surfaces warnings in the PR check before that gate is ready. |
 | 2026-08-02 | Documented Detekt's own `ForbiddenComment` rule (Style ruleset, active by default since 1.0.0, flags `TODO:`/`FIXME:`/`STOPSHIP:`) — already effectively running via `buildUponDefaultConfig = true`, but never stated anywhere, so no one knew it was there. Added "Patch-up fix instead of root-cause fix" — empty/log-only catch blocks and unjustified `@Suppress`, both non-blocking hints backed by `kmp-audit`'s two new detectors, with `TODO`/`FIXME` adjacency woven in as corroborating evidence rather than a separate check. |
