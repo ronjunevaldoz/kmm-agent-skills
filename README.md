@@ -204,6 +204,7 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 - [`code-quality`](skills/kmp-code-quality/) — Ktlint + Detekt, CI gates
 - [`accessibility`](skills/kmp-compose-accessibility/) — semantic roles, contentDescription, WCAG
 - [`benchmark`](skills/kmp-benchmark/) — kotlinx-benchmark setup, @Benchmark conventions, per-target registration
+- [`compose-web-performance`](skills/kmp-compose-web-performance/) — live browser profiling for the Web/Wasm target via chrome-devtools-mcp (traces, Lighthouse, network waterfall)
 
 ### Meta
 - [`expert`](skills/kmp-expert/) — skill routing and build order

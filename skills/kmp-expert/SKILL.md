@@ -212,7 +212,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 67 Skills and What They Own
+## The 68 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -306,6 +306,7 @@ versions when the local repo can be checked directly.
 | `kmp-compose-accessibility` | Semantic roles, `contentDescription`, `mergeDescendants`, touch targets, traversal order, Roborazzi a11y snapshots |
 | `kmp-compose-animation` | `AnimatedVisibility`, `animateContentSize`, `Crossfade`, `AnimatedContent`, `animateXAsState`, shared elements, reduced motion |
 | `kmp-benchmark` | `kotlinx-benchmark` setup, `@State`/`@Benchmark` conventions, per-target registration, `docs/reference/benchmark-matrix.md` result placement |
+| `kmp-compose-web-performance` | Live browser profiling for the Web/Wasm target via the official `chrome-devtools-mcp` — performance traces, Lighthouse audits, network waterfall, Wasm bundle-size awareness |
 
 ---
 
@@ -568,6 +569,10 @@ What is X?
 │     (cache-first, avoid redundant refresh)
 ├── App startup time or binary/APK size?
 │   → kmp-proguard-r8
+├── Web/Wasm target: slow page load, dropped frames in the browser, or bundle size?
+│   → kmp-compose-web-performance (live browser profiling via chrome-devtools-mcp —
+│     distinct from kmp-benchmark, which measures a Kotlin function in isolation,
+│     not the running browser's own load/render cost)
 ├── A specific function/class flagged as complex (long, many params, deep nesting)?
 │   → kmp-code-quality (Detekt `complexity:` rules — LongMethod,
 │     CyclomaticComplexMethod, LongParameterList)
@@ -675,6 +680,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "test canvas layout", "canvas screenshot", "layout regression test", "visual accuracy", "pixel-perfect test", "arrangement test", "test node placement", "UI layout verification", "100% accuracy test" | `kmp-roborazzi` |
 | "Ktlint", "Detekt", "code quality", "formatting", "architecture rules", "CI gate" | `kmp-code-quality` |
 | "benchmark", "microbenchmark", "kotlinx-benchmark", "performance number", "measure performance", "profile this", "@Benchmark", "JMH", "is this faster", "compare performance", "performance regression" | `kmp-benchmark` |
+| "web performance", "chrome devtools", "lighthouse", "performance trace", "wasm bundle size", "core web vitals", "network waterfall", "skiko performance", "compose web performance", "first paint", "wasmJs performance" | `kmp-compose-web-performance` |
 | "analytics", "event tracking", "track event", "Firebase Analytics", "screen tracking", "AnalyticsTracker", "event schema", "amplitude KMP", "mixpanel KMP" | `kmp-analytics` |
 | "form validation", "field validation", "required field", "email validation", "inline error", "submit disabled", "async validation", "FieldState", "ValidationResult" | `kmp-form-validation` |
 | "image loading", "Coil", "Coil 3", "AsyncImage", "network image", "image placeholder", "circular image", "avatar image", "image cache", "disk cache" | `kmp-image-loading` |
