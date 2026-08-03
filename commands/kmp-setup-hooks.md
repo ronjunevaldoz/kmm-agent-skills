@@ -13,6 +13,7 @@ There are two independent integration points: **git hooks** (for your local repo
 | Hook file | What it does | When it runs |
 |---|---|---|
 | `hooks/pre-commit-audit.sh` | Runs `audit_project.py` before any commit touching `.kt`/`.kts` files. Blocks the commit if architecture smells are found. | `git commit` |
+| `hooks/commit-msg` | Enforces Conventional Commit format and rejects any commit carrying a `Co-Authored-By:` trailer (commits — including an AI agent's — aren't attributed to the agent). | `git commit`, wired per Option A |
 | `hooks/validate-architecture.sh` | Runs `audit_project.py` after any file edit. Surfaces findings inline in the agent's output. | After every `Edit`/`Write` |
 | `hooks/check-skill-freshness.sh` | Warns when a skill's `last-updated` is >90 days old. Non-blocking. | Manually or scheduled CI |
 | `hooks/session-start-check-updates.sh` | Wraps `scripts/check_updates.py` — warns the agent up front if this repo's skills are behind `origin/main`. Non-blocking, always exits 0. | Every Claude Code session start (kmp-agent-skills clone only) |
@@ -23,26 +24,43 @@ There are two independent integration points: **git hooks** (for your local repo
 
 ---
 
-## Option A — Git pre-commit hook (local repo)
+## Option A — Git pre-commit + commit-msg hooks (local repo)
 
-Links `pre-commit-audit.sh` into your project's `.git/hooks/` so it runs automatically
-on every `git commit`:
+Wires both `pre-commit-audit.sh` (architecture smells) and `commit-msg` (Conventional
+Commit format, no `Co-Authored-By` trailer) into your project's `.git/hooks/` in one
+step — this is exactly what `scripts/install-hooks.sh` does, so use it instead of
+symlinking each hook by hand (a manual `ln -sf` only wires whichever one you remember
+to run — this repo's own `.git/hooks/` went unwired for `commit-msg` for a while for
+exactly that reason):
 
 ```bash
 # Run from your KMP project root (not the skills repo root):
-ln -sf "<path-to-skills-repo>/hooks/pre-commit-audit.sh" .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
+bash "<path-to-skills-repo>/scripts/install-hooks.sh"
 ```
+
+This symlinks `pre-commit-audit.sh` → `pre-commit`, `validate-architecture.sh` →
+`post-rewrite`, and `commit-msg` → `commit-msg`, and `chmod +x`s each source file.
 
 Test it:
 ```bash
-# Should print "Running architecture audit..." and exit 0 on a clean project
-git commit --allow-empty -m "test hook"
+# pre-commit: should print "Running architecture audit..." and exit 0 on a clean project
+git commit --allow-empty -m "test: hook check"
+
+# commit-msg: should be rejected — no Co-Authored-By trailer allowed
+git commit --allow-empty -m "$(printf 'chore: test\n\nCo-Authored-By: Claude <noreply@anthropic.com>')"
 ```
 
 To remove:
 ```bash
-rm .git/hooks/pre-commit
+rm .git/hooks/pre-commit .git/hooks/post-rewrite .git/hooks/commit-msg
+```
+
+If you only want the pre-commit architecture check without the commit-msg format
+enforcement (or vice versa), symlink that one file directly instead of running the
+installer:
+```bash
+ln -sf "<path-to-skills-repo>/hooks/pre-commit-audit.sh" .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
 ```
 
 ---
@@ -353,8 +371,8 @@ Option H  (block edits to vendored skills) — always set up; prevents silent dr
 ## Verify everything is wired
 
 ```bash
-# Test pre-commit hook
-git stash && git commit --allow-empty -m "hook test" && git stash pop
+# Test pre-commit + commit-msg hooks
+git stash && git commit --allow-empty -m "chore: hook test" && git stash pop
 
 # Test Claude Code hook — make any edit via the agent and check the tool output
 # for "OK: no lightweight architecture smells matched the current scan"
