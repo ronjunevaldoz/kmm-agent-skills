@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.6.1] — 2026-08-03
+
+### Fixed
+
+- fix(setup-hooks): wire commit-msg alongside pre-commit in Option A
+
+---
+
 ## [v2.6.0] — 2026-08-03
 
 ### Added
