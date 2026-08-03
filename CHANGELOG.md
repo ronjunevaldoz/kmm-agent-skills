@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.6.4] — 2026-08-03
+
+### Fixed
+
+- fix(code-quality): remove fabricated CouplingBetweenObjects Detekt rule
+
+---
+
 ## [v2.6.3] — 2026-08-03
 
 ### Docs
