@@ -256,11 +256,6 @@ complexity:
     allowedArguments: 3
     ignoreArgumentsMatchingNames: true
 
-coupling:
-  CouplingBetweenObjects:
-    active: true
-    threshold: 12
-
 performance:
   ArrayPrimitive:
     active: true
@@ -314,23 +309,28 @@ inheritance chain, which is exactly the pattern `kmp-clean-architecture`'s
 "Composition Over Inheritance" section explains how to avoid — see that section for the
 full rationale and fix.
 
-`LargeClass`/`TooManyFunctions`/`CouplingBetweenObjects` were a real gap: this collection
-had god-object detection scoped to only two file types (`kmp-audit`'s
-`_detect_viewmodel_size` for ViewModels, `_detect_god_composable` for Compose screens) —
-nothing caught a repository, use case, or manager class accumulating too many
-responsibilities. These three are real, AST-based Detekt rules (not this collection's own
-heuristic), so they catch it precisely instead of approximately:
+`LargeClass`/`TooManyFunctions` were a real gap: this collection had god-object
+detection scoped to only two file types (`kmp-audit`'s `_detect_viewmodel_size` for
+ViewModels, `_detect_god_composable` for Compose screens) — nothing caught a
+repository, use case, or manager class accumulating too many responsibilities. These
+two are real, AST-based Detekt rules (verified against Detekt's own
+`default-detekt-config.yml`, not assumed), so they catch it precisely instead of
+approximately:
 - `LargeClass` — a class over 400 lines, tuned above `LongMethod`'s 60-line function
   threshold since a class legitimately holding several medium methods is normal; the
   smell is the *class* growing unbounded, not any one method
 - `TooManyFunctions` — 15+ functions in one class is usually multiple responsibilities
   that haven't been split yet
-- `CouplingBetweenObjects` — 12+ distinct types referenced by one class's signatures is a
-  fan-out smell; the class knows about too much of the codebase to test or change safely
 
-`kmp-audit`'s `_detect_god_class` is the non-Detekt backstop for a
-project that hasn't wired this config yet — see that skill's own docs for its (looser,
-heuristic) thresholds.
+**Correction (2026-08-03):** this section previously also listed a `coupling:
+CouplingBetweenObjects` config as a third "real, AST-based Detekt rule" — verified
+directly against Detekt's own `default-detekt-config.yml` on GitHub and it does not
+exist. There is no `coupling:` rule set and no `CouplingBetweenObjects` rule in Detekt
+— that's a PMD (Java) rule concept, not a Detekt one, and was fabricated into this
+skill in error. Removed the config block; there is currently no direct Detekt
+equivalent for cross-class fan-out/coupling. `kmp-audit`'s `_detect_god_class` is the
+only signal for that specific concern — a heuristic, not an AST-based rule; see that
+skill's own docs for its thresholds.
 
 ### NamedArguments — requiring names, without requiring redundant ones
 
@@ -830,7 +830,7 @@ lint:
 ## Common Anti-Patterns
 
 - applying Detekt only to the root project — violations in submodules go undetected; apply via convention plugins
-- leaving `LargeClass`/`TooManyFunctions`/`CouplingBetweenObjects` unconfigured — god-object detection then only exists for ViewModels and Composables (via `kmp-audit`), not for a repository/use-case/manager class accumulating too many responsibilities
+- leaving `LargeClass`/`TooManyFunctions` unconfigured — god-object detection then only exists for ViewModels and Composables (via `kmp-audit`), not for a repository/use-case/manager class accumulating too many responsibilities
 - a wrapper function re-exploding an existing parameter object into individual primitives instead of accepting and forwarding the object — Primitive Obsession compounding Long Parameter List; the fix already exists one call away and got undone
 - setting `maxIssues > 0` — a non-zero threshold lets violations accumulate silently
 - using Ktlint without `.editorconfig` — line length defaults to 80; too short for Kotlin
@@ -1044,6 +1044,7 @@ When asked about code quality, linting, or formatting for KMP, respond in this o
 
 | Date | Change |
 |---|---|
+| 2026-08-03 | **Correction**: removed the `coupling: CouplingBetweenObjects` Detekt config block and its "real, AST-based Detekt rule" claim (the 2026-07-20 entry below) — verified directly against Detekt's own `default-detekt-config.yml` on GitHub and confirmed no `coupling:` rule set and no `CouplingBetweenObjects` rule exist in Detekt at all. It's a PMD (Java) rule concept that was fabricated into this skill in error. A user asking "is our coupling detector concrete enough?" prompted the check. No direct Detekt replacement exists currently; `kmp-audit`'s `_detect_god_class` heuristic remains the only signal for cross-class coupling/fan-out. `LargeClass`/`TooManyFunctions` (the other two rules from that same entry) are real and unaffected. |
 | 2026-08-03 | Added a one-line cross-reference to `kmp-native-authoring`'s new "Header vs implementation comments" section — the WHY-vs-WHAT split this section already documents for Kotlin KDoc/`//` applies identically to C++ header/implementation comments in a JNI or Kotlin/Native bridge, just with different syntax. |
 | 2026-08-02 | Added Detekt's `NamedArguments` rule (complexity ruleset) with `ignoreArgumentsMatchingNames: true` — a user asked whether `Foo(id = id, name = name)` (redundant naming, value already equals param name) is checked; verified the real rule and its exact opt-out flag via a filed Detekt issue (detekt#4591 -> #4613). Also added argument-list wrapping guidance (kotlinlang.org's inline-vs-one-per-line convention, ktlint's `standard:argument-list-wrapping` and its `ktlint_code_style` gating caveat) and a note that Android Studio's IDE formatter and ktlint are separate tools with separate config — setting one does not configure the other. |
 | 2026-08-02 | Added "Compiler Warnings" — a user reported seeing real Kotlin compiler warnings in Android Studio (deprecated calls, unchecked casts) that neither Ktlint nor Detekt catch, since neither invokes the actual compiler. Documented `allWarningsAsErrors` as an opt-in gate (never a day-one default — a big-bang change on a codebase with existing warnings) and cross-referenced `ci-github-actions`'s new CI step that surfaces warnings in the PR check before that gate is ready. |
