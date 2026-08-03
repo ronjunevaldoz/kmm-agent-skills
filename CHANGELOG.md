@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.6.3] — 2026-08-03
+
+### Docs
+
+- docs(readme): fix category-count table drift (65 -> 68 total)
+
+---
+
 ## [v2.6.2] — 2026-08-03
 
 ### Docs
