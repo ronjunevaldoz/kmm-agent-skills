@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.6.2] — 2026-08-03
+
+### Docs
+
+- docs(readme): add author credit line, fix stale 66 -> 68 skill count
+
+---
+
 ## [v2.6.1] — 2026-08-03
 
 ### Fixed
