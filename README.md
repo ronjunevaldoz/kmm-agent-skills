@@ -131,11 +131,11 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 | Category | Count | Covers |
 |---|---|---|
 | Foundation | 7 | Module structure, clean architecture, DI, CI, Android CLI |
-| Infrastructure | 11 | Auth, networking, database, publishing, JNI |
+| Infrastructure | 12 | Auth, networking, database, publishing, JNI |
 | Patterns | 21 | MVI, navigation, offline-first, notifications, IAP, and more |
 | UI System | 12 | Design system, state hoisting, animation, adaptive layout |
-| Testing & Quality | 5 | Unit tests, screenshot tests, lint/static analysis |
-| Meta | 9 | Routing, audit, migration, docs, release |
+| Testing & Quality | 6 | Unit tests, screenshot tests, lint/static analysis, web performance |
+| Meta | 10 | Routing, audit, migration, docs, release, refactor |
 
 <details>
 <summary>Full skill list (click to expand)</summary>
