@@ -1,5 +1,5 @@
 {
-  "version": "2.5.2",
+  "version": "2.6.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -991,6 +991,43 @@
         "single source of truth",
         "state sharing",
         "Compose state management"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kmp-compose-web-performance",
+      "path": "skills/kmp-compose-web-performance",
+      "description": "Live browser performance analysis for a Compose Multiplatform Web (wasmJs) target, using the official Chrome DevTools MCP server (github.com/ChromeDevTools/chrome-devtools-mcp) \u2014 performance traces, Lighthouse audits, network waterfall, and Wasm bundle-size awareness specific to Skiko's canvas-based rendering. Does NOT cover micro-benchmarking Kotlin functions (see kmp-benchmark) \u2014 this is live, real-browser profiling of the running app, not isolated function timing.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-08-03",
+      "keywords": [
+        "web performance",
+        "chrome devtools",
+        "lighthouse",
+        "performance trace",
+        "wasm bundle size",
+        "core web vitals",
+        "network waterfall",
+        "skiko performance",
+        "compose web performance",
+        "first paint",
+        "wasmJs performance"
+      ],
+      "triggers": [
+        "web performance",
+        "chrome devtools",
+        "lighthouse",
+        "lighthouse audit",
+        "performance trace",
+        "wasm bundle size",
+        "core web vitals",
+        "network waterfall",
+        "skiko performance",
+        "compose web performance",
+        "first paint",
+        "time to interactive",
+        "wasmJs performance",
+        "slow web load"
       ],
       "scripts": []
     },

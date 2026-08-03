@@ -2,7 +2,7 @@
 
 Generated 2026-08-03 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
-**67 skills** — 45 clean, 22 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
+**68 skills** — 46 clean, 22 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
@@ -12,7 +12,7 @@ Generated 2026-08-03 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 1066 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 972 | 2026-07-31 | 🟡 1 known debt |
-| [`kmp-expert`](../../skills/kmp-expert/) | 913 | 2026-07-31 | 🟡 1 known debt |
+| [`kmp-expert`](../../skills/kmp-expert/) | 919 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
 | [`kmp-legal-docs`](../../skills/kmp-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
 | [`kmp-roborazzi`](../../skills/kmp-roborazzi/) | 769 | 2026-07-10 | 🟡 1 known debt |
@@ -72,6 +72,7 @@ Generated 2026-08-03 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-ktor-auth-service`](../../skills/kmp-ktor-auth-service/) | 242 | 2026-06-13 | ✅ |
 | [`kmp-refactor`](../../skills/kmp-refactor/) | 232 | 2026-08-02 | ✅ |
 | [`kmp-android-cli`](../../skills/kmp-android-cli/) | 210 | 2026-07-19 | ✅ |
+| [`kmp-compose-web-performance`](../../skills/kmp-compose-web-performance/) | 210 | 2026-08-03 | ✅ |
 | [`kmp-token-saver`](../../skills/kmp-token-saver/) | 186 | 2026-07-13 | ✅ |
 
 **Status legend:** ✅ no issues · 🟡 known, tracked debt (doesn't block a release — see KI-008) · 🔴 blocking (would fail `scan_skill_issues.py`, a new regression, not tracked debt)
