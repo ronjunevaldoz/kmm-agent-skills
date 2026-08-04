@@ -60,22 +60,14 @@ _AGENTSKILLS_MAX_RECOMMENDED_LINES = 500
 # check not in this exact set still blocks — this is a snapshot, not a blanket
 # exemption for the two checks. Update via `python3 scripts/scan_skill_issues.py`
 # only after actually fixing the corresponding skill, never to silence a new one.
+#
+# KI-008 (oversized_skill_md) is fully resolved as of 2026-08-04 — all 22 skills that
+# exceeded the 500-line guideline were split into references/*.md. Only the unrelated
+# description_approaching_limit debt (a different check, description field length, not
+# body length) remains.
 KNOWN_DEBT: set[tuple[str, str]] = {
-    ("kmp-clean-architecture", "oversized_skill_md"),
-    ("kmp-compose-slot-api", "oversized_skill_md"),
-    ("kmp-compose-state-container", "oversized_skill_md"),
-    ("kmp-compose-state-hoisting", "oversized_skill_md"),
     ("kmp-compose-design-system", "description_approaching_limit"),
-    ("kmp-compose-design-system-extended", "description_approaching_limit"),
-    ("kmp-expect-actual", "oversized_skill_md"),
     ("kmp-layout-system", "description_approaching_limit"),
-    ("kmp-layout-system", "oversized_skill_md"),
-    ("kmp-network-layer", "oversized_skill_md"),
-    ("kmp-release", "oversized_skill_md"),
-    ("kmp-repository-pattern", "oversized_skill_md"),
-    ("kmp-shadcn-compose", "oversized_skill_md"),
-    ("kmp-shared-resources", "oversized_skill_md"),
-    ("kmp-sqldelight-setup", "oversized_skill_md"),
 }
 
 # Required quality sections (as headings or inline markers)

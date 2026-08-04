@@ -52,46 +52,35 @@ accepting the residual risk as documented here.
 
 ---
 
+## Resolved
+
 ### KI-008 — 22 of 64 SKILL.md files exceed agentskills.io's recommended 500-line body
 
-**Status:** Open — confirmed via the real `skills-ref` reference validator (cloned from
-`github.com/agentskills/agentskills`, installed locally, run against all 64 skills):
-0 hard-spec violations (`name`/`description` fields all pass `skills-ref validate`), but
-the spec's progressive-disclosure guideline — "Keep your main `SKILL.md` under 500 lines"
-— is violated by 22 skills, several severely:
+**Resolved:** 2026-08-04 — all 22 skills split into `references/*.md`, one commit/skill
+plus a final batch, verified against the full pytest suite and all 6 release gates after
+each. `kmp-compose-design-system-extended` (3101 lines, the worst offender at 6.2x over)
+went to 443; the rest landed at or under 500. No content was removed, only relocated —
+each moved section left a pointer stub (`Full content: references/<file>.md.`) under its
+original heading so the table of contents an agent sees on activation is unchanged.
 
-| Skill | Lines | Over by |
-|---|---|---|
-| `kmp-compose-design-system-extended` | 3101 | 6.2x |
-| `kmp-compose-design-system` | 2674 | 5.3x |
-| `kmp-mvi` | 1626 | 3.3x |
-| `kmp-feature-scaffold` | 1219 | 2.4x |
-| `kmp-expert` | 886 | 1.8x |
-| `kmp-navigation` | 828 | 1.7x |
-| ...16 more, 501–796 lines | | |
+`kmp-expert` kept its two routing tables (`## The 68 Skills and What They Own`, `## Skill
+Invocation Map`) inline since `validate_skill_map.py`/`validate_keyword_routing.py` check
+that file's own text directly and don't read `references/`.
 
-**Why it matters:** the spec's progressive-disclosure model assumes `SKILL.md`'s full
-body loads into context on every activation; detail belongs in `references/*.md`, loaded
-only when the agent needs it. A 3101-line `SKILL.md` defeats that — the entire file loads
-every time the skill activates, competing for context with everything else in the window.
+**Also fixed in the process** — three checks that only ever scanned `SKILL.md` text and
+went blind once content moved to `references/`:
+- `kmp-audit/scripts/audit_skills_repo.py`'s `_check_design_system` content checks
+- `scripts/check_compat_matrix.py` (missed a `roborazzi` version pin moved out of
+  `kmp-feature-scaffold`, caught by `tests/test_release.py`'s gate-order test)
+- `tests/test_docs_governance.py`'s project-owned-scaffold-contract test (content moved
+  out of `kmp-expert`)
 
-**Also found:** `parse_frontmatter` in `scripts/scan_skill_issues.py` mis-parsed any
-multi-line YAML folded (`>`) `description` field as the literal `>` character instead of
-its real content — a real bug, fixed as part of adding the checks below (verified no
-existing test depended on the old behavior).
+All three now concatenate `references/*.md` onto `SKILL.md` text before checking, the
+same pattern in each case.
 
-**Mitigation already in place:** `scripts/scan_skill_issues.py` now checks all of this —
-`name` length/charset/dir-match, `description` length (1024 hard limit, 800 soft warning),
-and the 500-line `SKILL.md` guideline (`oversized_skill_md` check) — as a regression guard
-for any *new* skill. It does not fix the 22 existing oversized skills.
-
-**Fix:** Not attempted yet — splitting 22 skills' detail into `references/*.md` is a
-large, skill-by-skill content restructuring effort (deciding what's core-on-every-load
-vs. reference-on-demand per skill), not a mechanical script. Proposed, not started.
-
----
-
-## Resolved
+`scripts/scan_skill_issues.py`'s `KNOWN_DEBT` baseline had every `oversized_skill_md`
+entry removed; only the unrelated `description_approaching_limit` debt (a different
+check — description field length, not body length) remains for 2 skills.
 
 ### KI-R01 — Agent not detecting magic color/variable violations in design system
 

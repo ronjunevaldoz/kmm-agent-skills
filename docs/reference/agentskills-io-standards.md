@@ -81,17 +81,16 @@ gate, it's part of the same one.
 
 ## Known gaps
 
-**22 of 64 skills exceed the 500-line guideline** — up to 6.2x over
-(`kmp-compose-design-system-extended` at 3101 lines). Tracked as
-[KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body).
-Not a hard-spec failure (`skills-ref validate` still passes all 64) — but it means the
-full body loads into context every time these skills activate, instead of the core
-instructions loading with detail deferred to `references/*.md`. Fixing this is a
-skill-by-skill content restructuring effort, not a mechanical script — each skill needs a
-judgment call on what's core-on-every-load vs. reference-on-demand.
+None currently. The 22-skill 500-line-guideline backlog
+([KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body))
+was resolved 2026-08-04 — every skill's detail that belonged in `references/*.md` was
+moved there, leaving a pointer stub under the original heading. `kmp-expert` is the one
+deliberate exception: its two routing tables stay inline because the validators that
+check them (`validate_skill_map.py`, `validate_keyword_routing.py`) read `SKILL.md`
+directly, not `references/`.
 
 [`docs/reference/skills-report.md`](skills-report.md) is the live, per-skill view of this
-gap — regenerated on every release by `scripts/generate_skills_report.py`, sourced from
+check — regenerated on every release by `scripts/generate_skills_report.py`, sourced from
 the same `scan_skill_issues.py` data as the compliance script above.
 
 ## Best-practice guidance worth knowing (not enforced, but real)

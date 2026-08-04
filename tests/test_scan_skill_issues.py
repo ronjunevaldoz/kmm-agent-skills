@@ -254,23 +254,28 @@ class AgentSkillsSpecTests(unittest.TestCase):
         # KI-008: a skill/check pair already in the KNOWN_DEBT baseline is real,
         # visible debt — it must still show up in the report, but must not fail
         # release.py's exit-code gate the way a brand-new violation would.
+        # KI-008's oversized_skill_md entries were all fixed on 2026-08-04 (real
+        # KNOWN_DEBT no longer has any), so this test monkeypatches a synthetic
+        # entry rather than depending on a currently-debt-carrying real skill name.
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             padding = "\n".join(f"Line {i} of filler content." for i in range(600))
             self._make_skill(
-                root, "kmp-clean-architecture",
-                "---\nname: kmp-clean-architecture\ndescription: Test\n"
+                root, "kmp-known-debt-fixture",
+                "---\nname: kmp-known-debt-fixture\ndescription: Test\n"
                 "last-updated: '2026-07-26'\n---\n\n" + self._minimal_skill_body(padding),
             )
-            report = self._run_scan(root)
-        self.assertTrue(any(i["check"] == "oversized_skill_md" for i in report["issues"]))
-        # missing_testing still legitimately blocks this synthetic fixture (unrelated
-        # to KNOWN_DEBT) — assert the oversized finding specifically isn't counted as
-        # blocking, not that nothing blocks at all.
-        blocking_checks = {
-            i["check"] for i in report["issues"]
-            if (i["skill_dir"], i["check"]) not in scan_skill_issues_scripts.KNOWN_DEBT
-        }
+            known_debt = {("kmp-known-debt-fixture", "oversized_skill_md")}
+            with mock.patch.object(scan_skill_issues_scripts, "KNOWN_DEBT", known_debt):
+                report = self._run_scan(root)
+                self.assertTrue(any(i["check"] == "oversized_skill_md" for i in report["issues"]))
+                # missing_testing still legitimately blocks this synthetic fixture
+                # (unrelated to KNOWN_DEBT) — assert the oversized finding specifically
+                # isn't counted as blocking, not that nothing blocks at all.
+                blocking_checks = {
+                    i["check"] for i in report["issues"]
+                    if (i["skill_dir"], i["check"]) not in scan_skill_issues_scripts.KNOWN_DEBT
+                }
         self.assertNotIn("oversized_skill_md", blocking_checks)
 
     def test_new_violation_still_blocks(self) -> None:
