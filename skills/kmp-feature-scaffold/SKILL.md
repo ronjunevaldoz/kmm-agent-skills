@@ -1214,6 +1214,7 @@ Treat project bootstrap and command entrypoints as orchestration only.
 - `kmp-flavor-environment` — add dev/staging/prod environments after scaffolding
 - `kmp-ci-github-actions` — CI workflow consumes the module structure this skill creates
 - `kmp-android-cli` — build/deploy/emulator management for this scaffold's Android target from the terminal, once the module structure exists
+- `kmp-code-quality` — file/type/function/constant naming conventions for everything scaffolded here
 
 ---
 
@@ -1254,6 +1255,7 @@ Ask for GROUP_ID and feature name before generating files. Map all paths to the 
 
 | Date | Change |
 |---|---|
+| 2026-08-04 | Added `kmp-code-quality` to Related Skills — naming conventions (file/type/function/constant casing) existed but only `kmp-mvi` cross-referenced them, so an agent scaffolding new modules here had no route to them. |
 | 2026-07-31 | Fixed real drift: this skill (and `/kmp-new-project`) referenced a bare `:androidApp` module and, in one place, a nonexistent `:composeApp` — verified against the live `Kotlin/kmp-wizard` `all-targets` template and found the real paths are `:app:androidApp`/`:app:desktopApp`/`:app:webApp`/`:app:shared`, plus a native (non-Gradle) `app/iosApp/` Xcode project. Fixed all 5 occurrences. Added Step 3d: kmp-wizard's default `:core` ships as one bare module (the exact `bare core module [HIGH]` anti-pattern this repo's own audit flags) and `:app:shared` ships with unused demo content — both must be fixed before Step 4, not scaffolded on top of. Added "The `:app:*` Module Boundary" section and a new `_detect_unauthorized_app_submodule` audit check enforcing that only kmp-wizard's own four entry points ever live under `app/`. 3 new regression tests. |
 | 2026-07-19 | Cross-referenced `kmp-android-cli` in Related Skills — build/deploy/emulator management for this scaffold's Android target, surfaced whenever project-foundation work already triggers this skill instead of requiring the literal "android cli" phrase. |
 | 2026-07-05 | Added anti-pattern against pre-creating empty platform source directories (`androidMain`, `iosMain`, `jvmMain`, ...) "just in case" — a real recurring smell reported from field experience. New audit detector `empty platform source set [LOW]` in `kmp-audit` catches directories with zero `.kt` files or files containing only package/import/comments. Declaring the compile target is still required and correct; only the physical directory should be created on-demand, when there's real expect/actual code to write. |

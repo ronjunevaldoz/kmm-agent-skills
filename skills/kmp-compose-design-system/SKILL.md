@@ -2629,6 +2629,7 @@ defaults (`App` prefix, token names as shown in the steps) are used.
 - `kmp-compose-preview-driven-development` — Desktop previews for each component variant using `PreviewParameterProvider`
 - `kmp-shadcn-compose` — the published-library alternative to this skill's owned-scaffold approach; see its own skill for the experimental-API risk tradeoff in full
 - `/kmp-migrate-to-shadcn` — the file-by-file migration path if a project decides to switch fully from this skill's generated components to shadcn-compose
+- `kmp-code-quality` — the `@Composable`-returning-`Unit`-must-be-PascalCase rule and other naming conventions this skill's components already follow by convention
 
 ---
 
@@ -2649,6 +2650,7 @@ Keep snippets small. Use the user's package name and token names when provided.
 
 | Date | Change |
 |---|---|
+| 2026-08-04 | Added `kmp-code-quality` to Related Skills — naming conventions existed but only `kmp-mvi` cross-referenced them. |
 | 2026-08-03 | Fixed `ComponentRegistryRule`: it flagged any `@Composable` whose name matched a DS component suffix (`Text`, `Icon`, `Card`, `Label`, `Progress`, ...) regardless of what the function body did — so a correctly-composed wrapper (`fun ProductCard(title: String) { AppCard { AppText(title) } }`) was flagged identically to an actual raw-primitive reimplementation. Added a body-content check: only flag when the matching DS component is never called anywhere in the body. Also fixed the class doc's claim that 0-parameter functions were exempt — that check was documented but never implemented; now it is. 2 new regression tests. |
 | 2026-07-26 | Named the one-variant-type-per-file convention for `styles/` explicitly and backed it with `kmp-audit`'s new `_detect_combined_style_file` — the same bundling problem as combined component files, one directory over. 1 new anti-pattern. |
 | 2026-07-26 | Named the one-component-per-file convention explicitly and backed it with `kmp-audit`'s new `_detect_combined_component_file` — real gap: every generated template in this skill already follows the convention (verified: 27 separate file headings, zero bundling), but it was never stated as a rule nor mechanically checked for a real project's own component files. 1 new anti-pattern. |

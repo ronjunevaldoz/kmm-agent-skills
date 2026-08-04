@@ -378,6 +378,8 @@ class EngineScopeTest {
   Multiplatform projects; this skill's slot-lambda guidance is the non-Compose analog
 - `kmp-clean-architecture` — layer boundaries still apply inside the
   library even though there's no `:ui`/`:presenter` split in the app sense
+- `kmp-code-quality` — file/type/function naming conventions apply to mimicked
+  primitives too; `Engine` above is a placeholder, not a naming exemption
 
 ---
 
@@ -400,6 +402,7 @@ reference API being mimicked when the user names one — do not speak genericall
 
 | Date | Change |
 |---|---|
+| 2026-08-04 | Added `kmp-code-quality` to Related Skills — naming conventions existed but only `kmp-mvi` cross-referenced them; mimicked primitives need real, project-specific names too, not `Engine`. |
 | 2026-08-04 | Three real gaps closed from a single user thread: (1) no guidance existed for mimicking more than one reference API in the same project (e.g. Compose's `Modifier` + shadcn-compose's component API) — added a subpackage-per-reference folder structure and a **Reference API** column for `MIRROR_MAP.md`. (2) `MIRROR_MAP.md` was placed "at the library root," contradicting this collection's own `docs-hygiene.md` Reference-doc placement rule (`docs/` root, not project root) — moved to `docs/MIRROR_MAP.md` and added as a named example row in `docs-hygiene.md`; also documented the split-when-bloated path (150-line `docs/` limit, split by Reference API into `docs/reference/mirror-map-<reference>.md`). (3) the `Engine` placeholder appeared 36 times with only one easy-to-miss disclaimer sentence stated after several early uses already occurred — replaced with a `kmp-compose-design-system`-style "Hard rule — never violated" blockquote callout placed before the placeholder's first use. |
 | 2026-08-04 | A user asked whether this skill catches mimicking a reference API's low-level primitives (`.width()`/`.height()`) while missing its common-case convenience shorthand (`fillMaxSize()`) — real gap: `MIRROR_MAP.md`'s row shape had no field prompting that question. Added a "Shorthand mirrored?" column with a concrete example table, and a matching anti-pattern. No mechanical detector — would need a hardcoded per-reference-API convenience-method table to check against, out of scope for a generic heuristic. |
 | 2026-07-31 | Initial release. |

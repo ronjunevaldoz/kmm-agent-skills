@@ -604,6 +604,7 @@ If Flow queries are not updating after a write, check that the write and the Flo
 - `kmp-repository-pattern` — SQLDelight drives the cache layer in offline-first repositories
 - `kmp-network-layer` — Ktor + SQLDelight together form the complete data layer
 - `kmp-dependency-injection` — Koin binding for `DatabaseDriverFactory` per platform
+- `kmp-code-quality` — file/type naming conventions for `.sq` files and generated Kotlin
 
 ---
 
@@ -624,5 +625,6 @@ Keep the snippet to one table and one query. Map to the user's actual entity nam
 
 | Date | Change |
 |---|---|
+| 2026-08-04 | Added `kmp-code-quality` to Related Skills — naming conventions existed but only `kmp-mvi` cross-referenced them. |
 | 2026-07-09 | The "one file per table" guideline had no enforcement anywhere. New `kmp-audit` detector `combined sqldelight table file [MEDIUM]` flags any `.sq` file defining more than one `CREATE TABLE`. |
 | 2026-06-06 | Initial release. |
