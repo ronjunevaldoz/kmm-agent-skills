@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.6.6] — 2026-08-04
+
+### Docs
+
+- docs(api-mimicry): add convenience-shorthand-coverage check to MIRROR_MAP.md
+
+---
+
 ## [v2.6.5] — 2026-08-04
 
 ### Fixed

@@ -47,13 +47,13 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-biometric-auth`](../../skills/kmp-biometric-auth/) | 373 | 2026-06-21 | ✅ |
 | [`kmp-push-notifications`](../../skills/kmp-push-notifications/) | 372 | 2026-06-21 | ✅ |
 | [`kmp-xcframework-spm`](../../skills/kmp-xcframework-spm/) | 364 | 2026-06-06 | ✅ |
+| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 361 | 2026-07-31 | ✅ |
 | [`kmp-form-validation`](../../skills/kmp-form-validation/) | 358 | 2026-06-21 | ✅ |
 | [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 358 | 2026-07-11 | ✅ |
 | [`kmp-lessons`](../../skills/kmp-lessons/) | 356 | 2026-07-12 | ✅ |
 | [`kmp-deep-linking`](../../skills/kmp-deep-linking/) | 351 | 2026-06-21 | ✅ |
 | [`kmp-crash-reporting`](../../skills/kmp-crash-reporting/) | 350 | 2026-06-24 | ✅ |
 | [`kmp-skill-harvester`](../../skills/kmp-skill-harvester/) | 337 | 2026-06-26 | ✅ |
-| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 336 | 2026-07-31 | ✅ |
 | [`kmp-feature-flags`](../../skills/kmp-feature-flags/) | 334 | 2026-06-21 | ✅ |
 | [`kmp-compose-accessibility`](../../skills/kmp-compose-accessibility/) | 330 | 2026-06-21 | ✅ |
 | [`kmp-docs-site`](../../skills/kmp-docs-site/) | 326 | 2026-07-11 | ✅ |
