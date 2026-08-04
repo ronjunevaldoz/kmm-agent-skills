@@ -258,8 +258,8 @@ class AgentSkillsSpecTests(unittest.TestCase):
             root = Path(tmp)
             padding = "\n".join(f"Line {i} of filler content." for i in range(600))
             self._make_skill(
-                root, "kmp-mvi",
-                "---\nname: kmp-mvi\ndescription: Test\n"
+                root, "kmp-clean-architecture",
+                "---\nname: kmp-clean-architecture\ndescription: Test\n"
                 "last-updated: '2026-07-26'\n---\n\n" + self._minimal_skill_body(padding),
             )
             report = self._run_scan(root)

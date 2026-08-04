@@ -105,9 +105,14 @@ def check(repo_root: Path) -> list[str]:
             if skill_dir not in skill_versions_cache:
                 skill_md = repo_root / "skills" / skill_dir / "SKILL.md"
                 if skill_md.exists():
-                    skill_versions_cache[skill_dir] = parse_toml_versions(
-                        skill_md.read_text(encoding="utf-8")
-                    )
+                    skill_text = skill_md.read_text(encoding="utf-8")
+                    references_dir = repo_root / "skills" / skill_dir / "references"
+                    if references_dir.is_dir():
+                        skill_text += "\n" + "\n".join(
+                            ref.read_text(encoding="utf-8")
+                            for ref in sorted(references_dir.glob("*.md"))
+                        )
+                    skill_versions_cache[skill_dir] = parse_toml_versions(skill_text)
                 else:
                     skill_versions_cache[skill_dir] = {}
 

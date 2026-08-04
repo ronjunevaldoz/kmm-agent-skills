@@ -9,6 +9,20 @@ from unittest import mock
 
 from _helpers import REPO_ROOT, load_module
 
+
+def read_skill_with_references(skill_dir: Path) -> str:
+    """SKILL.md text plus every references/*.md file concatenated — mirrors how
+    scripts/check_compat_matrix.py and audit_skills_repo.py already read a skill
+    after content was split out for the agentskills.io 500-line guideline (KI-008)."""
+    text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+    references_dir = skill_dir / "references"
+    if references_dir.is_dir():
+        text += "\n" + "\n".join(
+            ref.read_text(encoding="utf-8") for ref in sorted(references_dir.glob("*.md"))
+        )
+    return text
+
+
 class DocsScopeBoundaryTests(unittest.TestCase):
     def test_repo_and_consumer_docs_boundary_is_explicit(self) -> None:
         normalize = lambda text: " ".join(text.lower().split())
@@ -53,7 +67,7 @@ class DocsScopeBoundaryTests(unittest.TestCase):
     def test_claude_scaffold_contract_is_documented_as_project_owned_plus_runtime(self) -> None:
         normalize = lambda text: " ".join(text.lower().replace("`", "").split())
 
-        expert = normalize((REPO_ROOT / "skills" / "kmp-expert" / "SKILL.md").read_text(encoding="utf-8"))
+        expert = normalize(read_skill_with_references(REPO_ROOT / "skills" / "kmp-expert"))
         setup_agents = normalize((REPO_ROOT / "commands" / "kmp-setup-agents.md").read_text(encoding="utf-8"))
         new_project = normalize((REPO_ROOT / "commands" / "kmp-new-project.md").read_text(encoding="utf-8"))
 
