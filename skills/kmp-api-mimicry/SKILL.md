@@ -84,8 +84,12 @@ Default to this approach:
 3. **Never reuse the reference library's package namespace or literal branding.** Own
    group id, own package, own annotation name (`@EngineUiDsl`, not `@Composable`).
 4. **Write a mirror map** (`MIRROR_MAP.md`) documenting each mimicked primitive, its
-   inspiration, and the deliberate deviation — before writing the second mimicked
-   primitive, not after the tenth.
+   inspiration, the deliberate deviation, and whether the reference API's own
+   common-case convenience shorthand for that primitive was mirrored too (e.g.
+   Compose's `Modifier.fillMaxSize()` is sugar over `.width(Max).height(Max)` —
+   implementing only the low-level combinator and skipping the shorthand real
+   consumers actually reach for is an incomplete mimicry, not a smaller one) —
+   before writing the second mimicked primitive, not after the tenth.
 
 Why:
 - most of a reference API's *ergonomics* (chainable config, slot lambdas, scoped
@@ -225,7 +229,20 @@ rebuild the affected subtree.
   compiler-compatible with X, no interop with real X code" — this is the single
   highest-value sentence for avoiding wrong-expectation bug reports
 - Keep a `MIRROR_MAP.md` at the library root: one row per mimicked primitive, its
-  reference inspiration, and the deliberate deviation
+  reference inspiration, the deliberate deviation, and a **Shorthand mirrored?**
+  column — check whether the reference API also exposes a common-case convenience
+  method built from this primitive, and whether that shorthand was mirrored too:
+
+  ```markdown
+  | Primitive | Reference inspiration | Deliberate deviation | Shorthand mirrored? |
+  |---|---|---|---|
+  | `.width(Dp)` / `.height(Dp)` | `Modifier.width`/`.height` | Same semantics, custom renderer | `fillMaxSize()` — YES, added as `.width(Dimension.Max).height(Dimension.Max)` sugar |
+  | `.padding(Dp)` | `Modifier.padding` | Single-value only, no per-side overload yet | N/A — no reference shorthand exists for this one |
+  ```
+
+  A primitive with no corresponding reference shorthand is fine to mark `N/A` — the
+  point is to have asked the question for every row, not to force-add shorthands
+  that don't exist in the reference API either.
 - This is almost always a **library** project (see
   `kmp-library-publishing`), not an app — scaffold accordingly
 
@@ -283,6 +300,13 @@ class EngineScopeTest {
 - **Reimplementing Compose's full snapshot-state system "just in case"** — a
   multi-month undertaking almost never justified by the actual requirement; an explicit
   `requestRedraw()`/rebuild model covers most custom-renderer needs.
+- **Mirroring only the reference API's low-level primitives, skipping its common-case
+  shorthand** — e.g. implementing `.width(Dp)`/`.height(Dp)` but never `fillMaxSize()`.
+  Technically the same expressive power, but every consumer has to hand-write the
+  combinator every call site instead of reaching for the idiom real usage of the
+  reference API actually teaches. Caught by the `MIRROR_MAP.md`'s "Shorthand
+  mirrored?" column — ask the question for every primitive, not just the ones that
+  felt important at the time.
 - **Using the reference library's real annotation on non-reference functions** —
   applying `@Composable` to a function your own tooling processes is undefined behavior
   for any real Compose tooling that later touches the same codebase.
@@ -333,4 +357,5 @@ reference API being mimicked when the user names one — do not speak genericall
 
 | Date | Change |
 |---|---|
+| 2026-08-04 | A user asked whether this skill catches mimicking a reference API's low-level primitives (`.width()`/`.height()`) while missing its common-case convenience shorthand (`fillMaxSize()`) — real gap: `MIRROR_MAP.md`'s row shape had no field prompting that question. Added a "Shorthand mirrored?" column with a concrete example table, and a matching anti-pattern. No mechanical detector — would need a hardcoded per-reference-API convenience-method table to check against, out of scope for a generic heuristic. |
 | 2026-07-31 | Initial release. |
