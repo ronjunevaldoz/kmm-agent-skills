@@ -69,6 +69,16 @@ understanding of the reference API; verify against its real current source or do
 
 ---
 
+> **Hard rule — never violated:** `Engine` (as in `EngineModifier`, `EngineScope`,
+> `EngineUiDsl`) is a **placeholder in this SKILL.md's worked example**, exactly like
+> `GROUP_ID`. It must never be written to disk literally for a real project — pick your
+> own project's actual prefix before writing the first mimicked primitive. Do not fuse
+> your backend's brand name with the reference API's own type name either (e.g. don't
+> name it `VulkanModifier` just because the backend is Vulkan and the mimicked type is
+> Compose's `Modifier`) unless that fusion is genuinely your project's established
+> convention — it usually isn't, and reads as if it were copied from a real, verified
+> source when it's just this example's stand-in.
+
 ## Recommendation First
 
 Default to this approach:
@@ -83,13 +93,23 @@ Default to this approach:
    compiler plugin.
 3. **Never reuse the reference library's package namespace or literal branding.** Own
    group id, own package, own annotation name (`@EngineUiDsl`, not `@Composable`).
-4. **Write a mirror map** (`MIRROR_MAP.md`) documenting each mimicked primitive, its
-   inspiration, the deliberate deviation, and whether the reference API's own
-   common-case convenience shorthand for that primitive was mirrored too (e.g.
-   Compose's `Modifier.fillMaxSize()` is sugar over `.width(Max).height(Max)` —
-   implementing only the low-level combinator and skipping the shorthand real
-   consumers actually reach for is an incomplete mimicry, not a smaller one) —
-   before writing the second mimicked primitive, not after the tenth.
+4. **Write a mirror map** at `docs/MIRROR_MAP.md` (not project root — this is a
+   Reference-kind doc per `kmp-project-docs-maintainer`'s `docs-hygiene.md`, same
+   placement rule as any other permanent, update-in-place registry) documenting each
+   mimicked primitive, its inspiration, the deliberate deviation, and whether the
+   reference API's own common-case convenience shorthand for that primitive was
+   mirrored too (e.g. Compose's `Modifier.fillMaxSize()` is sugar over
+   `.width(Max).height(Max)` — implementing only the low-level combinator and skipping
+   the shorthand real consumers actually reach for is an incomplete mimicry, not a
+   smaller one) — before writing the second mimicked primitive, not after the tenth.
+   Mimicking more than one reference API (Compose's `Modifier` *and* a themed
+   component API like shadcn-compose) in the same project? One file, add a
+   **Reference API** column instead of splitting into one map per reference — keeps a
+   single source of truth. If it grows past `docs-hygiene.md`'s 150-line limit for any
+   `docs/` file (mechanically checked by `audit_skills_repo.py
+   --docs-hygiene-only`), split by Reference API into
+   `docs/reference/mirror-map-<reference>.md` files, and keep `docs/MIRROR_MAP.md`
+   itself as a short index pointing to each.
 
 Why:
 - most of a reference API's *ergonomics* (chainable config, slot lambdas, scoped
@@ -162,12 +182,8 @@ JNI/cinterop — see `kmp-jni-pro` and
 `kmp-expect-actual`) and needs a Compose-shaped declarative UI layer on
 top of it.
 
-Naming below uses a generic `Engine` placeholder — pick your own project's actual
-prefix instead. Do not literally fuse your backend's brand name with the reference
-API's own type name (e.g. do not name it `VulkanModifier` just because the backend is
-Vulkan and the mimicked type is Compose's `Modifier`) unless that fusion is genuinely
-your project's established naming convention — it usually isn't, and reads as if it
-were copied from a real, verified source when it's just this example's placeholder.
+Naming below uses the `Engine` placeholder — see the hard rule above before writing
+any of this to disk for a real project.
 
 ```kotlin
 // :library/src/commonMain/kotlin/.../EngineModifier.kt
@@ -213,6 +229,27 @@ without claiming or requiring real Compose compiler behavior. State changes are 
 caller's responsibility — call `setContent` again (or a narrower `invalidate()`) to
 rebuild the affected subtree.
 
+### Mimicking more than one reference API in the same project
+
+Subpackage per reference API, not one flat package — two different reference APIs can
+reuse the same primitive name for a different concept (both might have something
+called `Theme` or `Scope`), and a flat package forces an awkward rename that obscures
+which reference actually inspired a given type:
+
+```
+:library/src/commonMain/kotlin/.../
+├── modifier/              # mirrors Jetpack Compose's Modifier chain
+│   ├── EngineModifier.kt
+│   └── EngineScope.kt
+└── components/            # mirrors shadcn-compose's themed component API
+    ├── EngineButton.kt
+    └── EngineTheme.kt
+```
+
+The marker annotation (`@EngineUiDsl`) stays project-wide, one annotation, not one per
+reference — it signals "not real compiler-plugin-backed tooling," which is true
+regardless of which reference inspired a given primitive.
+
 ---
 
 ## Guidelines
@@ -228,17 +265,23 @@ rebuild the affected subtree.
 - State plainly in the library's README that it is "API-shape-inspired by X, not
   compiler-compatible with X, no interop with real X code" — this is the single
   highest-value sentence for avoiding wrong-expectation bug reports
-- Keep a `MIRROR_MAP.md` at the library root: one row per mimicked primitive, its
-  reference inspiration, the deliberate deviation, and a **Shorthand mirrored?**
-  column — check whether the reference API also exposes a common-case convenience
-  method built from this primitive, and whether that shorthand was mirrored too:
+- Keep `docs/MIRROR_MAP.md` (not project root): one row per mimicked primitive, which
+  **Reference API** it mirrors (only needed once you're mimicking more than one, e.g.
+  Compose's `Modifier` *and* a themed component API), its reference inspiration, the
+  deliberate deviation, and a **Shorthand mirrored?** column — check whether the
+  reference API also exposes a common-case convenience method built from this
+  primitive, and whether that shorthand was mirrored too:
 
   ```markdown
-  | Primitive | Reference inspiration | Deliberate deviation | Shorthand mirrored? |
-  |---|---|---|---|
-  | `.width(Dp)` / `.height(Dp)` | `Modifier.width`/`.height` | Same semantics, custom renderer | `fillMaxSize()` — YES, added as `.width(Dimension.Max).height(Dimension.Max)` sugar |
-  | `.padding(Dp)` | `Modifier.padding` | Single-value only, no per-side overload yet | N/A — no reference shorthand exists for this one |
+  | Primitive | Reference API | Reference inspiration | Deliberate deviation | Shorthand mirrored? |
+  |---|---|---|---|---|
+  | `.width(Dp)` / `.height(Dp)` | Jetpack Compose | `Modifier.width`/`.height` | Same semantics, custom renderer | `fillMaxSize()` — YES, added as `.width(Dimension.Max).height(Dimension.Max)` sugar |
+  | `.padding(Dp)` | Jetpack Compose | `Modifier.padding` | Single-value only, no per-side overload yet | N/A — no reference shorthand exists for this one |
+  | `EngineButton(variant)` | shadcn-compose | `ShadcnButton`'s variant system | Fewer variants, no theming tokens yet | N/A |
   ```
+
+  Drop the **Reference API** column entirely while only one reference is mimicked —
+  add it the moment a second one starts.
 
   A primitive with no corresponding reference shorthand is fine to mark `N/A` — the
   point is to have asked the question for every row, not to force-add shorthands
@@ -357,5 +400,6 @@ reference API being mimicked when the user names one — do not speak genericall
 
 | Date | Change |
 |---|---|
+| 2026-08-04 | Three real gaps closed from a single user thread: (1) no guidance existed for mimicking more than one reference API in the same project (e.g. Compose's `Modifier` + shadcn-compose's component API) — added a subpackage-per-reference folder structure and a **Reference API** column for `MIRROR_MAP.md`. (2) `MIRROR_MAP.md` was placed "at the library root," contradicting this collection's own `docs-hygiene.md` Reference-doc placement rule (`docs/` root, not project root) — moved to `docs/MIRROR_MAP.md` and added as a named example row in `docs-hygiene.md`; also documented the split-when-bloated path (150-line `docs/` limit, split by Reference API into `docs/reference/mirror-map-<reference>.md`). (3) the `Engine` placeholder appeared 36 times with only one easy-to-miss disclaimer sentence stated after several early uses already occurred — replaced with a `kmp-compose-design-system`-style "Hard rule — never violated" blockquote callout placed before the placeholder's first use. |
 | 2026-08-04 | A user asked whether this skill catches mimicking a reference API's low-level primitives (`.width()`/`.height()`) while missing its common-case convenience shorthand (`fillMaxSize()`) — real gap: `MIRROR_MAP.md`'s row shape had no field prompting that question. Added a "Shorthand mirrored?" column with a concrete example table, and a matching anti-pattern. No mechanical detector — would need a hardcoded per-reference-API convenience-method table to check against, out of scope for a generic heuristic. |
 | 2026-07-31 | Initial release. |

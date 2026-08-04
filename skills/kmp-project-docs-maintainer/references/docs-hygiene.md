@@ -49,6 +49,7 @@ Keep these lanes short-lived and promote stable guidance out of them into
 | `architecture.md` | Reference (root) | Keep — primary, README-linked |
 | `deployment.md` | Reference (root) | Keep — primary, README-linked |
 | `stable-feature-rules.md` | Reference (root) | Keep — stable registry, updated in place |
+| `MIRROR_MAP.md` (from `kmp-api-mimicry`) | Reference (root) | Keep at `docs/MIRROR_MAP.md`, not project root — a permanent, update-in-place registry of mimicked API primitives; split by Reference API into `docs/reference/mirror-map-<reference>.md` once past the 150-line limit below |
 | `auth-flow-internals.md` | Reference (reference/) | Move to `docs/reference/` — subsystem deep-dive |
 | `reference/*.md` | Reference (reference/) | Keep in `docs/reference/` |
 | `known-blockers.md` | Task | Rename to `YYYY-MM-DD-known-blockers.md`, move to `docs/tasks/` or `docs/bugs/`; archive when resolved |
