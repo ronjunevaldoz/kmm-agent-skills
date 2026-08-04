@@ -2656,6 +2656,78 @@ class LongStackedCommentBlockTests(unittest.TestCase):
             self.assertTrue(any("long stacked comment block" in f for f in findings))
 
 
+class JustificationCommentAboveSingleStatementTests(unittest.TestCase):
+    """A 3+ line comment block justifying one Gradle dependency line — even a real,
+    WHY-shaped reason doesn't need a paragraph to add one line. Distinct from the
+    long-stacked-comment-block check above: this is short enough (often 3-4 lines) to
+    duck under that check's 5-line threshold, and WHY-shaped enough to duck its
+    WHY-signal exemption too. Confirmed real: a user reported an agent-written comment
+    of this exact shape and asked for a mechanical backstop.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_justification_comment_above_single_dependency_line(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/build.gradle.kts",
+                "// Dispatchers.setMain(Dispatchers.Default) is needed because SuggestedCueViewModel uses\n"
+                "// androidx.lifecycle.viewModelScope, which resolves Dispatchers.Main via ServiceLoader --\n"
+                "// absent on plain JVM outside Android/Compose. kotlinx-coroutines-test's setMain accepts any\n"
+                "// real CoroutineDispatcher, not just TestDispatchers, so this isn't test-only despite the name.\n"
+                "    implementation(libs.kotlinx.coroutinesTest)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(
+                any("justification comment above single statement" in f for f in findings)
+            )
+
+    def test_ignores_short_comment_above_dependency_line(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/build.gradle.kts",
+                "// pinned for CVE-2026-1234\n"
+                "    implementation(libs.foo)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(
+                any("justification comment above single statement" in f for f in findings)
+            )
+
+    def test_ignores_comment_block_above_a_block_opener(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/build.gradle.kts",
+                "// line one\n// line two\n// line three\n"
+                "dependencies {\n"
+                "    implementation(libs.foo)\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(
+                any("justification comment above single statement" in f for f in findings)
+            )
+
+    def test_ignores_kotlin_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "core/src/commonMain/kotlin/Foo.kt",
+                "// line one\n// line two\n// line three\n"
+                "fun implementation() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(
+                any("justification comment above single statement" in f for f in findings)
+            )
+
+
 class DestructiveReadAccessorTests(unittest.TestCase):
     """A getter/consume function that clears the field it just read breaks the moment a
     second caller reads it in the same tick/request — the real bug found (and fixed) in

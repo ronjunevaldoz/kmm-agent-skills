@@ -23,6 +23,26 @@ Ask in this order — stop at the first "yes":
 4. Otherwise — don't write it. A comment that answers neither "what's the contract"
    nor "why is this not the obvious way" isn't pulling its weight.
 
+**A single-line addition (one dependency declaration, one config value, one import)
+almost never earns a comment**, even when the reasoning behind it is real and non-obvious.
+Put that reasoning in the commit message — it's discoverable via `git blame` exactly when
+someone needs it (touching that line), and doesn't sit in the file forever for every
+reader who doesn't. The one exception: a gotcha a future maintainer will independently
+re-trip on regardless of how they got there (a platform quirk, a version pin that looks
+removable but isn't) — that earns a single terse line, not a paragraph.
+
+**Watch for a WHY-shaped comment that's actually a leftover justification trail.** A
+genuine WHY comment states a fact a future reader needs and stops — it doesn't defend the
+choice. Tell: does it argue for the decision ("despite the name", "isn't just X", "to be
+clear") the way you'd explain it to a reviewer mid-PR, rather than simply stating the
+constraint to someone who already trusts the line works? That defensive tone is the
+signal it's process narration that survived into the file, not documentation the codebase
+needs. Cut it to the one sentence a maintainer actually needs, or drop it into the commit
+message instead. `kmp-audit`'s `_detect_justification_comment_above_single_statement`
+catches the mechanical shape of this (a 3+ line comment directly above one dependency
+line in a Gradle build file) — but the tone test above is what to apply by hand, since it
+generalizes past Gradle files.
+
 Two comment types, two jobs — never mix them:
 
 | | Single-line `//` | Multi-line `/** ... */` (KDoc) |
@@ -178,6 +198,38 @@ comments:
 `UndocumentedPublic*` requires KDoc on every public declaration; `DocumentationOverPrivate*`
 forbids it on private ones; `OutdatedDocumentation` catches KDoc whose `@param`/signature
 no longer matches the declaration after a refactor.
+
+### TODO / FIXME — deferred work, not a substitute for tracking it
+
+Verified against Google's Java Style Guide §4.8.6.2 (the real, commonly-cited source for
+this format, still applicable to Kotlin — kotlinlang.org's own conventions don't cover
+it) and IntelliJ/Android Studio's built-in TODO tool window, which recognizes `TODO` and
+`FIXME` case-insensitively by default:
+
+```kotlin
+// TODO: github.com/org/repo/issues/456 - remove once the upstream fix ships
+// FIXME: github.com/org/repo/issues/789 - retry loop can spin forever on a 5xx
+```
+
+- Always a link to a tracked issue, never a bare name — Google's guide explicitly warns
+  against using an individual's name as the only context; people leave, the comment
+  outlives them.
+- `TODO` = planned follow-up work; `FIXME` = known-broken code shipped anyway. Informal
+  distinction — tooling treats both identically, so don't rely on the word alone to
+  signal severity, say it in the note.
+- **This is not where "known issues" documentation belongs.** A `TODO`/`FIXME` is a
+  pointer to a tracked issue, not the issue's write-up — if there's no real issue behind
+  it yet, that's the actual gap (file one, or use `kmp-project-docs-maintainer`'s
+  `docs/bugs/` lane for an actively-worked one), not a long comment standing in for
+  tracking.
+- **Real gotcha, not a nice-to-have detail:** Detekt's `ForbiddenComment` rule (Style
+  ruleset) is active by default and forbids the literal strings `TODO:`/`FIXME:`/
+  `STOPSHIP:` outright — see `kotlin-library-pattern-choices.md`'s own section on this.
+  It does not distinguish a linked, well-formed `TODO` from a bare one; both fail. A
+  project that wants the format above to actually compile needs an `allowedPatterns`
+  regex on that rule exempting lines that match it (e.g. a line containing an issue-
+  tracker URL) — otherwise write the reasoning some other way (commit message, or the
+  `docs/bugs/` lane) since the marker itself won't pass CI.
 
 ### License headers — situational, not a default
 

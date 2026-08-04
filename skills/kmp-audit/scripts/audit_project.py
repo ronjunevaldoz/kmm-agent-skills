@@ -2804,6 +2804,63 @@ def _detect_long_stacked_comment_block(root: Path) -> list[str]:
     return findings
 
 
+# A justification comment above a single Gradle dependency/config line is a distinct
+# smell from the long-stacked-block check above: it's often short enough (3-4 lines) to
+# duck under _LONG_COMMENT_BLOCK_MIN_LINES, and it's usually WHY-shaped (real reasoning),
+# so the WHY-signal exemption above would wave it through too. The tell isn't length or
+# tone, it's proportion: 3+ lines justifying one dependency declaration. Confirmed real —
+# a user reported an agent-written comment of this exact shape and asked for a mechanical
+# backstop, not just the "put it in the commit message" rule in kmp-code-quality.
+_SINGLE_LINE_DEPENDENCY_STATEMENT_RE = re.compile(
+    r"^\s*(?:implementation|api|compileOnly|runtimeOnly|ksp|kapt|"
+    r"testImplementation|androidTestImplementation|debugImplementation)\([^()]*\)\s*$"
+)
+_JUSTIFICATION_COMMENT_MIN_LINES = 3
+
+
+def _detect_justification_comment_above_single_statement(root: Path) -> list[str]:
+    """Flag a 3+ line // comment block directly above one single-line Gradle dependency
+    declaration — even a real, non-obvious reason doesn't need a paragraph to justify
+    adding one line; that reasoning belongs in the commit message, discoverable via
+    git blame exactly when someone needs it, not sitting in the file for every reader.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.gradle.kts"):
+        if _is_excluded(path, root):
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+
+        block_start: int | None = None
+        block_lines: list[str] = []
+        for i, line in enumerate(lines):
+            if _COMMENT_LINE_RE.match(line):
+                if block_start is None:
+                    block_start = i
+                block_lines.append(line)
+                continue
+            if (
+                block_start is not None
+                and len(block_lines) >= _JUSTIFICATION_COMMENT_MIN_LINES
+                and _SINGLE_LINE_DEPENDENCY_STATEMENT_RE.match(line)
+            ):
+                findings.append(
+                    f"justification comment above single statement [LOW]: "
+                    f"{path.relative_to(root)}:{block_start + 1} "
+                    f"— {len(block_lines)} consecutive // lines justifying one dependency "
+                    f"line; per kmp-code-quality's Comment & KDoc Conventions, put the "
+                    f"reasoning in the commit message instead, unless it's a gotcha a "
+                    f"future maintainer will independently re-trip on\n"
+                    f"    {i + 1} | {line.strip()}"
+                )
+            block_start = None
+            block_lines = []
+
+    return findings
+
+
 # ── Destructive-read accessor (single-writer snapshot anti-pattern) ────────────
 # kmp-code-quality's Side-Effect-Free Accessors rule: a getter/consume
 # function must never mutate shared state as a side effect of being read — a second
@@ -4551,6 +4608,7 @@ def audit_project(root: Path) -> list[str]:
     # ── WHAT-comment inside a loop or conditional ────────────────────────────────
     findings.extend(_detect_what_comment_in_control_flow(root))
     findings.extend(_detect_long_stacked_comment_block(root))
+    findings.extend(_detect_justification_comment_above_single_statement(root))
 
     # ── Destructive-read accessor (single-writer snapshot anti-pattern) ─────────
     findings.extend(_detect_destructive_read_accessor(root))
