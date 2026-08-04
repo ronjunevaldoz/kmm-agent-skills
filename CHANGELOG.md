@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.6.9] — 2026-08-04
+
+### Docs
+
+- docs(docs-maintainer): add Delete vs Archive rule to docs-hygiene.md
+
+---
+
 ## [v2.6.8] — 2026-08-04
 
 ### Docs
