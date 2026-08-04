@@ -67,6 +67,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
 SKILLS_JSON = REPO_ROOT / "skills.json"
+PLUGIN_JSON = REPO_ROOT / ".claude-plugin" / "plugin.json"
 PLAN_MD = REPO_ROOT / "PLAN.md"
 CHANGELOG_MD = REPO_ROOT / "CHANGELOG.md"
 SKILLS_DIR = REPO_ROOT / "skills"
@@ -282,6 +283,19 @@ def update_skills_json(new_version: str) -> None:
     manifest = {"version": new_version, "skills": skills}
     SKILLS_JSON.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     ok(f"skills.json updated — version {new_version}, {len(skills)} skills")
+
+
+def update_plugin_json(new_version: str) -> None:
+    """Keep .claude-plugin/plugin.json's version in lockstep with skills.json's —
+    otherwise the Claude Code plugin marketplace entry silently drifts behind every
+    release, the exact staleness this script already exists to prevent for skills.json.
+    """
+    if not PLUGIN_JSON.exists():
+        return
+    manifest = json.loads(PLUGIN_JSON.read_text(encoding="utf-8"))
+    manifest["version"] = new_version
+    PLUGIN_JSON.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    ok(f".claude-plugin/plugin.json updated — version {new_version}")
 
 
 def update_skills_report() -> None:
@@ -503,12 +517,15 @@ def git_commit_and_tag(
     msg = f"Release {tag}\n\n{skill_count} skills shipped. See CHANGELOG.md for details."
 
     if dry_run:
-        info(f"[dry-run] would stage: skills.json PLAN.md CHANGELOG.md")
+        info(f"[dry-run] would stage: skills.json .claude-plugin/plugin.json PLAN.md CHANGELOG.md")
         info(f"[dry-run] would commit: {msg.splitlines()[0]}")
         info(f"[dry-run] would tag:    {tag}")
         return
 
-    run(["git", "add", "skills.json", "PLAN.md", "CHANGELOG.md", "docs/reference/skills-report.md"])
+    run([
+        "git", "add", "skills.json", ".claude-plugin/plugin.json",
+        "PLAN.md", "CHANGELOG.md", "docs/reference/skills-report.md",
+    ])
     run(["git", "commit", "-m", msg])
     run(["git", "tag", "-a", tag, "-m", f"Release {tag} — {skill_count} skills"])
     ok(f"Committed and tagged {tag}")
@@ -590,6 +607,7 @@ def main() -> int:
 
     # skills.json always stores the base semver (no -rc suffix)
     update_skills_json(new_base_version)
+    update_plugin_json(new_base_version)
     skill_count = len(json.loads(SKILLS_JSON.read_text())["skills"])
     update_plan_md(skill_count)
     changelog_section = update_changelog(full_version, prev_tag, dry_run=False)

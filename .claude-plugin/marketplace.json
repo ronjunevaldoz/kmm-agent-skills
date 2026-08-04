@@ -1,0 +1,15 @@
+{
+  "name": "kmp-agent-skills",
+  "description": "Kotlin Multiplatform agent skills, commands, and subagents for Claude Code.",
+  "owner": {
+    "name": "Ron Valdoz",
+    "url": "https://github.com/ronjunevaldoz"
+  },
+  "plugins": [
+    {
+      "name": "kmp-agent-skills",
+      "source": ".",
+      "description": "69 Kotlin Multiplatform agent skills, 29 slash commands, and 10 subagents covering the full KMP stack: architecture, MVI, networking, persistence, design systems, testing, and release."
+    }
+  ]
+}
