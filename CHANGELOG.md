@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.6.8] — 2026-08-04
+
+### Docs
+
+- docs(api-mimicry): fix Engine placeholder, MIRROR_MAP.md placement, multi-reference mimicry
+
+---
+
 ## [v2.6.7] — 2026-08-04
 
 ### Fixed

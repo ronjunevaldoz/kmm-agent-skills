@@ -40,6 +40,7 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kmp-datastore`](../../skills/kmp-datastore/) | 413 | 2026-06-18 | ✅ |
 | [`kmp-mongodb-database`](../../skills/kmp-mongodb-database/) | 409 | 2026-06-21 | ✅ |
+| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 405 | 2026-07-31 | ✅ |
 | [`kmp-compose-animation`](../../skills/kmp-compose-animation/) | 389 | 2026-06-21 | ✅ |
 | [`kmp-migration`](../../skills/kmp-migration/) | 386 | 2026-07-19 | ✅ |
 | [`kmp-permissions`](../../skills/kmp-permissions/) | 386 | 2026-06-21 | ✅ |
@@ -47,7 +48,6 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-biometric-auth`](../../skills/kmp-biometric-auth/) | 373 | 2026-06-21 | ✅ |
 | [`kmp-push-notifications`](../../skills/kmp-push-notifications/) | 372 | 2026-06-21 | ✅ |
 | [`kmp-xcframework-spm`](../../skills/kmp-xcframework-spm/) | 364 | 2026-06-06 | ✅ |
-| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 361 | 2026-07-31 | ✅ |
 | [`kmp-form-validation`](../../skills/kmp-form-validation/) | 358 | 2026-06-21 | ✅ |
 | [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 358 | 2026-07-11 | ✅ |
 | [`kmp-lessons`](../../skills/kmp-lessons/) | 356 | 2026-07-12 | ✅ |
