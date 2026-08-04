@@ -103,6 +103,26 @@ working surface and use `docs/tasks.md` as the index that links into them.
 
 ---
 
+## Delete vs Archive
+
+Git history already preserves every version of every file — archiving isn't what makes a
+file recoverable, `git log`/`git show` does that regardless. Archiving is for one specific
+case: a human should be able to stumble on the old content again *without* going to git
+history. Ask which case applies:
+
+| Case | Action | Why |
+|---|---|---|
+| Task-kind file, work is done (bug fixed, milestone shipped, plan completed) | Archive (`docs/tasks/archive/`, `docs/lessons/archive/`) | Future readers browsing `docs/` may want the resolution history without digging through git log |
+| Reference doc now fully superseded, zero unique information left | Delete | Nothing left to browse to — keeping it around just recreates the clutter this checklist exists to prevent; git history covers "what did this used to say" |
+| Non-doc file after it's been moved to its real home (`tests/fixtures/`, `api/`, project root) | Delete the `docs/` copy | The file lives on at its new path; leaving a stale copy in `docs/` is drift, not history |
+| File superseded by a rename (old path, content unchanged) | Delete old path | `git mv`/rename already carries the history forward; a leftover old-named file is a duplicate, not an archive |
+
+If in doubt whether a reference doc still has unique information, don't guess — grep for
+inbound links (see Clean-up Sequence step 2) and check whether anything still points at it
+before deleting.
+
+---
+
 ## Naming Convention
 
 All `docs/` files use **kebab-case**. Snake_case is a violation.
