@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.9.0] — 2026-08-04
+
+### Added
+
+- feat(plugin): wire this repo as an installable Claude Code plugin
+
+---
+
 ## [v2.8.0] — 2026-08-04
 
 ### Added
