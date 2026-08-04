@@ -2976,7 +2976,7 @@ def _detect_context_parameter_opportunity(root: Path) -> list[str]:
 # commonMain APIs should be called or composed, not extended. An abstract class with
 # only abstract members (no concrete implementation at all) forces every consumer into
 # an inheritance chain the commonMain code itself dictates — the same shape Detekt's real
-# UnnecessaryAbstractClass rule already flags ("should be an interface instead"), scoped
+# AbstractClassCanBeInterface rule already flags ("should be an interface instead"), scoped
 # here specifically to commonMain since that's where KMP's sharing advantage is lost by
 # reaching for inheritance instead of interface + injection. Not scoped to any domain
 # name (games, network clients, plugin systems, ...) — the smell is the shape, not the
@@ -3035,7 +3035,7 @@ def _detect_hardcoded_base_url(root: Path) -> list[str]:
 
 def _detect_extensible_abstract_class_in_common(root: Path) -> list[str]:
     """Flag a public abstract class in commonMain with only abstract members — the
-    exact shape Detekt's real UnnecessaryAbstractClass rule flags as "should be an
+    exact shape Detekt's real AbstractClassCanBeInterface rule flags as "should be an
     interface instead," scoped here to commonMain specifically.
     """
     findings: list[str] = []

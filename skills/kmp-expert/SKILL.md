@@ -625,7 +625,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | User asks about | Invoke skill |
 |---|---|
 | "layer contract", "clean architecture", "which layer", ":model vs :api", "internal visibility" | `kmp-clean-architecture` |
-| "composition over inheritance", "abstract class in commonMain", "extensible base class", "agent over-abstracting", "requires consumer to extend", "UnnecessaryAbstractClass" | `kmp-clean-architecture` |
+| "composition over inheritance", "abstract class in commonMain", "extensible base class", "agent over-abstracting", "requires consumer to extend", "AbstractClassCanBeInterface" | `kmp-clean-architecture` |
 | "set up a new KMP project", "create feature module", "6-layer scaffold" | `kmp-feature-scaffold` |
 | "presenter module", "ViewModel no Compose", "MVI ViewModel", "UiState UiIntent" | `kmp-presenter-module` |
 | "Koin", "dependency injection", "manual modules", "annotated mode" | `kmp-dependency-injection` |

@@ -231,7 +231,7 @@ build:
   maxIssues: 0
 
 style:
-  UnnecessaryAbstractClass:
+  AbstractClassCanBeInterface:
     active: true
 
 complexity:
@@ -303,11 +303,14 @@ libraries:
         - '*.domain.*'
 ```
 
-`UnnecessaryAbstractClass` matters more in KMP than in a single-platform codebase: an
-abstract class with only abstract members in `commonMain` forces every consumer into an
-inheritance chain, which is exactly the pattern `kmp-clean-architecture`'s
-"Composition Over Inheritance" section explains how to avoid — see that section for the
-full rationale and fix.
+`AbstractClassCanBeInterface` (**correction, 2026-08-04**: this section previously
+named it `UnnecessaryAbstractClass` — verified directly against Detekt's own
+`default-detekt-config.yml` on GitHub and that name doesn't exist; the real rule
+covering this exact case is `AbstractClassCanBeInterface`, active by default) matters
+more in KMP than in a single-platform codebase: an abstract class with only abstract
+members in `commonMain` forces every consumer into an inheritance chain, which is
+exactly the pattern `kmp-clean-architecture`'s "Composition Over Inheritance" section
+explains how to avoid — see that section for the full rationale and fix.
 
 `LargeClass`/`TooManyFunctions` were a real gap: this collection had god-object
 detection scoped to only two file types (`kmp-audit`'s `_detect_viewmodel_size` for

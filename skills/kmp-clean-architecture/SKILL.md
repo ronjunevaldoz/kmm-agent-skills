@@ -41,7 +41,7 @@ core module, feature module, core vs feature, shared module, use case pattern,
 mapper pattern, DTO mapper, domain error, typed error, sealed error, DomainError,
 cross-feature navigation, navigate to another feature, AppNavigator, feature dependency,
 composition over inheritance, abstract class in commonMain, extensible base class,
-UnnecessaryAbstractClass, interface over abstract class, avoid over-abstraction.
+AbstractClassCanBeInterface, interface over abstract class, avoid over-abstraction.
 
 **Freshness rule:** Detekt rule set API changes between minor versions — recheck the
 `ArchitectureRule` DSL when upgrading Detekt.
@@ -143,7 +143,7 @@ Wire `lifecycle` through Koin (already this collection's default DI, see
 `kmp-dependency-injection`) the same way any other dependency is
 injected — nothing about "the consumer must implement a contract" requires inheritance.
 
-**Mechanical detector:** Detekt's real `UnnecessaryAbstractClass` rule (wired in
+**Mechanical detector:** Detekt's real `AbstractClassCanBeInterface` rule (wired in
 `kmp-code-quality`) flags exactly this shape — "abstract class with only
 abstract members should be an interface instead" — for any project with Detekt already
 configured. `kmp-audit`'s `_detect_extensible_abstract_class_in_common`
@@ -615,7 +615,7 @@ which Gradle allows fine and nothing else catches.
 - `kmp-feature-scaffold` — creates the 6-layer module structure this skill governs
 - `kmp-presenter-module` — `:presenter` layer in depth: MVI contracts, ViewModel, Koin wiring
 - `kmp-unit-testing` — JVM-based ViewModel tests enabled by the `:presenter`/`:ui` split
-- `kmp-code-quality` — Ktlint + Detekt setup; Detekt's `UnnecessaryAbstractClass` rule is the mechanical enforcement for Composition Over Inheritance
+- `kmp-code-quality` — Ktlint + Detekt setup; Detekt's `AbstractClassCanBeInterface` rule is the mechanical enforcement for Composition Over Inheritance
 - `kmp-dependency-injection` — Koin wiring for interface + injection, the replacement for inheritance-based extension points
 - `kmp-audit` — `_detect_extensible_abstract_class_in_common` and `_detect_module_layer_violation` are the mechanical enforcement for this skill's Composition Over Inheritance and layer-order rules, independent of whether Detekt is configured; `_detect_value_class_opportunity` is a LOW-severity nudge for the Typed Domain IDs rule above; `_detect_bare_core_module` enforces the ":core" vs ":feature" Split below
 
@@ -660,6 +660,7 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
+| 2026-08-04 | **Correction**: renamed `UnnecessaryAbstractClass` to `AbstractClassCanBeInterface` throughout (trigger keywords, "Mechanical detector" section, Related Skills row) — verified directly against Detekt's own `default-detekt-config.yml` on GitHub and `UnnecessaryAbstractClass` does not exist as a Detekt rule name. The real rule matching this exact description ("abstract class with only abstract members should be an interface instead") is `AbstractClassCanBeInterface`, in the style ruleset, active by default. Same fabricated-name pattern as `kmp-code-quality`'s `CouplingBetweenObjects` correction — found via a repo-wide sweep after that one. `_detect_extensible_abstract_class_in_common` (the audit backstop) is unaffected, it's this collection's own heuristic, not a Detekt rule claim. |
 | 2026-07-26 | Real gap closed: the ":core" vs ":feature" Split table already documented `:core` as separate modules (`:core:model`, `:core:api`, ...) mirroring `:feature:*`'s shape, but `_detect_module_layer_violation`'s module-path regex only ever matched `feature/<name>/<layer>` — it never applied to `:core` at all, so a monolithic `:core` module went completely uncaught. Added `kmp-audit`'s new `_detect_bare_core_module`. |
 | 2026-07-20 | Added an explicit "umbrella module" anti-pattern — a real, general KMP anti-pattern this skill's 6-layer contract already prevents structurally but never named outright; cross-referenced `kmp-audit`'s existing `_detect_feature_split` status check. |
 | 2026-07-20 | Cross-referenced `kmp-audit`'s new `_detect_value_class_opportunity` — a LOW-severity nudge that flags 2+ raw String/Long ID parameters in one function signature, mechanically surfacing the Typed Domain IDs rule below instead of relying on an agent to remember it unprompted. |
