@@ -2617,6 +2617,44 @@ class LongStackedCommentBlockTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any("long stacked comment block" in f for f in findings))
 
+    def test_ignores_genuine_why_explanation(self) -> None:
+        # Real false-positive class: dense native/graphics pipeline code (Vulkan/
+        # WebGPU/OpenGL) legitimately needs a long inline WHY explanation — moving it
+        # to docs/reference/ would separate the reasoning from the exact code it
+        # explains. 2+ causal/justifying signal words exempt the block.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "backend/vulkan/src/commonMain/kotlin/Vulkan.kt",
+                "fun a() {}\n\n"
+                "// The image layout transition must happen before the render pass begins,\n"
+                "// because the driver assumes a specific layout at pass start on some\n"
+                "// hardware. This is a workaround for a non-obvious constraint not\n"
+                "// documented in the Vulkan spec itself, only observed empirically.\n"
+                "fun transitionImage() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("long stacked comment block" in f for f in findings))
+
+    def test_still_flags_lazy_narration_with_no_why_signal(self) -> None:
+        # A block with zero/one causal signal words should still be flagged — the
+        # WHY-exemption requires 2+ distinct signal words, not just one incidental
+        # word, so this doesn't silently swallow the real anti-pattern.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "backend/vulkan/src/commonMain/kotlin/Vulkan.kt",
+                "fun a() {}\n\n"
+                "// Create the buffer.\n"
+                "// Bind the memory.\n"
+                "// Map the pointer.\n"
+                "// Copy the data.\n"
+                "// Unmap the pointer.\n"
+                "fun uploadBuffer() {}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("long stacked comment block" in f for f in findings))
+
 
 class DestructiveReadAccessorTests(unittest.TestCase):
     """A getter/consume function that clears the field it just read breaks the moment a

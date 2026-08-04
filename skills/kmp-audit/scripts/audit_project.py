@@ -2725,11 +2725,34 @@ _COMMENT_LINE_RE = re.compile(r"^\s*//")
 _DOCS_REFERENCE_POINTER_RE = re.compile(r"docs/reference/")
 _LONG_COMMENT_BLOCK_MIN_LINES = 5
 
+# A long block explaining genuine WHY (a hardware/API constraint, a workaround, a
+# non-obvious ordering requirement) reads differently than one just narrating WHAT —
+# it uses causal/justifying language. This can't be a precise classifier (it's a
+# keyword heuristic, not real language understanding), but it targets a real,
+# confirmed false-positive class: dense native/graphics rendering code (Vulkan/
+# WebGPU/OpenGL pipeline setup) legitimately needs long inline WHY explanations,
+# and moving them to docs/reference/ would separate the reasoning from the exact
+# code it explains. Require 2+ distinct signal words, not just one incidental
+# "must", to avoid exempting a block that only glancingly uses one of these words.
+_WHY_SIGNAL_RE = re.compile(
+    r"\b(because|workaround|due to|otherwise|must be|required by|"
+    r"constraint|spec(?:ification)?|per the|note:|see spec|"
+    r"driver|hardware|non-obvious)\b",
+    re.IGNORECASE,
+)
+_WHY_SIGNAL_MIN_MATCHES = 2
+
 
 def _detect_long_stacked_comment_block(root: Path) -> list[str]:
     """Flag a run of 5+ consecutive // comment lines with no docs/reference/ pointer —
     the exact shape kmp-code-quality's own rule says to split, made
     mechanically checkable instead of relying on human review to remember the rule.
+
+    Exempts a block that reads as a genuine WHY explanation (2+ causal/justifying
+    signal words — "because", "workaround", "driver", "constraint", etc.) rather than
+    WHAT-narration — a real false-positive class found in dense native/graphics
+    rendering code (Vulkan/WebGPU/OpenGL pipeline setup), where a long inline WHY
+    explanation is often warranted, not lazy.
     """
     findings: list[str] = []
     for path in root.rglob("*.kt"):
@@ -2751,7 +2774,13 @@ def _detect_long_stacked_comment_block(root: Path) -> list[str]:
                 # inline-WHY-comment-grew-too-long problem this rule targets — skip it.
                 is_file_header = all(not lines[j].strip() for j in range(block_start))
                 joined = "\n".join(block_lines)
-                if not is_file_header and not _DOCS_REFERENCE_POINTER_RE.search(joined):
+                why_signal_count = len(_WHY_SIGNAL_RE.findall(joined))
+                is_likely_why_explanation = why_signal_count >= _WHY_SIGNAL_MIN_MATCHES
+                if (
+                    not is_file_header
+                    and not is_likely_why_explanation
+                    and not _DOCS_REFERENCE_POINTER_RE.search(joined)
+                ):
                     findings.append(
                         f"long stacked comment block [LOW]: {path.relative_to(root)}:{block_start + 1} "
                         f"— {len(block_lines)} consecutive // lines with no docs/reference/ "

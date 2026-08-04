@@ -555,7 +555,7 @@ Two comment types, two jobs — never mix them:
 | Documents | Internal WHY — a workaround, a non-obvious constraint | Public API contract — `@param`/`@return`/`@throws`/`@sample` |
 | Never used for | Restating WHAT the code does (good naming covers that) | Private members — rename instead (Detekt's `DocumentationOverPrivateFunction`/`Property` flags this) |
 | Visible to | Nobody outside the source file | Dokka + IDE quick-docs |
-| Grows past ~4 lines? | Split: keep the one-sentence WHY inline, move the rest to `docs/reference/` with a pointer comment (see below) — mechanically checked by `kmp-audit`'s `_detect_long_stacked_comment_block` (5+ consecutive `//` lines, no `docs/reference/` pointer, not a leading license header) | N/A — KDoc doesn't accumulate this way; if a class needs paragraphs, that's what `docs/reference/` is for too |
+| Grows past ~4 lines? | Split: keep the one-sentence WHY inline, move the rest to `docs/reference/` with a pointer comment (see below) — mechanically checked by `kmp-audit`'s `_detect_long_stacked_comment_block` (5+ consecutive `//` lines, no `docs/reference/` pointer, not a leading license header, not a block reading as genuine WHY — see that detector's own docs for the signal-word heuristic) | N/A — KDoc doesn't accumulate this way; if a class needs paragraphs, that's what `docs/reference/` is for too |
 | Nests? | N/A | KDoc does **not** nest. Plain block comments (`/* */`) do, unlike Java/C |
 
 ### Formatting
