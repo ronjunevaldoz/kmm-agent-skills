@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.6.10] — 2026-08-04
+
+### Docs
+
+- docs: cross-reference kmp-code-quality naming conventions from 4 more skills
+
+---
+
 ## [v2.6.9] — 2026-08-04
 
 ### Docs

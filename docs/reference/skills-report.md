@@ -7,9 +7,9 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
 | [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 3101 | 2026-07-08 | 🟡 1 known debt |
-| [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 2675 | 2026-07-26 | 🟡 2 known debt |
+| [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 2677 | 2026-07-26 | 🟡 2 known debt |
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
-| [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
+| [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 1266 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 1070 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 972 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-expert`](../../skills/kmp-expert/) | 919 | 2026-07-31 | 🟡 1 known debt |
@@ -20,7 +20,7 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 673 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 648 | 2026-06-26 | 🟡 1 known debt |
 | [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 633 | 2026-07-13 | 🟡 1 known debt |
-| [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 628 | 2026-07-09 | 🟡 1 known debt |
+| [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 630 | 2026-07-09 | 🟡 1 known debt |
 | [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 618 | 2026-07-20 | 🟡 1 known debt |
 | [`kmp-release`](../../skills/kmp-release/) | 590 | 2026-07-04 | 🟡 1 known debt |
 | [`kmp-compose-state-container`](../../skills/kmp-compose-state-container/) | 589 | 2026-06-06 | 🟡 1 known debt |
@@ -40,7 +40,7 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kmp-datastore`](../../skills/kmp-datastore/) | 413 | 2026-06-18 | ✅ |
 | [`kmp-mongodb-database`](../../skills/kmp-mongodb-database/) | 409 | 2026-06-21 | ✅ |
-| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 405 | 2026-07-31 | ✅ |
+| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 408 | 2026-07-31 | ✅ |
 | [`kmp-compose-animation`](../../skills/kmp-compose-animation/) | 389 | 2026-06-21 | ✅ |
 | [`kmp-migration`](../../skills/kmp-migration/) | 386 | 2026-07-19 | ✅ |
 | [`kmp-permissions`](../../skills/kmp-permissions/) | 386 | 2026-06-21 | ✅ |
