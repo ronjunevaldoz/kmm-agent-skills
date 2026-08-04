@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.8.0] — 2026-08-04
+
+### Added
+
+- feat(audit): flag justification comments over single dependency lines; add TODO/FIXME convention
+
+---
+
 ## [v2.7.0] — 2026-08-04
 
 ### Added

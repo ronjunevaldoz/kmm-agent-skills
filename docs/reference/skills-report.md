@@ -23,7 +23,7 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 450 | 2026-07-20 | ✅ |
 | [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
-| [`kmp-audit`](../../skills/kmp-audit/) | 445 | 2026-07-31 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 446 | 2026-07-31 | ✅ |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 443 | 2026-07-31 | ✅ |
 | [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 443 | 2026-07-08 | ✅ |
 | [`kmp-compose-state-container`](../../skills/kmp-compose-state-container/) | 438 | 2026-06-06 | ✅ |
