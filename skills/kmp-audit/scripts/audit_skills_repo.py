@@ -323,7 +323,13 @@ def audit_skills_repo(root: Path) -> list[str]:
         if (skill_dir / "scripts").exists() and "Script" not in text and "scripts/" not in text:
             findings.append(f"{skill_dir.name}: has scripts/ but no script guidance in SKILL.md")
 
-        _check_design_system(skill_dir, text, findings)
+        design_system_text = text
+        references_dir = skill_dir / "references"
+        if references_dir.exists():
+            design_system_text += "\n" + "\n".join(
+                ref.read_text(encoding="utf-8") for ref in sorted(references_dir.glob("*.md"))
+            )
+        _check_design_system(skill_dir, design_system_text, findings)
 
         if any(hint in text.lower() for hint in FAST_MOVING_HINTS) and re.search(
             r"latest|freshness|recheck",

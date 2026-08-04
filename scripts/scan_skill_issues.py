@@ -69,7 +69,6 @@ KNOWN_DEBT: set[tuple[str, str]] = {
     ("kmp-compose-design-system", "description_approaching_limit"),
     ("kmp-compose-design-system", "oversized_skill_md"),
     ("kmp-compose-design-system-extended", "description_approaching_limit"),
-    ("kmp-compose-design-system-extended", "oversized_skill_md"),
     ("kmp-expect-actual", "oversized_skill_md"),
     ("kmp-expert", "oversized_skill_md"),
     ("kmp-feature-scaffold", "oversized_skill_md"),
