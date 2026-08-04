@@ -78,6 +78,7 @@ first. Repo-internal docs -> `docs-maintainer`. Downstream consumer docs ->
 | Design system setup or token changes | `compose-design-system` |
 | Design system component library | `compose-design-system-extended`, `compose-design-system` |
 | shadcn-compose, ShadcnButton, ShadcnTheme, published shadcn-inspired component library | `shadcn-compose`, `compose-design-system` |
+| shadcn login form, shadcn admin/dashboard layout, shadcn data table, ShadcnField, ShadcnTable, ShadcnSidebar, composing a full page from shadcn-compose components | `shadcn-compose-layouts`, `shadcn-compose` |
 | UI/UX design or component API shaping | `designer`, `compose-design-system`, `compose-design-system-extended`, `compose-slot-api`, `compose-state-hoisting`, `compose-accessibility`, `compose-preview-driven-development`, `roborazzi` |
 | Paging / paginated lists | `paging`, `repository-pattern` |
 | Kotlin RPC (full-stack Kotlin backend) | `kotlin-rpc`, `network-layer` |

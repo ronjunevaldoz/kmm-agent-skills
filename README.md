@@ -190,6 +190,7 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 - [`design-system`](skills/kmp-compose-design-system/) — tokens and core components
 - [`design-system-extended`](skills/kmp-compose-design-system-extended/) — bottom sheet, dialog, snackbar, skeleton
 - [`shadcn-compose`](skills/kmp-shadcn-compose/) — published library alternative to `design-system` — 70+ components, real experimental-API dependency risk
+- [`shadcn-compose-layouts`](skills/kmp-shadcn-compose-layouts/) — composes shadcn-compose components into login forms, generic forms, data tables, and admin/dashboard shells, plus an audit script for hand-rolled patterns that should migrate to them
 - [`compose-state-hoisting`](skills/kmp-compose-state-hoisting/) — hoisting rules, `@Stable`, `@Immutable`
 - [`compose-state-container`](skills/kmp-compose-state-container/) — `remember` vs `ViewModel`, `rememberUpdatedState`
 - [`compose-animation`](skills/kmp-compose-animation/) — AnimatedVisibility, Crossfade, shared elements

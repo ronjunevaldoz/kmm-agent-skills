@@ -53,7 +53,9 @@
         "kmp-compose-slot-api",
         "kmp-compose-state-hoisting",
         "kmp-compose-state-container",
-        "kmp-compose-graphics-modifiers"
+        "kmp-compose-graphics-modifiers",
+        "kmp-shadcn-compose",
+        "kmp-shadcn-compose-layouts"
       ]
     },
     {
