@@ -1,5 +1,5 @@
 {
-  "version": "2.6.13",
+  "version": "2.7.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -3053,6 +3053,43 @@
       ],
       "scripts": [
         "fetch_component_signature.py"
+      ]
+    },
+    {
+      "name": "kmp-shadcn-compose-layouts",
+      "path": "skills/kmp-shadcn-compose-layouts",
+      "description": "Composes shadcn-compose's individual Shadcn* components into full page layouts \u2014 login/auth forms, generic data-entry forms, data table screens, and admin/dashboard shells \u2014 using recipes verified directly against the library's own real source, not assumed by analogy to real shadcn/ui's React blocks. Also audits an existing screen for underutilized shadcn-compose primitives (hand-rolled form fields instead of ShadcnField, hand-rolled tables instead of ShadcnTable, admin shells missing ShadcnSidebar) and suggests the specific migration. Companion to kmp-shadcn-compose, which stops at individual-component verification and does not cover page-level composition.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-08-04",
+      "keywords": [
+        "shadcn login form",
+        "shadcn admin layout",
+        "shadcn dashboard",
+        "shadcn data table",
+        "ShadcnField",
+        "ShadcnFieldGroup",
+        "ShadcnTable",
+        "ShadcnSidebar",
+        "shadcn compose form",
+        "admin shell compose multiplatform",
+        "shadcn compose dashboard",
+        "shadcn compose layout"
+      ],
+      "triggers": [
+        "shadcn login form",
+        "shadcn admin layout",
+        "shadcn dashboard",
+        "shadcn data table",
+        "ShadcnField",
+        "ShadcnFieldGroup",
+        "ShadcnTable",
+        "ShadcnSidebar",
+        "shadcn compose form",
+        "admin shell compose multiplatform",
+        "shadcn compose dashboard"
+      ],
+      "scripts": [
+        "scan_shadcn_layout_gaps.py"
       ]
     },
     {

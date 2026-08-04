@@ -2,6 +2,18 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.7.0] — 2026-08-04
+
+### Added
+
+- feat(shadcn-compose-layouts): add page-composition skill for shadcn-compose
+
+### Fixed
+
+- fix(update-consumer-skills): don't treat symlinked bundled-skill mirrors as collisions
+
+---
+
 ## [v2.6.13] — 2026-08-04
 
 ### Other
