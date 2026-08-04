@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.6.5] — 2026-08-04
+
+### Fixed
+
+- fix(audit): add WHY-signal exemption to long-stacked-comment-block detector
+
+---
+
 ## [v2.6.4] — 2026-08-03
 
 ### Fixed

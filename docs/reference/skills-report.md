@@ -1,6 +1,6 @@
 # Skills Report
 
-Generated 2026-08-03 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
+Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
 **68 skills** — 46 clean, 22 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
@@ -34,7 +34,7 @@ Generated 2026-08-03 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
-| [`kmp-audit`](../../skills/kmp-audit/) | 444 | 2026-07-31 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 445 | 2026-07-31 | ✅ |
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
 | [`kmp-paging`](../../skills/kmp-paging/) | 432 | 2026-06-21 | ✅ |
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
