@@ -2,36 +2,31 @@
 
 Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
-**68 skills** — 55 clean, 12 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
+**68 skills** — 66 clean, 0 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
-| [`kmp-network-layer`](../../skills/kmp-network-layer/) | 690 | 2026-07-31 | 🟡 1 known debt |
-| [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 673 | 2026-07-26 | 🟡 1 known debt |
-| [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 648 | 2026-06-26 | 🟡 1 known debt |
-| [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 633 | 2026-07-13 | 🟡 1 known debt |
-| [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 630 | 2026-07-09 | 🟡 1 known debt |
-| [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 618 | 2026-07-20 | 🟡 1 known debt |
-| [`kmp-release`](../../skills/kmp-release/) | 590 | 2026-07-04 | 🟡 1 known debt |
-| [`kmp-compose-state-container`](../../skills/kmp-compose-state-container/) | 589 | 2026-06-06 | 🟡 1 known debt |
-| [`kmp-shadcn-compose`](../../skills/kmp-shadcn-compose/) | 583 | 2026-07-31 | 🟡 1 known debt |
-| [`kmp-layout-system`](../../skills/kmp-layout-system/) | 532 | 2026-07-17 | 🟡 2 known debt |
-| [`kmp-expect-actual`](../../skills/kmp-expect-actual/) | 507 | 2026-07-20 | 🟡 1 known debt |
-| [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 504 | 2026-07-08 | 🟡 1 known debt |
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 500 | 2026-07-26 | ✅ |
+| [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 499 | 2026-07-26 | ✅ |
 | [`kmp-expert`](../../skills/kmp-expert/) | 490 | 2026-07-31 | ✅ |
 | [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 489 | 2026-07-14 | ✅ |
+| [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 483 | 2026-06-26 | ✅ |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 483 | 2026-07-31 | ✅ |
+| [`kmp-network-layer`](../../skills/kmp-network-layer/) | 474 | 2026-07-31 | ✅ |
+| [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 469 | 2026-07-08 | ✅ |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 468 | 2026-06-29 | ✅ |
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
+| [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 460 | 2026-07-09 | ✅ |
 | [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 454 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
+| [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 450 | 2026-07-20 | ✅ |
 | [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
 | [`kmp-audit`](../../skills/kmp-audit/) | 445 | 2026-07-31 | ✅ |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 443 | 2026-07-31 | ✅ |
 | [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 443 | 2026-07-08 | ✅ |
+| [`kmp-compose-state-container`](../../skills/kmp-compose-state-container/) | 438 | 2026-06-06 | ✅ |
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
 | [`kmp-paging`](../../skills/kmp-paging/) | 432 | 2026-06-21 | ✅ |
 | [`kmp-roborazzi`](../../skills/kmp-roborazzi/) | 431 | 2026-07-10 | ✅ |
@@ -40,10 +35,14 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-datastore`](../../skills/kmp-datastore/) | 413 | 2026-06-18 | ✅ |
 | [`kmp-mongodb-database`](../../skills/kmp-mongodb-database/) | 409 | 2026-06-21 | ✅ |
 | [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 408 | 2026-07-31 | ✅ |
+| [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 403 | 2026-07-13 | ✅ |
+| [`kmp-expect-actual`](../../skills/kmp-expect-actual/) | 400 | 2026-07-20 | ✅ |
+| [`kmp-shadcn-compose`](../../skills/kmp-shadcn-compose/) | 397 | 2026-07-31 | ✅ |
 | [`kmp-legal-docs`](../../skills/kmp-legal-docs/) | 393 | 2026-06-21 | ✅ |
 | [`kmp-compose-animation`](../../skills/kmp-compose-animation/) | 389 | 2026-06-21 | ✅ |
 | [`kmp-migration`](../../skills/kmp-migration/) | 386 | 2026-07-19 | ✅ |
 | [`kmp-permissions`](../../skills/kmp-permissions/) | 386 | 2026-06-21 | ✅ |
+| [`kmp-layout-system`](../../skills/kmp-layout-system/) | 383 | 2026-07-17 | 🟡 1 known debt |
 | [`kmp-workmanager`](../../skills/kmp-workmanager/) | 382 | 2026-06-21 | ✅ |
 | [`kmp-biometric-auth`](../../skills/kmp-biometric-auth/) | 373 | 2026-06-21 | ✅ |
 | [`kmp-push-notifications`](../../skills/kmp-push-notifications/) | 372 | 2026-06-21 | ✅ |
@@ -56,6 +55,7 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-skill-harvester`](../../skills/kmp-skill-harvester/) | 337 | 2026-06-26 | ✅ |
 | [`kmp-feature-flags`](../../skills/kmp-feature-flags/) | 334 | 2026-06-21 | ✅ |
 | [`kmp-compose-accessibility`](../../skills/kmp-compose-accessibility/) | 330 | 2026-06-21 | ✅ |
+| [`kmp-release`](../../skills/kmp-release/) | 328 | 2026-07-04 | ✅ |
 | [`kmp-docs-site`](../../skills/kmp-docs-site/) | 326 | 2026-07-11 | ✅ |
 | [`kmp-offline-first`](../../skills/kmp-offline-first/) | 324 | 2026-06-21 | ✅ |
 | [`kmp-native-authoring`](../../skills/kmp-native-authoring/) | 320 | 2026-07-31 | ✅ |
