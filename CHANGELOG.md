@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.6.12] — 2026-08-04
+
+### Other
+
+- refactor(skills): split 9 more oversized SKILL.md files into references/
+
+---
+
 ## [v2.6.11] — 2026-08-04
 
 ### Other

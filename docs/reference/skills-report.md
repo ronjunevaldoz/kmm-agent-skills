@@ -2,19 +2,10 @@
 
 Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
-**68 skills** — 47 clean, 21 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
+**68 skills** — 55 clean, 12 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
-| [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 2677 | 2026-07-26 | 🟡 2 known debt |
-| [`kmp-mvi`](../../skills/kmp-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
-| [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 1266 | 2026-07-31 | 🟡 1 known debt |
-| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 1070 | 2026-07-31 | 🟡 1 known debt |
-| [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 972 | 2026-07-31 | 🟡 1 known debt |
-| [`kmp-expert`](../../skills/kmp-expert/) | 919 | 2026-07-31 | 🟡 1 known debt |
-| [`kmp-navigation`](../../skills/kmp-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
-| [`kmp-legal-docs`](../../skills/kmp-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
-| [`kmp-roborazzi`](../../skills/kmp-roborazzi/) | 769 | 2026-07-10 | 🟡 1 known debt |
 | [`kmp-network-layer`](../../skills/kmp-network-layer/) | 690 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 673 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 648 | 2026-06-26 | 🟡 1 known debt |
@@ -27,20 +18,29 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-layout-system`](../../skills/kmp-layout-system/) | 532 | 2026-07-17 | 🟡 2 known debt |
 | [`kmp-expect-actual`](../../skills/kmp-expect-actual/) | 507 | 2026-07-20 | 🟡 1 known debt |
 | [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 504 | 2026-07-08 | 🟡 1 known debt |
+| [`kmp-mvi`](../../skills/kmp-mvi/) | 500 | 2026-07-26 | ✅ |
+| [`kmp-expert`](../../skills/kmp-expert/) | 490 | 2026-07-31 | ✅ |
 | [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 489 | 2026-07-14 | ✅ |
+| [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 483 | 2026-07-31 | ✅ |
+| [`kmp-navigation`](../../skills/kmp-navigation/) | 468 | 2026-06-29 | ✅ |
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
+| [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 454 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
 | [`kmp-audit`](../../skills/kmp-audit/) | 445 | 2026-07-31 | ✅ |
+| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 443 | 2026-07-31 | ✅ |
 | [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 443 | 2026-07-08 | ✅ |
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
 | [`kmp-paging`](../../skills/kmp-paging/) | 432 | 2026-06-21 | ✅ |
+| [`kmp-roborazzi`](../../skills/kmp-roborazzi/) | 431 | 2026-07-10 | ✅ |
+| [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 421 | 2026-07-31 | ✅ |
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kmp-datastore`](../../skills/kmp-datastore/) | 413 | 2026-06-18 | ✅ |
 | [`kmp-mongodb-database`](../../skills/kmp-mongodb-database/) | 409 | 2026-06-21 | ✅ |
 | [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 408 | 2026-07-31 | ✅ |
+| [`kmp-legal-docs`](../../skills/kmp-legal-docs/) | 393 | 2026-06-21 | ✅ |
 | [`kmp-compose-animation`](../../skills/kmp-compose-animation/) | 389 | 2026-06-21 | ✅ |
 | [`kmp-migration`](../../skills/kmp-migration/) | 386 | 2026-07-19 | ✅ |
 | [`kmp-permissions`](../../skills/kmp-permissions/) | 386 | 2026-06-21 | ✅ |
