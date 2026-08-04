@@ -1,5 +1,5 @@
 {
-  "version": "2.6.6",
+  "version": "2.6.7",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -367,7 +367,7 @@
         "composition over inheritance",
         "abstract class in commonMain",
         "extensible base class",
-        "UnnecessaryAbstractClass",
+        "AbstractClassCanBeInterface",
         "interface over abstract class",
         "avoid over-abstraction"
       ],

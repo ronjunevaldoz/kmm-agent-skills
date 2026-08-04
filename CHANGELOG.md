@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.6.7] — 2026-08-04
+
+### Fixed
+
+- fix(clean-architecture): rename fabricated UnnecessaryAbstractClass to real AbstractClassCanBeInterface
+
+---
+
 ## [v2.6.6] — 2026-08-04
 
 ### Docs

@@ -10,14 +10,14 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 2675 | 2026-07-26 | 🟡 2 known debt |
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 1264 | 2026-07-31 | 🟡 1 known debt |
-| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 1067 | 2026-07-31 | 🟡 1 known debt |
+| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 1070 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 972 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-expert`](../../skills/kmp-expert/) | 919 | 2026-07-31 | 🟡 1 known debt |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 828 | 2026-06-29 | 🟡 1 known debt |
 | [`kmp-legal-docs`](../../skills/kmp-legal-docs/) | 796 | 2026-06-21 | 🟡 1 known debt |
 | [`kmp-roborazzi`](../../skills/kmp-roborazzi/) | 769 | 2026-07-10 | 🟡 1 known debt |
 | [`kmp-network-layer`](../../skills/kmp-network-layer/) | 690 | 2026-07-31 | 🟡 1 known debt |
-| [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 672 | 2026-07-26 | 🟡 1 known debt |
+| [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 673 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 648 | 2026-06-26 | 🟡 1 known debt |
 | [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 633 | 2026-07-13 | 🟡 1 known debt |
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 628 | 2026-07-09 | 🟡 1 known debt |
