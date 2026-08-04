@@ -2,11 +2,10 @@
 
 Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
-**68 skills** — 46 clean, 22 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
+**68 skills** — 47 clean, 21 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
-| [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 3101 | 2026-07-08 | 🟡 1 known debt |
 | [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 2677 | 2026-07-26 | 🟡 2 known debt |
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 1626 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 1266 | 2026-07-31 | 🟡 1 known debt |
@@ -35,6 +34,7 @@ Generated 2026-08-04 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
 | [`kmp-audit`](../../skills/kmp-audit/) | 445 | 2026-07-31 | ✅ |
+| [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 443 | 2026-07-08 | ✅ |
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
 | [`kmp-paging`](../../skills/kmp-paging/) | 432 | 2026-06-21 | ✅ |
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
