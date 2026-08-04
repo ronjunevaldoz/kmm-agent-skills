@@ -182,6 +182,10 @@ echo "Syncing project-owned custom skills…"
 CUSTOM_SKILLS_COUNT=0
 if [[ -d "skills" ]]; then
   for skill_dir in skills/*; do
+    # A symlink here is a mirrored bundled skill (e.g. skills/<name> -> .agents/skills/<name>),
+    # not a project-owned one — skip it before the collision check below, otherwise every
+    # bundled skill mirrored this way falsely reports as "colliding with itself".
+    [[ -L "$skill_dir" ]] && continue
     [[ -d "$skill_dir" ]] || continue
     skill_name="$(basename "$skill_dir")"
     [[ "$skill_name" == "README.md" ]] && continue

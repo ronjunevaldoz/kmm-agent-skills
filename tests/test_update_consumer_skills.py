@@ -80,6 +80,64 @@ class UpdateConsumerSkillsScriptTests(unittest.TestCase):
             self.assertIn("kmp-project-docs-maintainer", agents_md)
             self.assertIn("/kmp-setup-hooks", result.stdout)
 
+    def test_symlinked_bundled_skill_mirror_does_not_false_positive_as_a_collision(self) -> None:
+        # Real bug: a project that mirrors skills/ as symlinks into .agents/skills/<name>
+        # (rather than real project-owned directories) tripped the collision check for
+        # every single bundled skill mirrored this way, since `-d` follows symlinks and
+        # the loop never distinguished a symlink from a real project-owned directory.
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            source = tmp_root / "source"
+            project = tmp_root / "project"
+            source.mkdir()
+            project.mkdir()
+
+            self._write(source, "skills.json", '{"version":"0.0.1"}\n')
+            self._write(
+                source,
+                "skills/shared-skill/SKILL.md",
+                "---\nname: shared-skill\ndescription: Shared bundle skill.\n---\n",
+            )
+            self._write(source, "CHANGELOG.md", "## [v0.0.1]\n- init\n---\n")
+
+            self._write(project, "settings.gradle.kts", 'rootProject.name = "DemoApp"\n')
+            (project / ".claude" / "skills").mkdir(parents=True)
+            self._write(
+                project,
+                "skills/real-project-skill/SKILL.md",
+                "---\nname: real-project-skill\ndescription: A real project-owned skill.\n---\n",
+            )
+            # Mirror the bundled skill as a symlink, same shape as .agents/skills/<name>.
+            (project / ".agents" / "skills" / "shared-skill").mkdir(parents=True)
+            self._write(
+                project,
+                ".agents/skills/shared-skill/SKILL.md",
+                "---\nname: shared-skill\ndescription: Shared bundle skill.\n---\n",
+            )
+            (project / "skills" / "shared-skill").symlink_to(
+                project / ".agents" / "skills" / "shared-skill", target_is_directory=True
+            )
+
+            result = subprocess.run(
+                [
+                    "bash",
+                    str(REPO_ROOT / "scripts" / "update-consumer-skills.sh"),
+                    "--source",
+                    str(source),
+                    "--agent-dir",
+                    ".claude/skills",
+                ],
+                cwd=project,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertNotIn("collides with a bundled", result.stdout)
+            self.assertTrue(
+                (project / ".claude" / "skills" / "real-project-skill" / "SKILL.md").is_file()
+            )
+
     def test_agents_skills_mirror_skipped_when_agent_dir_is_already_agents_skills(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_root = Path(tmp)
