@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.9.2] — 2026-08-06
+
+### Docs
+
+- docs(code-quality): add Kotlin delegation guidance (class delegation + delegated properties)
+
+---
+
 ## [v2.9.1] — 2026-08-06
 
 ### Docs
