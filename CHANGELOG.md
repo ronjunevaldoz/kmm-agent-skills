@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.9.1] — 2026-08-06
+
+### Docs
+
+- docs(code-quality): add core/helper/sugar/sample-local/deprecated categorization + DSL guidance
+
+---
+
 ## [v2.9.0] — 2026-08-04
 
 ### Added
