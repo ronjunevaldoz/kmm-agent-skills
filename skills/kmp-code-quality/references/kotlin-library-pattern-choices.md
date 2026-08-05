@@ -80,6 +80,41 @@ itself carries meaning.
   compiles when it shouldn't. `@DslMarker` restricts each lambda to its nearest receiver
   only, per Kotlin's own documented fix for exactly this scope-leak problem.
 
+### Delegation (`by`) — two distinct mechanisms, when each earns its keep
+
+Verified against kotlinlang.org's own delegation and delegated-properties pages, not
+assumed. "Delegation" covers two different Kotlin features — don't conflate them:
+
+**Class delegation** — implement an interface by forwarding to a held object instead of
+subclassing:
+
+```kotlin
+interface Base { fun print() }
+class BaseImpl(val x: Int) : Base { override fun print() { print(x) } }
+class Derived(b: Base) : Base by b   // compiler generates the forwarding methods
+```
+
+This is the mechanical tool for this file's own Composition Over Inheritance principle
+(see `kmp-clean-architecture`) — zero forwarding boilerplate, no `abstract class` forcing
+subclassing. **Real limitation, not obvious from the syntax**: overriding one delegated
+member doesn't change how the delegate's *other* methods behave — they still call the
+delegate's own internals, never your override. `by` supplements the contract at the top
+level; it can't intercept how the delegate calls itself.
+
+**Delegated properties** — `by lazy`/`Delegates.observable`/`Delegates.vetoable`/
+`Delegates.notNull()`, a different feature reusing the same `by` keyword:
+
+| Delegate | Use when |
+|---|---|
+| `by lazy { }` | Expensive init deferred to first access. Default `LazyThreadSafetyMode.SYNCHRONIZED` is thread-safe; `NONE` is a real perf lever, but only correct if init and every access are guaranteed same-thread |
+| `Delegates.observable` | React *after* a property changes (invalidate cache, re-render) |
+| `Delegates.vetoable` | Reject a value *before* assignment — a validation gate, called before the write completes |
+| `Delegates.notNull()` | A `var` set later, no sane dummy default, and not `lateinit`-eligible (e.g. a primitive type) |
+
+**Overengineering**: a custom property delegate for a get/set pattern used exactly
+once — that's just a getter/setter, no delegate needed. A delegate (custom or standard)
+earns its keep when the same pattern repeats across multiple properties or classes.
+
 ### Regex readability
 
 A regex used more than once, or complex enough to need explaining, must be bound to a
