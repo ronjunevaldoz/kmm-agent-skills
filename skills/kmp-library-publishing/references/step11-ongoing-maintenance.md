@@ -7,6 +7,20 @@ Part of `kmp-library-publishing`. Load this file when working on: step 11 — on
 Everything above covers shipping. A published library also needs a maintenance
 practice — real gaps found repeatedly in libraries that only had a publish checklist:
 
+### `core`/`helper`/`sugar` — higher stakes here than in an app
+
+`kmp-code-quality`'s Kotlin Library & Pattern Choices defines this categorization in
+full; in a published library specifically:
+- `core` (`public`) and `sugar` (`public`, calling into `core`) are **both** binary-compat
+  surface — `apiCheck`/`apiDump` (Step 5) track every one of them equally. Getting the
+  `core` vs `helper` call wrong here breaks SemVer for real external consumers, not just
+  messier internal code the way the same mistake would read in an app.
+- `helper` (`internal`) is compiler-enforced once `explicitApi()` is on (Step 1) — a
+  library can't accidentally leak a helper as public the way an app without
+  `explicitApi()` might.
+- `sample-local` is the `sample/` module below — never in the published artifact.
+- `deprecated` is the real cycle in the next section, not just a naming tag.
+
 ### Deprecation cycle, not silent removal
 
 Never delete a public symbol a consumer might already depend on. Mark it first:

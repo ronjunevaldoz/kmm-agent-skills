@@ -32,6 +32,54 @@ type is fine and not what this flags — the smell is unrelated functions sharin
 generic filename. `_detect_god_utils_file` flags a `*Utils.kt`/`*Helpers.kt` file with
 10+ top-level functions spanning 3+ distinct (or no) receiver types.
 
+### Code categorization: core / helper / sugar / sample-local / deprecated
+
+Five real categories for classifying a function or type — applies to both app and
+library code, though the stakes differ (see the library-specific mapping in
+`kmp-library-publishing`'s Ongoing Maintenance section). Guidance only — no mechanical
+detector yet, unlike most rules in this file:
+
+| Category | Kotlin mechanism | Meaning |
+|---|---|---|
+| `core` | `public` | Primary entry point — the thing callers are meant to reach for first |
+| `helper` | `internal` | Implementation detail behind `core` — no caller outside the module needs it, and the compiler enforces that once `explicitApi()` is on |
+| `sugar` | `public`, calls into `core` | Convenience overload/extension layered on `core` — optional, never the *only* way to do something |
+| `sample-local` | Separate module/source set, never the callable module | Demo/example code — belongs in a `samples`/`demo` module, not named or tagged its way out of the real one |
+| `deprecated` | `@Deprecated` | Has a real migration path and a removal plan — distinct from `unused`/dead code (nothing marks it, nothing references it, no plan needed beyond deleting it) |
+
+**"Utils" isn't a sixth category — it's the failure mode when this classification gets
+skipped.** A generic `Utils.kt`/`Helpers.kt` grab-bag (see above) is what happens when
+functions never get sorted into `core`/`helper`/`sugar` in the first place. A genuine
+small utility function is `sugar` (public, general-purpose, organized by receiver type —
+`StringExtensions.kt`) or `helper` (internal-only plumbing) — never its own bucket.
+
+**Redundancy check**: a `sugar` function must call the same `core` function/constructor a
+caller could reach directly — never duplicate validation or defaults logic between them.
+Two independent paths to build/do the same thing is the actual redundancy risk, not
+having both `core` and `sugar` in the first place (that split is normal and good).
+
+### DSL (type-safe builder) — when it's warranted, when it's overengineering
+
+Verified against kotlinlang.org's own type-safe-builders page, not assumed. Real,
+documented use cases: generating hierarchical markup (HTML/XML), configuring nested
+routes (Ktor). The common thread — a genuinely tree-shaped structure where the nesting
+itself carries meaning.
+
+- **Use a DSL when**: the shape is hierarchical (parent-child, not a flat parameter bag),
+  and a block structure reads better than a long named-argument call.
+- **Overengineering when**: ~5 or fewer flat params (a plain function call already reads
+  clean), single call site with no reuse as a mini-language, or no real nesting — wrapping
+  a data class in `apply {}`-shaped ceremony adds indirection without adding clarity.
+- **A DSL entry point is `core`, not a separate thing** — it must ultimately call the
+  same constructor/factory a caller could use directly. Exposing both a DSL and a raw
+  constructor as equally-promoted API, with logic that can drift between them, is the
+  redundancy this whole categorization exists to prevent.
+- **Real gotcha, not style**: any DSL that nests one builder inside another needs
+  `@DslMarker` on the receiver types. Without it, Kotlin lets a lambda call an *outer*
+  builder's methods from inside an *inner* one — e.g. `html { head { head {} } }`
+  compiles when it shouldn't. `@DslMarker` restricts each lambda to its nearest receiver
+  only, per Kotlin's own documented fix for exactly this scope-leak problem.
+
 ### Regex readability
 
 A regex used more than once, or complex enough to need explaining, must be bound to a
