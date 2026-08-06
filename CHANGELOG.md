@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.10.0] — 2026-08-06
+
+### Added
+
+- feat(audit): add 500-line guideline to references/*.md files, split one offender
+
+---
+
 ## [v2.9.2] — 2026-08-06
 
 ### Docs
