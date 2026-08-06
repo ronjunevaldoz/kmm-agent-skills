@@ -250,6 +250,38 @@ class AgentSkillsSpecTests(unittest.TestCase):
             report = self._run_scan(root)
         self.assertTrue(any(i["check"] == "oversized_skill_md" for i in report["issues"]))
 
+    def test_oversized_reference_md_flagged(self) -> None:
+        # Same 500-line guideline as SKILL.md itself, applied to references/*.md — a
+        # single reference file that's still 500+ lines is a large one-shot load when
+        # an agent does need it, and usually a sign it should split further.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            skill_dir = self._make_skill(
+                root, "kmp-foo",
+                "---\nname: kmp-foo\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
+                + self._minimal_skill_body(),
+            )
+            references_dir = skill_dir / "references"
+            references_dir.mkdir()
+            padding = "\n".join(f"Line {i} of filler content." for i in range(600))
+            (references_dir / "big.md").write_text(f"# Big\n\n{padding}\n", encoding="utf-8")
+            report = self._run_scan(root)
+        self.assertTrue(any(i["check"] == "oversized_reference_md" for i in report["issues"]))
+
+    def test_ignores_reference_md_under_the_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            skill_dir = self._make_skill(
+                root, "kmp-foo",
+                "---\nname: kmp-foo\ndescription: Test\nlast-updated: '2026-07-26'\n---\n\n"
+                + self._minimal_skill_body(),
+            )
+            references_dir = skill_dir / "references"
+            references_dir.mkdir()
+            (references_dir / "small.md").write_text("# Small\n\nJust a short reference.\n", encoding="utf-8")
+            report = self._run_scan(root)
+        self.assertFalse(any(i["check"] == "oversized_reference_md" for i in report["issues"]))
+
     def test_known_debt_reported_but_does_not_block(self) -> None:
         # KI-008: a skill/check pair already in the KNOWN_DEBT baseline is real,
         # visible debt — it must still show up in the report, but must not fail

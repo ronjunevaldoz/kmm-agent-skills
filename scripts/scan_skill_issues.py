@@ -278,6 +278,30 @@ def scan_skill(skill_dir: Path) -> list[dict]:
             ),
         )
 
+    # 8. Same 500-line guideline, applied to references/*.md — a reference file is only
+    # loaded on demand (not on every activation like SKILL.md), but a single reference
+    # that itself runs past 500 lines is still a large one-shot load when an agent does
+    # need it, and often a sign it should split further (e.g. by component/step).
+    references_dir = skill_dir / "references"
+    if references_dir.is_dir():
+        for ref_file in sorted(references_dir.glob("*.md")):
+            ref_lines = ref_file.read_text(encoding="utf-8").splitlines()
+            if len(ref_lines) > _AGENTSKILLS_MAX_RECOMMENDED_LINES:
+                add(
+                    severity="MEDIUM",
+                    check="oversized_reference_md",
+                    detail=(
+                        f"references/{ref_file.name} is {len(ref_lines)} lines — "
+                        f"same 500-line guideline as SKILL.md itself"
+                    ),
+                    prompt_hint=(
+                        f'`{skill_name}`\'s `references/{ref_file.name}` is {len(ref_lines)} '
+                        f'lines. Split it further — by component, step, or concern — into '
+                        f'more than one `references/*.md` file, same reasoning as the '
+                        f'`oversized_skill_md` check applied to SKILL.md itself.'
+                    ),
+                )
+
     return issues
 
 
