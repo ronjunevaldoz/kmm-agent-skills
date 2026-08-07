@@ -2,6 +2,18 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.13.0] — 2026-08-08
+
+### Added
+
+- feat(audit): detect .claude/AGENTS.md, commands/, settings.json gitignored
+
+### Docs
+
+- docs: document what to commit vs gitignore under .claude/ and .agents/
+
+---
+
 ## [v2.12.3] — 2026-08-07
 
 ### Fixed
