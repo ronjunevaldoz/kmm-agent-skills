@@ -4081,6 +4081,48 @@ class GodUtilsFileTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any("god utils file" in f for f in findings))
 
+    def test_flags_god_extensions_file(self) -> None:
+        # kmp-code-quality's rule names Utils.kt/Helpers.kt/Extensions.kt, but the
+        # filename regex covered only the first two — a god AppExtensions.kt sailed
+        # through the very check written to catch it.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            funcs = "\n\n".join(
+                [f"fun String.f{i}() = this" for i in range(4)]
+                + [f"fun Int.g{i}() = this" for i in range(4)]
+                + [f"fun List<String>.h{i}() = this" for i in range(4)]
+            )
+            self._write(root, "core/AppExtensions.kt", funcs)
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("god utils file" in f for f in findings))
+
+    def test_flags_utils_file_written_with_explicit_visibility(self) -> None:
+        # The top-level-fun regex was `^fun\\s+`, so any visibility modifier hid the
+        # function from it. Under explicitApi() every top-level fun is `public fun`, so
+        # this detector silently found nothing in exactly the library projects where
+        # API hygiene matters most.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            funcs = "\n\n".join(
+                [f"public fun String.f{i}() = this" for i in range(4)]
+                + [f"public fun Int.g{i}() = this" for i in range(4)]
+                + [f"internal fun List<String>.h{i}() = this" for i in range(4)]
+            )
+            self._write(root, "core/AppUtils.kt", funcs)
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("god utils file" in f for f in findings))
+
+    def test_ignores_recommended_single_receiver_extensions_file(self) -> None:
+        # StringExtensions.kt is the shape the rule *recommends*; adding `Extensions` to
+        # the filename regex must not start flagging it. The 3-receiver-type threshold
+        # is what keeps it safe.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            funcs = "\n\n".join(f"public fun String.f{i}() = this" for i in range(12))
+            self._write(root, "core/StringExtensions.kt", funcs)
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("god utils file" in f for f in findings))
+
     def test_ignores_non_utils_named_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

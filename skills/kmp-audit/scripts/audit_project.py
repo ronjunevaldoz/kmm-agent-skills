@@ -1423,8 +1423,27 @@ def _detect_kotlin_reflect_in_common(root: Path) -> list[str]:
 # about what's actually inside. A file of extensions all sharing one receiver type is
 # fine; the smell is unrelated functions sharing only a generic filename.
 
-_UTILS_FILENAME_RE = re.compile(r"(Utils|Helpers)$", re.IGNORECASE)
-_TOP_LEVEL_FUN_RE = re.compile(r"(?m)^fun\s+(?:<[^>]*>\s*)?(?:([\w.]+)\.)?(\w+)\s*\(")
+# `Extensions` included because kmp-code-quality's own rule names all three
+# (`Utils.kt`/`Helpers.kt`/`Extensions.kt`) — the regex covered only two, so a god
+# `AppExtensions.kt` sailed through the check written to catch it. Safe to add: the
+# _GOD_UTILS_MIN_RECEIVER_TYPES threshold below still exempts the *recommended* shape
+# (`StringExtensions.kt`, all one receiver type), which is 1 receiver, not 3+.
+_UTILS_FILENAME_RE = re.compile(r"(Utils|Helpers|Extensions)$", re.IGNORECASE)
+# Visibility modifiers matter here: this was `^fun\s+`, which matches a bare top-level
+# `fun` only. Under explicitApi() — which every library this collection scaffolds turns
+# on — every top-level function is written `public fun`/`internal fun`, so the detector
+# found zero functions and silently never fired, in exactly the projects where API
+# hygiene matters most.
+# A generic receiver (`fun List<String>.foo()`) matched nothing at all before: the
+# receiver group was `([\w.]+)\.`, which stops dead at the `<`, so the whole line failed
+# to parse and the function was invisible to both the count and the receiver-diversity
+# check. The receiver's type arguments are consumed but not captured, so `List<String>`
+# and `List<Int>` count as the same receiver type — which is what "distinct receiver
+# types" should mean here.
+_TOP_LEVEL_FUN_RE = re.compile(
+    r"(?m)^(?:public\s+|internal\s+|private\s+)?fun\s+(?:<[^>]*>\s*)?"
+    r"(?:([\w.]+)(?:<[^>]*>)?\.)?(\w+)\s*\("
+)
 _GOD_UTILS_MIN_FUNCTIONS = 10
 _GOD_UTILS_MIN_RECEIVER_TYPES = 3
 
