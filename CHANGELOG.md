@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.10.1] — 2026-08-07
+
+### Fixed
+
+- fix(consumer-update): version marker, stale-skill pruning, outdated-command detection
+
+---
+
 ## [v2.10.0] — 2026-08-06
 
 ### Added
