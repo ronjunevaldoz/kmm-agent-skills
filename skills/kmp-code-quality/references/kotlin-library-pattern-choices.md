@@ -36,8 +36,23 @@ generic filename. `_detect_god_utils_file` flags a `*Utils.kt`/`*Helpers.kt` fil
 
 Five real categories for classifying a function or type — applies to both app and
 library code, though the stakes differ (see the library-specific mapping in
-`kmp-library-publishing`'s Ongoing Maintenance section). Guidance only — no mechanical
-detector yet, unlike most rules in this file:
+`kmp-library-publishing`'s Ongoing Maintenance section).
+
+Mechanically classified by `kmp-audit`'s `scripts/classify_declarations.py`, which reads
+the table's "Kotlin mechanism" column literally — three of the five are exactly decidable
+(`@Deprecated`, sample path, visibility keyword), `sugar` is a conservative heuristic
+(public + single-expression body that delegates), and `core` is the residual:
+
+```bash
+python3 skills/kmp-audit/scripts/classify_declarations.py <project_root>
+python3 skills/kmp-audit/scripts/classify_declarations.py <project_root> --json --strict
+```
+
+It also flags two things the categories imply but nothing checked: a `@Deprecated` with
+no `ReplaceWith` (no migration path means it's dead code, not a deprecation) and a public
+declaration inside a sample module. Regex-based and single-file scope — no cross-module
+resolution — so `sugar` rows carry a `confidence` field and the output is a map to
+review, not a verdict.
 
 | Category | Kotlin mechanism | Meaning |
 |---|---|---|
