@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.13.1] — 2026-08-08
+
+### Fixed
+
+- fix(audit): scan .claude/agents/ directly for the tier-name-as-model bug
+
+---
+
 ## [v2.13.0] — 2026-08-08
 
 ### Added
