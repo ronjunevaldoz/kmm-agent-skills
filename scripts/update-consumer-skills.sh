@@ -155,6 +155,37 @@ echo ""
 # and is NOT one of the project's own `./skills/<name>` custom skills. The deployed
 # directory is a mirror by contract (`block-edit-vendored-skills.sh` refuses edits to
 # it), so removing a stale mirror there loses nothing that isn't reproducible.
+# Resolve a skill's deploy target to the real directory to write into. A destination
+# that's a symlink — e.g. `.claude/skills/<name> -> ../../.agents/skills/<name>`, a real
+# layout found deployed in production, one symlink per skill rather than the whole
+# directory — breaks writing to it directly, confirmed by direct reproduction on both
+# tools this script uses: BSD/macOS `cp -r` errors "Not a directory" on a directory
+# source copied onto a destination whose last path component is a symlink, even though
+# the link resolves to a real directory; Apple's `openrsync` (shipped since macOS 15,
+# not GPL rsync — `rsync --version` reports "openrsync") reports success and "sent N
+# bytes" while silently writing nothing through it. Resolving to the real path first
+# and writing there works correctly with every tool tried.
+resolve_target() {
+  local target="$1"
+  if [[ -L "$target" ]]; then
+    local link_val resolved
+    link_val="$(readlink "$target")"
+    if [[ "$link_val" = /* ]]; then
+      resolved="$link_val"
+    else
+      resolved="$(cd "$(dirname "$target")" 2>/dev/null && cd "$(dirname "$link_val")" 2>/dev/null && pwd)/$(basename "$link_val")"
+    fi
+    if [[ -n "$resolved" && -d "$(dirname "$resolved")" ]]; then
+      echo "$resolved"
+      return
+    fi
+    # Broken symlink (target's parent doesn't exist) — remove it and fall through to
+    # treating the original path as a plain, not-yet-existing directory.
+    rm -f "$target"
+  fi
+  echo "$target"
+}
+
 prune_stale_skills() {
   local target="$1"
   [[ -d "$target" ]] || return 0
@@ -189,7 +220,13 @@ if $DRY_RUN; then
   echo "  [dry-run] would copy $CHANGED changed skill file(s) → $AGENT_DIR/"
   prune_stale_skills "$AGENT_DIR"
 else
-  cp -r "$SKILLS_SOURCE/skills/"* "$AGENT_DIR/"
+  for skill_src in "$SKILLS_SOURCE"/skills/*/; do
+    skill_name="$(basename "$skill_src")"
+    resolved_target="$(resolve_target "$AGENT_DIR/$skill_name")"
+    mkdir -p "$(dirname "$resolved_target")"
+    rm -rf "$resolved_target"
+    cp -r "$skill_src" "$resolved_target"
+  done
   prune_stale_skills "$AGENT_DIR"
   # Version marker — read by scripts/check-installed-skills-version.sh, which
   # commands/kmp-setup-hooks.md wires as the Option E SessionStart hook for exactly
@@ -212,7 +249,13 @@ if [[ "$AGENT_DIR" != ".agents/skills" ]]; then
     prune_stale_skills ".agents/skills"
   else
     mkdir -p ".agents/skills"
-    cp -r "$SKILLS_SOURCE/skills/"* ".agents/skills/"
+    for skill_src in "$SKILLS_SOURCE"/skills/*/; do
+      skill_name="$(basename "$skill_src")"
+      resolved_target="$(resolve_target ".agents/skills/$skill_name")"
+      mkdir -p "$(dirname "$resolved_target")"
+      rm -rf "$resolved_target"
+      cp -r "$skill_src" "$resolved_target"
+    done
     prune_stale_skills ".agents/skills"
     echo "$NEW_VERSION" > ".agents/skills/.kmp-agent-skills-version"
     echo "  ✅  Skills deployed to .agents/skills (v$NEW_VERSION)"
@@ -249,13 +292,17 @@ if [[ -d "skills" ]]; then
       continue
     fi
 
-    mkdir -p "$target"
+    # resolve_target: same symlinked-destination problem as the bundled-skill deploy
+    # above applies here too — write into the real resolved directory, never through
+    # a per-skill symlink.
+    resolved_target="$(resolve_target "$target")"
+    mkdir -p "$resolved_target"
     if command -v rsync >/dev/null 2>&1; then
-      rsync -a --delete "$skill_dir/" "$target/"
+      rsync -a --delete "$skill_dir/" "$resolved_target/"
     else
-      rm -rf "$target"
-      mkdir -p "$AGENT_DIR"
-      cp -R "$skill_dir" "$AGENT_DIR/"
+      rm -rf "$resolved_target"
+      mkdir -p "$(dirname "$resolved_target")"
+      cp -R "$skill_dir" "$resolved_target"
     fi
     echo "  ✅  project skill synced: $skill_name"
 
@@ -264,13 +311,14 @@ if [[ -d "skills" ]]; then
     # agentskills.io-compliant client, not just whichever $AGENT_DIR was detected/passed.
     if [[ "$AGENT_DIR" != ".agents/skills" ]]; then
       agents_target=".agents/skills/$skill_name"
-      mkdir -p "$agents_target"
+      resolved_agents_target="$(resolve_target "$agents_target")"
+      mkdir -p "$resolved_agents_target"
       if command -v rsync >/dev/null 2>&1; then
-        rsync -a --delete "$skill_dir/" "$agents_target/"
+        rsync -a --delete "$skill_dir/" "$resolved_agents_target/"
       else
-        rm -rf "$agents_target"
-        mkdir -p ".agents/skills"
-        cp -R "$skill_dir" ".agents/skills/"
+        rm -rf "$resolved_agents_target"
+        mkdir -p "$(dirname "$resolved_agents_target")"
+        cp -R "$skill_dir" "$resolved_agents_target"
       fi
       echo "  ✅  project skill mirrored to .agents/skills: $skill_name"
     fi

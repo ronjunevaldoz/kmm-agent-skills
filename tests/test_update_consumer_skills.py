@@ -136,6 +136,43 @@ class UpdateConsumerSkillsScriptTests(unittest.TestCase):
             self.assertIn("[installed] /kmp-current", result.stdout)
             self.assertIn("[new] /kmp-brand-new", result.stdout)
 
+    def test_deploys_correctly_when_each_skill_is_individually_symlinked(self) -> None:
+        # Real production shape found in a consumer project: .claude/skills/<name> is a
+        # symlink to .agents/skills/<name>, per skill (not the whole directory mirrored
+        # at once). Writing to that destination directly broke on both tools this script
+        # can use: BSD/macOS `cp -r` errored "Not a directory" on a directory source
+        # copied onto a destination whose last path component is a symlink, even though
+        # the link resolves to a real directory. Apple's openrsync (shipped since macOS
+        # 15, not GPL rsync) reported success and "sent N bytes" while silently writing
+        # nothing through it — worse than the cp error, since it looked like it worked.
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            source, project = tmp_root / "source", tmp_root / "project"
+            source.mkdir()
+            project.mkdir()
+            self._minimal_source(source)
+            self._write(project, "settings.gradle.kts", 'rootProject.name = "DemoApp"\n')
+
+            real_dir = project / ".agents" / "skills" / "shared-skill"
+            real_dir.mkdir(parents=True)
+            (real_dir / "SKILL.md").write_text("stale content\n", encoding="utf-8")
+            (project / ".claude" / "skills").mkdir(parents=True)
+            (project / ".claude" / "skills" / "shared-skill").symlink_to(
+                Path("../../.agents/skills/shared-skill"), target_is_directory=True
+            )
+
+            result = self._run_update(source, project)
+
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            # Content must have actually updated — both through the symlink and at the
+            # real path it points to.
+            via_symlink = (project / ".claude" / "skills" / "shared-skill" / "SKILL.md")
+            real_path = (project / ".agents" / "skills" / "shared-skill" / "SKILL.md")
+            self.assertIn("Shared bundle skill", via_symlink.read_text(encoding="utf-8"))
+            self.assertIn("Shared bundle skill", real_path.read_text(encoding="utf-8"))
+            # The symlink itself must survive — not get clobbered into a real directory.
+            self.assertTrue((project / ".claude" / "skills" / "shared-skill").is_symlink())
+
     def test_dry_run_survives_a_source_with_no_reflog(self) -> None:
         # `HEAD@{1}` needs a reflog entry, absent in a fresh/shallow/CI checkout. Under
         # `set -o pipefail` that git failure used to propagate and abort the whole run
