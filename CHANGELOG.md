@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.10.5] — 2026-08-07
+
+### Other
+
+- refactor(new-project): split into five phase references; close KI-009
+
+---
+
 ## [v2.10.4] — 2026-08-07
 
 ### Other
