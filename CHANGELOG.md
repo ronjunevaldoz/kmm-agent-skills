@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.10.2] — 2026-08-07
+
+### Docs
+
+- docs(update-skills): correct the version that ships automatic stale-skill pruning
+
+---
+
 ## [v2.10.1] — 2026-08-07
 
 ### Fixed
