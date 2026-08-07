@@ -4256,6 +4256,73 @@ class AgentsSkillsCrossClientTests(unittest.TestCase):
             self.assertFalse(any("bundled-looking skill name" in f for f in findings))
 
 
+class AgentSetupGitignoredTests(unittest.TestCase):
+    """A `.claude/AGENTS.md` that exists locally but is gitignored looks identical to a
+    correctly committed one to every filesystem-only check — it only breaks for whoever
+    clones next. Reproduces the real bug found in a consumer project (`awaken`): the
+    file was present and current on the author's machine, and both `--dry-run` and this
+    audit reported nothing wrong, because nothing checked git-tracking status."""
+
+    def _base_claude_setup(self, root: Path) -> Path:
+        (root / "settings.gradle.kts").write_text("", encoding="utf-8")
+        (root / "CLAUDE.md").write_text("", encoding="utf-8")
+        claude = root / ".claude"
+        (claude / "commands").mkdir(parents=True)
+        (claude / "commands" / "x.md").write_text("", encoding="utf-8")
+        (claude / "AGENTS.md").write_text("", encoding="utf-8")
+        (claude / "settings.json").write_text("{}", encoding="utf-8")
+        skill_dir = claude / "skills" / "kmp-mvi"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("", encoding="utf-8")
+        agents_skill = root / ".agents" / "skills" / "kmp-mvi"
+        agents_skill.mkdir(parents=True)
+        (agents_skill / "SKILL.md").write_text("", encoding="utf-8")
+        return claude
+
+    def _git_init(self, root: Path, gitignore: str) -> None:
+        subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+        (root / ".gitignore").write_text(gitignore, encoding="utf-8")
+
+    def test_flags_gitignored_agents_md(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._base_claude_setup(root)
+            self._git_init(root, ".claude/\n")
+            findings = audit_scripts._detect_agent_setup(root)
+            self.assertTrue(
+                any("AGENTS.md exists but is gitignored" in f for f in findings)
+            )
+
+    def test_flags_gitignored_commands_and_settings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._base_claude_setup(root)
+            self._git_init(root, ".claude/\n")
+            findings = audit_scripts._detect_agent_setup(root)
+            self.assertTrue(
+                any("commands/ exists but is gitignored" in f for f in findings)
+            )
+            self.assertTrue(
+                any("settings.json exists but is gitignored" in f for f in findings)
+            )
+
+    def test_ignores_when_only_skills_mirror_is_gitignored(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._base_claude_setup(root)
+            self._git_init(root, ".claude/skills/\n.agents/skills/\n")
+            findings = audit_scripts._detect_agent_setup(root)
+            self.assertFalse(any("gitignored" in f for f in findings))
+
+    def test_ignores_outside_a_git_repo(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._base_claude_setup(root)
+            # No `git init` — a plain checkout-less directory should never be flagged.
+            findings = audit_scripts._detect_agent_setup(root)
+            self.assertFalse(any("gitignored" in f for f in findings))
+
+
 class PartialParamDocumentationTests(unittest.TestCase):
     def _write(self, root: Path, rel_path: str, content: str) -> None:
         path = root / rel_path

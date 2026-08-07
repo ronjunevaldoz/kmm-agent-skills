@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -303,6 +304,27 @@ def print_roadmap(root: Path, state: dict, plan: list[dict]) -> None:
 
 # ── Agent & consumer setup checks ────────────────────────────────────────────
 
+def _git_ignored(root: Path, relpath: str) -> bool:
+    """True if `relpath` exists on disk but git would refuse to track it.
+
+    A file that's present locally and merely gitignored looks identical to a correctly
+    committed one to every other check here — it only breaks for whoever clones next.
+    Skips silently outside a git repo or if `git` isn't on PATH.
+    """
+    if not (root / ".git").exists():
+        return False
+    try:
+        result = subprocess.run(
+            ["git", "check-ignore", "-q", relpath],
+            cwd=root,
+            capture_output=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0
+
+
 def _detect_agent_setup(root: Path) -> list[str]:
     # Only meaningful for real Gradle projects; skip bare temp dirs used in unit tests.
     is_gradle_project = (root / "settings.gradle.kts").exists() or (root / "settings.gradle").exists()
@@ -317,10 +339,30 @@ def _detect_agent_setup(root: Path) -> list[str]:
 
     if not (claude / "AGENTS.md").exists():
         findings.append("agent-setup [HIGH]: .claude/AGENTS.md missing — no skill routing table (run /kmp-setup-agents)")
+    elif _git_ignored(root, ".claude/AGENTS.md"):
+        findings.append(
+            "agent-setup [HIGH]: .claude/AGENTS.md exists but is gitignored — CLAUDE.md "
+            "loads it as the literal system prompt every session, so a fresh clone, "
+            "teammate, or CI runner gets none at all until someone reruns "
+            "/kmp-setup-agents; commit it (see \"What To Commit Vs Gitignore\" in "
+            "docs/reference/ai-collaboration.md)"
+        )
 
     commands_dir = claude / "commands"
     if not commands_dir.exists() or not any(commands_dir.iterdir()):
         findings.append("agent-setup [MEDIUM]: .claude/commands/ missing — consumer commands not installed")
+    elif _git_ignored(root, ".claude/commands"):
+        findings.append(
+            "agent-setup [MEDIUM]: .claude/commands/ exists but is gitignored — "
+            "installed consumer commands never reach a fresh clone or teammate"
+        )
+
+    settings_json = claude / "settings.json"
+    if settings_json.exists() and _git_ignored(root, ".claude/settings.json"):
+        findings.append(
+            "agent-setup [MEDIUM]: .claude/settings.json exists but is gitignored — "
+            "the Bash allowlist and hook wiring never reach a fresh clone or teammate"
+        )
 
     skills_dir = claude / "skills"
     if not skills_dir.exists() or not any(skills_dir.iterdir()):
