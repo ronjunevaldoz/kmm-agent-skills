@@ -91,10 +91,18 @@ def classify_file(path: Path, rel: str) -> list[dict]:
     is_sample = bool(_SAMPLE_PATH_RE.search(rel))
     rows: list[dict] = []
     pending_annotations: list[str] = []
+    # Brace depth inside a function body. A `val`/`var` in there is a local variable, not
+    # API surface — without this, every `val x = ...` inside a method body was classified
+    # as `core`, which in real code buries the actual declarations in noise.
+    fun_body_depth = 0
 
     for i, line in enumerate(text.splitlines(), 1):
         stripped = line.strip()
         if not stripped or stripped.startswith(("//", "*", "/*")):
+            continue
+
+        if fun_body_depth > 0:
+            fun_body_depth += line.count("{") - line.count("}")
             continue
 
         ann = _ANNOTATION_RE.match(line)
@@ -156,6 +164,13 @@ def classify_file(path: Path, rel: str) -> list[dict]:
             "visibility": visibility, "classification": classification,
             "confidence": confidence, "why": why, "problem": problem,
         })
+
+        # A `fun` with a block body opens a scope whose contents are locals, not API.
+        # A class/object body is NOT skipped — its members are exactly what we classify.
+        if kind == "fun":
+            opened = line.count("{") - line.count("}")
+            if opened > 0:
+                fun_body_depth = opened
     return rows
 
 

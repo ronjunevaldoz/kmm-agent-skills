@@ -96,6 +96,31 @@ class ClassifyDeclarationsTests(unittest.TestCase):
         rows = self._classify({"lib/src/commonTest/kotlin/ATest.kt": "public fun t() = 1\n"})
         self.assertEqual(rows, {})
 
+    def test_local_variables_inside_a_function_body_are_not_api_surface(self) -> None:
+        # Caught by the worked before/after example: `var last = null` inside a method
+        # body was classified as `core`. Real code is mostly function bodies, so this
+        # buried the actual declarations in noise.
+        rows = self._classify({"lib/A.kt":
+            "class Client {\n"
+            "    fun send(r: R): Response {\n"
+            "        var last: Response? = null\n"
+            "        val attempts = 3\n"
+            "        return last!!\n"
+            "    }\n"
+            "}\n"})
+        self.assertEqual(sorted(rows), ["Client", "send"])
+
+    def test_class_members_are_still_classified(self) -> None:
+        # The body-skip must apply to `fun` bodies only — a class body's members are
+        # exactly what this classifier exists to look at.
+        rows = self._classify({"lib/A.kt":
+            "class Client {\n"
+            "    internal fun helper() = 1\n"
+            "    val timeout: Long = 30\n"
+            "}\n"})
+        self.assertEqual(rows["helper"]["classification"], "helper")
+        self.assertEqual(rows["timeout"]["classification"], "core")
+
     def test_comment_lines_are_not_parsed_as_declarations(self) -> None:
         rows = self._classify({"lib/A.kt": "// public fun ghost() = 1\npublic fun real() = 1\n"})
         self.assertIn("real", rows)

@@ -73,6 +73,92 @@ caller could reach directly — never duplicate validation or defaults logic bet
 Two independent paths to build/do the same thing is the actual redundancy risk, not
 having both `core` and `sugar` in the first place (that split is normal and good).
 
+#### Worked example
+
+Before — everything public, and `sendWithTimeout` re-implements `send` instead of
+delegating, so the backoff math exists in two places:
+
+```kotlin
+class RetryingClient(private val engine: Engine) {
+
+    fun backoffDelay(attempt: Int): Long = 1000L * (1 shl attempt)
+
+    fun send(req: Request): Response {
+        var last: Response? = null
+        repeat(MAX_ATTEMPTS) { attempt ->
+            last = engine.execute(req)
+            if (last.isSuccess) return last
+            sleep(backoffDelay(attempt))
+        }
+        return last!!
+    }
+
+    fun sendWithTimeout(req: Request, timeoutMs: Long): Response {
+        var last: Response? = null
+        repeat(MAX_ATTEMPTS) { attempt ->
+            last = engine.execute(req.copy(timeoutMs = timeoutMs))
+            if (last.isSuccess) return last
+            sleep(1000L * (1 shl attempt))   // duplicated backoff math
+        }
+        return last!!
+    }
+}
+
+@Deprecated("no longer used")
+fun legacySend(req: Request): Response = RetryingClient(defaultEngine).send(req)
+```
+
+`classify_declarations.py` reports everything as `core` — no `helper`, no `sugar` — plus
+one problem:
+
+```
+  core         medium  backoffDelay
+  core         medium  send
+  core         medium  sendWithTimeout
+  deprecated   high    legacySend
+
+  legacySend — deprecated without ReplaceWith
+```
+
+Four public entry points where the API really has one. That flat `core`-only shape is the
+signal: nothing is marked as an implementation detail, and nothing delegates.
+
+After — one real implementation, one overload delegating to it, the retry math made
+`internal`, and the deprecation given a migration path:
+
+```kotlin
+class RetryingClient(private val engine: Engine) {
+
+    internal fun backoffDelay(attempt: Int): Long = 1000L * (1 shl attempt)
+
+    fun send(req: Request): Response = send(req, DEFAULT_TIMEOUT_MS)
+
+    fun send(req: Request, timeoutMs: Long): Response {
+        var last: Response? = null
+        repeat(MAX_ATTEMPTS) { attempt ->
+            last = engine.execute(req.copy(timeoutMs = timeoutMs))
+            if (last.isSuccess) return last
+            sleep(backoffDelay(attempt))
+        }
+        return last!!
+    }
+}
+
+@Deprecated("Use RetryingClient.send()", ReplaceWith("RetryingClient(defaultEngine).send(req)"))
+fun legacySend(req: Request): Response = RetryingClient(defaultEngine).send(req)
+```
+
+```
+  core         medium  RetryingClient
+  helper       high    backoffDelay     internal visibility
+  sugar        high    send             overload delegating to another send()
+  core         medium  send             public, not a delegation
+  deprecated   high    legacySend       @Deprecated present
+```
+
+No problems, and the published surface shrank from four functions to two. The backoff
+math now exists once, so a fix to it can't miss a caller.
+
 ### DSL (type-safe builder) — when it's warranted, when it's overengineering
 
 Verified against kotlinlang.org's own type-safe-builders page, not assumed. Real,
