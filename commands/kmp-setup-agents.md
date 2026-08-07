@@ -180,15 +180,11 @@ correct frontmatter shape from day one.
 - `rules/` is optional for assistant-specific overlays and must not duplicate the canonical policy doc
 - `docs/*` owns stable project design; `skills/*` owns repo-local execution guidance
 - `.claude/settings.json` owns runtime permissions and hook wiring
-- any edit to a project-owned skill must be re-deployed into **both** `.agents/skills/`
-  (the cross-client target) and `.claude/skills/` (Claude's own mirror) — `update-
-  consumer-skills.sh` handles both automatically, so this is one command, not two
-  manual copies
+- any edit to a project-owned skill must be re-deployed into **both** `.agents/skills/` (the cross-client target) and `.claude/skills/` (Claude's own mirror) — `update-consumer-skills.sh` handles both automatically, one command, not two manual copies
 
 `docs/reference/agent-catalog.md` should explain:
 - provider-neutral model tiers such as `flagship-coding`, `balanced-coding`, `fast-utility`, `precision-review`
-- provider-specific model mapping belongs in one canonical doc, not in every agent file
-- `AGENTS.md` / `CLAUDE.md` / `GEMINI.md` should point back to this catalog instead of hardcoding stale model names
+- provider-specific model mapping belongs in one canonical doc, not in every agent file; `AGENTS.md`/`CLAUDE.md`/`GEMINI.md` should point back to this catalog instead of hardcoding stale model names
 
 If any of these files already exist, print their current contents and skip unless the
 user explicitly asks to overwrite them.
@@ -203,57 +199,7 @@ sub-domain like that, author a project-owned maintainer agent the same way a pro
 authors a custom skill: `agents/<name>-maintainer.md` at the root, deployed to
 `.claude/agents/<name>-maintainer.md`.
 
-Only do this when the sub-domain is real and ongoing — a one-off task doesn't need a standing agent. Two concrete cases this collection's own skills already point at:
-
-**A library that mimics a reference API's shape** (`kmp-api-mimicry`):
-
-```markdown
-# <library name> — UI DSL Maintainer
-
-Owns: keeping the mimicked API shape honest against `MIRROR_MAP.md`.
-
-## When to use
-- Adding a new mimicked primitive (a new `*Modifier` function, a new slot composable)
-- Reviewing whether a change quietly started claiming real reference-API behavior
-  (recomposition, skipping) this library doesn't actually provide
-
-## Checklist
-1. Does `MIRROR_MAP.md` have a row for every mimicked primitive touched this session?
-2. Does the naming avoid fusing the target runtime's name with the reference API's own
-   type name (see `kmp-api-mimicry`'s naming-placeholder guidance)?
-3. Does any new doc comment or README line imply real compiler-plugin behavior
-   (`@Composable`-compatible, "supports recomposition") that isn't actually true?
-
-Load `kmp-api-mimicry` for the underlying method; this agent only owns
-enforcing it stays applied as the library grows.
-```
-
-**A library with a first-party native core** (`kmp-native-authoring` +
-`kmp-jni-pro`):
-
-```markdown
-# <library name> — Native Core Maintainer
-
-Owns: the boundary between this library's own C/C++ core and its JNI/cinterop bridge.
-
-## When to use
-- Adding a new native function that needs a Kotlin-side binding
-- Reviewing whether JNI glue is being written before the native core's own public
-  header API has stabilized (see `kmp-native-authoring`'s handoff point)
-
-## Checklist
-1. Is the new native function's public C-ABI signature in `native/include/` before any
-   `external fun` is written on the Kotlin side?
-2. Does the bridge stay a marshalling-only C-shim, with no reimplemented logic
-   (`kmp-jni-pro`'s Phase 0 discovery + EP-1)?
-3. Are native-side tests (ctest/gtest) passing independently of the Kotlin test suite?
-
-Load `kmp-native-authoring` for authoring the C/C++ core itself, and
-`kmp-jni-pro` for the bridge — this agent owns the boundary between them.
-```
-
-Both examples are starting points, not fixed templates — the real checklist should
-reflect the project's actual `MIRROR_MAP.md`/native layout, not be copied verbatim.
+Only do this when the sub-domain is real and ongoing — a one-off task doesn't need a standing agent. Two concrete cases this collection's own skills already point at (UI DSL mimicry, first-party native core) with full example templates: `kmp-expert`'s `references/agents-md-templates.md` → "Library-specific maintainer agent examples". Both are starting points, not fixed templates — the real checklist should reflect the project's actual `MIRROR_MAP.md`/native layout, not be copied verbatim.
 
 **Gate — verify before proceeding:**
 
@@ -399,6 +345,20 @@ accumulated `recurring_issues`/`proven_patterns` history.
 
 ---
 
+## Step 7b — Update `.gitignore`
+
+Without this step a fresh project silently inherits a real bug found in a consumer
+project: `.claude/` blanket-gitignored, so `.claude/AGENTS.md` — the file `CLAUDE.md`
+loads as the literal system prompt — was never tracked, leaving every fresh clone with
+no system prompt until someone reran this command.
+
+Read `kmp-expert`'s `references/agents-md-templates.md` → "What to commit vs gitignore"
+section for the exact entries and the blanket-vs-scoped replacement logic (same file
+and dual-path convention as Step 4's templates), and apply it to this project's
+`.gitignore` — creating the file if it doesn't exist yet.
+
+---
+
 ## Step 8 — Write `CLAUDE.md`
 
 If `CLAUDE.md` does not exist in the project root, create a minimal one that tells
@@ -443,7 +403,8 @@ If it already exists, print the current permissions and skip — do not overwrit
 template blindly.** Run the same check Step 5's gate already ran
 (`ls agents/README.md rules/README.md hooks/README.md commands/README.md
 skills/README.md`) plus `.claude/AGENTS.md`, `.claude/commands/`, `.claude/skills/`,
-`.agents/skills/`, `.agents/pipeline-context.json`, `.claude/settings.json`. Print `✅`
+`.agents/skills/`, `.agents/pipeline-context.json`, `.claude/settings.json`,
+`.gitignore`. Print `✅`
 only for a path that actually exists on disk right now; print `❌ missing` for anything
 that doesn't, and go back and create it before telling the user setup is complete. Never
 print a raw `<if>`/`</if>` tag — resolve the Codex/Gemini lines to plain text, present
@@ -466,6 +427,7 @@ Generated:
   ✅ .claude/skills/                           — same <N> skills, Claude Code's own mirror
   ✅ .agents/pipeline-context.json             — project context seeded for the planner agent
   ✅ .claude/settings.json                     — Bash allowlist + hook wiring home
+  ✅ .gitignore                                — scoped to ignore skill mirrors, track AGENTS.md
   ✅ .codex/agents/                            — <N> subagents translated to TOML (only if Codex was deployed)
   ✅ .gemini/commands/                         — <N> commands translated to TOML (only if Gemini was deployed)
 
@@ -495,6 +457,5 @@ Try it now:
 - Keep project-owned artifacts in the root scaffold even if they only contain README
   placeholders today; that empty scaffold prevents future edits from drifting straight
   into `.claude/`.
-- Gitignore only `.claude/skills/` and `.agents/skills/` (reproducible mirrors) — commit
-  `.claude/AGENTS.md`, `.claude/commands/`, `.claude/settings.json`. See "What To Commit
-  Vs Gitignore" in `docs/reference/ai-collaboration.md`.
+- Step 7b handles `.gitignore` scoping automatically now — see "What To Commit Vs
+  Gitignore" in `docs/reference/ai-collaboration.md` if you need to apply it by hand.

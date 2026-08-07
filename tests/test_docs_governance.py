@@ -166,6 +166,20 @@ class AgentSetupSingleOwnerTests(unittest.TestCase):
         self.assertIn("docs/decisions/", new_project)
         self.assertNotIn("docs/decisions/", setup_agents)
 
+    def test_setup_agents_scopes_gitignore_instead_of_only_documenting_it(self) -> None:
+        # A real consumer project (awaken) had .claude/ blanket-gitignored, so
+        # .claude/AGENTS.md — the file CLAUDE.md loads as the literal system prompt —
+        # was never tracked. Docs alone don't prevent a fresh project from inheriting
+        # the same bug; the command has to actually apply the scoped .gitignore.
+        setup_agents = self._read("commands/kmp-setup-agents.md")
+        ref = self._read("skills/kmp-expert/references/agents-md-templates.md")
+
+        self.assertIn("Step 7b", setup_agents)
+        self.assertIn(".gitignore", setup_agents)
+        self.assertIn("What to commit vs gitignore", ref)
+        self.assertIn(".claude/skills/", ref)
+        self.assertIn("!.claude/AGENTS.md", ref)
+
 
 class CleanCommentsCoversEveryCommentDetectorTests(unittest.TestCase):
     """`/kmp-clean-comments` must name every comment finding the audit can emit.

@@ -212,3 +212,78 @@ Recommended `.gitignore` entries in a consumer project:
 
 Do not add a bare `.claude/` or `.agents/` ignore line — that would also swallow
 `AGENTS.md`, `settings.json`, and `commands/`.
+
+**Applying this during `/kmp-setup-agents` Step 7b:** if `.gitignore` doesn't exist,
+create it with the entries above. If it exists and already has a **blanket** `.claude/`
+or `.agents/` line (exactly that, not a scoped sub-path), replace it with the scoped
+form, negating what must stay tracked:
+
+```gitignore
+.claude/*
+!.claude/AGENTS.md
+!.claude/settings.json
+!.claude/commands/
+.agents/skills/
+```
+
+If neither the scoped nor blanket entries exist yet, append the scoped form from above.
+If scoped entries are already present in any form, skip — don't duplicate.
+
+---
+
+## Library-specific maintainer agent examples
+
+Referenced from `/kmp-setup-agents`'s "Library-specific maintainer agents" section.
+`agents/<name>-maintainer.md` at the project root, deployed to
+`.claude/agents/<name>-maintainer.md` — only for a real, ongoing sub-domain the generic
+`agents/*.md` roster (`planner`, `implementer`, `reviewer`, `fixer`, ...) doesn't own.
+
+**A library that mimics a reference API's shape** (`kmp-api-mimicry`):
+
+```markdown
+# <library name> — UI DSL Maintainer
+
+Owns: keeping the mimicked API shape honest against `MIRROR_MAP.md`.
+
+## When to use
+- Adding a new mimicked primitive (a new `*Modifier` function, a new slot composable)
+- Reviewing whether a change quietly started claiming real reference-API behavior
+  (recomposition, skipping) this library doesn't actually provide
+
+## Checklist
+1. Does `MIRROR_MAP.md` have a row for every mimicked primitive touched this session?
+2. Does the naming avoid fusing the target runtime's name with the reference API's own
+   type name (see `kmp-api-mimicry`'s naming-placeholder guidance)?
+3. Does any new doc comment or README line imply real compiler-plugin behavior
+   (`@Composable`-compatible, "supports recomposition") that isn't actually true?
+
+Load `kmp-api-mimicry` for the underlying method; this agent only owns
+enforcing it stays applied as the library grows.
+```
+
+**A library with a first-party native core** (`kmp-native-authoring` +
+`kmp-jni-pro`):
+
+```markdown
+# <library name> — Native Core Maintainer
+
+Owns: the boundary between this library's own C/C++ core and its JNI/cinterop bridge.
+
+## When to use
+- Adding a new native function that needs a Kotlin-side binding
+- Reviewing whether JNI glue is being written before the native core's own public
+  header API has stabilized (see `kmp-native-authoring`'s handoff point)
+
+## Checklist
+1. Is the new native function's public C-ABI signature in `native/include/` before any
+   `external fun` is written on the Kotlin side?
+2. Does the bridge stay a marshalling-only C-shim, with no reimplemented logic
+   (`kmp-jni-pro`'s Phase 0 discovery + EP-1)?
+3. Are native-side tests (ctest/gtest) passing independently of the Kotlin test suite?
+
+Load `kmp-native-authoring` for authoring the C/C++ core itself, and
+`kmp-jni-pro` for the bridge — this agent owns the boundary between them.
+```
+
+Both examples are starting points, not fixed templates — the real checklist should
+reflect the project's actual `MIRROR_MAP.md`/native layout, not be copied verbatim.
