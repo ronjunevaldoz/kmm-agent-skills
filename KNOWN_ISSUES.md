@@ -52,16 +52,22 @@ accepting the residual risk as documented here.
 
 ---
 
-### KI-009 — 2 slash commands exceed the 500-line progressive-disclosure guideline
+### KI-009 — slash commands exceeding the 500-line progressive-disclosure guideline
 
-**Status:** Open — the 500-line guideline now covers `SKILL.md` (KI-008, resolved) and
-`references/*.md` (v2.10.0), and as of the `oversized_command_md` check it covers
-`commands/*.md` too. Two commands are over:
+**Status:** Open, one command remaining. The 500-line guideline now covers `SKILL.md`
+(KI-008, resolved), `references/*.md` (v2.10.0), and `commands/*.md` (the
+`oversized_command_md` check).
 
-| Command | Lines | Over by |
-|---|---|---|
-| `/kmp-new-project` | 1390 | 2.8x |
-| `/kmp-setup-agents` | 638 | 1.3x |
+| Command | Was | Now | State |
+|---|---|---|---|
+| `/kmp-setup-agents` | 638 | **496** | ✅ resolved — `AGENTS.md` + `CLAUDE.md` template bodies moved to `kmp-expert`'s `references/agents-md-templates.md` |
+| `/kmp-new-project` | 1390 | 1157 | Open — Step 10's duplicated agent setup was removed (a real drift bug, see below), but the command is still 2.3x over |
+
+**Why the templates went to a skill reference, not a plugin-root `assets/` directory:**
+`/kmp-setup-agents` is consumer-facing (README tells users to run it in any existing KMP
+project), and `update-consumer-skills.sh --install-commands` copies a command as a single
+bare `.md` file. Skills are always deployed; assets are not. A template referenced from
+`assets/` would resolve in this repo and be missing in every consumer project.
 
 **Why it matters:** a slash command's whole body loads into context the moment it's
 invoked — the same cost the guideline bounds for `SKILL.md`. `/kmp-new-project` is also

@@ -900,7 +900,7 @@ owns, and is the single source of truth for, every piece of the agent scaffold:
 
 | What it writes | Its step |
 |---|---|
-| `.claude/AGENTS.md` (App and Library variants) | Step 4 |
+| `.claude/AGENTS.md` (App and Library variants) — body lives in `kmp-expert`'s `references/agents-md-templates.md` | Step 4 |
 | `agents/`, `rules/`, `hooks/`, `commands/`, `skills/` scaffold + `CLAUDE.md` + `docs/reference/ai-collaboration.md` + `docs/reference/agent-catalog.md` | Step 5 |
 | Consumer command set into `.claude/commands/` | Step 6 |
 | Codex / Gemini translation (opt-in, never silent) | Step 6a |

@@ -120,10 +120,24 @@ class AgentSetupSingleOwnerTests(unittest.TestCase):
                 f"belongs to /kmp-setup-agents alone, or the two copies will drift again",
             )
 
-    def test_setup_agents_still_owns_the_agents_md_template(self) -> None:
-        setup_agents = self._read("commands/kmp-setup-agents.md")
-        self.assertIn("## Published artifacts", setup_agents)
-        self.assertIn("## Skill routing", setup_agents)
+    def test_the_agents_md_template_lives_in_exactly_one_deployed_place(self) -> None:
+        # The template moved out of the command and into a skill reference — a command is
+        # copied to a consumer as a single bare .md (update-consumer-skills.sh's
+        # `cp "$cmd_file"`), while skills are always deployed, so a skill reference is
+        # the only location a consumer-facing command can actually resolve at runtime.
+        ref = self._read("skills/kmp-expert/references/agents-md-templates.md")
+        self.assertIn("## Published artifacts", ref)
+        self.assertIn("### For APP projects", ref)
+        self.assertIn("### For LIBRARY projects", ref)
+
+        for command in ("kmp-setup-agents", "kmp-new-project"):
+            body = self._read(f"commands/{command}.md")
+            self.assertNotIn(
+                "## Published artifacts", body,
+                f"the AGENTS.md template body is back in {command}.md — it belongs only "
+                f"in kmp-expert/references/agents-md-templates.md",
+            )
+            self.assertIn("agents-md-templates.md", body)
 
     def test_new_project_still_owns_what_setup_agents_does_not_write(self) -> None:
         # setup-agents runs against existing projects that already have a README and

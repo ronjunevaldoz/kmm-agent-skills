@@ -75,7 +75,6 @@ KNOWN_DEBT: set[tuple[str, str]] = {
     # real per-command restructuring decision (which steps belong in the owning skill
     # vs. stay inline). Tracked, not silently passed.
     ("kmp-new-project", "oversized_command_md"),
-    ("kmp-setup-agents", "oversized_command_md"),
 }
 
 # Required quality sections (as headings or inline markers)
