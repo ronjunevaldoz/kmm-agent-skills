@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.10.7] — 2026-08-07
+
+### Fixed
+
+- fix(audit): three gaps in _detect_god_utils_file, incl. silent no-op under explicitApi()
+
+---
+
 ## [v2.10.6] — 2026-08-07
 
 ### Fixed
