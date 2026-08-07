@@ -3789,6 +3789,40 @@ class AgentFileStandardsTests(unittest.TestCase):
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any(f.startswith("project agent") for f in findings))
 
+    def test_flags_tier_name_in_deployed_agent_with_no_canonical_source(self) -> None:
+        """Reproduces the real bug found in a consumer project (`awaken`): the real
+        agent files lived under a project skill (`skills/awake/agents/`), symlinked
+        into `.claude/agents/` — never at the canonical `agents/` path this detector
+        used to require. 10 files had `model: balanced-coding`/`flagship-coding`
+        (tier-name literals) and produced a real "invalid model" error at runtime,
+        completely outside the old detector's scan."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "skills/awake/agents/engineer.md",
+                "---\nname: engineer\ndescription: Builds features.\n"
+                "model: balanced-coding\n---\n\nBody.\n",
+            )
+            (root / ".claude").mkdir(parents=True, exist_ok=True)
+            (root / ".claude" / "agents").symlink_to(
+                root / "skills" / "awake" / "agents", target_is_directory=True
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("project agent uses tier name as model" in f for f in findings))
+
+    def test_does_not_double_report_a_tier_name_present_in_both_copies(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            content = (
+                "---\nname: reviewer\ndescription: Reviews code.\n"
+                "model: balanced-coding\n---\n\nBody.\n"
+            )
+            self._write(root, "agents/reviewer.md", content)
+            self._write(root, ".claude/agents/reviewer.md", content)
+            findings = audit_scripts.audit_project(root)
+            hits = [f for f in findings if "project agent uses tier name as model" in f]
+            self.assertEqual(len(hits), 1)
+
 
 class ObjectCreationInLoopTests(unittest.TestCase):
     def _write(self, root: Path, rel_path: str, content: str) -> None:

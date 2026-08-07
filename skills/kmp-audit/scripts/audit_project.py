@@ -3576,6 +3576,33 @@ _TOML_KEY_RE = {
 }
 
 
+def _agent_md_standards_findings(text: str, rel: Path) -> list[str]:
+    findings: list[str] = []
+    fm_match = _FRONTMATTER_RE.match(text)
+    if not fm_match:
+        findings.append(
+            f"project agent missing frontmatter [HIGH]: {rel} — agent files "
+            f"need a --- ... --- YAML frontmatter block with name and description"
+        )
+        return findings
+    frontmatter = fm_match.group(1)
+    if not _FRONTMATTER_NAME_RE.search(frontmatter):
+        findings.append(f"project agent frontmatter missing name [HIGH]: {rel}")
+    if not _FRONTMATTER_DESCRIPTION_RE.search(frontmatter):
+        findings.append(f"project agent frontmatter missing description [HIGH]: {rel}")
+    model_match = _AGENT_MODEL_FIELD_RE.search(frontmatter)
+    if model_match and model_match.group(1) in _TIER_NAME_LITERALS:
+        findings.append(
+            f"project agent uses tier name as model [HIGH]: {rel} — "
+            f"model: {model_match.group(1)} is a provider-neutral tier name, "
+            f"not a real model id; look up the real id for this tier in "
+            f"docs/reference/agent-catalog.md's Mapping Rule table (see "
+            f"kmp-expert's Project-Specific Commands/Agents/"
+            f"Skills section)"
+        )
+    return findings
+
+
 def _detect_agent_file_standards(root: Path) -> list[str]:
     """Flag a project-owned agent file (agents/*.md or .codex/agents/*.toml) that
     doesn't meet its real, verified format requirements, or a tier-name literal
@@ -3584,6 +3611,7 @@ def _detect_agent_file_standards(root: Path) -> list[str]:
     findings: list[str] = []
 
     agents_dir = root / "agents"
+    source_content: dict[str, str] = {}
     if agents_dir.is_dir():
         for agent_md in sorted(agents_dir.glob("*.md")):
             if _is_excluded(agent_md, root):
@@ -3592,33 +3620,26 @@ def _detect_agent_file_standards(root: Path) -> list[str]:
                 text = agent_md.read_text(encoding="utf-8", errors="ignore")
             except OSError:
                 continue
-            rel = agent_md.relative_to(root)
-            fm_match = _FRONTMATTER_RE.match(text)
-            if not fm_match:
-                findings.append(
-                    f"project agent missing frontmatter [HIGH]: {rel} — agent files "
-                    f"need a --- ... --- YAML frontmatter block with name and description"
-                )
+            source_content[agent_md.name] = text
+            findings.extend(_agent_md_standards_findings(text, agent_md.relative_to(root)))
+
+    # Also check .claude/agents/ directly — the copy Claude Code actually loads. A
+    # project's real source doesn't always live at the canonical agents/ path (e.g. a
+    # custom agent bundled inside a project skill and symlinked in), so relying on
+    # agents_dir alone misses the exact files that can produce a real "invalid model"
+    # runtime error. Deliberately skips _is_excluded (.claude is normally excluded to
+    # avoid scanning deployed skill bundle templates) since .claude/agents/*.md is
+    # exactly this detector's real target here, same reasoning as the .codex scan below.
+    deployed_dir = root / ".claude" / "agents"
+    if deployed_dir.is_dir():
+        for agent_md in sorted(deployed_dir.glob("*.md")):
+            try:
+                text = agent_md.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
                 continue
-            frontmatter = fm_match.group(1)
-            if not _FRONTMATTER_NAME_RE.search(frontmatter):
-                findings.append(
-                    f"project agent frontmatter missing name [HIGH]: {rel}"
-                )
-            if not _FRONTMATTER_DESCRIPTION_RE.search(frontmatter):
-                findings.append(
-                    f"project agent frontmatter missing description [HIGH]: {rel}"
-                )
-            model_match = _AGENT_MODEL_FIELD_RE.search(frontmatter)
-            if model_match and model_match.group(1) in _TIER_NAME_LITERALS:
-                findings.append(
-                    f"project agent uses tier name as model [HIGH]: {rel} — "
-                    f"model: {model_match.group(1)} is a provider-neutral tier name, "
-                    f"not a real model id; look up the real id for this tier in "
-                    f"docs/reference/agent-catalog.md's Mapping Rule table (see "
-                    f"kmp-expert's Project-Specific Commands/Agents/"
-                    f"Skills section)"
-                )
+            if source_content.get(agent_md.name) == text:
+                continue  # already validated via its project-owned source copy
+            findings.extend(_agent_md_standards_findings(text, agent_md.relative_to(root)))
 
     codex_agents_dir = root / ".codex" / "agents"
     if codex_agents_dir.is_dir():
