@@ -203,6 +203,25 @@ class CleanCommentsCoversEveryCommentDetectorTests(unittest.TestCase):
             self.assertIn(finding, auditor, f"{finding!r} no longer emitted by audit_project.py")
 
 
+class SetupAgentsCommandClassificationTests(unittest.TestCase):
+    """`kmp-setup-agents.md`'s consumer-safe / repo-internal command lists must cover
+    every file in commands/ between them. Found stale by audit: kmp-clean-comments.md
+    and kmp-migrate-to-shadcn.md were added to commands/ after this list was written
+    and sat in neither bucket — not flagged unsafe, not confirmed safe, silently
+    excluded from --install-commands guidance either way.
+    """
+
+    def test_every_command_is_classified_as_consumer_safe_or_repo_internal(self) -> None:
+        all_commands = {p.name for p in (REPO_ROOT / "commands").glob("*.md")}
+        text = (REPO_ROOT / "commands" / "kmp-setup-agents.md").read_text(encoding="utf-8")
+        unclassified = {name for name in all_commands if name not in text}
+        self.assertEqual(
+            unclassified, set(),
+            f"commands/ files missing from both the consumer-safe and repo-internal "
+            f"lists in kmp-setup-agents.md: {sorted(unclassified)}",
+        )
+
+
 class CommonFirstSharedCodeTests(unittest.TestCase):
     def test_common_first_formatting_rule_is_explicit(self) -> None:
         normalize = lambda text: " ".join(text.lower().replace("`", "").split())

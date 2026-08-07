@@ -298,11 +298,15 @@ Consumer commands (safe to install):
   kmp-update-skills.md          — pull latest skills and re-deploy
   kmp-report-skill-issue.md     — file a skill bug report
   kmp-check-updates.md          — check for skill updates
+  kmp-clean-comments.md         — refactor code documentation
+  kmp-migrate-to-shadcn.md      — migrate design system to shadcn-compose
 ```
 
-Do NOT copy repo-internal commands: `kmp-new-skill.md`, `kmp-modify-skill.md`,
-`kmp-maintain-docs.md`, `kmp-release-notes.md`, `kmp-setup-hooks.md`,
-`kmp-new-project.md`, `kmp-setup-agents.md`.
+Do NOT copy repo-internal commands — each one operates on `kmp-agent-skills` itself, not
+on the consumer project: `kmp-new-skill.md`, `kmp-modify-skill.md`, `kmp-maintain-docs.md`,
+`kmp-release-notes.md`, `kmp-setup-hooks.md`, `kmp-new-project.md`, `kmp-setup-agents.md`,
+`kmp-submit-issue.md`, `kmp-summarize-issues.md`, `kmp-sync-local-skills.md`.
+Both lists must cover every file in `commands/`.
 
 For each file: if it already exists in `.claude/commands/` and the content differs,
 show a one-line diff summary and ask `[update/skip]` before overwriting.
