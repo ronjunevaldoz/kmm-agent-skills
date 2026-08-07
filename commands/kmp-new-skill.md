@@ -44,6 +44,10 @@ Show the answers and wait for user confirmation before writing the file.
 
 ## Step 3 — Scaffold the SKILL.md
 
+Follow `docs/reference/writing-style.md` for any numbered step you write.
+One instruction per step, under 20 prose words, active voice.
+Rationale prose and changelog entries are exempt — that doc says which and why.
+
 Create `skills/kmp-$ARGUMENTS/SKILL.md` with this exact structure:
 
 ```markdown

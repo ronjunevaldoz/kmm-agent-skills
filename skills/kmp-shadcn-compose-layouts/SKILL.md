@@ -364,11 +364,16 @@ unusual layouts, same caveat `kmp-compose-design-system`'s own
 ## Output Style
 
 When asked to build or audit a layout, respond in this order:
-1. Confirm shadcn-compose is already set up in the project (`ShadcnTheme` in real source) — if not, point to `kmp-shadcn-compose` first rather than proceeding
-2. Identify which archetype the request matches (login/auth form, generic form, data table, admin/dashboard shell) — ask if genuinely ambiguous rather than guessing
-3. The recipe, using only verified signatures — call out any parameter not shown in this skill with a note to verify it via `fetch_component_signature.py`
-4. Any real, disclosed gap relevant to the request (e.g. no password masking, no table sort/filter) — never silently paper over one
-5. For an audit request: run `scan_shadcn_layout_gaps.py`, then explain each finding's suggested migration in the same terms as this skill's own recipes
+1. Confirm shadcn-compose is set up — look for `ShadcnTheme` in real source.
+   If it is missing, point to `kmp-shadcn-compose` first.
+2. Identify the archetype: login/auth form, generic form, data table, or admin shell.
+   Ask when the request is genuinely ambiguous. Do not guess.
+3. Give the recipe, using only verified signatures.
+   Flag any parameter not shown here — verify it with `fetch_component_signature.py`.
+4. Name any real, disclosed gap that affects the request.
+   Examples: no password masking, no table sort/filter. Never paper over one silently.
+5. For an audit request, run `scan_shadcn_layout_gaps.py`.
+   Explain each finding's migration in the same terms as this skill's own recipes.
 
 ---
 

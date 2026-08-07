@@ -309,6 +309,62 @@ def scan_skill(skill_dir: Path) -> list[dict]:
     return issues
 
 
+# ASD-STE100 (the aerospace controlled-language standard, free at asd-ste100.org) caps a
+# procedural sentence at 20 words and requires one instruction per sentence. This repo
+# adopts that structural rule for *procedural* text only — numbered steps — and
+# deliberately not STE's ~900-word approved dictionary, which would strip precise terms
+# this collection depends on ("delegate", "heuristic", "residual"). Rationale and the
+# rejected alternatives live in docs/reference/writing-style.md.
+#
+# Inline code spans are removed before counting: `binary-compatibility-validator` is an
+# identifier, not prose complexity. Tokens with no letter in them (stray commas left by
+# that removal) are not words either — counting them made an enumeration of backticked
+# skill names look like a 25-word sentence.
+_NUMBERED_STEP_RE = re.compile(r"^\s*\d+\.\s+(.*)")
+_CODE_SPAN_RE = re.compile(r"`[^`]*`")
+_MAX_PROCEDURAL_WORDS = 20
+
+
+def procedural_word_count(text: str) -> int:
+    """Prose words in a procedural line, ignoring inline code spans and punctuation."""
+    return sum(1 for tok in _CODE_SPAN_RE.sub(" ", text).split() if any(c.isalpha() for c in tok))
+
+
+def scan_long_procedural_steps(paths: list[Path], label_prefix: str = "") -> list[dict]:
+    """Flag a numbered step whose prose runs past the 20-word procedural limit."""
+    issues: list[dict] = []
+    for path in paths:
+        in_fence = False
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if line.lstrip().startswith("```"):
+                in_fence = not in_fence
+                continue
+            if in_fence:
+                continue
+            m = _NUMBERED_STEP_RE.match(line)
+            if not m:
+                continue
+            words = procedural_word_count(m.group(1))
+            if words <= _MAX_PROCEDURAL_WORDS:
+                continue
+            name = path.stem if path.name != "SKILL.md" else path.parent.name
+            issues.append({
+                "skill": f"{label_prefix}{name}",
+                "skill_dir": name,
+                "severity": "LOW",
+                "check": "long_procedural_step",
+                "detail": f"{path.name}:{lineno} — numbered step is {words} prose words (limit 20)",
+                "prompt_hint": (
+                    f"Step at {path}:{lineno} runs {words} prose words. Per this repo's "
+                    f"writing style (docs/reference/writing-style.md), a numbered step "
+                    f"holds one instruction and stays under 20 words. Split it into two "
+                    f"steps, or move the explanation onto its own line beneath the step."
+                ),
+                "description": "", "last_updated": "", "lines": words,
+            })
+    return issues
+
+
 def scan_commands() -> list[dict]:
     """Apply the same 500-line progressive-disclosure guideline to `commands/*.md`.
 
@@ -373,6 +429,10 @@ def main() -> int:
             all_issues.extend(scan_skill(skill_dir))
 
     all_issues.extend(scan_commands())
+    all_issues.extend(scan_long_procedural_steps(sorted(SKILLS_DIR.glob("*/SKILL.md"))))
+    all_issues.extend(
+        scan_long_procedural_steps(sorted(COMMANDS_DIR.glob("*.md")), label_prefix="/")
+    )
 
     open_known = read_open_known_issues()
 

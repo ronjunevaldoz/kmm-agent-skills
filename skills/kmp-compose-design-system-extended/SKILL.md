@@ -323,7 +323,8 @@ fun SettingsPage() {
 8. `AppSelect` — dropdown opens/closes, selected value updates, keyboard accessible
 9. Desktop hover on `AppIconButton` inside `AppTooltip` — tooltip appears above, does not blink
 10. `AppResizablePanelGroup` — dragging the divider resizes both panes smoothly, clamped to `minWeight`/`maxWeight`
-11. `AppScrollArea` on Desktop — scrollbar renders aligned to the trailing edge, thumb is draggable and tracks scroll position; on Android/iOS, no visible thumb (expected — not a bug)
+11. `AppScrollArea` on Desktop — scrollbar sits on the trailing edge, thumb drags and tracks scroll.
+    On Android/iOS there is no visible thumb. That is expected, not a bug.
 12. `./gradlew :desktopApp:run` — all components render correctly on JVM target
 
 ---

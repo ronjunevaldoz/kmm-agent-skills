@@ -410,3 +410,45 @@ class ReadOpenKnownIssuesTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LongProceduralStepTests(unittest.TestCase):
+    """ASD-STE100's 20-word procedural cap, adopted for numbered steps only.
+
+    Rationale and the rejected parts of STE live in docs/reference/writing-style.md.
+    """
+
+    def _count(self, text: str) -> int:
+        return scan_skill_issues_scripts.procedural_word_count(text)
+
+    def test_inline_code_spans_do_not_count_as_prose(self) -> None:
+        # An enumeration of backticked identifiers is data, not a long sentence.
+        self.assertEqual(
+            self._count("Load these: `navigation`, `mvi`, `paging`, `analytics`"), 2)
+
+    def test_punctuation_left_by_code_removal_is_not_a_word(self) -> None:
+        # Counting the leftover commas made a list of skill names look like a 25-word
+        # sentence — the bug that made the first run of this check report false hits.
+        self.assertEqual(self._count("`a`, `b`, `c`, `d`"), 0)
+
+    def test_flags_a_step_over_the_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "kmp-x.md"
+            p.write_text("1. " + " ".join(f"word{i}" for i in range(25)) + "\n", encoding="utf-8")
+            issues = scan_skill_issues_scripts.scan_long_procedural_steps([p])
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues[0]["check"], "long_procedural_step")
+
+    def test_ignores_a_step_within_the_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "kmp-x.md"
+            p.write_text("1. Run the script and read the report line.\n", encoding="utf-8")
+            self.assertEqual(scan_skill_issues_scripts.scan_long_procedural_steps([p]), [])
+
+    def test_ignores_numbered_lines_inside_a_fenced_block(self) -> None:
+        # Numbered lines inside sample output or code are not instructions to an agent.
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "kmp-x.md"
+            p.write_text("```\n1. " + " ".join(f"w{i}" for i in range(30)) + "\n```\n",
+                         encoding="utf-8")
+            self.assertEqual(scan_skill_issues_scripts.scan_long_procedural_steps([p]), [])

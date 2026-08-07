@@ -98,6 +98,10 @@ If ambiguous, show a list and ask the user to confirm.
 
 ## Step 2 — Check current quality gaps
 
+Any numbered step you add or edit follows `docs/reference/writing-style.md`:
+one instruction, under 20 prose words, active voice.
+The `long_procedural_step` finding below is that rule.
+
 ```bash
 python3 scripts/scan_skill_issues.py | python3 -c "
 import json, sys
