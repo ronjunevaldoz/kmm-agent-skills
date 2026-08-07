@@ -102,7 +102,21 @@ naming:
   FunctionNaming:
     active: true
     excludes: ['**/test/**', '**/*Test.kt', '**/*Preview*']
+  InvalidPackageDeclaration:
+    active: true
+```
 
+**"Package directive does not match the file location"** — Detekt's `InvalidPackageDeclaration`
+rule (naming ruleset, alias `PackageDirectoryMismatch`), not Ktlint. It's active by
+default and already running via `buildUponDefaultConfig = true` above, same invisible-
+by-default situation as `ForbiddenComment`; listed here so it's stated, not assumed.
+Fires when the `package` statement doesn't match the file's path relative to the source
+root (`src/commonMain/kotlin/`) — a file at `.../com/foo/bar/File.kt` declaring
+`package com.foo.baz` mismatches the `bar` segment. Fix the `package` line or move the
+file to match it; there's no config here to silence it correctly, since the mismatch is
+always a real bug (an unreachable import path for other files in the same package).
+
+```yaml
 libraries:
   rules:
     - name: 'NoComposeInPresenter'

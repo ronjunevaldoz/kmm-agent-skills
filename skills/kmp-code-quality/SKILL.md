@@ -32,6 +32,9 @@ metadata:
     - composable naming
     - constant naming
     - backing property
+    - package directive does not match the file location
+    - InvalidPackageDeclaration
+    - PackageDirectoryMismatch
 ---
 
 ## When to Use This Skill
