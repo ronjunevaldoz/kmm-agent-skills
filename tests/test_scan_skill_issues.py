@@ -282,6 +282,29 @@ class AgentSkillsSpecTests(unittest.TestCase):
             report = self._run_scan(root)
         self.assertFalse(any(i["check"] == "oversized_reference_md" for i in report["issues"]))
 
+    def test_oversized_command_md_flagged(self) -> None:
+        # A slash command's whole body loads on invocation — the same cost
+        # oversized_skill_md bounds for SKILL.md — but commands/ was covered by no size
+        # check at all until this one.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            commands_dir = root / "commands"
+            commands_dir.mkdir(parents=True)
+            padding = "\n".join(f"Step {i}." for i in range(600))
+            (commands_dir / "kmp-huge.md").write_text(f"# /kmp-huge\n\n{padding}\n", encoding="utf-8")
+            (commands_dir / "kmp-small.md").write_text("# /kmp-small\n\nDo one thing.\n", encoding="utf-8")
+
+            old = scan_skill_issues_scripts.COMMANDS_DIR
+            scan_skill_issues_scripts.COMMANDS_DIR = commands_dir
+            try:
+                issues = scan_skill_issues_scripts.scan_commands()
+            finally:
+                scan_skill_issues_scripts.COMMANDS_DIR = old
+
+        flagged = [i for i in issues if i["check"] == "oversized_command_md"]
+        self.assertEqual([i["skill_dir"] for i in flagged], ["kmp-huge"])
+        self.assertEqual(flagged[0]["skill"], "/kmp-huge")
+
     def test_known_debt_reported_but_does_not_block(self) -> None:
         # KI-008: a skill/check pair already in the KNOWN_DEBT baseline is real,
         # visible debt — it must still show up in the report, but must not fail

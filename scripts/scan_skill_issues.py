@@ -16,6 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SKILLS_DIR = ROOT / "skills"
+COMMANDS_DIR = ROOT / "commands"
 KNOWN_ISSUES_FILE = ROOT / "KNOWN_ISSUES.md"
 TODAY = date.today()
 STALE_MONTHS = 6
@@ -68,6 +69,13 @@ _AGENTSKILLS_MAX_RECOMMENDED_LINES = 500
 KNOWN_DEBT: set[tuple[str, str]] = {
     ("kmp-compose-design-system", "description_approaching_limit"),
     ("kmp-layout-system", "description_approaching_limit"),
+    # KI-009 — two commands exceed the same 500-line guideline. Splitting a slash
+    # command is not the same mechanical move as splitting a SKILL.md: a command is an
+    # executable procedure whose steps are ordered and cross-referencing, so it needs a
+    # real per-command restructuring decision (which steps belong in the owning skill
+    # vs. stay inline). Tracked, not silently passed.
+    ("kmp-new-project", "oversized_command_md"),
+    ("kmp-setup-agents", "oversized_command_md"),
 }
 
 # Required quality sections (as headings or inline markers)
@@ -305,6 +313,45 @@ def scan_skill(skill_dir: Path) -> list[dict]:
     return issues
 
 
+def scan_commands() -> list[dict]:
+    """Apply the same 500-line progressive-disclosure guideline to `commands/*.md`.
+
+    A slash command's whole body loads into context the moment it's invoked — exactly
+    the cost `oversized_skill_md` exists to bound for `SKILL.md` — but commands were
+    never covered by any size check. Reported per-command using the command's filename
+    stem as the `skill_dir` key so `KNOWN_DEBT` gates it the same way as the other two.
+    """
+    issues: list[dict] = []
+    if not COMMANDS_DIR.is_dir():
+        return issues
+
+    for cmd_file in sorted(COMMANDS_DIR.glob("*.md")):
+        lines = cmd_file.read_text(encoding="utf-8").splitlines()
+        if len(lines) <= _AGENTSKILLS_MAX_RECOMMENDED_LINES:
+            continue
+        name = cmd_file.stem
+        issues.append({
+            "skill": f"/{name}",
+            "skill_dir": name,
+            "severity": "MEDIUM",
+            "check": "oversized_command_md",
+            "detail": (
+                f"commands/{cmd_file.name} is {len(lines)} lines — same 500-line "
+                f"guideline as SKILL.md and references/*.md"
+            ),
+            "prompt_hint": (
+                f"`/{name}` is {len(lines)} lines and loads in full on every invocation. "
+                f"Move the step-by-step detail into the skill(s) it already delegates to, "
+                f"or into `references/*.md` under the owning skill, and keep the command "
+                f"itself a thin orchestration checklist."
+            ),
+            "description": "",
+            "last_updated": "",
+            "lines": len(lines),
+        })
+    return issues
+
+
 def read_open_known_issues() -> list[str]:
     """Return titles of issues marked as open in KNOWN_ISSUES.md."""
     if not KNOWN_ISSUES_FILE.exists():
@@ -328,6 +375,8 @@ def main() -> int:
     for skill_dir in sorted(SKILLS_DIR.iterdir()):
         if skill_dir.is_dir():
             all_issues.extend(scan_skill(skill_dir))
+
+    all_issues.extend(scan_commands())
 
     open_known = read_open_known_issues()
 

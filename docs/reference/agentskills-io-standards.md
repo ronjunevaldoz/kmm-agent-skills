@@ -73,6 +73,7 @@ repo's own internal quality bar:
 | `description_approaching_limit` | LOW | `description` over 800 chars — not a violation, a heads-up |
 | `oversized_skill_md` | MEDIUM | `SKILL.md` body over 500 lines — the progressive-disclosure guideline |
 | `oversized_reference_md` | MEDIUM | A single `references/*.md` file over 500 lines — same guideline, applied one level down |
+| `oversized_command_md` | MEDIUM | A `commands/*.md` slash command over 500 lines — its whole body loads on invocation, same cost the guideline bounds for `SKILL.md` |
 
 Run it: `python3 scripts/scan_skill_issues.py`
 

@@ -52,6 +52,36 @@ accepting the residual risk as documented here.
 
 ---
 
+### KI-009 — 2 slash commands exceed the 500-line progressive-disclosure guideline
+
+**Status:** Open — the 500-line guideline now covers `SKILL.md` (KI-008, resolved) and
+`references/*.md` (v2.10.0), and as of the `oversized_command_md` check it covers
+`commands/*.md` too. Two commands are over:
+
+| Command | Lines | Over by |
+|---|---|---|
+| `/kmp-new-project` | 1390 | 2.8x |
+| `/kmp-setup-agents` | 638 | 1.3x |
+
+**Why it matters:** a slash command's whole body loads into context the moment it's
+invoked — the same cost the guideline bounds for `SKILL.md`. `/kmp-new-project` is also
+the single most likely command to be invoked at the *start* of a session, when the
+context it consumes is most valuable.
+
+**Why it isn't a mechanical fix like KI-008 was:** a `SKILL.md` split moves reference
+material an agent loads on demand. A command is an *executable procedure* — ordered,
+cross-referencing steps where the agent is mid-workflow. Deciding which steps can move
+into the owning skill (`kmp-feature-scaffold`, `kmp-setup-agents`' own targets) versus
+which must stay inline to keep the procedure followable is a real per-command judgment
+call, and getting it wrong breaks the new-project workflow rather than just making a doc
+harder to find.
+
+**Mitigation in place:** `scripts/scan_skill_issues.py`'s `oversized_command_md` check
+flags any *new* command that crosses the line; these two are in `KNOWN_DEBT` so they're
+reported but don't block a release, same handling KI-008 had.
+
+---
+
 ## Resolved
 
 ### KI-008 — 22 of 64 SKILL.md files exceed agentskills.io's recommended 500-line body

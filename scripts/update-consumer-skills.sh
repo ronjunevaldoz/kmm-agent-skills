@@ -147,14 +147,56 @@ echo ""
 
 # ── Deploy skills (auto — passive reference docs) ─────────────────────────────
 
+# `cp -r` only ever adds and overwrites — it never removes a skill directory that no
+# longer exists upstream. A skill renamed or deleted in a release therefore lingers in
+# the consumer's deployed copy forever (the exact situation `migrate-kmm-to-kmp.sh` was
+# written to clean up by hand after the kmm-*/kmp-* rename). Prune those here instead,
+# scoped tightly: only a directory that exists in the target, is absent from the source,
+# and is NOT one of the project's own `./skills/<name>` custom skills. The deployed
+# directory is a mirror by contract (`block-edit-vendored-skills.sh` refuses edits to
+# it), so removing a stale mirror there loses nothing that isn't reproducible.
+prune_stale_skills() {
+  local target="$1"
+  [[ -d "$target" ]] || return 0
+
+  local stale_dir stale_name
+  for stale_dir in "$target"/*; do
+    [[ -d "$stale_dir" ]] || continue
+    [[ -L "$stale_dir" ]] && continue        # symlinked mirror, not a real deployed copy
+    stale_name="$(basename "$stale_dir")"
+
+    [[ -d "$SKILLS_SOURCE/skills/$stale_name" ]] && continue   # still shipped upstream
+    [[ -d "skills/$stale_name" ]] && continue                  # project-owned custom skill
+
+    if $DRY_RUN; then
+      echo "  [dry-run] would remove stale skill: $target/$stale_name"
+    else
+      rm -rf "$stale_dir"
+      echo "  🗑   removed stale skill (no longer shipped upstream): $stale_name"
+    fi
+  done
+}
+
 echo "Deploying skills to ${AGENT_DIR}…"
 
 if $DRY_RUN; then
-  CHANGED=$(git -C "$SKILLS_SOURCE" diff "HEAD@{1}..HEAD" --name-only -- skills/ 2>/dev/null | wc -l | tr -d ' ')
+  # `HEAD@{1}` needs a reflog entry, which a fresh clone, a shallow clone, or a CI
+  # checkout doesn't have — and under `set -o pipefail` that git failure propagates
+  # through the pipeline and kills the whole script mid-run. Fall back to 0 instead:
+  # a dry-run's change count is informational, never worth aborting the run over.
+  CHANGED=$(git -C "$SKILLS_SOURCE" diff "HEAD@{1}..HEAD" --name-only -- skills/ 2>/dev/null | wc -l | tr -d ' ' || echo 0)
+  [[ -n "$CHANGED" ]] || CHANGED=0
   echo "  [dry-run] would copy $CHANGED changed skill file(s) → $AGENT_DIR/"
+  prune_stale_skills "$AGENT_DIR"
 else
   cp -r "$SKILLS_SOURCE/skills/"* "$AGENT_DIR/"
-  echo "  ✅  Skills deployed"
+  prune_stale_skills "$AGENT_DIR"
+  # Version marker — read by scripts/check-installed-skills-version.sh, which
+  # commands/kmp-setup-hooks.md wires as the Option E SessionStart hook for exactly
+  # this deploy path. Without it that hook reports "no version marker" on every
+  # session and the stale-skills check silently never runs.
+  echo "$NEW_VERSION" > "$AGENT_DIR/.kmp-agent-skills-version"
+  echo "  ✅  Skills deployed (v$NEW_VERSION)"
 fi
 
 # Mirror into .agents/skills/ too — the project-level half of agentskills.io's
@@ -167,10 +209,13 @@ if [[ "$AGENT_DIR" != ".agents/skills" ]]; then
   echo "Deploying skills to .agents/skills (cross-client convention)…"
   if $DRY_RUN; then
     echo "  [dry-run] would copy skills → .agents/skills/"
+    prune_stale_skills ".agents/skills"
   else
     mkdir -p ".agents/skills"
     cp -r "$SKILLS_SOURCE/skills/"* ".agents/skills/"
-    echo "  ✅  Skills deployed to .agents/skills"
+    prune_stale_skills ".agents/skills"
+    echo "$NEW_VERSION" > ".agents/skills/.kmp-agent-skills-version"
+    echo "  ✅  Skills deployed to .agents/skills (v$NEW_VERSION)"
   fi
 fi
 
@@ -269,10 +314,18 @@ if $INSTALL_COMMANDS; then
       first_line="$(head -1 "$cmd_file")"
       dest="$COMMANDS_DIR/$(basename "$cmd_file")"
 
-      if [[ -f "$dest" ]]; then
+      # Three states, not two: an already-installed command whose source has since
+      # changed upstream must be distinguishable from one that's current. Reporting
+      # both as "[installed]" is how a consumer silently keeps running a stale copy of
+      # a command that was fixed upstream — they see "installed" and skip it.
+      default_answer="N"
+      if [[ ! -f "$dest" ]]; then
+        status="[new]"
+      elif cmp -s "$cmd_file" "$dest"; then
         status="[installed]"
       else
-        status="[new]"
+        status="[outdated]"
+        default_answer="Y"
       fi
 
       echo "  $status /$cmd_name"
@@ -281,11 +334,20 @@ if $INSTALL_COMMANDS; then
       echo ""
 
       if ! $DRY_RUN; then
-        printf "  Install /%s? [y/N] " "$cmd_name"
+        if [[ "$default_answer" == "Y" ]]; then
+          printf "  Update /%s? [Y/n] " "$cmd_name"
+        else
+          printf "  Install /%s? [y/N] " "$cmd_name"
+        fi
         read -r answer </dev/tty
+        [[ -z "$answer" ]] && answer="$default_answer"
         if [[ "$answer" =~ ^[Yy]$ ]]; then
           cp "$cmd_file" "$dest"
-          echo "  ✅  /$cmd_name installed"
+          if [[ "$status" == "[outdated]" ]]; then
+            echo "  ✅  /$cmd_name updated"
+          else
+            echo "  ✅  /$cmd_name installed"
+          fi
         else
           echo "  —  /$cmd_name skipped"
         fi

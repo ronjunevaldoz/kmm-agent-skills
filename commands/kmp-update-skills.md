@@ -42,11 +42,15 @@ export KMP_AGENT_SKILLS_SOURCE=/path/to/kmp-agent-skills   # add to shell profil
 
 ## Step 1b — Migrating a project last updated before v2.2.0
 
+**As of v2.11.0 this is handled automatically** — `update-consumer-skills.sh` now prunes
+any deployed skill directory that no longer exists upstream, on every run, scoped so it
+never touches the project's own `./skills/<name>` custom skills. The manual step below is
+only needed for the parts pruning doesn't cover: old `commands/kmm-*.md` slash commands
+and the `.kmm-skills` → `.kmp-skills` marker rename.
+
 If the project was last synced before the kotlin-multiplatform-* → kmp-* (v2.0.0) or
-kmp-design-system-etc → kmp-compose-* (v2.2.0) renames, `update-consumer-skills.sh`'s
-rsync alone won't remove the now-orphaned old-named directories — it only cleans files
-*inside* a matched target, not a dir whose source no longer exists under that name. Run
-the cleanup once, after Step 1's update completes:
+kmp-design-system-etc → kmp-compose-* (v2.2.0) renames, run the cleanup once, after
+Step 1's update completes:
 
 ```bash
 bash .claude/skills/scripts/migrate-kmm-to-kmp.sh --dry-run   # preview
