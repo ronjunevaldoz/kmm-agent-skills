@@ -52,43 +52,40 @@ accepting the residual risk as documented here.
 
 ---
 
+## Resolved
+
 ### KI-009 — slash commands exceeding the 500-line progressive-disclosure guideline
 
-**Status:** Open, one command remaining. The 500-line guideline now covers `SKILL.md`
-(KI-008, resolved), `references/*.md` (v2.10.0), and `commands/*.md` (the
-`oversized_command_md` check).
+**Resolved:** 2026-08-07 — both commands are under the guideline.
 
-| Command | Was | Now | State |
+| Command | Was | Now | How |
 |---|---|---|---|
-| `/kmp-setup-agents` | 638 | **496** | ✅ resolved — `AGENTS.md` + `CLAUDE.md` template bodies moved to `kmp-expert`'s `references/agents-md-templates.md` |
-| `/kmp-new-project` | 1390 | 1157 | Open — Step 10's duplicated agent setup was removed (a real drift bug, see below), but the command is still 2.3x over |
+| `/kmp-setup-agents` | 638 | 496 | `AGENTS.md` + `CLAUDE.md` template bodies moved to `kmp-expert`'s `references/agents-md-templates.md` |
+| `/kmp-new-project` | 1390 | 64 | Split into five phase references; the command is now a phase index |
 
-**Why the templates went to a skill reference, not a plugin-root `assets/` directory:**
-`/kmp-setup-agents` is consumer-facing (README tells users to run it in any existing KMP
-project), and `update-consumer-skills.sh --install-commands` copies a command as a single
-bare `.md` file. Skills are always deployed; assets are not. A template referenced from
-`assets/` would resolve in this repo and be missing in every consumer project.
+**Why the two needed different fixes.** `/kmp-setup-agents` was ~43% literal file
+templates, so extracting the payload was enough. `/kmp-new-project` was not: only 31% of
+it was fenced content, and extracting *every* template still left ~794 lines. It was
+genuinely ~800 lines of ordered procedure, so the only real fix was the per-command
+restructuring decision this issue was opened to flag — splitting the 11 steps into five
+self-contained phases under `skills/kmp-expert/references/new-project-phase-*.md`, with
+the command reduced to an index plus the gate between each phase.
 
-**Why it matters:** a slash command's whole body loads into context the moment it's
-invoked — the same cost the guideline bounds for `SKILL.md`. `/kmp-new-project` is also
-the single most likely command to be invoked at the *start* of a session, when the
-context it consumes is most valuable.
+**Two real bugs surfaced while doing it**, both from the same root cause — a procedure
+duplicating content a skill already owned, with nothing checking the two stayed in sync:
+- Step 10 carried its own copy of the `AGENTS.md` templates, and the `[Library]` variant
+  had lost five skill-routing rows (`kmp-roborazzi`, `kmp-api-mimicry`, `kmp-jni-pro`,
+  `kmp-native-authoring`, BOM). A library scaffolded via `/kmp-new-project` silently got
+  a worse `AGENTS.md` than the same project via `/kmp-setup-agents`.
+- F-01 carried its own copy of kmp-wizard's module map, which disagreed with
+  `kmp-feature-scaffold`'s about when `:server` exists (this copy said "only if SERVER is
+  in PLATFORMS"; the *branch* decides it). That pair had already drifted once before, on
+  `:androidApp` vs `:app:androidApp` — fixed in both places rather than deduplicated.
 
-**Why it isn't a mechanical fix like KI-008 was:** a `SKILL.md` split moves reference
-material an agent loads on demand. A command is an *executable procedure* — ordered,
-cross-referencing steps where the agent is mid-workflow. Deciding which steps can move
-into the owning skill (`kmp-feature-scaffold`, `kmp-setup-agents`' own targets) versus
-which must stay inline to keep the procedure followable is a real per-command judgment
-call, and getting it wrong breaks the new-project workflow rather than just making a doc
-harder to find.
-
-**Mitigation in place:** `scripts/scan_skill_issues.py`'s `oversized_command_md` check
-flags any *new* command that crosses the line; these two are in `KNOWN_DEBT` so they're
-reported but don't block a release, same handling KI-008 had.
+Both now delegate to the single owner, guarded by `AgentSetupSingleOwnerTests`.
 
 ---
 
-## Resolved
 
 ### KI-008 — 22 of 64 SKILL.md files exceed agentskills.io's recommended 500-line body
 

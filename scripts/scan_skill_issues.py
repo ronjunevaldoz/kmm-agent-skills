@@ -69,12 +69,9 @@ _AGENTSKILLS_MAX_RECOMMENDED_LINES = 500
 KNOWN_DEBT: set[tuple[str, str]] = {
     ("kmp-compose-design-system", "description_approaching_limit"),
     ("kmp-layout-system", "description_approaching_limit"),
-    # KI-009 — two commands exceed the same 500-line guideline. Splitting a slash
-    # command is not the same mechanical move as splitting a SKILL.md: a command is an
-    # executable procedure whose steps are ordered and cross-referencing, so it needs a
-    # real per-command restructuring decision (which steps belong in the owning skill
-    # vs. stay inline). Tracked, not silently passed.
-    ("kmp-new-project", "oversized_command_md"),
+    # KI-009 (oversized_command_md) is fully resolved as of 2026-08-07 — both offending
+    # commands are under the guideline. Only description-length debt remains, which is a
+    # different check on a different field.
 }
 
 # Required quality sections (as headings or inline markers)

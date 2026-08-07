@@ -460,11 +460,13 @@ Full implementation content lives in `references/*.md`: `dependency-graph`,
 `required-vs-optional-skills`, `project-specific-source-of-truth`, `changelog`. Load the
 specific file named in the pointer under its matching heading above, not all of them.
 
-`references/agents-md-templates.md` is the exception to that pattern — it isn't backing
-a heading in this file. It holds the literal `.claude/AGENTS.md` and `CLAUDE.md` bodies
-that `/kmp-setup-agents` writes into a project, kept here rather than in the command
-because a command reaches a consumer as a single bare `.md` file while skills are always
-deployed. Load it when generating or reviewing a project's agent scaffold.
+Two reference groups back a *command*, not a heading here — orchestration is this skill's:
+
+- `references/agents-md-templates.md` — the `.claude/AGENTS.md` and `CLAUDE.md` bodies
+  `/kmp-setup-agents` writes. Here, not in the command, because a command reaches a
+  consumer as a single bare `.md` while skills are always deployed.
+- `references/new-project-phase-1..5-*.md` — the five phases of `/kmp-new-project`; the
+  command is just the index and gates. **Load one phase at a time**, or the split is moot.
 The 68 Skills table and Skill Invocation Map stay inline above — `validate_skill_map.py`
 and `validate_keyword_routing.py` check this file's own text directly.
 

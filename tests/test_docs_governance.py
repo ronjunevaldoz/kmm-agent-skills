@@ -23,6 +23,23 @@ def read_skill_with_references(skill_dir: Path) -> str:
     return text
 
 
+def read_command_with_phases(command: str) -> str:
+    """A command's own text plus any phase reference files it delegates to.
+
+    `/kmp-new-project` is a thin phase index; its actual procedure lives in
+    `skills/kmp-expert/references/new-project-phase-*.md` (KI-009). Same reasoning as
+    read_skill_with_references above — assert against the whole procedure, not just the
+    index, or these checks silently stop testing anything the moment content moves.
+    """
+    text = (REPO_ROOT / "commands" / f"{command}.md").read_text(encoding="utf-8")
+    phase_dir = REPO_ROOT / "skills" / "kmp-expert" / "references"
+    stem = command.replace("kmp-", "", 1)
+    text += "\n" + "\n".join(
+        f.read_text(encoding="utf-8") for f in sorted(phase_dir.glob(f"{stem}-phase-*.md"))
+    )
+    return text
+
+
 class DocsScopeBoundaryTests(unittest.TestCase):
     def test_repo_and_consumer_docs_boundary_is_explicit(self) -> None:
         normalize = lambda text: " ".join(text.lower().split())
@@ -69,7 +86,7 @@ class DocsScopeBoundaryTests(unittest.TestCase):
 
         expert = normalize(read_skill_with_references(REPO_ROOT / "skills" / "kmp-expert"))
         setup_agents = normalize((REPO_ROOT / "commands" / "kmp-setup-agents.md").read_text(encoding="utf-8"))
-        new_project = normalize((REPO_ROOT / "commands" / "kmp-new-project.md").read_text(encoding="utf-8"))
+        new_project = normalize(read_command_with_phases("kmp-new-project"))
 
         for text in (expert, setup_agents, new_project):
             self.assertIn("rules/", text)
@@ -108,7 +125,7 @@ class AgentSetupSingleOwnerTests(unittest.TestCase):
         return (REPO_ROOT / rel).read_text(encoding="utf-8")
 
     def test_new_project_delegates_agent_setup_instead_of_inlining_it(self) -> None:
-        new_project = self._read("commands/kmp-new-project.md")
+        new_project = read_command_with_phases("kmp-new-project")
 
         self.assertIn("/kmp-setup-agents", new_project)
         # The AGENTS.md body template must exist in exactly one command. These marker
@@ -131,7 +148,7 @@ class AgentSetupSingleOwnerTests(unittest.TestCase):
         self.assertIn("### For LIBRARY projects", ref)
 
         for command in ("kmp-setup-agents", "kmp-new-project"):
-            body = self._read(f"commands/{command}.md")
+            body = read_command_with_phases(command)
             self.assertNotIn(
                 "## Published artifacts", body,
                 f"the AGENTS.md template body is back in {command}.md — it belongs only "
@@ -142,7 +159,7 @@ class AgentSetupSingleOwnerTests(unittest.TestCase):
     def test_new_project_still_owns_what_setup_agents_does_not_write(self) -> None:
         # setup-agents runs against existing projects that already have a README and
         # docs/, so it deliberately never writes them — new-project must keep those.
-        new_project = self._read("commands/kmp-new-project.md")
+        new_project = read_command_with_phases("kmp-new-project")
         setup_agents = self._read("commands/kmp-setup-agents.md")
 
         self.assertIn("README.md", new_project)
