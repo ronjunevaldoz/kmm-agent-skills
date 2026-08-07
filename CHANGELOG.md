@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.12.0] — 2026-08-07
+
+### Added
+
+- feat(style): adopt ASD-STE100's procedural rules for numbered steps only
+
+---
+
 ## [v2.11.1] — 2026-08-07
 
 ### Fixed

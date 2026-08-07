@@ -24,7 +24,7 @@ Generated 2026-08-07 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 450 | 2026-07-20 | ✅ |
 | [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
-| [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 445 | 2026-07-08 | ✅ |
+| [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 446 | 2026-07-08 | ✅ |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 443 | 2026-07-31 | ✅ |
 | [`kmp-compose-state-container`](../../skills/kmp-compose-state-container/) | 438 | 2026-06-06 | ✅ |
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
@@ -38,9 +38,9 @@ Generated 2026-08-07 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 403 | 2026-07-13 | ✅ |
 | [`kmp-expect-actual`](../../skills/kmp-expect-actual/) | 400 | 2026-07-20 | ✅ |
 | [`kmp-shadcn-compose`](../../skills/kmp-shadcn-compose/) | 397 | 2026-07-31 | ✅ |
+| [`kmp-shadcn-compose-layouts`](../../skills/kmp-shadcn-compose-layouts/) | 394 | 2026-08-04 | ✅ |
 | [`kmp-legal-docs`](../../skills/kmp-legal-docs/) | 393 | 2026-06-21 | ✅ |
 | [`kmp-compose-animation`](../../skills/kmp-compose-animation/) | 389 | 2026-06-21 | ✅ |
-| [`kmp-shadcn-compose-layouts`](../../skills/kmp-shadcn-compose-layouts/) | 389 | 2026-08-04 | ✅ |
 | [`kmp-migration`](../../skills/kmp-migration/) | 386 | 2026-07-19 | ✅ |
 | [`kmp-permissions`](../../skills/kmp-permissions/) | 386 | 2026-06-21 | ✅ |
 | [`kmp-layout-system`](../../skills/kmp-layout-system/) | 383 | 2026-07-17 | 🟡 1 known debt |
@@ -65,8 +65,8 @@ Generated 2026-08-07 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-analytics`](../../skills/kmp-analytics/) | 297 | 2026-06-21 | ✅ |
 | [`kmp-logging`](../../skills/kmp-logging/) | 297 | 2026-06-24 | ✅ |
 | [`kmp-kotlin-rpc`](../../skills/kmp-kotlin-rpc/) | 285 | 2026-07-31 | ✅ |
+| [`kmp-imagevector-generator`](../../skills/kmp-imagevector-generator/) | 277 | 2026-07-08 | ✅ |
 | [`kmp-compose-preview-driven-development`](../../skills/kmp-compose-preview-driven-development/) | 276 | 2026-07-08 | ✅ |
-| [`kmp-imagevector-generator`](../../skills/kmp-imagevector-generator/) | 276 | 2026-07-08 | ✅ |
 | [`kmp-proguard-r8`](../../skills/kmp-proguard-r8/) | 269 | 2026-06-29 | ✅ |
 | [`kmp-unit-testing`](../../skills/kmp-unit-testing/) | 269 | 2026-06-18 | ✅ |
 | [`kmp-compose-graphics-modifiers`](../../skills/kmp-compose-graphics-modifiers/) | 266 | 2026-06-13 | ✅ |
