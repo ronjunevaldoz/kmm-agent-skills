@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.10.4] — 2026-08-07
+
+### Other
+
+- refactor(setup-agents): move AGENTS.md/CLAUDE.md templates to a deployed skill reference
+
+---
+
 ## [v2.10.3] — 2026-08-07
 
 ### Fixed

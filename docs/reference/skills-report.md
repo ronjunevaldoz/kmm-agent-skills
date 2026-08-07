@@ -8,7 +8,7 @@ Generated 2026-08-07 by `scripts/generate_skills_report.py` — run it after any
 |---|---|---|---|
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 500 | 2026-07-26 | ✅ |
 | [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 499 | 2026-07-26 | ✅ |
-| [`kmp-expert`](../../skills/kmp-expert/) | 492 | 2026-07-31 | ✅ |
+| [`kmp-expert`](../../skills/kmp-expert/) | 498 | 2026-07-31 | ✅ |
 | [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 489 | 2026-07-14 | ✅ |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 484 | 2026-07-31 | ✅ |
