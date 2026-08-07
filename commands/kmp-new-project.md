@@ -890,194 +890,43 @@ complete until `apiCheck`/`build`/`test` all pass and the local-publish resolve 
 
 ## Step 10 — Generate agent setup
 
-After verify passes, generate both the project-owned Claude scaffold and the deployed
-`.claude/` runtime so the team gets agent-driven workflows on day one without burying
-all agent authoring inside runtime-only files.
+After verify passes, set up the agent scaffold — then write the two things that are
+specific to a brand-new project and have no equivalent in an existing one.
 
-**Write the project-owned source scaffold** first:
+### 10a — Delegate the agent setup to `/kmp-setup-agents`
 
-```
-agents/README.md
-rules/README.md
-hooks/README.md
-commands/README.md
-skills/README.md
-docs/reference/ai-collaboration.md
-docs/reference/agent-catalog.md
-CLAUDE.md
-```
+**Run `/kmp-setup-agents` rather than re-implementing it here.** That command already
+owns, and is the single source of truth for, every piece of the agent scaffold:
 
-`docs/reference/ai-collaboration.md` should explain:
-- project-specific artifacts live in `agents/`, `rules/`, `hooks/`, `commands/`, `skills/`
-- `docs/reference/ai-collaboration.md` is the canonical explanation of that layout
-- `rules/` is optional for assistant-specific overlays and must not duplicate the canonical policy doc
-- `docs/*` owns stable project design; `skills/*` owns repo-local execution guidance
-- `.claude/AGENTS.md` is the deployed routing/context copy for Claude
-- `.claude/settings.json` owns runtime permissions and hook wiring
-- any project-owned agent artifact must be re-deployed into `.claude/` after edits
-
-`docs/reference/agent-catalog.md` should explain:
-- provider-neutral model tiers such as `flagship-coding`, `balanced-coding`, `fast-utility`, `precision-review`
-- provider-specific model mapping belongs in one canonical doc, not in every agent file
-- thin entrypoints like `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` should point back to that catalog
-
-`skills/README.md` should include a minimal `skills/<name>/SKILL.md` starter template
-with YAML frontmatter (`name`, `description`) and a note that project-owned custom
-skills are synced into `.claude/skills/<name>/` — and, per agentskills.io's own
-cross-client convention (verified in `docs/reference/agentskills-io-standards.md`),
-also into `.agents/skills/<name>/` so the skill is visible to any agentskills.io-
-compliant client, not just Claude Code.
-
-`CLAUDE.md` should stay thin and only bootstrap Claude into the generated runtime:
-
-```markdown
-### Claude Code Project Profile
-
-### Load skills context on initialization
---system-prompt-file=".claude/AGENTS.md"
-
-### Default flags
---compact
---verbose=false
-
-### Canonical project-owned agent sources
-- docs/reference/ai-collaboration.md
-- docs/reference/agent-catalog.md
-- agents/
-- rules/     (optional overlays only)
-- hooks/
-- commands/
-- skills/
-
-### Ignore generated and vendor directories
---ignore="**/build/**"
---ignore="**/.gradle/**"
---ignore="**/vendor/**"
---ignore="**/third_party/**"
-```
-
-**[App] Write `.claude/AGENTS.md`** — tailored to this project's actual modules and stack:
-
-```markdown
-# AGENTS.md — <PROJECT_NAME>
-
-This project uses [kmp-agent-skills](https://github.com/ronjunevaldoz/kmp-agent-skills).
-Skills are installed in `.claude/skills/`.
-
-## Project persona
-
-<1 short paragraph describing the app-specific agent identity>
-
-Examples:
-- Todo app: Task Steward — optimize for fast capture, clear prioritization, low-friction completion, and zero clutter.
-- Habit app: Coach — keep streaks visible, reduce shame-heavy language, and make progress obvious.
-- Finance app: Steward — prioritize clarity, trust, and careful review over flashy automation.
-
-## Skill routing
-
-| Topic | Skill |
+| What it writes | Its step |
 |---|---|
-| New feature end-to-end | `feature-scaffold` → `clean-architecture` → `mvi` |
-| ViewModel / screen state | `mvi` |
-| Navigation | `navigation` |
-| Dependency injection | `dependency-injection` |
-| Code quality / linting | `code-quality` |
-| Unit tests | `unit-testing` |
-| Android CLI / emulator / deploy | `android-cli` |
-| Project docs / onboarding | `project-docs-maintainer` |
-<only rows for skills actually scaffolded in this project:>
-| Auth / login | `ktor-auth-service` |
-| Local database | `sqldelight-setup` |
-| REST API / network | `network-layer` |
-| Key-value settings | `datastore` |
-| Screenshot tests | `roborazzi` |
-| ProGuard / release build | `proguard-r8` |
-| Design system | `design-system` (or `shadcn-compose`/`tailwind-compose`/`heroicons-compose` if chosen in Step 6a) |
-| Architecture audit | `audit` |
+| `.claude/AGENTS.md` (App and Library variants) | Step 4 |
+| `agents/`, `rules/`, `hooks/`, `commands/`, `skills/` scaffold + `CLAUDE.md` + `docs/reference/ai-collaboration.md` + `docs/reference/agent-catalog.md` | Step 5 |
+| Consumer command set into `.claude/commands/` | Step 6 |
+| Codex / Gemini translation (opt-in, never silent) | Step 6a |
+| `.agents/pipeline-context.json` | Step 7a |
+| `.claude/settings.json` Bash allowlist | Step 9 |
+| Skills into `.claude/skills/` + the `.agents/skills/` cross-client mirror | Step 8 |
 
-## Feature modules
+Pass it the values already collected in Step 1 (`PROJECT_NAME`, `GROUP_ID`,
+`PROJECT_TYPE`, `PLATFORMS`) plus the module graph and skill list this run actually
+produced, so its generated `AGENTS.md` reflects the real project instead of re-deriving
+it.
 
-| Feature | Layers |
-|---|---|
-<one row per :feature:<name> module group, e.g.:>
-| auth | :domain :data :presenter :ui |
-| <feature> | :domain :data :presenter :ui |
+> **Why delegation, not a copy:** this step previously inlined its own duplicate of
+> those templates. The two copies drifted — the `[Library]` `AGENTS.md` written here
+> had lost five skill-routing rows (`kmp-roborazzi`, `kmp-api-mimicry`, `kmp-jni-pro`,
+> `kmp-native-authoring`, BOM) and used different placeholder names (`<PROJECT_NAME>`
+> vs `<artifactId>`) than the one `/kmp-setup-agents` writes. A library scaffolded
+> through this command silently got a worse `AGENTS.md` than the same project set up
+> through that one. One template, one owner, no drift.
 
-## Stack
+### 10b — Write the project `README.md`
 
-| Library | Skill |
-|---|---|
-<one row per library detected in libs.versions.toml>
+`/kmp-setup-agents` deliberately does not touch a project's own `README.md` — it runs
+against existing projects that already have one. A new project doesn't, so write it here.
 
-## Commands installed
-
-See `.claude/commands/kmp-*.md` for available slash commands.
-Key commands:
-- `/kmp-implement-feature <name>` — plan → implement → validate → review a new feature
-- `/kmp-run-audit` — run architecture audit with per-finding remediation
-- `/kmp-verify` — full validation pipeline (tests, audit, design, screenshots)
-- `/kmp-execute-ticket <id>` — implement a GitHub issue end-to-end
-- `/kmp-fix-design` — scan and fix design system violations
-- `/kmp-update-skills` — pull latest skills and re-deploy
-```
-
-**[Library] Write `.claude/AGENTS.md`** — same shape `/kmp-setup-agents` generates for
-an existing library project (see that command's Step 4 "For LIBRARY projects" template
-verbatim), so a library scaffolded here and one onboarded later via `/kmp-setup-agents`
-end up with identical routing:
-
-```markdown
-# AGENTS.md — <PROJECT_NAME>
-
-This project uses [kmp-agent-skills](https://github.com/ronjunevaldoz/kmp-agent-skills).
-Skills are installed in `.claude/skills/`.
-
-## Project overview
-
-<1–2 sentences: what the library does, target consumers>
-Group ID: <GROUP_ID>   Artifact: <PROJECT_NAME>   Published to: <PUBLISH_TARGET>
-
-## Skill routing
-
-| Topic | Skill |
-|---|---|
-| Publishing to Maven Central | `kmp-library-publishing` |
-| iOS / SPM distribution | `kmp-xcframework-spm` |
-| API surface management | `kmp-library-publishing` (apiCheck / apiDump) |
-| Platform-specific implementations | `kmp-expect-actual` |
-| Unit / integration tests | `kmp-unit-testing` |
-| Code quality (detekt, ktlint) | `kmp-code-quality` |
-| CI automation | `kmp-ci-github-actions` |
-| Android CLI / emulator / deploy | `kmp-android-cli` |
-| Project docs / onboarding | `kmp-project-docs-maintainer` |
-| Architecture audit | `kmp-audit` |
-| Harvest consumer lessons | `kmp-audit` (`--harvest` mode via `/kmp-harvest-lessons`) |
-
-## Published artifacts
-
-| Artifact | Module |
-|---|---|
-| <GROUP_ID>:<PROJECT_NAME> | :library |
-| <GROUP_ID>:<PROJECT_NAME>-testing | :library-testing (if present) |
-
-## API surface rules
-
-- Never remove or rename public symbols without a major version bump
-- Run `./gradlew apiDump` after any public API change; commit the `.api` file
-- `./gradlew apiCheck` runs in CI and blocks merge if API diff is uncommitted
-- Mark internal symbols with `@InternalApi` to exclude from the dump
-
-## Commands installed
-
-See `.claude/commands/kmp-*.md` for available slash commands.
-Key commands:
-- `/kmp-run-audit` — architecture audit with per-finding remediation
-- `/kmp-harvest-lessons` — collect patterns to upstream to skills
-- `/kmp-verify` — full validation pipeline (build + test + apiCheck)
-- `/kmp-check-updates` — check for skill updates
-```
-
-**[App] Write `README.md`** at the project root:
+**[App]:**
 
 ```markdown
 # <PROJECT_NAME>
@@ -1110,7 +959,7 @@ Install [kmp-agent-skills](https://github.com/ronjunevaldoz/kmp-agent-skills), t
 - `/kmp-verify` — full validation pipeline
 ```
 
-**[Library] Write `README.md`** at the project root:
+**[Library]:**
 
 ```markdown
 # <PROJECT_NAME>
@@ -1144,9 +993,7 @@ Published to <PUBLISH_TARGET>. See [releases](../../releases) for the latest ver
 
 This library uses `explicitApi()` and `binary-compatibility-validator` — every public
 declaration is deliberate, and `library/api/library.api` tracks the full surface.
-See `docs/reference/agentskills-io-standards.md`'s sibling doc (once written for this
-project) or `kmp-library-publishing`'s semver classification table
-before bumping versions.
+See `kmp-library-publishing`'s semver classification table before bumping versions.
 
 ## Agent workflows
 
@@ -1155,22 +1002,13 @@ Install [kmp-agent-skills](https://github.com/ronjunevaldoz/kmp-agent-skills), t
 - `/kmp-verify` — full validation pipeline (build + test + apiCheck)
 ```
 
-**[App] Finalize `docs/`** — `docs/architecture.md` and `docs/layout-system/` already exist
-from Step 4's F-03 (written immediately after confirmation, not deferred to here).
-Append the `## Features` and `## Stack` sections now that implementation is complete —
-the sprint plan and `libs.versions.toml` weren't final back at Step 4:
+### 10c — [App] Finalize `docs/`
 
-```
-docs/
-  architecture.md     — written in Step 4, finalized here with Features + Stack
-  decisions/          — Architecture Decision Records (ADRs), written now
-    001-mvi-pattern.md
-    002-sqldelight-vs-room.md   (if SQLDelight was chosen)
-    003-koin-di.md
-  layout-system/      — already written by Step 4's F-03 (screen wireframes per feature)
-```
+`docs/architecture.md` and `docs/layout-system/` already exist from Step 4's F-03
+(written immediately after confirmation, not deferred to here). Append `## Features` and
+`## Stack` now that implementation is complete — the sprint plan and
+`libs.versions.toml` weren't final back at Step 4:
 
-Append to the existing `docs/architecture.md`:
 ```markdown
 ## Features
 
@@ -1181,84 +1019,13 @@ Append to the existing `docs/architecture.md`:
 <key libraries and versions from libs.versions.toml>
 ```
 
-**Copy the consumer command set** into `.claude/commands/`:
+Then write the ADRs, which only exist once the tech choices are actually made:
 
 ```
-Commands to copy (these are safe for consumer projects):
-  kmp-implement-feature.md
-  kmp-run-audit.md
-  kmp-verify.md
-  kmp-execute-ticket.md
-  kmp-fix-design.md
-  kmp-audit-screenshots.md
-  kmp-record-design-baselines.md
-  kmp-audit-design-visual.md
-  kmp-update-design-system.md
-  kmp-update-skills.md
-  kmp-report-skill-issue.md
-  kmp-check-updates.md
-```
-
-Do NOT copy repo-internal commands (`kmp-new-skill.md`, `kmp-modify-skill.md`,
-`kmp-maintain-docs.md`, `kmp-release-notes.md`, `kmp-setup-hooks.md`) —
-those are for maintaining this skills repo, not consumer projects.
-
-Use `AskUserQuestion` — "Also deploy this project's agents/commands to Codex CLI and/or
-Gemini CLI?" — options: Codex only / Gemini only / both / skip. Never deploy silently.
-Real, verified capability per provider (see `docs/reference/ai-collaboration.md`'s
-Per-Provider Capability Matrix): Codex CLI has subagents only (`.codex/agents/*.toml`,
-no custom-commands mechanism); Gemini CLI has commands only (`.gemini/commands/*.toml`,
-no confirmed subagent mechanism). If chosen, translate `agents/*.md`/`commands/*.md`
-(this project's own project-owned sources, written in Step 5's scaffold) into the
-target TOML shape — see `/kmp-setup-agents`'s Step 6a for the exact field mapping. Tell
-the user explicitly that translated content may reference Claude-specific tool names
-that don't map cleanly — review before relying on it.
-
-**Deploy skills into `.claude/skills/`** in two passes:
-- first copy the shared `kmp-agent-skills/skills/` bundle
-- then sync any project-owned custom skills from `skills/<name>/` into `.claude/skills/<name>/`
-
-**Mirror the same copy into `.agents/skills/`** — the project-level half of
-agentskills.io's cross-client convention (verified in
-`docs/reference/agentskills-io-standards.md`), so any agentskills.io-compliant client
-working in this new project sees the same skills, not just Claude Code.
-
-**Write `.agents/pipeline-context.json`** — seed the project planner with initial context.
-Deliberately not under `.claude/`: `agents/planner.md`'s body is copied verbatim into
-`.codex/agents/planner.toml` if the user opts into Codex deployment (Step 6a below), and
-a `.claude/`-prefixed path baked into that shared source text would be broken there —
-`.agents/` is the cross-client-neutral location, same reasoning as `.agents/skills/`:
-
-```json
-{
-  "project": "<PROJECT_NAME>",
-  "group_id": "<GROUP_ID>",
-  "platforms": ["<platform list>"],
-  "skills_used": ["<skill list from this run>"],
-  "recurring_issues": [],
-  "proven_patterns": []
-}
-```
-
-The `planner` agent reads this to avoid known pitfalls and reuse proven approaches.
-Update `recurring_issues` and `proven_patterns` manually as the project evolves.
-
-**Write `.claude/settings.json`** with allowlist for common read operations:
-
-```json
-{
-  "permissions": {
-    "allow": [
-      "Bash(./gradlew *)",
-      "Bash(git status)",
-      "Bash(git diff*)",
-      "Bash(git log*)",
-      "Bash(python3 .claude/skills/kmp-audit/scripts/*)",
-      "Bash(find . -name *.kt*)",
-      "Bash(grep *)"
-    ]
-  }
-}
+docs/decisions/          — Architecture Decision Records (ADRs), written now
+  001-mvi-pattern.md
+  002-sqldelight-vs-room.md   (if SQLDelight was chosen)
+  003-koin-di.md
 ```
 
 ---
