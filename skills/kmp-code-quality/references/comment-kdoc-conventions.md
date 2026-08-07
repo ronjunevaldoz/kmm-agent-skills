@@ -187,6 +187,9 @@ comments:
   UndocumentedPublicFunction:
     active: true
     excludes: ['**/test/**', '**/*Test.kt', '**/*Preview*']
+  UndocumentedPublicProperty:
+    active: true
+    excludes: ['**/test/**', '**/*Test.kt', '**/*Preview*']
   DocumentationOverPrivateFunction:
     active: true
   DocumentationOverPrivateProperty:
@@ -198,6 +201,14 @@ comments:
 `UndocumentedPublic*` requires KDoc on every public declaration; `DocumentationOverPrivate*`
 forbids it on private ones; `OutdatedDocumentation` catches KDoc whose `@param`/signature
 no longer matches the declaration after a refactor.
+
+**`UndocumentedPublicProperty` is easy to leave out and was** — this block enabled only
+the `Class` and `Function` variants while the sentence above claimed "every public
+declaration", and `kmp-audit`'s `_detect_undocumented_public_api` backstop matched only
+`class`/`interface`/`object`/`fun` too. A public `val` on a library's API surface was
+covered by neither. Both now include properties. It matters most under `explicitApi()`,
+where a public property is a permanent part of the published surface that
+`binary-compatibility-validator` will track whether or not anyone documented it.
 
 ### TODO / FIXME — deferred work, not a substitute for tracking it
 

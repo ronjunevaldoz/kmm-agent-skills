@@ -2553,6 +2553,55 @@ class ProjectSkillStandardsTests(unittest.TestCase):
             self.assertFalse(any("project skill deployment drift" in f for f in findings))
 
 
+class WhatCommentInControlFlowTests(unittest.TestCase):
+    """This detector shipped with no tests at all. An audit of the comment surface found
+    it reported findings against lines containing no comment: it located comments with a
+    plain `line.find("//")`, which also matches the `//` inside a URL string literal, so
+    `val base = "https://build.example.com"` next to an `if` was reported as "this //
+    comment narrates what the block does".
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def _findings(self, source: str) -> list[str]:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "feature/x/src/commonMain/kotlin/F.kt", source)
+            return [f for f in audit_scripts.audit_project(root)
+                    if "what-comment in control flow" in f]
+
+    def test_flags_what_narration_above_a_loop(self) -> None:
+        self.assertTrue(self._findings(
+            "fun a() {\n    // Loop through items\n    for (i in x) { p(i) }\n}\n"))
+
+    def test_ignores_a_genuine_why_comment(self) -> None:
+        self.assertFalse(self._findings(
+            "fun b() {\n    // Workaround: driver rejects batches over 64\n"
+            "    for (i in x) { p(i) }\n}\n"))
+
+    def test_ignores_a_url_string_literal_in_a_conditional(self) -> None:
+        # No comment on this line at all — the `//` belongs to `https://`.
+        self.assertFalse(self._findings(
+            'fun c() {\n    if (link == "https://get.myapp.io/share") { open() }\n}\n'))
+
+    def test_ignores_a_url_assigned_above_a_conditional(self) -> None:
+        self.assertFalse(self._findings(
+            'fun d() {\n    val base = "https://build.example.com/v1"\n'
+            '    if (base.isEmpty()) { p() }\n}\n'))
+
+    def test_still_flags_a_real_comment_that_follows_a_url_string(self) -> None:
+        # The string-literal skip must not swallow a genuine trailing comment.
+        self.assertTrue(self._findings(
+            'fun e() {\n    if (u == "https://a.io") { p() }  // check if ready\n}\n'))
+
+    def test_handles_an_escaped_quote_before_the_comment(self) -> None:
+        self.assertTrue(self._findings(
+            'fun f() {\n    val s = "a\\"b"\n    if (s.isEmpty()) { p() }  // build the list\n}\n'))
+
+
 class LongStackedCommentBlockTests(unittest.TestCase):
     """kmp-code-quality's own rule says a // block growing past ~4
     lines should split off to docs/reference/ — documented but never mechanically
@@ -3241,6 +3290,34 @@ class UndocumentedPublicApiTests(unittest.TestCase):
                 " * Controls retry behavior for transient network failures.\n"
                 " */\n"
                 "public class RetryPolicy(public val maxAttempts: Int)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("undocumented public api" in f for f in findings))
+
+    def test_flags_undocumented_public_property(self) -> None:
+        # A public property is as much published surface as a function under
+        # explicitApi() — binary-compatibility-validator tracks it either way — but this
+        # detector matched only class/interface/object/fun, and kmp-code-quality's Detekt
+        # block enabled only UndocumentedPublicClass/Function. A public `val` was covered
+        # by neither, while the doc claimed "every public declaration".
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._enable_explicit_api(root)
+            self._write(
+                root, "library/src/commonMain/kotlin/Config.kt",
+                "public val defaultTimeoutMs: Long = 30_000\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("undocumented public api" in f for f in findings))
+
+    def test_ignores_documented_public_property(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._enable_explicit_api(root)
+            self._write(
+                root, "library/src/commonMain/kotlin/Config.kt",
+                "/** Default request timeout applied when none is set per-call. */\n"
+                "public val defaultTimeoutMs: Long = 30_000\n",
             )
             findings = audit_scripts.audit_project(root)
             self.assertFalse(any("undocumented public api" in f for f in findings))

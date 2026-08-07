@@ -167,6 +167,42 @@ class AgentSetupSingleOwnerTests(unittest.TestCase):
         self.assertNotIn("docs/decisions/", setup_agents)
 
 
+class CleanCommentsCoversEveryCommentDetectorTests(unittest.TestCase):
+    """`/kmp-clean-comments` must name every comment finding the audit can emit.
+
+    It shipped naming one (`what-comment in control flow`) and asserting it was "the only
+    one of the four categories with an automated detector". Four more comment detectors
+    landed after that sentence was written, so the dedicated comment-cleanup command was
+    acting on less than the audit already knew — true when written, silently stale after.
+    """
+
+    COMMENT_FINDINGS = (
+        "what-comment in control flow",
+        "long stacked comment block",
+        "justification comment above single statement",
+        "undocumented public api",
+        "partial param documentation",
+    )
+
+    def test_command_names_every_comment_finding_the_auditor_emits(self) -> None:
+        command = (REPO_ROOT / "commands" / "kmp-clean-comments.md").read_text(encoding="utf-8")
+        for finding in self.COMMENT_FINDINGS:
+            self.assertIn(
+                finding, command,
+                f"/kmp-clean-comments doesn't mention the {finding!r} finding — a comment "
+                f"detector exists that the comment-cleanup command won't act on",
+            )
+
+    def test_the_finding_strings_still_exist_in_the_auditor(self) -> None:
+        # Guards the other direction: if a finding string is renamed in audit_project.py,
+        # the command's filter list silently stops matching anything.
+        auditor = (REPO_ROOT / "skills" / "kmp-audit" / "scripts" / "audit_project.py").read_text(
+            encoding="utf-8"
+        )
+        for finding in self.COMMENT_FINDINGS:
+            self.assertIn(finding, auditor, f"{finding!r} no longer emitted by audit_project.py")
+
+
 class CommonFirstSharedCodeTests(unittest.TestCase):
     def test_common_first_formatting_rule_is_explicit(self) -> None:
         normalize = lambda text: " ".join(text.lower().replace("`", "").split())

@@ -11,6 +11,9 @@ per-file confirmation, the same pattern as `/fix-design`.
 - `function_mechanics_kdoc` — a KDoc that narrates line-by-line mechanics instead of inputs/outputs/edge cases
 - `extension_missing_receiver_scope` — an extension function's KDoc that doesn't state the receiver scope or calling context (`@receiver`)
 - `what_comment_in_control_flow` — a `//` comment inside a loop/conditional that narrates WHAT the block does
+- `long_stacked_comment_block` — a `//` block past ~4 lines that should keep one WHY sentence inline and move the rest to `docs/reference/`
+- `justification_comment_above_single_statement` — a 3+ line `//` block justifying one dependency line; the reasoning belongs in the commit message
+- `partial_param_documentation` — a KDoc that documents some but not all parameters (worse than none: it reads complete)
 
 **What it never touches:**
 - KDoc on private members — flagged for removal (rename the member instead), never added
@@ -44,11 +47,22 @@ reading any file in full:
 python3 "$SKILLS_ROOT/skills/kmp-audit/scripts/audit_project.py" "$SCOPE_PATH" --json
 ```
 
-Filter results to `what-comment in control flow` findings — this is the only one of the
-four categories with an automated detector (regex heuristic, not AST; expect some false
-negatives and rare false positives). The other three categories (class/function/extension
-KDoc) have no static detector — read the file(s) in scope directly and apply the rules
-below by hand.
+Filter to the comment findings. **Five** of them now have automated detectors — this
+command previously used only the first and told the agent the other categories had none,
+which went stale as detectors were added and left the dedicated comment-cleanup command
+acting on less than the audit already knew:
+
+| Finding string | Covers | Note |
+|---|---|---|
+| `what-comment in control flow` | `what_comment_in_control_flow` | Regex heuristic, not AST — expect some false negatives |
+| `long stacked comment block` | A `//` block past ~4 lines with no `docs/reference/` pointer | Exempts blocks reading as genuine WHY (2+ causal signal words) |
+| `justification comment above single statement` | A 3+ line `//` block justifying one Gradle dependency line | Reasoning belongs in the commit message |
+| `undocumented public api` | `function_missing_kdoc`, and public classes/properties | Only fires on projects using `explicitApi()` |
+| `partial param documentation` | A KDoc documenting some but not all parameters | Worse than no KDoc — reads complete, isn't |
+
+The remaining categories (`class_trivial_kdoc`, `function_mechanics_kdoc`,
+`extension_missing_receiver_scope`) are judgment calls with no static detector — read the
+file(s) in scope directly and apply the rules below by hand.
 
 For `diff` scope, get the changed `.kt` files via `git diff --name-only` (staged +
 unstaged) and read each one instead of running the project-wide scanner.

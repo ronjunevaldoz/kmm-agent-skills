@@ -1205,8 +1205,15 @@ def _detect_library_multimodule_missing_build_logic(root: Path) -> list[str]:
 # enough signal to check (most app code is public by Kotlin's own default).
 
 _EXPLICIT_API_MARKER_RE = re.compile(r"\bexplicitApi(?:Warning)?\s*\(")
+# `val`/`var` included deliberately: a public property is as much of a published API
+# surface as a function under explicitApi() (binary-compatibility-validator tracks it
+# either way), but this regex matched only class/interface/object/fun, and
+# kmp-code-quality's Detekt block enabled only UndocumentedPublicClass/Function — so a
+# public `val` was documented by neither, despite the doc claiming "every public
+# declaration". Safe to match here because this whole detector is gated on the project
+# actually using explicitApi(), which forces the literal `public` keyword.
 _PUBLIC_DECL_RE = re.compile(
-    r"(?m)^(?P<indent>[ \t]*)public\s+(?:class|interface|object|fun)\s+(\w+)"
+    r"(?m)^(?P<indent>[ \t]*)public\s+(?:class|interface|object|fun|val|var)\s+(\w+)"
 )
 
 
@@ -2671,6 +2678,37 @@ _WHY_MARKER_RE = re.compile(
 _CONTROL_FLOW_KEYWORD_RE = re.compile(r"\b(?:for|while|if|when)\s*\(")
 
 
+def _line_comment_index(line: str) -> int:
+    """Index of the first `//` that actually starts a comment, or -1.
+
+    A plain `line.find("//")` also matches the `//` inside a URL string literal, which
+    produced findings pointing at lines with no comment on them at all — e.g.
+    `val base = "https://build.example.com"` next to an `if` was reported as "this //
+    comment narrates what the block does". Skips over double-quoted and single-quoted
+    literals, honouring backslash escapes.
+
+    Single-line scope only: a `//` inside a multi-line raw string (`\"\"\"`) still slips
+    through, since this scans one line without cross-line state. That's a narrower gap
+    than the URL case and hasn't been observed in practice.
+    """
+    i, n = 0, len(line)
+    quote = ""
+    while i < n:
+        ch = line[i]
+        if quote:
+            if ch == "\\":
+                i += 2
+                continue
+            if ch == quote:
+                quote = ""
+        elif ch in ('"', "'"):
+            quote = ch
+        elif ch == "/" and i + 1 < n and line[i + 1] == "/":
+            return i
+        i += 1
+    return -1
+
+
 def _detect_what_comment_in_control_flow(root: Path) -> list[str]:
     """Flag // comments that narrate WHAT a loop/conditional does instead of WHY.
 
@@ -2687,7 +2725,7 @@ def _detect_what_comment_in_control_flow(root: Path) -> list[str]:
         except OSError:
             continue
         for i, line in enumerate(lines):
-            idx = line.find("//")
+            idx = _line_comment_index(line)
             if idx == -1:
                 continue
             comment_text = line[idx + 2 :].strip()
