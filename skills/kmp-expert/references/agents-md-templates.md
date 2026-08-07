@@ -182,3 +182,33 @@ and just bootstraps Claude Code into the generated runtime:
 --ignore="**/vendor/**"
 --ignore="**/third_party/**"
 ```
+
+---
+
+## What to commit vs gitignore under `.claude/` and `.agents/`
+
+Not everything this file's templates write is the same kind of artifact — some of it is a
+reproducible mirror, some of it is live, project-specific configuration:
+
+- **Safe to gitignore**: `.claude/skills/`, `.agents/skills/` (bundled `kmp-agent-skills`
+  content). These are a pure deployed mirror — `update-consumer-skills.sh` reproduces them
+  byte-for-byte from the upstream repo at any time. A missing or stale copy degrades
+  gracefully: the agent just lacks a skill file until the next sync.
+- **Commit these**: `.claude/AGENTS.md`, `.claude/settings.json`, `.claude/commands/`.
+  These are generated once by `/kmp-setup-agents` but are *not* reproducible boilerplate —
+  `.claude/AGENTS.md` holds this project's detected skill set and module graph, and may be
+  hand-tuned afterward. It is also **live configuration**, not just a reference doc:
+  `CLAUDE.md` points `--system-prompt-file` straight at it, so it loads as the actual
+  system prompt on every session. Gitignore it and a fresh clone, new teammate, or CI
+  runner has *no system prompt at all* until someone remembers to rerun
+  `/kmp-setup-agents` — a harder failure than a missing skill file.
+
+Recommended `.gitignore` entries in a consumer project:
+
+```gitignore
+.claude/skills/
+.agents/skills/
+```
+
+Do not add a bare `.claude/` or `.agents/` ignore line — that would also swallow
+`AGENTS.md`, `settings.json`, and `commands/`.

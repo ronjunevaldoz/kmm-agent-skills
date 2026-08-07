@@ -2,8 +2,7 @@
 
 Canonical cross-agent policy for downstream repos using `kmp-agent-skills`.
 
-This doc exists to stop policy drift across `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`,
-repo-local skills, and one-off notes in `docs/`.
+This doc exists to stop policy drift across `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, repo-local skills, and one-off notes in `docs/`.
 
 ## Source Of Truth
 
@@ -69,6 +68,13 @@ Codex/Gemini support a different, non-symmetric subset of commands/agents/skills
 TOML rather than Markdown — see `docs/reference/provider-capability-matrix.md` for the
 real, verified matrix and the translation rules before deploying to either.
 
+## What To Commit Vs Gitignore Under `.claude/` And `.agents/`
+
+Gitignore only `.claude/skills/` and `.agents/skills/` (reproducible mirrors); commit
+`.claude/AGENTS.md`, `.claude/settings.json`, `.claude/commands/` (project-specific, and
+for `AGENTS.md`, live system-prompt content). Rationale and `.gitignore` snippet:
+`skills/kmp-expert/references/agents-md-templates.md`.
+
 ## Thin Entrypoints
 
 `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` should stay thin — bootstrap flags, a short
@@ -80,8 +86,7 @@ become the only place architecture or repo policy lives.
 Keep the long-form explanation canonical in `docs/reference/ai-collaboration.md`,
 `docs/reference/agent-catalog.md`, and other `docs/reference/*.md` domain rules.
 Duplicate only short startup guardrails in entrypoint files, and only when: the agent
-must reliably see it on startup, missing it would cause expensive/unsafe work, and the
-duplicated text stays short and points back to the canonical doc.
+must reliably see it on startup, missing it would cause expensive/unsafe work, and the duplicated text stays short and points back to the canonical doc.
 
 ## Docs Versus Skills
 

@@ -12,13 +12,12 @@ Use this when:
 
 Do NOT use this for brand-new projects — `/kmp-new-project` handles agent setup as part of scaffold.
 
-This command deploys **this collection's own** skills/commands into `.claude/`, and it
-also scaffolds the project-owned source locations Claude teams should keep in Git:
-`agents/`, `rules/`, `hooks/`, `commands/`, `skills/`, `docs/reference/ai-collaboration.md`,
-and a thin `CLAUDE.md`. For a project's **own custom** command, agent, skill, or hook —
-one that doesn't come from `kmp-agent-skills` — author it in those project-owned
-locations first, then deploy a copy into `.claude/`. Never author a project-specific
-artifact directly into `.claude/` as its only copy.
+This command deploys **this collection's own** skills/commands into `.claude/`, and
+scaffolds the project-owned source locations Claude teams should keep in Git: `agents/`,
+`rules/`, `hooks/`, `commands/`, `skills/`, `docs/reference/ai-collaboration.md`, and a
+thin `CLAUDE.md`. For a project's own custom command, agent, skill, or hook, author it in
+those project-owned locations first, then deploy a copy into `.claude/` — never author a
+project-specific artifact directly into `.claude/` as its only copy.
 
 ---
 
@@ -201,11 +200,10 @@ The generic `agents/*.md` roster this collection ships (`planner`, `implementer`
 sub-domain concept, like a mimicked UI DSL's mirror-map staying honest, or a native core
 staying separated from its JNI/cinterop bridge. When a library has a real, distinct
 sub-domain like that, author a project-owned maintainer agent the same way a project
-authors a custom skill: `agents/<name>-maintainer.md` at the project root, deployed to
+authors a custom skill: `agents/<name>-maintainer.md` at the root, deployed to
 `.claude/agents/<name>-maintainer.md`.
 
-Only do this when the sub-domain is real and ongoing — a one-off task doesn't need a
-standing agent. Two concrete cases this collection's own skills already point at:
+Only do this when the sub-domain is real and ongoing — a one-off task doesn't need a standing agent. Two concrete cases this collection's own skills already point at:
 
 **A library that mimics a reference API's shape** (`kmp-api-mimicry`):
 
@@ -265,8 +263,7 @@ ls agents/README.md rules/README.md hooks/README.md commands/README.md skills/RE
 ```
 
 Every path must exist on disk. If any are missing, create them now — do not move to
-Step 6 with a partial scaffold, and do not rely on Step 10's summary to catch it later;
-that summary reports what this gate already confirmed, not a fresh check.
+Step 6 with a partial scaffold, and do not rely on Step 10's summary to catch it later; that summary reports what this gate already confirmed, not a fresh check.
 
 ---
 
@@ -498,3 +495,6 @@ Try it now:
 - Keep project-owned artifacts in the root scaffold even if they only contain README
   placeholders today; that empty scaffold prevents future edits from drifting straight
   into `.claude/`.
+- Gitignore only `.claude/skills/` and `.agents/skills/` (reproducible mirrors) — commit
+  `.claude/AGENTS.md`, `.claude/commands/`, `.claude/settings.json`. See "What To Commit
+  Vs Gitignore" in `docs/reference/ai-collaboration.md`.
