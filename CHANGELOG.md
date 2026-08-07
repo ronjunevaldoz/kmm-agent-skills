@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.11.1] — 2026-08-07
+
+### Fixed
+
+- fix(audit): classify_declarations skipped nothing — local vars counted as API surface
+
+---
+
 ## [v2.11.0] — 2026-08-07
 
 ### Added
