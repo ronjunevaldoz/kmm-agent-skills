@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.12.3] — 2026-08-07
+
+### Fixed
+
+- fix(setup-agents): classify 5 commands missing from the consumer-safe/repo-internal lists
+
+---
+
 ## [v2.12.2] — 2026-08-07
 
 ### Fixed
