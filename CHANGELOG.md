@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.10.3] — 2026-08-07
+
+### Fixed
+
+- fix(new-project): delegate agent setup to /kmp-setup-agents instead of duplicating it
+
+---
+
 ## [v2.10.2] — 2026-08-07
 
 ### Docs
