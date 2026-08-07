@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.14.0] — 2026-08-08
+
+### Added
+
+- feat(setup-agents): scope .gitignore for .claude/ during setup, not just document it
+
+---
+
 ## [v2.13.1] — 2026-08-08
 
 ### Fixed
