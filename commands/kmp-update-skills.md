@@ -42,7 +42,7 @@ export KMP_AGENT_SKILLS_SOURCE=/path/to/kmp-agent-skills   # add to shell profil
 
 ## Step 1b — Migrating a project last updated before v2.2.0
 
-**As of v2.11.0 this is handled automatically** — `update-consumer-skills.sh` now prunes
+**As of v2.10.1 this is handled automatically** — `update-consumer-skills.sh` now prunes
 any deployed skill directory that no longer exists upstream, on every run, scoped so it
 never touches the project's own `./skills/<name>` custom skills. The manual step below is
 only needed for the parts pruning doesn't cover: old `commands/kmm-*.md` slash commands
