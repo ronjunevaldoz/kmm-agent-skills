@@ -1,5 +1,5 @@
 {
-  "version": "2.12.0",
+  "version": "2.12.1",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -403,7 +403,10 @@
         "acronym casing",
         "composable naming",
         "constant naming",
-        "backing property"
+        "backing property",
+        "package directive does not match the file location",
+        "InvalidPackageDeclaration",
+        "PackageDirectoryMismatch"
       ],
       "triggers": [
         "Ktlint",

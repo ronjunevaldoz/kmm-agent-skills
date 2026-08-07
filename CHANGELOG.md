@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.12.1] — 2026-08-07
+
+### Docs
+
+- docs(code-quality): document Detekt's InvalidPackageDeclaration rule
+
+---
+
 ## [v2.12.0] — 2026-08-07
 
 ### Added
