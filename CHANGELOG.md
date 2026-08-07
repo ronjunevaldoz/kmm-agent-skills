@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.10.6] — 2026-08-07
+
+### Fixed
+
+- fix(audit): comment-surface audit — string-literal false positive, coverage gaps
+
+---
+
 ## [v2.10.5] — 2026-08-07
 
 ### Other
