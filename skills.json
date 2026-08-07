@@ -1,5 +1,5 @@
 {
-  "version": "2.10.7",
+  "version": "2.11.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -175,6 +175,7 @@
       "scripts": [
         "audit_project.py",
         "audit_skills_repo.py",
+        "classify_declarations.py",
         "draft_issue.py",
         "generate_structure_diagram.py",
         "governance_check.py"

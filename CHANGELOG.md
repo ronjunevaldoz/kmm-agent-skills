@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.11.0] — 2026-08-07
+
+### Added
+
+- feat(audit): add classify_declarations.py — a real classifier for the core/sugar taxonomy
+
+---
+
 ## [v2.10.7] — 2026-08-07
 
 ### Fixed
