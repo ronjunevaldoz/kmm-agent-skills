@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.12.2] — 2026-08-07
+
+### Fixed
+
+- fix(update-consumer-skills): deploy correctly when a skill is individually symlinked
+
+---
+
 ## [v2.12.1] — 2026-08-07
 
 ### Docs
