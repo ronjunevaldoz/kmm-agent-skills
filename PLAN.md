@@ -17,7 +17,7 @@ Update when skills are added, revised, or completed.
 
 ---
 
-## Shipped Skills (69) — v1.16.0
+## Shipped Skills (69)
 
 ### Layer 0 — Architecture Contract
 | Skill | Status | Notes |
@@ -97,57 +97,19 @@ Update when skills are added, revised, or completed.
 | Skill | Status | Notes |
 |---|---|---|
 | `kmp-legal-docs` | ✅ | Privacy Policy + T&C templates, auto-detect scanner, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, consent gate, CI gate |
-| `kmp-expert` | ✅ | 54-skill routing map, dependency graph, invocation map, build order |
+| `kmp-expert` | ✅ | 69-skill routing map, dependency graph, invocation map, build order |
 | `kmp-migration` | ✅ | Incremental adoption: assess current state, MVVM→MVI, monolith→multi-module, Hilt→Koin migration paths |
 
 ---
 
 ## Open Defects
 
-None. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for tracked open items.
+See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for tracked open items — do not duplicate its
+count or contents here; that duplication is what let this line go stale before.
 
 ---
 
-## Shipped — v1.17.0 (Repo Validation Hardening)
-
-| Item | Status | Description |
-|---|---|---|
-| Repo validation workflow | ✅ Shipped | Added a repo-owned PR/push workflow that runs skill issue scan, repo audit, skill map validation, keyword routing validation, and pytest. |
-| Release validation gates | ✅ Shipped | `scripts/release.py` now runs scan, audit, skill map validation, keyword routing validation, and pytest before any version mutation. |
-| Validator command cleanup | ✅ Shipped | Updated stale validator command docs to use the expert skill script paths and `--repo-root .` where required. |
-
----
-
-## Shipped — v1.15.0 (Consumer Changelogs, Release Notes & App Versioning)
-
-| Item | Status | Description |
-|---|---|---|
-| `## Changelog` in all 47 skills | ✅ Shipped | Consumer-facing release note table in every SKILL.md; travels with the skill on install |
-| `agents/changelog.md` | ✅ Shipped | Changelog agent: categorizes git + skill diff into Breaking/New/Improved/Fixed, writes consumer release notes |
-| `commands/kmp-release-notes.md` | ✅ Shipped | `/kmp-release-notes` command: per-skill or collection release notes from git history |
-| `scripts/generate_release_notes.py` | ✅ Shipped | Reads git log + per-skill `## Changelog` tables, outputs structured JSON for the changelog agent |
-| App versioning pattern | ✅ Shipped | `gradle.properties` as single source of truth for `VERSION_NAME`/`VERSION_CODE`; `BuildKonfig` exposes `APP_VERSION` to `commonMain` |
-| `CONTRIBUTING.md` | ✅ Shipped | Full contribution guide: skill authoring, commit format, PR checklist, release process |
-
----
-
-## Shipped — v1.14.0 (E2E Testing & Project Bootstrap)
-
-| Item | Status | Description |
-|---|---|---|
-| `/kmp-new-project` command | ✅ Shipped | Natural language → full KMP project scaffold. Drives full pipeline: feature-scaffold → clean-arch → infrastructure → design system → features → verify |
-| `samples/todo-app.md` | ✅ Shipped | E2E test spec: 12 skills, local persistence, form validation, MVI, Roborazzi. Pass/fail is objective (audit + jvmTest + screenshot audit) |
-| More sample specs | 📋 Planned | `samples/social-feed.md` (paging, image loading, kRPC), `samples/settings-app.md` (DataStore, biometric auth) |
-
----
-
-## Upcoming — v1.x (Quality & Hardening)
-
-No open quality-hardening items after the repo validation gate pass.
-
----
-
-## Upcoming — v2.0 (Platform Milestone)
+## Upcoming — Platform Compatibility
 
 Require coordination across multiple files or introduce breaking changes to existing skill guidance.
 
@@ -156,8 +118,7 @@ Require coordination across multiple files or introduce breaking changes to exis
 | Kotlin 2.x / K2 verification pass | HIGH | Audit every skill's code snippets against K2 — some `expect/actual` and annotation patterns changed. Update minimum Kotlin version across all TOML snippets. |
 | AGP 10 migration | MEDIUM | AGP 10 changes module graph declaration API. Update `feature-scaffold` and `clean-architecture` skills when AGP 10 stable ships. |
 | Compose Multiplatform 2.x readiness | MEDIUM | CMP 2.x expected to stabilize shared navigation and resources API. `navigation`, `shared-resources`, and `adaptive-layout` skills will need version bumps and pattern updates. |
-| Skill freshness CI gate | LOW | `/kmp-setup-hooks Option C` describes a weekly cron. Post-v2.0 add it to the repo's own `.github/workflows/` so freshness warnings surface without a local install. |
-| `kmp-testing-robot` | 💡 Deferred | UI test robot pattern (Page Object Model for Compose). Deferred until Roborazzi + compose-test-rule coverage feels insufficient in practice. |
+| Skill freshness CI gate | LOW | `/kmp-setup-hooks Option C` describes a weekly cron. Add it to the repo's own `.github/workflows/` so freshness warnings surface without a local install — `kmp-audit.yml`/`repo-validation.yml` don't cover this yet. |
 
 ---
 

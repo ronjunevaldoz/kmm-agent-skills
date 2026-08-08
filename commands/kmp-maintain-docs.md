@@ -13,8 +13,10 @@ Arguments (all optional):
 ## Step 1 — Identify scope
 
 If `$ARGUMENTS` names a file or path, use that as the primary source. Otherwise inspect
-`README.md`, `GETTING_STARTED.md`, `INSTALL.md`, `RELEASING.md`, `docs/`, `agents/`,
-`commands/`, and the touched skill docs.
+`README.md`, `GETTING_STARTED.md`, `INSTALL.md`, `RELEASING.md`, `PLAN.md`,
+`KNOWN_ISSUES.md`, `docs/`, `agents/`, `commands/`, and the touched skill docs. `PLAN.md`
+rots silently if skipped — its shipped-skill count, version header, and "Open Defects"
+line are claims that go stale every release unless checked against reality.
 
 If the requested work is consumer release notes or per-skill changelog tables, hand off
 to `agents/changelog.md` instead.
