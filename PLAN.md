@@ -17,88 +17,18 @@ Update when skills are added, revised, or completed.
 
 ---
 
-## Shipped Skills (69)
+## Shipped Skills
 
-### Layer 0 — Architecture Contract
-| Skill | Status | Notes |
-|---|---|---|
-| `kmp-feature-scaffold` | ✅ | AGP 9, build-logic, version catalog, Koin 4, 6-layer model |
-| `kmp-clean-architecture` | ✅ | 6-layer contract, :model vs :api, internal visibility, Detekt rules |
-| `kmp-presenter-module` | ✅ | Pure Kotlin ViewModel, MVI contracts, no Compose dep, Koin wiring |
+Full roster with what each skill owns, by layer: `skills/kmp-expert/SKILL.md`'s
+"The N Skills and What They Own" section — the single source of truth, mechanically
+checked against README.md and the planner routing table by
+`skills/kmp-expert/scripts/validate_skill_map.py`. This file used to keep its own
+copy of that same table; it silently drifted to 49 of 69 skills before anyone
+noticed, because nothing checked it against the real count. Don't reintroduce a
+second copy here — link to it instead.
 
-### Layer 1 — Project Foundation
-| Skill | Status | Notes |
-|---|---|---|
-| `kmp-dependency-injection` | ✅ | Koin manual + annotated modes, scope rules, test overrides |
-| `kmp-flavor-environment` | ✅ | BuildKonfig, AppConfig, Android product flavors |
-| `kmp-ci-github-actions` | ✅ | Android/iOS/Desktop/Web matrix, XCFramework release |
-| `kmp-audit` | ✅ | Architecture review, boundary check, skills repo hygiene, issue drafts |
-
-### Layer 2 — Core Infrastructure
-| Skill | Status | Notes |
-|---|---|---|
-| `kmp-ktor-auth-service` | ✅ | Bearer + JWT, sessions, Ktor RPC auth, login/refresh/logout |
-| `kmp-mongodb-database` | ✅ | Coroutine driver, repository boundary, typed errors, change streams |
-| `kmp-kotlin-rpc` | ✅ | Kotlin RPC vs REST decision, shared contract, Ktor auth integration |
-| `kmp-network-layer` | ✅ | Ktor 3, NetworkResult<T>, safeRequest, token refresh interceptor |
-| `kmp-sqldelight-setup` | ✅ | SQLDelight 2, platform drivers, schema, migrations, Flow queries |
-| `kmp-datastore` | ✅ | Preferences + Proto DataStore, expect/actual factory, Koin wiring |
-| `kmp-xcframework-spm` | ✅ | XCFramework build, SPM binary target, CI release |
-| `kmp-logging` | ✅ | logger wrapper, kotlin-logging or Kermit, log levels, logger factory, crash boundary, Koin wiring |
-
-### Layer 3 — Platform Patterns
-| Skill | Status | Notes |
-|---|---|---|
-| `kmp-expect-actual` | ✅ | 4 categories, typealias actual, @ObjCName, Kotlin/Native memory |
-| `kmp-repository-pattern` | ✅ | Interface/:data impl, mapper pattern, 3 fetch strategies, optimistic updates |
-| `kmp-jni-pro` | ✅ | JVM JNI bridge, @JvmStatic entry points, wrapper/C-shim discipline, memory-safe interop |
-
-### Layer 4 — Feature Building Blocks
-| Skill | Status | Notes |
-|---|---|---|
-| `kmp-navigation` | ✅ | JetBrains Nav Compose, type-safe routes, nested graphs, bottom nav |
-| `kmp-shared-resources` | ✅ | CMP Resources, strings/images/fonts, plurals, localization |
-| `kmp-mvi` | ✅ | Contract pattern, MviViewModel, Channel<Effect>, Turbine testing |
-| `kmp-paging` | ✅ | Paging 3, PagingSource, RemoteMediator, cursor/offset, load-state |
-| `kmp-analytics` | ✅ | Sealed AnalyticsEvent, Firebase/Amplitude impls, screen tracking, FakeAnalytics |
-| `kmp-form-validation` | ✅ | ValidationResult, FieldState, async debounce, ValidatedTextField, submit gate |
-| `kmp-image-loading` | ✅ | Coil 3, single ImageLoader, AsyncImage, AvatarImage, HeroImage |
-| `kmp-permissions` | ✅ | PermissionState, expect/actual PermissionController, Android + iOS |
-| `kmp-deep-linking` | ✅ | App Links + Universal Links, DeepLinkParser, NavHost navDeepLink, AASA |
-| `kmp-biometric-auth` | ✅ | BiometricResult, expect/actual BiometricAuthenticator, BiometricPrompt, LAContext |
-| `kmp-push-notifications` | ✅ | FCM + APNs, PushToken, FirebaseMessagingService, NotificationHandler expect/actual |
-| `kmp-workmanager` | ✅ | CoroutineWorker, BGTaskScheduler, expect/actual BackgroundScheduler, retry |
-| `kmp-feature-flags` | ✅ | FeatureFlag enum, Firebase Remote Config, A/B variants, kill switch |
-| `kmp-offline-first` | ✅ | SyncState, SyncManager, optimistic updates with rollback, conflict resolution |
-| `kmp-crash-reporting` | ✅ | CrashReporter interface, Firebase Crashlytics + Sentry, dSYM symbolication |
-
-### Layer 5 — UI System
-| Skill | Status | Notes |
-|---|---|---|
-| `kmp-compose-design-system` | ✅ | Tokens, AppTheme, dark mode, 6 core components (Stable tier), ownership model, `scripts/update_design_system.py`, `scripts/scan_design_violations.py` |
-| `kmp-compose-design-system-extended` | ✅ | 27 additional components with stability tiers (Stable / Experimental) |
-| `kmp-compose-adaptive-layout` | ✅ | WindowSizeClass, Compact/Medium/Expanded, list-detail split, migration mode |
-| `kmp-compose-animation` | ✅ | AnimatedVisibility, Crossfade, AnimatedContent, animateXAsState, shared elements |
-| `kmp-compose-slot-api` | ✅ | Slot patterns, scoped slots, CompositionLocal, component API shape |
-| `kmp-compose-state-hoisting` | ✅ | Hoist-until-shared rule, controlled components, stateless vs stateful |
-| `kmp-compose-state-container` | ✅ | remember/rememberSaveable/ViewModel survival matrix, custom Saver |
-| `kmp-compose-graphics-modifiers` | ✅ | graphicsLayer, Canvas, drawBehind, drawWithCache, workflow node shells |
-| `kmp-compose-preview-driven-development` | ✅ | Desktop-first @Preview, PreviewParameterProvider, PDD cycle |
-
-### Layer 6 — Testing & Quality
-| Skill | Status | Notes |
-|---|---|---|
-| `kmp-unit-testing` | ✅ | runTest, Turbine, fake-over-mock, :core:testing fixtures, JVM ViewModel tests |
-| `kmp-roborazzi` | ✅ | Screenshot tests from @Preview on JVM, golden images, CI diff |
-| `kmp-code-quality` | ✅ | Ktlint + Detekt, CI gates, pre-commit hook |
-| `kmp-compose-accessibility` | ✅ | Semantic roles, contentDescription, touch targets, Roborazzi a11y snapshots |
-
-### Meta
-| Skill | Status | Notes |
-|---|---|---|
-| `kmp-legal-docs` | ✅ | Privacy Policy + T&C templates, auto-detect scanner, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, consent gate, CI gate |
-| `kmp-expert` | ✅ | 69-skill routing map, dependency graph, invocation map, build order |
-| `kmp-migration` | ✅ | Incremental adoption: assess current state, MVVM→MVI, monolith→multi-module, Hilt→Koin migration paths |
+Non-shipped work (🚧 in progress, 📋 planned, 💡 idea) is tracked below, under
+Upcoming, since `kmp-expert`'s table only lists what's actually shipped.
 
 ---
 

@@ -240,7 +240,7 @@ on Claude Code, the primary target — same 500-line discipline this repo enforc
 
 ## Picking skills to install
 
-Not every project needs all 30 skills. Install by phase:
+Not every project needs the full collection. Install by phase:
 
 ### Starting a new project
 

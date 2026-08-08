@@ -54,6 +54,21 @@ def validate_skill_map(repo_root: Path) -> list[str]:
     if missing_in_expert:
         errors.append("missing from expert: " + ", ".join(missing_in_expert))
 
+    # Prose skill-count mentions drift silently — every skill *name* appearing in
+    # README.md (checked above) doesn't catch a stale "68 skills" summary line sitting
+    # next to an accurate list. Found real: README.md and agentskills-io-standards.md
+    # both said "68 skills" while the repo had 69. Positive-presence check, not a
+    # negative "no wrong number" scan — the latter would false-positive on legitimate
+    # historical counts (e.g. "the 22-skill backlog was resolved on <date>").
+    count_phrase = f"{len(skill_names)} skills"
+    if count_phrase not in readme_text:
+        errors.append(f"README.md is missing the current count phrase {count_phrase!r} — a skill-count summary line has likely gone stale")
+    standards_path = repo_root / "docs" / "reference" / "agentskills-io-standards.md"
+    if standards_path.exists():
+        standards_text = read_text(standards_path)
+        if count_phrase not in standards_text:
+            errors.append(f"agentskills-io-standards.md is missing the current count phrase {count_phrase!r} — a skill-count summary line has likely gone stale")
+
     # Check that every skill has at least one routing row in agents/planner.md.
     # The planner uses short names (e.g. "logging") stripped of the
     # "kmp-" prefix; non-standard prefixes (e.g. "jni-kotlin-pro")

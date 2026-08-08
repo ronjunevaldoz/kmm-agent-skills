@@ -86,16 +86,12 @@ Claude invokes `kmp-ktor-auth-service` automatically because "JWT" and
 
 ## Skill Collection Overview
 
-**57 skills** organized into layers:
-
-- **Foundation** (6 skills) — project setup, clean architecture rules, DI, CI
-- **Infrastructure** (8 skills) — networking, databases, auth, logging
-- **Patterns** (19 skills) — repositories, navigation, offline-first, paging, IAP, push, analytics, and more
-- **UI System** (9 skills) — design tokens, components, animations, state hoisting, previews
-- **Testing & Quality** (4 skills) — unit tests, screenshots, code quality, accessibility
-- **Meta** (8 skills) — expert routing, audit, migration, legal docs, release, lessons
-
-See [README.md](README.md) for the full map.
+69 skills organized into layers — architecture contract, project foundation, core
+infrastructure, platform patterns, feature building blocks, UI system, testing & quality,
+plus a meta layer for routing/audit/migration. Full per-layer breakdown, kept in sync
+with the real skill count automatically:
+[`skills/kmp-expert/SKILL.md`](skills/kmp-expert/SKILL.md)'s "The Skills and What They
+Own" section. See [README.md](README.md) for the full map too.
 
 ---
 
