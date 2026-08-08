@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.16.4] — 2026-08-08
+
+### Docs
+
+- docs(code-quality): add Kotlin's own conventions for extension visibility and file placement
+
+---
+
 ## [v2.16.3] — 2026-08-08
 
 ### Docs
