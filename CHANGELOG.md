@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.16.2] — 2026-08-08
+
+### Fixed
+
+- fix(docs): eliminate PLAN.md's duplicate skill roster; mechanize count checks
+
+---
+
 ## [v2.16.1] — 2026-08-08
 
 ### Fixed
