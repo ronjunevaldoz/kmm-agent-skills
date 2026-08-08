@@ -52,6 +52,38 @@ accepting the residual risk as documented here.
 
 ---
 
+### KI-010 — `git tag` is never mechanically blocked outside `scripts/release.py`
+
+**Status:** Open — filed 2026-08-08, structural, not a missed implementation.
+
+**Symptom:** `docs/reference/versioning-policy.md`'s Hard Rule #1 says "Never `git tag`
+manually — always use `scripts/release.py`." Nothing enforces this. `.githooks/` only
+wires `commit-msg` (Conventional Commit format on the commit that will later be tagged).
+A bare `git tag v9.9.9` on any commit, from any shell, succeeds silently — no hook fires,
+no warning, no rejection.
+
+**Why this is harder than the `commit-msg` case:** Git has no native `pre-tag` hook. The
+full client-side hook list (`pre-commit`, `commit-msg`, `pre-push`, `post-commit`,
+`pre-rebase`, etc. — see `githooks(5)`) has nothing that runs on `git tag` itself. The
+closest real mechanism is `pre-push`, which *can* inspect any tag ref about to leave the
+machine and reject one that doesn't match `release.py`'s shape (annotated tag, pointing
+at a commit whose message starts with `Release v`), but that only catches it at push
+time, not at tag-creation time, and a manually-created tag deleted before push leaves no
+trace either way.
+
+**Mitigation already in place:** policy + agent discipline only — `versioning-policy.md`'s
+Hard Rule #1, followed by convention. No consumer project has this enforced either;
+`kmp-release`'s scripts assume they're the only path to a tag, same as this repo.
+
+**Fix:** Not attempted here — a `pre-push` tag-shape guard is buildable but is its own
+scoped feature (false-positive risk on legitimately hand-created tags, e.g. a one-off
+hotfix tag during an incident), not a natural side effect of anything already shipped.
+Revisit if a tag ever *does* get created by hand and causes a real problem; until then,
+documented risk, not a silent gap someone will trip on unknowingly the way KI-007's
+naming collision was.
+
+---
+
 ## Resolved
 
 ### KI-009 — slash commands exceeding the 500-line progressive-disclosure guideline
