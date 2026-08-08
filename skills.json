@@ -1,5 +1,5 @@
 {
-  "version": "2.16.2",
+  "version": "2.16.3",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -426,7 +426,12 @@
         "documentation comment",
         "comment style",
         "kdoc vs line comment",
-        "how to comment kotlin"
+        "how to comment kotlin",
+        "extension function",
+        "when to use Kotlin extension",
+        "extension static resolution",
+        "extension vs member function",
+        "extension property"
       ],
       "scripts": []
     },
