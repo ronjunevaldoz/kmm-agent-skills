@@ -48,7 +48,8 @@ Use when you need to:
 **Trigger keywords:** Ktlint, Detekt, code quality, formatting, architecture rules, CI gate,
 static analysis, lint, import check, layer violation, code style, KDoc, comment convention,
 when to use comments, documentation comment, comment style, kdoc vs line comment,
-how to comment kotlin.
+how to comment kotlin, extension function, when to use Kotlin extension, extension
+static resolution, extension vs member function, extension property.
 
 **Freshness rule:** Ktlint and Detekt versions change frequently — recheck the latest releases
 before pinning. Detekt architecture rule DSL changes between minor versions.

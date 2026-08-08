@@ -32,6 +32,54 @@ type is fine and not what this flags — the smell is unrelated functions sharin
 generic filename. `_detect_god_utils_file` flags a `*Utils.kt`/`*Helpers.kt` file with
 10+ top-level functions spanning 3+ distinct (or no) receiver types.
 
+### Extension functions — when to reach for one, and when not to
+
+Verified against [kotlinlang.org/docs/extensions.html](https://kotlinlang.org/docs/extensions.html).
+An extension adds a callable function/property to a type you don't own, or don't want to
+put a method directly on — dot-notation syntax, but resolved at compile time, not a real
+member.
+
+**Reach for an extension when:**
+- Extending a type you can't modify — a third-party or stdlib type (`String`, `List<T>`,
+  a platform SDK type)
+- A pure utility that reads naturally as `receiver.doThing()` — check the stdlib first
+  (`.map()`, `.filter()`, `.fold()`) before writing a new one
+- A computed property with no backing state — `val User.displayName: String get() = ...`
+- Building a DSL — see the DSL section below; scoped extension receivers are what make a
+  type-safe builder's inner block feel like part of the type it's building
+
+**Don't reach for an extension when:**
+- **You need runtime polymorphism.** This is the pitfall that actually bites — extension
+  functions are resolved **statically**, by the variable's *declared* type, not the
+  object's *runtime* type. A member function overriding a base class dispatches
+  correctly; an extension "overriding" one does not:
+
+  ```kotlin
+  fun Shape.describe() = "a shape"
+  fun Rectangle.describe() = "a rectangle"   // NOT an override — a separate function
+
+  fun printIt(s: Shape) = println(s.describe())
+
+  printIt(Rectangle())   // prints "a shape" — resolved by the *declared* type Shape,
+                          // not the real Rectangle instance. A member function would
+                          // have printed "a rectangle".
+  ```
+
+  If a caller genuinely needs different behavior per subtype through a shared reference,
+  that's a member function on the base type (or a `sealed class`/`when`), not an
+  extension — no exception, this is the one case with a real correctness cost, not just
+  a style preference.
+- **The function needs private/protected access** to the type it's extending — extensions
+  only see the public API, same as any other outside caller. Make it a member instead.
+- **It's one of many top-level extensions crowding a shared package** — namespace
+  pollution is real; prefer scoping the extension to a smaller, purpose-named file (see
+  Util/extension file organization above) or a narrower receiver type over a broad one
+  (`fun JSONObject.toUserOrNull()` over a generic `fun Any.toUserOrNull()`).
+- **State needs to be stored on the extended type.** Extension properties can't have a
+  backing field or an initializer — `val Foo.cache: MutableMap<K, V> = mutableMapOf()`
+  doesn't compile. Store the state elsewhere (an external map keyed by identity, or a
+  real member on the type) if it's more than a computed read.
+
 ### Code categorization: core / helper / sugar / sample-local / deprecated
 
 Five real categories for classifying a function or type — applies to both app and
