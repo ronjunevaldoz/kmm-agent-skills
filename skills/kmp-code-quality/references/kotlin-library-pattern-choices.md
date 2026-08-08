@@ -32,12 +32,30 @@ type is fine and not what this flags — the smell is unrelated functions sharin
 generic filename. `_detect_god_utils_file` flags a `*Utils.kt`/`*Helpers.kt` file with
 10+ top-level functions spanning 3+ distinct (or no) receiver types.
 
+A dedicated `*Extensions.kt` file is the right call for a **third-party or stdlib type**
+you don't own the source of (`String`, `List<T>`) — there's no class file to put it in.
+For a type **this project owns**, Kotlin's own coding conventions are more specific and
+worth following exactly: an extension relevant to every caller of that class belongs in
+the *same file as the class itself*, not a separate extensions file; an extension that
+only makes sense for one specific caller belongs next to that caller's code instead.
+"Avoid creating files just to hold all extensions of some class" (verified,
+[kotlinlang.org/docs/coding-conventions.html](https://kotlinlang.org/docs/coding-conventions.html)).
+
 ### Extension functions — when to reach for one, and when not to
 
-Verified against [kotlinlang.org/docs/extensions.html](https://kotlinlang.org/docs/extensions.html).
+Verified against [kotlinlang.org/docs/extensions.html](https://kotlinlang.org/docs/extensions.html)
+and [kotlinlang.org/docs/coding-conventions.html](https://kotlinlang.org/docs/coding-conventions.html).
 An extension adds a callable function/property to a type you don't own, or don't want to
 put a method directly on — dot-notation syntax, but resolved at compile time, not a real
-member.
+member. Kotlin's own conventions endorse this liberally: "every time you have a function
+that works primarily on an object, consider making it an extension function accepting
+that object as a receiver" — but pair that with the visibility default below, or
+"liberally" becomes public-API sprawl.
+
+**Default to the narrowest visibility that works** — local (inside the function that uses
+it) or `private` member/top-level, widening to `internal` or `public` only once a second,
+real caller needs it. Kotlin's own conventions frame this explicitly as minimizing API
+pollution, not just a style preference.
 
 **Reach for an extension when:**
 - Extending a type you can't modify — a third-party or stdlib type (`String`, `List<T>`,
@@ -71,10 +89,9 @@ member.
   a style preference.
 - **The function needs private/protected access** to the type it's extending — extensions
   only see the public API, same as any other outside caller. Make it a member instead.
-- **It's one of many top-level extensions crowding a shared package** — namespace
-  pollution is real; prefer scoping the extension to a smaller, purpose-named file (see
-  Util/extension file organization above) or a narrower receiver type over a broad one
-  (`fun JSONObject.toUserOrNull()` over a generic `fun Any.toUserOrNull()`).
+- **It's one of many `public` top-level extensions crowding a shared package** — the
+  visibility default above is the fix; also prefer a narrower receiver type over a broad
+  one (`fun JSONObject.toUserOrNull()` over a generic `fun Any.toUserOrNull()`).
 - **State needs to be stored on the extended type.** Extension properties can't have a
   backing field or an initializer — `val Foo.cache: MutableMap<K, V> = mutableMapOf()`
   doesn't compile. Store the state elsewhere (an external map keyed by identity, or a
