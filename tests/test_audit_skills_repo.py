@@ -409,6 +409,45 @@ class AuditSkillsRepoTests(unittest.TestCase):
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertFalse(any("docs-hygiene" in f for f in findings))
 
+    def test_flags_oversized_root_doc(self) -> None:
+        # _check_docs_hygiene's 150-line limit only ever scanned docs/ — every
+        # _PERMANENT_ROOT_DOCS file sits one directory above that and was invisible to
+        # any size check. Real bug: INSTALL.md grew to 609 lines unnoticed.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            (root / "INSTALL.md").write_text("# install\n" + "line\n" * 501, encoding="utf-8")
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any(
+                "docs-hygiene" in f and "INSTALL.md" in f and "500" in f
+                for f in findings
+            ))
+
+    def test_does_not_flag_root_doc_under_the_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            (root / "INSTALL.md").write_text("# install\n" + "line\n" * 100, encoding="utf-8")
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertFalse(any("INSTALL.md" in f and "docs-hygiene" in f for f in findings))
+
+    def test_changelog_is_exempt_from_the_root_doc_size_limit(self) -> None:
+        # CHANGELOG.md is auto-generated and append-only by design (release.py prepends
+        # a section per release) — flagging it as bloated would be a permanent false
+        # positive, not a real finding to act on.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            (root / "CHANGELOG.md").write_text("# changelog\n" + "line\n" * 3000, encoding="utf-8")
+
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertFalse(any("CHANGELOG.md" in f for f in findings))
+
 
 if __name__ == "__main__":
     unittest.main()

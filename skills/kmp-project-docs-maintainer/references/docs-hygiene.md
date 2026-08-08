@@ -144,6 +144,7 @@ The audit script (`audit_skills_repo.py --docs-hygiene-only`) flags snake_case f
 | Rule | Limit | Action |
 |---|---|---|
 | Any `docs/` file (outside `archive/`) | 150 lines | Split or archive completed sections |
+| Root-level named doc (`README.md`, `KNOWN_ISSUES.md`, etc. — see `_ROOT_DOCS_WITH_SIZE_LIMIT` in `audit_skills_repo.py`; `CHANGELOG.md` is exempt, it's auto-generated and append-only) | 500 lines | Split least-central sections into `docs/reference/*.md`, leave a pointer — same pattern as an oversized `SKILL.md` |
 | Unprocessed lessons in `docs/lessons/` | 20 files | Harvest via `kmp-skill-harvester` |
 | Lesson file age without harvest | 30 days | Harvest or archive |
 | Task file marked `status: done` in active `docs/tasks/` | 0 | Move to `docs/tasks/archive/` immediately |

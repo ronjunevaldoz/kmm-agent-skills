@@ -161,6 +161,30 @@ def _check_stale_task_docs_at_root(root: Path, findings: list[str]) -> None:
             )
 
 
+# _check_docs_hygiene's 150-line limit only ever scans docs_dir = root / "docs" — every
+# _PERMANENT_ROOT_DOCS file sits at the root, one directory above that, and was
+# completely outside any size check. Found real: INSTALL.md had grown to 609 lines with
+# nobody catching it. CHANGELOG.md is deliberately excluded — it's auto-generated,
+# append-only (policy: never edit for dev commits), and its growth is the whole point,
+# unlike every other root doc here which should stay navigable.
+ROOT_DOC_MAX_LINES = 500
+_ROOT_DOCS_WITH_SIZE_LIMIT = _PERMANENT_ROOT_DOCS - {"CHANGELOG"}
+
+
+def _check_root_doc_hygiene(root: Path, findings: list[str]) -> None:
+    for f in root.glob("*.md"):
+        if f.stem.upper() not in _ROOT_DOCS_WITH_SIZE_LIMIT:
+            continue
+        lines = f.read_text(encoding="utf-8", errors="ignore").count("\n")
+        if lines > ROOT_DOC_MAX_LINES:
+            findings.append(
+                f"docs-hygiene: root-level {f.name} is {lines} lines "
+                f"(limit {ROOT_DOC_MAX_LINES}) — split the least-central sections into "
+                f"docs/reference/*.md and leave a pointer, same pattern used for "
+                f"oversized SKILL.md/command files"
+            )
+
+
 DOCS_MAX_LINES = 150
 LESSON_STALE_DAYS = 30
 LESSON_BACKLOG_LIMIT = 20
@@ -353,6 +377,7 @@ def audit_skills_repo(root: Path) -> list[str]:
     _check_naming_conventions(root, findings)
     _check_stale_task_docs_at_root(root, findings)
     _check_docs_hygiene(root, findings)
+    _check_root_doc_hygiene(root, findings)
     _check_commonmain_jvm_apis(root, findings)
 
     readme = root / "README.md"
@@ -387,6 +412,7 @@ def main() -> int:
     if args.docs_hygiene_only:
         findings: list[str] = []
         _check_docs_hygiene(root, findings)
+        _check_root_doc_hygiene(root, findings)
     elif args.jvm_api_only:
         findings = []
         _check_commonmain_jvm_apis(root, findings)
