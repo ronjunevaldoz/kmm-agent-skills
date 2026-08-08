@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.16.5] — 2026-08-08
+
+### Docs
+
+- docs(code-quality): note there is no @deprecated KDoc tag
+
+---
+
 ## [v2.16.4] — 2026-08-08
 
 ### Docs
