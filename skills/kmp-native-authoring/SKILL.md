@@ -172,7 +172,17 @@ Comments section:
   pointer cast belongs — right above the real call, not in the public header a Kotlin
   consumer reads.
 - `//` preferred over `/* */`, matching this repo's own header example above and
-  Google's explicit guidance.
+  Google's explicit guidance ("you can use either... however `//` is much more common").
+  The real reason to actually prefer it, not just follow convention: `/* */` doesn't
+  nest — commenting out a block of code that already contains a `/* */` comment
+  silently truncates at that first `*/`, leaving the rest uncommented. `//` has no
+  such trap, since commenting out N lines is just N independent line comments.
+- **Real exception**: a header meant to be included by a strict C89/ANSI C compiler
+  (not C++, not C99+) has no `//` at all — it's a C++-only addition, standardized in C
+  only as of C99. This repo's own `native/include/*.h` headers are compiled as C++20
+  (see `CMakeLists.txt` below), so this doesn't apply here — noted only because it's
+  the one real reason `/* */` still exists in a modern C-ABI header at all, not just
+  a historical leftover to ignore.
 
 Mixing the two — putting implementation rationale in the header — means every consumer
 of the C-ABI (both the JNI bridge and Kotlin/Native cinterop) has to read past
