@@ -156,6 +156,13 @@ includeBuild("tailwind/style-experimental")
 | `@property` / `@receiver` / `@constructor` | Constructor property / extension receiver / primary constructor, documented separately from the class summary |
 | `@suppress` | Hides a technically-public declaration from generated docs |
 
+**There is no `@deprecated` KDoc tag** — verified against kotlinlang.org's KDoc
+reference, which states this explicitly. Use the `@Deprecated` compiler annotation
+instead; it's already the mechanism this repo's `deprecated` code-tier maps to (see
+`kotlin-library-pattern-choices.md`'s Code categorization section), and unlike a doc
+tag it actually produces a compiler warning at every call site, not just a
+documentation note nobody sees until they open the generated docs.
+
 **An example is warranted only when usage isn't obvious from the signature** (a builder, a
 DSL) — never required per function or per file, same "why not what" rule as `//`. When one
 is warranted, use `@sample`, not a pasted code block: it points at a real compiled
