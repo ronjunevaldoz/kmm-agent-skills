@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.16.1] — 2026-08-08
+
+### Fixed
+
+- fix(docs): clean PLAN.md staleness; add it to docs-maintainer's scope
+
+---
+
 ## [v2.16.0] — 2026-08-08
 
 ### Added
