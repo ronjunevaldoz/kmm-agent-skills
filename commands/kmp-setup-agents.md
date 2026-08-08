@@ -166,12 +166,21 @@ commands/README.md
 skills/README.md
 docs/reference/ai-collaboration.md
 docs/reference/agent-catalog.md
+KNOWN_ISSUES.md
 ```
 
 Each README should say what belongs there and that `.claude/` is the deployed runtime
 copy, not the only source of truth. `skills/README.md` should include a minimal
 `skills/<name>/SKILL.md` starter template so the first project-owned custom skill has a
 correct frontmatter shape from day one.
+
+`KNOWN_ISSUES.md` tracks confirmed agent behavior gaps, tool limitations, and workarounds
+for *this* project — the narrative counterpart to `.agents/pipeline-context.json`'s
+`recurring_issues` (a flat blocker list `/kmp-execute-ticket` reads before starting work;
+this file is where the full write-up for one of those blockers lives). Seed it with just
+the header and empty `## Open` / `## Resolved` sections — same shape as this repo's own
+`KNOWN_ISSUES.md`, entries added as real issues are actually found, never pre-filled with
+speculative ones. Owned going forward by `kmp-project-docs-maintainer`.
 
 `docs/reference/ai-collaboration.md` should explain:
 - `CLAUDE.md` is a thin bootstrap that points to `.claude/AGENTS.md`
