@@ -1,5 +1,5 @@
 {
-  "version": "2.15.0",
+  "version": "2.16.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -2246,7 +2246,16 @@
         "Divergent Change",
         "God State",
         "unrelated concerns in one ViewModel",
-        "state cohesion"
+        "state cohesion",
+        "framework-agnostic store",
+        "non-Compose MVI",
+        "custom renderer state",
+        "game engine UI state",
+        "drainEffects",
+        "poll effects",
+        "MVI without ViewModel",
+        "cross-tree shared state",
+        "sibling panels"
       ],
       "scripts": []
     },

@@ -7,8 +7,8 @@ Generated 2026-08-08 by `scripts/generate_skills_report.py` — run it after any
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
 | [`kmp-expert`](../../skills/kmp-expert/) | 500 | 2026-07-31 | ✅ |
-| [`kmp-mvi`](../../skills/kmp-mvi/) | 500 | 2026-07-26 | ✅ |
 | [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 499 | 2026-07-26 | ✅ |
+| [`kmp-mvi`](../../skills/kmp-mvi/) | 499 | 2026-07-26 | ✅ |
 | [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 489 | 2026-07-14 | ✅ |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 484 | 2026-07-31 | ✅ |
@@ -33,8 +33,8 @@ Generated 2026-08-08 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 421 | 2026-07-31 | ✅ |
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kmp-datastore`](../../skills/kmp-datastore/) | 413 | 2026-06-18 | ✅ |
+| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 410 | 2026-07-31 | ✅ |
 | [`kmp-mongodb-database`](../../skills/kmp-mongodb-database/) | 409 | 2026-06-21 | ✅ |
-| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 408 | 2026-07-31 | ✅ |
 | [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 403 | 2026-07-13 | ✅ |
 | [`kmp-expect-actual`](../../skills/kmp-expect-actual/) | 400 | 2026-07-20 | ✅ |
 | [`kmp-shadcn-compose`](../../skills/kmp-shadcn-compose/) | 397 | 2026-07-31 | ✅ |

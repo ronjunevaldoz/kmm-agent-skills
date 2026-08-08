@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.16.0] — 2026-08-08
+
+### Added
+
+- feat(mvi): document a framework-agnostic Store for non-Compose consumers
+
+---
+
 ## [v2.15.0] — 2026-08-08
 
 ### Added
