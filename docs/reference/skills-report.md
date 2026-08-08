@@ -56,10 +56,10 @@ Generated 2026-08-08 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-skill-harvester`](../../skills/kmp-skill-harvester/) | 337 | 2026-06-26 | ✅ |
 | [`kmp-feature-flags`](../../skills/kmp-feature-flags/) | 334 | 2026-06-21 | ✅ |
 | [`kmp-compose-accessibility`](../../skills/kmp-compose-accessibility/) | 330 | 2026-06-21 | ✅ |
+| [`kmp-native-authoring`](../../skills/kmp-native-authoring/) | 330 | 2026-07-31 | ✅ |
 | [`kmp-release`](../../skills/kmp-release/) | 328 | 2026-07-04 | ✅ |
 | [`kmp-docs-site`](../../skills/kmp-docs-site/) | 326 | 2026-07-11 | ✅ |
 | [`kmp-offline-first`](../../skills/kmp-offline-first/) | 324 | 2026-06-21 | ✅ |
-| [`kmp-native-authoring`](../../skills/kmp-native-authoring/) | 320 | 2026-07-31 | ✅ |
 | [`kmp-image-loading`](../../skills/kmp-image-loading/) | 317 | 2026-06-21 | ✅ |
 | [`kmp-benchmark`](../../skills/kmp-benchmark/) | 301 | 2026-07-10 | ✅ |
 | [`kmp-analytics`](../../skills/kmp-analytics/) | 297 | 2026-06-21 | ✅ |

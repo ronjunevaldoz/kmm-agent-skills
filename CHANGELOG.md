@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.16.6] — 2026-08-08
+
+### Docs
+
+- docs(native-authoring): explain why // beats /* */, and the real C89 exception
+
+---
+
 ## [v2.16.5] — 2026-08-08
 
 ### Docs
