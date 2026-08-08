@@ -2,6 +2,19 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.15.0] — 2026-08-08
+
+### Added
+
+- feat(audit): enforce a 500-line limit on root-level docs; split INSTALL.md
+- feat(setup-agents): scaffold KNOWN_ISSUES.md for consumer projects
+
+### Docs
+
+- docs: file KI-010 — git tag creation is never mechanically blocked
+
+---
+
 ## [v2.14.0] — 2026-08-08
 
 ### Added
