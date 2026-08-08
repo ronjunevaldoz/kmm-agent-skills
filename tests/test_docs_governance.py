@@ -236,6 +236,30 @@ class SetupAgentsCommandClassificationTests(unittest.TestCase):
         )
 
 
+class FrameworkAgnosticStoreTests(unittest.TestCase):
+    """kmp-mvi's Contract pattern is plain Kotlin — a real consumer project needed the
+    non-Compose/non-ViewModel variant (a custom Vulkan/WebGPU/OpenGL renderer with no
+    coroutine-driven recomposition loop), and it didn't exist anywhere in the skill.
+    """
+
+    def test_skill_md_points_at_the_reference_and_lists_it_in_decision_table(self) -> None:
+        skill = (REPO_ROOT / "skills" / "kmp-mvi" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("framework-agnostic-store", skill)
+        self.assertIn("Non-Compose consumer", skill)
+
+    def test_reference_file_covers_scope_ownership_and_pull_based_draining(self) -> None:
+        ref = (REPO_ROOT / "skills" / "kmp-mvi" / "references" / "framework-agnostic-store.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("CoroutineScope", ref)
+        self.assertIn("drainEffects", ref)
+        self.assertIn("tryReceive", ref)
+
+    def test_kmp_api_mimicry_cross_links_back(self) -> None:
+        mimicry = (REPO_ROOT / "skills" / "kmp-api-mimicry" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("kmp-mvi", mimicry)
+
+
 class CommonFirstSharedCodeTests(unittest.TestCase):
     def test_common_first_formatting_rule_is_explicit(self) -> None:
         normalize = lambda text: " ".join(text.lower().replace("`", "").split())

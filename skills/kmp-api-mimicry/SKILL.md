@@ -376,6 +376,8 @@ class EngineScopeTest {
   real thing rather than mimicking its shape
 - `kmp-compose-slot-api` — slot-lambda patterns for real Compose
   Multiplatform projects; this skill's slot-lambda guidance is the non-Compose analog
+- `kmp-mvi` — state management for the mimicked UI; its framework-agnostic `Store`
+  (no ViewModel, no Compose) is the state-container counterpart to this skill's DSL-shape mimicry
 - `kmp-clean-architecture` — layer boundaries still apply inside the
   library even though there's no `:ui`/`:presenter` split in the app sense
 - `kmp-code-quality` — file/type/function naming conventions apply to mimicked

@@ -58,7 +58,9 @@ user interaction, screen state management, UI state, state management,
 nav args ViewModel, route arguments ViewModel, pass id to ViewModel,
 search debounce ViewModel, cancel job intent, in-flight cancellation,
 typed error state, UiError sealed, shared ViewModel, wizard ViewModel, multi-step flow,
-Divergent Change, God State, unrelated concerns in one ViewModel, state cohesion.
+Divergent Change, God State, unrelated concerns in one ViewModel, state cohesion,
+framework-agnostic store, non-Compose MVI, custom renderer state, game engine UI state,
+drainEffects, poll effects, MVI without ViewModel, cross-tree shared state, sibling panels.
 
 **Freshness rule:** `lifecycle-viewmodel-compose` and CMP lifecycle integration change between
 releases — recheck the AndroidX lifecycle and JetBrains CMP docs before upgrading.
@@ -98,6 +100,7 @@ Start with the thinnest option that works. Add layers only when they carry weigh
 | Async load, no user actions | Thin `ViewModel` + `StateFlow` (no Contract) | Lifecycle awareness needed, but no intents or effects |
 | Async load + user actions + navigation | Full `MviViewModel` + Contract | All three concerns present — Contract pays for itself |
 | Multi-step flow | One shared `MviViewModel` + thin step screens | Steps share state; per-step ViewModels add no value |
+| Non-Compose consumer (custom renderer, game engine UI, immediate-mode toolkit) | Framework-agnostic `Store` — see `framework-agnostic-store` reference | No ambient coroutine scope driving recomposition; needs pull-based effect draining, not `LaunchedEffect` |
 
 ### Thin pattern 1 — no ViewModel at all
 
@@ -137,8 +140,7 @@ sealed interface ProfileState {
 }
 ```
 
-The `ProfileState` sealed interface lives in the same file as the ViewModel — no
-`Contract` object wrapper needed until there are Intents and Effects to group with it.
+The `ProfileState` sealed interface lives in the same file as the ViewModel — no `Contract` object wrapper needed until there are Intents and Effects to group with it.
 
 ### When the full Contract pattern earns its place
 
@@ -164,8 +166,7 @@ UI → Intent → ViewModel → State update → UI re-render
 
 - **State** (`StateFlow`) — what the screen renders. Always up-to-date, never missed.
 - **Intent** — what the user did. A sealed interface of user-triggered events.
-- **Effect** — one-shot side effects that should NOT be replayed on recomposition
-  (navigation, showing a snackbar, triggering a dialog).
+- **Effect** — one-shot side effects that should NOT be replayed on recomposition (navigation, showing a snackbar, triggering a dialog).
 
 ### Why `Channel<Effect>` and not `SharedFlow<Effect>`?
 
@@ -176,8 +177,7 @@ process restart, screen rotation, or Compose lifecycle pause). `SharedFlow(repla
 **replays the last effect on re-subscription**, causing double-navigation.
 
 `Channel` delivers each effect **exactly once** to exactly one collector. If no collector
-is active the effect is buffered (up to `Channel.BUFFERED` capacity) and delivered when
-one subscribes. This matches what "one-shot event" actually means.
+is active the effect is buffered (up to `Channel.BUFFERED` capacity) and delivered when one subscribes. This matches what "one-shot event" actually means.
 
 ```kotlin
 // ❌ Wrong — replays navigation event on recomposition
@@ -190,8 +190,7 @@ val effect: Flow<Effect> = _effect.receiveAsFlow()
 
 ### Why `MutableStateFlow.update {}` and not direct assignment?
 
-`StateFlow.update {}` is **atomic** — it uses compare-and-swap under the hood. Direct
-assignment is not:
+`StateFlow.update {}` is **atomic** — it uses compare-and-swap under the hood. Direct assignment is not:
 
 ```kotlin
 // ❌ Race condition — reads value, updates, writes back; concurrent coroutines can stomp each other
@@ -262,8 +261,7 @@ data class State(
 | `@Immutable` | All public fields are deeply immutable (only `val` of immutable types) | `data class` whose fields are primitives, `String`, or other `@Immutable` types |
 | `@Stable` | Reads are stable (same inputs → same outputs) and Compose is notified of changes via snapshot state | Fields include mutable collections or types Compose can't infer stability for |
 
-Without either annotation, the Compose compiler conservatively marks the type as **unstable**
-and recomposes every consumer on every parent recomposition — even when `State` hasn't changed.
+Without either annotation, the Compose compiler conservatively marks the type as **unstable** and recomposes every consumer on every parent recomposition — even when `State` hasn't changed.
 
 **Rules for Intent:**
 - `sealed interface`, not `sealed class` — Kotlin 1.9+ `data object` for no-arg intents
@@ -281,8 +279,7 @@ Split every screen into two composables:
 
 - `FooScreen(viewModel = ...)` owns DI, state collection, and effect collection.
 - `FooContent(state, onIntent)` is pure, previewable, and testable.
-- Navigation callbacks stay as lambdas (`onBack`, `onNavigateToX`) instead of being
-  pushed into `Intent` unless they are true in-screen actions.
+- Navigation callbacks stay as lambdas (`onBack`, `onNavigateToX`) instead of being pushed into `Intent` unless they are true in-screen actions.
 - If a screen has multiple nav callbacks, group them into a `FooNavActions` data class.
 
 ```kotlin
@@ -319,6 +316,10 @@ Full content: `references/implementing-a-viewmodel.md`.
 
 Full content: `references/compose-integration.md`.
 
+## Framework-Agnostic Store — No ViewModel, No Compose
+
+Full content: `references/framework-agnostic-store.md`.
+
 ## Koin Wiring
 
 ```kotlin
@@ -334,8 +335,7 @@ val authUiModule = module {
 }
 ```
 
-Use `viewModel { AuthViewModel(get()) }` only when you need custom qualifiers or
-conditional wiring. For everything else, `viewModelOf` is less code and identical behavior.
+Use `viewModel { AuthViewModel(get()) }` only when you need custom qualifiers or conditional wiring. For everything else, `viewModelOf` is less code and identical behavior.
 
 **ViewModels that need `SavedStateHandle`** (nav args, back-stack results):
 
@@ -354,9 +354,7 @@ Never construct `SavedStateHandle()` yourself — Koin's ViewModelFactory provid
 the AndroidX `CreationExtras` bag. See `kmp-dependency-injection` for
 the full SavedStateHandle + Koin reference.
 
-If you update either `koin-compose-viewmodel` or `androidx.lifecycle.viewmodelCompose`,
-run the Wasm target as part of the verification pass — that is where version drift is most likely
-to surface first.
+If you update either `koin-compose-viewmodel` or `androidx.lifecycle.viewmodelCompose`, run the Wasm target as part of the verification pass — that is where version drift is most likely to surface first.
 
 With **Koin annotated mode** (Koin Compiler Plugin):
 ```kotlin
@@ -463,9 +461,9 @@ If the ViewModel is growing beyond 150–200 lines, apply the decomposition deci
 
 Full implementation content lives in `references/*.md` — one file per heading above with
 a pointer (`mvi-viewmodel-base-class`, `implementing-a-viewmodel`, `compose-integration`,
-`nav-args-initial-state`, `testing`, `state-patterns`, `multi-source-state`,
-`viewmodel-size-decomposition`, `changelog`). Load the specific file named in the pointer
-under the matching heading, not all of them.
+`framework-agnostic-store`, `nav-args-initial-state`, `testing`, `state-patterns`,
+`multi-source-state`, `viewmodel-size-decomposition`, `changelog`). Load the specific
+file named in the pointer under the matching heading, not all of them.
 
 ---
 
@@ -478,6 +476,7 @@ under the matching heading, not all of them.
 - `kmp-compose-state-container` — when to use `remember` vs ViewModel as the state container
 - `kmp-compose-preview-driven-development` — `FooContent` stateless composables are the fast-preview target
 - `kmp-audit` — `_detect_viewmodel_too_many_intents` (15+ Intent variants — a god-ViewModel signal line count alone can miss), `_detect_viewmodel_multiple_stateflows` (2+ exposed StateFlow properties beyond `state` — the Contract pattern's "one State per screen" broken a different way), and `_detect_viewmodel_injects_repository` (a `*Repository` constructor param — the ViewModel-depends-only-on-`:domain` rule, made mechanically enforced instead of just documented)
+- `kmp-api-mimicry` — mimicking a reference API's DSL shape on a non-Compose runtime; the Contract's `State`/`Intent`/`Effect` types and the framework-agnostic `Store` are the state-management counterpart when the UI layer itself isn't real Compose
 
 ---
 
