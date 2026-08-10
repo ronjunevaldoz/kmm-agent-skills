@@ -307,5 +307,30 @@ Next steps:
   /kmp-implement-feature <name>   — add your next API surface
 ```
 
+### Offer the next milestone
+
+`PLAN.md`'s `## MVP scope` is now fully checked off. Before ending the session, draft
+the next milestone from `## Post-MVP` — same draft → confirm → persist pattern as
+Step 3a-3d, scoped to what ships next instead of the whole MVP.
+
+Pull the `## Post-MVP` list and draft:
+
+```
+## Draft: next milestone
+
+Slice <N+1> — <name from the top Post-MVP items> (~1 sprint)
+  Outcome: <what ships>
+  Tasks: <features pulled from Post-MVP>
+
+Remaining Post-MVP (not in this milestone): <rest>
+```
+
+Confirm via `AskUserQuestion` (same options as Step 3c: looks good / move a task /
+add-remove a feature / split). On confirm, append the new slice to `PLAN.md`'s
+`## Delivery plan` with checkbox tasks, and remove the drafted items from
+`## Post-MVP`.
+
+Skip this offer if `## Post-MVP` is empty, or if the user says the project is done.
+
 ---
 
