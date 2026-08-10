@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.16.9] — 2026-08-10
+
+### Fixed
+
+- fix(kmp-new-project): split plan-confirmation into two turns
+
+---
+
 ## [v2.16.8] — 2026-08-10
 
 ### Added
