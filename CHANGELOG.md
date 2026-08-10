@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.16.7] — 2026-08-10
+
+### Docs
+
+- docs: fill in the Apache 2.0 copyright appendix
+
+---
+
 ## [v2.16.6] — 2026-08-08
 
 ### Docs
