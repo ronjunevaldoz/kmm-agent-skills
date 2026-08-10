@@ -76,6 +76,40 @@ running them.
 
 If the user omits a field, state the assumption before proceeding and keep moving.
 
+### Persist the requirements analysis
+
+Once intake is collected, write `docs/requirements-analysis.md` at the project root —
+the durable record of what was actually asked for. A printed summary alone doesn't
+survive a session stopping here, and "analyze and summarize" requests specifically (a
+linked spec doc, a take-home exam, a pasted requirements doc) need something on disk
+to hand off or come back to, not just a chat message.
+
+```markdown
+# <PROJECT_NAME> — Requirements Analysis
+
+## Source
+<"Plain description" | "Spec file: <path>" | "External doc: <link, if the user
+pasted content from one>">
+
+## Requirements (as given)
+
+<Restate the actual requirements, summarized but complete — every explicit
+requirement from the source, not a one-line gloss. If the source was long
+(a multi-page spec), this is the place to compress it faithfully — don't drop a
+requirement because it seemed minor.>
+
+## Assumptions made
+
+<Only the ambiguities intake actually resolved — inferred or asked. Skip anything
+the source stated explicitly; this section is for gaps the source left open.>
+
+See `docs/decisions/` (written at Step 10c) for the resulting technical choices and
+reasoning — not duplicated here.
+```
+
+This file is written unconditionally, before Step 3's plan-confirmation gate — it's a
+record of the input, not a decision that could still change during 3c's review.
+
 ---
 
 ## Step 2 — Infer feature set and load expert routing
