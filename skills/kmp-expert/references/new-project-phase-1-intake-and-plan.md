@@ -173,8 +173,11 @@ Estimated MVP: <N> sprints (~<N> weeks)
 
 ### 3c — Confirm the plan
 
-Print 3a and 3b's drafts together, then use `AskUserQuestion` (not a printed prompt
-waiting for free text) to gate the decision. Offer these options:
+Print 3a and 3b's drafts together and **end the turn there** — do not call
+`AskUserQuestion` in the same response. The confirmation popup renders on top of the
+draft; calling both together gives the user no real chance to read the plan before
+being asked to approve it. Ask for confirmation via `AskUserQuestion` only in the next
+message. Offer these options:
 
 - **Looks good** — accept the plan as drafted, proceed to persisting it (3d)
 - **Move a task to a different slice** — ask which task and which slice

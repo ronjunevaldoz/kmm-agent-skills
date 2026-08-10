@@ -325,10 +325,11 @@ Slice <N+1> — <name from the top Post-MVP items> (~1 sprint)
 Remaining Post-MVP (not in this milestone): <rest>
 ```
 
-Confirm via `AskUserQuestion` (same options as Step 3c: looks good / move a task /
-add-remove a feature / split). On confirm, append the new slice to `PLAN.md`'s
-`## Delivery plan` with checkbox tasks, and remove the drafted items from
-`## Post-MVP`.
+Print the draft and end the turn there, same two-turn split as Step 3c — do not call
+`AskUserQuestion` in the same response. Confirm in the next message (same options as
+Step 3c: looks good / move a task / add-remove a feature / split). On confirm, append
+the new slice to `PLAN.md`'s `## Delivery plan` with checkbox tasks, and remove the
+drafted items from `## Post-MVP`.
 
 Skip this offer if `## Post-MVP` is empty, or if the user says the project is done.
 
