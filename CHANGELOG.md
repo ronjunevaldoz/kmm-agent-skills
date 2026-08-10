@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.16.10] — 2026-08-10
+
+### Added
+
+- feat(kmp-new-project): persist requirements analysis at intake
+
+---
+
 ## [v2.16.9] — 2026-08-10
 
 ### Fixed
