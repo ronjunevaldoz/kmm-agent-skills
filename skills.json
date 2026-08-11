@@ -1,5 +1,5 @@
 {
-  "version": "2.16.10",
+  "version": "2.17.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -1870,14 +1870,14 @@
     {
       "name": "kmp-layout-system",
       "path": "skills/kmp-layout-system",
-      "description": "Drafts and documents screen layouts for any KMP consumer project. Creates docs/layout-system/ with one markdown file per screen \u2014 each file has a component table and an ASCII wireframe. A shared _components.md holds the project-wide component registry. Use this skill whenever a new screen is being designed, an existing screen changes, a layout review is requested, or a project has no layout-system docs yet. Trigger proactively on any new project or new screen \u2014 layout-system docs should exist before or alongside implementation, not after. Trigger keywords: layout system, screen layout, wireframe, layout spec, layout docs, draft screen, add screen layout, document layout, layout-system, component layout, screen wireframe, layout diagram, screen structure, layout missing, no layout docs, create layout, update layout, design screen, sketch layout, plan screen, html wireframe, html to compose, implement wireframe, html mockup to jetpack compose.",
+      "description": "Drafts and documents screen layouts for any KMP consumer project. Creates docs/layout-system/ with one markdown file per screen \u2014 each file has a component table and an SVG wireframe. A shared _components.md holds the project-wide component registry. Use this skill whenever a new screen is being designed, an existing screen changes, a layout review is requested, or a project has no layout-system docs yet. Trigger proactively on any new project or new screen \u2014 layout-system docs should exist before or alongside implementation, not after. Trigger keywords: layout system, screen layout, wireframe, layout spec, layout docs, draft screen, add screen layout, document layout, layout-system, component layout, screen wireframe, layout diagram, screen structure, layout missing, no layout docs, create layout, update layout, design screen, sketch layout, plan screen, html wireframe, html to compose, implement wireframe, html mockup to jetpack compose.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-17",
+      "last_updated": "2026-08-10",
       "keywords": [
         "layout system",
         "wireframe",
         "screen layout",
-        "ASCII wireframe",
+        "SVG wireframe",
         "component registry",
         "layout spec",
         "docs layout-system",

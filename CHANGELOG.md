@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.17.0] — 2026-08-11
+
+### Added
+
+- feat(kmp-layout-system): switch wireframes from ASCII to SVG
+
+---
+
 ## [v2.16.10] — 2026-08-10
 
 ### Added
