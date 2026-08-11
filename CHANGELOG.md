@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.17.1] — 2026-08-11
+
+### Docs
+
+- docs(kmp-code-quality): extensions are syntax, not architecture
+
+---
+
 ## [v2.17.0] — 2026-08-11
 
 ### Added
