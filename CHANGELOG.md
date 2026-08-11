@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.18.0] — 2026-08-11
+
+### Added
+
+- feat(kmp-clean-architecture): add API/Implementation Boundary section
+
+---
+
 ## [v2.17.1] — 2026-08-11
 
 ### Docs
