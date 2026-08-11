@@ -3,12 +3,14 @@ name: kmp-clean-architecture
 description: >
   Defines the 6-layer clean architecture contract for KMP feature modules:
   :model / :api / :domain / :data / :presenter / :ui. Covers layer dependency
-  rules, :model vs :api split, internal visibility enforcement, and Detekt
-  architecture fitness functions that make violations fail the build.
+  rules, :model vs :api split, internal visibility enforcement, the
+  api()/implementation() Gradle configuration boundary (ABI/type leakage,
+  consumer compile fixtures, facade scopes), dependency-cycle detection, and
+  Detekt architecture fitness functions that make violations fail the build.
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-07-26'
+  last-updated: '2026-08-11'
   keywords:
     - clean architecture
     - Kotlin Multiplatform
@@ -20,6 +22,10 @@ metadata:
     - architecture rules
     - model module
     - presenter module
+    - api implementation boundary
+    - ABI leakage
+    - consumer compile fixture
+    - facade scope
 ---
 
 ## When to Use This Skill
@@ -41,7 +47,10 @@ core module, feature module, core vs feature, shared module, use case pattern,
 mapper pattern, DTO mapper, domain error, typed error, sealed error, DomainError,
 cross-feature navigation, navigate to another feature, AppNavigator, feature dependency,
 composition over inheritance, abstract class in commonMain, extensible base class,
-AbstractClassCanBeInterface, interface over abstract class, avoid over-abstraction.
+AbstractClassCanBeInterface, interface over abstract class, avoid over-abstraction,
+api vs implementation, api() vs implementation(), ABI leakage, type leakage,
+consumer compile fixture, facade scope, Gradle configuration boundary,
+dependency cycle, circular dependency.
 
 **Freshness rule:** Detekt rule set API changes between minor versions — recheck the
 `ArchitectureRule` DSL when upgrading Detekt.
@@ -356,44 +365,15 @@ within a layer's public API surface.
 
 ---
 
+## API/Implementation Boundary
+
+Full content: `references/api-implementation-boundary.md`.
+
+---
+
 ## Detekt Architecture Rules
 
-Add to `detekt.yml` to fail the build when import-level violations are detected:
-
-```yaml
-libraries:
-  rules:
-    - name: 'NoPresentationInDomain'
-      active: true
-      includes: ['**/domain/**']
-      excludes: []
-      forbidden:
-        - 'androidx.lifecycle.*'
-        - 'androidx.compose.*'
-        - '*.presenter.*'
-        - '*.ui.*'
-
-    - name: 'NoDataInUi'
-      active: true
-      includes: ['**/ui/**']
-      excludes: []
-      forbidden:
-        - '*.data.*'
-        - '*.domain.*'
-        - 'io.ktor.*'
-        - 'app.cash.sqldelight.*'
-
-    - name: 'NoComposeInPresenter'
-      active: true
-      includes: ['**/presenter/**']
-      excludes: []
-      forbidden:
-        - 'androidx.compose.*'
-        - 'org.jetbrains.compose.*'
-```
-
-These rules complement the Gradle dependency graph — they catch cases where a developer
-adds a compile dep and imports it directly rather than through a proper module boundary.
+Full content: `references/detekt-architecture-rules.md`.
 
 ---
 
@@ -430,8 +410,9 @@ which Gradle allows fine and nothing else catches.
 ## References
 
 Full implementation content lives in `references/*.md`: `composition-over-inheritance`,
-`cross-feature-navigation`, `typed-domain-errors`. Load the specific file named in the
-pointer under its matching heading above, not all of them.
+`cross-feature-navigation`, `typed-domain-errors`, `api-implementation-boundary`,
+`detekt-architecture-rules`. Load the specific file named in the pointer under its
+matching heading above, not all of them.
 
 ---
 
@@ -440,9 +421,10 @@ pointer under its matching heading above, not all of them.
 - `kmp-feature-scaffold` — creates the 6-layer module structure this skill governs
 - `kmp-presenter-module` — `:presenter` layer in depth: MVI contracts, ViewModel, Koin wiring
 - `kmp-unit-testing` — JVM-based ViewModel tests enabled by the `:presenter`/`:ui` split
-- `kmp-code-quality` — Ktlint + Detekt setup; Detekt's `AbstractClassCanBeInterface` rule is the mechanical enforcement for Composition Over Inheritance
+- `kmp-code-quality` — Ktlint + Detekt setup; Detekt's `AbstractClassCanBeInterface` rule is the mechanical enforcement for Composition Over Inheritance; its extension-functions section's "receiver type + module dependency graph is the architecture" rule is the Kotlin-visibility-level version of the API/Implementation Boundary's Gradle-configuration-level rule above
 - `kmp-dependency-injection` — Koin wiring for interface + injection, the replacement for inheritance-based extension points
 - `kmp-audit` — `_detect_extensible_abstract_class_in_common` and `_detect_module_layer_violation` are the mechanical enforcement for this skill's Composition Over Inheritance and layer-order rules, independent of whether Detekt is configured; `_detect_value_class_opportunity` is a LOW-severity nudge for the Typed Domain IDs rule above; `_detect_bare_core_module` enforces the ":core" vs ":feature" Split below
+- `kmp-library-publishing` — the same "does a consumer actually resolve this" discipline the API/Implementation Boundary's consumer compile fixtures apply internally, applied at the published-artifact boundary instead
 
 ---
 
@@ -485,6 +467,7 @@ When asked about architecture layers or module boundaries, respond in this order
 
 | Date | Change |
 |---|---|
+| 2026-08-11 | Added "API/Implementation Boundary" (new `references/api-implementation-boundary.md`): the `api()`/`implementation()` Gradle configuration decision rule, verified against `kmp-feature-scaffold`'s own generated templates (which already got this right, just never explained why); ABI/type-leakage as the real compile-time bug a wrong choice causes; consumer compile fixtures as a structural CI check for it; naming the existing `:data`-module-only-public pattern as a "facade scope"; cross-referenced (not duplicated) dependency-cycle detection, which `_detect_module_layer_violation` already covers. Also split "Detekt Architecture Rules" out to `references/detekt-architecture-rules.md` to make room — SKILL.md was back over the 500-line cap after the new section. |
 | 2026-08-04 | Split "Composition Over Inheritance in commonMain", "Cross-Feature Navigation", and "Typed Domain Errors" out of SKILL.md into `references/*.md`, leaving pointer stubs plus a new References section. SKILL.md drops from 673 to 498 lines, clearing the agentskills.io 500-line recommendation. No content removed, only relocated. Part of the same backlog cleanup as the other 10 skills fixed alongside it (KI-008). |
 | 2026-08-04 | **Correction**: renamed `UnnecessaryAbstractClass` to `AbstractClassCanBeInterface` throughout (trigger keywords, "Mechanical detector" section, Related Skills row) — verified directly against Detekt's own `default-detekt-config.yml` on GitHub and `UnnecessaryAbstractClass` does not exist as a Detekt rule name. The real rule matching this exact description ("abstract class with only abstract members should be an interface instead") is `AbstractClassCanBeInterface`, in the style ruleset, active by default. Same fabricated-name pattern as `kmp-code-quality`'s `CouplingBetweenObjects` correction — found via a repo-wide sweep after that one. `_detect_extensible_abstract_class_in_common` (the audit backstop) is unaffected, it's this collection's own heuristic, not a Detekt rule claim. |
 | 2026-07-26 | Real gap closed: the ":core" vs ":feature" Split table already documented `:core` as separate modules (`:core:model`, `:core:api`, ...) mirroring `:feature:*`'s shape, but `_detect_module_layer_violation`'s module-path regex only ever matched `feature/<name>/<layer>` — it never applied to `:core` at all, so a monolithic `:core` module went completely uncaught. Added `kmp-audit`'s new `_detect_bare_core_module`. |
