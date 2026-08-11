@@ -52,6 +52,18 @@ that works primarily on an object, consider making it an extension function acce
 that object as a receiver" — but pair that with the visibility default below, or
 "liberally" becomes public-API sprawl.
 
+**Extensions are syntax. The receiver type and module dependency graph are the
+architecture.** An extension only decides how a call *reads* — dot-notation sugar over
+what's really a static top-level function. It grants no special access and enforces no
+boundary by itself. Use extensions to build declarative, fluent vocabulary for a
+domain — not just UI builders; a network-request DSL, a test-assertion DSL, a config
+DSL are the same pattern. Use a narrow receiver type plus the module boundary
+(`internal`, or simply which module declares the extension) to control what that
+vocabulary is actually allowed to touch. A `public` extension on a broad receiver type
+(`Any`, `String`) declared in a widely-depended-on module is unrestricted API surface no
+matter how nicely it reads — the fix is always narrower receiver + narrower visibility,
+never "write a better-named extension."
+
 **Default to the narrowest visibility that works** — local (inside the function that uses
 it) or `private` member/top-level, widening to `internal` or `public` only once a second,
 real caller needs it. Kotlin's own conventions frame this explicitly as minimizing API
