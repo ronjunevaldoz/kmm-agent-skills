@@ -50,8 +50,42 @@ class CreateWireframeTests(unittest.TestCase):
             root = Path(tmp)
             p = self._write(root, "Inbox", "A")
             text = p.read_text()
-            for token in ("# Inbox", "## Components", "## Interaction notes", "```"):
+            for token in ("# Inbox", "## Components", "## Interaction notes", "<svg", "</svg>"):
                 self.assertIn(token, text)
+
+    def test_wireframe_is_not_fenced(self) -> None:
+        # Raw <svg> must NOT be wrapped in a ``` fence — GitHub (and most markdown
+        # renderers) only render inline SVG as an image when it's raw markup, not
+        # inside a code block, which would show it as syntax-highlighted text instead.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            p = self._write(root, "Inbox", "A")
+            text = p.read_text()
+            self.assertNotIn("```", text)
+
+    def test_wireframe_svg_is_valid_xml(self) -> None:
+        import re
+        import xml.etree.ElementTree as ET
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for pattern in ("A", "B", "C", "D"):
+                p = self._write(root, f"Screen{pattern}", pattern)
+                text = p.read_text()
+                svg = re.search(r"<svg.*?</svg>", text, re.DOTALL)
+                self.assertIsNotNone(svg, f"no <svg> block found for pattern {pattern}")
+                ET.fromstring(svg.group(0))  # raises if malformed
+
+    def test_wireframe_labels_are_xml_escaped(self) -> None:
+        # A placeholder like <primary content> must render as &lt;primary content&gt;
+        # in the raw SVG text — an unescaped literal `<`/`>` is invalid XML and was a
+        # real, confirmed bug caught while building this.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            p = self._write(root, "Inbox", "A")
+            text = p.read_text()
+            self.assertIn("&lt;primary content&gt;", text)
+            self.assertNotIn("<primary content>", text)
 
 
 if __name__ == "__main__":

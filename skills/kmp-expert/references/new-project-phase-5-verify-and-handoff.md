@@ -231,7 +231,7 @@ Docs:
   PLAN.md                — MVP scope + delivery plan, checked off as sprints complete
   docs/architecture.md   — 6-layer rules, module map, stack
   docs/decisions/        — ADRs for key tech choices
-  docs/layout-system/    — ASCII wireframes per screen
+  docs/layout-system/    — SVG wireframes per screen
 
 Agent setup:
   agents/ rules/ hooks/ commands/ skills/  — project-owned source scaffold

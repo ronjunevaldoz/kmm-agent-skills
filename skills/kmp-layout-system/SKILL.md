@@ -3,7 +3,7 @@ name: kmp-layout-system
 description: >-
   Drafts and documents screen layouts for any KMP consumer project. Creates
   docs/layout-system/ with one markdown file per screen — each file has a component
-  table and an ASCII wireframe. A shared _components.md holds the project-wide
+  table and an SVG wireframe. A shared _components.md holds the project-wide
   component registry. Use this skill whenever a new screen is being designed, an
   existing screen changes, a layout review is requested, or a project has no
   layout-system docs yet. Trigger proactively on any new project or new screen —
@@ -16,12 +16,12 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-07-17'
+  last-updated: '2026-08-10'
   keywords:
     - layout system
     - wireframe
     - screen layout
-    - ASCII wireframe
+    - SVG wireframe
     - component registry
     - layout spec
     - docs layout-system
@@ -98,8 +98,8 @@ python3 ~/.claude/skills/kmp-layout-system/scripts/create_wireframe.py \
 
 **One screen = one invocation = one file.** Never put two screens in one file and never
 append a screen to another screen's file. The script seeds the correct section skeleton and
-a starting wireframe block for the chosen pattern (A/B/C/D) — you then fill in the component
-table and draw the ASCII wireframe (keep every row the same character width).
+a starting SVG wireframe for the chosen pattern (A/B/C/D) — you then fill in the component
+table and edit the SVG's `<rect>`/`<text>` regions to match the real screen.
 
 ---
 
@@ -145,7 +145,7 @@ grid instead of judging screen space.
 1. Read the project source to identify all existing screens and persistent components.
 2. Run `create_wireframe.py` once per screen — it creates `docs/layout-system/` and
    `_components.md` on the first call, then one screen file per subsequent call.
-3. Fill in each screen file's component table and ASCII wireframe.
+3. Fill in each screen file's component table and SVG wireframe.
 4. Link to `docs/layout-system/` from `docs/architecture.md` or `README.md`.
 
 ---
@@ -169,52 +169,57 @@ Update this file when a component's dimensions, visibility, or behavior changes.
 
 ---
 
-## ASCII Wireframe Format
+## SVG Wireframe Format
+
+Each region is an SVG `<rect>` (border + fill, no gradients) with a `<text>`/`<tspan>`
+label inside it — real proportions, no monospace-alignment upkeep, viewable inline in
+any markdown renderer that supports embedded SVG (GitHub does) with no compile step.
 
 ### Rules
 
-- **No emoji inside the grid.** Emoji are double-width in monospace fonts and break
-  alignment. Use short `[label]` placeholders inside the grid. Map labels to emoji
-  in a **Legend** line directly below the wireframe.
-- Active nav item: append `*` to the label — e.g. `[nav-1]*`.
-- **Borders: Unicode box-drawing characters, not plain ASCII `+`/`-`/`|`.** Plain ASCII
-  renders visibly uneven in most monospace fonts at junctions; box-drawing characters
-  are purpose-built single-width glyphs (verified: East Asian Width property `Na`/`N`,
-  same width class as ASCII, unlike double-width emoji) that render cleanly in every
-  modern markdown viewer. Exact character per position:
-  | Position | Character | Position | Character |
-  |---|---|---|---|
-  | Horizontal line | `─` | Vertical line | `│` |
-  | Top-left corner | `┌` | Top-right corner | `┐` |
-  | Bottom-left corner | `└` | Bottom-right corner | `┘` |
-  | T-junction (opens right) | `├` | T-junction (opens left) | `┤` |
-  | T-junction (opens down) | `┬` | T-junction (opens up) | `┴` |
-  | Full cross | `┼` | | |
-
-  A hyphen inside a label (`[nav-1]`) is plain text, not a border — never convert it.
-- All rows in a wireframe must be the **same character width**.
-- Sub-region breaks (action rows, input areas): use `│───│` only on the column being
-  split. Other columns keep `│   │` on the same row.
-- Column widths are fixed per wireframe. Pick widths that reflect real proportions,
-  then hold them across every row in that wireframe.
-- **Scrollable regions:** add `[scroll]` to the right side of the first content row
-  in a scrollable area. Use `~ ~ ~ ~` as a "more content below" divider row when
-  the list is long and content is truncated in the wireframe.
+- **Canvas: `viewBox="0 0 760 420"`, fixed across every wireframe.** Consistent
+  proportions make screens comparable at a glance; don't pick a different canvas size
+  per screen.
+- **XML-escape every literal `<`/`>` in a label.** A placeholder like `<primary
+  content>` must be written `&lt;primary content&gt;` inside `<text>`/`<tspan>` —
+  raw `<`/`>` in SVG text content parses as a tag, not text, and silently corrupts
+  the wireframe. This is a real, confirmed bug class (caught live during
+  `/ts-new-project`'s SVG-based sibling skill build) — `create_wireframe.py`'s `_esc()`
+  helper handles this automatically for generated content; apply the same escaping by
+  hand for anything you add or edit afterward.
+- **Region fill:** `white` for a normal region, `#f5f5f5` for a dimmed
+  still-mounted-underneath region (e.g. Pattern C's base canvas under an overlay),
+  `#333` (dark, with white text) for the screen's single most important action (e.g.
+  Pattern D's primary button). Don't invent additional fills — three is enough to
+  read as "normal / dimmed / emphasized."
+- **Border + text color:** `stroke="#333"` on every `<rect>`, `fill="#333"` on normal
+  text (`fill="white"` only on the dark emphasized rect). Consistent across every
+  wireframe — this is a gray-box sketch, not a themed mockup.
+- Active nav item: append `*` to the label — e.g. `nav-1*` (same convention as before).
+- Multi-line labels: stack `<tspan x="..." y="...">` elements inside one `<text>`
+  block, one per line — see any pattern in `references/wireframe-templates.md` for
+  the real spacing (18px line height).
+- **Scrollable regions:** append `[scroll]` to the label of the first content region
+  in a scrollable area — same bracket convention as before, just as SVG text now
+  instead of a monospace grid annotation.
 - **Phone variant:** if the nav chrome changes on phone (e.g. rail → bottom bar),
-  add a separate wireframe block in the same screen file labeled `Phone variant`.
+  add a separate `<svg>` block in the same screen file under a `## Phone variant`
+  heading, same canvas size.
 
-### Column sizing guide
+### Region sizing guide
 
-Choose widths based on the project's actual layout proportions:
+Pick region widths within the 760×420 canvas that reflect real proportions:
 
-| Panel type          | Typical inner width | Notes                             |
-|---------------------|--------------------|------------------------------------|
-| Narrow nav strip    | 8–12 chars         | Icon-only side rail                |
-| Secondary panel     | 14–20 chars        | List, mode selector, sidebar       |
-| Main content area   | remainder          | Always `flex 1`                    |
-| Full-width canvas   | all remaining      | When secondary panel is hidden     |
+| Region type          | Typical width | Notes                             |
+|-----------------------|---------------|------------------------------------|
+| Narrow nav strip      | 64px          | Icon-only side rail                |
+| Secondary panel       | 140–200px     | List, mode selector, sidebar       |
+| Main content area     | remainder     | Always the flex/fill region        |
+| Full-width canvas     | 760px         | When the secondary panel is hidden |
 
-Total row width (including all `│` and `─` borders) must be the same for every row.
+Region widths in one wireframe should sum to 760 (accounting for any gaps) — the
+same "hold proportions consistent across the whole screen" discipline the old
+same-character-width rule enforced, just in pixels instead of characters.
 
 ---
 
@@ -280,12 +285,12 @@ Full content: `references/filled-example.md`.
 |---|---|
 | `_components.md` updated | Any new or changed component in the registry |
 | Screen file exists | One `.md` per screen |
-| Placeholders filled in | No `<placeholder>` left in committed files |
-| No emoji in grid | Emoji only in the Legend line below the wireframe |
-| Active state shown | Active nav item uses `*` suffix, e.g. `[nav-1]*` |
-| All rows same width | Every row in the wireframe is the same character count |
-| Sub-region dividers | `|---|` only on the column being split |
-| Variants present | Separate wireframe block per layout variant (modal, empty state, etc.) |
+| Placeholders filled in | No `<placeholder>`-style label left un-filled in committed files (still XML-escaped if genuinely left as a placeholder) |
+| SVG is valid XML | Parses cleanly — `python3 -c "import xml.etree.ElementTree as ET; ET.fromstring(open('x.svg').read())"` or equivalent |
+| Labels XML-escaped | Every literal `<`/`>` in a `<text>`/`<tspan>` is `&lt;`/`&gt;` |
+| Active state shown | Active nav item uses `*` suffix, e.g. `nav-1*` |
+| Canvas consistent | `viewBox="0 0 760 420"` on every wireframe in the project |
+| Variants present | Separate `<svg>` block per layout variant (modal, empty state, etc.) |
 | Phone variant | If nav chrome differs on phone, a `Phone variant` block exists in the screen file |
 | Interaction notes | Each screen file has a short notes section |
 
@@ -303,7 +308,8 @@ Use Pattern A (3-col) for tablet/desktop, Pattern B (2-col) when the side panel 
 
 - Putting project-specific component names directly in the wireframe template rather than in a Filled Example section
 - Skipping the phone variant when the nav layout changes at mobile breakpoints
-- Using emoji inside the ASCII grid (breaks monospace alignment) — put emoji only in the Legend line
+- **Leaving a literal `<`/`>` unescaped in an SVG label** — corrupts the wireframe (parses as an XML tag, not text); always `&lt;`/`&gt;` a placeholder like `<primary content>`
+- Inventing a new fill color per wireframe instead of the fixed 3-color set (white / `#f5f5f5` dimmed / `#333` emphasized) — this is a gray-box sketch, not a themed mockup
 - Letting `_components.md` drift from the actual Compose component names — it is a living registry, not a snapshot
 - Writing `docs/layout-system/` files that describe the current implementation rather than the intended design; the layout doc should lead the code, not follow it
 - Putting more than one screen in a single file, or appending a screen to another screen's file — run `create_wireframe.py` once per screen so each gets its own file; caught in a consumer project by the audit's `combined layout screen file [MEDIUM]`
@@ -316,10 +322,12 @@ Use Pattern A (3-col) for tablet/desktop, Pattern B (2-col) when the side panel 
 
 This skill produces markdown documentation, not runtime code. The validation equivalent of a test is the **Validation Checklist** at the end of each screen file:
 
-- All `<placeholder>` tags replaced with real names in committed files
-- All rows in every ASCII block are the same character width
+- All `<placeholder>` tags replaced with real names in committed files (or, if left
+  as a placeholder, still XML-escaped)
+- Every SVG block parses as valid XML — a literal unescaped `<`/`>` in a label is
+  the one real, confirmed failure mode here
 - Phone variant block present when nav changes at mobile breakpoints
-- No emoji inside the grid (only in Legend lines)
+- Canvas `viewBox="0 0 760 420"` consistent across every wireframe in the project
 - `_components.md` registry lists every component that appears in any screen file
 - Platform column (`Both` / `Android` / `iOS`) filled for every row
 
@@ -335,7 +343,7 @@ When asked to create or update layout-system docs, respond in this order:
 1. State which screens will be created or updated and which pattern applies to each
 2. Create or update `_components.md` first — it is the registry everything else references
 3. Create screen files one at a time, starting with the screen that has the most shared components
-4. Show the ASCII wireframe inline for each screen so the user can review alignment before committing
+4. Show the SVG wireframe inline for each screen so the user can review the layout before committing
 5. End with the Validation Checklist filled out for the files just written
 
 Keep explanations short. The wireframe is the primary output — do not narrate what each row means unless the user asks.
@@ -371,6 +379,7 @@ above, not all of them.
 
 | Date | Change |
 |---|---|
+| 2026-08-10 | Switched wireframes from Unicode-box-drawing ASCII to SVG — `create_wireframe.py` now emits `<rect>`/`<text>` regions per pattern instead of a character grid, both reference files (`wireframe-templates.md`, `filled-example.md`) rewritten to match, `generate_slot_scaffold.py` untouched (reads the frontmatter contract, not the visual). Motivation: SVG gives real proportions with zero alignment upkeep, embeds inline in any markdown viewer with no compile step, unlike ASCII which needed a whole box-drawing-character convention just to render evenly. Caught and fixed a real bug during the rewrite: a literal `<`/`>` in a placeholder label (e.g. `<primary content>`) is invalid unescaped inside SVG/XML text content — added `create_wireframe.py`'s `_esc()` helper and the escaping rule now documented above; confirmed via `xml.etree.ElementTree` parsing all 4 generated patterns before shipping. |
 | 2026-07-17 | Switched wireframe borders from plain ASCII (`+`/`-`/`|`) to Unicode box-drawing characters (`┌┐└┘├┤┬┴┼─│`) — plain ASCII renders visibly uneven at junctions in most monospace fonts; box-drawing glyphs are purpose-built single-width characters (verified: same East Asian Width class as ASCII, unlike double-width emoji) that render cleanly everywhere. Converted all 4 templates in this file and in `create_wireframe.py`'s `PATTERNS` dict programmatically (a hand-converted first attempt corrupted label hyphens like `[nav-1]` into `[nav─1]` — caught before shipping, fixed by only converting `-` adjacent to another border character). Also found and fixed a real, pre-existing bug this surfaced: `create_wireframe.py`'s Pattern D `full width` line was 1 character shorter than every other row, violating this skill's own same-width rule. |
 | 2026-07-12 | Added "Translating an External HTML/CSS Wireframe" — a real consumer project had an HTML wireframe implemented incorrectly (`ShadcnTextField` given a hallucinated `singleLine` parameter instead of using the real, dedicated `ShadcnTextarea` component). New structural mapping table (flex/grid → Row/Column, `<textarea>` → verify the project's actual multi-line shape, icon webfont classes → resolve via imagevector-generator, never assumed 1:1), and a hard rule: never assume a Compose component's parameters by analogy to the source HTML or to Compose's own API shape. Translates into this skill's existing `docs/layout-system/*.md` format — no parallel format for HTML sources. Expanded the mapping table with 6 more verified constructs (checkbox, radio group, range slider, table, modal dialog, file input — the last one has no shadcn-compose equivalent at all, confirmed rather than assumed) using `kmp-shadcn-compose`'s new `fetch_component_signature.py`. 2 new anti-patterns. |
 | 2026-07-09 | The one-screen-per-file rule was documented but had no enforcement beyond `create_wireframe.py` refusing to overwrite — a hand-edited file could still merge two screens together silently. New `kmp-audit` detector `combined layout screen file [MEDIUM]` flags any `docs/layout-system/*.md` file (other than `_components.md`) with more than one top-level heading. |

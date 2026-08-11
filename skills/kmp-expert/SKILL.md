@@ -190,7 +190,7 @@ versions when the local repo can be checked directly.
 | `kmp-migration` | Incremental adoption guide: assess current state, prioritized skill adoption order, MVVM→MVI, monolith→multi-module, Hilt→Koin migration paths |
 | `kmp-refactor` | Rename/move/copy/delete: textual sweep (docs/skills/commands) vs IDE-native refactor (Kotlin symbols), module-move checklist against the 6-layer contract, safe-delete dangling-reference check |
 | `kmp-project-docs-maintainer` | Consumer-facing README, onboarding, and docs/reference sync for downstream KMP projects |
-| `kmp-layout-system` | ASCII wireframe docs for screens — draft and document app layout before or after implementation; lives in `docs/layout-system/` |
+| `kmp-layout-system` | SVG wireframe docs for screens — draft and document app layout before or after implementation; lives in `docs/layout-system/` |
 | `kmp-lessons` | Structured lesson files capturing pattern mismatches and fixes; feeds the skill-harvester |
 | `kmp-skill-harvester` | Reads accumulated lesson files and proposes amendments to source skills; produces a harvest report |
 | `kmp-legal-docs` | Privacy Policy, Terms & Conditions, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, in-app `LegalDocsScreen`, consent gate |
@@ -316,7 +316,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "Koin", "dependency injection", "manual modules", "annotated mode" | `kmp-dependency-injection` |
 | "review my KMP project", "audit this repo", "what's wrong with this architecture" | `kmp-audit` |
 | "project docs", "consumer docs", "project README", "getting started", "project docs reference", "onboarding docs", "architecture diagram", "library docs", "app docs" | `kmp-project-docs-maintainer` |
-| "layout system", "screen wireframe", "ASCII wireframe", "draft screen", "document screen layout", "layout doc", "screen layout", "layout-system" | `kmp-layout-system` |
+| "layout system", "screen wireframe", "SVG wireframe", "draft screen", "document screen layout", "layout doc", "screen layout", "layout-system" | `kmp-layout-system` |
 | "write a lesson", "capture lesson", "document a finding", "pattern mismatch", "lesson file" | `kmp-lessons` |
 | "harvest lessons", "propose skill amendments", "skill harvester", "harvest findings", "update skills from lessons" | `kmp-skill-harvester` |
 | "migrate existing project", "adopt MVI", "LiveData to StateFlow", "migrate to clean architecture", "incremental adoption", "where to start", "brownfield", "refactor architecture", "migration path", "legacy project" | `kmp-migration` |

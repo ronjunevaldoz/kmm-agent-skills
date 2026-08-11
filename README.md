@@ -198,7 +198,7 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 - [`adaptive-layout`](skills/kmp-compose-adaptive-layout/) — WindowSizeClass, list-detail split
 - [`graphics-modifiers`](skills/kmp-compose-graphics-modifiers/) — Canvas, graphicsLayer
 - [`preview-driven-development`](skills/kmp-compose-preview-driven-development/) — Desktop-first `@Preview` workflow, PDD cycle
-- [`layout-system`](skills/kmp-layout-system/) — ASCII wireframe docs per screen + slot-grid layout contracts
+- [`layout-system`](skills/kmp-layout-system/) — SVG wireframe docs per screen + slot-grid layout contracts
 - [`imagevector-generator`](skills/kmp-imagevector-generator/) — raster/SVG → compiled Kotlin ImageVector; no hand-written paths, no PNG icons
 
 ### Testing & Quality

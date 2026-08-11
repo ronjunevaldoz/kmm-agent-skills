@@ -182,7 +182,7 @@ Each feature follows the 6-layer pattern:
 confirmed MVP + post-MVP feature list, generate a file in
 `docs/layout-system/<feature>/<ScreenName>.md` containing:
 - **Component table** — every visible element, its type, and the design-system component it maps to
-- **ASCII wireframe** — structural layout showing slot positions, spacing zones, and scroll regions
+- **SVG wireframe** — structural layout showing slot positions, spacing zones, and scroll regions
 - **State variants** — one wireframe per meaningful state (loading, empty, error, filled)
 
 Example for a product list screen:
@@ -214,7 +214,7 @@ survives all the way to real code with nothing to flag it otherwise:
 
 If a wireframe's draft violates the convention for its archetype, fix it before
 presenting — don't present a known-wrong layout and rely on the user to catch it.
-This is a text-level sanity pass on the ASCII content itself, not a substitute for
+This is a content-level sanity pass on the SVG wireframe itself, not a substitute for
 `/audit-design-visual`'s later screenshot-based review (that runs on real rendered
 output after implementation; this runs on the plan, before any code exists).
 

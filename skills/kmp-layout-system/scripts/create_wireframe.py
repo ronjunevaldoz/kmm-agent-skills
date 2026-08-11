@@ -7,8 +7,8 @@ correct section skeleton (Components table, a starting wireframe block, Interact
 It never combines multiple screens into one file and never overwrites an existing screen
 file (edit those in place). Bootstraps docs/layout-system/_components.md if missing.
 
-The agent fills in the ASCII wireframe and component values — the script guarantees the
-one-file-per-screen structure, naming, and location.
+The agent fills in the SVG wireframe's labels and component values — the script guarantees
+the one-file-per-screen structure, naming, location, and a real-proportioned starting SVG.
 
 Usage:
   python3 create_wireframe.py --screen "Inbox" --pattern A
@@ -21,54 +21,89 @@ import re
 import sys
 from pathlib import Path
 
-PATTERNS = {
-    "A": """\
-┌──────────┬──────────────────┬──────────────────────────────────────────────┐
-│ <Nav>    │ <Side Panel>     │ <Main Area>                                  │
-│ <N> dp   │ <N> dp           │ flex 1                                       │
-├──────────┼──────────────────┼──────────────────────────────────────────────┤
-│          │                  │                                              │
-│ [nav-1]* │ <item>           │ <primary content>                            │
-│ [nav-2]  │ <item>           │ <primary content>                            │
-│          │                  │──────────────────────────────────────────────│
-│ [nav-3]  │                  │ <action row>                                 │
-└──────────┴──────────────────┴──────────────────────────────────────────────┘
-Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>  * = active""",
-    "B": """\
-┌──────────┬────────────────────────────────────────────────────────────┐
-│ <Nav>    │ <Main Area>                                                │
-│ <N> dp   │ flex 1  (<Side Panel> not rendered)                        │
-├──────────┼────────────────────────────────────────────────────────────┤
-│          │                                                            │
-│ [nav-1]  │ [tab] <Tab A>  [tab] <Tab B>  [tab] <Tab C>                │
-│ [nav-2]* │ <content>                                                  │
-│ [nav-3]  │                                                            │
-└──────────┴────────────────────────────────────────────────────────────┘
-Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>  * = active""",
-    "C": """\
-┌──────────┬────────────────────────────────────────────────────────────┐
-│ <Nav>    │ [canvas stays in place — no swap]                          │
-│ <N> dp   │                                                            │
-├──────────┼────────────────────────────────────────────────────────────┤
-│          │     ┌──────────────────────────────────────────────────┐   │
-│ [nav-1]  │     │ <Sheet title>                                  X │   │
-│ [nav-2]* │     │ <content line>                                   │   │
-│ [nav-3]  │     └──────────────────────────────────────────────────┘   │
-└──────────┴────────────────────────────────────────────────────────────┘
-Legend: [nav-1] = <name>  [nav-2] = <name>  [nav-3] = <name>  * = active""",
-    "D": """\
-┌────────────────────────────────────────────────────────────────────────┐
-│ <Screen Title>                                                         │
-│ full width                                                             │
-├────────────────────────────────────────────────────────────────────────┤
-│                                                                        │
-│  <header / hero content>                                               │
-│  <content row>                                       [scroll]          │
-│  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~   │
-│  [ <Primary action>                                                  ] │
-│  <secondary action>                                                    │
-└────────────────────────────────────────────────────────────────────────┘""",
-}
+CANVAS_W = 760
+CANVAS_H = 420
+FONT = 'font-family="sans-serif" font-size="13" fill="#333"'
+
+
+def _rect(x: int, y: int, w: int, h: int, fill: str = "white") -> str:
+    return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}" stroke="#333" stroke-width="1"/>'
+
+
+def _esc(text: str) -> str:
+    """XML-escape a label. Placeholders use `<name>` — a literal `<`/`>` in SVG text
+    content is invalid XML (parses as a tag start, not text) unless escaped."""
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _text_lines(x: int, y: int, lines: list[str]) -> str:
+    """Stacked <tspan> lines, vertically centered around y. Labels are XML-escaped."""
+    line_height = 18
+    start_y = y - (len(lines) - 1) * line_height / 2
+    tspans = "".join(
+        f'<tspan x="{x}" y="{start_y + i * line_height:.0f}">{_esc(line)}</tspan>'
+        for i, line in enumerate(lines)
+    )
+    return f'<text text-anchor="middle" {FONT}>{tspans}</text>'
+
+
+def _svg(body: str) -> str:
+    return f'<svg viewBox="0 0 {CANVAS_W} {CANVAS_H}" xmlns="http://www.w3.org/2000/svg">\n{body}\n</svg>'
+
+
+def _pattern_a() -> str:
+    nav = _rect(0, 0, 64, CANVAS_H) + _text_lines(32, 60, ["Nav", "nav-1*", "nav-2", "nav-3", "nav-4", "nav-5"])
+    side = _rect(64, 0, 180, CANVAS_H) + _text_lines(154, 40, ["Side Panel", "<item>", "<item>", "<item>"])
+    main_w = CANVAS_W - 244
+    main_top = _rect(244, 0, main_w, 320) + _text_lines(244 + main_w // 2, 160, ["Main Area", "<primary content>"])
+    main_action = _rect(244, 320, main_w, 40) + _text_lines(244 + main_w // 2, 340, ["<action row>"])
+    main_input = _rect(244, 360, main_w, 60) + _text_lines(244 + main_w // 2, 390, ["<input area>"])
+    return _svg(nav + side + main_top + main_action + main_input)
+
+
+def _pattern_b() -> str:
+    nav = _rect(0, 0, 64, CANVAS_H) + _text_lines(32, 60, ["Nav", "nav-1", "nav-2*", "nav-3", "nav-4"])
+    main_w = CANVAS_W - 64
+    tabs = _rect(64, 0, main_w, 40) + _text_lines(64 + main_w // 2, 20, ["[tab] Tab A    [tab] Tab B    [tab] Tab C"])
+    content = _rect(64, 40, main_w, CANVAS_H - 40)
+    card_y, card_w, card_h, gap = 100, 140, 100, 20
+    cards = ""
+    for i in range(4):
+        cx = 84 + i * (card_w + gap)
+        cards += _rect(cx, card_y, card_w, card_h) + _text_lines(cx + card_w // 2, card_y + card_h + 16, ["<label>"])
+    return _svg(nav + tabs + content + cards)
+
+
+def _pattern_c() -> str:
+    nav = _rect(0, 0, 64, CANVAS_H) + _text_lines(32, 60, ["Nav", "nav-1", "nav-2*", "nav-3"])
+    canvas_w = CANVAS_W - 64
+    canvas = _rect(64, 0, canvas_w, CANVAS_H, fill="#f5f5f5") + _text_lines(
+        64 + canvas_w // 2, 40, ["[canvas stays in place — no swap]"]
+    )
+    sheet_x, sheet_y, sheet_w, sheet_h = 250, 110, 380, 220
+    sheet_title = _rect(sheet_x, sheet_y, sheet_w, 40) + _text_lines(
+        sheet_x + sheet_w // 2, sheet_y + 20, ["<Sheet title>          X"]
+    )
+    sheet_body = _rect(sheet_x, sheet_y + 40, sheet_w, sheet_h - 40) + _text_lines(
+        sheet_x + sheet_w // 2, sheet_y + 40 + (sheet_h - 40) // 2, ["<content line>", "<content line>"]
+    )
+    return _svg(nav + canvas + sheet_title + sheet_body)
+
+
+def _pattern_d() -> str:
+    title = _rect(0, 0, CANVAS_W, 50) + _text_lines(CANVAS_W // 2, 25, ["<Screen Title> — full width"])
+    header = _rect(0, 50, CANVAS_W, 120) + _text_lines(CANVAS_W // 2, 110, ["<header / hero content>"])
+    content = _rect(0, 170, CANVAS_W, 180) + _text_lines(CANVAS_W // 2, 260, ["<content row>  [scroll]", "<content row>"])
+    primary = (
+        _rect(0, 350, CANVAS_W, 40, fill="#333")
+        + f'<text x="{CANVAS_W // 2}" y="375" text-anchor="middle" font-family="sans-serif" '
+          f'font-size="13" fill="white">&lt; Primary action &gt;</text>'
+    )
+    secondary = _text_lines(CANVAS_W // 2, 405, ["<secondary action>"])
+    return _svg(title + header + content + primary + secondary)
+
+
+PATTERNS = {"A": _pattern_a, "B": _pattern_b, "C": _pattern_c, "D": _pattern_d}
 
 _COMPONENTS_TEMPLATE = """\
 # Component Registry
@@ -76,7 +111,7 @@ _COMPONENTS_TEMPLATE = """\
 Update this file when a component's dimensions, visibility, or behavior changes.
 
 | Component       | Width / Height | Visibility               | Platform             | Notes              |
-|-----------------|----------------|--------------------------|----------------------|--------------------|
+|-----------------|----------------|--------------------------|-----------------------|--------------------|
 | <Component A>   | <N> dp         | <always / screen X only> | Both / Android / iOS | <short description> |
 """
 
@@ -88,6 +123,8 @@ def slugify(name: str) -> str:
 
 # Slot-grid frontmatter per pattern: which named slots exist and which render at each
 # breakpoint. Weights are simple fractions from a closed set — never arbitrary floats.
+# Unaffected by the ASCII-to-SVG switch — this contract drives generate_slot_scaffold.py,
+# not the visual wireframe.
 PATTERN_GRIDS = {
     "A": ("[nav, side, main]",
           "{compact: [main], medium: [nav, main], expanded: [nav, side, main]}",
@@ -105,7 +142,7 @@ PATTERN_GRIDS = {
 
 
 def render(screen: str, pattern: str) -> str:
-    wireframe = PATTERNS[pattern]
+    wireframe = PATTERNS[pattern]()
     slots, grid, weights = PATTERN_GRIDS[pattern]
     return f"""\
 ---
@@ -129,9 +166,7 @@ weights: {weights}
 
 ## Default
 
-```
 {wireframe}
-```
 
 ---
 
@@ -166,7 +201,8 @@ def main() -> int:
     screen_file.write_text(render(args.screen, args.pattern), encoding="utf-8")
     print(f"✅  Created screen file: {screen_file}")
     print("    One file per screen — run create_wireframe.py again for the next screen.")
-    print("    Now fill in the component table and the ASCII wireframe (keep all rows the same width).")
+    print("    Now fill in the component table and the SVG wireframe's <text> labels with")
+    print("    the project's real component names and content.")
     return 0
 
 
