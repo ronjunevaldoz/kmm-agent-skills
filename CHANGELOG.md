@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.18.1] — 2026-08-14
+
+### Fixed
+
+- fix(update-consumer-skills): stop warning about commands that are current
+
+---
+
 ## [v2.18.0] — 2026-08-11
 
 ### Added
