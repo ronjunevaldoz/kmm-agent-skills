@@ -48,6 +48,40 @@ dependencies {
 }
 ```
 
+### Wiring KMP source sets into `check` (required — do not skip)
+
+**The plain `detekt` task is a silent no-op on a KMP module.** Detekt's Gradle plugin
+creates per-source-set tasks — `detektMetadataCommonMain`, `detektJvmMain`,
+`detektAndroidDebug`, etc. — but does not wire them into `check` for a multiplatform
+target the way it does for a plain JVM module. Real, confirmed failure mode: a module
+with a genuine `LongParameterList` violation in `commonMain` reports
+`BUILD SUCCESSFUL` when someone runs `./gradlew :module:detekt` — the task exists,
+runs, and scans nothing, because commonMain's real analysis lives on
+`detektMetadataCommonMain`, not `detekt`. `./gradlew check` looked equally clean for
+the same reason, until this wiring is added. Add once, in the root `build.gradle.kts`:
+
+```kotlin
+subprojects {
+    apply(plugin = "io.gitlab.arturbosch.detekt")
+    // ...
+
+    afterEvaluate {
+        val detektAnalysisTasks =
+            tasks.matching {
+                it.name.startsWith("detekt") && !it.name.contains("Baseline") &&
+                    it.name != "detektGenerateConfig"
+            }
+        tasks.matching { it.name == "check" }.configureEach { dependsOn(detektAnalysisTasks) }
+    }
+}
+```
+
+After this, `./gradlew check` (or a project-defined aggregate like `detektAll`) is the
+only command that actually covers every KMP source set. Never trust a bare
+`./gradlew detekt`/`:module:detekt` result on a multiplatform module as "clean" —
+confirm which task actually ran by checking its report file lists real `<file>`
+entries, not just that the build succeeded.
+
 ### Root `detekt.yml`
 
 ```yaml
@@ -261,11 +295,15 @@ body, forward the object instead of restating its fields.
 ### Usage
 
 ```bash
-# Run Detekt (fails on violations)
-./gradlew detekt
+# Run Detekt across every KMP source set (fails on violations) — NOT `./gradlew detekt`,
+# see "Wiring KMP source sets into check" above for why that's a silent no-op here
+./gradlew check
 
-# Generate HTML report
-./gradlew detekt --report html:build/reports/detekt/detekt.html
+# Run one target's analysis directly, e.g. to iterate on commonMain only
+./gradlew detektMetadataCommonMain
+
+# Generate HTML report for one target
+./gradlew detektMetadataCommonMain --report html:build/reports/detekt/commonMain.html
 
 # Fix auto-fixable issues (formatting only)
 ./gradlew detektFormat
