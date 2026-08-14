@@ -341,14 +341,32 @@ fi
 
 # ── Commands (manual — require explicit approval) ─────────────────────────────
 
-echo ""
-echo "  ⚠️  Slash commands were NOT copied automatically."
-echo "  Commands tell the agent to run shell operations and must be reviewed"
-echo "  before install. Use --install-commands to review and approve each one."
-echo ""
+# Only warn when something has actually drifted — this used to print unconditionally
+# on every single update, even when every command was already current, which trained
+# consumers to ignore it. Compute drift first (cheap: a cmp -s loop, no prompting),
+# then only surface the warning, with the actual drifted names, when it's true.
+COMMANDS_SRC="$SKILLS_SOURCE/commands"
+DRIFTED_COMMANDS=()
+if [[ -d "$COMMANDS_SRC" ]]; then
+  for cmd_file in "$COMMANDS_SRC"/*.md; do
+    [[ -f "$cmd_file" ]] || continue
+    dest="$COMMANDS_DIR/$(basename "$cmd_file")"
+    if [[ ! -f "$dest" ]] || ! cmp -s "$cmd_file" "$dest"; then
+      DRIFTED_COMMANDS+=("$(basename "$cmd_file" .md)")
+    fi
+  done
+fi
+
+if [[ ${#DRIFTED_COMMANDS[@]} -gt 0 ]] && ! $INSTALL_COMMANDS; then
+  echo ""
+  echo "  ⚠️  ${#DRIFTED_COMMANDS[@]} slash command(s) new or changed upstream, not"
+  echo "      copied automatically: ${DRIFTED_COMMANDS[*]/#//}"
+  echo "  Commands tell the agent to run shell operations and must be reviewed"
+  echo "  before install. Use --install-commands to review and approve each one."
+  echo ""
+fi
 
 if $INSTALL_COMMANDS; then
-  COMMANDS_SRC="$SKILLS_SOURCE/commands"
   if [[ ! -d "$COMMANDS_SRC" ]]; then
     echo "  No commands/ directory found in $SKILLS_SOURCE"
   else

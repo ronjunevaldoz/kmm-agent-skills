@@ -136,6 +136,45 @@ class UpdateConsumerSkillsScriptTests(unittest.TestCase):
             self.assertIn("[installed] /kmp-current", result.stdout)
             self.assertIn("[new] /kmp-brand-new", result.stdout)
 
+    def test_warns_about_drifted_commands_without_install_commands_flag(self) -> None:
+        # Real bug: the "slash commands not updated" warning used to print
+        # unconditionally on every run, even when every command was already current —
+        # training consumers to ignore it. It should only fire, and name the actual
+        # drifted commands, when something genuinely changed upstream.
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            source, project = tmp_root / "source", tmp_root / "project"
+            source.mkdir()
+            project.mkdir()
+            self._minimal_source(source)
+            self._write(source, "commands/kmp-drifted.md", "# /kmp-drifted\n\nNew body.\n")
+            self._write(project, "settings.gradle.kts", 'rootProject.name = "DemoApp"\n')
+            self._write(project, ".claude/commands/kmp-drifted.md", "# /kmp-drifted\n\nOLD body.\n")
+
+            result = self._run_update(source, project)
+
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertIn("1 slash command(s)", result.stdout)
+            self.assertIn("/kmp-drifted", result.stdout)
+            self.assertIn("--install-commands", result.stdout)
+
+    def test_no_command_warning_when_everything_is_current(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            source, project = tmp_root / "source", tmp_root / "project"
+            source.mkdir()
+            project.mkdir()
+            self._minimal_source(source)
+            self._write(source, "commands/kmp-current.md", "# /kmp-current\n\nSame body.\n")
+            self._write(project, "settings.gradle.kts", 'rootProject.name = "DemoApp"\n')
+            self._write(project, ".claude/commands/kmp-current.md", "# /kmp-current\n\nSame body.\n")
+
+            result = self._run_update(source, project)
+
+            self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+            self.assertNotIn("slash command(s)", result.stdout)
+            self.assertNotIn("NOT copied automatically", result.stdout)
+
     def test_deploys_correctly_when_each_skill_is_individually_symlinked(self) -> None:
         # Real production shape found in a consumer project: .claude/skills/<name> is a
         # symlink to .agents/skills/<name>, per skill (not the whole directory mirrored

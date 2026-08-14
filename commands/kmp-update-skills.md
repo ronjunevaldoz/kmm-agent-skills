@@ -151,7 +151,9 @@ What changed:
 
 Audit: clean / <N> findings
 
-Note: slash commands were not updated. Run with --install-commands to review and update them.
+<If the script printed a "N slash command(s) new or changed upstream" warning, repeat
+it here with the named commands. If it printed nothing, commands are current — say
+nothing about them; don't restate a static note regardless of whether it's true.>
 ```
 
 ---
