@@ -1,5 +1,5 @@
 {
-  "version": "2.18.1",
+  "version": "2.18.2",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -392,10 +392,12 @@
       "path": "skills/kmp-code-quality",
       "description": "Sets up Ktlint (formatting) and Detekt (code smells + architecture rules) for a KMP project. Both run as CI gates. Ktlint is near-zero config. Detekt architecture rules enforce the 6-layer module boundary contract from kmp-clean-architecture.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-31",
+      "last_updated": "2026-08-14",
       "keywords": [
         "Ktlint",
         "Detekt",
+        "detektMetadataCommonMain",
+        "detekt KMP wiring",
         "code quality",
         "formatting",
         "architecture rules",
@@ -444,7 +446,12 @@
         "when to use Kotlin extension",
         "extension static resolution",
         "extension vs member function",
-        "extension property"
+        "extension property",
+        "detekt not catching violations",
+        "detekt false clean",
+        "detektMetadataCommonMain",
+        "detekt KMP task",
+        "detekt silent no-op"
       ],
       "scripts": []
     },

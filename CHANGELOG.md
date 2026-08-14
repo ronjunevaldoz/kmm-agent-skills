@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.18.2] — 2026-08-14
+
+### Fixed
+
+- fix(kmp-code-quality): document Detekt's KMP task-wiring footgun
+
+---
+
 ## [v2.18.1] — 2026-08-14
 
 ### Fixed
