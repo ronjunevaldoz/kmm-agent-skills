@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.19.0] — 2026-08-15
+
+### Added
+
+- feat(setup-hooks): add Option I — auto-bootstrap a missing skills deploy
+
+---
+
 ## [v2.18.2] — 2026-08-14
 
 ### Fixed
