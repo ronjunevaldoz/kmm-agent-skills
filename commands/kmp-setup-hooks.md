@@ -21,6 +21,7 @@ There are two independent integration points: **git hooks** (for your local repo
 | `gitleaks` (via `pre-commit` framework) | Scans staged changes for API keys/passwords/tokens before they're committed. Platform-independent — scans source text, not compiled output. Blocks the commit if a secret is found. | `git commit`, wired per Option F |
 | `hooks/block-computer-use-for-compose.sh` | Blocks `mcp__computer-use__*` tool calls in a Compose Multiplatform project — forces the agent onto Roborazzi/`runComposeUiTest` instead of manually driving the app. | Before any `mcp__computer-use__*` call, wired per Option G |
 | `hooks/block-edit-vendored-skills.sh` | Blocks `Edit`/`Write` calls targeting a deployed skill mirror (`.claude/skills/`, `.agents/skills/`, `.codex/skills/`, `.gemini/skills/`) instead of the real source. | Before any `Edit`/`Write`, wired per Option H |
+| `scripts/bootstrap-consumer-skills.sh` | Auto-populates a genuinely missing `.claude/skills/` deploy (fresh clone, new teammate, CI) — never touches an already-populated one. Non-blocking, always exits 0. | Every Claude Code session start, wired per Option I |
 
 ---
 
@@ -353,6 +354,67 @@ To remove: delete the `PreToolUse` entry from `settings.json`.
 
 ---
 
+## Option I — Auto-bootstrap a missing skills deploy (Claude Code SessionStart hook)
+
+For a project that gitignores its deployed `.claude/skills/` payload instead of
+committing it — the deploy is bulky, generated, and re-derivable, so committing it is
+optional, not required. Without this hook, a fresh clone (new teammate, new machine, a
+CI runner) has an empty `.claude/skills/` and nothing fills it until someone remembers
+to run `/kmp-update-skills` by hand — which itself isn't discoverable on a fresh clone
+if commands are also gitignored. This hook closes that gap automatically, once, right
+after a fresh clone's first session starts:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash <path-to-skills-repo>/scripts/bootstrap-consumer-skills.sh .claude/skills; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Only acts on a genuinely missing or empty target.** If `.claude/skills/` already has
+content, the hook does nothing at all — this is a one-time bootstrap for a fresh clone,
+not a refresh mechanism for an existing deploy. An existing deploy might carry
+project-specific state this hook has no business silently rewriting; keeping it current
+after the first bootstrap is `/kmp-update-skills`'s job, same as always.
+
+**Two paths, in order:** if `$KMP_AGENT_SKILLS_SOURCE` (or the legacy
+`$KMM_AGENT_SKILLS_SOURCE`) points at a local kmp-agent-skills clone, it deploys from
+there directly — fast, no network. Otherwise it falls back to
+`npx skills add ronjunevaldoz/kmp-agent-skills` — slower, but works on a teammate's or
+CI's machine that's never cloned this repo at all. If neither is available (no local
+clone configured, no `npx` on `PATH`), it prints what to run manually and exits 0
+anyway — same non-blocking guarantee as every other SessionStart hook here.
+
+Never touches `commands/` — same reasoning as `update-consumer-skills.sh`'s own
+default: commands tell the agent to run shell operations and need explicit human
+review, not an automated hook.
+
+Test it:
+```bash
+# Should bootstrap and print "Bootstrapped ..." — run from an empty scratch dir
+rm -rf /tmp/bootstrap-test && mkdir -p /tmp/bootstrap-test && cd /tmp/bootstrap-test
+KMP_AGENT_SKILLS_SOURCE=<path-to-skills-repo> \
+  bash <path-to-skills-repo>/scripts/bootstrap-consumer-skills.sh .claude/skills
+
+# Re-run — should print nothing at all, already populated
+KMP_AGENT_SKILLS_SOURCE=<path-to-skills-repo> \
+  bash <path-to-skills-repo>/scripts/bootstrap-consumer-skills.sh .claude/skills
+```
+
+To remove: delete the `SessionStart` entry from `settings.json`.
+
+---
+
 ## Recommended setup for most projects
 
 ```
@@ -364,6 +426,7 @@ Option E  (SessionStart installed-version check) — any consumer project with a
 Option F  (secrets scan) — always set up; real security risk, zero cost once wired
 Option G  (block computer-use for Compose) — set up for any Compose Multiplatform project
 Option H  (block edits to vendored skills) — always set up; prevents silent drift
+Option I  (auto-bootstrap missing skills) — only if .claude/skills/ is gitignored, not committed
 ```
 
 ---
