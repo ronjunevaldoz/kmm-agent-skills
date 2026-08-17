@@ -109,6 +109,31 @@ pollution, not just a style preference.
   doesn't compile. Store the state elsewhere (an external map keyed by identity, or a
   real member on the type) if it's more than a computed read.
 
+### God receiver — extension sprawl hides a type's real API
+
+Mirror image of `_detect_god_utils_file` above: that one flags one *file* accumulating
+unrelated receivers, this flags one *receiver* accumulating unrelated extensions across
+many files. A type like `Context`, a shared `AppScope`, or any widely-injected class can
+end up with dozens of `public` extensions scattered across the codebase — a networking
+extension here, an analytics extension there, a navigation extension somewhere else. Each
+individual extension looks clean; the type as a whole becomes a god object whose real
+capability set is invisible from its own declaration — nothing in the class file tells a
+reader what it can do, only a repo-wide grep does.
+
+**The fix is membership over extensions**: if a function represents core, always-available
+behavior of the type — every caller needs it, it's part of the type's essential
+contract — make it a member, not an extension. Reserve extensions for what the earlier
+"Reach for an extension when" list actually describes: types you don't own, optional
+convenience, narrow-context sugar. A function that's core behavior but written as an
+extension anyway doesn't gain anything from the dot-notation syntax — it just moves the
+declaration somewhere the type's own file doesn't advertise, for no benefit.
+
+This is a judgment call, not something mechanically flagged today — an extension count
+alone doesn't distinguish "this type has genuinely broad, well-organized sugar" from "this
+type is being used as a service locator via extensions." Watch for it during review: if
+understanding what a type can do requires searching the whole codebase instead of reading
+one file, that's the signal, regardless of how many extensions triggered it.
+
 ### Code categorization: core / helper / sugar / sample-local / deprecated
 
 Five real categories for classifying a function or type — applies to both app and
