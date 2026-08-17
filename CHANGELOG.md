@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.22.0] — 2026-08-17
+
+### Added
+
+- feat(kmp-code-quality): attribution comments need confirmation first
+
+---
+
 ## [v2.21.0] — 2026-08-17
 
 ### Added
