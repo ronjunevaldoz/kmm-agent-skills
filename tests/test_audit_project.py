@@ -4743,5 +4743,59 @@ class UnjustifiedSuppressTests(unittest.TestCase):
             self.assertFalse(hints)
 
 
+class HedgingLanguageTests(unittest.TestCase):
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        path = root / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+    def test_flags_hedge_phrase_in_readme(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "README.md",
+                "In order to build the project, run the build command.\n",
+            )
+            findings = audit_scripts._detect_hedging_language(root)
+            self.assertTrue(any("hedging language" in f and "README.md:1" in f for f in findings))
+
+    def test_flags_hedge_phrase_in_docs_subdir(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "docs/architecture.md",
+                "# Architecture\n\nIt should be noted that modules follow the 6-layer contract.\n",
+            )
+            findings = audit_scripts._detect_hedging_language(root)
+            self.assertTrue(any("It should be noted that" in f for f in findings))
+
+    def test_ignores_hedge_phrase_inside_code_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "README.md",
+                "# Demo\n\n```text\nIn order to reproduce, do X.\n```\n",
+            )
+            findings = audit_scripts._detect_hedging_language(root)
+            self.assertFalse(findings)
+
+    def test_ignores_archived_docs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "docs/tasks/archive/2026-01-01-plan.md",
+                "In order to migrate, we did X.\n",
+            )
+            findings = audit_scripts._detect_hedging_language(root)
+            self.assertFalse(findings)
+
+    def test_clean_docs_produce_no_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(root, "README.md", "Run `./gradlew build` to build.\n")
+            findings = audit_scripts._detect_hedging_language(root)
+            self.assertFalse(findings)
+
+
 if __name__ == "__main__":
     unittest.main()

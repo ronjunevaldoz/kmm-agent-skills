@@ -354,7 +354,7 @@ Read `references/docs-hygiene.md` before any clean-up task. It covers:
 
 ## Related Skills
 
-- `kmp-audit` — catches doc drift when the docs repo or consumer project needs a health check.
+- `kmp-audit` — catches doc drift when the docs repo or consumer project needs a health check; `_detect_hedging_language` is the mechanical enforcement for the Writing Style rule's hedge-phrase check above (the other 6 rules stay judgment calls — not mechanically detectable without real false-positive risk).
 - `kmp-release` — use when project docs need to explain versioning or publishing flow.
 - `kmp-legal-docs` — use when the docs are specifically about privacy, terms, or compliance.
 - `kmp-library-publishing` — owns the Maven Central pipeline `docs/libraries.md` catalogs; its release checklist should point here.
@@ -375,6 +375,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-08-17 | Cross-referenced `kmp-audit`'s new `_detect_hedging_language` — the Writing Style rule's hedge-phrase check now has real mechanical backing, not just prose guidance a reader has to self-police. |
 | 2026-08-15 | Added "Writing Style — Clear, Concise, Organized, Developer-Friendly": real gap — this skill governed doc *structure* (topology, hygiene, classification) but had nothing about doc *prose quality*. 7 concrete rules (lead with the answer, one idea per section, concrete over abstract, cut hedging, organize by reader intent not build order, table over paragraph for comparisons, every example must be real and runnable). 2 new anti-patterns. |
 | 2026-08-04 | Added a "Delete vs Archive" section to `references/docs-hygiene.md` — real gap: the only prior guidance was a blanket "Never delete — archive," but that only made sense for the Consolidation Rule's task-kind files. Git history already preserves every version regardless of delete/archive, so the actual test is whether a human should be able to browse the old content again without going to git log — archive covers that case (task/bug resolution history); a fully-superseded reference doc, a `docs/` copy of a file already moved to its real home, or a leftover pre-rename file has nothing left to browse to and should just be deleted. Also registered `MIRROR_MAP.md` (from `kmp-api-mimicry`) as a named classification example. |
 | 2026-07-11 | Added `docs/libraries.md` (Maven coordinate/version/publish-status catalog, cross-referenced from `library-publishing`) and `docs/testing.md` (test coverage index, cross-referenced from `unit-testing`/`roborazzi`) to the default topology — closing a real gap where "libraries" only had architecture-diagram guidance and "tests"/"demos" had nothing. `docs/demos.md` added as explicitly **conditional**, not default — only when a real demo module exists. Cross-referenced the new `kmp-docs-site` skill (public GitHub Pages developer guide) and drew an explicit boundary: never share this skill's internal `docs/` folder as that site's source. 2 new anti-patterns, 3 new validation-matrix rows. |

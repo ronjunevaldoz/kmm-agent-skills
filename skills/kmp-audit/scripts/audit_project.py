@@ -1304,6 +1304,85 @@ def _detect_undocumented_public_api(root: Path) -> list[str]:
     return findings
 
 
+# ── Hedging/filler language in consumer-facing docs ─────────────────────────────
+# Per kmp-project-docs-maintainer's Writing Style section: these exact phrases add
+# length without adding information and are always removable without loss of
+# meaning. Regex-detectable with low false-positive risk — unlike "buried lead" or
+# "table vs paragraph", which need real judgment, a hedge phrase is either present
+# or it isn't. Scoped to root-level named docs + docs/ this skill actually owns;
+# archived task notes are frozen history, not something this rule should churn.
+
+_HEDGE_PHRASES = [
+    "in order to",
+    "it should be noted that",
+    "it is important to note that",
+    "please note that",
+    "generally speaking",
+    "as previously mentioned",
+    "needless to say",
+    "at this point in time",
+    "due to the fact that",
+    "in the event that",
+    "for all intents and purposes",
+    "it goes without saying",
+]
+_HEDGE_PHRASE_RE = re.compile(
+    r"\b(" + "|".join(re.escape(p) for p in _HEDGE_PHRASES) + r")\b",
+    re.IGNORECASE,
+)
+_CONSUMER_DOC_ROOT_NAMES = {
+    "README.md",
+    "GETTING_STARTED.md",
+    "INSTALL.md",
+    "RELEASING.md",
+}
+
+
+def _iter_consumer_docs(root: Path):
+    for name in _CONSUMER_DOC_ROOT_NAMES:
+        path = root / name
+        if path.is_file():
+            yield path
+    docs_dir = root / "docs"
+    if not docs_dir.is_dir():
+        return
+    for path in sorted(docs_dir.rglob("*.md")):
+        if "archive" in path.relative_to(docs_dir).parts:
+            continue
+        yield path
+
+
+def _detect_hedging_language(root: Path) -> list[str]:
+    """Flag hedging/filler phrases in consumer-facing docs — real, cited phrases
+    from kmp-project-docs-maintainer's Writing Style rule, not a fabricated list.
+    """
+    findings: list[str] = []
+    for path in _iter_consumer_docs(root):
+        if _is_excluded(path, root):
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        in_code_block = False
+        for i, line in enumerate(lines):
+            if line.strip().startswith("```"):
+                in_code_block = not in_code_block
+                continue
+            if in_code_block:
+                continue
+            match = _HEDGE_PHRASE_RE.search(line)
+            if not match:
+                continue
+            findings.append(
+                f"hedging language [LOW]: {path.relative_to(root)}:{i + 1} "
+                f"— '{match.group(1)}' adds length without adding information. "
+                f"Per kmp-project-docs-maintainer's Writing Style rule, cut it\n"
+                f"    {i + 1} | {line.strip()}"
+            )
+    return findings
+
+
 # ── @Composable function returning Unit named like a verb, not a type ──────────
 # Per the Android Kotlin style guide's naming rules: a @Composable function that
 # returns Unit is a UI node, not an action — it must be PascalCase, read as a noun
@@ -4752,6 +4831,9 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Undocumented public API (library projects only) ──────────────────────────
     findings.extend(_detect_undocumented_public_api(root))
+
+    # ── Hedging/filler language in consumer-facing docs ──────────────────────────
+    findings.extend(_detect_hedging_language(root))
     findings.extend(_detect_lowercase_unit_composable(root))
     findings.extend(_detect_partial_param_documentation(root))
     findings.extend(_detect_kotlin_reflect_in_common(root))
