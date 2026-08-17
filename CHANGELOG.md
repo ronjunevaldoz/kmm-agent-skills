@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.20.0] — 2026-08-17
+
+### Added
+
+- feat(kmp-project-docs-maintainer): add writing-style guidance
+
+---
+
 ## [v2.19.0] — 2026-08-15
 
 ### Added
