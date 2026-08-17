@@ -1,5 +1,5 @@
 {
-  "version": "2.23.0",
+  "version": "2.24.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -392,7 +392,7 @@
       "path": "skills/kmp-code-quality",
       "description": "Sets up Ktlint (formatting) and Detekt (code smells + architecture rules) for a KMP project. Both run as CI gates. Ktlint is near-zero config. Detekt architecture rules enforce the 6-layer module boundary contract from kmp-clean-architecture.",
       "license": "Apache-2.0",
-      "last_updated": "2026-08-17",
+      "last_updated": "2026-08-18",
       "keywords": [
         "Ktlint",
         "Detekt",
@@ -421,7 +421,11 @@
         "backing property",
         "package directive does not match the file location",
         "InvalidPackageDeclaration",
-        "PackageDirectoryMismatch"
+        "PackageDirectoryMismatch",
+        "god receiver",
+        "extension sprawl",
+        "membership over extensions",
+        "god object extension"
       ],
       "triggers": [
         "Ktlint",
@@ -460,7 +464,11 @@
         "historical narration comment",
         "migration comment",
         "previously comment",
-        "comment history not purpose"
+        "comment history not purpose",
+        "god receiver",
+        "extension sprawl",
+        "membership over extensions",
+        "god object extension"
       ],
       "scripts": []
     },

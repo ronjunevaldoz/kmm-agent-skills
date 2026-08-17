@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.24.0] — 2026-08-18
+
+### Added
+
+- feat(kmp-code-quality): document god-receiver extension sprawl anti-pattern
+
+---
+
 ## [v2.23.0] — 2026-08-17
 
 ### Added
