@@ -43,6 +43,33 @@ catches the mechanical shape of this (a 3+ line comment directly above one depen
 line in a Gradle build file) — but the tone test above is what to apply by hand, since it
 generalizes past Gradle files.
 
+**Attribution comments need confirmation first — never added silently.** A comment
+naming a *source* ("suggested by kmp-audit," a mode's own tag prefix, "per code
+review") isn't the same as one stating a *fact*. It answers who said so, not why the
+code is this way — a different failure than the justification trail above, and it
+rots the same way a task reference does: the source stops mattering the moment context
+changes.
+
+Rule: before adding one, ask the user first (`AskUserQuestion`, or name the line and
+get explicit go-ahead). No exceptions for a format built to carry real content, like a
+tagged convention documenting a genuine limitation — the gate is on adding *this
+instance*, not on whether the convention itself is legitimate.
+
+```kotlin
+// ❌ Attribution — cites a source, not a fact
+// suggested by kmp-audit
+val cache = mutableMapOf<String, User>()
+
+// ❌ Still attribution, even in a tagged-convention format
+// mode-tag: shortcut taken here
+val cache = mutableMapOf<String, User>()
+
+// ✓ Real WHY — states the fact, cites no source
+// Global lock, not per-account — fine at current throughput; revisit if
+// concurrent writes start queuing.
+val cache = mutableMapOf<String, User>()
+```
+
 Two comment types, two jobs — never mix them:
 
 | | Single-line `//` | Multi-line `/** ... */` (KDoc) |

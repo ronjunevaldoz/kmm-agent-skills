@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-08-14'
+  last-updated: '2026-08-17'
   keywords:
     - Ktlint
     - Detekt
@@ -53,7 +53,8 @@ when to use comments, documentation comment, comment style, kdoc vs line comment
 how to comment kotlin, extension function, when to use Kotlin extension, extension
 static resolution, extension vs member function, extension property, detekt not
 catching violations, detekt false clean, detektMetadataCommonMain, detekt KMP task,
-detekt silent no-op.
+detekt silent no-op, attribution comment, signature comment, provenance comment,
+suggested by comment, confirm before comment.
 
 **Freshness rule:** Ktlint and Detekt versions change frequently — recheck the latest releases
 before pinning. Detekt architecture rule DSL changes between minor versions.
