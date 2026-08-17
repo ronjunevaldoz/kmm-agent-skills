@@ -41,6 +41,11 @@ metadata:
     - extension sprawl
     - membership over extensions
     - god object extension
+    - verb chaos
+    - twin nouns
+    - naming dialect
+    - inconsistent verb naming
+    - duplicate type name
 ---
 
 ## When to Use This Skill
@@ -60,7 +65,8 @@ catching violations, detekt false clean, detektMetadataCommonMain, detekt KMP ta
 detekt silent no-op, attribution comment, signature comment, provenance comment,
 suggested by comment, confirm before comment, historical narration comment,
 migration comment, previously comment, comment history not purpose, god receiver,
-extension sprawl, membership over extensions, god object extension.
+extension sprawl, membership over extensions, god object extension, verb chaos,
+twin nouns, naming dialect, inconsistent verb naming, duplicate type name.
 
 **Freshness rule:** Ktlint and Detekt versions change frequently — recheck the latest releases
 before pinning. Detekt architecture rule DSL changes between minor versions.
@@ -440,6 +446,10 @@ If Detekt reports false positives, use `@Suppress("RuleName")` at the call site,
 ## Kotlin Library & Pattern Choices
 
 Full content: `references/kotlin-library-pattern-choices.md`.
+
+## Naming & Extension Conventions
+
+Full content: `references/naming-and-extension-conventions.md`.
 
 ## Output Style
 
