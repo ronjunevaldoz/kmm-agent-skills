@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.21.0] — 2026-08-17
+
+### Added
+
+- feat(kmp-audit): detect hedging language in consumer docs
+
+---
+
 ## [v2.20.0] — 2026-08-17
 
 ### Added

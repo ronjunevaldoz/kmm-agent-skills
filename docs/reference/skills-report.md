@@ -19,7 +19,7 @@ Generated 2026-08-17 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 460 | 2026-07-09 | ✅ |
-| [`kmp-audit`](../../skills/kmp-audit/) | 458 | 2026-07-31 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 459 | 2026-07-31 | ✅ |
 | [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 454 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 451 | 2026-08-14 | ✅ |
@@ -41,8 +41,8 @@ Generated 2026-08-17 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-shadcn-compose-layouts`](../../skills/kmp-shadcn-compose-layouts/) | 394 | 2026-08-04 | ✅ |
 | [`kmp-legal-docs`](../../skills/kmp-legal-docs/) | 393 | 2026-06-21 | ✅ |
 | [`kmp-layout-system`](../../skills/kmp-layout-system/) | 392 | 2026-08-10 | 🟡 1 known debt |
+| [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 390 | 2026-08-15 | ✅ |
 | [`kmp-compose-animation`](../../skills/kmp-compose-animation/) | 389 | 2026-06-21 | ✅ |
-| [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 389 | 2026-08-15 | ✅ |
 | [`kmp-migration`](../../skills/kmp-migration/) | 386 | 2026-07-19 | ✅ |
 | [`kmp-permissions`](../../skills/kmp-permissions/) | 386 | 2026-06-21 | ✅ |
 | [`kmp-workmanager`](../../skills/kmp-workmanager/) | 382 | 2026-06-21 | ✅ |
