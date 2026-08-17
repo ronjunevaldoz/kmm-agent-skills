@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-07-11'
+  last-updated: '2026-08-15'
   references:
     - references/docs-hygiene.md
   keywords:
@@ -56,7 +56,8 @@ If the target is this repository, route to `docs-maintainer` instead.
 releasing, docs reference, onboarding docs, architecture docs, architecture diagram,
 docs drift, documentation maintainer, project documentation, repo docs, library docs,
 app docs, clean docs, clean up docs, tidy docs, docs cleanup, update docs, fix docs,
-refresh docs, docs out of date, stale docs, docs are wrong.
+refresh docs, docs out of date, stale docs, docs are wrong, developer friendly docs,
+concise docs, clear docs, docs writing style, organize docs.
 
 **Freshness rule:** project docs drift whenever code, commands, config, or folder names
 change — re-read the live project README, the touched docs, and the relevant source files
@@ -92,6 +93,32 @@ Use the diagram to answer "what is the shape of this project?" at a glance:
   in `docs/architecture.md` or reference pages when needed
 
 Update the diagram whenever a module, boundary, or release flow changes.
+
+### Writing Style — Clear, Concise, Organized, Developer-Friendly
+
+Docs are for someone about to run a command or make a decision, not someone reading
+end to end. Every edit should make the doc easier to act on, not just more complete.
+
+- **Lead with the answer, not the setup.** State the command, decision, or fact in the
+  first sentence; explain why after, only if it's non-obvious. A reader scanning for
+  "what do I run" shouldn't read three paragraphs of context first.
+- **One idea per section, each short enough to scan.** If a section needs its own
+  table of contents, it's really several sections — split it.
+- **Concrete over abstract.** "Run `./gradlew check` before pushing" beats "ensure
+  quality gates pass." A real command, path, or example always beats a description
+  of one.
+- **Cut hedging and filler on sight.** "In order to", "it should be noted that",
+  "generally speaking" add length without adding information — delete them.
+- **Organize by what the reader is trying to do, not by build/implementation order.**
+  A README's structure should follow "what does a new developer need, in the order
+  they need it" — not the order features were built.
+- **Prefer a table over a paragraph when comparing options** — same convention this
+  skill already uses throughout (Fix Maturity Lanes, Project Doc Change Checklist). A
+  developer scanning for their own case finds it faster in a row than buried in prose.
+- **Every code example must be real and runnable, not illustrative pseudocode** —
+  copy-pasting it should work, or it isn't worth including. Ties into the existing
+  "code snippets that no longer compile" anti-pattern below — that's about staleness,
+  this is about never shipping a fake example in the first place.
 
 ### Default Docs Topology
 
@@ -319,6 +346,8 @@ Read `references/docs-hygiene.md` before any clean-up task. It covers:
 - Leaving a stale command name in README or onboarding docs after a rename.
 - Updating one doc page and forgetting the linked reference page that explains it.
 - Copying code snippets that no longer compile or run.
+- Burying the command/decision a reader needs three paragraphs deep instead of leading with it — see Writing Style above.
+- Writing a paragraph to compare options a table would show at a glance.
 - Mixing consumer release-note content into general project docs.
 - Scaffolding `docs/demos.md` (or a demo module) when the project has no runnable demo app — this page is conditional, not part of the default topology.
 - Reusing this skill's internal `docs/` folder as the source for a public GitHub Pages developer guide — see `kmp-docs-site`, which uses a separate `website/` folder specifically to avoid leaking task notes/roadmap to a public site.
@@ -346,6 +375,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-08-15 | Added "Writing Style — Clear, Concise, Organized, Developer-Friendly": real gap — this skill governed doc *structure* (topology, hygiene, classification) but had nothing about doc *prose quality*. 7 concrete rules (lead with the answer, one idea per section, concrete over abstract, cut hedging, organize by reader intent not build order, table over paragraph for comparisons, every example must be real and runnable). 2 new anti-patterns. |
 | 2026-08-04 | Added a "Delete vs Archive" section to `references/docs-hygiene.md` — real gap: the only prior guidance was a blanket "Never delete — archive," but that only made sense for the Consolidation Rule's task-kind files. Git history already preserves every version regardless of delete/archive, so the actual test is whether a human should be able to browse the old content again without going to git log — archive covers that case (task/bug resolution history); a fully-superseded reference doc, a `docs/` copy of a file already moved to its real home, or a leftover pre-rename file has nothing left to browse to and should just be deleted. Also registered `MIRROR_MAP.md` (from `kmp-api-mimicry`) as a named classification example. |
 | 2026-07-11 | Added `docs/libraries.md` (Maven coordinate/version/publish-status catalog, cross-referenced from `library-publishing`) and `docs/testing.md` (test coverage index, cross-referenced from `unit-testing`/`roborazzi`) to the default topology — closing a real gap where "libraries" only had architecture-diagram guidance and "tests"/"demos" had nothing. `docs/demos.md` added as explicitly **conditional**, not default — only when a real demo module exists. Cross-referenced the new `kmp-docs-site` skill (public GitHub Pages developer guide) and drew an explicit boundary: never share this skill's internal `docs/` folder as that site's source. 2 new anti-patterns, 3 new validation-matrix rows. |
 | 2026-06-27 | Extracted classification + hygiene into references/docs-hygiene.md. Added: docs/ root vs reference/ placement rule, clean-up sequence, consolidation rule, naming convention (kebab-case), non-doc file detection. Slimmed SKILL.md to a pointer. |
