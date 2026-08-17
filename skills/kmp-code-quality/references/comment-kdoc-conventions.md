@@ -43,6 +43,26 @@ catches the mechanical shape of this (a 3+ line comment directly above one depen
 line in a Gradle build file) — but the tone test above is what to apply by hand, since it
 generalizes past Gradle files.
 
+**Historical narration isn't a substitute for current purpose.** A comment describing
+what code *used to be* or *how it got here* ("previously used LiveData", "migrated
+from X in 2024", "this used to throw NPE") is git log's job, not the file's. A reader
+needs what the line does and why it's shaped this way *now* — not its backstory,
+which means nothing without context the comment doesn't provide either. If the current
+shape has a real reason, state that reason directly; drop the "previously"/"migrated
+from" framing entirely.
+
+```kotlin
+// ❌ Narrates history — git log already has this, and it's meaningless to a
+// reader with no memory of the backstory
+// Previously used LiveData, migrated to StateFlow in the 2024 refactor
+val state: StateFlow<UiState> = ...
+
+// ✓ States the current constraint, no history
+// Cold by default — a collector that arrives after emission sees nothing until
+// the next update; call .value for the current snapshot instead.
+val state: StateFlow<UiState> = ...
+```
+
 **Attribution comments need confirmation first — never added silently.** A comment
 naming a *source* ("suggested by kmp-audit," a mode's own tag prefix, "per code
 review") isn't the same as one stating a *fact*. It answers who said so, not why the

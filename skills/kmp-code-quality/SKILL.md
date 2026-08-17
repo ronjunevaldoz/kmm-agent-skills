@@ -54,7 +54,8 @@ how to comment kotlin, extension function, when to use Kotlin extension, extensi
 static resolution, extension vs member function, extension property, detekt not
 catching violations, detekt false clean, detektMetadataCommonMain, detekt KMP task,
 detekt silent no-op, attribution comment, signature comment, provenance comment,
-suggested by comment, confirm before comment.
+suggested by comment, confirm before comment, historical narration comment,
+migration comment, previously comment, comment history not purpose.
 
 **Freshness rule:** Ktlint and Detekt versions change frequently — recheck the latest releases
 before pinning. Detekt architecture rule DSL changes between minor versions.
