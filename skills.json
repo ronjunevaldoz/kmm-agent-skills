@@ -1,5 +1,5 @@
 {
-  "version": "2.22.0",
+  "version": "2.23.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -456,7 +456,11 @@
         "signature comment",
         "provenance comment",
         "suggested by comment",
-        "confirm before comment"
+        "confirm before comment",
+        "historical narration comment",
+        "migration comment",
+        "previously comment",
+        "comment history not purpose"
       ],
       "scripts": []
     },

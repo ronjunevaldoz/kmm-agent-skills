@@ -21,8 +21,8 @@ Generated 2026-08-17 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 460 | 2026-07-09 | ✅ |
 | [`kmp-audit`](../../skills/kmp-audit/) | 459 | 2026-07-31 | ✅ |
 | [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 454 | 2026-07-26 | 🟡 1 known debt |
+| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 453 | 2026-08-17 | ✅ |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
-| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 452 | 2026-08-17 | ✅ |
 | [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 450 | 2026-07-20 | ✅ |
 | [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
 | [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 446 | 2026-07-08 | ✅ |
