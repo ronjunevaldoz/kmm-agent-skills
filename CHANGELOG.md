@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.25.0] — 2026-08-18
+
+### Added
+
+- feat(kmp-code-quality): document verb chaos and twin nouns naming anti-patterns
+
+---
+
 ## [v2.24.0] — 2026-08-18
 
 ### Added

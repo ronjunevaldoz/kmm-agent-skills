@@ -15,12 +15,12 @@ Generated 2026-08-18 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 482 | 2026-08-11 | ✅ |
 | [`kmp-network-layer`](../../skills/kmp-network-layer/) | 474 | 2026-07-31 | ✅ |
 | [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 469 | 2026-07-08 | ✅ |
+| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 468 | 2026-08-18 | ✅ |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 468 | 2026-06-29 | ✅ |
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 460 | 2026-07-09 | ✅ |
 | [`kmp-audit`](../../skills/kmp-audit/) | 459 | 2026-07-31 | ✅ |
-| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 458 | 2026-08-18 | ✅ |
 | [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 454 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 450 | 2026-07-20 | ✅ |

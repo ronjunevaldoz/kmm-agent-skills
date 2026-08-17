@@ -1,5 +1,5 @@
 {
-  "version": "2.24.0",
+  "version": "2.25.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -425,7 +425,12 @@
         "god receiver",
         "extension sprawl",
         "membership over extensions",
-        "god object extension"
+        "god object extension",
+        "verb chaos",
+        "twin nouns",
+        "naming dialect",
+        "inconsistent verb naming",
+        "duplicate type name"
       ],
       "triggers": [
         "Ktlint",
@@ -468,7 +473,12 @@
         "god receiver",
         "extension sprawl",
         "membership over extensions",
-        "god object extension"
+        "god object extension",
+        "verb chaos",
+        "twin nouns",
+        "naming dialect",
+        "inconsistent verb naming",
+        "duplicate type name"
       ],
       "scripts": []
     },
