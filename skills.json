@@ -1,5 +1,5 @@
 {
-  "version": "2.25.0",
+  "version": "2.25.1",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -119,8 +119,12 @@
       "path": "skills/kmp-audit",
       "description": "KMP project audit skill for reviewing an existing Kotlin Multiplatform codebase. Use this skill to inspect architecture, module boundaries, state handling, repository and network layering, Compose patterns, expect/actual usage, shared resources, design system usage, test coverage, platform readiness, and the skills repo itself. Produces findings, risk levels, and a fix sequence instead of implementation code. Pair with kmp-expert to route any follow-up work to the right domain skills.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-31",
+      "last_updated": "2026-08-18",
       "keywords": [
+        "docs hygiene kebab case",
+        "SCREAMING_CASE filename",
+        "docs-hygiene-only",
+        "audit_skills_repo vs audit_project",
         "KMP audit",
         "project audit",
         "architecture review",
@@ -2678,7 +2682,7 @@
       "path": "skills/kmp-project-docs-maintainer",
       "description": "Maintains downstream consumer-facing KMP project documentation only: README, GETTING_STARTED, INSTALL, RELEASING, docs/reference pages, onboarding guides, architecture notes, and architecture diagrams. Use this skill when project docs need to match the actual code, commands, config, folder layout, or app/library structure. Does NOT cover consumer release-note generation, per-skill changelogs, or skills-repo documentation.",
       "license": "Apache-2.0",
-      "last_updated": "2026-08-15",
+      "last_updated": "2026-08-18",
       "keywords": [
         "project docs",
         "consumer docs",

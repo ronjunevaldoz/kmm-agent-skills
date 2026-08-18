@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.25.1] — 2026-08-18
+
+### Fixed
+
+- fix(kmp-audit): catch SCREAMING_CASE filenames in docs-hygiene kebab-case check
+
+---
+
 ## [v2.25.0] — 2026-08-18
 
 ### Added
