@@ -199,7 +199,11 @@ _NON_DOC_EXTENSIONS = {
 # (do not flag files inside these — they were intentionally placed)
 _KNOWN_NON_DOC_SUBDIRS = {"archive"}
 
-_SNAKE_CASE_RE = re.compile(r"^[a-z][a-z0-9]*(_[a-z0-9]+)+$")
+# Case-insensitive: catches both snake_case and SCREAMING_SNAKE_CASE — docs/ subdirectory
+# files must be kebab-case regardless of which underscore-separated case they picked.
+# (Root-level docs are the opposite — _check_naming_conventions requires SCREAMING_CASE
+# there — this check only ever runs against files under docs/.)
+_SNAKE_CASE_RE = re.compile(r"^[A-Za-z][A-Za-z0-9]*(_[A-Za-z0-9]+)+$")
 
 
 _JVM_ONLY_APIS = (
@@ -316,9 +320,9 @@ def _check_docs_hygiene(root: Path, findings: list[str]) -> None:
         if "archive" in md.parts:
             continue
         if _SNAKE_CASE_RE.match(md.stem):
-            kebab = md.stem.replace("_", "-")
+            kebab = md.stem.replace("_", "-").lower()
             findings.append(
-                f"docs hygiene: {md.relative_to(root)} uses snake_case "
+                f"docs hygiene: {md.relative_to(root)} is not kebab-case "
                 f"— rename to {kebab}.md"
             )
 

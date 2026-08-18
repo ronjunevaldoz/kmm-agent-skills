@@ -449,5 +449,46 @@ class AuditSkillsRepoTests(unittest.TestCase):
             self.assertFalse(any("CHANGELOG.md" in f for f in findings))
 
 
+class DocsHygieneNamingTests(unittest.TestCase):
+    def test_flags_screaming_case_filename_in_docs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            docs_dir = root / "docs"
+            docs_dir.mkdir()
+            (docs_dir / "MVP_PLAN.md").write_text("# plan\n", encoding="utf-8")
+
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertTrue(any(
+                "MVP_PLAN.md" in f and "kebab-case" in f and "mvp-plan.md" in f
+                for f in findings
+            ))
+
+    def test_flags_snake_case_filename_in_docs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            docs_dir = root / "docs"
+            docs_dir.mkdir()
+            (docs_dir / "auth_flow_internals.md").write_text("# auth\n", encoding="utf-8")
+
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertTrue(any(
+                "auth_flow_internals.md" in f and "auth-flow-internals.md" in f
+                for f in findings
+            ))
+
+    def test_does_not_flag_kebab_case_filename(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            docs_dir = root / "docs"
+            docs_dir.mkdir()
+            (docs_dir / "auth-flow-internals.md").write_text("# auth\n", encoding="utf-8")
+
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertFalse(any("kebab-case" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()

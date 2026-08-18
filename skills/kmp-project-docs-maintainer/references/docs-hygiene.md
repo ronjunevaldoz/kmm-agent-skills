@@ -168,3 +168,9 @@ python3 skills/kmp-audit/scripts/audit_skills_repo.py . --docs-hygiene-only
 # Full audit including docs hygiene
 python3 skills/kmp-audit/scripts/audit_skills_repo.py .
 ```
+
+Despite the name, `--docs-hygiene-only` works standalone against **any** project's `docs/`
+root, not just this skills repo — it ships inside `kmp-audit`'s own `scripts/` directory, so
+every consumer project that installs `kmp-audit` already has it locally. `audit_project.py`
+(the other script in the same directory) is a separate tool for Kotlin/Compose code smells
+and does not implement these hygiene checks — don't reach for it here.
