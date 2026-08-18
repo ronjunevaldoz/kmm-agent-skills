@@ -1,5 +1,5 @@
 {
-  "version": "2.26.0",
+  "version": "2.27.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -121,6 +121,9 @@
       "license": "Apache-2.0",
       "last_updated": "2026-08-18",
       "keywords": [
+        "enum masquerading as sealed",
+        "enum should be sealed class",
+        "force unwrap in when branch",
         "docs hygiene kebab case",
         "SCREAMING_CASE filename",
         "docs-hygiene-only",

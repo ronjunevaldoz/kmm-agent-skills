@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.27.0] — 2026-08-19
+
+### Added
+
+- feat(kmp-audit): add enum-masquerading-as-sealed detector
+
+---
+
 ## [v2.26.0] — 2026-08-19
 
 ### Added
