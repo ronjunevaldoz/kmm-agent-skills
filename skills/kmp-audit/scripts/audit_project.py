@@ -2698,6 +2698,133 @@ def _detect_builder_without_build_method(root: Path) -> list[str]:
     return findings
 
 
+# ── Duplicate code block (file-scoped, literal-line clone detection) ────────
+# Real gap: nothing in this file catches repeated code. kotlin-library-pattern-choices.md
+# documents "the same construction when/if-else chain duplicated across call sites" as
+# the missing-factory tell, but that was prose guidance with no script behind it. This
+# is deliberately the narrow, safe version — file-scoped (misses cross-file duplication,
+# the more common/costly case) and literal-line matching (misses copy-paste with renamed
+# variables, which real clone detection needs token normalization to catch). A wider
+# version is a real next step, not attempted here.
+
+_FUN_START_RE = re.compile(r"\bfun\s+(\w+)\s*\(")
+_DUPLICATE_BLOCK_MIN_LINES = 5
+_DUPLICATE_LINE_MIN_LEN = 8
+
+
+def _find_function_bodies(text: str) -> list[tuple[str, int, str]]:
+    """Return (name, 1-indexed start line, body text) for each `fun` with a block
+    body ({...}) in this file. Skips single-expression (`= ...`) and abstract/
+    interface functions with no body. Brace-depth scan, not a real parser — good
+    enough for well-formed Kotlin source, same tolerance as this file's other
+    heuristic detectors.
+    """
+    results: list[tuple[str, int, str]] = []
+    for m in _FUN_START_RE.finditer(text):
+        name = m.group(1)
+        depth = 0
+        i = m.end() - 1  # position of '('
+        while i < len(text):
+            if text[i] == "(":
+                depth += 1
+            elif text[i] == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+            i += 1
+        else:
+            continue
+        j = i + 1
+        brace_idx = None
+        while j < len(text):
+            ch = text[j]
+            if ch == "{":
+                brace_idx = j
+                break
+            if ch in "=;":
+                break
+            if ch == "\n" and j + 1 < len(text) and text[j + 1] == "\n":
+                break
+            j += 1
+        if brace_idx is None:
+            continue
+        depth = 0
+        k = brace_idx
+        while k < len(text):
+            if text[k] == "{":
+                depth += 1
+            elif text[k] == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+            k += 1
+        else:
+            continue
+        start_line = text.count("\n", 0, m.start()) + 1
+        results.append((name, start_line, text[brace_idx + 1 : k]))
+    return results
+
+
+def _normalize_duplicate_lines(body: str) -> list[str]:
+    lines = []
+    for raw in body.splitlines():
+        line = raw.strip()
+        if not line or line in ("{", "}") or line.startswith("//"):
+            continue
+        if len(line) < _DUPLICATE_LINE_MIN_LEN:
+            continue
+        lines.append(line)
+    return lines
+
+
+def _shingles(lines: list[str], size: int) -> set[tuple[str, ...]]:
+    return {tuple(lines[i : i + size]) for i in range(len(lines) - size + 1)}
+
+
+def _detect_duplicate_code_block(root: Path) -> list[str]:
+    """Flag 2+ functions in the same file sharing a run of
+    _DUPLICATE_BLOCK_MIN_LINES+ identical consecutive statement lines.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        functions = _find_function_bodies(text)
+        if len(functions) < 2:
+            continue
+        normalized = [
+            (name, start_line, _normalize_duplicate_lines(body))
+            for name, start_line, body in functions
+        ]
+        for idx_a in range(len(normalized)):
+            name_a, line_a, lines_a = normalized[idx_a]
+            if len(lines_a) < _DUPLICATE_BLOCK_MIN_LINES:
+                continue
+            shingles_a = _shingles(lines_a, _DUPLICATE_BLOCK_MIN_LINES)
+            if not shingles_a:
+                continue
+            for idx_b in range(idx_a + 1, len(normalized)):
+                name_b, line_b, lines_b = normalized[idx_b]
+                if len(lines_b) < _DUPLICATE_BLOCK_MIN_LINES:
+                    continue
+                common = shingles_a & _shingles(lines_b, _DUPLICATE_BLOCK_MIN_LINES)
+                if not common:
+                    continue
+                sample = next(iter(common))
+                findings.append(
+                    f"duplicate code block [MEDIUM]: {path.relative_to(root)}:{line_a} "
+                    f"— '{name_a}' (line {line_a}) and '{name_b}' (line {line_b}) share "
+                    f"{_DUPLICATE_BLOCK_MIN_LINES}+ identical consecutive lines; extract "
+                    f"the shared logic into one function both call\n"
+                    f"    | {sample[0]}"
+                )
+    return findings
+
+
 # ── Patch-up fix instead of root-cause fix (hints) ──────────────────────────
 # Non-blocking by design, same reasoning as the two hints above: "is this a real fix
 # or a band-aid" is fundamentally a judgment call a regex can't fully make. What's
@@ -4923,6 +5050,7 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_context_parameter_opportunity(root))
     findings.extend(_detect_enum_masquerading_as_sealed(root))
     findings.extend(_detect_builder_without_build_method(root))
+    findings.extend(_detect_duplicate_code_block(root))
 
     # ── God class (repo-wide, not scoped to ViewModel/Composable) ───────────────
     findings.extend(_detect_god_class(root))

@@ -4895,5 +4895,83 @@ class BuilderWithoutBuildMethodTests(unittest.TestCase):
             self.assertFalse(any("builder without build()" in f for f in findings))
 
 
+class DuplicateCodeBlockTests(unittest.TestCase):
+    """Real gap surfaced by a user question: nothing caught repeated code. File-scoped,
+    literal-line matching only — deliberately the narrow, safe version.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_two_functions_sharing_five_identical_lines(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/OrderService.kt",
+                "class OrderService {\n"
+                "    fun placeOrder(userId: String, cartId: String): Result {\n"
+                "        val user = fetchUser(userId)\n"
+                "        val cart = fetchCart(cartId)\n"
+                "        val inventory = checkInventory(cart.items)\n"
+                "        val totalPrice = calculateTotal(cart.items)\n"
+                "        val discount = applyDiscount(user, totalPrice)\n"
+                "        return Result.Success(discount)\n"
+                "    }\n\n"
+                "    fun previewOrder(userId: String, cartId: String): Result {\n"
+                "        val user = fetchUser(userId)\n"
+                "        val cart = fetchCart(cartId)\n"
+                "        val inventory = checkInventory(cart.items)\n"
+                "        val totalPrice = calculateTotal(cart.items)\n"
+                "        val discount = applyDiscount(user, totalPrice)\n"
+                "        return Result.Preview(discount)\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any(
+                "duplicate code block" in f and "placeOrder" in f and "previewOrder" in f
+                for f in findings
+            ))
+
+    def test_ignores_functions_sharing_fewer_than_five_lines(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/SmallService.kt",
+                "class SmallService {\n"
+                "    fun a(): Int {\n"
+                "        val computed = compute()\n"
+                "        val adjusted = adjust(computed)\n"
+                "        return adjusted\n"
+                "    }\n\n"
+                "    fun b(): Int {\n"
+                "        val computed = compute()\n"
+                "        val adjusted = adjust(computed)\n"
+                "        return adjusted + 1\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("duplicate code block" in f for f in findings))
+
+    def test_ignores_single_function_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/orders/src/commonMain/kotlin/OnlyOne.kt",
+                "class OnlyOne {\n"
+                "    fun run(): Int {\n"
+                "        val computed = compute()\n"
+                "        val adjusted = adjust(computed)\n"
+                "        return adjusted\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("duplicate code block" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()

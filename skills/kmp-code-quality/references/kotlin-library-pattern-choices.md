@@ -223,6 +223,10 @@ fun Transport.Companion.from(config: TransportConfig): Transport = when (config.
 discriminator, appearing at more than one call site — that's a missing factory, not a
 false positive to tolerate. Less mechanically clean than the enum/sealed tell above,
 since "the same chain" requires comparing logic across files, not one file in isolation.
+`kmp-audit`'s `_detect_duplicate_code_block` backs the narrower, same-file version of this
+tell mechanically — two functions in one file sharing 5+ identical consecutive lines.
+Cross-file duplication (the more common case for this specific factory smell) still needs
+a manual read.
 
 ### Splitting a god class — which named role the extracted piece actually is
 
