@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.29.0] — 2026-08-19
+
+### Added
+
+- feat(kmp-audit): add duplicate-code-block detector
+
+---
+
 ## [v2.28.0] — 2026-08-19
 
 ### Added

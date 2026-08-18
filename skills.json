@@ -1,5 +1,5 @@
 {
-  "version": "2.28.0",
+  "version": "2.29.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -121,6 +121,10 @@
       "license": "Apache-2.0",
       "last_updated": "2026-08-19",
       "keywords": [
+        "duplicate code block",
+        "repeated code detection",
+        "clone detection",
+        "DRY violation",
         "builder without build method",
         "enum masquerading as sealed",
         "enum should be sealed class",
