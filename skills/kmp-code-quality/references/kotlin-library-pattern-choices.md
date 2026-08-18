@@ -224,6 +224,58 @@ discriminator, appearing at more than one call site — that's a missing factory
 false positive to tolerate. Less mechanically clean than the enum/sealed tell above,
 since "the same chain" requires comparing logic across files, not one file in isolation.
 
+### Splitting a god class — which named role the extracted piece actually is
+
+`_detect_god_class` says "split into smaller, single-responsibility classes" but doesn't
+say *what to name the pieces* — and a wrong name here just relocates the vague-suffix
+smell (`_detect_vague_class_name_suffix`'s `Manager`/`Processor`/`Helper`/`Info`/`Data`
+list) instead of fixing it. Four real roles, each answering a different question about
+what the extracted piece actually does:
+
+| Role | The extracted piece's job | Test |
+|---|---|---|
+| **Factory** | Decides *which concrete type* to construct | Multiple return paths, all producing the same supertype |
+| **Builder** | Accumulates config across calls, then produces *one* final object | Chained calls that return `this`/the builder, ending in one `build()` |
+| **Adapter** | Makes one interface *look like* another — no new logic | Every public function delegates to a wrapped instance; no independent state |
+| **Manager/Coordinator** | Owns a genuinely stateful *lifecycle* | Has start/stop, register/unregister, connect/disconnect-shaped methods |
+
+**Manager is the one that goes vague first.** It's the only role of the four with no
+required shape — nothing about "manages something" forces a `build()`-shaped method or a
+delegation pattern the way Builder/Adapter do. That's exactly why it's on the vague-suffix
+list: a class named `*Manager` with no actual lifecycle (no start/stop, no
+register/unregister) isn't managing anything — it's a `Manager` name papering over "logic
+that didn't fit anywhere else." `kmp-offline-first`'s `SyncManager` (`requestSync(tag)` to
+trigger, `observeSyncState(tag)` to subscribe) is the legitimate shape: it owns an ongoing
+process's state across calls, which is what this table's test is really checking for —
+not the literal spelling `start`/`stop`, but a genuine trigger/observe lifecycle instead of
+a bag of pure transforms.
+
+```kotlin
+// ❌ "Manager" with no lifecycle — the name says nothing about what it actually does
+class UserManager(private val api: UserApi) {
+    fun formatDisplayName(user: User): String = ...
+    fun validateEmail(email: String): Boolean = ...
+    fun computeAge(birthDate: LocalDate): Int = ...
+}
+// every function here is a pure transform — this is a UserFormatter, or three
+// separate top-level functions, not anything that "manages" a lifecycle
+
+// ✓ Manager only once there's a real lifecycle to own
+class SyncManager(private val api: SyncApi) {
+    private var job: Job? = null
+    fun start(scope: CoroutineScope) { job = scope.launch { api.streamUpdates().collect { ... } } }
+    fun stop() { job?.cancel() }
+}
+```
+
+**The mechanical tell for `Builder`**: a class named `*Builder` with no `build()` method
+anywhere in the file is a name/shape mismatch — the convention a reader expects
+(`.field(x).field(y).build()`) isn't there, and the class is a `Builder` in name only.
+Genuinely checkable, same confidence level as the enum/sealed tell above. `Factory` and
+`Adapter` don't have an equally sharp single-file tell — "which concrete type" and "makes
+one interface look like another" both need reading what the class actually delegates to,
+not just a name-shape match.
+
 ### DSL (type-safe builder) — when it's warranted, when it's overengineering
 
 Verified against kotlinlang.org's own type-safe-builders page, not assumed. Real,

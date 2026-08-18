@@ -2626,7 +2626,7 @@ def _detect_name_behavior_drift(root: Path) -> list[str]:
 
 _VAGUE_CLASS_DECL_RE = re.compile(
     r"(?m)^(?!.*\b(?:data|enum|sealed|annotation)\s+class\b)"
-    r"(?:[\w@()]+\s+)*(?:class|interface|object)\s+(\w*(?:Manager|Processor|Helper|Info|Data))\b"
+    r"(?:[\w@()]+[^\S\n]+)*(?:class|interface|object)\s+(\w*(?:Manager|Processor|Helper|Info|Data))\b"
 )
 
 
@@ -2650,6 +2650,49 @@ def _detect_vague_class_name_suffix(root: Path) -> list[str]:
                 f"responsibility (e.g. a Coordinator, Service, Repository, or Store) — "
                 f"non-blocking, a well-scoped small class with this suffix can still be "
                 f"the right call\n"
+                f"    {line_no} | {snippet}"
+            )
+    return findings
+
+
+# ── Builder-named class with no build() method (name/shape mismatch) ────────
+# kmp-code-quality's "Splitting a god class" rule: unlike Manager (no required shape,
+# hence the vague-suffix hint above), Builder carries a specific reader expectation —
+# chained calls ending in build(). A *Builder class with no build() anywhere in the
+# file is a real name/shape mismatch, not a judgment call, so this stays a plain
+# finding rather than folding into the vague-suffix hint's non-blocking treatment.
+
+_BUILDER_CLASS_DECL_RE = re.compile(
+    r"(?m)^(?!.*\b(?:data|enum|sealed|annotation)\s+class\b)"
+    r"(?:[\w@()]+[^\S\n]+)*(?:class|interface|object)\s+(\w*Builder)\b"
+)
+_BUILD_METHOD_RE = re.compile(r"\bfun\s+build\s*\(")
+
+
+def _detect_builder_without_build_method(root: Path) -> list[str]:
+    """Flag a *Builder-named class/interface/object with no build() method in the
+    same file — the reader-expected shape (chained setters ending in build()) isn't
+    there, so the name doesn't match what the class actually does.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        if _BUILD_METHOD_RE.search(text):
+            continue
+        for match in _BUILDER_CLASS_DECL_RE.finditer(text):
+            name = match.group(1)
+            line_no, snippet = _at(text, match.start())
+            findings.append(
+                f"builder without build() [LOW]: {path.relative_to(root)}:{line_no} "
+                f"— '{name}' is named Builder but no build() method exists in this "
+                f"file; per kmp-code-quality's Splitting a god class rule, either add "
+                f"the expected build() terminal method or rename to what it actually "
+                f"does\n"
                 f"    {line_no} | {snippet}"
             )
     return findings
@@ -4879,6 +4922,7 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_value_class_opportunity(root))
     findings.extend(_detect_context_parameter_opportunity(root))
     findings.extend(_detect_enum_masquerading_as_sealed(root))
+    findings.extend(_detect_builder_without_build_method(root))
 
     # ── God class (repo-wide, not scoped to ViewModel/Composable) ───────────────
     findings.extend(_detect_god_class(root))

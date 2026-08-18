@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-08-18'
+  last-updated: '2026-08-19'
   keywords:
     - Ktlint
     - Detekt
@@ -50,6 +50,11 @@ metadata:
     - when to use sealed class
     - when to use factory
     - enum standing in for sealed
+    - when to use builder
+    - when to use manager
+    - when to use adapter
+    - splitting a god class
+    - builder without build method
 ---
 
 ## When to Use This Skill
@@ -71,7 +76,9 @@ suggested by comment, confirm before comment, historical narration comment,
 migration comment, previously comment, comment history not purpose, god receiver,
 extension sprawl, membership over extensions, god object extension, verb chaos,
 twin nouns, naming dialect, inconsistent verb naming, duplicate type name, enum vs
-sealed class, when to use sealed class, when to use factory, enum standing in for sealed.
+sealed class, when to use sealed class, when to use factory, enum standing in for sealed,
+when to use builder, when to use manager, when to use adapter, splitting a god class,
+builder without build method.
 
 **Freshness rule:** Ktlint and Detekt versions change frequently — recheck the latest releases
 before pinning. Detekt architecture rule DSL changes between minor versions.

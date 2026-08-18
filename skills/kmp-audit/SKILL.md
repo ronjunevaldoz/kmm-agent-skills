@@ -11,8 +11,9 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-08-18'
+  last-updated: '2026-08-19'
   keywords:
+    - builder without build method
     - enum masquerading as sealed
     - enum should be sealed class
     - force unwrap in when branch
@@ -419,6 +420,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-08-19 | Added `_detect_builder_without_build_method` — mechanical check for `kmp-code-quality`'s new "Splitting a god class" rule: a `*Builder`-named class/interface/object with no `build()` method anywhere in the file is a real name/shape mismatch (the reader-expected chained-calls-ending-in-build() shape isn't there), not a fuzzy judgment call, so it's a plain finding rather than folded into the non-blocking vague-suffix hint. Fixing this detector's own regex surfaced a real pre-existing line-number bug shared with `_detect_vague_class_name_suffix` — `\s+` in the modifier-prefix group slurps across blank lines, so a class preceded by `package x\n\n` reports the `package` line instead of the actual `class` line. Fixed for the new regex (`[^\S\n]+` instead of `\s+`); flagged the sibling regex's identical bug as a separate follow-up rather than expanding this change's scope. 2 new tests. |
 | 2026-08-18 | Added `_detect_enum_masquerading_as_sealed` — mechanical nudge for `kmp-code-quality`'s new "Enum vs sealed class vs factory" rule. Heuristic (same window-scan technique as `_detect_destructive_read_accessor`, not a real type-checker): a `when` referencing an enum's variants 2+ times, with a `!!` force-unwrap inside the same window, signals a branch needed data the enum has nowhere to carry. Verified it fires on the doc's own before-example and stays silent on the sealed-class fix. 3 new tests. |
 | 2026-08-18 | Fixed `_check_docs_hygiene`'s kebab-case check in `audit_skills_repo.py` — `_SNAKE_CASE_RE` only matched lowercase `snake_case`, so a `SCREAMING_CASE.md` file in a consumer's `docs/` (a real violation, `kmp-project-docs-maintainer`'s docs-hygiene rule requires kebab-case everywhere under `docs/`) went unflagged. Found live: ran `--docs-hygiene-only` against a real downstream project (verifying a filed issue's premise), the run correctly caught stale lessons and an unarchived done task but missed two genuinely SCREAMING_CASE filenames. Regex now case-insensitive; kebab suggestion lowercases. Also added a doc-clarity note to `docs-hygiene.md` — the issue's actual root cause was conflating `audit_project.py` (no hygiene checks, correctly) with the script `docs-hygiene.md` actually documents (`audit_skills_repo.py --docs-hygiene-only`, which already worked standalone against any project despite its skills-repo-sounding name). 3 new tests. |
 | 2026-08-17 | Added `_detect_hedging_language` — mechanical enforcement for `kmp-project-docs-maintainer`'s new Writing Style rule, which until now was pure judgment with no detector backing it. Scoped honestly: only the hedge-phrase rule is regex-detectable with low false-positive risk (a fixed, real phrase list — "in order to", "it should be noted that", etc.); the other 6 Writing Style rules (buried lead, table vs paragraph, real-example) need actual judgment and aren't claimed here. Scans root-level named docs + `docs/**/*.md`, skips fenced code blocks and `docs/*/archive/` (frozen history, not something this rule should churn). 5 tests. |

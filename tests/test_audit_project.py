@@ -4856,5 +4856,44 @@ class EnumMasqueradingAsSealedTests(unittest.TestCase):
             self.assertFalse(any("enum masquerading as sealed" in f for f in findings))
 
 
+class BuilderWithoutBuildMethodTests(unittest.TestCase):
+    """kmp-code-quality's Splitting a god class rule: a *Builder-named class with no
+    build() method is a real name/shape mismatch, not a judgment call.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_builder_with_no_build_method(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/net/src/commonMain/kotlin/RequestBuilder.kt",
+                "package test\n\n"
+                "class RequestBuilder {\n"
+                "    fun url(value: String): RequestBuilder { return this }\n"
+                "    fun send(): Request = Request()\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("builder without build()" in f and "RequestBuilder.kt:3" in f for f in findings))
+
+    def test_ignores_builder_with_build_method(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/net/src/commonMain/kotlin/RequestBuilder.kt",
+                "package test\n\n"
+                "class RequestBuilder {\n"
+                "    fun url(value: String): RequestBuilder { return this }\n"
+                "    fun build(): Request = Request()\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("builder without build()" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()
