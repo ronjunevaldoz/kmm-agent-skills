@@ -3155,6 +3155,69 @@ def _detect_value_class_opportunity(root: Path) -> list[str]:
     return findings
 
 
+# ── Enum masquerading as a sealed class (nullable escape hatches under a when) ──
+# kmp-code-quality's "Enum vs sealed class vs factory" rule: the mechanical tell is an
+# enum type whose `when` usages force a `!!` inside a branch — a sign the branch needed
+# data that only belongs to it, which the enum has nowhere to carry, so it leaked out
+# as a nullable field the caller has to force-unwrap instead. Window-based heuristic
+# (same technique as _detect_destructive_read_accessor's fixed-offset scan): doesn't
+# parse real branch return types, so it's a nudge, not a certain misuse claim.
+
+_ENUM_CLASS_RE = re.compile(r"\benum\s+class\s+(\w+)")
+_WHEN_KEYWORD_RE = re.compile(r"\bwhen\b")
+_ENUM_MASQUERADE_WINDOW = 20
+
+
+def _detect_enum_masquerading_as_sealed(root: Path) -> list[str]:
+    """Flag a `when` over an enum type where some branch force-unwraps (`!!`) a
+    value — the enum's variants likely need different data, not a shared nullable
+    field outside the enum. Nudge toward kmp-code-quality's sealed-class guidance.
+    """
+    enum_names: set[str] = set()
+    kt_files = [
+        p for p in root.rglob("*.kt")
+        if not _is_excluded(p, root) and not _is_test_source(p)
+    ]
+    for path in kt_files:
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        enum_names.update(_ENUM_CLASS_RE.findall(text))
+
+    if not enum_names:
+        return []
+
+    findings: list[str] = []
+    for path in kt_files:
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        for i, line in enumerate(lines):
+            if not _WHEN_KEYWORD_RE.search(line):
+                continue
+            window = lines[i : i + _ENUM_MASQUERADE_WINDOW]
+            window_text = "\n".join(window)
+            referenced = {name for name in enum_names if f"{name}." in window_text}
+            if not referenced:
+                continue
+            enum_hit = next(iter(referenced))
+            if window_text.count(f"{enum_hit}.") < 2:
+                continue
+            if "!!" not in window_text:
+                continue
+            findings.append(
+                f"enum masquerading as sealed [MEDIUM]: {path.relative_to(root)}:{i + 1} "
+                f"— `when` over {enum_hit} has a branch force-unwrapping ('!!') a value; "
+                f"the variant likely needs its own data, which {enum_hit} has nowhere to "
+                f"carry. Per kmp-code-quality's Enum vs sealed class vs factory rule, "
+                f"consider a sealed class/interface with the data on each variant\n"
+                f"    {i + 1} | {line.strip()}"
+            )
+    return findings
+
+
 # ── Context parameter opportunity (same param repeated across many signatures) ──
 # kmp-dependency-injection's Context Parameters section: a value
 # threaded through many function signatures in the same file (a logger, a session)
@@ -4815,6 +4878,7 @@ def audit_project(root: Path) -> list[str]:
     # ── Pattern-adoption opportunities (nudges, not misuse flags) ───────────────
     findings.extend(_detect_value_class_opportunity(root))
     findings.extend(_detect_context_parameter_opportunity(root))
+    findings.extend(_detect_enum_masquerading_as_sealed(root))
 
     # ── God class (repo-wide, not scoped to ViewModel/Composable) ───────────────
     findings.extend(_detect_god_class(root))

@@ -4797,5 +4797,64 @@ class HedgingLanguageTests(unittest.TestCase):
             self.assertFalse(findings)
 
 
+class EnumMasqueradingAsSealedTests(unittest.TestCase):
+    """kmp-code-quality's Enum vs sealed class vs factory rule: an enum whose `when`
+    forces a `!!` in a branch likely needed variant-specific data it has nowhere to
+    carry — a nudge toward sealed class/interface, not a certain misuse claim.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_enum_when_with_force_unwrap_branch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/state/src/commonMain/kotlin/State.kt",
+                "enum class RequestState { IDLE, LOADING, LOADED, FAILED }\n\n"
+                "fun render(state: RequestState, data: List<Item>?, error: String?) = when (state) {\n"
+                "    RequestState.LOADED -> renderList(data!!)\n"
+                "    RequestState.FAILED -> renderError(error!!)\n"
+                "    else -> renderSpinner()\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("enum masquerading as sealed" in f for f in findings))
+
+    def test_ignores_sealed_class_replacement(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/state/src/commonMain/kotlin/State.kt",
+                "sealed interface RequestState {\n"
+                "    data object Idle : RequestState\n"
+                "    data class Loaded(val data: List<Item>) : RequestState\n"
+                "}\n\n"
+                "fun render(state: RequestState) = when (state) {\n"
+                "    is RequestState.Loaded -> renderList(state.data)\n"
+                "    else -> renderSpinner()\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("enum masquerading as sealed" in f for f in findings))
+
+    def test_ignores_enum_when_without_force_unwrap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/state/src/commonMain/kotlin/State.kt",
+                "enum class Direction { NORTH, SOUTH, EAST, WEST }\n\n"
+                "fun label(direction: Direction) = when (direction) {\n"
+                "    Direction.NORTH -> \"N\"\n"
+                "    Direction.SOUTH -> \"S\"\n"
+                "    else -> \"?\"\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("enum masquerading as sealed" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()
