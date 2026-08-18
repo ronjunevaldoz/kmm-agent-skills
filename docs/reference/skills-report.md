@@ -13,10 +13,10 @@ Generated 2026-08-19 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 484 | 2026-07-31 | ✅ |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 483 | 2026-06-26 | ✅ |
 | [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 482 | 2026-08-11 | ✅ |
+| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 480 | 2026-08-19 | ✅ |
 | [`kmp-network-layer`](../../skills/kmp-network-layer/) | 474 | 2026-07-31 | ✅ |
-| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 473 | 2026-08-18 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 470 | 2026-08-19 | ✅ |
 | [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 469 | 2026-07-08 | ✅ |
-| [`kmp-audit`](../../skills/kmp-audit/) | 468 | 2026-08-18 | ✅ |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 468 | 2026-06-29 | ✅ |
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |

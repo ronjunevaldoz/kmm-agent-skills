@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.28.0] — 2026-08-19
+
+### Added
+
+- feat(kmp-code-quality): document god-class-split roles, add builder detector
+
+---
+
 ## [v2.27.0] — 2026-08-19
 
 ### Added
