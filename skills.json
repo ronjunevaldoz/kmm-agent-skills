@@ -1,5 +1,5 @@
 {
-  "version": "2.25.1",
+  "version": "2.26.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -434,7 +434,11 @@
         "twin nouns",
         "naming dialect",
         "inconsistent verb naming",
-        "duplicate type name"
+        "duplicate type name",
+        "enum vs sealed class",
+        "when to use sealed class",
+        "when to use factory",
+        "enum standing in for sealed"
       ],
       "triggers": [
         "Ktlint",
@@ -482,7 +486,11 @@
         "twin nouns",
         "naming dialect",
         "inconsistent verb naming",
-        "duplicate type name"
+        "duplicate type name",
+        "enum vs sealed class",
+        "when to use sealed class",
+        "when to use factory",
+        "enum standing in for sealed"
       ],
       "scripts": []
     },

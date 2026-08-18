@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.26.0] — 2026-08-19
+
+### Added
+
+- feat(kmp-code-quality): document enum vs sealed class vs factory decision
+
+---
+
 ## [v2.25.1] — 2026-08-18
 
 ### Fixed
