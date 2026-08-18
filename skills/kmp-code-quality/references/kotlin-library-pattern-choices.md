@@ -147,6 +147,83 @@ fun legacySend(req: Request): Response = RetryingClient(defaultEngine).send(req)
 No problems, and the published surface shrank from four functions to two. The backoff
 math now exists once, so a fix to it can't miss a caller.
 
+### Enum vs sealed class vs factory — which one a type actually needs
+
+Three different tools for three different shapes of "one of several kinds." Picking the
+wrong one either loses type safety (an enum standing in for what should carry different
+data per case) or adds ceremony nothing needs (a sealed hierarchy for what's really just
+a label).
+
+**Enum — fixed, closed set, identical shape.** Every variant carries the same kind of
+data (often none beyond a label), and the full set is known at compile time and isn't
+expected to grow per-instance shape. `enum class Direction { NORTH, SOUTH, EAST, WEST }`,
+`enum class LogLevel { DEBUG, INFO, WARN, ERROR }`. If every variant's body is just a
+`val` of the same type, enum is correct — don't reach for more.
+
+**Sealed class/interface — variants carry different data or behavior.** Reach for this
+the moment two variants need different fields, or a `when` over the type needs to return
+different *shapes* per branch rather than just different values of one shared type:
+
+```kotlin
+// ❌ enum standing in for what should be sealed — the `when` returns different
+// shapes per branch, and Loaded's payload has nowhere to live on the enum itself
+enum class RequestState { IDLE, LOADING, LOADED, FAILED }
+
+fun render(state: RequestState, data: List<Item>?, error: String?) = when (state) {
+    RequestState.LOADED -> renderList(data!!)   // data is nullable everywhere else too
+    RequestState.FAILED -> renderError(error!!)
+    else -> renderSpinner()
+}
+
+// ✓ sealed — each variant owns exactly the data it needs, no nullable escape hatches
+sealed interface RequestState {
+    data object Idle : RequestState
+    data object Loading : RequestState
+    data class Loaded(val data: List<Item>) : RequestState
+    data class Failed(val error: String) : RequestState
+}
+
+fun render(state: RequestState) = when (state) {
+    RequestState.Idle, RequestState.Loading -> renderSpinner()
+    is RequestState.Loaded -> renderList(state.data)
+    is RequestState.Failed -> renderError(state.error)
+}
+```
+
+**The mechanical tell**: an `enum class` with a companion or nearby `when(this) { ... }`
+that returns different types, or forces nullable fields to live outside the enum because
+only some variants need them — that's an enum doing a sealed class's job. Genuinely
+checkable: grep for an enum type name, then check whether any `when` over it returns a
+non-uniform type (not all branches producing the same primitive/simple value).
+
+**Factory — construction needs logic, not just enum-lookup.** Reach for a factory
+function when picking or building an instance requires validation, an external-input
+mapping (a raw string/config value → the right variant), or a runtime decision among
+multiple implementations — anything past what `enumValueOf<T>()` or a one-line `when`
+already gives you for free:
+
+```kotlin
+// ❌ the same "pick implementation from a config string" logic duplicated at each call site
+val client = when (config.transport) {
+    "http" -> HttpTransport(config.baseUrl)
+    "websocket" -> WebSocketTransport(config.baseUrl)
+    else -> error("unknown transport: ${config.transport}")
+}
+// ...same when-block, copy-pasted, three files over
+
+// ✓ one factory, one place the mapping can be fixed or extended
+fun Transport.Companion.from(config: TransportConfig): Transport = when (config.transport) {
+    "http" -> HttpTransport(config.baseUrl)
+    "websocket" -> WebSocketTransport(config.baseUrl)
+    else -> error("unknown transport: ${config.transport}")
+}
+```
+
+**The mechanical tell**: the same construction `when`/`if-else` chain, keyed on the same
+discriminator, appearing at more than one call site — that's a missing factory, not a
+false positive to tolerate. Less mechanically clean than the enum/sealed tell above,
+since "the same chain" requires comparing logic across files, not one file in isolation.
+
 ### DSL (type-safe builder) — when it's warranted, when it's overengineering
 
 Verified against kotlinlang.org's own type-safe-builders page, not assumed. Real,

@@ -46,6 +46,10 @@ metadata:
     - naming dialect
     - inconsistent verb naming
     - duplicate type name
+    - enum vs sealed class
+    - when to use sealed class
+    - when to use factory
+    - enum standing in for sealed
 ---
 
 ## When to Use This Skill
@@ -66,7 +70,8 @@ detekt silent no-op, attribution comment, signature comment, provenance comment,
 suggested by comment, confirm before comment, historical narration comment,
 migration comment, previously comment, comment history not purpose, god receiver,
 extension sprawl, membership over extensions, god object extension, verb chaos,
-twin nouns, naming dialect, inconsistent verb naming, duplicate type name.
+twin nouns, naming dialect, inconsistent verb naming, duplicate type name, enum vs
+sealed class, when to use sealed class, when to use factory, enum standing in for sealed.
 
 **Freshness rule:** Ktlint and Detekt versions change frequently — recheck the latest releases
 before pinning. Detekt architecture rule DSL changes between minor versions.
