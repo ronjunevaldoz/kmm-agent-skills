@@ -264,7 +264,7 @@ class CommonFirstSharedCodeTests(unittest.TestCase):
     def test_common_first_formatting_rule_is_explicit(self) -> None:
         normalize = lambda text: " ".join(text.lower().replace("`", "").split())
 
-        expert = normalize((REPO_ROOT / "skills" / "kmp-expert" / "SKILL.md").read_text(encoding="utf-8"))
+        expert = normalize(read_skill_with_references(REPO_ROOT / "skills" / "kmp-expert"))
         expect_actual = normalize((REPO_ROOT / "skills" / "kmp-expect-actual" / "SKILL.md").read_text(encoding="utf-8"))
         audit = normalize((REPO_ROOT / "skills" / "kmp-audit" / "SKILL.md").read_text(encoding="utf-8"))
 

@@ -33,6 +33,17 @@ def validate_skill_map(repo_root: Path) -> list[str]:
     readme_text = read_text(readme_path)
     expert_text = read_text(expert_path)
 
+    # A skill only needing an invocation-map mention (not a full layer-table row) can
+    # live entirely inside a references/*.md pointer section (e.g. Skill Invocation Map
+    # once it outgrew the line cap) — concatenate those in too, or a skill mentioned
+    # only there reads as "missing from expert" when it isn't. Found real:
+    # kmp-token-saver had no layer-table row, only an invocation-map mention, and that
+    # mention moved to references/skill-invocation-map.md the moment the map was split.
+    expert_references_dir = expert_path.parent / "references"
+    expert_search_text = expert_text + "\n" + "\n".join(
+        read_text(p) for p in sorted(expert_references_dir.glob("*.md"))
+    ) if expert_references_dir.exists() else expert_text
+
     errors: list[str] = []
 
     count_match = re.search(r"## The (\d+) Skills and What They Own", expert_text)
@@ -47,7 +58,7 @@ def validate_skill_map(repo_root: Path) -> list[str]:
 
     # Use literal name lookup so non-standard prefixes (e.g. jni-kotlin-pro) are found.
     missing_in_readme = sorted(name for name in skill_names if name not in readme_text)
-    missing_in_expert = sorted(name for name in skill_names if name not in expert_text)
+    missing_in_expert = sorted(name for name in skill_names if name not in expert_search_text)
 
     if missing_in_readme:
         errors.append("missing from README: " + ", ".join(missing_in_readme))
@@ -68,6 +79,17 @@ def validate_skill_map(repo_root: Path) -> list[str]:
         standards_text = read_text(standards_path)
         if count_phrase not in standards_text:
             errors.append(f"agentskills-io-standards.md is missing the current count phrase {count_phrase!r} — a skill-count summary line has likely gone stale")
+
+    # Found real: agents/planner.md said "Our 66 skills cover distinct concerns" while
+    # the repo had 69 — three releases stale, because this check only ever covered
+    # README.md and agentskills-io-standards.md. planner.md wasn't in scope even though
+    # it has its own hand-typed count-mention, the exact class of bug this whole
+    # mechanism exists to catch.
+    planner_path = repo_root / "agents" / "planner.md"
+    if planner_path.exists():
+        planner_text = read_text(planner_path)
+        if count_phrase not in planner_text:
+            errors.append(f"agents/planner.md is missing the current count phrase {count_phrase!r} — a skill-count summary line has likely gone stale")
 
     # Check that every skill has at least one routing row in agents/planner.md.
     # The planner uses short names (e.g. "logging") stripped of the

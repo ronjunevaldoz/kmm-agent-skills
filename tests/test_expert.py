@@ -34,7 +34,7 @@ class ValidateSkillMapTests(unittest.TestCase):
             # planner.md must reference all non-meta skills (short names)
             (root / "agents").mkdir()
             (root / "agents" / "planner.md").write_text(
-                "| feature a | `a`, `b` |\n",
+                "Our 3 skills cover distinct concerns.\n| feature a | `a`, `b` |\n",
                 encoding="utf-8",
             )
             skills_dir = root / "skills"
@@ -72,6 +72,32 @@ class ValidateSkillMapTests(unittest.TestCase):
             errors = expert_scripts.validate_skill_map(root)
             self.assertTrue(any("README.md is missing the current count phrase" in e for e in errors))
 
+    def test_validate_skill_map_flags_stale_count_phrase_in_planner(self) -> None:
+        # Reproduces the real bug: agents/planner.md said "Our 66 skills cover distinct
+        # concerns" while the repo had 69 — three releases stale, because the
+        # count-phrase check only ever covered README.md and
+        # agentskills-io-standards.md, never planner.md.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text(
+                "kmp-a\nkmp-b\nkmp-expert\n3 skills covering the stack.\n",
+                encoding="utf-8",
+            )
+            (root / "agents").mkdir()
+            (root / "agents" / "planner.md").write_text(
+                "Our 2 skills cover distinct concerns.\n| feature a | `a`, `b` |\n",
+                encoding="utf-8",
+            )
+            skills_dir = root / "skills"
+            for name in ("kmp-a", "kmp-b", "kmp-expert"):
+                (skills_dir / name).mkdir(parents=True)
+                (skills_dir / name / "SKILL.md").write_text(
+                    "## The 3 Skills and What They Own\nkmp-a\nkmp-b\nkmp-expert\n",
+                    encoding="utf-8",
+                )
+            errors = expert_scripts.validate_skill_map(root)
+            self.assertTrue(any("agents/planner.md is missing the current count phrase" in e for e in errors))
+
     def test_validate_skill_map_does_not_false_positive_on_unrelated_historical_count(self) -> None:
         # agentskills-io-standards.md legitimately mentions a different, historical
         # number (e.g. "the 22-skill backlog was resolved...") alongside the current
@@ -88,7 +114,10 @@ class ValidateSkillMapTests(unittest.TestCase):
                 encoding="utf-8",
             )
             (root / "agents").mkdir()
-            (root / "agents" / "planner.md").write_text("| feature a | `a`, `b` |\n", encoding="utf-8")
+            (root / "agents" / "planner.md").write_text(
+                "Our 3 skills cover distinct concerns.\n| feature a | `a`, `b` |\n",
+                encoding="utf-8",
+            )
             skills_dir = root / "skills"
             for name in ("kmp-a", "kmp-b", "kmp-expert"):
                 (skills_dir / name).mkdir(parents=True)

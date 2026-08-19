@@ -11,7 +11,7 @@ Created and maintained by [Ron Valdoz](https://github.com/ronjunevaldoz).
 AI agent skills for **Kotlin Multiplatform (KMP)** development — clean module boundaries,
 version catalogs, build-logic convention plugins, and explicit review loops before code is generated.
 
-Built on the open [Agent Skills](https://agentskills.io) format. All 69 skills verified
+Built on the open [Agent Skills](https://agentskills.io) format. All 70 skills verified
 against the real [`skills-ref`](https://github.com/agentskills/agentskills) reference
 validator — see [`docs/reference/agentskills-io-standards.md`](docs/reference/agentskills-io-standards.md)
 for what was checked and how.
@@ -124,7 +124,7 @@ python3 scripts/release.py auto --dry-run # preview first
 
 ## Skills
 
-69 skills covering the full KMP stack. Load the smallest set that answers the request.
+70 skills covering the full KMP stack. Load the smallest set that answers the request.
 Health at a glance (size, freshness, known issues) without reading every `SKILL.md`:
 [`docs/reference/skills-report.md`](docs/reference/skills-report.md).
 
@@ -145,6 +145,7 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 - [`clean-architecture`](skills/kmp-clean-architecture/) — layer contract, `:model` vs `:api`, `internal` rules
 - [`presenter-module`](skills/kmp-presenter-module/) — pure-Kotlin ViewModel, MVI contracts, no Compose dep
 - [`dependency-injection`](skills/kmp-dependency-injection/) — Koin wiring and scopes
+- [`coroutines-flow-patterns`](skills/kmp-coroutines-flow-patterns/) — structured concurrency, Flow/StateFlow/SharedFlow selection, exception transparency, testing
 - [`flavor-environment`](skills/kmp-flavor-environment/) — BuildKonfig, secrets, env setup
 - [`ci-github-actions`](skills/kmp-ci-github-actions/) — CI matrix and release workflow
 - [`android-cli`](skills/kmp-android-cli/) — Google's `android` CLI: emulator, build/deploy, SDK installs, agent bootstrap

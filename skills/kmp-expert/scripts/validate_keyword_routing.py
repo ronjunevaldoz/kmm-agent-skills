@@ -34,13 +34,25 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def extract_invocation_map_text(expert_text: str) -> str:
-    """Return only the text inside the Skill Invocation Map section."""
+REFERENCES_POINTER_RE = re.compile(r"references/([\w.-]+\.md)")
+
+
+def extract_invocation_map_text(expert_text: str, expert_dir: Path) -> str:
+    """Return the text of the Skill Invocation Map section — following the
+    `references/*.md` pointer if the section was split out to stay under the
+    line cap, same as any other pointer-stubbed section in this repo.
+    """
     start = expert_text.find(SKILL_MAP_SECTION)
     if start == -1:
         return ""
     end = expert_text.find("\n---", start)
-    return expert_text[start:end] if end != -1 else expert_text[start:]
+    section = expert_text[start:end] if end != -1 else expert_text[start:]
+    pointer = REFERENCES_POINTER_RE.search(section)
+    if pointer:
+        ref_path = expert_dir / "references" / pointer.group(1)
+        if ref_path.exists():
+            return read_text(ref_path)
+    return section
 
 
 def _trigger_keywords(skill_text: str) -> set[str]:
@@ -71,7 +83,7 @@ def validate_keyword_routing(repo_root: Path) -> list[str]:
     skill_names = {p.name for p in skill_dirs}
 
     expert_text = read_text(expert_path)
-    map_text = extract_invocation_map_text(expert_text)
+    map_text = extract_invocation_map_text(expert_text, expert_path.parent)
 
     errors: list[str] = []
 
