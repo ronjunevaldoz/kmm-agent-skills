@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.32.0] — 2026-08-19
+
+### Added
+
+- feat(kmp-expert): add kmp-coroutines-flow-patterns skill
+
+---
+
 ## [v2.31.0] — 2026-08-19
 
 ### Added

@@ -2,11 +2,10 @@
 
 Generated 2026-08-19 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
-**69 skills** — 67 clean, 0 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
+**70 skills** — 68 clean, 0 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
-| [`kmp-expert`](../../skills/kmp-expert/) | 500 | 2026-07-31 | ✅ |
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 499 | 2026-07-26 | ✅ |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 495 | 2026-08-19 | ✅ |
 | [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
@@ -30,6 +29,7 @@ Generated 2026-08-19 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
 | [`kmp-paging`](../../skills/kmp-paging/) | 432 | 2026-06-21 | ✅ |
 | [`kmp-roborazzi`](../../skills/kmp-roborazzi/) | 431 | 2026-07-10 | ✅ |
+| [`kmp-expert`](../../skills/kmp-expert/) | 423 | 2026-08-19 | ✅ |
 | [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 421 | 2026-07-31 | ✅ |
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kmp-datastore`](../../skills/kmp-datastore/) | 413 | 2026-06-18 | ✅ |
@@ -48,6 +48,7 @@ Generated 2026-08-19 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-workmanager`](../../skills/kmp-workmanager/) | 382 | 2026-06-21 | ✅ |
 | [`kmp-biometric-auth`](../../skills/kmp-biometric-auth/) | 373 | 2026-06-21 | ✅ |
 | [`kmp-push-notifications`](../../skills/kmp-push-notifications/) | 372 | 2026-06-21 | ✅ |
+| [`kmp-coroutines-flow-patterns`](../../skills/kmp-coroutines-flow-patterns/) | 367 | 2026-08-19 | ✅ |
 | [`kmp-xcframework-spm`](../../skills/kmp-xcframework-spm/) | 364 | 2026-06-06 | ✅ |
 | [`kmp-form-validation`](../../skills/kmp-form-validation/) | 358 | 2026-06-21 | ✅ |
 | [`kmp-lessons`](../../skills/kmp-lessons/) | 356 | 2026-07-12 | ✅ |

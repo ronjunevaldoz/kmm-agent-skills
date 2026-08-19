@@ -1,5 +1,5 @@
 {
-  "version": "2.31.0",
+  "version": "2.32.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -1140,6 +1140,61 @@
       "scripts": []
     },
     {
+      "name": "kmp-coroutines-flow-patterns",
+      "path": "skills/kmp-coroutines-flow-patterns",
+      "description": "General-purpose Kotlin coroutines and Flow patterns for Kotlin Multiplatform \u2014 structured concurrency and scope hierarchy, parallel decomposition, cold Flow vs StateFlow vs SharedFlow selection, exception transparency (the catch operator vs try/catch around a collector), cancellation-safe cleanup, and coroutine/Flow testing with runTest and Turbine. Does NOT cover screen-level state/effect wiring (see kmp-mvi) or repository Flow exposure conventions (see kmp-repository-pattern) \u2014 this is the shared foundation both build on.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-08-19",
+      "keywords": [
+        "coroutines",
+        "kotlinx.coroutines",
+        "structured concurrency",
+        "coroutine scope",
+        "Flow",
+        "StateFlow",
+        "SharedFlow",
+        "cold flow",
+        "hot flow",
+        "flatMapLatest",
+        "flatMapMerge",
+        "retry backoff",
+        "catch operator",
+        "exception transparency",
+        "cancellation",
+        "runTest",
+        "Turbine",
+        "GlobalScope",
+        "async awaitAll",
+        "Mutex"
+      ],
+      "triggers": [
+        "coroutine",
+        "kotlinx.coroutines",
+        "coroutine scope",
+        "structured concurrency",
+        "GlobalScope",
+        "Flow",
+        "StateFlow",
+        "SharedFlow",
+        "cold flow",
+        "hot flow",
+        "flatMapLatest",
+        "flatMapMerge",
+        "flatMapConcat",
+        "retry backoff",
+        "catch operator",
+        "exception transparency",
+        "cancellation",
+        "runTest",
+        "Turbine",
+        "async awaitAll",
+        "parallel decomposition",
+        "Mutex",
+        "coroutine testing"
+      ],
+      "scripts": []
+    },
+    {
       "name": "kmp-crash-reporting",
       "path": "skills/kmp-crash-reporting",
       "description": "Crash reporting for Kotlin Multiplatform apps \u2014 Firebase Crashlytics on Android/iOS, Sentry as a cross-platform alternative, custom non-fatal event recording, and breadcrumb logging. Covers: logger breadcrumb bridges, symbolication setup for Kotlin/Native dSYMs, and a CrashReporter expect/actual interface that keeps commonMain free of platform SDKs. Does NOT cover general structured logging (see logging skill) or app analytics/events (see analytics skill).",
@@ -1455,7 +1510,7 @@
       "path": "skills/kmp-expert",
       "description": "KMP Expert Orchestrator \u2014 maps all skills in this collection, their dependency order, and how to sequence them for any Kotlin Multiplatform project. Use this skill first to decide which other skill to invoke, in what order, for a given task. Covers: skill dependency graph, layer-by-layer build order, feature-slice assembly sequence, decision trees for the most common \"what do I use here?\" questions, and when to hand off to the project audit skill. This is a meta-skill; it delegates to domain skills for implementation and review, and it can turn confirmed audit findings into issue drafts or question drafts when the repo needs tracking. The long-term goal is to keep this skills collection aligned with the cleanest KMP architecture patterns possible.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-31",
+      "last_updated": "2026-08-19",
       "keywords": [
         "KMP expert",
         "orchestrator",
