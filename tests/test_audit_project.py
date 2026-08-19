@@ -4973,5 +4973,119 @@ class DuplicateCodeBlockTests(unittest.TestCase):
             self.assertFalse(any("duplicate code block" in f for f in findings))
 
 
+class StepwiseWhatCommentsTests(unittest.TestCase):
+    """kmp-code-quality's 'a process never gets one // per step' rule."""
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_interleaved_numbered_step_comments(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/src/commonMain/kotlin/LoginFlow.kt",
+                "class LoginFlow {\n"
+                "    fun run() {\n"
+                "        // 1. validate the form\n"
+                "        validate()\n"
+                "        // 2. then log in\n"
+                "        login()\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("stepwise what-comments" in f for f in findings))
+
+    def test_ignores_single_numbered_comment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/src/commonMain/kotlin/Ok.kt",
+                "class Ok {\n"
+                "    fun run() {\n"
+                "        // 1. only one step here, no repetition\n"
+                "        validate()\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("stepwise what-comments" in f for f in findings))
+
+    def test_ignores_real_why_comment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/src/commonMain/kotlin/Ok2.kt",
+                "class Ok2 {\n"
+                "    fun run() {\n"
+                "        // Global lock, not per-account — fine at current throughput\n"
+                "        validate()\n"
+                "        login()\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("stepwise what-comments" in f for f in findings))
+
+
+class CommentOnlyStubBodyTests(unittest.TestCase):
+    """kmp-code-quality's stub-body rule: a checklist of // comments standing in for
+    an unimplemented function isn't documentation.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_comment_only_checklist_body(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/render/src/commonMain/kotlin/Renderer.kt",
+                "class Renderer {\n"
+                "    fun recordCommand() {\n"
+                "        // Begin Shadow Render Pass\n"
+                "        // Bind basic shadow-casting pipeline\n"
+                "        // Render mesh positions only\n"
+                "        // End Render Pass\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("comment-only stub body" in f for f in findings))
+
+    def test_ignores_single_todo_comment_body(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/render/src/commonMain/kotlin/Renderer.kt",
+                "class Renderer {\n"
+                "    fun recordCommand() {\n"
+                "        // TODO: github.com/org/repo/issues/123 - implement shadow pass\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("comment-only stub body" in f for f in findings))
+
+    def test_ignores_body_with_real_statements(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/render/src/commonMain/kotlin/Renderer.kt",
+                "class Renderer {\n"
+                "    fun recordCommand() {\n"
+                "        // Begin Shadow Render Pass\n"
+                "        beginPass()\n"
+                "    }\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("comment-only stub body" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()

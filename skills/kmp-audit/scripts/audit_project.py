@@ -3152,6 +3152,90 @@ def _detect_long_stacked_comment_block(root: Path) -> list[str]:
     return findings
 
 
+# ── Stepwise WHAT comments (a process narrated one // per step) ─────────────
+# kmp-code-quality's "a process never gets one // per step" rule. Two shapes: (1) a
+# numbered/step-prefixed // comment directly above its own statement, repeated 2+
+# times — narrates a sequence the code's own top-to-bottom order + naming already
+# give. (2) a function body containing only // comments and no real statement — not
+# documentation, an unimplemented stub. Scoped narrowly (numbered/step-prefixed
+# comments only, not the broader WHAT-verb list) to avoid catching a single legitimate
+# WHY comment that happens to start with a verb.
+
+_STEP_COMMENT_RE = re.compile(r"^(?:\d+[.):]|step\s*\d+[:.]?)\s+\S", re.IGNORECASE)
+_STEPWISE_WINDOW = 15
+
+
+def _detect_stepwise_what_comments(root: Path) -> list[str]:
+    """Flag 2+ numbered/step // comments, each directly above its own statement,
+    within a nearby window — a process narrated one line per step instead of letting
+    the code's own order and naming speak for it.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        step_lines: list[int] = []
+        for i in range(len(lines) - 1):
+            idx = _line_comment_index(lines[i])
+            if idx == -1 or lines[i][:idx].strip():
+                continue
+            comment_text = lines[i][idx + 2 :].strip()
+            if not _STEP_COMMENT_RE.match(comment_text):
+                continue
+            next_line = lines[i + 1].strip()
+            if not next_line or _COMMENT_LINE_RE.match(next_line):
+                continue
+            step_lines.append(i)
+        reported_until = -1
+        for line_no in step_lines:
+            if line_no <= reported_until:
+                continue
+            nearby = [ln for ln in step_lines if line_no <= ln <= line_no + _STEPWISE_WINDOW]
+            if len(nearby) < 2:
+                continue
+            findings.append(
+                f"stepwise what-comments [LOW]: {path.relative_to(root)}:{line_no + 1} "
+                f"— {len(nearby)} numbered/step // comments narrate a sequence the "
+                f"code's own order and naming already give; per kmp-code-quality's "
+                f"'a process never gets one // per step' rule, delete them\n"
+                f"    {line_no + 1} | {lines[line_no].strip()}"
+            )
+            reported_until = nearby[-1]
+    return findings
+
+
+def _detect_comment_only_stub_body(root: Path) -> list[str]:
+    """Flag a function body containing only 2+ // comments and no real statement — an
+    unimplemented stub wearing a step checklist as a disguise, not documentation. A
+    single comment line (a TODO reference, or a WHY explaining intentional emptiness)
+    is the legitimate shape this rule's own fix recommends, not what this flags.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        for name, start_line, body in _find_function_bodies(text):
+            body_lines = [line.strip() for line in body.splitlines() if line.strip()]
+            if len(body_lines) < 2 or not all(_COMMENT_LINE_RE.match(line) for line in body_lines):
+                continue
+            findings.append(
+                f"comment-only stub body [LOW]: {path.relative_to(root)}:{start_line} "
+                f"— '{name}' has no real statement, only // comments outlining an "
+                f"intended implementation; per kmp-code-quality's stub-body rule, "
+                f"replace with one TODO: linking a tracked issue, or implement it\n"
+                f"    {start_line} | {body_lines[0]}"
+            )
+    return findings
+
+
 # A justification comment above a single Gradle dependency/config line is a distinct
 # smell from the long-stacked-block check above: it's often short enough (3-4 lines) to
 # duck under _LONG_COMMENT_BLOCK_MIN_LINES, and it's usually WHY-shaped (real reasoning),
@@ -5040,6 +5124,8 @@ def audit_project(root: Path) -> list[str]:
     # ── WHAT-comment inside a loop or conditional ────────────────────────────────
     findings.extend(_detect_what_comment_in_control_flow(root))
     findings.extend(_detect_long_stacked_comment_block(root))
+    findings.extend(_detect_stepwise_what_comments(root))
+    findings.extend(_detect_comment_only_stub_body(root))
     findings.extend(_detect_justification_comment_above_single_statement(root))
 
     # ── Destructive-read accessor (single-writer snapshot anti-pattern) ─────────

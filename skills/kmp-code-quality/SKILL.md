@@ -55,6 +55,10 @@ metadata:
     - when to use adapter
     - splitting a god class
     - builder without build method
+    - stepwise comments
+    - numbered step comments
+    - comment-only stub body
+    - process narrated in comments
 ---
 
 ## When to Use This Skill
@@ -78,7 +82,8 @@ extension sprawl, membership over extensions, god object extension, verb chaos,
 twin nouns, naming dialect, inconsistent verb naming, duplicate type name, enum vs
 sealed class, when to use sealed class, when to use factory, enum standing in for sealed,
 when to use builder, when to use manager, when to use adapter, splitting a god class,
-builder without build method.
+builder without build method, stepwise comments, numbered step comments,
+comment-only stub body, process narrated in comments.
 
 **Freshness rule:** Ktlint and Detekt versions change frequently — recheck the latest releases
 before pinning. Detekt architecture rule DSL changes between minor versions.

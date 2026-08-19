@@ -13,6 +13,10 @@ metadata:
   author: kmp-agent-skills
   last-updated: '2026-08-19'
   keywords:
+    - stepwise what-comments
+    - comment-only stub body
+    - numbered step comments
+    - process narrated in comments
     - duplicate code block
     - repeated code detection
     - clone detection
@@ -424,6 +428,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-08-19 | Added `_detect_stepwise_what_comments` and `_detect_comment_only_stub_body` — mechanical backing for `kmp-code-quality`'s new "a process never gets one `//` per step" rule. First flags a numbered/step-prefixed `//` comment repeated 2+ times, each directly above its own statement (narrower than the broader WHAT-verb list, to avoid catching a single legitimate WHY comment that starts with a verb). Second flags a function body containing 2+ `//` lines and zero real statements — an unimplemented checklist standing in for code. Found and fixed a false positive during verification: the stub-body check initially fired on a *single* `TODO:` line too, which is the rule's own recommended fix — now requires 2+ comment lines. 6 new tests. |
 | 2026-08-19 | Added `_detect_duplicate_code_block` — a user asked why a class using repetitive code wasn't caught; verified it genuinely wasn't (no detector in this file targets code duplication, and Detekt itself has no clone-detection ruleset by default). Deliberately narrow and safe: file-scoped (misses cross-file duplication, the costlier case) and literal-line matching (misses copy-paste with renamed variables — real clone detection needs token normalization, not attempted here). Flags 2+ functions in one file sharing 5+ identical consecutive statement lines via a brace-depth function-body scan + line-shingle intersection. 3 new tests. |
 | 2026-08-19 | Added `_detect_builder_without_build_method` — mechanical check for `kmp-code-quality`'s new "Splitting a god class" rule: a `*Builder`-named class/interface/object with no `build()` method anywhere in the file is a real name/shape mismatch (the reader-expected chained-calls-ending-in-build() shape isn't there), not a fuzzy judgment call, so it's a plain finding rather than folded into the non-blocking vague-suffix hint. Fixing this detector's own regex surfaced a real pre-existing line-number bug shared with `_detect_vague_class_name_suffix` — `\s+` in the modifier-prefix group slurps across blank lines, so a class preceded by `package x\n\n` reports the `package` line instead of the actual `class` line. Fixed for the new regex (`[^\S\n]+` instead of `\s+`); flagged the sibling regex's identical bug as a separate follow-up rather than expanding this change's scope. 2 new tests. |
 | 2026-08-18 | Added `_detect_enum_masquerading_as_sealed` — mechanical nudge for `kmp-code-quality`'s new "Enum vs sealed class vs factory" rule. Heuristic (same window-scan technique as `_detect_destructive_read_accessor`, not a real type-checker): a `when` referencing an enum's variants 2+ times, with a `!!` force-unwrap inside the same window, signals a branch needed data the enum has nowhere to carry. Verified it fires on the doc's own before-example and stays silent on the sealed-class fix. 3 new tests. |

@@ -90,6 +90,50 @@ val cache = mutableMapOf<String, User>()
 val cache = mutableMapOf<String, User>()
 ```
 
+**A process never gets one `//` per step — one line total, or zero.** This is broader
+than the Inline blocks rule below: that one is scoped to loops/conditionals, this covers
+*any* sequence of plain statements. Two shapes, same failure:
+
+- **Interleaved**: a `//` naming each step sits above its own call, repeated down the
+  function (`// 1. validate` / `validate()` / `// 2. log in` / `login()`). If the calls
+  are already named for what they do, the numbering adds nothing top-to-bottom order
+  doesn't already give a reader — delete every line.
+- **Stacked, no code at all**: a function body that's *only* comments, each naming a step
+  of an intended implementation, with nothing actually implemented. This isn't a
+  documentation problem, it's an unimplemented stub wearing documentation as a disguise —
+  collapse to one `TODO:` with a tracked issue (see TODO/FIXME below), not a checklist.
+
+```kotlin
+// ❌ interleaved — each call already says what it does; the steps add nothing
+// 1. validate the form
+validate()
+// 2. then log in
+login()
+
+// ✓ names already say it
+validate()
+login()
+
+// ❌ stacked, zero real code — a checklist standing in for an implementation
+override fun recordCommand(encoder: CommandEncoder) {
+    // Begin Shadow Render Pass
+    // Bind basic shadow-casting pipeline
+    // Render mesh positions only
+    // End Render Pass
+}
+
+// ✓ one line, honest about being unimplemented, actually tracked
+override fun recordCommand(encoder: CommandEncoder) {
+    // TODO: github.com/org/repo/issues/123 - implement shadow pass
+}
+```
+
+Distinct from a long stacked `//` block explaining one genuine WHY (the "Grows past
+~4 lines" row in the table below, and `_detect_long_stacked_comment_block`'s WHY-signal
+exemption) — that's one continuous explanation that happens to need several lines. This
+is *N separate WHAT statements*, one per step; even two of them side by side is already
+the anti-pattern, length isn't what makes it wrong.
+
 Two comment types, two jobs — never mix them:
 
 | | Single-line `//` | Multi-line `/** ... */` (KDoc) |
