@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.30.0] — 2026-08-19
+
+### Added
+
+- feat(kmp-code-quality): a process never gets one // per step
+
+---
+
 ## [v2.29.0] — 2026-08-19
 
 ### Added

@@ -1,5 +1,5 @@
 {
-  "version": "2.29.0",
+  "version": "2.30.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -121,6 +121,10 @@
       "license": "Apache-2.0",
       "last_updated": "2026-08-19",
       "keywords": [
+        "stepwise what-comments",
+        "comment-only stub body",
+        "numbered step comments",
+        "process narrated in comments",
         "duplicate code block",
         "repeated code detection",
         "clone detection",
@@ -451,7 +455,11 @@
         "when to use manager",
         "when to use adapter",
         "splitting a god class",
-        "builder without build method"
+        "builder without build method",
+        "stepwise comments",
+        "numbered step comments",
+        "comment-only stub body",
+        "process narrated in comments"
       ],
       "triggers": [
         "Ktlint",
@@ -508,7 +516,11 @@
         "when to use manager",
         "when to use adapter",
         "splitting a god class",
-        "builder without build method"
+        "builder without build method",
+        "stepwise comments",
+        "numbered step comments",
+        "comment-only stub body",
+        "process narrated in comments"
       ],
       "scripts": []
     },
