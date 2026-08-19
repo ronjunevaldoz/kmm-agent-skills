@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.31.0] — 2026-08-19
+
+### Added
+
+- feat(kmp-code-quality): add scope functions and sequences guidance
+
+---
+
 ## [v2.30.1] — 2026-08-19
 
 ### Docs

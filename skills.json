@@ -1,5 +1,5 @@
 {
-  "version": "2.30.1",
+  "version": "2.31.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -459,7 +459,12 @@
         "stepwise comments",
         "numbered step comments",
         "comment-only stub body",
-        "process narrated in comments"
+        "process narrated in comments",
+        "scope functions",
+        "let vs run vs apply vs also",
+        "when to use with",
+        "sequence vs list",
+        "asSequence"
       ],
       "triggers": [
         "Ktlint",
@@ -520,7 +525,12 @@
         "stepwise comments",
         "numbered step comments",
         "comment-only stub body",
-        "process narrated in comments"
+        "process narrated in comments",
+        "scope functions",
+        "let vs run vs apply vs also",
+        "when to use with",
+        "sequence vs list",
+        "asSequence"
       ],
       "scripts": []
     },
