@@ -48,18 +48,16 @@ what code *used to be* or *how it got here* ("previously used LiveData", "migrat
 from X in 2024", "this used to throw NPE") is git log's job, not the file's. A reader
 needs what the line does and why it's shaped this way *now* — not its backstory,
 which means nothing without context the comment doesn't provide either. If the current
-shape has a real reason, state that reason directly; drop the "previously"/"migrated
-from" framing entirely.
+shape has a real reason, state that reason directly, in one `//` line; drop the
+"previously"/"migrated from" framing entirely.
 
 ```kotlin
-// ❌ Narrates history — git log already has this, and it's meaningless to a
-// reader with no memory of the backstory
+// ❌ Narrates history — git log already has this
 // Previously used LiveData, migrated to StateFlow in the 2024 refactor
 val state: StateFlow<UiState> = ...
 
-// ✓ States the current constraint, no history
-// Cold by default — a collector that arrives after emission sees nothing until
-// the next update; call .value for the current snapshot instead.
+// ✓ States the current constraint, no history, one line
+// Cold by default — a late collector sees nothing until the next update; call .value for the current snapshot.
 val state: StateFlow<UiState> = ...
 ```
 
@@ -223,14 +221,15 @@ path(fill = SolidColor(Color.Black)) {  // tint at call site
 
 **A `//` block that keeps growing is a sign two audiences got merged into one comment.**
 Keep only the sentence that answers "why would someone break this by simplifying it?" —
-move everything else (mechanism detail, rejected alternatives, exact version numbers) to
-`docs/reference/` (the lane `kmp-project-docs-maintainer` already
-defines for deep references), with a one-line pointer left behind:
+one `//` line, not a paragraph — and move everything else (mechanism detail, rejected
+alternatives, exact version numbers) to `docs/reference/` (the lane
+`kmp-project-docs-maintainer` already defines for deep references), with a one-line
+pointer left behind. Two lines total, not four — if the WHY sentence itself doesn't fit
+one line, that's the signal the detail belongs in `docs/reference/` too, not a second or
+third `//` line in the file:
 
 ```kotlin
-// Composite build (not include()): root's apply false on org.jetbrains.compose locks
-// that plugin ID to 1.11.1 build-wide. This module needs 1.12.0-beta01 for an
-// experimental Compose Foundation Style API not available in the stable line.
+// Composite build, not include() — needs 1.12.0-beta01, newer than root's 1.11.1 pin.
 // Full rationale: docs/reference/composite-build-style-experimental.md
 includeBuild("tailwind/style-experimental")
 ```
