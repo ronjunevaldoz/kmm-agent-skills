@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.30.1] — 2026-08-19
+
+### Docs
+
+- docs(kmp-code-quality): flatten multi-line WHY examples to one // line
+
+---
+
 ## [v2.30.0] — 2026-08-19
 
 ### Added
