@@ -69,18 +69,9 @@ ACCEPTANCE CRITERIA:
 
 ## Phase 2 — Plan
 
-Load `agents/planner.md` with the ticket content as input.
-
-The layer planner:
-1. Reads `.claude/pipeline-context.json` for `recurring_issues` and `proven_patterns`
-2. Identifies which of the 45 skills apply based on what the ticket requires
-3. Maps the acceptance criteria to specific layers and Koin bindings
-4. Produces a full `BUILD ORDER` plan
-
-Include the acceptance criteria in the plan output — the implementer will mark each one
-met or pending as it completes each layer.
-
-**Gate: show plan, wait for approval.**
+Follow the Plan section of [Feature Delivery Pipeline](references/feature-delivery-pipeline.md).
+Read `.claude/pipeline-context.json`, map every acceptance criterion to a layer and Koin binding,
+and include the criteria in the plan as met, pending, or unclear.
 
 ---
 
@@ -100,11 +91,7 @@ If branch exists, switch to it.
 
 ## Phase 4 — Implement
 
-Load `agents/implementer.md`. Execute the approved plan in 6-layer build order:
-
-```
-:model → :api → :domain → :data → :presenter → :ui
-```
+Follow the Implement section of [Feature Delivery Pipeline](references/feature-delivery-pipeline.md).
 
 After each layer, check it against the ticket's acceptance criteria. Mark each as:
 - `✓ met` — addressed in this layer
@@ -115,20 +102,13 @@ After each layer, check it against the ticket's acceptance criteria. Mark each a
 
 ## Phase 5 — Validate
 
-Load `agents/validator.md`:
-
-1. Architecture audit (`audit_project.py`)
-2. `commonMain` metadata compilation
-3. JVM compile + `jvmTest` in parallel
-
-On failure → load `agents/fixer.md`, fix, re-validate. Max 2 cycles.
-Still failing after 2 cycles → stop and report.
+Follow the Validate section of [Feature Delivery Pipeline](references/feature-delivery-pipeline.md).
 
 ---
 
 ## Phase 6 — Review
 
-Load `agents/reviewer.md`.
+Follow the Review section of [Feature Delivery Pipeline](references/feature-delivery-pipeline.md).
 
 In addition to the standard review checklist, verify the acceptance criteria:
 
@@ -138,8 +118,7 @@ CRITERIA CHECK:
   ✗ <criterion> — not yet addressed
 ```
 
-Any unmet criterion → implement, re-validate, re-review (one cycle).
-Any blocker → load `agents/fixer.md` (one cycle).
+Any unmet criterion → implement, re-validate, and re-review once.
 
 ---
 

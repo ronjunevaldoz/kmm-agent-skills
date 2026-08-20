@@ -23,8 +23,8 @@ import org.jetbrains.kotlin.psi.*
  *
  * FLAGGED:
  *   - `fun MyButton(label: String) { Button(onClick = {}) { Text(label) } }` in
- *     feature/*/ui/ — ends in "Button", body never calls AppButton
- *   - `fun CustomCard(title: String) { Card { Text(title) } }` in feature/*/ —
+ *     feature/<feature>/ui/ — ends in "Button", body never calls AppButton
+ *   - `fun CustomCard(title: String) { Card { Text(title) } }` in feature/<feature>/ —
  *     ends in "Card", body never calls AppCard
  */
 class ComponentRegistryRule(config: Config) : Rule(config) {
@@ -36,7 +36,7 @@ class ComponentRegistryRule(config: Config) : Rule(config) {
         debt = Debt.TWENTY_MINS,
     )
 
-    private val componentPrefix: String by config.valueOrDefault("componentPrefix", "App")
+    private val componentPrefix = config.valueOrDefault("componentPrefix", "App")
 
     private val dsComponentSuffixes = setOf(
         "Button", "Card", "Text", "Badge", "Chip", "TextField",

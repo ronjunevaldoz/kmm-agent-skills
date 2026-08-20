@@ -12,7 +12,7 @@ class HardcodedColorRule(config: Config) : Rule(config) {
 
     override val issue = Issue(
         id = "HardcodedColor",
-        severity = Severity.Error,
+        severity = Severity.Defect,
         description = "Hardcoded Color() literal. Use appTheme.colors.* instead.",
         debt = Debt.FIVE_MINS,
     )

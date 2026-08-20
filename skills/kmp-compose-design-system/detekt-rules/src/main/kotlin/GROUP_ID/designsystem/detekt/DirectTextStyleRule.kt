@@ -14,7 +14,7 @@ class DirectTextStyleRule(config: Config) : Rule(config) {
 
     override val issue = Issue(
         id = "DirectTextStyle",
-        severity = Severity.Error,
+        severity = Severity.Defect,
         description = "Direct TextStyle(...) construction. Use AppTextStyle enum via appTheme.typography.* instead.",
         debt = Debt.FIVE_MINS,
     )

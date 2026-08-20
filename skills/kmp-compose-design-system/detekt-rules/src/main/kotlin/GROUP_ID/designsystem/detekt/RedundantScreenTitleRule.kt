@@ -22,8 +22,8 @@ import org.jetbrains.kotlin.psi.*
  *   - Text inside a Preview composable (*Preview suffix)
  *   - Text with a non-string-literal argument (e.g. dynamic state.title)
  *   - Text inside the design system itself (core/designsystem/)
- *   - Text composables that are not a direct or near-top descendant of the
- *     outermost layout call (e.g. text deep inside an item composable)
+ *   - Text composables nested below the outermost layout call (e.g. text deep
+ *     inside a card, list item, or other child composable)
  *
  * Severity is Warning (not Error) because legitimate uses exist — e.g. a
  * section header inside content. Review before removing.
@@ -40,6 +40,7 @@ class RedundantScreenTitleRule(config: Config) : Rule(config) {
 
     private val textFunctions = setOf("Text", "AppText")
     private val screenSuffixes = setOf("Content", "Screen")
+    private val maxContentLambdaDepth = 1
 
     override fun visitNamedFunction(function: KtNamedFunction) {
         super.visitNamedFunction(function)
@@ -64,7 +65,12 @@ class RedundantScreenTitleRule(config: Config) : Rule(config) {
                     return
                 }
 
-                // Check if the first arg is a plain string literal
+                if (!isNearTopLevel(expression, function)) {
+                    super.visitCallExpression(expression)
+                    return
+                }
+
+                // Check if the first arg is a plain string literal.
                 val firstArg = expression.valueArguments.firstOrNull()
                     ?.getArgumentExpression() ?: return
                 if (firstArg is KtStringTemplateExpression && !firstArg.hasInterpolation()) {
@@ -75,5 +81,18 @@ class RedundantScreenTitleRule(config: Config) : Rule(config) {
                 super.visitCallExpression(expression)
             }
         })
+    }
+
+    private fun isNearTopLevel(expression: KtCallExpression, function: KtNamedFunction): Boolean {
+        var ancestor = expression.parent
+        var contentLambdaDepth = 0
+        while (ancestor != null && ancestor != function) {
+            if (ancestor is KtLambdaArgument) {
+                contentLambdaDepth += 1
+                if (contentLambdaDepth > maxContentLambdaDepth) return false
+            }
+            ancestor = ancestor.parent
+        }
+        return true
     }
 }

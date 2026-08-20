@@ -1,18 +1,10 @@
 ---
 name: kmp-layout-system
 description: >-
-  Drafts and documents screen layouts for any KMP consumer project. Creates
-  docs/layout-system/ with one markdown file per screen — each file has a component
-  table and an SVG wireframe. A shared _components.md holds the project-wide
-  component registry. Use this skill whenever a new screen is being designed, an
-  existing screen changes, a layout review is requested, or a project has no
-  layout-system docs yet. Trigger proactively on any new project or new screen —
-  layout-system docs should exist before or alongside implementation, not after.
-  Trigger keywords: layout system, screen layout, wireframe, layout spec, layout docs,
-  draft screen, add screen layout, document layout, layout-system, component layout,
-  screen wireframe, layout diagram, screen structure, layout missing, no layout docs,
-  create layout, update layout, design screen, sketch layout, plan screen, html wireframe,
-  html to compose, implement wireframe, html mockup to jetpack compose.
+  Drafts and maintains KMP screen-layout documentation in docs/layout-system/.
+  Produces one markdown spec and SVG wireframe per screen plus a shared component registry.
+  Use for new screens, layout changes, layout review, or projects missing layout specs;
+  create the documentation before or alongside implementation.
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
@@ -65,6 +57,9 @@ chrome changes, or a modal becomes a full screen.
 
 **Trigger automatically on project setup.** If the directory is missing, create it before
 finishing any screen implementation task.
+
+**Trigger keywords:** layout system, screen layout, wireframe, layout spec, layout docs,
+draft screen, component layout, screen wireframe, layout diagram, and HTML wireframe.
 
 ---
 

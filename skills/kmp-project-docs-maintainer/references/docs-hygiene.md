@@ -96,7 +96,7 @@ If a task-kind file (blockers, gap plan, milestone tracker) exists at the `docs/
 3. Archive the original file: `docs/tasks/archive/YYYY-MM-DD-original-name.md`.
 4. Leave a backlink in `docs/tasks.md` pointing to the dated archive entry.
 
-Never delete — archive. The history is evidence.
+For completed task-kind files, archive rather than delete. The history is evidence.
 
 If the project uses `docs/mvp/` or `docs/bugs/`, keep those lanes as the active
 working surface and use `docs/tasks.md` as the index that links into them.

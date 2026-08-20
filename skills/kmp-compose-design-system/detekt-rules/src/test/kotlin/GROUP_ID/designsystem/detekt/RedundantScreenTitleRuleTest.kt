@@ -57,13 +57,13 @@ class RedundantScreenTitleRuleTest {
     }
 
     @Test fun `does not flag Text in design system module`() {
-        val findings = rule().lint("""
+        val findings = rule().lintAt("core/designsystem/components/AppButton.kt", """
             import androidx.compose.runtime.Composable
             @Composable
             fun AppButtonContent() {
                 Text("label")
             }
-        """.trimIndent(), "core/designsystem/components/AppButton.kt")
+        """.trimIndent())
         assertTrue(findings.isEmpty())
     }
 
@@ -73,6 +73,23 @@ class RedundantScreenTitleRuleTest {
             @Composable
             fun GuildCard() {
                 Text("LordNine PH")
+            }
+        """.trimIndent())
+        assertTrue(findings.isEmpty())
+    }
+
+    @Test fun `does not flag a nested section header`() {
+        val findings = rule().lint("""
+            import androidx.compose.runtime.Composable
+            @Composable
+            fun CommunityContent(state: State) {
+                Column {
+                    AppCard {
+                        Column {
+                            Text("Recent activity")
+                        }
+                    }
+                }
             }
         """.trimIndent())
         assertTrue(findings.isEmpty())

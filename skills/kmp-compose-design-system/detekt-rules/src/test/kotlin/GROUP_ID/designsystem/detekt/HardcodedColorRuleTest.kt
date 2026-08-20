@@ -26,10 +26,10 @@ class HardcodedColorRuleTest {
     }
 
     @Test fun `does not flag Color in Colors_kt`() {
-        val findings = rule().lint("""
+        val findings = rule().lintAt("AppColors.kt", """
             import androidx.compose.ui.graphics.Color
             val primary = Color(0xFF6200EE)
-        """.trimIndent(), "AppColors.kt")
+        """.trimIndent())
         assertTrue(findings.isEmpty())
     }
 

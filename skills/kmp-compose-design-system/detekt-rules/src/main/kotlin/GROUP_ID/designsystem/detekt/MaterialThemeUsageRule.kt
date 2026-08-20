@@ -15,7 +15,7 @@ class MaterialThemeUsageRule(config: Config) : Rule(config) {
 
     override val issue = Issue(
         id = "MaterialThemeUsage",
-        severity = Severity.Error,
+        severity = Severity.Defect,
         description = "MaterialTheme.* access found. Use appTheme.* from the design system instead.",
         debt = Debt.TEN_MINS,
     )

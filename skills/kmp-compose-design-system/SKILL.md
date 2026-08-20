@@ -1,17 +1,10 @@
 ---
 name: kmp-compose-design-system
 description: >
-  Scaffolds a custom Compose Multiplatform design system in :core:designsystem using
-  the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles,
-  @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates:
-  color/typography/shape/spacing
-  tokens, AppTheme with light/dark support, StyleScope extensions for token access,
-  shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant,
-  ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision),
-  and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText)
-  built on BasicXxx CMP primitives. "App" is a placeholder prefix derived from the
-  project's actual name (scripts/derive_component_prefix.py), not a hardcoded literal.
-  No Material dependency — fully custom, fully owned.
+  Scaffolds a fully owned Compose Multiplatform design system in :core:designsystem
+  using the experimental Compose Styles API. Produces semantic design tokens, AppTheme,
+  style accessors, sealed component variants, and core App* primitives without Material.
+  The App prefix is derived from the project's name and can be customized.
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
@@ -451,4 +444,3 @@ Keep snippets small. Use the user's package name and token names when provided.
 ## Changelog
 
 Full content: `references/changelog.md`.
-

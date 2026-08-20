@@ -1,0 +1,62 @@
+[
+  {
+    "id": "jni-bridge-not-cinterop",
+    "prompt": "Add a JNI wrapper around a C++ decoder and expose it to Kotlin/JVM.",
+    "expected_skills": ["kmp-jni-pro"],
+    "expected_boundary": "JNI is JVM-only; do not route this work to Kotlin/Native cinterop.",
+    "required_evidence": [
+      "phase-0-library-discovery",
+      "phase-0.5-header-audit",
+      "third-party-read-only"
+    ]
+  },
+  {
+    "id": "cinterop-not-jni",
+    "prompt": "Create an iOS actual implementation using a CPointer and a .def file.",
+    "expected_skills": ["kmp-expect-actual"],
+    "expected_boundary": "Kotlin/Native cinterop is not JNI; do not select kmp-jni-pro.",
+    "required_evidence": ["expect-actual-boundary"]
+  },
+  {
+    "id": "repository-not-offline-first",
+    "prompt": "Add a repository that maps DTOs and reads through a local cache.",
+    "expected_skills": ["kmp-repository-pattern"],
+    "expected_boundary": "Do not select offline-first without sync or conflict-resolution requirements.",
+    "required_evidence": ["data-mapping-boundary"]
+  },
+  {
+    "id": "offline-first-sync",
+    "prompt": "Implement background synchronization with conflict resolution for offline edits.",
+    "expected_skills": ["kmp-offline-first", "kmp-repository-pattern"],
+    "expected_boundary": "Offline-first owns synchronization and conflict resolution; repository-pattern owns repository boundaries.",
+    "required_evidence": ["sync-strategy", "conflict-resolution"]
+  },
+  {
+    "id": "presenter-not-compose-mvi",
+    "prompt": "Create a pure-Kotlin ViewModel with UiState and UiIntent. It must not import Compose.",
+    "expected_skills": ["kmp-presenter-module"],
+    "expected_boundary": "Do not route a presenter-only module to Compose UI guidance.",
+    "required_evidence": ["no-compose-import", "ui-state-intent-contract"]
+  },
+  {
+    "id": "mvi-compose-screen",
+    "prompt": "Split this Compose screen into Screen and Content and collect one-shot effects safely.",
+    "expected_skills": ["kmp-mvi"],
+    "expected_boundary": "This is Compose integration and effect handling, not presenter-module scaffolding alone.",
+    "required_evidence": ["screen-content-split", "one-shot-effect-handling"]
+  },
+  {
+    "id": "custom-design-system-not-shadcn",
+    "prompt": "Create a fully owned Compose design system with AppTheme and no Material dependency.",
+    "expected_skills": ["kmp-compose-design-system"],
+    "expected_boundary": "Do not select shadcn-compose when the project requires a custom owned system.",
+    "required_evidence": ["custom-theme", "no-material-dependency"]
+  },
+  {
+    "id": "shadcn-not-custom-design-system",
+    "prompt": "The project already uses ShadcnTheme. Add a ShadcnCard settings layout.",
+    "expected_skills": ["kmp-shadcn-compose"],
+    "expected_boundary": "Do not introduce AppTheme or App* components into a ShadcnTheme project.",
+    "required_evidence": ["preserve-shadcn-theme"]
+  }
+]

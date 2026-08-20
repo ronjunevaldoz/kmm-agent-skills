@@ -19,14 +19,14 @@ import org.jetbrains.kotlin.psi.*
  *   import GROUP_ID.core.designsystem.tokens.AppSpacing
  *   import GROUP_ID.core.designsystem.typography.AppTypography
  *
- * Only applied to files under feature/*/ui/ to avoid false positives in test
+ * Only applied to files under feature/<feature>/ui/ to avoid false positives in test
  * helpers and design system documentation.
  */
 class ImportBoundaryRule(config: Config) : Rule(config) {
 
     override val issue = Issue(
         id = "DesignTokenImportBoundary",
-        severity = Severity.Error,
+        severity = Severity.Defect,
         description = "Direct token import in a feature UI module. Access tokens via appTheme.* inside @Composable functions, not via direct class imports.",
         debt = Debt.TEN_MINS,
     )
