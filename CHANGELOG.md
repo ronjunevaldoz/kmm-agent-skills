@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.33.0] — 2026-08-20
+
+### Added
+
+- feat(kmp-code-quality): flag robotic/formal comment phrasing
+
+---
+
 ## [v2.32.0] — 2026-08-19
 
 ### Added

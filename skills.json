@@ -1,5 +1,5 @@
 {
-  "version": "2.32.0",
+  "version": "2.33.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -121,6 +121,8 @@
       "license": "Apache-2.0",
       "last_updated": "2026-08-19",
       "keywords": [
+        "robotic comment phrase",
+        "formal comment phrasing",
         "stepwise what-comments",
         "comment-only stub body",
         "numbered step comments",
@@ -460,6 +462,8 @@
         "numbered step comments",
         "comment-only stub body",
         "process narrated in comments",
+        "robotic comment",
+        "formal comment phrasing",
         "scope functions",
         "let vs run vs apply vs also",
         "when to use with",
@@ -526,6 +530,8 @@
         "numbered step comments",
         "comment-only stub body",
         "process narrated in comments",
+        "robotic comment",
+        "formal comment phrasing",
         "scope functions",
         "let vs run vs apply vs also",
         "when to use with",

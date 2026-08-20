@@ -1,19 +1,19 @@
 # Skills Report
 
-Generated 2026-08-19 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
+Generated 2026-08-20 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
 **70 skills** — 68 clean, 0 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 499 | 2026-07-26 | ✅ |
-| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 495 | 2026-08-19 | ✅ |
+| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 498 | 2026-08-19 | ✅ |
 | [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 489 | 2026-07-14 | ✅ |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 484 | 2026-07-31 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 483 | 2026-08-19 | ✅ |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 483 | 2026-06-26 | ✅ |
 | [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 482 | 2026-08-11 | ✅ |
-| [`kmp-audit`](../../skills/kmp-audit/) | 480 | 2026-08-19 | ✅ |
 | [`kmp-network-layer`](../../skills/kmp-network-layer/) | 474 | 2026-07-31 | ✅ |
 | [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 469 | 2026-07-08 | ✅ |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 468 | 2026-06-29 | ✅ |
