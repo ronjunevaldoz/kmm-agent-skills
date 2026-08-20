@@ -59,6 +59,8 @@ metadata:
     - numbered step comments
     - comment-only stub body
     - process narrated in comments
+    - robotic comment
+    - formal comment phrasing
     - scope functions
     - let vs run vs apply vs also
     - when to use with
@@ -88,7 +90,8 @@ twin nouns, naming dialect, inconsistent verb naming, duplicate type name, enum 
 sealed class, when to use sealed class, when to use factory, enum standing in for sealed,
 when to use builder, when to use manager, when to use adapter, splitting a god class,
 builder without build method, stepwise comments, numbered step comments,
-comment-only stub body, process narrated in comments, scope functions,
+comment-only stub body, process narrated in comments, robotic comment,
+formal comment phrasing, scope functions,
 let vs run vs apply vs also, when to use with, sequence vs list, asSequence.
 
 **Freshness rule:** Ktlint and Detekt versions change frequently — recheck the latest releases

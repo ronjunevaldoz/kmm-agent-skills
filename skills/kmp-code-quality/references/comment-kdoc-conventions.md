@@ -43,6 +43,29 @@ catches the mechanical shape of this (a 3+ line comment directly above one depen
 line in a Gradle build file) — but the tone test above is what to apply by hand, since it
 generalizes past Gradle files.
 
+**Write it the way you'd explain it to a teammate, not a textbook.** A comment that
+translates the code into formal prose ("this function is responsible for validating
+the user's email address in order to ensure it conforms to the expected format") reads
+as robotic — a developer explaining the same thing out loud wouldn't reach for "is
+responsible for" or "in order to." Plain words, or don't write it (per the WHAT test
+above — that example says nothing the name doesn't already say):
+
+```kotlin
+// ❌ Robotic — textbook prose that says nothing the name doesn't
+// This function is responsible for validating the user's email address
+// in order to ensure it conforms to the expected format.
+fun isValidEmail(email: String): Boolean = EMAIL_REGEX.matches(email)
+
+// ✓ Name already says it — no comment needed
+fun isValidEmail(email: String): Boolean = EMAIL_REGEX.matches(email)
+```
+
+`kmp-audit`'s `_detect_robotic_comment_phrase` catches a fixed list of formal openers
+("is responsible for", "this class is used to", plus `kmp-project-docs-maintainer`'s
+Writing Style hedge phrases — "in order to," "it should be noted that") in `//` and
+KDoc comments — the same regex-safe, low-false-positive treatment as
+`_detect_hedging_language`, applied to code comments instead of markdown docs.
+
 **Historical narration isn't a substitute for current purpose.** A comment describing
 what code *used to be* or *how it got here* ("previously used LiveData", "migrated
 from X in 2024", "this used to throw NPE") is git log's job, not the file's. A reader

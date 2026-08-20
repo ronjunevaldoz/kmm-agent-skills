@@ -5087,5 +5087,56 @@ class CommentOnlyStubBodyTests(unittest.TestCase):
             self.assertFalse(any("comment-only stub body" in f for f in findings))
 
 
+class RoboticCommentPhraseTests(unittest.TestCase):
+    """kmp-code-quality's Comment & KDoc Conventions: a comment that translates code
+    into textbook prose isn't how a developer would explain it to a teammate.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_robotic_line_comment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/src/commonMain/kotlin/Email.kt",
+                "package test\n\n"
+                "// This function is responsible for validating the email\n"
+                "fun isValidEmail(email: String): Boolean = EMAIL_REGEX.matches(email)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("robotic comment phrasing" in f and "Email.kt:3" in f for f in findings))
+
+    def test_flags_robotic_kdoc(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/src/commonMain/kotlin/Preferences.kt",
+                "package test\n\n"
+                "/**\n"
+                " * This class is used to store user preferences.\n"
+                " */\n"
+                "class Preferences\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("robotic comment phrasing" in f for f in findings))
+
+    def test_ignores_real_why_comment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/auth/src/commonMain/kotlin/Cache.kt",
+                "package test\n\n"
+                "fun ok(): Boolean {\n"
+                "    // Cache miss is expected on cold start, not a bug\n"
+                "    return true\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("robotic comment phrasing" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()

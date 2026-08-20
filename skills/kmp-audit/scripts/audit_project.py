@@ -1383,6 +1383,78 @@ def _detect_hedging_language(root: Path) -> list[str]:
     return findings
 
 
+# ── Robotic/formal phrasing inside a Kotlin comment ─────────────────────────────
+# A comment that translates code into textbook prose ("this function is responsible
+# for validating...") isn't how a developer would actually explain it to a teammate —
+# real, distinct gap from the docs-hedging rule above: that one covers markdown docs,
+# this covers // and KDoc comments in .kt source, and adds comment-specific robotic
+# openers on top of the general hedge-phrase list (some overlap is intentional — "in
+# order to" reads robotic in both places).
+
+_ROBOTIC_COMMENT_ONLY_PHRASES = [
+    "is responsible for",
+    "this function is used to",
+    "this method is used to",
+    "this class is used to",
+    "the purpose of this function is to",
+    "the purpose of this method is to",
+    "this variable is used to store",
+    "this is a function that",
+    "this code is responsible for",
+]
+_ROBOTIC_COMMENT_PHRASES = _HEDGE_PHRASES + _ROBOTIC_COMMENT_ONLY_PHRASES
+_ROBOTIC_COMMENT_RE = re.compile(
+    r"\b(" + "|".join(re.escape(p) for p in _ROBOTIC_COMMENT_PHRASES) + r")\b",
+    re.IGNORECASE,
+)
+_KDOC_START_RE = re.compile(r"/\*\*")
+_KDOC_END_RE = re.compile(r"\*/")
+
+
+def _detect_robotic_comment_phrase(root: Path) -> list[str]:
+    """Flag formal/robotic phrasing inside a // or KDoc comment — real, cited phrases
+    (the docs-hedging list plus comment-specific openers like "is responsible for"),
+    not a fabricated list. A comment that reads like a textbook translated the code
+    into prose isn't how a developer would actually explain it to a teammate.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        in_kdoc = False
+        for i, line in enumerate(lines):
+            comment_text = None
+            if in_kdoc:
+                comment_text = line
+                if _KDOC_END_RE.search(line):
+                    in_kdoc = False
+            elif _KDOC_START_RE.search(line):
+                comment_text = line
+                if not _KDOC_END_RE.search(line):
+                    in_kdoc = True
+            else:
+                idx = _line_comment_index(line)
+                if idx != -1:
+                    comment_text = line[idx + 2 :]
+            if comment_text is None:
+                continue
+            match = _ROBOTIC_COMMENT_RE.search(comment_text)
+            if not match:
+                continue
+            findings.append(
+                f"robotic comment phrasing [LOW]: {path.relative_to(root)}:{i + 1} "
+                f"— '{match.group(1)}' reads like textbook prose, not how a developer "
+                f"would explain this to a teammate. Per kmp-code-quality's Comment "
+                f"& KDoc Conventions, cut it or state the fact directly\n"
+                f"    {i + 1} | {line.strip()}"
+            )
+    return findings
+
+
 # ── @Composable function returning Unit named like a verb, not a type ──────────
 # Per the Android Kotlin style guide's naming rules: a @Composable function that
 # returns Unit is a UI node, not an action — it must be PascalCase, read as a noun
@@ -5156,6 +5228,7 @@ def audit_project(root: Path) -> list[str]:
 
     # ── Hedging/filler language in consumer-facing docs ──────────────────────────
     findings.extend(_detect_hedging_language(root))
+    findings.extend(_detect_robotic_comment_phrase(root))
     findings.extend(_detect_lowercase_unit_composable(root))
     findings.extend(_detect_partial_param_documentation(root))
     findings.extend(_detect_kotlin_reflect_in_common(root))
