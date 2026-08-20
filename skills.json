@@ -1,5 +1,5 @@
 {
-  "version": "2.33.0",
+  "version": "2.34.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -730,7 +730,7 @@
     {
       "name": "kmp-compose-design-system",
       "path": "skills/kmp-compose-design-system",
-      "description": "Scaffolds a custom Compose Multiplatform design system in :core:designsystem using the new Compose Styles API from Android docs (developer.android.com/develop/ui/compose/styles, @ExperimentalStylesApi). This is the styling layer, not the Slot API. Generates: color/typography/shape/spacing tokens, AppTheme with light/dark support, StyleScope extensions for token access, shadcn-inspired sealed variant systems (ButtonVariant, CardVariant, BadgeVariant, ChipVariant, TextFieldVariant), AppTextStyle enum (no Compose TextStyle collision), and 6 core components (AppButton, AppCard, AppTextField, AppChip, AppBadge, AppText) built on BasicXxx CMP primitives. \"App\" is a placeholder prefix derived from the project's actual name (scripts/derive_component_prefix.py), not a hardcoded literal. No Material dependency \u2014 fully custom, fully owned.",
+      "description": "Scaffolds a fully owned Compose Multiplatform design system in :core:designsystem using the experimental Compose Styles API. Produces semantic design tokens, AppTheme, style accessors, sealed component variants, and core App* primitives without Material. The App prefix is derived from the project's name and can be customized.",
       "license": "Apache-2.0",
       "last_updated": "2026-07-26",
       "keywords": [
@@ -1560,6 +1560,7 @@
         "project-specific skill"
       ],
       "scripts": [
+        "evaluate_skill_behavior.py",
         "validate_keyword_routing.py",
         "validate_skill_map.py"
       ]
@@ -2030,7 +2031,7 @@
     {
       "name": "kmp-layout-system",
       "path": "skills/kmp-layout-system",
-      "description": "Drafts and documents screen layouts for any KMP consumer project. Creates docs/layout-system/ with one markdown file per screen \u2014 each file has a component table and an SVG wireframe. A shared _components.md holds the project-wide component registry. Use this skill whenever a new screen is being designed, an existing screen changes, a layout review is requested, or a project has no layout-system docs yet. Trigger proactively on any new project or new screen \u2014 layout-system docs should exist before or alongside implementation, not after. Trigger keywords: layout system, screen layout, wireframe, layout spec, layout docs, draft screen, add screen layout, document layout, layout-system, component layout, screen wireframe, layout diagram, screen structure, layout missing, no layout docs, create layout, update layout, design screen, sketch layout, plan screen, html wireframe, html to compose, implement wireframe, html mockup to jetpack compose.",
+      "description": "Drafts and maintains KMP screen-layout documentation in docs/layout-system/. Produces one markdown spec and SVG wireframe per screen plus a shared component registry. Use for new screens, layout changes, layout review, or projects missing layout specs; create the documentation before or alongside implementation.",
       "license": "Apache-2.0",
       "last_updated": "2026-08-10",
       "keywords": [
@@ -2049,7 +2050,18 @@
         "implement wireframe",
         "html mockup to jetpack compose"
       ],
-      "triggers": [],
+      "triggers": [
+        "layout system",
+        "screen layout",
+        "wireframe",
+        "layout spec",
+        "layout docs",
+        "draft screen",
+        "component layout",
+        "screen wireframe",
+        "layout diagram",
+        "and HTML wireframe"
+      ],
       "scripts": [
         "create_wireframe.py",
         "generate_slot_scaffold.py"

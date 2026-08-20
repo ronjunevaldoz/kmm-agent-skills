@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.34.0] — 2026-08-21
+
+### Added
+
+- feat(skill-behavior): add routing evaluation suite
+
+---
+
 ## [v2.33.0] — 2026-08-20
 
 ### Added

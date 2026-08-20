@@ -1,8 +1,8 @@
 # Skills Report
 
-Generated 2026-08-20 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
+Generated 2026-08-21 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
-**70 skills** — 68 clean, 0 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
+**70 skills** — 70 clean, 0 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
@@ -20,10 +20,10 @@ Generated 2026-08-20 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 460 | 2026-07-09 | ✅ |
-| [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 454 | 2026-07-26 | 🟡 1 known debt |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 450 | 2026-07-20 | ✅ |
 | [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
+| [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 446 | 2026-07-26 | ✅ |
 | [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 446 | 2026-07-08 | ✅ |
 | [`kmp-compose-state-container`](../../skills/kmp-compose-state-container/) | 438 | 2026-06-06 | ✅ |
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
@@ -40,9 +40,9 @@ Generated 2026-08-20 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-shadcn-compose`](../../skills/kmp-shadcn-compose/) | 397 | 2026-07-31 | ✅ |
 | [`kmp-shadcn-compose-layouts`](../../skills/kmp-shadcn-compose-layouts/) | 394 | 2026-08-04 | ✅ |
 | [`kmp-legal-docs`](../../skills/kmp-legal-docs/) | 393 | 2026-06-21 | ✅ |
-| [`kmp-layout-system`](../../skills/kmp-layout-system/) | 392 | 2026-08-10 | 🟡 1 known debt |
 | [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 391 | 2026-08-18 | ✅ |
 | [`kmp-compose-animation`](../../skills/kmp-compose-animation/) | 389 | 2026-06-21 | ✅ |
+| [`kmp-layout-system`](../../skills/kmp-layout-system/) | 387 | 2026-08-10 | ✅ |
 | [`kmp-migration`](../../skills/kmp-migration/) | 386 | 2026-07-19 | ✅ |
 | [`kmp-permissions`](../../skills/kmp-permissions/) | 386 | 2026-06-21 | ✅ |
 | [`kmp-workmanager`](../../skills/kmp-workmanager/) | 382 | 2026-06-21 | ✅ |
