@@ -2733,6 +2733,45 @@ def _detect_vague_class_name_suffix(root: Path) -> list[str]:
     return findings
 
 
+# ── Ponytail comment density (project-wide, not per-file) ──────────────────
+# ponytail mode's own `ponytail:` tag is legitimate WHY content by design — each one
+# states a real, deliberate ceiling and an upgrade path, not an attribution. But a
+# real case found the count itself is the actual signal: 40 tags added across a
+# single work session, spread thin (max 2 in any one file — a per-file threshold
+# would have caught none of it). Project-wide total is what actually answers "did
+# every one of these get added because it's genuinely load-bearing, or does adding
+# one need to become a habit worth pausing on." Non-blocking — a real ceiling is
+# still a real ceiling regardless of how many others exist; this is a nudge to
+# re-review the backlog, not a claim any individual tag is wrong.
+
+_PONYTAIL_TAG_RE = re.compile(r"\bponytail:")
+_PONYTAIL_DENSITY_THRESHOLD = 20
+
+
+def _detect_ponytail_comment_density(root: Path) -> list[str]:
+    """Flag when a project accumulates too many `ponytail:` ceiling comments in
+    total — a per-file count would miss this, since the real case was many files
+    with 1-2 each, not one file with many.
+    """
+    count = 0
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            continue
+        count += len(_PONYTAIL_TAG_RE.findall(text))
+    if count < _PONYTAIL_DENSITY_THRESHOLD:
+        return []
+    return [
+        f"ponytail comment density [LOW]: {count} 'ponytail:' comments across the "
+        f"project (threshold {_PONYTAIL_DENSITY_THRESHOLD}) — review whether every "
+        f"one is still a genuine, current ceiling before adding more; a real ceiling "
+        f"stays valid regardless of count, but this many warrants a backlog pass"
+    ]
+
+
 # ── Builder-named class with no build() method (name/shape mismatch) ────────
 # kmp-code-quality's "Splitting a god class" rule: unlike Manager (no required shape,
 # hence the vague-suffix hint above), Builder carries a specific reader expectation —
@@ -5214,6 +5253,7 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_context_parameter_opportunity(root))
     findings.extend(_detect_enum_masquerading_as_sealed(root))
     findings.extend(_detect_builder_without_build_method(root))
+    findings.extend(_detect_ponytail_comment_density(root))
     findings.extend(_detect_duplicate_code_block(root))
 
     # ── God class (repo-wide, not scoped to ViewModel/Composable) ───────────────

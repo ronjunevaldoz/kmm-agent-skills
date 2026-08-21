@@ -111,6 +111,17 @@ val cache = mutableMapOf<String, User>()
 val cache = mutableMapOf<String, User>()
 ```
 
+**A per-instance confirmation gate doesn't stop a mode from adding many, fast.** Real
+case: a ponytail-mode session (its own `ponytail:` tag is legitimate WHY content by
+design, not attribution — see above) added 40 of them across one work session, no
+single instance wrong, but the total reads as noise. The per-instance gate is a
+real-time behavioral rule an in-context mode can simply not apply; it isn't
+mechanically enforceable after the fact. What *is* checkable after the fact is
+density — `kmp-audit`'s `_detect_ponytail_comment_density` flags a project
+accumulating 20+ `ponytail:` comments total (not per-file — the real case spread
+thin, max 2 in any one file, so a per-file threshold would have caught none of it) as
+a nudge to review the backlog, not a claim any individual tag is wrong.
+
 **A process never gets one `//` per step — one line total, or zero.** This is broader
 than the Inline blocks rule below: that one is scoped to loops/conditionals, this covers
 *any* sequence of plain statements. Two shapes, same failure:

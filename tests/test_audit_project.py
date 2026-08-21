@@ -5138,5 +5138,39 @@ class RoboticCommentPhraseTests(unittest.TestCase):
             self.assertFalse(any("robotic comment phrasing" in f for f in findings))
 
 
+class PonytailCommentDensityTests(unittest.TestCase):
+    """Real case found: 40 legitimate ponytail: ceiling comments added across one
+    work session, spread thin (max 2 in any one file) — a per-file threshold
+    would have caught none of it. Project-wide total is the real signal.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_when_total_exceeds_threshold(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for i in range(21):
+                self._write(
+                    root, f"feature/f{i}/src/commonMain/kotlin/File{i}.kt",
+                    f"// ponytail: ceiling {i}, upgrade path {i}\nclass File{i}\n",
+                )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("ponytail comment density" in f and "21 " in f for f in findings))
+
+    def test_ignores_when_under_threshold(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for i in range(5):
+                self._write(
+                    root, f"feature/f{i}/src/commonMain/kotlin/File{i}.kt",
+                    f"// ponytail: ceiling {i}, upgrade path {i}\nclass File{i}\n",
+                )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("ponytail comment density" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()
