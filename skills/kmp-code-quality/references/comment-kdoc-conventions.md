@@ -206,6 +206,15 @@ Verified against Kotlin's own official coding conventions (kotlinlang.org), not 
   `[declaration]` resolves the same way a reference inside the documented element would —
   no full qualification needed if it's already imported in the file. A fenced code block
   (` ``` `) works too, for a short usage snippet that doesn't warrant a full `@sample`.
+- **Never leave a referenced class, function, or property as raw text.** Wrap it in
+  `[Brackets]` (or fully-qualified `[com.example.Client]` for a type outside the file)
+  every time a KDoc mentions another declaration by name — the whole point of the
+  Markdown support above is a Dokka-generated cross-link; plain text loses it silently,
+  with no compiler warning to catch the omission.
+- **Backtick a literal, value, or parameter name mentioned in prose** — `` `null` ``,
+  `` `true` ``, `` `timeoutMillis` `` — same reasoning as code fences: it's a value, not
+  English prose, and backticks are how Markdown (and this repo's own KDoc) already marks
+  that distinction everywhere else.
 
 ### By architectural level
 
@@ -218,6 +227,7 @@ use both together when reviewing or refactoring documentation.
 | Functions & methods | KDoc only for complex public members, using the tag table below. Document inputs, outputs, and edge cases — never mechanics. `UndocumentedPublicFunction` requires *something*, so trivial one-liners (a getter, a pure delegate) get a single sentence, not a full `@param` breakdown. |
 | Extension functions | State the receiver scope and calling context — *when* to reach for this extension, not just what it returns. Use `@receiver` for any precondition the receiver must satisfy (e.g. "must be called from inside an active `viewModelScope`"). This is the one KDoc case where "when to use it" outranks "what it does," because the same signature can exist as a member on an unrelated type. |
 | Inline blocks (loops, conditionals) | No `//` that explains WHAT a block does — extract a named function or variable so the code reads as its own explanation. Keep `//` only for a non-obvious workaround or a business-logic WHY. |
+| Sealed classes/interfaces & enums | KDoc the parent type for what the whole closed set represents, then a one-line KDoc per variant for what specifically distinguishes *that* case — never a blanket comment above the whole `when` a caller writes elsewhere. |
 
 ```kotlin
 /**
@@ -226,6 +236,20 @@ use both together when reviewing or refactoring documentation.
  * in-flight retries when the receiver is cancelled instead of leaking a delay loop.
  */
 suspend fun <T> CoroutineScope.retryWhileActive(times: Int, block: suspend () -> T): T { ... }
+```
+
+```kotlin
+/** Outcome of a [retryWhileActive] call — exactly one of these per attempt. */
+sealed interface RetryOutcome {
+    /** [block] returned normally within the retry budget. */
+    data class Success(val value: Any?) : RetryOutcome
+
+    /** Every retry attempt failed; [cause] is the last exception thrown. */
+    data class ExhaustedRetries(val cause: Throwable) : RetryOutcome
+
+    /** The enclosing [CoroutineScope] was cancelled before [block] could complete. */
+    data object Cancelled : RetryOutcome
+}
 ```
 
 ### Two real mistakes this caught
