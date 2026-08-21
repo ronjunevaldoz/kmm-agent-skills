@@ -362,6 +362,29 @@ but agents enforce it before a commit is ever attempted.
 
 ---
 
+### KI-R18 — `pre-commit-audit.sh` silently never ran through the real installed hook
+
+**Resolved:** `v2.38.0` — `fix(hooks): pre-commit-audit.sh gates docs hygiene, fix REPO_ROOT resolution`  
+**Was:** A user asked why a consumer project's docs grew past 1000+ lines with nothing
+catching it. The hook only ever audited `.kt` files (no docs-hygiene check at all), but
+tracing further found a second, worse bug: `REPO_ROOT` was derived from
+`${BASH_SOURCE[0]}`, which resolves to `"$REPO_ROOT/.git"` — one level short — when
+invoked via the real symlinked `.git/hooks/pre-commit` that `scripts/install-hooks.sh`
+creates. `KMP_AUDIT_DIR` (and originally `AUDIT_SCRIPT`) then pointed nowhere, so both
+the Kotlin architecture audit and any docs check silently no-op'd on every real commit,
+indistinguishable from "ran clean." Verified live with `bash -x .git/hooks/pre-commit`.  
+**Fix:**
+- Added a docs-hygiene check (`audit_skills_repo.py --docs-hygiene-only`) gated on
+  staged `docs/*.md` or root-level doc changes, auto-detecting where `kmp-audit` is
+  deployed (`skills/`, `.claude/skills/`, `.agents/skills/`, `.codex/skills/`,
+  `.gemini/skills/`)
+- Replaced `${BASH_SOURCE[0]}`-derived `REPO_ROOT` with `git rev-parse --show-toplevel`,
+  invocation-path independent regardless of symlink vs. direct execution
+- Updated `commands/kmp-setup-hooks.md`'s hook table to match
+- Added 3 tests exercising the real symlink-invocation path (`tests/test_hook_scripts.py`)
+
+---
+
 ### KI-R17 — No automated way to find design violations in existing project code
 
 **Resolved:** `v1.18.0` — `feat(design-system): add /kmp-fix-design command with Roborazzi vision verification`  
