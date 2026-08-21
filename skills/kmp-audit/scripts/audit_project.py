@@ -1330,6 +1330,26 @@ _HEDGE_PHRASE_RE = re.compile(
     r"\b(" + "|".join(re.escape(p) for p in _HEDGE_PHRASES) + r")\b",
     re.IGNORECASE,
 )
+
+# Comment-specific robotic openers, layered on top of the hedge-phrase list above.
+# Shared by _detect_hedging_language (docs) and _detect_robotic_comment_phrase (.kt
+# comments) — docs deserve the same "does this read like a textbook" bar as code.
+_ROBOTIC_COMMENT_ONLY_PHRASES = [
+    "is responsible for",
+    "this function is used to",
+    "this method is used to",
+    "this class is used to",
+    "the purpose of this function is to",
+    "the purpose of this method is to",
+    "this variable is used to store",
+    "this is a function that",
+    "this code is responsible for",
+]
+_ROBOTIC_COMMENT_PHRASES = _HEDGE_PHRASES + _ROBOTIC_COMMENT_ONLY_PHRASES
+_ROBOTIC_COMMENT_RE = re.compile(
+    r"\b(" + "|".join(re.escape(p) for p in _ROBOTIC_COMMENT_PHRASES) + r")\b",
+    re.IGNORECASE,
+)
 _CONSUMER_DOC_ROOT_NAMES = {
     "README.md",
     "GETTING_STARTED.md",
@@ -1353,8 +1373,10 @@ def _iter_consumer_docs(root: Path):
 
 
 def _detect_hedging_language(root: Path) -> list[str]:
-    """Flag hedging/filler phrases in consumer-facing docs — real, cited phrases
-    from kmp-project-docs-maintainer's Writing Style rule, not a fabricated list.
+    """Flag hedging/filler phrases and robotic/formal openers in consumer-facing
+    docs — real, cited phrases from kmp-project-docs-maintainer's Writing Style
+    rule plus the same robotic-phrase list _detect_robotic_comment_phrase applies
+    to code comments, not a fabricated list.
     """
     findings: list[str] = []
     for path in _iter_consumer_docs(root):
@@ -1371,12 +1393,13 @@ def _detect_hedging_language(root: Path) -> list[str]:
                 continue
             if in_code_block:
                 continue
-            match = _HEDGE_PHRASE_RE.search(line)
+            match = _ROBOTIC_COMMENT_RE.search(line)
             if not match:
                 continue
             findings.append(
                 f"hedging language [LOW]: {path.relative_to(root)}:{i + 1} "
-                f"— '{match.group(1)}' adds length without adding information. "
+                f"— '{match.group(1)}' adds length without adding information, or reads "
+                f"as formal/robotic prose instead of how a developer would say it. "
                 f"Per kmp-project-docs-maintainer's Writing Style rule, cut it\n"
                 f"    {i + 1} | {line.strip()}"
             )
@@ -1387,26 +1410,9 @@ def _detect_hedging_language(root: Path) -> list[str]:
 # A comment that translates code into textbook prose ("this function is responsible
 # for validating...") isn't how a developer would actually explain it to a teammate —
 # real, distinct gap from the docs-hedging rule above: that one covers markdown docs,
-# this covers // and KDoc comments in .kt source, and adds comment-specific robotic
-# openers on top of the general hedge-phrase list (some overlap is intentional — "in
-# order to" reads robotic in both places).
+# this covers // and KDoc comments in .kt source. Both share _ROBOTIC_COMMENT_RE
+# (defined above, next to _HEDGE_PHRASE_RE) since the same phrase list applies to both.
 
-_ROBOTIC_COMMENT_ONLY_PHRASES = [
-    "is responsible for",
-    "this function is used to",
-    "this method is used to",
-    "this class is used to",
-    "the purpose of this function is to",
-    "the purpose of this method is to",
-    "this variable is used to store",
-    "this is a function that",
-    "this code is responsible for",
-]
-_ROBOTIC_COMMENT_PHRASES = _HEDGE_PHRASES + _ROBOTIC_COMMENT_ONLY_PHRASES
-_ROBOTIC_COMMENT_RE = re.compile(
-    r"\b(" + "|".join(re.escape(p) for p in _ROBOTIC_COMMENT_PHRASES) + r")\b",
-    re.IGNORECASE,
-)
 _KDOC_START_RE = re.compile(r"/\*\*")
 _KDOC_END_RE = re.compile(r"\*/")
 

@@ -490,5 +490,47 @@ class DocsHygieneNamingTests(unittest.TestCase):
             self.assertFalse(any("kebab-case" in f for f in findings))
 
 
+class OrphanedReferenceDocTests(unittest.TestCase):
+    """docs-hygiene.md already tells a human to grep for inbound links before
+    deleting a reference doc — this automates that grep as a review nudge.
+    """
+
+    def test_flags_reference_doc_with_no_inbound_links(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ref_dir = root / "docs" / "reference"
+            ref_dir.mkdir(parents=True)
+            (ref_dir / "orphaned-doc.md").write_text("# Orphaned\n\nNothing links here.\n", encoding="utf-8")
+            (root / "README.md").write_text("# Test project\n", encoding="utf-8")
+
+            findings: list[str] = []
+            audit_repo_scripts._check_orphaned_reference_docs(root, findings)
+            self.assertTrue(any("orphaned-doc.md" in f and "no inbound links" in f for f in findings))
+
+    def test_does_not_flag_linked_reference_doc(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            ref_dir = root / "docs" / "reference"
+            ref_dir.mkdir(parents=True)
+            (ref_dir / "linked-doc.md").write_text("# Linked\n\nReal content.\n", encoding="utf-8")
+            (root / "README.md").write_text(
+                "# Test project\n\nSee [linked-doc.md](docs/reference/linked-doc.md) for details.\n",
+                encoding="utf-8",
+            )
+
+            findings: list[str] = []
+            audit_repo_scripts._check_orphaned_reference_docs(root, findings)
+            self.assertFalse(any("linked-doc.md" in f for f in findings))
+
+    def test_does_not_flag_when_no_docs_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# Test project\n", encoding="utf-8")
+
+            findings: list[str] = []
+            audit_repo_scripts._check_orphaned_reference_docs(root, findings)
+            self.assertEqual(findings, [])
+
+
 if __name__ == "__main__":
     unittest.main()

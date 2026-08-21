@@ -150,6 +150,7 @@ The audit script (`audit_skills_repo.py --docs-hygiene-only`) flags snake_case f
 | Task file marked `status: done` in active `docs/tasks/` | 0 | Move to `docs/tasks/archive/` immediately |
 | Non-doc file (`.json`, `.yaml`, etc.) directly in `docs/` | 0 | Move to purpose-specific directory |
 | Snake_case filename in `docs/` | 0 | Rename to kebab-case |
+| Reference doc (`docs/` root or `docs/reference/`) with no inbound links anywhere in the repo | 0 | Review — link it from wherever introduces the topic, or delete per Delete vs Archive above if it's genuinely stale |
 
 ### Lesson lifecycle
 

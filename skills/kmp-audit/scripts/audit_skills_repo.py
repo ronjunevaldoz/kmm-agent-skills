@@ -327,6 +327,61 @@ def _check_docs_hygiene(root: Path, findings: list[str]) -> None:
             )
 
 
+# ── Orphaned reference doc (no inbound links from anywhere in the repo) ─────────
+# docs-hygiene.md already tells a human to "grep for inbound links" before deleting a
+# reference doc — this automates that grep as a nudge, not a verdict. A doc with zero
+# inbound links isn't necessarily stale (it could be a fresh doc nothing points to yet,
+# or an intentional standalone entry point), so this stays a review flag, same
+# treatment as every other non-blocking hint in this file.
+
+_REFERENCE_DOC_EXCLUDE_SUBDIR_NAMES = {"tasks", "lessons", "bugs", "mvp", "archive"}
+
+
+def _iter_reference_docs(docs_dir: Path):
+    for f in sorted(docs_dir.glob("*.md")):
+        yield f
+    reference_dir = docs_dir / "reference"
+    if reference_dir.is_dir():
+        for f in sorted(reference_dir.rglob("*.md")):
+            if "archive" in f.relative_to(reference_dir).parts:
+                continue
+            yield f
+
+
+def _check_orphaned_reference_docs(root: Path, findings: list[str]) -> None:
+    docs_dir = root / "docs"
+    if not docs_dir.is_dir():
+        return
+    reference_docs = list(_iter_reference_docs(docs_dir))
+    if not reference_docs:
+        return
+
+    all_md_files = [p for p in root.rglob("*.md") if "archive" not in p.parts]
+    combined_text = ""
+    for p in all_md_files:
+        try:
+            combined_text += p.read_text(encoding="utf-8", errors="ignore") + "\n"
+        except OSError:
+            continue
+
+    for doc in reference_docs:
+        rel = doc.relative_to(root)
+        # Every mention of this doc's own filename counts as an inbound link,
+        # including the doc's own self-mention in a header comment — subtract 1.
+        mentions = combined_text.count(doc.name)
+        try:
+            self_mentions = doc.read_text(encoding="utf-8", errors="ignore").count(doc.name)
+        except OSError:
+            self_mentions = 0
+        if mentions - self_mentions <= 0:
+            findings.append(
+                f"docs hygiene: {rel} has no inbound links from anywhere else in the "
+                f"repo — review whether it's stale and should be deleted, or just "
+                f"needs linking from wherever introduces the topic (see docs-hygiene.md's "
+                f"Delete vs Archive table before deleting)"
+            )
+
+
 def audit_skills_repo(root: Path) -> list[str]:
     findings: list[str] = []
     skills_dir = root / "skills"
@@ -417,6 +472,7 @@ def main() -> int:
         findings: list[str] = []
         _check_docs_hygiene(root, findings)
         _check_root_doc_hygiene(root, findings)
+        _check_orphaned_reference_docs(root, findings)
     elif args.jvm_api_only:
         findings = []
         _check_commonmain_jvm_apis(root, findings)

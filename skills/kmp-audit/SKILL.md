@@ -11,9 +11,11 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-08-19'
+  last-updated: '2026-08-21'
   keywords:
     - robotic comment phrase
+    - orphaned reference doc
+    - no inbound links doc
     - formal comment phrasing
     - stepwise what-comments
     - comment-only stub body
@@ -430,6 +432,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-08-21 | Widened `_detect_hedging_language` to also match the comment-specific robotic-phrase list ("is responsible for", "this class is used to") that previously only applied to `.kt` comments via `_detect_robotic_comment_phrase` — docs deserve the same "does this read like a textbook" bar as code. Also added `_check_orphaned_reference_docs` to `audit_skills_repo.py` — flags a `docs/`-root or `docs/reference/*.md` file with zero inbound links from anywhere else in the repo. Automates the grep `docs-hygiene.md` already tells a human to do by hand before deleting a reference doc; stays a review nudge, not a deletion verdict, since a fresh doc nothing points to yet isn't necessarily stale. Both wired into `--docs-hygiene-only`, the consumer-facing path. 5 new tests. |
 | 2026-08-19 | Added `_detect_robotic_comment_phrase` — mechanical backing for `kmp-code-quality`'s new "write it like you'd explain it to a teammate" rule. Scans `//` and KDoc comments in `.kt` files for formal/robotic phrasing: comment-specific openers ("is responsible for", "this class is used to") plus the existing docs-hedging phrase list ("in order to," "it should be noted that"). Distinct scope from `_detect_hedging_language` (markdown docs) — this one walks Kotlin source, tracking KDoc block state and reusing `_line_comment_index` to avoid the URL-in-string false positive already fixed for the control-flow WHAT-comment detector. 3 new tests. |
 | 2026-08-19 | Added `_detect_stepwise_what_comments` and `_detect_comment_only_stub_body` — mechanical backing for `kmp-code-quality`'s new "a process never gets one `//` per step" rule. First flags a numbered/step-prefixed `//` comment repeated 2+ times, each directly above its own statement (narrower than the broader WHAT-verb list, to avoid catching a single legitimate WHY comment that starts with a verb). Second flags a function body containing 2+ `//` lines and zero real statements — an unimplemented checklist standing in for code. Found and fixed a false positive during verification: the stub-body check initially fired on a *single* `TODO:` line too, which is the rule's own recommended fix — now requires 2+ comment lines. 6 new tests. |
 | 2026-08-19 | Added `_detect_duplicate_code_block` — a user asked why a class using repetitive code wasn't caught; verified it genuinely wasn't (no detector in this file targets code duplication, and Detekt itself has no clone-detection ruleset by default). Deliberately narrow and safe: file-scoped (misses cross-file duplication, the costlier case) and literal-line matching (misses copy-paste with renamed variables — real clone detection needs token normalization, not attempted here). Flags 2+ functions in one file sharing 5+ identical consecutive statement lines via a brace-depth function-body scan + line-shingle intersection. 3 new tests. |
