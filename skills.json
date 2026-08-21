@@ -1,5 +1,5 @@
 {
-  "version": "2.38.1",
+  "version": "2.39.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -119,8 +119,10 @@
       "path": "skills/kmp-audit",
       "description": "KMP project audit skill for reviewing an existing Kotlin Multiplatform codebase. Use this skill to inspect architecture, module boundaries, state handling, repository and network layering, Compose patterns, expect/actual usage, shared resources, design system usage, test coverage, platform readiness, and the skills repo itself. Produces findings, risk levels, and a fix sequence instead of implementation code. Pair with kmp-expert to route any follow-up work to the right domain skills.",
       "license": "Apache-2.0",
-      "last_updated": "2026-08-21",
+      "last_updated": "2026-08-22",
       "keywords": [
+        "ponytail comment density",
+        "too many ponytail comments",
         "robotic comment phrase",
         "orphaned reference doc",
         "no inbound links doc",
@@ -412,7 +414,7 @@
       "path": "skills/kmp-code-quality",
       "description": "Sets up Ktlint (formatting) and Detekt (code smells + architecture rules) for a KMP project. Both run as CI gates. Ktlint is near-zero config. Detekt architecture rules enforce the 6-layer module boundary contract from kmp-clean-architecture.",
       "license": "Apache-2.0",
-      "last_updated": "2026-08-21",
+      "last_updated": "2026-08-22",
       "keywords": [
         "Ktlint",
         "Detekt",
@@ -476,7 +478,9 @@
         "let vs run vs apply vs also",
         "when to use with",
         "sequence vs list",
-        "asSequence"
+        "asSequence",
+        "ponytail comment density",
+        "too many ponytail comments"
       ],
       "triggers": [
         "Ktlint",
@@ -550,7 +554,9 @@
         "let vs run vs apply vs also",
         "when to use with",
         "sequence vs list",
-        "asSequence"
+        "asSequence",
+        "ponytail comment density",
+        "too many ponytail comments"
       ],
       "scripts": []
     },

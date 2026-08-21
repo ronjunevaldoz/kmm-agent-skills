@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.39.0] — 2026-08-22
+
+### Added
+
+- feat(kmp-audit): add ponytail comment density detector
+
+---
+
 ## [v2.38.1] — 2026-08-21
 
 ### Docs
