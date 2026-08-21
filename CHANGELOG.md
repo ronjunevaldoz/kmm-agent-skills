@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.38.1] — 2026-08-21
+
+### Docs
+
+- docs: add KI-R18 for pre-commit-audit.sh REPO_ROOT silent no-op
+
+---
+
 ## [v2.38.0] — 2026-08-21
 
 ### Fixed
