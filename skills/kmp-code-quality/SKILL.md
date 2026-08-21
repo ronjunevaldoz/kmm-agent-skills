@@ -64,6 +64,9 @@ metadata:
     - KDoc bracket linking
     - sealed class KDoc
     - backtick literal KDoc
+    - delicate code comment
+    - pointer first fragile code
+    - read before modifying comment
     - scope functions
     - let vs run vs apply vs also
     - when to use with
@@ -95,6 +98,7 @@ when to use builder, when to use manager, when to use adapter, splitting a god c
 builder without build method, stepwise comments, numbered step comments,
 comment-only stub body, process narrated in comments, robotic comment,
 formal comment phrasing, KDoc bracket linking, sealed class KDoc, backtick literal KDoc,
+delicate code comment, pointer first fragile code, read before modifying comment,
 scope functions,
 let vs run vs apply vs also, when to use with, sequence vs list, asSequence.
 

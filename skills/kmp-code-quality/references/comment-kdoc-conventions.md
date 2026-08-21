@@ -281,6 +281,27 @@ third `//` line in the file:
 includeBuild("tailwind/style-experimental")
 ```
 
+**Genuinely delicate code puts the pointer first, not last.** The ordering above is
+right for the common case — the one-line summary already tells a reader enough, the
+`docs/reference/` link is there if they want more. Reserve pointer-first for the rare
+case where the risk is different in kind: correctness depends on a non-obvious
+invariant that neither the type system nor a quick read of the function catches, and an
+agent (or a person) confident enough to "simplify" it would silently reintroduce a real
+bug — exact statement ordering for a hardware/driver timing reason, a workaround for a
+specific upstream bug where the obvious fix brings it back. Putting the pointer first
+means whoever's about to edit hits "read this before touching it" before they've formed
+an opinion about the code, not after:
+
+```kotlin
+// Read docs/reference/retry-backoff-invariants.md before touching this function.
+// Reordering these three lines reintroduces the double-fire bug from #482.
+fun retryWithBackoff(attempt: Int): Duration { ... }
+```
+
+Don't reach for this ordering by default — it reads as an alarm, and an alarm that
+fires on ordinary code stops meaning anything. It's for the specific case above, not a
+substitute for a normal WHY comment on code that's merely a little subtle.
+
 ### KDoc: code definition, params, samples
 
 | Tag | Purpose |
