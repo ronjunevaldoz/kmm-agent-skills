@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.35.0] — 2026-08-21
+
+### Added
+
+- feat(kmp-code-quality): add mandatory bracket linking, sealed class KDoc, backtick literals
+
+---
+
 ## [v2.34.0] — 2026-08-21
 
 ### Added
