@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.38.0] — 2026-08-21
+
+### Fixed
+
+- fix(hooks): pre-commit-audit.sh gates docs hygiene, fix REPO_ROOT resolution
+
+---
+
 ## [v2.37.0] — 2026-08-21
 
 ### Added
