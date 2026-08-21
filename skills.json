@@ -1,5 +1,5 @@
 {
-  "version": "2.36.0",
+  "version": "2.37.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -469,6 +469,9 @@
         "KDoc bracket linking",
         "sealed class KDoc",
         "backtick literal KDoc",
+        "delicate code comment",
+        "pointer first fragile code",
+        "read before modifying comment",
         "scope functions",
         "let vs run vs apply vs also",
         "when to use with",
@@ -540,6 +543,9 @@
         "KDoc bracket linking",
         "sealed class KDoc",
         "backtick literal KDoc",
+        "delicate code comment",
+        "pointer first fragile code",
+        "read before modifying comment",
         "scope functions",
         "let vs run vs apply vs also",
         "when to use with",

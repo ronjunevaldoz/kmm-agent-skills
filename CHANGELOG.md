@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.37.0] — 2026-08-21
+
+### Added
+
+- feat(kmp-code-quality): put the reference pointer first for delicate code
+
+---
+
 ## [v2.36.0] — 2026-08-21
 
 ### Added
