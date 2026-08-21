@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.36.0] — 2026-08-21
+
+### Added
+
+- feat(kmp-audit): widen robotic-phrase docs check, add orphaned-doc detector
+
+---
+
 ## [v2.35.1] — 2026-08-21
 
 ### Docs
