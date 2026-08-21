@@ -273,5 +273,70 @@ class HookScriptTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
 
 
+class PreCommitAuditDocsHygieneTests(unittest.TestCase):
+    """pre-commit-audit.sh's docs-hygiene gating and REPO_ROOT resolution — new
+    shell plumbing not covered by audit_skills_repo.py's own tests. Verified live
+    that the original ${BASH_SOURCE[0]}-based REPO_ROOT computation resolved to
+    "$REPO_ROOT/.git" (one level short) when invoked through the real symlinked
+    .git/hooks/pre-commit, silently no-op'ing every check — `git rev-parse
+    --show-toplevel` is invocation-path independent, these tests pin that down.
+    """
+
+    def _init_repo_with_audit(self, tmp: Path) -> None:
+        subprocess.run(["git", "init", "-q"], cwd=tmp, check=True)
+        claude_skills = tmp / ".claude" / "skills"
+        claude_skills.mkdir(parents=True)
+        (claude_skills / "kmp-audit").symlink_to(
+            REPO_ROOT / "skills" / "kmp-audit", target_is_directory=True
+        )
+
+    def test_blocks_on_oversized_staged_doc(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_str:
+            tmp = Path(tmp_str)
+            self._init_repo_with_audit(tmp)
+            docs_dir = tmp / "docs"
+            docs_dir.mkdir()
+            (docs_dir / "big.md").write_text("# Big\n" + "line\n" * 300, encoding="utf-8")
+            subprocess.run(["git", "add", "docs/big.md"], cwd=tmp, check=True)
+
+            result = subprocess.run(
+                ["bash", str(HOOKS_DIR / "pre-commit-audit.sh")],
+                cwd=tmp, capture_output=True,
+            )
+            self.assertEqual(result.returncode, 1)
+            self.assertIn(b"docs hygiene found issues", result.stdout)
+
+    def test_allows_commit_when_no_docs_or_kotlin_staged(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_str:
+            tmp = Path(tmp_str)
+            self._init_repo_with_audit(tmp)
+            (tmp / "notes.txt").write_text("just a text file\n", encoding="utf-8")
+            subprocess.run(["git", "add", "notes.txt"], cwd=tmp, check=True)
+
+            result = subprocess.run(
+                ["bash", str(HOOKS_DIR / "pre-commit-audit.sh")],
+                cwd=tmp, capture_output=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout.decode() + result.stderr.decode())
+
+    def test_allows_commit_when_staged_doc_is_small_and_linked(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_str:
+            tmp = Path(tmp_str)
+            self._init_repo_with_audit(tmp)
+            docs_dir = tmp / "docs"
+            docs_dir.mkdir()
+            (docs_dir / "small.md").write_text("# Small\n" + "line\n" * 10, encoding="utf-8")
+            (tmp / "README.md").write_text(
+                "# Test\n\nSee [small.md](docs/small.md) for details.\n", encoding="utf-8",
+            )
+            subprocess.run(["git", "add", "docs/small.md", "README.md"], cwd=tmp, check=True)
+
+            result = subprocess.run(
+                ["bash", str(HOOKS_DIR / "pre-commit-audit.sh")],
+                cwd=tmp, capture_output=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout.decode() + result.stderr.decode())
+
+
 if __name__ == "__main__":
     unittest.main()

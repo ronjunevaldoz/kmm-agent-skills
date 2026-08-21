@@ -12,7 +12,7 @@ There are two independent integration points: **git hooks** (for your local repo
 
 | Hook file | What it does | When it runs |
 |---|---|---|
-| `hooks/pre-commit-audit.sh` | Runs `audit_project.py` before any commit touching `.kt`/`.kts` files. Blocks the commit if architecture smells are found. | `git commit` |
+| `hooks/pre-commit-audit.sh` | Runs `audit_project.py` before any commit touching `.kt`/`.kts` files, and `audit_skills_repo.py --docs-hygiene-only` before any commit touching `docs/*.md` or a root-level doc. Blocks the commit if architecture smells or docs hygiene issues (line caps, naming, orphaned reference docs) are found. Auto-detects whether `kmp-audit` is deployed at `skills/`, `.claude/skills/`, `.agents/skills/`, `.codex/skills/`, or `.gemini/skills/`. | `git commit` |
 | `hooks/commit-msg` | Enforces Conventional Commit format and rejects any commit carrying a `Co-Authored-By:` trailer (commits — including an AI agent's — aren't attributed to the agent). | `git commit`, wired per Option A |
 | `hooks/validate-architecture.sh` | Runs `audit_project.py` after any file edit. Surfaces findings inline in the agent's output. | After every `Edit`/`Write` |
 | `hooks/check-skill-freshness.sh` | Warns when a skill's `last-updated` is >90 days old. Non-blocking. | Manually or scheduled CI |
