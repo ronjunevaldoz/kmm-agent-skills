@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.35.1] — 2026-08-21
+
+### Docs
+
+- docs(agents): recognize when research reaches a doc-worthy conclusion
+
+---
+
 ## [v2.35.0] — 2026-08-21
 
 ### Added
