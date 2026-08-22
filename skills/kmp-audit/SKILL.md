@@ -151,6 +151,27 @@ the user and the other skills what to do next.
   responsibility, or was renamed away from its real purpose, is a WARNING even though no
   script can catch it — call it out the same as any other finding.
 
+### 1b) Construction/execution lifecycle coupling
+- A class's primary constructor should capture only what it needs for its own
+  activation — not every runtime feature variant a caller might eventually want.
+  Watch for an infra-role class (a manager, engine, registry, or coordinator by
+  *role*, not by name — any class can have this shape, naming it is not a
+  reliable signal) whose constructor collects several nullable-default-null or
+  Boolean-toggle params representing execution-time feature modes
+  (`variantAConfig`, `enableSpecializedBehaviorX`) it doesn't need just to exist.
+- No script flags this, deliberately — it's a judgment call about the class's
+  *role*, not a countable shape. A legitimate config/state data class can carry
+  the exact same param signature and be completely fine; a regex counting
+  nullable/Boolean params alone would flag both identically and just become
+  false-positive noise to maintain. Ask instead: does this class need to know
+  about variant B just to be constructed, or only once execution actually asks
+  for it?
+- Fix: isolate construction from execution. Collapse the variant params into an
+  immutable Specification Key (a small data class describing the requested
+  variation) and resolve the actual behavior lazily — a cache keyed on that
+  Specification Key, populated on first use — instead of the constructor
+  pre-declaring every variation upfront.
+
 ### 2) State and MVI
 - Screen state should be immutable
 - One-shot effects should not be replayed
@@ -293,6 +314,13 @@ The description names the symptom, not the fix.
 [di] TodoListViewModel registered as factory instead of viewModel
 ```
 
+## References
+
+Full implementation content lives in `references/*.md`: `governance-ci-enforcement`.
+Load it under the Governance & CI Enforcement pointer above, not standalone.
+
+---
+
 ## Common Anti-Patterns
 
 - reporting findings before reading `AGENTS.md` and `README.md` — misses project-specific constraints
@@ -307,71 +335,11 @@ An audit should produce findings that are actionable. If a finding doesn't map t
 
 ## Governance & CI Enforcement
 
-Run the governance check in a consumer project's CI so violations block the build automatically — no manual audit required.
+Wiring a consumer project's CI to run the governance check automatically — the
+`.kmp-skills` version file, the reusable workflow, what it scans, the `fail_on`
+threshold guide, and running it locally before pushing.
 
-### Step 1 — Add a `.kmp-skills` version file to the consumer project root
-
-```json
-{
-  "skills_repo": "ronjunevaldoz/kmp-agent-skills",
-  "version": "1.24.1"
-}
-```
-
-Commit this file. It declares which skills collection version the project targets and
-must pin a release tag, not a mutable ref like `main`. The governance check prints it
-on every run and fails if the file is missing or the version is not tag-pinned.
-
-### Step 2 — Wire the reusable workflow
-
-Create `.github/workflows/governance.yml` in the consumer project:
-
-```yaml
-name: KMP Governance
-
-on:
-  pull_request:
-  push:
-    branches: [main]
-
-jobs:
-  kmp-governance:
-    uses: ronjunevaldoz/kmp-agent-skills/.github/workflows/kmp-audit.yml@main
-    with:
-      project_root: .
-      fail_on: HIGH
-      skills_ref: v1.24.1   # pin to a tag for reproducibility
-```
-
-That is the complete consumer setup — no scripts to copy, no dependencies to install beyond Python 3.12 (provided by the workflow).
-
-### What the governance check runs
-
-| Scanner | Detects | Severity |
-|---|---|---|
-| `scan_design_violations.py` | Hardcoded colors, dp literals, Material theme usage, TextStyle construction, nested containers, layout inconsistency | HIGH (error), MEDIUM (warning) |
-| `audit_project.py` | State copy races, SharedFlow replay effects, NetworkResult in UI state, DTO import in UI layer, magic color literals, hardcoded spacing, missing preview stubs | HIGH |
-| `validate_module_graph.py` | Missing feature module files, missing `androidApp` UI link, missing `*ContentPreview.kt` stub beside feature UI content | HIGH |
-
-Findings at or above `fail_on` exit non-zero and fail the CI job. Findings below the threshold are reported but do not fail.
-
-### Threshold guide
-
-| `fail_on` value | When to use |
-|---|---|
-| `HIGH` | Default. Fails only on correctness violations and architecture boundary breaks. |
-| `MEDIUM` | Stricter. Also fails on design-token warnings and layout inconsistencies. Recommended once the project is stable. |
-| `LOW` | Full enforcement. Fails on any finding. Use for highly regulated or greenfield projects. |
-
-### Running locally before pushing
-
-```bash
-# From inside the skills repo (development)
-python3 skills/kmp-audit/scripts/governance_check.py /path/to/consumer/project
-
-# From a consumer project with the skills repo checked out alongside it
-python3 ../kmp-agent-skills/skills/kmp-audit/scripts/governance_check.py .
-```
+Full content: [references/governance-ci-enforcement.md](references/governance-ci-enforcement.md).
 
 ---
 
@@ -436,6 +404,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | Added "1b) Construction/execution lifecycle coupling" — user supplied a full architectural rule spec ("Predictive Interface Over-Configuration": an infra manager/engine/registry class whose constructor hoards nullable/toggle params for runtime feature variants instead of resolving them lazily via a Specification Key). Initially planned a mechanical regex detector scoped to manager-suffixed class names; user pushed back twice — any class name can have this shape (name is not a reliable signal), and a name-agnostic structural heuristic (param count + has-a-function) would just be false-positive noise to maintain, real maintenance debt for a smell that's fundamentally about the class's *role*, not a countable shape. Added as a judgment-only inspection item instead, same treatment as 1a's naming-drift check — no script backs this one, deliberately. Extracted "Governance & CI Enforcement" into `references/governance-ci-enforcement.md` (first references/ split for this skill) to stay under the 500-line cap after the addition. |
 | 2026-08-22 | Rewrote the docs/tasks/ hygiene check for `kmp-project-docs-maintainer`'s new task naming convention (user-requested): `docs/tasks/<parent>/<NN>-<slug>-<status>.md`, status one of `todo`/`doing`/`blocked`/`done` in the filename instead of a `status:` field in content. Replaced the `status:\s*(done\|completed\|closed)` content regex with `_TASK_FILE_RE` filename validation; added a missing-`**Date:**`-line check (the date moved out of the filename into the content); added a check for loose `.md` files sitting directly in `docs/tasks/` instead of under a parent folder. Also fixed `_check_naming_conventions`'s generic kebab-case scan, which would have false-positived on the new `NN-slug-status` filenames (they don't match the old `YYYY-MM-DD-` optional prefix) — now skips `docs/tasks/` entirely, since that path owns its own stricter check. 6 new tests. |
 | 2026-08-22 | Added `_detect_investigation_narration_comment` — mechanical backing for `kmp-code-quality`'s new "state the finding, not the investigation" rule. Fixed phrase list ("investigated", "turned out to be", "root cause was", "steps to reproduce") in `//`/KDoc comments; `TODO`/`FIXME` naturally exempt since neither appears in the phrase list. Extracted `_iter_kt_comment_lines` as a shared helper — this detector and `_detect_robotic_comment_phrase` were duplicating the same KDoc-block-state scan. 3 new tests. |
 | 2026-08-22 | Added `_detect_ponytail_comment_density` — real case found live: a ponytail-mode session added 40 legitimate `ponytail:` ceiling comments (each individually correct, states a real limitation + upgrade path) across one work session, spread thin across many files (max 2 in any one file), reading as noise in aggregate even though no single instance was wrong. A per-file threshold would have caught none of it — project-wide total (20+) is the actual signal. Non-blocking: a real ceiling stays valid regardless of count, this is a backlog-review nudge. 2 new tests. |
