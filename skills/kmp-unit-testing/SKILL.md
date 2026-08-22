@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-06-18'
+  last-updated: '2026-08-22'
   keywords:
     - unit testing
     - KMP
@@ -34,7 +34,8 @@ Use when you need to:
 **Trigger keywords:** unit test, runTest, Turbine, Flow test, ViewModel test, fake repository,
 :core:testing, coroutines test, JVM test, fake over mock, test fixtures, test builders,
 test, write test, test code, coverage, test ViewModel, test logic, testing, write tests,
-unit testing, test this, how to test, test the screen.
+unit testing, test this, how to test, test the screen, Kover, kotlinx-kover,
+coverage threshold, koverVerify, koverHtmlReport, code coverage KMP, minimum coverage.
 
 **Freshness rule:** Turbine API changes between minor versions — recheck `awaitItem()` vs
 `awaitComplete()` semantics when upgrading. Kotlin coroutines test API is stable but
@@ -229,6 +230,75 @@ ViewModel tests in `:presenter` run via `jvmTest` because `:presenter` declares 
 
 ---
 
+## Test Coverage — Kover
+
+Verified against [kotlinlang's kotlinx-kover docs](https://kotlin.github.io/kotlinx-kover/gradle-plugin/),
+not assumed. `org.jetbrains.kotlinx.kover` (currently `0.9.8`) is the real KMP-native
+coverage tool — JaCoCo has no Kotlin/Native support at all, Kover is JetBrains' own
+replacement built for this collection's multiplatform target matrix.
+
+**Real limitation, stated honestly: Kover measures JVM-executed tests only.**
+"Coverage measurement only for JVM targets. Source code outside the common and JVM
+source sets is ignored" (verified, same source). That means `jvmTest` runs (which is
+where this collection's ViewModel/presenter tests already live, per Running Tests
+above) are covered — a Kotlin/Native (iOS) or JS/Wasm-only test run is not measured at
+all. Don't report a coverage percentage as if it reflects the whole KMP target matrix;
+it reflects the JVM-executed subset.
+
+```kotlin
+// Root build.gradle.kts
+plugins {
+    id("org.jetbrains.kotlinx.kover") version "0.9.8"
+}
+
+kover {
+    reports {
+        total {
+            verify {
+                rule {
+                    minBound(50)   // fails the build below 50% line coverage
+                }
+            }
+        }
+    }
+}
+```
+
+`koverVerify` is **not** automatically wired into `check`; add the dependency
+explicitly so CI's normal `./gradlew check` actually enforces the threshold instead of
+silently skipping it:
+
+```kotlin
+tasks.check {
+    dependsOn(tasks.named("koverVerify"))
+}
+```
+
+```bash
+./gradlew koverVerify        # fails if coverage is below the configured threshold
+./gradlew koverHtmlReport    # generates a browsable HTML report
+```
+
+Exclude generated code and DI wiring (nothing meaningful to cover) rather than lowering
+the threshold to compensate for them. Composables are excluded for a different
+reason — they're verified by `kmp-roborazzi`'s screenshot tests, a separate mechanism;
+a line-coverage percentage from Kover isn't the tool that should judge UI correctness:
+
+```kotlin
+kover {
+    reports {
+        filters {
+            excludes {
+                classes("*.BuildConfig", "*_Factory", "*Module_*")
+                annotatedBy("androidx.compose.runtime.Composable")
+            }
+        }
+    }
+}
+```
+
+---
+
 ## Related Skills
 
 - `kmp-presenter-module` — the `:presenter` module whose ViewModels are tested here
@@ -266,4 +336,5 @@ When asked about testing KMP code, respond in this order:
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | Added "Test Coverage — Kover" — a user asked whether Kotlin test coverage was covered at all; "coverage" was already a trigger keyword with zero real content behind it, confirmed via grep across this skill, `kmp-code-quality`, and `kmp-ci-github-actions`. Verified against kotlinx-kover's own docs, including the real, honestly-stated limitation: Kover measures JVM-executed tests only — Kotlin/Native (iOS) and JS/Wasm test runs aren't covered at all, so a coverage percentage reflects the JVM-executed subset, not the whole KMP target matrix. Covers plugin setup, `minBound` verification rule, wiring `koverVerify` into `check` (not automatic), and exclusion filters (generated code/DI, plus Composables — covered by `kmp-roborazzi` instead, a different mechanism). |
 | 2026-06-18 | Initial release. |

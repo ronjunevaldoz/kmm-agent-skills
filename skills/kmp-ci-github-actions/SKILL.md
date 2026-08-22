@@ -9,7 +9,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-07-14'
+  last-updated: '2026-08-22'
   keywords:
     - GitHub Actions
     - CI/CD
@@ -40,7 +40,8 @@ Use when you need to:
 release workflow, KMP CI, XCFramework release, Gradle cache CI, PR checks,
 continuous integration, continuous delivery, CD pipeline, GitHub workflow YAML,
 automate build, merge checks, branch protection, automated release, deploy workflow,
-CI is red, CI failing, GitHub Actions minutes, free tier CI, run CI locally, act local runner.
+CI is red, CI failing, GitHub Actions minutes, free tier CI, run CI locally, act local runner,
+koverVerify, test coverage CI, coverage gate.
 
 **Freshness rule:** GitHub Actions runner images and `actions/setup-java` / `gradle/actions` versions
 change frequently — recheck pinned versions and `runs-on` labels before using this skill in a new project.
@@ -200,12 +201,22 @@ jobs:
       - name: Run Desktop (JVM) tests
         run: ./gradlew jvmTest --continue
 
+      - name: Verify test coverage (Kover — JVM-executed tests only, see kmp-unit-testing)
+        run: ./gradlew koverVerify
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-test-results
           path: '**/build/reports/tests/'
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kover-html-report
+          path: '**/build/reports/kover/'
 
   # ─── Web Tests ──────────────────────────────────────────────────────────────
   test-web:
@@ -242,53 +253,9 @@ jobs:
 
 ---
 
-## Step 2: Create `.github/workflows/release.yml`
+## Step 2: Release Workflow
 
-```yaml
-name: Release
-
-on:
-  push:
-    tags:
-      - 'v*'
-
-jobs:
-
-  # ─── Build XCFramework ──────────────────────────────────────────────────────
-  build-xcframework:
-    name: Build XCFramework
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'zulu'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-
-      - name: Build XCFramework
-        run: ./gradlew :shared:assembleReleaseXCFramework
-
-      - name: Upload XCFramework artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: XCFramework-${{ github.ref_name }}
-          path: shared/build/XCFrameworks/release/
-          retention-days: 30
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: shared/build/XCFrameworks/release/**
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
+Full content: `references/release-workflow.md`.
 
 ---
 
@@ -447,6 +414,13 @@ reproduce what GitHub would run; `test-ios` still only gets verified on a real p
 
 ---
 
+## References
+
+Full implementation content lives in `references/*.md`: `release-workflow`. Load it
+under Step 2's pointer above, not standalone.
+
+---
+
 ## Common Anti-Patterns
 
 - running all targets in one job — a single iOS failure blocks Android feedback; use per-target jobs
@@ -485,5 +459,6 @@ Keep the YAML snippet to one job. Map to the user's actual module names and sign
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | Added a `koverVerify` step to the `test-desktop` job (Kover only measures JVM-executed tests, so this is where it belongs) plus an HTML-report artifact upload — real gap found alongside `kmp-unit-testing`'s new Kover section: "coverage" was a trigger keyword with zero real content anywhere, including here. Split Step 2 (release workflow) out to `references/release-workflow.md` to stay under the line cap after the addition. |
 | 2026-08-02 | Added a CI step surfacing real Kotlin compiler warnings in the PR job summary — Ktlint/Detekt never invoke the actual compiler, so deprecated-API/unchecked-cast warnings were only ever visible live in Android Studio, invisible to CI. Non-blocking, cross-referenced to `code-quality`'s new `allWarningsAsErrors` gate for once a project is ready to enforce it. |
 | 2026-07-14 | Real gap closed: no guidance existed for recognizing/reducing free-tier CI minutes exhaustion (macOS runners bill at 10× — `test-ios` alone can exhaust the 2,000 min/month private-repo quota), and a "CI is red on every push" report traced to exactly this. Added a section on recognizing the real signal (a billing banner on the run page, not the job's own logs) and reducing it (`paths-ignore`, moving iOS off the required gate). Added `scripts/install-act.sh` and `scripts/run-ci-locally.sh` — dry-run the real workflow YAML locally via `act`/Docker before pushing, zero GitHub minutes spent. Verified act's real, documented limitation: no macOS Docker image exists, so `test-ios` can't be faithfully emulated — the script detects that job from the real workflow file and warns, rather than silently failing; documented the real fix (`if: ${{ !env.ACT }}`) rather than inventing a `--skip-job` flag act doesn't have (caught and fixed dead code in my own first draft that tried to build one). |
