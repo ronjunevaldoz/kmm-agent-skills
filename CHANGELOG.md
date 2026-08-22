@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.42.0] — 2026-08-22
+
+### Added
+
+- feat(docs-hygiene): task filenames encode status, date moves into content
+
+---
+
 ## [v2.41.0] — 2026-08-22
 
 ### Added

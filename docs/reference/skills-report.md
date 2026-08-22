@@ -7,7 +7,7 @@ Generated 2026-08-22 by `scripts/generate_skills_report.py` — run it after any
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 499 | 2026-07-26 | ✅ |
-| [`kmp-audit`](../../skills/kmp-audit/) | 492 | 2026-08-22 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 493 | 2026-08-22 | ✅ |
 | [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 484 | 2026-07-31 | ✅ |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 483 | 2026-06-26 | ✅ |
@@ -40,7 +40,7 @@ Generated 2026-08-22 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-shadcn-compose`](../../skills/kmp-shadcn-compose/) | 397 | 2026-07-31 | ✅ |
 | [`kmp-shadcn-compose-layouts`](../../skills/kmp-shadcn-compose-layouts/) | 394 | 2026-08-04 | ✅ |
 | [`kmp-legal-docs`](../../skills/kmp-legal-docs/) | 393 | 2026-06-21 | ✅ |
-| [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 392 | 2026-08-21 | ✅ |
+| [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 392 | 2026-08-22 | ✅ |
 | [`kmp-compose-animation`](../../skills/kmp-compose-animation/) | 389 | 2026-06-21 | ✅ |
 | [`kmp-layout-system`](../../skills/kmp-layout-system/) | 387 | 2026-08-10 | ✅ |
 | [`kmp-migration`](../../skills/kmp-migration/) | 386 | 2026-07-19 | ✅ |
