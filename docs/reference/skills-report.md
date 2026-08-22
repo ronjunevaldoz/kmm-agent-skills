@@ -7,8 +7,8 @@ Generated 2026-08-22 by `scripts/generate_skills_report.py` — run it after any
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 499 | 2026-07-26 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 492 | 2026-08-22 | ✅ |
 | [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
-| [`kmp-audit`](../../skills/kmp-audit/) | 489 | 2026-08-22 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 489 | 2026-07-14 | ✅ |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 484 | 2026-07-31 | ✅ |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 483 | 2026-06-26 | ✅ |
@@ -19,7 +19,7 @@ Generated 2026-08-22 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 460 | 2026-07-09 | ✅ |
-| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 456 | 2026-08-22 | ✅ |
+| [`kmp-code-quality`](../../skills/kmp-code-quality/) | 459 | 2026-08-22 | ✅ |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 450 | 2026-07-20 | ✅ |
 | [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |

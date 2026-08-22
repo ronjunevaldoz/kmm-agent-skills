@@ -1,5 +1,5 @@
 {
-  "version": "2.39.0",
+  "version": "2.40.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -121,6 +121,8 @@
       "license": "Apache-2.0",
       "last_updated": "2026-08-22",
       "keywords": [
+        "investigation narration comment",
+        "state the finding not the investigation",
         "ponytail comment density",
         "too many ponytail comments",
         "robotic comment phrase",
@@ -480,7 +482,9 @@
         "sequence vs list",
         "asSequence",
         "ponytail comment density",
-        "too many ponytail comments"
+        "too many ponytail comments",
+        "investigation narration comment",
+        "state the finding not the investigation"
       ],
       "triggers": [
         "Ktlint",
@@ -556,7 +560,9 @@
         "sequence vs list",
         "asSequence",
         "ponytail comment density",
-        "too many ponytail comments"
+        "too many ponytail comments",
+        "investigation narration comment",
+        "state the finding not the investigation"
       ],
       "scripts": []
     },
