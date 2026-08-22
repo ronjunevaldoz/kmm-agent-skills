@@ -1,13 +1,12 @@
 # Skills Report
 
-Generated 2026-08-22 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
+Generated 2026-08-23 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
 **70 skills** — 70 clean, 0 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 499 | 2026-07-26 | ✅ |
-| [`kmp-audit`](../../skills/kmp-audit/) | 493 | 2026-08-22 | ✅ |
 | [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 484 | 2026-07-31 | ✅ |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 483 | 2026-06-26 | ✅ |
@@ -18,6 +17,7 @@ Generated 2026-08-22 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 464 | 2026-08-22 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 462 | 2026-08-22 | ✅ |
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 460 | 2026-07-09 | ✅ |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 459 | 2026-08-22 | ✅ |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |

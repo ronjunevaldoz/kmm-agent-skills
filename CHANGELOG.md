@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.43.0] — 2026-08-23
+
+### Added
+
+- feat(kmp-audit): add construction/execution lifecycle coupling as judgment-only check
+
+---
+
 ## [v2.42.0] — 2026-08-22
 
 ### Added
