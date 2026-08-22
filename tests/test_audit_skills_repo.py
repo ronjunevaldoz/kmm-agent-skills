@@ -490,6 +490,92 @@ class DocsHygieneNamingTests(unittest.TestCase):
             self.assertFalse(any("kebab-case" in f for f in findings))
 
 
+class TaskFileConventionTests(unittest.TestCase):
+    """docs/tasks/<parent>/<NN>-<slug>-<status>.md — status lives in the filename,
+    the date lives inside the content instead of a filename prefix.
+    """
+
+    def _write_task(self, root: Path, parent: str, name: str, body: str) -> Path:
+        task_dir = root / "docs" / "tasks" / parent
+        task_dir.mkdir(parents=True, exist_ok=True)
+        path = task_dir / name
+        path.write_text(body, encoding="utf-8")
+        return path
+
+    def test_valid_task_file_no_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_task(
+                root, "todo-app", "01-add-auth-doing.md",
+                "# Add auth\n\n**Date:** 2026-08-22\n\nBody.\n",
+            )
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertFalse(any("task" in f.lower() or "01-add-auth" in f for f in findings))
+
+    def test_flags_filename_not_matching_convention(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_task(
+                root, "todo-app", "2026-08-22-add-auth.md",
+                "**Date:** 2026-08-22\n",
+            )
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertTrue(any(
+                "2026-08-22-add-auth.md" in f and "does not match" in f for f in findings
+            ))
+
+    def test_flags_done_file_still_in_active_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_task(
+                root, "todo-app", "01-add-auth-done.md",
+                "# Add auth\n\n**Date:** 2026-08-22\n",
+            )
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertTrue(any(
+                "01-add-auth-done.md" in f and "archive" in f for f in findings
+            ))
+
+    def test_does_not_flag_done_file_inside_archive(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_task(
+                root, "todo-app/archive", "01-add-auth-done.md",
+                "# Add auth\n\n**Date:** 2026-08-22\n",
+            )
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertFalse(any("01-add-auth-done.md" in f for f in findings))
+
+    def test_flags_missing_date_line(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_task(
+                root, "todo-app", "01-add-auth-todo.md",
+                "# Add auth\n\nNo date here.\n",
+            )
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertTrue(any(
+                "01-add-auth-todo.md" in f and "Date" in f for f in findings
+            ))
+
+    def test_flags_loose_file_directly_in_tasks_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            tasks_dir = root / "docs" / "tasks"
+            tasks_dir.mkdir(parents=True)
+            (tasks_dir / "01-add-auth-todo.md").write_text("**Date:** 2026-08-22\n", encoding="utf-8")
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertTrue(any(
+                "sits directly in docs/tasks/" in f for f in findings
+            ))
+
+
 class OrphanedReferenceDocTests(unittest.TestCase):
     """docs-hygiene.md already tells a human to grep for inbound links before
     deleting a reference doc — this automates that grep as a review nudge.

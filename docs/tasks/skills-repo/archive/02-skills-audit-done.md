@@ -1,5 +1,7 @@
 # Skills audit — 2026-06-18
 
+**Date:** 2026-06-18
+
 Run against 23 skills using `skills/kmp-audit/scripts/audit_skills_repo.py`
 and a manual pass against the skill creation standards.
 

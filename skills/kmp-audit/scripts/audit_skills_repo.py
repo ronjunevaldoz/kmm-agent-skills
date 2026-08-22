@@ -115,6 +115,13 @@ KEBAB_DIRS = ("agents", "commands", "docs", "samples")
 _SCREAMING_RE = re.compile(r"^[A-Z][A-Z0-9_-]*$")
 _KEBAB_RE = re.compile(r"^(\d{4}-\d{2}-\d{2}-)?[a-z][a-z0-9-]*$")
 
+# docs/tasks/<parent>/<NN>-<slug>-<status>.md — status lives in the filename, not
+# hidden in frontmatter, so it's readable without opening the file. Numbering resets
+# per parent folder, not enforced as globally unique here (authoring convention, not
+# a mechanical invariant worth flagging gaps/reuse for).
+_TASK_FILE_RE = re.compile(r"^\d{2}-[a-z][a-z0-9]*(?:-[a-z0-9]+)*-(todo|doing|blocked|done)$")
+_TASK_DATE_RE = re.compile(r"\*\*Date:\*\*\s*\d{4}-\d{2}-\d{2}")
+
 # The only root-level .md files this repo's own docs-hygiene policy (see
 # agents/docs-maintainer.md "Doc lifecycle") treats as permanent Reference docs
 # (or the resolved-stays-for-reference KNOWN_ISSUES.md registry). Anything else at
@@ -142,6 +149,11 @@ def _check_naming_conventions(root: Path, findings: list[str]) -> None:
         if not subdir.exists():
             continue
         for f in subdir.rglob("*.md"):
+            # docs/tasks/ has its own <NN>-<slug>-<status>.md convention, validated
+            # separately by _check_docs_hygiene — skip it here to avoid a false
+            # positive against the generic kebab regex.
+            if subdir_name == "docs" and f.relative_to(subdir).parts[0] == "tasks":
+                continue
             if not _KEBAB_RE.match(f.stem):
                 findings.append(
                     f"naming: {f.relative_to(root)} should be kebab-case "
@@ -154,8 +166,9 @@ def _check_stale_task_docs_at_root(root: Path, findings: list[str]) -> None:
         if f.stem.upper() not in _PERMANENT_ROOT_DOCS:
             findings.append(
                 f"docs-hygiene: root-level {f.name} looks like a Task-kind doc "
-                f"(one-off audit/report/gap-analysis) — move to docs/tasks/, and "
-                f"archive to docs/tasks/archive/YYYY-MM-DD-slug.md once actioned. "
+                f"(one-off audit/report/gap-analysis) — move to "
+                f"docs/tasks/<parent>/01-slug-todo.md, and rename to "
+                f"docs/tasks/<parent>/archive/01-slug-done.md once actioned. "
                 f"If this is a genuinely new permanent doc, add its name to "
                 f"_PERMANENT_ROOT_DOCS in audit_skills_repo.py."
             )
@@ -286,18 +299,38 @@ def _check_docs_hygiene(root: Path, findings: list[str]) -> None:
                 f"(limit {LESSON_BACKLOG_LIMIT}) — harvest and archive processed lessons"
             )
 
-    # 4. Task files marked done still in active tasks dir (not archive)
+    # 4. Task files: docs/tasks/<parent>/<NN>-<slug>-<status>.md — status lives in the
+    # filename (todo/doing/blocked/done), the date lives inside the content instead.
     tasks_dir = docs_dir / "tasks"
     if tasks_dir.exists():
-        for md in tasks_dir.glob("*.md"):
-            if "archive" in md.parts:
-                continue
-            text = md.read_text(encoding="utf-8").lower()
-            if re.search(r"status:\s*(done|completed|closed)", text):
-                findings.append(
-                    f"docs hygiene: {md.relative_to(root)} is marked done "
-                    "— move to docs/tasks/archive/"
-                )
+        for loose in sorted(tasks_dir.glob("*.md")):
+            findings.append(
+                f"docs hygiene: {loose.relative_to(root)} sits directly in docs/tasks/ "
+                "— move under a parent folder: docs/tasks/<parent>/01-slug-todo.md"
+            )
+        for parent_dir in sorted(p for p in tasks_dir.iterdir() if p.is_dir()):
+            for md in sorted(parent_dir.rglob("*.md")):
+                in_archive = "archive" in md.relative_to(parent_dir).parts
+                m = _TASK_FILE_RE.match(md.stem)
+                if not m:
+                    findings.append(
+                        f"docs hygiene: {md.relative_to(root)} does not match "
+                        "<NN>-<slug>-<status>.md (status: todo/doing/blocked/done) "
+                        "— rename to match the task naming convention"
+                    )
+                    continue
+                if not in_archive and m.group(1) == "done":
+                    findings.append(
+                        f"docs hygiene: {md.relative_to(root)} is marked done "
+                        f"— move to {parent_dir.relative_to(root)}/archive/"
+                    )
+                if not in_archive and not _TASK_DATE_RE.search(
+                    md.read_text(encoding="utf-8", errors="ignore")
+                ):
+                    findings.append(
+                        f"docs hygiene: {md.relative_to(root)} is missing a "
+                        "**Date:** YYYY-MM-DD line in its content"
+                    )
 
     # 5. Non-markdown files sitting directly in docs/ (flag as non-docs)
     for f in docs_dir.iterdir():

@@ -66,9 +66,11 @@ this repo's own docs:
   Stays in place, updated in place. `README.md`, `AGENTS.md`, `INSTALL.md`,
   `docs/reference/*.md`, per-skill `SKILL.md`.
 - **Task** — "what are we doing right now?" A one-off audit, gap analysis, or migration
-  report. Goes in `docs/tasks/`, never at repo root. Archive to `docs/tasks/archive/YYYY-MM-DD-slug.md`
-  the moment its findings are actioned or the work ships — see `docs/tasks/archive/` for
-  precedent. Never delete a Task doc — archive it; the history is evidence.
+  report. Goes in `docs/tasks/<parent>/<NN>-<slug>-<status>.md`, never at repo root
+  (status is one of `todo`/`doing`/`blocked`/`done`, the date lives inside the file
+  content — see `docs-hygiene.md`'s Naming Convention). Rename the status suffix to
+  `-done` and move to `docs/tasks/<parent>/archive/` the moment its findings are actioned
+  or the work ships. Never delete a Task doc — archive it; the history is evidence.
 - **Permanent registry, resolved-stays** — `KNOWN_ISSUES.md` is its own third case:
   resolved issues stay in place marked resolved, because they explain why a rule exists.
   Don't archive these into `docs/tasks/`.

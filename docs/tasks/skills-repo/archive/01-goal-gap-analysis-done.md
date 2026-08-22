@@ -1,5 +1,7 @@
 # Goal gap analysis — 2026-06-18
 
+**Date:** 2026-06-18
+
 ---
 
 ## Coverage

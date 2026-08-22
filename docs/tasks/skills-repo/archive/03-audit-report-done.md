@@ -1,6 +1,6 @@
 # Deep Technical Audit — kmp-agent-skills
 
-Date: 2026-08-02 · HEAD: `3181873` (v1.118.0) · Mode: **diagnose only, no code changed**
+**Date:** 2026-08-02 · HEAD: `3181873` (v1.118.0) · Mode: **diagnose only, no code changed**
 
 Every finding below was verified against an actual file lookup or command run — three
 candidate findings from intermediate scans were discarded as false positives after
