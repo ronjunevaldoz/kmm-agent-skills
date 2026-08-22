@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.41.0] — 2026-08-22
+
+### Added
+
+- feat(kmp-unit-testing): add Kover test coverage guidance
+
+---
+
 ## [v2.40.0] — 2026-08-22
 
 ### Added

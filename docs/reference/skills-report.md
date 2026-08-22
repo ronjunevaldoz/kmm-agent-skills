@@ -9,7 +9,6 @@ Generated 2026-08-22 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-mvi`](../../skills/kmp-mvi/) | 499 | 2026-07-26 | ✅ |
 | [`kmp-audit`](../../skills/kmp-audit/) | 492 | 2026-08-22 | ✅ |
 | [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
-| [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 489 | 2026-07-14 | ✅ |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 484 | 2026-07-31 | ✅ |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 483 | 2026-06-26 | ✅ |
 | [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 482 | 2026-08-11 | ✅ |
@@ -17,6 +16,7 @@ Generated 2026-08-22 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 469 | 2026-07-08 | ✅ |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 468 | 2026-06-29 | ✅ |
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
+| [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 464 | 2026-08-22 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 460 | 2026-07-09 | ✅ |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 459 | 2026-08-22 | ✅ |
@@ -54,6 +54,7 @@ Generated 2026-08-22 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-lessons`](../../skills/kmp-lessons/) | 356 | 2026-07-12 | ✅ |
 | [`kmp-deep-linking`](../../skills/kmp-deep-linking/) | 351 | 2026-06-21 | ✅ |
 | [`kmp-crash-reporting`](../../skills/kmp-crash-reporting/) | 350 | 2026-06-24 | ✅ |
+| [`kmp-unit-testing`](../../skills/kmp-unit-testing/) | 340 | 2026-08-22 | ✅ |
 | [`kmp-skill-harvester`](../../skills/kmp-skill-harvester/) | 337 | 2026-06-26 | ✅ |
 | [`kmp-feature-flags`](../../skills/kmp-feature-flags/) | 334 | 2026-06-21 | ✅ |
 | [`kmp-compose-accessibility`](../../skills/kmp-compose-accessibility/) | 330 | 2026-06-21 | ✅ |
@@ -69,7 +70,6 @@ Generated 2026-08-22 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-imagevector-generator`](../../skills/kmp-imagevector-generator/) | 277 | 2026-07-08 | ✅ |
 | [`kmp-compose-preview-driven-development`](../../skills/kmp-compose-preview-driven-development/) | 276 | 2026-07-08 | ✅ |
 | [`kmp-proguard-r8`](../../skills/kmp-proguard-r8/) | 269 | 2026-06-29 | ✅ |
-| [`kmp-unit-testing`](../../skills/kmp-unit-testing/) | 269 | 2026-06-18 | ✅ |
 | [`kmp-compose-graphics-modifiers`](../../skills/kmp-compose-graphics-modifiers/) | 266 | 2026-06-13 | ✅ |
 | [`kmp-ktor-auth-service`](../../skills/kmp-ktor-auth-service/) | 242 | 2026-06-13 | ✅ |
 | [`kmp-refactor`](../../skills/kmp-refactor/) | 232 | 2026-08-02 | ✅ |

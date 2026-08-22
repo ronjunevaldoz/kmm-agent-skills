@@ -1,5 +1,5 @@
 {
-  "version": "2.40.0",
+  "version": "2.41.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -283,7 +283,7 @@
       "path": "skills/kmp-ci-github-actions",
       "description": "Sets up GitHub Actions CI for a Kotlin Multiplatform (KMP) project. Produces two workflow files: ci.yml (lint, Android tests, iOS tests, Desktop JVM tests, Web JS + WasmJs tests, Gradle cache) and release.yml (XCFramework build + upload artifact). All target platforms are covered. Assumes AGP 9+ and the project structure from kmp-feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-14",
+      "last_updated": "2026-08-22",
       "keywords": [
         "GitHub Actions",
         "CI/CD",
@@ -324,7 +324,10 @@
         "GitHub Actions minutes",
         "free tier CI",
         "run CI locally",
-        "act local runner"
+        "act local runner",
+        "koverVerify",
+        "test coverage CI",
+        "coverage gate"
       ],
       "scripts": []
     },
@@ -3492,7 +3495,7 @@
       "path": "skills/kmp-unit-testing",
       "description": "Unit testing patterns for KMP: runTest + Turbine for Flow assertions, fake-over-mock rule, :core:testing shared fixtures module, and ViewModel tests that run on plain JVM via the :presenter module with no Android dependency.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-18",
+      "last_updated": "2026-08-22",
       "keywords": [
         "unit testing",
         "KMP",
@@ -3530,7 +3533,14 @@
         "unit testing",
         "test this",
         "how to test",
-        "test the screen"
+        "test the screen",
+        "Kover",
+        "kotlinx-kover",
+        "coverage threshold",
+        "koverVerify",
+        "koverHtmlReport",
+        "code coverage KMP",
+        "minimum coverage"
       ],
       "scripts": []
     },
