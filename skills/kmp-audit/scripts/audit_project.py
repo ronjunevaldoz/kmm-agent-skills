@@ -1417,6 +1417,31 @@ _KDOC_START_RE = re.compile(r"/\*\*")
 _KDOC_END_RE = re.compile(r"\*/")
 
 
+def _iter_kt_comment_lines(lines: list[str]):
+    """Yield (line_index, comment_text, raw_line) for every // or KDoc
+    comment-bearing line in a .kt file's lines — shared by every detector that
+    scans comment *content* rather than code, so the KDoc-block-state tracking
+    and the URL-in-string-safe // detection (`_line_comment_index`) live once.
+    """
+    in_kdoc = False
+    for i, line in enumerate(lines):
+        comment_text = None
+        if in_kdoc:
+            comment_text = line
+            if _KDOC_END_RE.search(line):
+                in_kdoc = False
+        elif _KDOC_START_RE.search(line):
+            comment_text = line
+            if not _KDOC_END_RE.search(line):
+                in_kdoc = True
+        else:
+            idx = _line_comment_index(line)
+            if idx != -1:
+                comment_text = line[idx + 2 :]
+        if comment_text is not None:
+            yield i, comment_text, line
+
+
 def _detect_robotic_comment_phrase(root: Path) -> list[str]:
     """Flag formal/robotic phrasing inside a // or KDoc comment — real, cited phrases
     (the docs-hedging list plus comment-specific openers like "is responsible for"),
@@ -1431,23 +1456,7 @@ def _detect_robotic_comment_phrase(root: Path) -> list[str]:
             lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
         except OSError:
             continue
-        in_kdoc = False
-        for i, line in enumerate(lines):
-            comment_text = None
-            if in_kdoc:
-                comment_text = line
-                if _KDOC_END_RE.search(line):
-                    in_kdoc = False
-            elif _KDOC_START_RE.search(line):
-                comment_text = line
-                if not _KDOC_END_RE.search(line):
-                    in_kdoc = True
-            else:
-                idx = _line_comment_index(line)
-                if idx != -1:
-                    comment_text = line[idx + 2 :]
-            if comment_text is None:
-                continue
+        for i, comment_text, raw_line in _iter_kt_comment_lines(lines):
             match = _ROBOTIC_COMMENT_RE.search(comment_text)
             if not match:
                 continue
@@ -1456,7 +1465,58 @@ def _detect_robotic_comment_phrase(root: Path) -> list[str]:
                 f"— '{match.group(1)}' reads like textbook prose, not how a developer "
                 f"would explain this to a teammate. Per kmp-code-quality's Comment "
                 f"& KDoc Conventions, cut it or state the fact directly\n"
-                f"    {i + 1} | {line.strip()}"
+                f"    {i + 1} | {raw_line.strip()}"
+            )
+    return findings
+
+
+# ── Investigation narration inside a comment ────────────────────────────────
+# Per kmp-code-quality's "State the finding, not the investigation" rule: a comment
+# recounting the debugging process, or quoting a bug report's own prose, isn't what a
+# reader needs — they need the fact the investigation ended on. TODO/FIXME are exempt
+# by design (see kmp-code-quality's TODO/FIXME section) — this targets narration
+# prose, not a tracked-issue pointer.
+
+_INVESTIGATION_NARRATION_PHRASES = [
+    "investigated",
+    "after debugging",
+    "turned out to be",
+    "root cause was",
+    "steps to reproduce",
+    "upon further investigation",
+    "traced the issue to",
+    "after checking",
+    "it was found that",
+]
+_INVESTIGATION_NARRATION_RE = re.compile(
+    r"\b(" + "|".join(re.escape(p) for p in _INVESTIGATION_NARRATION_PHRASES) + r")\b",
+    re.IGNORECASE,
+)
+
+
+def _detect_investigation_narration_comment(root: Path) -> list[str]:
+    """Flag a // or KDoc comment narrating how a bug was tracked down, or quoting
+    a bug report's own prose — real, cited phrase list, not fabricated.
+    """
+    findings: list[str] = []
+    for path in root.rglob("*.kt"):
+        if _is_excluded(path, root) or _is_test_source(path):
+            continue
+        try:
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+        except OSError:
+            continue
+        for i, comment_text, raw_line in _iter_kt_comment_lines(lines):
+            match = _INVESTIGATION_NARRATION_RE.search(comment_text)
+            if not match:
+                continue
+            findings.append(
+                f"investigation narration comment [LOW]: {path.relative_to(root)}:{i + 1} "
+                f"— '{match.group(1)}' narrates the debugging process instead of "
+                f"stating the fact it ended on. Per kmp-code-quality's Comment & KDoc "
+                f"Conventions, state the finding directly (TODO/FIXME with a tracked "
+                f"issue link is fine for real deferred work)\n"
+                f"    {i + 1} | {raw_line.strip()}"
             )
     return findings
 
@@ -5254,6 +5314,7 @@ def audit_project(root: Path) -> list[str]:
     findings.extend(_detect_enum_masquerading_as_sealed(root))
     findings.extend(_detect_builder_without_build_method(root))
     findings.extend(_detect_ponytail_comment_density(root))
+    findings.extend(_detect_investigation_narration_comment(root))
     findings.extend(_detect_duplicate_code_block(root))
 
     # ── God class (repo-wide, not scoped to ViewModel/Composable) ───────────────

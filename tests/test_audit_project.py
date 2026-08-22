@@ -5172,5 +5172,55 @@ class PonytailCommentDensityTests(unittest.TestCase):
             self.assertFalse(any("ponytail comment density" in f for f in findings))
 
 
+class InvestigationNarrationCommentTests(unittest.TestCase):
+    """kmp-code-quality's 'state the finding, not the investigation' rule: a
+    comment recounting the debugging process isn't what a reader needs.
+    """
+
+    def _write(self, root: Path, rel_path: str, content: str) -> None:
+        d = (root / rel_path).parent
+        d.mkdir(parents=True, exist_ok=True)
+        (root / rel_path).write_text(content, encoding="utf-8")
+
+    def test_flags_investigation_narration(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/cache/src/commonMain/kotlin/Cache.kt",
+                "package test\n\n"
+                "// Investigated: checked retry logic, turned out the root cause was a\n"
+                "// stale cache entry.\n"
+                "class ExpiringCache(ttl: Int)\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertTrue(any("investigation narration comment" in f for f in findings))
+
+    def test_ignores_todo_with_tracked_issue(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/cache/src/commonMain/kotlin/Cache.kt",
+                "package test\n\n"
+                "fun ok() {\n"
+                "    // TODO: github.com/org/repo/issues/123 - revisit retry backoff\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("investigation narration comment" in f for f in findings))
+
+    def test_ignores_real_why_comment(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write(
+                root, "feature/cache/src/commonMain/kotlin/Cache.kt",
+                "package test\n\n"
+                "fun ok() {\n"
+                "    // 30s TTL -- a longer cache silently served stale data across a reconnect.\n"
+                "}\n",
+            )
+            findings = audit_scripts.audit_project(root)
+            self.assertFalse(any("investigation narration comment" in f for f in findings))
+
+
 if __name__ == "__main__":
     unittest.main()

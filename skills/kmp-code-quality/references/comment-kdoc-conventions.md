@@ -66,6 +66,32 @@ Writing Style hedge phrases — "in order to," "it should be noted that") in `//
 KDoc comments — the same regex-safe, low-false-positive treatment as
 `_detect_hedging_language`, applied to code comments instead of markdown docs.
 
+**State the finding, not the investigation.** A comment walking through how a bug was
+tracked down ("investigated: checked X first, ruled it out, turned out to be Y"), or
+quoting an issue/bug-report's own prose verbatim, isn't what a reader needs — they need
+the current fact the investigation ended on, not the path taken to find it. `TODO:`/
+`FIXME:` are the one exception: readers already know that convention, and a linked
+tracked issue for real deferred work is genuinely useful, not narration (see TODO/FIXME
+below) — this rule is about prose that recounts the *process*, not a pointer to
+follow-up work.
+
+```kotlin
+// ❌ narrates the investigation — a reader needs the fact, not the journey
+// Investigated: first checked if it was a race condition, ruled that out. Then
+// checked the retry logic, turned out the root cause was actually a stale cache
+// entry. Bug report said: "app shows old data after reconnecting to wifi."
+val cache = ExpiringCache(ttl = 30.seconds)
+
+// ✓ states the fact the investigation ended on, nothing else
+// 30s TTL — a longer cache silently served stale data across a network reconnect.
+val cache = ExpiringCache(ttl = 30.seconds)
+```
+
+`kmp-audit`'s `_detect_investigation_narration_comment` catches a fixed list of
+narration phrases ("investigated", "turned out to be", "root cause was", "steps to
+reproduce") in `//` and KDoc comments — same regex-safe treatment as the robotic-phrase
+and hedging checks above.
+
 **Historical narration isn't a substitute for current purpose.** A comment describing
 what code *used to be* or *how it got here* ("previously used LiveData", "migrated
 from X in 2024", "this used to throw NPE") is git log's job, not the file's. A reader

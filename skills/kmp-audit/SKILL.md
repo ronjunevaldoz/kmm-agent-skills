@@ -13,6 +13,8 @@ metadata:
   author: kmp-agent-skills
   last-updated: '2026-08-22'
   keywords:
+    - investigation narration comment
+    - state the finding not the investigation
     - ponytail comment density
     - too many ponytail comments
     - robotic comment phrase
@@ -434,6 +436,7 @@ Ask before converting findings to issue drafts. Keep implementation advice minim
 
 | Date | Change |
 |---|---|
+| 2026-08-22 | Added `_detect_investigation_narration_comment` — mechanical backing for `kmp-code-quality`'s new "state the finding, not the investigation" rule. Fixed phrase list ("investigated", "turned out to be", "root cause was", "steps to reproduce") in `//`/KDoc comments; `TODO`/`FIXME` naturally exempt since neither appears in the phrase list. Extracted `_iter_kt_comment_lines` as a shared helper — this detector and `_detect_robotic_comment_phrase` were duplicating the same KDoc-block-state scan. 3 new tests. |
 | 2026-08-22 | Added `_detect_ponytail_comment_density` — real case found live: a ponytail-mode session added 40 legitimate `ponytail:` ceiling comments (each individually correct, states a real limitation + upgrade path) across one work session, spread thin across many files (max 2 in any one file), reading as noise in aggregate even though no single instance was wrong. A per-file threshold would have caught none of it — project-wide total (20+) is the actual signal. Non-blocking: a real ceiling stays valid regardless of count, this is a backlog-review nudge. 2 new tests. |
 | 2026-08-21 | Widened `_detect_hedging_language` to also match the comment-specific robotic-phrase list ("is responsible for", "this class is used to") that previously only applied to `.kt` comments via `_detect_robotic_comment_phrase` — docs deserve the same "does this read like a textbook" bar as code. Also added `_check_orphaned_reference_docs` to `audit_skills_repo.py` — flags a `docs/`-root or `docs/reference/*.md` file with zero inbound links from anywhere else in the repo. Automates the grep `docs-hygiene.md` already tells a human to do by hand before deleting a reference doc; stays a review nudge, not a deletion verdict, since a fresh doc nothing points to yet isn't necessarily stale. Both wired into `--docs-hygiene-only`, the consumer-facing path. 5 new tests. |
 | 2026-08-19 | Added `_detect_robotic_comment_phrase` — mechanical backing for `kmp-code-quality`'s new "write it like you'd explain it to a teammate" rule. Scans `//` and KDoc comments in `.kt` files for formal/robotic phrasing: comment-specific openers ("is responsible for", "this class is used to") plus the existing docs-hedging phrase list ("in order to," "it should be noted that"). Distinct scope from `_detect_hedging_language` (markdown docs) — this one walks Kotlin source, tracking KDoc block state and reusing `_line_comment_index` to avoid the URL-in-string false positive already fixed for the control-flow WHAT-comment detector. 3 new tests. |

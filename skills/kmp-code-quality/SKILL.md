@@ -74,6 +74,8 @@ metadata:
     - asSequence
     - ponytail comment density
     - too many ponytail comments
+    - investigation narration comment
+    - state the finding not the investigation
 ---
 
 ## When to Use This Skill
@@ -103,7 +105,8 @@ formal comment phrasing, KDoc bracket linking, sealed class KDoc, backtick liter
 delicate code comment, pointer first fragile code, read before modifying comment,
 scope functions,
 let vs run vs apply vs also, when to use with, sequence vs list, asSequence,
-ponytail comment density, too many ponytail comments.
+ponytail comment density, too many ponytail comments, investigation narration
+comment, state the finding not the investigation.
 
 **Freshness rule:** Ktlint and Detekt versions change frequently — recheck the latest releases
 before pinning. Detekt architecture rule DSL changes between minor versions.
