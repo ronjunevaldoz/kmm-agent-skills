@@ -53,6 +53,13 @@ skill-name/
 
 This is the one guideline this repo doesn't fully meet yet — see Known Gaps below.
 
+`kmp-audit`'s `audit_skills_repo.py` enforces the undocumented-directory guard for all
+three optional directories — `scripts/`, `references/`, and `assets/` — flagging a skill
+that has one of these directories but never mentions it in `SKILL.md`. This repo's
+pre-existing `templates/` (4 skills, whole project-scaffolding trees copied verbatim)
+predates this doc and isn't part of the spec — a separate, still-unchecked local
+convention, not folded into `assets/`.
+
 ### Validation
 
 `skills-ref validate ./my-skill` is the official reference check — install instructions

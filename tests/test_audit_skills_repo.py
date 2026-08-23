@@ -28,6 +28,34 @@ class AuditSkillsRepoTests(unittest.TestCase):
             findings = audit_repo_scripts.audit_skills_repo(root)
             self.assertTrue(any("missing freshness guidance" in finding for finding in findings))
 
+    def test_audit_skills_repo_flags_assets_dir_without_guidance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            skill_dir = root / "skills" / "example-skill"
+            (skill_dir / "assets").mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: example-skill\ndescription: example\n---\n\n## When to Use This Skill\n\nExample.\n",
+                encoding="utf-8",
+            )
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertTrue(any("has assets/ but no assets guidance" in f for f in findings))
+
+    def test_audit_skills_repo_does_not_flag_assets_dir_with_guidance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# repo\n\nStart here\n\nRoadmap\n", encoding="utf-8")
+            skill_dir = root / "skills" / "example-skill"
+            (skill_dir / "assets").mkdir(parents=True)
+            (skill_dir / "SKILL.md").write_text(
+                "---\nname: example-skill\ndescription: example\n---\n\n"
+                "## When to Use This Skill\n\nExample.\n\n"
+                "## Assets\n\nCopy `assets/logo.png` when scaffolding.\n",
+                encoding="utf-8",
+            )
+            findings = audit_repo_scripts.audit_skills_repo(root)
+            self.assertFalse(any("has assets/ but no assets guidance" in f for f in findings))
+
     def test_audit_skills_repo_flags_missing_all_targets_branch_guidance(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

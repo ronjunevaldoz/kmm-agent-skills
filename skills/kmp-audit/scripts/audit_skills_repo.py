@@ -439,6 +439,15 @@ def audit_skills_repo(root: Path) -> list[str]:
         if (skill_dir / "scripts").exists() and "Script" not in text and "scripts/" not in text:
             findings.append(f"{skill_dir.name}: has scripts/ but no script guidance in SKILL.md")
 
+        # agentskills.io's real spec (docs/reference/agentskills-io-standards.md) lists
+        # assets/ as the official "templates, static resources" directory — same
+        # undocumented-directory risk as scripts/ and references/ above, so it gets the
+        # same guard. Note: this repo's pre-existing templates/ (4 skills, project
+        # scaffolding trees) predates that doc and isn't part of the spec — a separate,
+        # still-unchecked convention, not folded into this check.
+        if (skill_dir / "assets").exists() and "Asset" not in text and "assets/" not in text:
+            findings.append(f"{skill_dir.name}: has assets/ but no assets guidance in SKILL.md")
+
         design_system_text = text
         references_dir = skill_dir / "references"
         if references_dir.exists():
