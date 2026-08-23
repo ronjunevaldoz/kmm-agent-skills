@@ -1,5 +1,5 @@
 {
-  "version": "2.52.0",
+  "version": "2.53.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -586,7 +586,7 @@
       "path": "skills/kmp-compose-accessibility",
       "description": "Accessibility (a11y) for Kotlin Multiplatform Compose \u2014 semantic roles and mergeDescendants, contentDescription on interactive and image elements, screen reader traversal order, minimum touch target size, Roborazzi accessibility snapshot tests, reduced-motion support, and a Compose a11y audit checklist.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-21",
+      "last_updated": "2026-08-24",
       "keywords": [
         "accessibility",
         "a11y",
@@ -2443,7 +2443,7 @@
       "path": "skills/kmp-mvi",
       "description": "MVI (Model-View-Intent) architecture pattern for Kotlin Multiplatform + Compose Multiplatform. Covers: the Contract pattern (State/Intent/Effect per screen), MviViewModel base class with StateFlow for state and Channel for one-shot effects, atomic state updates, Compose screen/content split, testing ViewModels with Turbine, and the most common MVI pitfalls in KMP. Zero new dependencies \u2014 builds on androidx.lifecycle.ViewModel and kotlinx.coroutines already present in feature-scaffold.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-26",
+      "last_updated": "2026-08-24",
       "keywords": [
         "MVI",
         "Model-View-Intent",

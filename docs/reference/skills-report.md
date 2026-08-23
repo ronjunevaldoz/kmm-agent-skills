@@ -6,8 +6,8 @@ Generated 2026-08-24 by `scripts/generate_skills_report.py` — run it after any
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
-| [`kmp-mvi`](../../skills/kmp-mvi/) | 499 | 2026-07-26 | ✅ |
 | [`kmp-in-app-purchases`](../../skills/kmp-in-app-purchases/) | 490 | 2026-06-29 | ✅ |
+| [`kmp-mvi`](../../skills/kmp-mvi/) | 486 | 2026-08-24 | ✅ |
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 484 | 2026-07-31 | ✅ |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 483 | 2026-06-26 | ✅ |
 | [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 482 | 2026-08-11 | ✅ |
@@ -54,10 +54,10 @@ Generated 2026-08-24 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-lessons`](../../skills/kmp-lessons/) | 356 | 2026-07-12 | ✅ |
 | [`kmp-deep-linking`](../../skills/kmp-deep-linking/) | 351 | 2026-06-21 | ✅ |
 | [`kmp-crash-reporting`](../../skills/kmp-crash-reporting/) | 350 | 2026-06-24 | ✅ |
+| [`kmp-compose-accessibility`](../../skills/kmp-compose-accessibility/) | 346 | 2026-08-24 | ✅ |
 | [`kmp-unit-testing`](../../skills/kmp-unit-testing/) | 340 | 2026-08-22 | ✅ |
 | [`kmp-skill-harvester`](../../skills/kmp-skill-harvester/) | 337 | 2026-06-26 | ✅ |
 | [`kmp-feature-flags`](../../skills/kmp-feature-flags/) | 334 | 2026-06-21 | ✅ |
-| [`kmp-compose-accessibility`](../../skills/kmp-compose-accessibility/) | 330 | 2026-06-21 | ✅ |
 | [`kmp-native-authoring`](../../skills/kmp-native-authoring/) | 330 | 2026-07-31 | ✅ |
 | [`kmp-release`](../../skills/kmp-release/) | 328 | 2026-07-04 | ✅ |
 | [`kmp-docs-site`](../../skills/kmp-docs-site/) | 326 | 2026-07-11 | ✅ |

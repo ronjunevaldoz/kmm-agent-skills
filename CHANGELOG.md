@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.53.0] — 2026-08-24
+
+### Added
+
+- feat(kmp-mvi): extract cross-framework generic guidance for MVI and accessibility
+
+---
+
 ## [v2.52.0] — 2026-08-24
 
 ### Added
