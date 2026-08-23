@@ -57,6 +57,54 @@ its actual source" by shape alone; both can produce identical code.
   helper is not evidence of copying; a byte-for-byte block with renamed
   variables is.
 
+### Clean-Room Provenance Record
+
+"Do we have proof of non-copyright-violation" — verified what that actually
+means before writing this, rather than assuming: the real "clean room"
+process (upheld in *Sega v. Accolade*; the Columbia Data Products/IBM BIOS
+case is the textbook example) is a **two-team model** — one team studies the
+target and writes a behavior-only functional spec, a second team implements
+from that spec *without ever accessing the original source*. It exists to
+defend against copyright/trade-secret claims when reverse-engineering
+**closed-source, proprietary** software.
+
+**That full apparatus is usually the wrong tool here.** Most reference APIs
+this skill mimics (Jetpack Compose, Retrofit, Room) are already open-source
+under a permissive license — their source isn't a secret you're barred from
+seeing, so there's nothing to wall off. The actual risk for an open-source
+reference API is narrower and already covered above: verbatim copying without
+attribution, not "you had access to code you shouldn't have." A lightweight
+**Provenance Record** — documenting each mimicked primitive was derived from
+public docs, not copy-pasted from source — is the right-sized artifact for
+that case.
+
+**Escalate to the real two-team process (and actual legal counsel, not this
+skill) only when the reference API is genuinely closed-source or
+proprietary** and there's real commercial exposure — mimicking SwiftUI's
+shape from Apple's public documentation is a materially different legal
+position than mimicking Compose's shape from AOSP's public, Apache-2.0
+source, precisely because Compose's source was never off-limits to begin
+with.
+
+**Provenance Record template** — one file, one row per mimicked primitive
+(pairs with `docs/MIRROR_MAP.md`, doesn't replace it):
+
+```markdown
+# Provenance Record
+
+| Primitive | Author | Date | Sources consulted | Reference source viewed? |
+|---|---|---|---|---|
+| `EngineModifier.padding()` | @handle | 2026-08-23 | [Compose Modifier docs](https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier) | No — public docs only |
+| `EngineScope.Box()` | @handle | 2026-08-23 | Compose Layouts guide | No — public docs only |
+```
+
+**"Reference source viewed?" — answer honestly, not defensively.** "Yes, for
+research" is fine and common; what matters is what happens next: if source
+was viewed, the record should say what was verified from it (behavior,
+naming) versus what was independently written (the actual implementation).
+"No" is the stronger position when true — don't claim it if a source browse
+actually happened.
+
 ## 3) Font Licensing & Assets
 
 Applies to every project bundling fonts, mimicry or not — not specific to any
