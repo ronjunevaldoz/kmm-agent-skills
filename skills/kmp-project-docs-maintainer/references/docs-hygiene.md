@@ -42,6 +42,63 @@ Use these lanes when the project keeps planning or bug history in nested folders
 Keep these lanes short-lived and promote stable guidance out of them into
 `docs/architecture.md`, `docs/deployment.md`, or `docs/reference/`.
 
+### Decision lane (ADR)
+
+A fourth case that doesn't fit either Reference's "update in place" or Task's
+"archive when done" — an Architecture Decision Record. Verified against the
+real, widely-adopted pattern (Michael Nygard, 2011; rated ADOPT on
+ThoughtWorks' Technology Radar): **one decision per file, roughly one page,
+immutable once accepted.**
+
+- **Location**: `docs/decisions/NNNN-slug.md` — 4-digit, globally sequential
+  across the whole project (not per-parent like `docs/tasks/`; ADRs are meant
+  to be found by number in a flat directory listing).
+- **Shape**: title + `**Status:**` (`Proposed` / `Accepted` / `Superseded` /
+  `Deprecated`) + Context + Decision + Consequences. Nygard's original
+  four-section format — don't invent a different shape per project.
+- **Immutable once Accepted.** A changed decision gets a **new** numbered
+  file; the old file's `**Status:**` line changes to
+  `Superseded by ADR-00XX` and links forward — the file body itself is never
+  rewritten. A decision log where the losing arguments were quietly edited
+  away is worse than no log at all.
+- **Never archived, never deleted** — even superseded ADRs stay in
+  `docs/decisions/` as the historical record of what the team actually
+  committed to and why it changed.
+- **Not for**: implementation plans (that's the Task lane), full design
+  specs, or operational runbooks — an ADR records the *choice*, not the *plan
+  to execute it* or *how to operate it*.
+- One real anti-pattern this corrects: a single growing `decision-log.md`
+  that every decision gets appended to. That's a Task-shaped habit (one file,
+  edited forever) applied to Reference-shaped content — split it into one
+  `docs/decisions/NNNN-slug.md` per decision instead.
+
+**Starter template** — `docs/decisions/0001-slug.md`:
+
+```markdown
+# 0001. Use SQLDelight for local persistence
+
+**Status:** Accepted
+
+## Context
+
+What forced this decision? The problem, constraint, or tradeoff — not the
+whole subsystem, just what made a choice necessary here.
+
+## Decision
+
+The actual choice, stated plainly. One sentence if possible.
+
+## Consequences
+
+What this makes easier, what it makes harder, what it forecloses. Include
+the real cost, not just the benefit — an ADR that only lists upsides reads
+as marketing, not a decision record.
+```
+
+When a later decision changes this one, don't edit this file's body — write
+`docs/decisions/0002-slug.md` and change only this file's Status line to
+`**Status:** Superseded by ADR-0002`.
+
 ### Classification examples
 
 | File | Kind | Action |
@@ -60,6 +117,8 @@ Keep these lanes short-lived and promote stable guidance out of them into
 | `tasks.md` | Task (entrypoint) | Keep at `docs/tasks.md` |
 | `fixtures/*.json` | Non-doc | Move to `tests/fixtures/` or `src/test/resources/` |
 | `openapi.json` | Non-doc | Move to `api/` or `spec/` at project root |
+| `decision-log.md` (one growing file) | Decision lane, done wrong | Split into `docs/decisions/0001-slug.md` per decision; stop appending to one file |
+| `0001-use-sqldelight-for-persistence.md` | Decision lane | Keep at `docs/decisions/` — immutable once `Accepted`, never archived |
 
 ### Ambiguity test
 
@@ -67,6 +126,12 @@ Keep these lanes short-lived and promote stable guidance out of them into
 - Yes → Reference.
 - No → Task. Archive when done.
 - Neither → Non-doc. Move it out of `docs/`.
+
+A decision record is the one case that looks like it fails this test (a
+superseded ADR is no longer "accurate," today's decision moved on) but still
+isn't a Task — it's kept precisely *because* it's outdated, as the record of
+what changed and why. If the file records a choice and its reasoning →
+Decision lane, not Reference or Task.
 
 ---
 
@@ -119,6 +184,7 @@ history. Ask which case applies:
 | Reference doc now fully superseded, zero unique information left | Delete | Nothing left to browse to — keeping it around just recreates the clutter this checklist exists to prevent; git history covers "what did this used to say" |
 | Non-doc file after it's been moved to its real home (`tests/fixtures/`, `api/`, project root) | Delete the `docs/` copy | The file lives on at its new path; leaving a stale copy in `docs/` is drift, not history |
 | File superseded by a rename (old path, content unchanged) | Delete old path | `git mv`/rename already carries the history forward; a leftover old-named file is a duplicate, not an archive |
+| Decision record (ADR), superseded by a later decision | Neither — mark `**Status:** Superseded by ADR-00XX`, leave the file in place | The whole point of an ADR is the historical record; deleting or archiving it destroys exactly the "why did we change our mind" trail it exists to preserve |
 
 If in doubt whether a reference doc still has unique information, don't guess — grep for
 inbound links (see Clean-up Sequence step 2) and check whether anything still points at it
@@ -196,6 +262,8 @@ active file, or a reader can't trust it as a substitute for opening each one.
 | Non-doc file (`.json`, `.yaml`, etc.) directly in `docs/` | 0 | Move to purpose-specific directory |
 | Snake_case filename in `docs/` | 0 | Rename to kebab-case |
 | Reference doc (`docs/` root or `docs/reference/`) with no inbound links anywhere in the repo | 0 | Review — link it from wherever introduces the topic, or delete per Delete vs Archive above if it's genuinely stale |
+| Decision record filename not matching `NNNN-slug.md` (4-digit, sequential) | 0 | Rename to match the ADR naming convention |
+| Decision record missing a `**Status:**` line | 0 | Add `**Status:** Proposed`/`Accepted`/`Superseded by ADR-00XX`/`Deprecated` |
 
 ### Lesson lifecycle
 

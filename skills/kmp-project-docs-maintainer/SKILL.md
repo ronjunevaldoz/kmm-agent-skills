@@ -34,6 +34,9 @@ metadata:
     - docs/libraries.md
     - docs/testing.md
     - docs/demos.md
+    - ADR
+    - architecture decision record
+    - module README
 ---
 
 ## When to Use This Skill
@@ -57,7 +60,9 @@ releasing, docs reference, onboarding docs, architecture docs, architecture diag
 docs drift, documentation maintainer, project documentation, repo docs, library docs,
 app docs, clean docs, clean up docs, tidy docs, docs cleanup, update docs, fix docs,
 refresh docs, docs out of date, stale docs, docs are wrong, developer friendly docs,
-concise docs, clear docs, docs writing style, organize docs.
+concise docs, clear docs, docs writing style, organize docs, ADR, architecture
+decision record, decision log, module README, per-module docs, thinner docs,
+scaffold docs.
 
 **Freshness rule:** project docs drift whenever code, commands, config, or folder names
 change — re-read the live project README, the touched docs, and the relevant source files
@@ -340,13 +345,63 @@ Use this validation matrix for project docs:
 ## Doc Classification and Hygiene
 
 Read `references/docs-hygiene.md` before any clean-up task. It covers:
-- Three-kind classification (Reference / Task / Non-doc) with examples
+- Classification (Reference / Task / Non-doc, plus the Decision/ADR lane) with examples
 - `docs/` root vs `docs/reference/` placement rule
+- Decision lane (ADR): one-decision-per-file, immutable once Accepted, starter template
 - Clean-up sequence (classify → check references → update links → move → consolidate → validate)
 - Consolidation rule for task files scattered at the `docs/` root
 - Naming convention (kebab-case; snake_case is flagged by the audit script)
-- Hygiene limits table (line limits, lesson backlog, stale lessons, non-doc files)
+- Hygiene limits table (line limits, lesson backlog, stale lessons, non-doc files, ADR shape)
 - Lesson lifecycle and hygiene check commands
+
+---
+
+## Per-Module README.md
+
+A different concern from everything above — this lives *inside* a module
+directory (`:feature:auth/README.md`, `:core:network/README.md`), not under
+`docs/` at all, and no other skill currently owns it.
+
+**Not every module needs one.** A thin leaf module (`:model`, `:api`) with a
+handful of self-explanatory files doesn't need a README duplicating what the
+code already says — that's the same "will a reader gain something a file
+listing wouldn't already tell them" test as everything else in this skill.
+Add one when a module has:
+- non-obvious setup or wiring steps a newcomer wouldn't guess from the files alone
+- a public API surface other modules actually depend on
+- a role that isn't obvious from its name and the 6-layer contract alone
+
+**Starter template** — `:module-path/README.md`:
+
+```markdown
+# :feature:auth:presenter
+
+What this module owns — one or two sentences, not a re-explanation of the
+6-layer contract (`kmp-clean-architecture` already covers that).
+
+## Public API
+
+The types/functions other modules actually consume from here. Skip internals
+— if it's not `internal` or `public` on purpose for cross-module use, it
+doesn't belong in this list.
+
+## Depends on
+
+`:feature:auth:domain`, `:core:mvi` — only the direct deps a reader would
+need to know before touching this module, not the full transitive graph.
+
+## Gotchas
+
+Anything a newcomer would get wrong without being told. Skip this section
+entirely if there isn't a real one — an empty "nothing to note here" section
+is worse than no section.
+```
+
+Keep it short — a module README ballooning past a page is the same drift
+this skill's `docs/` line caps exist to prevent, just uncapped because it
+lives outside `docs/` and the mechanical check doesn't reach it yet (see
+`kmp-clean-architecture`/`kmp-feature-scaffold` for the module-boundary rules
+this README should stay consistent with, not restate).
 
 ---
 
@@ -369,6 +424,7 @@ Read `references/docs-hygiene.md` before any clean-up task. It covers:
 - `kmp-library-publishing` — owns the Maven Central pipeline `docs/libraries.md` catalogs; its release checklist should point here.
 - `kmp-unit-testing` / `kmp-roborazzi` — own the actual test coverage `docs/testing.md` indexes; this page doesn't duplicate their content.
 - `kmp-docs-site` — the public, GitHub-Pages-deployed developer guide for a published library; a separate concern from this skill's internal `docs/` — never share the same source folder.
+- `kmp-clean-architecture` — owns the 6-layer module contract a per-module README should stay consistent with, not restate.
 
 ## Output Style
 
@@ -384,6 +440,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | Added the Decision lane (ADR) and Per-Module README.md. User asked us to research why a real consumer project's `docs/` had grown to 141 files / 29,650 lines — `kmp-audit --docs-hygiene-only` found 118 real violations there, including a 1,578-line `decision-log.md` and a 714-line findings file, both trying to be Architecture Decision Records built as one growing log instead of one-file-per-decision. Verified the real, widely-adopted ADR pattern (Michael Nygard, 2011; ThoughtWorks Radar ADOPT) before writing: one decision per file, ~1 page, immutable once `Accepted`, superseded by a new numbered file rather than edited. Added `docs/decisions/NNNN-slug.md` with a starter template, plus two mechanical checks in `kmp-audit` (filename shape, `**Status:**` line presence). Separately, user asked whether per-module `README.md` was a different concern — confirmed yes (code-colocated, not under `docs/`, zero prior coverage anywhere) and added a Per-Module README.md section with its own starter template, explicitly out of `docs/`'s line-cap enforcement since it lives outside that tree. |
 | 2026-08-23 | Upgraded `docs/tasks.md`'s Task Log template from a bullet list to an explicit `\| Task \| Status \| Parent \|` table — user wanted to read every task's status without opening each file one by one. `kmp-audit`'s `_check_docs_hygiene` now flags an active task file with no matching row in `docs/tasks.md`, so the table can't silently drift from what's actually on disk. |
 | 2026-08-22 | Task filename convention changed at the user's request: `docs/tasks/YYYY-MM-DD-slug.md` → `docs/tasks/<parent>/<NN>-<slug>-<status>.md` (status one of `todo`/`doing`/`blocked`/`done`, resets numbering per parent folder). Status now lives in the filename instead of a `status:` field in content — the whole point is reading status without opening the file. The date moved the other direction: out of the filename, into a `**Date:** YYYY-MM-DD` line in the content. Rewrote `docs-hygiene.md`'s Naming Convention, Consolidation Rule, and Delete vs Archive sections; updated `kmp-audit`'s `_check_docs_hygiene` to validate the new shape and flag a missing Date line instead of grepping for `status: done`. Migrated this repo's own 3 archived task docs (`docs/tasks/archive/*.md`) into the new convention under a `skills-repo` parent. |
 | 2026-08-21 | Added an "orphaned reference doc" row to the Hygiene Limits table — a user asked for the audit to flag stale/rename/delete candidates directly instead of leaving it to a human grep. Backed by `kmp-audit`'s new `_check_orphaned_reference_docs`: a `docs/`-root or `docs/reference/*.md` file with zero inbound links anywhere in the repo gets flagged for review, not auto-deleted — automates the grep this doc's own Delete vs Archive section already told a human to do by hand. |

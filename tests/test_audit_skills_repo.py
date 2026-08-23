@@ -652,6 +652,67 @@ class TaskFileConventionTests(unittest.TestCase):
             self.assertFalse(any("not indexed in docs/tasks.md" in f for f in findings))
 
 
+class DecisionRecordConventionTests(unittest.TestCase):
+    """docs/decisions/<NNNN>-<slug>.md — one ADR per file, Status readable without
+    opening it, verified against the real Nygard ADR pattern.
+    """
+
+    def test_valid_decision_record_no_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            decisions_dir = root / "docs" / "decisions"
+            decisions_dir.mkdir(parents=True)
+            (decisions_dir / "0001-use-sqldelight.md").write_text(
+                "# 0001. Use SQLDelight\n\n**Status:** Accepted\n\n## Context\n\nWhy.\n",
+                encoding="utf-8",
+            )
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertFalse(any("0001-use-sqldelight.md" in f for f in findings))
+
+    def test_flags_filename_not_matching_convention(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            decisions_dir = root / "docs" / "decisions"
+            decisions_dir.mkdir(parents=True)
+            (decisions_dir / "use-sqldelight.md").write_text(
+                "**Status:** Accepted\n", encoding="utf-8"
+            )
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertTrue(any(
+                "use-sqldelight.md" in f and "does not match" in f for f in findings
+            ))
+
+    def test_flags_missing_status_line(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            decisions_dir = root / "docs" / "decisions"
+            decisions_dir.mkdir(parents=True)
+            (decisions_dir / "0001-use-sqldelight.md").write_text(
+                "# 0001. Use SQLDelight\n\nNo status here.\n", encoding="utf-8"
+            )
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertTrue(any(
+                "0001-use-sqldelight.md" in f and "Status" in f for f in findings
+            ))
+
+    def test_accepts_superseded_status(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            decisions_dir = root / "docs" / "decisions"
+            decisions_dir.mkdir(parents=True)
+            (decisions_dir / "0001-use-sqldelight.md").write_text(
+                "**Status:** Superseded by ADR-0002\n", encoding="utf-8"
+            )
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertFalse(any(
+                "0001-use-sqldelight.md" in f and "Status" in f for f in findings
+            ))
+
+
 class OrphanedReferenceDocTests(unittest.TestCase):
     """docs-hygiene.md already tells a human to grep for inbound links before
     deleting a reference doc — this automates that grep as a review nudge.

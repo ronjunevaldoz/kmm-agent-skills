@@ -122,6 +122,17 @@ _KEBAB_RE = re.compile(r"^(\d{4}-\d{2}-\d{2}-)?[a-z][a-z0-9-]*$")
 _TASK_FILE_RE = re.compile(r"^\d{2}-[a-z][a-z0-9]*(?:-[a-z0-9]+)*-(todo|doing|blocked|done)$")
 _TASK_DATE_RE = re.compile(r"\*\*Date:\*\*\s*\d{4}-\d{2}-\d{2}")
 
+# docs/decisions/<NNNN>-<slug>.md — Architecture Decision Records. Verified against
+# the real, widely-adopted Nygard ADR pattern: one decision per file, 4-digit
+# sequential numbering (found by number in a flat directory listing, not per-parent
+# like tasks), a Status line so a reader can tell Accepted from Superseded without
+# opening every file — same "status readable without opening the file" reasoning
+# as the task-file convention above.
+_DECISION_FILE_RE = re.compile(r"^\d{4}-[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
+_DECISION_STATUS_RE = re.compile(
+    r"\*\*Status:\*\*\s*(Proposed|Accepted|Deprecated|Superseded)", re.IGNORECASE
+)
+
 # The only root-level .md files this repo's own docs-hygiene policy (see
 # agents/docs-maintainer.md "Doc lifecycle") treats as permanent Reference docs
 # (or the resolved-stays-for-reference KNOWN_ISSUES.md registry). Anything else at
@@ -342,6 +353,24 @@ def _check_docs_hygiene(root: Path, findings: list[str]) -> None:
                         "without opening every task file"
                     )
 
+    # 4b. Decision records: docs/decisions/<NNNN>-<slug>.md, one decision per file,
+    # a Status line so a reader can tell Accepted from Superseded without opening it.
+    decisions_dir = docs_dir / "decisions"
+    if decisions_dir.exists():
+        for md in sorted(decisions_dir.glob("*.md")):
+            if not _DECISION_FILE_RE.match(md.stem):
+                findings.append(
+                    f"docs hygiene: {md.relative_to(root)} does not match "
+                    "<NNNN>-<slug>.md (4-digit, sequential) — rename to match the "
+                    "ADR naming convention"
+                )
+                continue
+            if not _DECISION_STATUS_RE.search(md.read_text(encoding="utf-8", errors="ignore")):
+                findings.append(
+                    f"docs hygiene: {md.relative_to(root)} is missing a "
+                    "**Status:** line (Proposed/Accepted/Superseded/Deprecated)"
+                )
+
     # 5. Non-markdown files sitting directly in docs/ (flag as non-docs)
     for f in docs_dir.iterdir():
         if f.is_file() and f.suffix in _NON_DOC_EXTENSIONS:
@@ -377,7 +406,7 @@ def _check_docs_hygiene(root: Path, findings: list[str]) -> None:
 # or an intentional standalone entry point), so this stays a review flag, same
 # treatment as every other non-blocking hint in this file.
 
-_REFERENCE_DOC_EXCLUDE_SUBDIR_NAMES = {"tasks", "lessons", "bugs", "mvp", "archive"}
+_REFERENCE_DOC_EXCLUDE_SUBDIR_NAMES = {"tasks", "lessons", "bugs", "mvp", "archive", "decisions"}
 
 
 def _iter_reference_docs(docs_dir: Path):
