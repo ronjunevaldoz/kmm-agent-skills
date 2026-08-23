@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.55.0] — 2026-08-24
+
+### Added
+
+- feat(kmp-refine-skill): add consumer command for qualitative skill refinement
+
+---
+
 ## [v2.54.0] — 2026-08-24
 
 ### Added
