@@ -124,6 +124,18 @@ end to end. Every edit should make the doc easier to act on, not just more compl
   copy-pasting it should work, or it isn't worth including. Ties into the existing
   "code snippets that no longer compile" anti-pattern below — that's about staleness,
   this is about never shipping a fake example in the first place.
+- **Mermaid only where prose or a table genuinely can't show the shape** — a module
+  dependency graph, a sequence/flow diagram (auth flow, data flow). Don't default to
+  a diagram for something a short list or table already says as clearly; a diagram
+  nobody needed is the same "more content, not more clarity" failure as an unneeded
+  paragraph. `kmp-audit`'s `generate_structure_diagram.py --mermaid` generates the
+  module-graph case directly — don't hand-draw one that tool already produces.
+  **Code snippets belong wherever an actual API/interface is being described** —
+  Reference deep-dives, Task plans (the real approach, not pseudocode — same rule as
+  above), Module READMEs (the public API example). **ADRs mostly need neither** — a
+  decision record explains the choice and its consequences in prose; if a decision
+  needs a diagram or snippet to justify itself, that content belongs in the Reference
+  doc the ADR should link to, not duplicated inside the ADR itself.
 
 ### Default Docs Topology
 
@@ -447,6 +459,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | Added an 8th Writing Style rule: when to use Mermaid vs a code snippet vs neither, per doc kind — user asked directly which doc kinds should use which. Mermaid only for module graphs/sequence flows a table or list genuinely can't show (points at `kmp-audit`'s existing `generate_structure_diagram.py --mermaid` for the module-graph case rather than re-deriving one by hand); code snippets wherever a real API/interface is being described (Reference, Task, Module README); ADRs need neither — link out to the Reference doc instead of duplicating a diagram/snippet inside the decision record. |
 | 2026-08-23 | Added Reference Doc Starter Templates (root `README.md`, `docs/architecture.md`, `docs/reference/<topic>.md`) — user asked to see a template for every doc kind; Task, ADR, and Module README already had one, these three primary Reference docs didn't. Lives in `references/docs-hygiene.md`, moved there after adding it directly to `SKILL.md` pushed it to 548 lines. |
 | 2026-08-23 | Added the Decision lane (ADR) and Per-Module README.md. User asked us to research why a real consumer project's `docs/` had grown to 141 files / 29,650 lines — `kmp-audit --docs-hygiene-only` found 118 real violations there, including a 1,578-line `decision-log.md` and a 714-line findings file, both trying to be Architecture Decision Records built as one growing log instead of one-file-per-decision. Verified the real, widely-adopted ADR pattern (Michael Nygard, 2011; ThoughtWorks Radar ADOPT) before writing: one decision per file, ~1 page, immutable once `Accepted`, superseded by a new numbered file rather than edited. Added `docs/decisions/NNNN-slug.md` with a starter template, plus two mechanical checks in `kmp-audit` (filename shape, `**Status:**` line presence). Separately, user asked whether per-module `README.md` was a different concern — confirmed yes (code-colocated, not under `docs/`, zero prior coverage anywhere) and added a Per-Module README.md section with its own starter template, explicitly out of `docs/`'s line-cap enforcement since it lives outside that tree. |
 | 2026-08-23 | Upgraded `docs/tasks.md`'s Task Log template from a bullet list to an explicit `\| Task \| Status \| Parent \|` table — user wanted to read every task's status without opening each file one by one. `kmp-audit`'s `_check_docs_hygiene` now flags an active task file with no matching row in `docs/tasks.md`, so the table can't silently drift from what's actually on disk. |
