@@ -15,8 +15,8 @@ Generated 2026-08-23 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 469 | 2026-07-08 | ✅ |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 468 | 2026-06-29 | ✅ |
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 464 | 2026-08-23 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 464 | 2026-08-22 | ✅ |
-| [`kmp-audit`](../../skills/kmp-audit/) | 463 | 2026-08-22 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 460 | 2026-07-09 | ✅ |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 459 | 2026-08-22 | ✅ |
@@ -35,12 +35,12 @@ Generated 2026-08-23 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kmp-datastore`](../../skills/kmp-datastore/) | 413 | 2026-06-18 | ✅ |
 | [`kmp-mongodb-database`](../../skills/kmp-mongodb-database/) | 409 | 2026-06-21 | ✅ |
+| [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 403 | 2026-08-23 | ✅ |
 | [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 403 | 2026-07-13 | ✅ |
 | [`kmp-expect-actual`](../../skills/kmp-expect-actual/) | 400 | 2026-07-20 | ✅ |
 | [`kmp-shadcn-compose`](../../skills/kmp-shadcn-compose/) | 397 | 2026-07-31 | ✅ |
 | [`kmp-shadcn-compose-layouts`](../../skills/kmp-shadcn-compose-layouts/) | 394 | 2026-08-04 | ✅ |
 | [`kmp-legal-docs`](../../skills/kmp-legal-docs/) | 393 | 2026-06-21 | ✅ |
-| [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 392 | 2026-08-22 | ✅ |
 | [`kmp-compose-animation`](../../skills/kmp-compose-animation/) | 389 | 2026-06-21 | ✅ |
 | [`kmp-layout-system`](../../skills/kmp-layout-system/) | 387 | 2026-08-10 | ✅ |
 | [`kmp-migration`](../../skills/kmp-migration/) | 386 | 2026-07-19 | ✅ |

@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.47.0] — 2026-08-23
+
+### Added
+
+- feat(docs-hygiene): enforce docs/tasks.md as a real status index
+
+---
+
 ## [v2.46.0] — 2026-08-23
 
 ### Added
