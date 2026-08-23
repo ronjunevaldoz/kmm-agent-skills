@@ -12,7 +12,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-07-31'
+  last-updated: '2026-08-23'
   keywords:
     - mimic api
     - api mimicry
@@ -28,6 +28,11 @@ metadata:
     - engine-agnostic dsl
     - own compiler-free dsl
     - api shape porting
+    - compliance audit
+    - trademark violation
+    - font license
+    - clean room implementation
+    - IP audit
 ---
 
 ## When to Use This Skill
@@ -59,7 +64,8 @@ Do NOT use this skill when:
 **Trigger keywords:** mimic api, api mimicry, clone api shape, inspired by jetpack
 compose, custom dsl engine, from-scratch renderer, vulkan ui, metal ui, port api
 ergonomics, reimplement compose-like dsl, non-compose renderer, engine-agnostic dsl,
-own compiler-free dsl, api shape porting.
+own compiler-free dsl, api shape porting, compliance audit, trademark violation,
+font license, clean room implementation, IP audit.
 
 **Freshness rule:** the reference API you are mimicking changes between its own
 releases (Jetpack Compose's `Modifier` and `CompositionLocal` surface, SwiftUI's
@@ -363,6 +369,21 @@ class EngineScopeTest {
 
 ---
 
+## Compliance & Legal Audit
+
+Auditing an *existing* mimicry project for namespace/trademark, code-origin,
+font-license, or accidental-real-dependency risk — generic to any reference
+API being mimicked, not just Jetpack Compose. Two of the four categories are
+mechanically checkable (namespace collision, font license presence,
+dependency re-linking, via `scripts/scan_mimicry_compliance.py`); code-origin
+review stays a manual judgment call, same reasoning as everywhere else in
+this skill that a script can't safely automate a "was this independently
+derived or copied" question.
+
+Full content: [references/compliance-audit.md](references/compliance-audit.md).
+
+---
+
 ## Related Skills
 
 - `kmp-library-publishing` — this is almost always a library project;
@@ -404,6 +425,7 @@ reference API being mimicked when the user names one — do not speak genericall
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | Added "Compliance & Legal Audit" (`references/compliance-audit.md`) — user supplied a Compose/Vulkan-specific compliance-audit prompt and asked to genericize it for any reference API/organization, not just Jetpack Compose/Google. Four categories: namespace/trademark naming, code-origin/attribution, font licensing, accidental real-dependency re-linking. Verified real legal facts before writing (Apache 2.0's NOTICE-file/changed-file/attribution requirements, SIL OFL's font+license-text bundling rules) rather than assuming. Added `scripts/scan_mimicry_compliance.py` for the three mechanically-safe checks (font-license presence always on; namespace collision and dependency re-linking both opt-in via explicit `--namespace-prefix`/`--dependency-coordinate` flags, deliberately no dangerous defaults — this collection's own primary audience builds real Compose Multiplatform apps constantly, so a default flagging `androidx.compose.*` would false-positive on nearly every normal consumer project). Code-origin/attribution review stays a manual checklist — same "judgment call, not a countable shape" reasoning `kmp-audit`'s "Construction/execution lifecycle coupling" item just established for a different smell. |
 | 2026-08-04 | Added `kmp-code-quality` to Related Skills — naming conventions existed but only `kmp-mvi` cross-referenced them; mimicked primitives need real, project-specific names too, not `Engine`. |
 | 2026-08-04 | Three real gaps closed from a single user thread: (1) no guidance existed for mimicking more than one reference API in the same project (e.g. Compose's `Modifier` + shadcn-compose's component API) — added a subpackage-per-reference folder structure and a **Reference API** column for `MIRROR_MAP.md`. (2) `MIRROR_MAP.md` was placed "at the library root," contradicting this collection's own `docs-hygiene.md` Reference-doc placement rule (`docs/` root, not project root) — moved to `docs/MIRROR_MAP.md` and added as a named example row in `docs-hygiene.md`; also documented the split-when-bloated path (150-line `docs/` limit, split by Reference API into `docs/reference/mirror-map-<reference>.md`). (3) the `Engine` placeholder appeared 36 times with only one easy-to-miss disclaimer sentence stated after several early uses already occurred — replaced with a `kmp-compose-design-system`-style "Hard rule — never violated" blockquote callout placed before the placeholder's first use. |
 | 2026-08-04 | A user asked whether this skill catches mimicking a reference API's low-level primitives (`.width()`/`.height()`) while missing its common-case convenience shorthand (`fillMaxSize()`) — real gap: `MIRROR_MAP.md`'s row shape had no field prompting that question. Added a "Shorthand mirrored?" column with a concrete example table, and a matching anti-pattern. No mechanical detector — would need a hardcoded per-reference-API convenience-method table to check against, out of scope for a generic heuristic. |
