@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-07-26'
+  last-updated: '2026-08-24'
   keywords:
     - design system
     - Compose Styles API
@@ -38,6 +38,11 @@ metadata:
     - stateless variant
     - context-aware modifier
     - memoized style
+    - golden ratio
+    - type scale
+    - text overflow
+    - text truncation
+    - i18n text expansion
 ---
 
 ## When to Use This Skill
@@ -68,7 +73,9 @@ dark mode toggle, in-app theme override, user theme preference, theme settings,
 LocalAppDarkTheme, isSystemInDarkTheme, system dark mode, follow system theme,
 dynamic theme, runtime theme switch, light dark switch, theme preference setting,
 component prefix, custom prefix instead of App, rename App to project name,
-project-specific component names, COMPONENT_PREFIX, derive prefix from project name.
+project-specific component names, COMPONENT_PREFIX, derive prefix from project name,
+golden ratio, type scale, typographic scale, text overflow, text truncation,
+text hell, line length, i18n text expansion, translated string overflow.
 
 **Freshness rule:** `@ExperimentalStylesApi` is experimental (Android Jetpack Compose
 `1.12.0-alpha03` at last check) and the Styles API changes between releases — Material
@@ -398,6 +405,17 @@ If the design system feels inconsistent, check: (1) are all pages using `AppScaf
 
 ---
 
+## Typography Scale & Text Resilience
+
+Modular type-scale ratios (golden ratio included, with the honest caveat on
+when it's the wrong choice for dense UI), fixing text overflow/truncation,
+and making layouts resilient to translated strings (the 2× expansion rule,
+CJK's opposite failure mode, RTL).
+
+Full content: `references/typography-scale-and-text-resilience.md`.
+
+---
+
 ## References
 
 The `references/` directory contains project-facing documents the skill uses at generation time:
@@ -406,7 +424,7 @@ The `references/` directory contains project-facing documents the skill uses at 
 |---|---|---|
 | `references/design-system-template.md` | Living design system doc — tokens, component inventory, detekt overrides, audit log | Copy to `docs/design-system.md` in your project; fill in token values and prefix |
 | `references/compose-styles-api-reference.md` | Extracted ground truth from the 9 official Compose Styles API doc pages (API surface, do's/don'ts, performance benchmarks, limitations) | Audit generated Style code against this before applying `/update-design-system` or reviewing a PR that touches `styles/` or `components/` |
-| `references/step0-component-prefix.md`, `step1-module-setup.md`, `step2-design-tokens.md`, `step3-apptheme.md`, `step4-stylescope-extensions.md`, `step5-variant-systems.md`, `step6-core-components.md`, `component-previews.md`, `step8-usage-patterns.md`, `testing.md`, `detekt-rules.md`, `screen-layout-contract.md`, `changelog.md` | This skill's own implementation content, split out of `SKILL.md` for progressive disclosure | Load the specific file named in the pointer left under the matching heading in `SKILL.md` |
+| `references/step0-component-prefix.md`, `step1-module-setup.md`, `step2-design-tokens.md`, `step3-apptheme.md`, `step4-stylescope-extensions.md`, `step5-variant-systems.md`, `step6-core-components.md`, `component-previews.md`, `step8-usage-patterns.md`, `testing.md`, `detekt-rules.md`, `screen-layout-contract.md`, `typography-scale-and-text-resilience.md`, `changelog.md` | This skill's own implementation content, split out of `SKILL.md` for progressive disclosure | Load the specific file named in the pointer left under the matching heading in `SKILL.md` |
 | `scripts/derive_component_prefix.py` | Deterministically derives the component prefix (`App` placeholder replacement) from the project name | Run in Step 0 before generating any code; see precedence order there |
 
 The skill reads `docs/design-system.md` when it exists in the target project to infer
@@ -420,7 +438,9 @@ defaults (`App` prefix, token names as shown in the steps) are used.
 - `kmp-feature-scaffold` — `:core:designsystem` follows the same convention plugin pattern
 - `kmp-compose-design-system-extended` — additional components (`AppDialog`, `AppToast`, `AppTabs`, etc.) built on this foundation
 - `kmp-audit` — `_detect_combined_component_file`/`_detect_combined_style_file` mechanically check the one-component-per-file and one-component's-variants-per-file conventions above
-- `kmp-shared-resources` — fonts and icons loaded via `Res` accessors inside the design system
+- `kmp-shared-resources` — fonts and icons loaded via `Res` accessors inside the design system; also the string catalog the text-resilience guidance above applies to
+- `kmp-compose-accessibility` — system font scaling (up to 200%) is a related but distinct text-resilience case
+- `kmp-compose-adaptive-layout` — line-length bounds apply per breakpoint, not just once globally
 - `kmp-compose-preview-driven-development` — Desktop previews for each component variant using `PreviewParameterProvider`
 - `kmp-shadcn-compose` — the published-library alternative to this skill's owned-scaffold approach; see its own skill for the experimental-API risk tradeoff in full
 - `/kmp-migrate-to-shadcn` — the file-by-file migration path if a project decides to switch fully from this skill's generated components to shadcn-compose
