@@ -178,6 +178,7 @@ copying it. You can review the source file in another terminal before answering.
 | `/kmp-update-skills` | Pull latest skills and re-deploy |
 | `/kmp-check-updates` | Check whether a newer version is available |
 | `/kmp-report-skill-issue` | File a structured skill bug report |
+| `/kmp-refine-skill <name>` | Refine a project-owned skill against agentskills.io's real qualitative best practices |
 
 **Or use the guided installer** to set up the full `.claude/` in one step:
 

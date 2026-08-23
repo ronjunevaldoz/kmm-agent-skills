@@ -257,6 +257,7 @@ All commands are `kmp-` prefixed so they don't collide with your own `.claude/co
 | `/kmp-update-skills` | Pull latest skills and re-deploy to `.claude/skills/` |
 | `/kmp-check-updates` | Check for a newer version of kmp-agent-skills |
 | `/kmp-report-skill-issue` | File a structured skill bug report |
+| `/kmp-refine-skill <name>` | Refine a project-owned skill against agentskills.io's real qualitative best practices (description phrasing, gotchas, scoping) |
 
 ### Repo-internal commands
 

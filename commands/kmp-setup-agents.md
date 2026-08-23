@@ -252,6 +252,7 @@ Consumer commands (safe to install):
   kmp-check-updates.md          — check for skill updates
   kmp-clean-comments.md         — refactor code documentation
   kmp-migrate-to-shadcn.md      — migrate design system to shadcn-compose
+  kmp-refine-skill.md           — refine a project-owned skill against agentskills.io best practices
 ```
 
 Do NOT copy repo-internal commands — each one operates on `kmp-agent-skills` itself, not

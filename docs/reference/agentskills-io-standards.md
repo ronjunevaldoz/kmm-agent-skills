@@ -104,18 +104,9 @@ the same `scan_skill_issues.py` data as the compliance script above.
 
 ## Best-practice guidance worth knowing (not enforced, but real)
 
-From `agentskills.io/skill-creation/best-practices.md` and `optimizing-descriptions.md`:
-
-- **Add what the agent lacks, omit what it knows.** Don't explain what a Compose function
-  is; do explain this collection's own conventions (6-layer contract, Koin scope rules).
-- **Gotchas sections are the highest-value content** — concrete corrections to mistakes
-  an agent will make without being told, not generic advice.
-- **Imperative descriptions**: "Use this skill when..." not "This skill does...". The
-  agent is deciding whether to act.
-- **Provide defaults, not menus** — this repo's own "Recommendation First" section in
-  every skill already does exactly this.
-- **File references stay one level deep** from `SKILL.md` — don't chain
-  `references/a.md` pointing to `references/b.md` pointing to `references/c.md`.
+Full content, re-verified against the live agentskills.io docs on 2026-08-24:
+[`docs/reference/skill-best-practices.md`](skill-best-practices.md) — `kmp-refine-skill`
+uses it as its qualitative checklist for consumer project-owned skills.
 
 ## Related
 
