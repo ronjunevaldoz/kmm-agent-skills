@@ -1,5 +1,5 @@
 {
-  "version": "2.47.0",
+  "version": "2.48.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -2906,7 +2906,10 @@
         "testing coverage doc",
         "docs/libraries.md",
         "docs/testing.md",
-        "docs/demos.md"
+        "docs/demos.md",
+        "ADR",
+        "architecture decision record",
+        "module README"
       ],
       "triggers": [
         "project docs",
@@ -2939,7 +2942,14 @@
         "concise docs",
         "clear docs",
         "docs writing style",
-        "organize docs"
+        "organize docs",
+        "ADR",
+        "architecture decision record",
+        "decision log",
+        "module README",
+        "per-module docs",
+        "thinner docs",
+        "scaffold docs"
       ],
       "scripts": []
     },

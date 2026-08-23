@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.48.0] — 2026-08-23
+
+### Added
+
+- feat(docs-hygiene): add Decision lane (ADR) and Per-Module README.md
+
+---
+
 ## [v2.47.0] — 2026-08-23
 
 ### Added

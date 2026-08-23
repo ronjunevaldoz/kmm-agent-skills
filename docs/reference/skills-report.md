@@ -18,6 +18,7 @@ Generated 2026-08-23 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-audit`](../../skills/kmp-audit/) | 464 | 2026-08-23 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 464 | 2026-08-22 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
+| [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 460 | 2026-08-23 | ✅ |
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 460 | 2026-07-09 | ✅ |
 | [`kmp-code-quality`](../../skills/kmp-code-quality/) | 459 | 2026-08-22 | ✅ |
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
@@ -35,7 +36,6 @@ Generated 2026-08-23 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kmp-datastore`](../../skills/kmp-datastore/) | 413 | 2026-06-18 | ✅ |
 | [`kmp-mongodb-database`](../../skills/kmp-mongodb-database/) | 409 | 2026-06-21 | ✅ |
-| [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 403 | 2026-08-23 | ✅ |
 | [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 403 | 2026-07-13 | ✅ |
 | [`kmp-expect-actual`](../../skills/kmp-expect-actual/) | 400 | 2026-07-20 | ✅ |
 | [`kmp-shadcn-compose`](../../skills/kmp-shadcn-compose/) | 397 | 2026-07-31 | ✅ |
