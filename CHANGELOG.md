@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.54.0] — 2026-08-24
+
+### Added
+
+- feat(kmp-resilience): add resilience skill, exception design, and layer separation anti-patterns
+
+---
+
 ## [v2.53.0] — 2026-08-24
 
 ### Added
