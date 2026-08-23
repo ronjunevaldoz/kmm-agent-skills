@@ -2,6 +2,15 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.50.0] — 2026-08-23
+
+### Added
+
+- feat(kmp-api-mimicry): add Clean-Room Provenance Record template
+- feat(docs-hygiene): add Mermaid/code-snippet Writing Style rule
+
+---
+
 ## [v2.49.0] — 2026-08-23
 
 ### Added

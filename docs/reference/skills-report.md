@@ -11,10 +11,10 @@ Generated 2026-08-23 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-library-publishing`](../../skills/kmp-library-publishing/) | 484 | 2026-07-31 | ✅ |
 | [`kmp-compose-slot-api`](../../skills/kmp-compose-slot-api/) | 483 | 2026-06-26 | ✅ |
 | [`kmp-clean-architecture`](../../skills/kmp-clean-architecture/) | 482 | 2026-08-11 | ✅ |
+| [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 481 | 2026-08-23 | ✅ |
 | [`kmp-network-layer`](../../skills/kmp-network-layer/) | 474 | 2026-07-31 | ✅ |
 | [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 469 | 2026-07-08 | ✅ |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 468 | 2026-06-29 | ✅ |
-| [`kmp-project-docs-maintainer`](../../skills/kmp-project-docs-maintainer/) | 468 | 2026-08-23 | ✅ |
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kmp-audit`](../../skills/kmp-audit/) | 464 | 2026-08-23 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 464 | 2026-08-22 | ✅ |
@@ -28,7 +28,7 @@ Generated 2026-08-23 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 446 | 2026-07-08 | ✅ |
 | [`kmp-compose-state-container`](../../skills/kmp-compose-state-container/) | 438 | 2026-06-06 | ✅ |
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
-| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 432 | 2026-08-23 | ✅ |
+| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 436 | 2026-08-23 | ✅ |
 | [`kmp-paging`](../../skills/kmp-paging/) | 432 | 2026-06-21 | ✅ |
 | [`kmp-roborazzi`](../../skills/kmp-roborazzi/) | 431 | 2026-07-10 | ✅ |
 | [`kmp-expert`](../../skills/kmp-expert/) | 424 | 2026-08-23 | ✅ |
