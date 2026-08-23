@@ -27,13 +27,13 @@ Generated 2026-08-23 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 446 | 2026-07-08 | ✅ |
 | [`kmp-compose-state-container`](../../skills/kmp-compose-state-container/) | 438 | 2026-06-06 | ✅ |
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |
+| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 432 | 2026-08-23 | ✅ |
 | [`kmp-paging`](../../skills/kmp-paging/) | 432 | 2026-06-21 | ✅ |
 | [`kmp-roborazzi`](../../skills/kmp-roborazzi/) | 431 | 2026-07-10 | ✅ |
 | [`kmp-expert`](../../skills/kmp-expert/) | 424 | 2026-08-23 | ✅ |
 | [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 421 | 2026-07-31 | ✅ |
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
 | [`kmp-datastore`](../../skills/kmp-datastore/) | 413 | 2026-06-18 | ✅ |
-| [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 410 | 2026-07-31 | ✅ |
 | [`kmp-mongodb-database`](../../skills/kmp-mongodb-database/) | 409 | 2026-06-21 | ✅ |
 | [`kmp-repository-pattern`](../../skills/kmp-repository-pattern/) | 403 | 2026-07-13 | ✅ |
 | [`kmp-expect-actual`](../../skills/kmp-expect-actual/) | 400 | 2026-07-20 | ✅ |

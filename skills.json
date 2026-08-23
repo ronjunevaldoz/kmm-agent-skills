@@ -1,5 +1,5 @@
 {
-  "version": "2.45.0",
+  "version": "2.46.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -79,7 +79,7 @@
       "path": "skills/kmp-api-mimicry",
       "description": "Mimics the public API *shape* (DSL entry points, chainable modifier objects, slot lambdas, marker annotations, scoped builders) of a well-known reference API \u2014 Jetpack Compose, SwiftUI, Retrofit, Room, etc. \u2014 when building a from-scratch Kotlin Multiplatform library on a different runtime (a custom Vulkan/Metal renderer, a custom RPC engine, a custom persistence engine). Does NOT cover consuming or wrapping the real reference library \u2014 that is normal dependency usage. Does NOT cover building a real Compose-compiler-style plugin; explicitly scopes to plain-function DSL mimicry and documents what real recomposition/skipping you give up by not writing one.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-31",
+      "last_updated": "2026-08-23",
       "keywords": [
         "mimic api",
         "api mimicry",
@@ -94,7 +94,12 @@
         "non-compose renderer",
         "engine-agnostic dsl",
         "own compiler-free dsl",
-        "api shape porting"
+        "api shape porting",
+        "compliance audit",
+        "trademark violation",
+        "font license",
+        "clean room implementation",
+        "IP audit"
       ],
       "triggers": [
         "mimic api",
@@ -110,9 +115,16 @@
         "non-compose renderer",
         "engine-agnostic dsl",
         "own compiler-free dsl",
-        "api shape porting"
+        "api shape porting",
+        "compliance audit",
+        "trademark violation",
+        "font license",
+        "clean room implementation",
+        "IP audit"
       ],
-      "scripts": []
+      "scripts": [
+        "scan_mimicry_compliance.py"
+      ]
     },
     {
       "name": "kmp-audit",

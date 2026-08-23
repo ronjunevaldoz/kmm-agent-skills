@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.46.0] — 2026-08-23
+
+### Added
+
+- feat(kmp-api-mimicry): add generic Compliance & Legal Audit
+
+---
+
 ## [v2.45.0] — 2026-08-23
 
 ### Added
