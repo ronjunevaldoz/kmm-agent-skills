@@ -278,6 +278,44 @@ class ProfileContentScreenshotTest {
         failing = [f for f in findings if governance_scripts.SEVERITY_RANK.get(f["severity"], 0) >= threshold]
         self.assertEqual(failing, [])
 
+    def test_docs_hygiene_flags_oversized_doc(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            docs_dir = root / "docs"
+            docs_dir.mkdir()
+            (docs_dir / "architecture.md").write_text(
+                "\n".join(f"line {i}" for i in range(200)), encoding="utf-8"
+            )
+            findings = governance_scripts.run_docs_hygiene(root)
+        self.assertTrue(any(
+            f["source"] == "docs_hygiene" and "architecture.md" in f["file"] for f in findings
+        ))
+
+    def test_docs_hygiene_clean_docs_no_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            docs_dir = root / "docs"
+            docs_dir.mkdir()
+            (docs_dir / "architecture.md").write_text("Short doc.\n", encoding="utf-8")
+            # linked from README so the orphaned-reference-doc check doesn't fire
+            (root / "README.md").write_text("See [architecture.md](docs/architecture.md).\n", encoding="utf-8")
+            findings = governance_scripts.run_docs_hygiene(root)
+        self.assertEqual(findings, [])
+
+    def test_docs_hygiene_is_medium_and_does_not_fail_high_threshold(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            docs_dir = root / "docs"
+            docs_dir.mkdir()
+            (docs_dir / "architecture.md").write_text(
+                "\n".join(f"line {i}" for i in range(200)), encoding="utf-8"
+            )
+            findings = governance_scripts.run_docs_hygiene(root)
+        self.assertTrue(all(f["severity"] == "MEDIUM" for f in findings))
+        threshold = governance_scripts.SEVERITY_RANK["HIGH"]
+        failing = [f for f in findings if governance_scripts.SEVERITY_RANK.get(f["severity"], 0) >= threshold]
+        self.assertEqual(failing, [])
+
     def test_reads_kmm_skills_version(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

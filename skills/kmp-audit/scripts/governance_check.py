@@ -3,8 +3,17 @@
 governance_check.py — KMP skills governance gate for consumer KMP projects.
 
 Orchestrates:
-  1. scan_design_violations.py  (design system + layout consistency)
-  2. audit_project.py           (architecture smells)
+  1. scan_design_violations.py               (design system + layout consistency)
+  2. audit_project.py                        (architecture smells)
+  3. audit_skills_repo.py --docs-hygiene-only (docs/ drift — line caps, task/ADR
+                                                naming, orphaned reference docs)
+
+Real gap this closes: a local pre-commit hook is a one-time fork of this repo's
+hook script — update-consumer-skills.sh never re-syncs hooks/, so a consumer
+project's local hook silently drifts out of date the moment this repo improves
+it. CI has no such staleness problem — it checks out kmp-agent-skills fresh
+(pinned to skills_ref) on every run, so wiring the docs-hygiene check in here
+is the actual "always synchronized" backstop, not the local hook.
 
 Reads .kmp-skills from the project root to identify the declared skills version.
 
@@ -31,6 +40,7 @@ SCRIPT_DIR = Path(__file__).parent
 REPO_ROOT = SCRIPT_DIR.parent.parent.parent
 SCAN_VIOLATIONS = REPO_ROOT / "skills/kmp-compose-design-system/scripts/scan_design_violations.py"
 AUDIT_PROJECT = REPO_ROOT / "skills/kmp-audit/scripts/audit_project.py"
+AUDIT_SKILLS_REPO = REPO_ROOT / "skills/kmp-audit/scripts/audit_skills_repo.py"
 
 SEVERITY_RANK: dict[str, int] = {"HIGH": 2, "MEDIUM": 1, "LOW": 0}
 _SCAN_SEVERITY_MAP: dict[str, str] = {"error": "HIGH", "warning": "MEDIUM"}
@@ -140,6 +150,32 @@ def run_audit_project(project_root: Path) -> list[dict]:
     return findings
 
 
+def run_docs_hygiene(project_root: Path) -> list[dict]:
+    if not AUDIT_SKILLS_REPO.exists():
+        return []
+    result = subprocess.run(
+        [sys.executable, str(AUDIT_SKILLS_REPO), str(project_root), "--docs-hygiene-only"],
+        capture_output=True,
+        text=True,
+    )
+    findings = []
+    for line in result.stdout.splitlines():
+        line = line.strip()
+        if not line.startswith("docs hygiene: "):
+            continue
+        body = line[len("docs hygiene: "):]
+        path, _, message = body.partition(" ")
+        findings.append({
+            "source": "docs_hygiene",
+            "severity": "MEDIUM",
+            "type": "docs_hygiene_violation",
+            "file": path,
+            "line": 0,
+            "message": message.strip(),
+        })
+    return findings
+
+
 def print_report(findings: list[dict], threshold: str, version: str | None) -> None:
     if version:
         print(f"KMP Skills governance — targeting v{version}")
@@ -190,7 +226,12 @@ def main() -> int:
     threshold = SEVERITY_RANK[args.fail_on]
     version = read_skills_version(root)
 
-    all_findings = validate_skills_version_pin(root) + run_scan_violations(root) + run_audit_project(root)
+    all_findings = (
+        validate_skills_version_pin(root)
+        + run_scan_violations(root)
+        + run_audit_project(root)
+        + run_docs_hygiene(root)
+    )
     failing = [f for f in all_findings if SEVERITY_RANK.get(f["severity"], 0) >= threshold]
 
     if args.json_output:

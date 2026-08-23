@@ -40,13 +40,28 @@ That is the complete consumer setup — no scripts to copy, no dependencies to i
 
 ## What the governance check runs
 
+Verified directly against `governance_check.py`'s own source, not assumed —
+this table previously claimed a `validate_module_graph.py` scanner that was
+never actually wired in, a real drift between doc and script caught while
+adding the docs-hygiene check below.
+
 | Scanner | Detects | Severity |
 |---|---|---|
+| `.kmp-skills` version pin | Missing or non-tag-pinned skills version file | HIGH |
 | `scan_design_violations.py` | Hardcoded colors, dp literals, Material theme usage, TextStyle construction, nested containers, layout inconsistency | HIGH (error), MEDIUM (warning) |
 | `audit_project.py` | State copy races, SharedFlow replay effects, NetworkResult in UI state, DTO import in UI layer, magic color literals, hardcoded spacing, missing preview stubs | HIGH |
-| `validate_module_graph.py` | Missing feature module files, missing `androidApp` UI link, missing `*ContentPreview.kt` stub beside feature UI content | HIGH |
+| `audit_skills_repo.py --docs-hygiene-only` | `docs/` line-cap overruns, task/ADR naming and status drift, orphaned reference docs, non-doc files in `docs/` — the same checks this repo runs on itself | MEDIUM |
 
-Findings at or above `fail_on` exit non-zero and fail the CI job. Findings below the threshold are reported but do not fail.
+Findings at or above `fail_on` exit non-zero and fail the CI job. Findings below the threshold are reported but do not fail. The docs-hygiene checks default to MEDIUM, not HIGH — they won't block a build under the default `fail_on: HIGH` threshold, only surface in the report; raise `fail_on` to `MEDIUM` (see Threshold guide) once a project wants that enforced, not just visible.
+
+**Why this check exists here and not only as a local pre-commit hook**: a
+consumer project's local hook is a one-time fork of this repo's own hook
+script — nothing re-syncs it, so it silently drifts out of date every time
+this repo improves the check (verified real: a consumer project's forked
+hook was found still referencing an issue this repo resolved months earlier,
+and never running the docs-hygiene check at all as a result). CI has no such
+staleness problem — it checks out `kmp-agent-skills` fresh, pinned to
+`skills_ref`, on every run.
 
 ## Threshold guide
 
