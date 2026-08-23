@@ -1,5 +1,5 @@
 {
-  "version": "2.55.0",
+  "version": "2.56.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -2862,7 +2862,7 @@
       "path": "skills/kmp-proguard-r8",
       "description": "ProGuard and R8 obfuscation for KMP Android builds \u2014 keep rules for KMP artifacts, Koin, Ktor, SQLDelight, kotlinx.serialization, and Compose. Covers: when to enable minification, writing keep rules without breaking KMP shared code, validating the release APK, and the most common shrinking crashes in KMP projects.",
       "license": "Apache-2.0",
-      "last_updated": "2026-06-29",
+      "last_updated": "2026-08-24",
       "keywords": [
         "ProGuard",
         "R8",
@@ -3308,6 +3308,52 @@
         "test scrollbar",
         "boundsInRoot",
         "layout stability test"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kmp-security",
+      "path": "skills/kmp-security",
+      "description": "Mobile app security for Kotlin Multiplatform beyond Android-only R8 obfuscation \u2014 certificate/SSL pinning (expect/actual, no cross-platform Ktor support exists natively), root/jailbreak/tamper detection via freeRASP's real KMP variant, encrypted local storage via KSafe, iOS/ Kotlin-Native release-binary symbol stripping, and an OWASP Mobile Top 10 2024 coverage map across this collection. Does NOT cover Android-specific R8/ProGuard obfuscation \u2014 that's kmp-proguard-r8's own scope, cross- referenced here rather than duplicated. Does NOT cover secrets-in-source scanning (gitleaks pre-commit) \u2014 that's kmp-setup-hooks Option F.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-08-24",
+      "keywords": [
+        "security",
+        "certificate pinning",
+        "SSL pinning",
+        "root detection",
+        "jailbreak detection",
+        "tamper detection",
+        "freeRASP",
+        "RASP",
+        "secure storage",
+        "encrypted storage",
+        "KSafe",
+        "OWASP Mobile Top 10",
+        "binary stripping",
+        "symbol stripping",
+        "reverse engineering"
+      ],
+      "triggers": [
+        "certificate pinning",
+        "SSL pinning",
+        "public key pinning",
+        "root detection",
+        "jailbreak detection",
+        "tamper detection",
+        "freeRASP",
+        "RASP",
+        "runtime application self-protection",
+        "secure storage",
+        "encrypted storage",
+        "KSafe",
+        "OWASP Mobile Top 10",
+        "binary stripping",
+        "symbol stripping",
+        "strip debug symbols",
+        "reverse engineering",
+        "Frida detection",
+        "MITM"
       ],
       "scripts": []
     },

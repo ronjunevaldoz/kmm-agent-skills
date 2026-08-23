@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.56.0] — 2026-08-24
+
+### Added
+
+- feat(kmp-security): add mobile security skill for pinning, RASP, storage, obfuscation
+
+---
+
 ## [v2.55.0] — 2026-08-24
 
 ### Added
