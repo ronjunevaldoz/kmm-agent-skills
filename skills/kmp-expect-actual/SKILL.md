@@ -12,7 +12,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-07-20'
+  last-updated: '2026-08-24'
   keywords:
     - expect actual
     - expect class
@@ -322,6 +322,24 @@ opening the file.
 - **`actual` in a shared module** — `actual` declarations must live in platform source sets (`androidMain`, `iosMain`); putting them in `commonMain` defeats the purpose.
 - **Not annotating with `@ObjCName`** — every `expect` declaration that surfaces to Swift should carry `@ObjCName` to control the generated Swift name. Load `kmp-xcframework-spm` for guidance.
 - **Leaking a raw platform type into a `commonMain` function signature** — `fun save(context: Context)` or `fun present(vc: UIViewController)` written directly in shared code forces every other target to either fake the type or never compile. This is exactly what `expect class PlatformContext` above exists to prevent — the platform type never appears in a `commonMain` signature at all, only its `expect`-declared abstraction does.
+- **Copy-pasted `actual` leaves a sibling's vocabulary behind** — real, evidence-backed pattern: a second platform's `actual` implementation started as a copy of the first, and some fields never got redesigned for the new platform's own shape. Generalized example (not the domain it was found in — the shape is identical regardless of platform pair):
+
+  ```kotlin
+  // androidMain — actual for a push-notification backend
+  actual class PushClient actual constructor() {
+      actual val token: String? get() = fcmToken
+      val fcmToken: String? = null       // real field, used
+  }
+
+  // iosMain — actual copy-pasted from androidMain, never redesigned
+  actual class PushClient actual constructor() {
+      actual val token: String? get() = apnsToken
+      val fcmToken: String? = null       // ❌ leftover from the Android actual — unused, meaningless on iOS
+      val apnsToken: String? = null      // the real field
+  }
+  ```
+
+  `fcmToken` on the iOS `actual` is dead weight that reads as "this platform also has an FCM token," which is false — it's a copy-paste leftover, not a real field. The fix isn't subtle: delete fields that don't belong to the platform being implemented, don't keep them "for symmetry." Each `actual` should look like it was designed for its own platform, not edited from the other one.
 
 ---
 
@@ -395,6 +413,7 @@ Lead with the decision rule. Keep snippets small — one `expect`/`actual` pair 
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | Added "Copy-pasted `actual` leaves a sibling's vocabulary behind" — real finding from reviewing a KMP native-binding project: a second platform's `actual` implementation was copy-pasted from its sibling and left unused fields shaped for the wrong platform. Generalized to a push-notification-client example, not the domain it was found in. Cross-referenced from `kmp-jni-pro`'s new Phase 0f. |
 | 2026-08-04 | Split "The Four Categories That Warrant expect/actual" out of SKILL.md into `references/four-categories.md`, leaving a pointer stub plus a new References section. SKILL.md drops from 507 to 399 lines, clearing the agentskills.io 500-line recommendation. No content removed, only relocated. Part of the same backlog cleanup as the other 19 skills fixed alongside it (KI-008). |
 | 2026-07-20 | Added an explicit "leaking a raw platform type into a commonMain function signature" anti-pattern — a real, general KMP anti-pattern (not library-specific), named explicitly even though the skill's own `expect class PlatformContext` example already teaches the correct pattern. |
 | 2026-06-06 | Initial release. |

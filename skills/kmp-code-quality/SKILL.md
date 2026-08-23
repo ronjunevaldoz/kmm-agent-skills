@@ -7,7 +7,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-08-22'
+  last-updated: '2026-08-24'
   keywords:
     - Ktlint
     - Detekt
@@ -106,7 +106,9 @@ delicate code comment, pointer first fragile code, read before modifying comment
 scope functions,
 let vs run vs apply vs also, when to use with, sequence vs list, asSequence,
 ponytail comment density, too many ponytail comments, investigation narration
-comment, state the finding not the investigation.
+comment, state the finding not the investigation, exception design, custom exception,
+sealed exception, when to use require, when to use check, generic exception, throw
+Exception, checked exceptions Kotlin.
 
 **Freshness rule:** Ktlint and Detekt versions change frequently — recheck the latest releases
 before pinning. Detekt architecture rule DSL changes between minor versions.
@@ -441,6 +443,14 @@ Full content: `references/naming-and-extension-conventions.md`.
 ## Scope Functions & Sequences
 
 Full content: `references/scope-functions-and-sequences.md`.
+
+## Exception Design
+
+`require`/`check` vs a sealed Result type vs a custom exception hierarchy vs
+generic `throw Exception(...)` — Kotlin has no checked exceptions, so this
+decision matters more than in Java.
+
+Full content: `references/exception-design.md`.
 
 ## Output Style
 

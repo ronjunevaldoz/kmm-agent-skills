@@ -13,7 +13,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-08-23'
+  last-updated: '2026-08-24'
   keywords:
     - KMP expert
     - orchestrator
@@ -169,7 +169,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 71 Skills and What They Own
+## The 72 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -206,6 +206,7 @@ versions when the local repo can be checked directly.
 | `kmp-mongodb-database` | MongoDB coroutine driver, repository boundary, document mapping, reactive reads with Flow, change streams |
 | `kmp-kotlin-rpc` | Kotlin RPC boundaries, shared service contracts, client/server layout, Ktor auth integration |
 | `kmp-network-layer` | Ktor 3 client, `NetworkResult<T>`, `safeRequest {}`, token refresh interceptor |
+| `kmp-resilience` | Retry/backoff/jitter, timeouts, circuit breaker, rate limiting, idempotency keys, transient-vs-fatal error classification, backend/platform resilience parity |
 | `kmp-mcp-sdk` | Model Context Protocol via the official `modelcontextprotocol/kotlin-sdk` — MCP server exposing tools/resources/prompts, MCP client, transport selection (STDIO/Streamable HTTP/SSE/WebSocket) |
 | `kmp-sqldelight-setup` | SQLDelight 2, platform drivers, schema files, migrations, Flow queries |
 | `kmp-datastore` | Preferences DataStore + Proto DataStore, expect/actual factory, Koin wiring, SharedPreferences migration |

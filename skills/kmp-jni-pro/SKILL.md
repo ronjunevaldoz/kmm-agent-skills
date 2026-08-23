@@ -9,7 +9,7 @@ description: >-
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-07-31'
+  last-updated: '2026-08-24'
   keywords:
     - JNI
     - Kotlin native
@@ -45,6 +45,7 @@ You have confirmed and fixed all of these classes of bug. You do not repeat them
 - `references/wrapper-patterns.md` — concrete C wrapper templates: lifecycle, streaming, callback/trampoline, multi-library pipeline
 - `references/header-compatibility-matrix.md` — deterministic `.h` audit; classify every type/paradigm as Supported / Conditional / Unsupported before any code
 - `references/architectural-feedback-schema.md` — structured halt-and-report format when a header has Unsupported constructs; C-shim design strategies
+- `references/kotlin-consumer-separation.md` — the same wrapper discipline one layer up: Kotlin code consuming bound native functions must not weld raw calls to business logic
 - https://developer.android.com/ndk/guides/jni-tips — Android JNI tips for footprint, threading, local refs, and release discipline
 - https://github.com/ronjunevaldoz/jni-binding-generator — Python generator that reads Kotlin `external fun` declarations and emits C++ JNI stubs, reducing boilerplate by 60–80%; ships Gradle integration and a `--check` drift mode for CI
 
@@ -311,6 +312,16 @@ Java_com_example_Engine_nativeCreate(JNIEnv* env, jobject, jstring modelPath) {
 
 ---
 
+### Phase 0f — Kotlin-side consumer separation
+
+The same wrapper discipline as Phase 0e, one layer up: the Kotlin code
+consuming generated/bound native functions must not weld raw binding calls
+to business logic in the same function.
+
+Full content: `references/kotlin-consumer-separation.md`.
+
+---
+
 ### Phase 1 — Understand the boundary
 
 1. Find the Kotlin `external fun` declarations and the matching `Java_*` JNI function.
@@ -391,6 +402,7 @@ See `references/error-patterns.md` for full evidence and context.
 | Early return before cleanup | RAII or `goto cleanup`; never bare `return error` before `delete ctx` (EP-8) |
 | Null handle not checked | Zero-check the `jlong` before casting to a pointer |
 | JNI types in C wrapper | `jstring`/`jbyteArray` stay in `*-jni.cpp`; wrapper is pure C++ |
+| Business logic welded to raw binding calls | Wrap raw calls in a thin Kotlin facade — business logic must be independently unit-testable without the native library loaded (Phase 0f) |
 
 **Algorithm reimplementation (EP-1) — most common mistake:**
 
@@ -454,6 +466,7 @@ Never reimplement a library function found in step 1 — cite it by name.
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | Added "Phase 0f — Kotlin-side consumer separation" (`references/kotlin-consumer-separation.md`) — real anti-pattern found reviewing a KMP native-binding consumer's render code: raw binding calls welded to business logic in the same function, making the business logic impossible to unit-test without the native library loaded. Generalized to a native-audio-DSP example rather than the domain it was found in. Also documented the cross-`actual` naming-leak variant (a binding class copy-pasted from a sibling platform, left with unused fields from the wrong shape) and cross-referenced `kmp-expect-actual`'s new version of the same rule. 1 new anti-pattern table row. |
 | 2026-07-31 | Added a C unsigned-integer type-mapping row to `references/type-mapping.md` — real gap: JNI has no unsigned primitive type at all, so a C `uint32_t` must cross as the equivalent signed JNI type (`jint`) and become a Kotlin `UInt` only after, as a Kotlin-side wrapper, never a JNI-level concept. Verified against kotlinlang.org's own unsigned-integer-types docs. |
 | 2026-06-22 | B1/B2 bloat compression: merged "Recommendation First" + "Core identity" into single "Stack contract" section with DO/NEVER table; compressed "Common Anti-Patterns" from prose to reference table + EP-1 code example; trimmed "Output Style" to concise 8-step list. No information removed. |
 | 2026-06-22 | Added references/header-compatibility-matrix.md (deterministic `.h` audit: Supported/Conditional/Unsupported tiers for 22 C++ constructs, decision gate) and references/architectural-feedback-schema.md (halt-and-report format + 9 C-shim strategies for Unsupported constructs). Added Phase 0.5 (header audit) to the workflow, pre-task checklist, output style (matrix as required artifact #2), References and Integration sections. |

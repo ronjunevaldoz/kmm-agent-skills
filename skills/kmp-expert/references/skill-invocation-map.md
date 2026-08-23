@@ -31,6 +31,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "MongoDB", "database", "collection", "Flow", "change stream", "server-side Kotlin" | `kmp-mongodb-database` |
 | "kotlin rpc", "kRPC", "kotlinx rpc", "RPC service", "shared RPC models" | `kmp-kotlin-rpc` |
 | "add Ktor", "network layer", "API calls", "token refresh" | `kmp-network-layer` |
+| "retry", "exponential backoff", "circuit breaker", "timeout", "rate limiting", "idempotency key", "transient error", "device lost", "backend parity" | `kmp-resilience` |
 | "MCP", "Model Context Protocol", "kotlin-sdk", "MCP server", "MCP client", "MCP tool", "expose tool to Claude" | `kmp-mcp-sdk` |
 | "local database", "SQLite", "SQLDelight", "offline storage" | `kmp-sqldelight-setup` |
 | "CI", "GitHub Actions", "run KMP tests" | `kmp-ci-github-actions` |
