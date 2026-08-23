@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.51.0] — 2026-08-24
+
+### Added
+
+- feat(kmp-compose-design-system): add typography scale rationale + text resilience
+
+---
+
 ## [v2.50.0] — 2026-08-23
 
 ### Added

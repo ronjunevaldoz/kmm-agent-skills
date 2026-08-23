@@ -1,6 +1,6 @@
 # Skills Report
 
-Generated 2026-08-23 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
+Generated 2026-08-24 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
 **71 skills** — 71 clean, 0 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
@@ -15,6 +15,7 @@ Generated 2026-08-23 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-network-layer`](../../skills/kmp-network-layer/) | 474 | 2026-07-31 | ✅ |
 | [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 469 | 2026-07-08 | ✅ |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 468 | 2026-06-29 | ✅ |
+| [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 466 | 2026-08-24 | ✅ |
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
 | [`kmp-audit`](../../skills/kmp-audit/) | 464 | 2026-08-23 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 464 | 2026-08-22 | ✅ |
@@ -24,7 +25,6 @@ Generated 2026-08-23 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-dependency-injection`](../../skills/kmp-dependency-injection/) | 453 | 2026-07-20 | ✅ |
 | [`kmp-compose-state-hoisting`](../../skills/kmp-compose-state-hoisting/) | 450 | 2026-07-20 | ✅ |
 | [`kmp-compose-adaptive-layout`](../../skills/kmp-compose-adaptive-layout/) | 447 | 2026-07-07 | ✅ |
-| [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 446 | 2026-07-26 | ✅ |
 | [`kmp-compose-design-system-extended`](../../skills/kmp-compose-design-system-extended/) | 446 | 2026-07-08 | ✅ |
 | [`kmp-compose-state-container`](../../skills/kmp-compose-state-container/) | 438 | 2026-06-06 | ✅ |
 | [`kmp-flavor-environment`](../../skills/kmp-flavor-environment/) | 437 | 2026-06-21 | ✅ |

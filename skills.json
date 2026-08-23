@@ -1,5 +1,5 @@
 {
-  "version": "2.50.0",
+  "version": "2.51.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -773,7 +773,7 @@
       "path": "skills/kmp-compose-design-system",
       "description": "Scaffolds a fully owned Compose Multiplatform design system in :core:designsystem using the experimental Compose Styles API. Produces semantic design tokens, AppTheme, style accessors, sealed component variants, and core App* primitives without Material. The App prefix is derived from the project's name and can be customized.",
       "license": "Apache-2.0",
-      "last_updated": "2026-07-26",
+      "last_updated": "2026-08-24",
       "keywords": [
         "design system",
         "Compose Styles API",
@@ -802,7 +802,12 @@
         "Modifier.composed",
         "stateless variant",
         "context-aware modifier",
-        "memoized style"
+        "memoized style",
+        "golden ratio",
+        "type scale",
+        "text overflow",
+        "text truncation",
+        "i18n text expansion"
       ],
       "triggers": [
         "design system",
@@ -856,7 +861,16 @@
         "rename App to project name",
         "project-specific component names",
         "COMPONENT_PREFIX",
-        "derive prefix from project name"
+        "derive prefix from project name",
+        "golden ratio",
+        "type scale",
+        "typographic scale",
+        "text overflow",
+        "text truncation",
+        "text hell",
+        "line length",
+        "i18n text expansion",
+        "translated string overflow"
       ],
       "scripts": [
         "derive_component_prefix.py",
