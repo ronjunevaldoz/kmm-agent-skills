@@ -11,7 +11,7 @@ Created and maintained by [Ron Valdoz](https://github.com/ronjunevaldoz).
 AI agent skills for **Kotlin Multiplatform (KMP)** development — clean module boundaries,
 version catalogs, build-logic convention plugins, and explicit review loops before code is generated.
 
-Built on the open [Agent Skills](https://agentskills.io) format. All 72 skills verified
+Built on the open [Agent Skills](https://agentskills.io) format. All 73 skills verified
 against the real [`skills-ref`](https://github.com/agentskills/agentskills) reference
 validator — see [`docs/reference/agentskills-io-standards.md`](docs/reference/agentskills-io-standards.md)
 for what was checked and how.
@@ -124,7 +124,7 @@ python3 scripts/release.py auto --dry-run # preview first
 
 ## Skills
 
-72 skills covering the full KMP stack. Load the smallest set that answers the request.
+73 skills covering the full KMP stack. Load the smallest set that answers the request.
 Health at a glance (size, freshness, known issues) without reading every `SKILL.md`:
 [`docs/reference/skills-report.md`](docs/reference/skills-report.md).
 
@@ -132,7 +132,7 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 |---|---|---|
 | Foundation | 8 | Module structure, clean architecture, DI, CI, Android CLI |
 | Infrastructure | 14 | Auth, networking, resilience, MCP, database, publishing, JNI |
-| Patterns | 21 | MVI, navigation, offline-first, notifications, IAP, and more |
+| Patterns | 22 | MVI, navigation, offline-first, notifications, IAP, security, and more |
 | UI System | 13 | Design system, state hoisting, animation, adaptive layout |
 | Testing & Quality | 6 | Unit tests, screenshot tests, lint/static analysis, web performance |
 | Meta | 10 | Routing, audit, migration, docs, release, refactor |
@@ -187,6 +187,7 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 - [`shared-resources`](skills/kmp-shared-resources/) — shared resources and localization
 - [`in-app-purchases`](skills/kmp-in-app-purchases/) — Play Billing + StoreKit 2, PurchaseState, MVI paywall
 - [`proguard-r8`](skills/kmp-proguard-r8/) — R8 keep rules for KMP libraries, release build validation
+- [`security`](skills/kmp-security/) — certificate pinning, root/jailbreak detection (freeRASP), encrypted storage (KSafe), iOS binary stripping, OWASP Mobile Top 10 map
 - [`desktop-app`](skills/kmp-desktop-app/) — window management, tray, file picker, packaging
 
 ### UI System

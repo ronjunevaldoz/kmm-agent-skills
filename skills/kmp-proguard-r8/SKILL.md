@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-06-29'
+  last-updated: '2026-08-24'
   keywords:
     - ProGuard
     - R8
@@ -247,6 +247,7 @@ Run instrumented tests against the `release` build type:
 - `kmp-sqldelight-setup` — SQLDelight rules are required when local DB is present
 - `kmp-dependency-injection` — Koin rules are required for all projects using Koin
 - `kmp-release` — R8 config is part of the release checklist
+- `kmp-security` — the iOS/Kotlin-Native counterpart (release-binary symbol stripping) plus certificate pinning, root/jailbreak detection, and encrypted storage; this skill stays Android-obfuscation-only
 
 ---
 
@@ -266,4 +267,5 @@ Keep rules as targeted as possible — never suggest blanket keep rules.
 
 | Date | Change |
 |---|---|
+| 2026-08-24 | Cross-referenced the new `kmp-security` skill — iOS/Kotlin-Native release-binary stripping, certificate pinning, root/jailbreak detection, and encrypted storage now have a real home; this skill stays scoped to Android R8/ProGuard obfuscation only. |
 | 2026-06-29 | Initial release. |

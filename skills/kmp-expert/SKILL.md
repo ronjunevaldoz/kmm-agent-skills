@@ -169,7 +169,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 72 Skills and What They Own
+## The 73 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -196,6 +196,7 @@ versions when the local repo can be checked directly.
 | `kmp-skill-harvester` | Reads accumulated lesson files and proposes amendments to source skills; produces a harvest report |
 | `kmp-legal-docs` | Privacy Policy, Terms & Conditions, Google Play Data Safety, App Store privacy labels, GDPR/CCPA, in-app `LegalDocsScreen`, consent gate |
 | `kmp-proguard-r8` | R8 minification for KMP Android release builds: keep rules per library (Koin, Ktor, SQLDelight, serialization), release crash diagnosis, mapping.txt management |
+| `kmp-security` | Certificate/SSL pinning, root/jailbreak/tamper detection (freeRASP), encrypted local storage (KSafe), iOS/Native release-binary stripping, OWASP Mobile Top 10 coverage map |
 | `kmp-in-app-purchases` | IAP and subscriptions: shared `PurchaseState` domain model, Play Billing (Android) and StoreKit 2 (iOS) implementations, MVI ViewModel integration, server-side validation |
 | `kmp-desktop-app` | Desktop-specific: window management, system tray, file picker, native menu bar, keyboard shortcuts, drag-and-drop, JPackage packaging (dmg/msi/deb) |
 
