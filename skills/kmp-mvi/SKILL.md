@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-07-26'
+  last-updated: '2026-08-24'
   keywords:
     - MVI
     - Model-View-Intent
@@ -187,6 +187,18 @@ private val _effect = MutableSharedFlow<Effect>(replay = 1)
 private val _effect = Channel<Effect>(Channel.BUFFERED)
 val effect: Flow<Effect> = _effect.receiveAsFlow()
 ```
+
+**This is not a Kotlin/Compose-specific bug class — verified the same failure exists in
+React.** A toast/navigation effect driven by a `useEffect` watching persisted state
+replays the exact same way `SharedFlow(replay = 1)` does: on React 18 StrictMode's
+dev-only double-invoke, on a real remount, or on browser back/forward navigation
+re-reading `location.state`. The real fix is the same shape, not just conceptually
+similar: fire the effect from the **event handler that causes the transition**, not
+reactively from a `useEffect` watching state that outlives the moment it happened
+— the framework-neutral version of "don't replay a one-shot event from persisted
+state," `Channel` is just the Kotlin-coroutines mechanism for enforcing it. See
+`ts-state-management`'s "One-Shot Effects — Not Persisted State" for the React-side
+write-up of the identical bug and fix.
 
 ### Why `MutableStateFlow.update {}` and not direct assignment?
 
@@ -370,32 +382,7 @@ Full content: `references/nav-args-initial-state.md`.
 
 ## In-flight Cancellation
 
-When an intent triggers a job that should supersede any prior job of the same type
-(search, filter, reload), cancel the previous job before launching the new one.
-
-```kotlin
-private var searchJob: Job? = null
-
-private fun search(query: String) {
-    searchJob?.cancel()
-    if (query.isBlank()) {
-        updateState { copy(results = emptyList(), isSearching = false) }
-        return
-    }
-    searchJob = viewModelScope.launch {
-        updateState { copy(isSearching = true) }
-        delay(300)                    // debounce — skip if cancelled during delay
-        val results = repo.search(query)
-        updateState { copy(results = results, isSearching = false) }
-    }
-}
-```
-
-The `delay(300)` acts as a debounce: if a new `SearchQueryChanged` intent arrives within
-300 ms the coroutine is cancelled before the network call fires.
-
-**When NOT to cancel:** submit, save, and delete actions should not be cancellable by
-re-typing — guard those with an `isLoading` flag instead (see `login()` example above).
+Full content: `references/in-flight-cancellation.md`.
 
 ---
 
@@ -461,9 +448,9 @@ If the ViewModel is growing beyond 150–200 lines, apply the decomposition deci
 
 Full implementation content lives in `references/*.md` — one file per heading above with
 a pointer (`mvi-viewmodel-base-class`, `implementing-a-viewmodel`, `compose-integration`,
-`framework-agnostic-store`, `nav-args-initial-state`, `testing`, `state-patterns`,
-`multi-source-state`, `viewmodel-size-decomposition`, `changelog`). Load the specific
-file named in the pointer under the matching heading, not all of them.
+`framework-agnostic-store`, `nav-args-initial-state`, `in-flight-cancellation`, `testing`,
+`state-patterns`, `multi-source-state`, `viewmodel-size-decomposition`, `changelog`). Load
+the specific file named in the pointer under the matching heading, not all of them.
 
 ---
 
