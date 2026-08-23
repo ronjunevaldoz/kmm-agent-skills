@@ -27,6 +27,94 @@ Both hold reference docs — the distinction is scope:
 
 Rule of thumb: if you'd link to it from README, it belongs in `docs/` root. If you'd link to it from `architecture.md` or `deployment.md`, it belongs in `docs/reference/`.
 
+### Reference Doc Starter Templates
+
+The Task, ADR, and Module README templates elsewhere in this skill all had a
+literal starting shape; these three primary Reference docs didn't — adding
+them here so every doc kind has one to copy from, not just a classification
+rule.
+
+**Root `README.md`** — entry point only, link out rather than re-explain:
+
+```markdown
+# project-name
+
+One sentence: what this is and who it's for.
+
+## Quick Start
+
+The fewest commands a new reader needs to run it.
+
+## Documentation
+
+- [Architecture](docs/architecture.md) — system design, module graph
+- [Deployment](docs/deployment.md) — how this ships
+- [docs/reference/](docs/reference/) — subsystem deep-dives
+
+## License
+
+Pointer to LICENSE, not a restatement.
+```
+
+**`docs/architecture.md`** — the stable, long-form system-design doc:
+
+```markdown
+# Architecture
+
+## Overview
+
+What the system does, in a few sentences — not a restatement of the README.
+
+## Module Graph
+
+Mermaid, when the shape genuinely needs a diagram to read at a glance —
+skip it if a short list of modules and their roles says the same thing.
+
+## Layers
+
+| Layer | Owns |
+|---|---|
+| ... | ... |
+
+## Key Decisions
+
+Link to `docs/decisions/` for the *why* — don't restate individual ADRs
+here, this doc explains the current shape, not the history of how it got
+there.
+
+## Related
+
+Links to `docs/deployment.md`, `docs/reference/*.md`.
+```
+
+**`docs/reference/<topic>.md`** — one subsystem deep-dive, same shape regardless of topic:
+
+```markdown
+# <Topic>
+
+## Why this exists
+
+The problem or constraint that made this subsystem's design non-obvious —
+skip if the topic is genuinely just "here's how X works," not "here's why
+X works this unusual way."
+
+## Details
+
+The actual explanation — code snippets for real API shapes, a table for
+comparisons, prose only for what a table or snippet can't show.
+
+## Gotchas
+
+What a reader would get wrong without this doc. The highest-value section —
+skip it only if there genuinely are none, don't pad it to fill space.
+
+## Related
+
+Links to the primary doc that introduces this topic (architecture.md,
+deployment.md, or another reference/ page) — every reference/ page needs at
+least one inbound link, or `kmp-audit` flags it as orphaned.
+```
+
 ### Active work lanes
 
 Use these lanes when the project keeps planning or bug history in nested folders:

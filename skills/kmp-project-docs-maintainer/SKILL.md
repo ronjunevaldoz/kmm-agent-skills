@@ -184,6 +184,12 @@ Use the active lanes like this:
 If the project needs chronological task history as well, keep `docs/tasks/` as the
 archive lane for dated phase notes and pointers, but do not force every active doc there.
 
+### Reference Doc Starter Templates
+
+Root `README.md`, `docs/architecture.md`, and `docs/reference/<topic>.md` starter
+templates — full content in `references/docs-hygiene.md`'s "Reference Doc Starter
+Templates" section.
+
 ### Fix Maturity Lanes
 
 Use one of these lanes for every fix note in `docs/tasks/`:
@@ -347,6 +353,7 @@ Use this validation matrix for project docs:
 Read `references/docs-hygiene.md` before any clean-up task. It covers:
 - Classification (Reference / Task / Non-doc, plus the Decision/ADR lane) with examples
 - `docs/` root vs `docs/reference/` placement rule
+- Reference Doc Starter Templates: root README.md, architecture.md, reference/<topic>.md
 - Decision lane (ADR): one-decision-per-file, immutable once Accepted, starter template
 - Clean-up sequence (classify → check references → update links → move → consolidate → validate)
 - Consolidation rule for task files scattered at the `docs/` root
@@ -440,6 +447,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | Added Reference Doc Starter Templates (root `README.md`, `docs/architecture.md`, `docs/reference/<topic>.md`) — user asked to see a template for every doc kind; Task, ADR, and Module README already had one, these three primary Reference docs didn't. Lives in `references/docs-hygiene.md`, moved there after adding it directly to `SKILL.md` pushed it to 548 lines. |
 | 2026-08-23 | Added the Decision lane (ADR) and Per-Module README.md. User asked us to research why a real consumer project's `docs/` had grown to 141 files / 29,650 lines — `kmp-audit --docs-hygiene-only` found 118 real violations there, including a 1,578-line `decision-log.md` and a 714-line findings file, both trying to be Architecture Decision Records built as one growing log instead of one-file-per-decision. Verified the real, widely-adopted ADR pattern (Michael Nygard, 2011; ThoughtWorks Radar ADOPT) before writing: one decision per file, ~1 page, immutable once `Accepted`, superseded by a new numbered file rather than edited. Added `docs/decisions/NNNN-slug.md` with a starter template, plus two mechanical checks in `kmp-audit` (filename shape, `**Status:**` line presence). Separately, user asked whether per-module `README.md` was a different concern — confirmed yes (code-colocated, not under `docs/`, zero prior coverage anywhere) and added a Per-Module README.md section with its own starter template, explicitly out of `docs/`'s line-cap enforcement since it lives outside that tree. |
 | 2026-08-23 | Upgraded `docs/tasks.md`'s Task Log template from a bullet list to an explicit `\| Task \| Status \| Parent \|` table — user wanted to read every task's status without opening each file one by one. `kmp-audit`'s `_check_docs_hygiene` now flags an active task file with no matching row in `docs/tasks.md`, so the table can't silently drift from what's actually on disk. |
 | 2026-08-22 | Task filename convention changed at the user's request: `docs/tasks/YYYY-MM-DD-slug.md` → `docs/tasks/<parent>/<NN>-<slug>-<status>.md` (status one of `todo`/`doing`/`blocked`/`done`, resets numbering per parent folder). Status now lives in the filename instead of a `status:` field in content — the whole point is reading status without opening the file. The date moved the other direction: out of the filename, into a `**Date:** YYYY-MM-DD` line in the content. Rewrote `docs-hygiene.md`'s Naming Convention, Consolidation Rule, and Delete vs Archive sections; updated `kmp-audit`'s `_check_docs_hygiene` to validate the new shape and flag a missing Date line instead of grepping for `status: done`. Migrated this repo's own 3 archived task docs (`docs/tasks/archive/*.md`) into the new convention under a `skills-repo` parent. |
