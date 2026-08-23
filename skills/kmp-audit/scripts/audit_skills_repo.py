@@ -303,6 +303,10 @@ def _check_docs_hygiene(root: Path, findings: list[str]) -> None:
     # filename (todo/doing/blocked/done), the date lives inside the content instead.
     tasks_dir = docs_dir / "tasks"
     if tasks_dir.exists():
+        tasks_index = docs_dir / "tasks.md"
+        tasks_index_text = (
+            tasks_index.read_text(encoding="utf-8", errors="ignore") if tasks_index.exists() else ""
+        )
         for loose in sorted(tasks_dir.glob("*.md")):
             findings.append(
                 f"docs hygiene: {loose.relative_to(root)} sits directly in docs/tasks/ "
@@ -330,6 +334,12 @@ def _check_docs_hygiene(root: Path, findings: list[str]) -> None:
                     findings.append(
                         f"docs hygiene: {md.relative_to(root)} is missing a "
                         "**Date:** YYYY-MM-DD line in its content"
+                    )
+                if not in_archive and md.name not in tasks_index_text:
+                    findings.append(
+                        f"docs hygiene: {md.relative_to(root)} is not indexed in "
+                        "docs/tasks.md — add a Task Log row so status is readable "
+                        "without opening every task file"
                     )
 
     # 5. Non-markdown files sitting directly in docs/ (flag as non-docs)

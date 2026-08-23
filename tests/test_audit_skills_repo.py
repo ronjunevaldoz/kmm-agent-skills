@@ -537,6 +537,11 @@ class TaskFileConventionTests(unittest.TestCase):
                 root, "todo-app", "01-add-auth-doing.md",
                 "# Add auth\n\n**Date:** 2026-08-22\n\nBody.\n",
             )
+            (root / "docs" / "tasks.md").write_text(
+                "# Tasks\n\n| Task | Status | Parent |\n|---|---|---|\n"
+                "| [01-add-auth](tasks/todo-app/01-add-auth-doing.md) | doing | todo-app |\n",
+                encoding="utf-8",
+            )
             findings: list[str] = []
             audit_repo_scripts._check_docs_hygiene(root, findings)
             self.assertFalse(any("task" in f.lower() or "01-add-auth" in f for f in findings))
@@ -602,6 +607,49 @@ class TaskFileConventionTests(unittest.TestCase):
             self.assertTrue(any(
                 "sits directly in docs/tasks/" in f for f in findings
             ))
+
+    def test_flags_active_task_not_indexed_in_tasks_md(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_task(
+                root, "todo-app", "01-add-auth-doing.md",
+                "# Add auth\n\n**Date:** 2026-08-22\n",
+            )
+            (root / "docs" / "tasks.md").write_text("# Tasks\n\nNothing here yet.\n", encoding="utf-8")
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertTrue(any(
+                "01-add-auth-doing.md" in f and "not indexed in docs/tasks.md" in f
+                for f in findings
+            ))
+
+    def test_does_not_flag_task_indexed_in_tasks_md(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_task(
+                root, "todo-app", "01-add-auth-doing.md",
+                "# Add auth\n\n**Date:** 2026-08-22\n",
+            )
+            (root / "docs" / "tasks.md").write_text(
+                "# Tasks\n\n| Task | Status | Parent |\n|---|---|---|\n"
+                "| [01-add-auth](tasks/todo-app/01-add-auth-doing.md) | doing | todo-app |\n",
+                encoding="utf-8",
+            )
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertFalse(any("not indexed in docs/tasks.md" in f for f in findings))
+
+    def test_does_not_flag_archived_task_for_missing_index(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._write_task(
+                root, "todo-app/archive", "01-add-auth-done.md",
+                "# Add auth\n\n**Date:** 2026-08-22\n",
+            )
+            (root / "docs" / "tasks.md").write_text("# Tasks\n\nNothing here yet.\n", encoding="utf-8")
+            findings: list[str] = []
+            audit_repo_scripts._check_docs_hygiene(root, findings)
+            self.assertFalse(any("not indexed in docs/tasks.md" in f for f in findings))
 
 
 class OrphanedReferenceDocTests(unittest.TestCase):

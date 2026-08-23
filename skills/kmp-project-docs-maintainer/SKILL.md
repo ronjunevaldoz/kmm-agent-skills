@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-08-22'
+  last-updated: '2026-08-23'
   references:
     - references/docs-hygiene.md
   keywords:
@@ -270,13 +270,23 @@ When creating a new downstream project, start `docs/tasks.md` with this structur
 
 ## Task Log
 
-- [01-plan-doing](tasks/my-feature/01-plan-doing.md)
-- [02-build-todo](tasks/my-feature/02-build-todo.md)
+| Task | Status | Parent |
+|---|---|---|
+| [01-plan](tasks/my-feature/01-plan-doing.md) | doing | my-feature |
+| [02-build](tasks/my-feature/02-build-todo.md) | todo | my-feature |
 
 ## Archive Index
 
 - [my-feature](tasks/my-feature/archive/)
 ```
+
+A table, not a bullet list — the whole point is reading every active task's status in
+one place without opening each file. Every active (non-archive) task file under
+`docs/tasks/<parent>/` needs a row here; `kmp-audit`'s `--docs-hygiene-only` flags a
+task file with no matching row (see `docs-hygiene.md`'s Hygiene Limits). Update the
+row's **Status** column and the link's target filename together — the filename is the
+source of truth for status (per the naming convention), this table is just a rolled-up
+index of it, not a second place to track status independently.
 
 ### 2b) Use `<NN>-<slug>-<status>.md` task filenames
 
@@ -374,6 +384,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-08-23 | Upgraded `docs/tasks.md`'s Task Log template from a bullet list to an explicit `\| Task \| Status \| Parent \|` table — user wanted to read every task's status without opening each file one by one. `kmp-audit`'s `_check_docs_hygiene` now flags an active task file with no matching row in `docs/tasks.md`, so the table can't silently drift from what's actually on disk. |
 | 2026-08-22 | Task filename convention changed at the user's request: `docs/tasks/YYYY-MM-DD-slug.md` → `docs/tasks/<parent>/<NN>-<slug>-<status>.md` (status one of `todo`/`doing`/`blocked`/`done`, resets numbering per parent folder). Status now lives in the filename instead of a `status:` field in content — the whole point is reading status without opening the file. The date moved the other direction: out of the filename, into a `**Date:** YYYY-MM-DD` line in the content. Rewrote `docs-hygiene.md`'s Naming Convention, Consolidation Rule, and Delete vs Archive sections; updated `kmp-audit`'s `_check_docs_hygiene` to validate the new shape and flag a missing Date line instead of grepping for `status: done`. Migrated this repo's own 3 archived task docs (`docs/tasks/archive/*.md`) into the new convention under a `skills-repo` parent. |
 | 2026-08-21 | Added an "orphaned reference doc" row to the Hygiene Limits table — a user asked for the audit to flag stale/rename/delete candidates directly instead of leaving it to a human grep. Backed by `kmp-audit`'s new `_check_orphaned_reference_docs`: a `docs/`-root or `docs/reference/*.md` file with zero inbound links anywhere in the repo gets flagged for review, not auto-deleted — automates the grep this doc's own Delete vs Archive section already told a human to do by hand. |
 | 2026-08-18 | Clarified `references/docs-hygiene.md`'s "Running the hygiene check" — a filed issue (kmp-agent-skills#6) claimed the documented command only resolves inside this skills repo; verified live against a real consumer project and disproved that (works standalone). The genuine confusion was the script's name — `audit_skills_repo.py` sounds skills-repo-only despite its `--docs-hygiene-only` path being generic. Added a one-line note plus an explicit "don't use `audit_project.py` here" pointer, since that's the script that actually has no hygiene checks. See `kmp-audit`'s changelog for the real bug the same investigation turned up (SCREAMING_CASE filenames weren't being caught). |

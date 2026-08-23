@@ -174,8 +174,10 @@ title, as the file's own record of when it started:
 violation — move it to `docs/tasks/<parent>/archive/` in the same rename.
 
 The audit script (`audit_skills_repo.py --docs-hygiene-only`) validates the
-`<NN>-<slug>-<status>.md` shape, flags a `-done` file still outside `archive/`, and
-flags a task file with no `**Date:**` line in its content.
+`<NN>-<slug>-<status>.md` shape, flags a `-done` file still outside `archive/`, flags a
+task file with no `**Date:**` line in its content, and flags an active task file with
+no matching row in `docs/tasks.md`'s Task Log table — the index has to name every
+active file, or a reader can't trust it as a substitute for opening each one.
 
 ---
 
@@ -190,6 +192,7 @@ flags a task file with no `**Date:**` line in its content.
 | Task file with a `-done` filename suffix still in active `docs/tasks/<parent>/` | 0 | Move to `docs/tasks/<parent>/archive/` immediately |
 | Task filename not matching `<NN>-<slug>-<status>.md` (status: todo/doing/blocked/done) | 0 | Rename to match the task naming convention |
 | Task file missing a `**Date:**` line in its content | 0 | Add the date line — filenames no longer carry a date prefix |
+| Active task file not mentioned in `docs/tasks.md` | 0 | Add a Task Log row — the index must name every active task so status is readable without opening each file |
 | Non-doc file (`.json`, `.yaml`, etc.) directly in `docs/` | 0 | Move to purpose-specific directory |
 | Snake_case filename in `docs/` | 0 | Rename to kebab-case |
 | Reference doc (`docs/` root or `docs/reference/`) with no inbound links anywhere in the repo | 0 | Review — link it from wherever introduces the topic, or delete per Delete vs Archive above if it's genuinely stale |
