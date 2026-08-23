@@ -1,5 +1,5 @@
 {
-  "version": "2.44.0",
+  "version": "2.45.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -1545,7 +1545,7 @@
       "path": "skills/kmp-expert",
       "description": "KMP Expert Orchestrator \u2014 maps all skills in this collection, their dependency order, and how to sequence them for any Kotlin Multiplatform project. Use this skill first to decide which other skill to invoke, in what order, for a given task. Covers: skill dependency graph, layer-by-layer build order, feature-slice assembly sequence, decision trees for the most common \"what do I use here?\" questions, and when to hand off to the project audit skill. This is a meta-skill; it delegates to domain skills for implementation and review, and it can turn confirmed audit findings into issue drafts or question drafts when the repo needs tracking. The long-term goal is to keep this skills collection aligned with the cleanest KMP architecture patterns possible.",
       "license": "Apache-2.0",
-      "last_updated": "2026-08-19",
+      "last_updated": "2026-08-23",
       "keywords": [
         "KMP expert",
         "orchestrator",
@@ -2289,6 +2289,47 @@
         "Sentry logging",
         "Koin logger",
         "production logs"
+      ],
+      "scripts": []
+    },
+    {
+      "name": "kmp-mcp-sdk",
+      "path": "skills/kmp-mcp-sdk",
+      "description": "Model Context Protocol (MCP) for Kotlin Multiplatform using the official modelcontextprotocol/kotlin-sdk (maintained with JetBrains). Covers building an MCP server that exposes tools/resources/prompts to an LLM client (Claude, Claude Code, MCP Inspector), building an MCP client that connects to an external MCP server from a Kotlin app, transport selection (STDIO, Streamable HTTP, SSE, WebSocket, ChannelTransport for tests), and Ktor wiring since the SDK does not bundle a Ktor engine transitively. Targets JVM, Native, JS, and Wasm from commonMain.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-08-23",
+      "keywords": [
+        "MCP",
+        "Model Context Protocol",
+        "kotlin-sdk",
+        "modelcontextprotocol",
+        "MCP server",
+        "MCP client",
+        "MCP tool",
+        "MCP resource",
+        "MCP prompt",
+        "StreamableHttp",
+        "StdioServerTransport",
+        "Claude tool",
+        "LLM tool",
+        "agent tool"
+      ],
+      "triggers": [
+        "MCP",
+        "Model Context Protocol",
+        "kotlin-sdk",
+        "modelcontextprotocol",
+        "MCP server",
+        "MCP client",
+        "MCP tool",
+        "MCP resource",
+        "MCP prompt",
+        "expose tool to Claude",
+        "Streamable HTTP",
+        "StdioServerTransport",
+        "WebSocket transport",
+        "agent tool",
+        "LLM tool"
       ],
       "scripts": []
     },

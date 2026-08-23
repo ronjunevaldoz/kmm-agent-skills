@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.45.0] — 2026-08-23
+
+### Added
+
+- feat(kmp-mcp-sdk): add skill for the official MCP Kotlin SDK
+
+---
+
 ## [v2.44.0] — 2026-08-23
 
 ### Added
