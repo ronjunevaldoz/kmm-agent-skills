@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.49.0] — 2026-08-23
+
+### Added
+
+- feat(docs-hygiene): add starter templates for README.md, architecture.md, reference/
+
+---
+
 ## [v2.48.0] — 2026-08-23
 
 ### Added
