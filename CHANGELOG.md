@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.52.0] — 2026-08-24
+
+### Added
+
+- feat(kmp-audit): wire docs-hygiene into the CI governance check
+
+---
+
 ## [v2.51.0] — 2026-08-24
 
 ### Added

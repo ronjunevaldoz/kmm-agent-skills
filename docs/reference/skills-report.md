@@ -16,8 +16,8 @@ Generated 2026-08-24 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-shared-resources`](../../skills/kmp-shared-resources/) | 469 | 2026-07-08 | ✅ |
 | [`kmp-navigation`](../../skills/kmp-navigation/) | 468 | 2026-06-29 | ✅ |
 | [`kmp-compose-design-system`](../../skills/kmp-compose-design-system/) | 466 | 2026-08-24 | ✅ |
+| [`kmp-audit`](../../skills/kmp-audit/) | 465 | 2026-08-24 | ✅ |
 | [`kmp-jni-pro`](../../skills/kmp-jni-pro/) | 465 | 2026-07-31 | ✅ |
-| [`kmp-audit`](../../skills/kmp-audit/) | 464 | 2026-08-23 | ✅ |
 | [`kmp-ci-github-actions`](../../skills/kmp-ci-github-actions/) | 464 | 2026-08-22 | ✅ |
 | [`kmp-desktop-app`](../../skills/kmp-desktop-app/) | 463 | 2026-06-29 | ✅ |
 | [`kmp-sqldelight-setup`](../../skills/kmp-sqldelight-setup/) | 460 | 2026-07-09 | ✅ |
