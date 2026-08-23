@@ -121,5 +121,5 @@ From `agentskills.io/skill-creation/best-practices.md` and `optimizing-descripti
 
 - `kmp-audit`'s `_detect_project_skill_standards` already enforces a
   version of this 500-line rule (with a `references/` escape hatch) on *consumer
-  projects'* own project-owned skills — this doc is this repo holding its own 70 skills
+  projects'* own project-owned skills — this doc is this repo holding its own 71 skills
   to the same real standard, not inventing a new one.

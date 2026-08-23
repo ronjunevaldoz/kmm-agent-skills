@@ -31,6 +31,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "MongoDB", "database", "collection", "Flow", "change stream", "server-side Kotlin" | `kmp-mongodb-database` |
 | "kotlin rpc", "kRPC", "kotlinx rpc", "RPC service", "shared RPC models" | `kmp-kotlin-rpc` |
 | "add Ktor", "network layer", "API calls", "token refresh" | `kmp-network-layer` |
+| "MCP", "Model Context Protocol", "kotlin-sdk", "MCP server", "MCP client", "MCP tool", "expose tool to Claude" | `kmp-mcp-sdk` |
 | "local database", "SQLite", "SQLDelight", "offline storage" | `kmp-sqldelight-setup` |
 | "CI", "GitHub Actions", "run KMP tests" | `kmp-ci-github-actions` |
 | "android cli", "android-cli", "android init", "android skills add", "create AVD from terminal", "android run apk", "agent-first android", "android studio quail", "render compose preview cli", "build and run android app", "deploy to emulator", "run KMP android target" | `kmp-android-cli` |

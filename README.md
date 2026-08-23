@@ -11,7 +11,7 @@ Created and maintained by [Ron Valdoz](https://github.com/ronjunevaldoz).
 AI agent skills for **Kotlin Multiplatform (KMP)** development — clean module boundaries,
 version catalogs, build-logic convention plugins, and explicit review loops before code is generated.
 
-Built on the open [Agent Skills](https://agentskills.io) format. All 70 skills verified
+Built on the open [Agent Skills](https://agentskills.io) format. All 71 skills verified
 against the real [`skills-ref`](https://github.com/agentskills/agentskills) reference
 validator — see [`docs/reference/agentskills-io-standards.md`](docs/reference/agentskills-io-standards.md)
 for what was checked and how.
@@ -124,7 +124,7 @@ python3 scripts/release.py auto --dry-run # preview first
 
 ## Skills
 
-70 skills covering the full KMP stack. Load the smallest set that answers the request.
+71 skills covering the full KMP stack. Load the smallest set that answers the request.
 Health at a glance (size, freshness, known issues) without reading every `SKILL.md`:
 [`docs/reference/skills-report.md`](docs/reference/skills-report.md).
 
@@ -153,6 +153,7 @@ Health at a glance (size, freshness, known issues) without reading every `SKILL.
 ### Infrastructure
 - [`ktor-auth-service`](skills/kmp-ktor-auth-service/) — auth service, bearer/JWT, sessions
 - [`network-layer`](skills/kmp-network-layer/) — Ktor client, auth refresh, result mapping
+- [`mcp-sdk`](skills/kmp-mcp-sdk/) — Model Context Protocol via `modelcontextprotocol/kotlin-sdk`: MCP server/client, transport selection
 - [`sqldelight-setup`](skills/kmp-sqldelight-setup/) — SQLDelight schema, drivers, migrations
 - [`datastore`](skills/kmp-datastore/) — Preferences DataStore + Proto DataStore
 - [`xcframework-spm`](skills/kmp-xcframework-spm/) — XCFramework and SPM export
