@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.57.0] — 2026-08-24
+
+### Added
+
+- feat(kmp-kotlinpoet): add skill for authoring custom KSP processors
+
+---
+
 ## [v2.56.0] — 2026-08-24
 
 ### Added

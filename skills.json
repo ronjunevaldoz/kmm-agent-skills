@@ -1,5 +1,5 @@
 {
-  "version": "2.56.0",
+  "version": "2.57.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -2040,6 +2040,43 @@
       "scripts": [
         "scaffold_kotlin_rpc.py"
       ]
+    },
+    {
+      "name": "kmp-kotlinpoet",
+      "path": "skills/kmp-kotlinpoet",
+      "description": "Building a custom KSP (Kotlin Symbol Processing) annotation processor that generates Kotlin source with KotlinPoet \u2014 FileSpec/TypeSpec/FunSpec/ PropertySpec builders, format specifiers, the two-module processor structure, ServiceLoader registration, and the kotlinpoet-ksp interop module for converting KSP's KSType/KSClassDeclaration into KotlinPoet's TypeName/ClassName. Use when a project wants compile-time code generation from annotations instead of runtime reflection. Does NOT cover consuming an existing KSP processor (Koin's annotated mode, Room, etc.) \u2014 that's ordinary dependency usage; this skill is for authoring a new processor.",
+      "license": "Apache-2.0",
+      "last_updated": "2026-08-24",
+      "keywords": [
+        "KotlinPoet",
+        "KSP",
+        "Kotlin Symbol Processing",
+        "annotation processor",
+        "code generation",
+        "SymbolProcessor",
+        "SymbolProcessorProvider",
+        "FileSpec",
+        "TypeSpec",
+        "FunSpec",
+        "custom annotation",
+        "compile-time codegen"
+      ],
+      "triggers": [
+        "KotlinPoet",
+        "KSP",
+        "Kotlin Symbol Processing",
+        "annotation processor",
+        "code generation",
+        "SymbolProcessor",
+        "SymbolProcessorProvider",
+        "FileSpec",
+        "TypeSpec",
+        "FunSpec",
+        "custom annotation",
+        "compile-time codegen",
+        "generate Kotlin source"
+      ],
+      "scripts": []
     },
     {
       "name": "kmp-ktor-auth-service",

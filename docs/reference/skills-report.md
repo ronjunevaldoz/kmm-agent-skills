@@ -2,7 +2,7 @@
 
 Generated 2026-08-24 by `scripts/generate_skills_report.py` — run it after any skill edit to refresh; not auto-run on every commit.
 
-**73 skills** — 73 clean, 0 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
+**74 skills** — 74 clean, 0 over the 500-line agentskills.io guideline (tracked as [KI-008](../../KNOWN_ISSUES.md#ki-008--22-of-64-skillmd-files-exceed-agentskillsios-recommended-500-line-body)).
 
 | Skill | Lines | Last Updated | Status |
 |---|---|---|---|
@@ -31,7 +31,7 @@ Generated 2026-08-24 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-api-mimicry`](../../skills/kmp-api-mimicry/) | 436 | 2026-08-23 | ✅ |
 | [`kmp-paging`](../../skills/kmp-paging/) | 432 | 2026-06-21 | ✅ |
 | [`kmp-roborazzi`](../../skills/kmp-roborazzi/) | 431 | 2026-07-10 | ✅ |
-| [`kmp-expert`](../../skills/kmp-expert/) | 426 | 2026-08-24 | ✅ |
+| [`kmp-expert`](../../skills/kmp-expert/) | 427 | 2026-08-24 | ✅ |
 | [`kmp-feature-scaffold`](../../skills/kmp-feature-scaffold/) | 421 | 2026-07-31 | ✅ |
 | [`kmp-expect-actual`](../../skills/kmp-expect-actual/) | 419 | 2026-08-24 | ✅ |
 | [`kmp-presenter-module`](../../skills/kmp-presenter-module/) | 419 | 2026-07-20 | ✅ |
@@ -62,6 +62,7 @@ Generated 2026-08-24 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-feature-flags`](../../skills/kmp-feature-flags/) | 334 | 2026-06-21 | ✅ |
 | [`kmp-native-authoring`](../../skills/kmp-native-authoring/) | 330 | 2026-07-31 | ✅ |
 | [`kmp-release`](../../skills/kmp-release/) | 328 | 2026-07-04 | ✅ |
+| [`kmp-kotlinpoet`](../../skills/kmp-kotlinpoet/) | 327 | 2026-08-24 | ✅ |
 | [`kmp-docs-site`](../../skills/kmp-docs-site/) | 326 | 2026-07-11 | ✅ |
 | [`kmp-offline-first`](../../skills/kmp-offline-first/) | 324 | 2026-06-21 | ✅ |
 | [`kmp-image-loading`](../../skills/kmp-image-loading/) | 317 | 2026-06-21 | ✅ |
