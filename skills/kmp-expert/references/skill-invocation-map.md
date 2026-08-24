@@ -58,6 +58,7 @@ When the user asks about one of these topics, invoke the corresponding skill:
 | "shadcn-compose", "ShadcnButton", "ShadcnTheme", "ShadcnCard", "shadcn ui kotlin", "shadcn compose multiplatform", "ExperimentalFoundationStyleApi", "shadcn kmp" | `kmp-shadcn-compose` |
 | "shadcn login form", "shadcn admin layout", "shadcn dashboard", "shadcn data table", "ShadcnField", "ShadcnFieldGroup", "ShadcnTable", "ShadcnSidebar", "shadcn compose form", "admin shell compose multiplatform" | `kmp-shadcn-compose-layouts` |
 | "mimic api", "api mimicry", "clone api shape", "inspired by jetpack compose", "custom dsl engine", "from-scratch renderer", "vulkan ui", "metal ui", "port api ergonomics", "reimplement compose-like dsl", "non-compose renderer", "engine-agnostic dsl", "own compiler-free dsl", "api shape porting" | `kmp-api-mimicry` |
+| "KotlinPoet", "KSP", "Kotlin Symbol Processing", "annotation processor", "SymbolProcessor", "FileSpec", "TypeSpec", "generate Kotlin source", "compile-time codegen" | `kmp-kotlinpoet` |
 | "slot API", "content lambda", "composable parameter", "scoped slot" | `kmp-compose-slot-api` |
 | "state hoisting", "hoist state", "controlled component", "where does state go" | `kmp-compose-state-hoisting` |
 | "remember vs ViewModel", "rememberSaveable", "state survival", "config change" | `kmp-compose-state-container` |

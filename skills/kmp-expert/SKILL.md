@@ -169,7 +169,7 @@ versions when the local repo can be checked directly.
 
 ---
 
-## The 73 Skills and What They Own
+## The 74 Skills and What They Own
 
 ### Layer 0 — Architecture Contract
 | Skill | Owns |
@@ -215,6 +215,7 @@ versions when the local repo can be checked directly.
 | `kmp-library-publishing` | Maven Central publishing (vanniktech plugin), GitHub Packages, BOM, binary-compatibility-validator, SNAPSHOT vs stable channels, GPG signing, release checklist |
 | `kmp-docs-site` | GitHub Pages developer guide for a published library — MkDocs Material, Dokka HTML API reference, compiler-verified snippet extraction, release-tag-triggered CI deploy |
 | `kmp-api-mimicry` | Mimicking a reference API's shape (Modifier-style chains, slot lambdas, DSL markers) for a from-scratch library on a non-standard runtime (custom native renderer, custom transport) — plain-function DSL vs. real-compiler-plugin decision, mirror-map documentation |
+| `kmp-kotlinpoet` | Authoring a custom KSP annotation processor with KotlinPoet — FileSpec/TypeSpec/FunSpec builders, two-module processor structure, `kotlinpoet-ksp` interop for converting KSP types |
 | `kmp-logging` | logger wrapper, kotlin-logging or Kermit, log levels, logger factory, crash breadcrumb bridge, Koin wiring |
 
 ### Layer 3 — Platform Patterns
