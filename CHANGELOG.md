@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.58.0] — 2026-08-26
+
+### Added
+
+- feat(docs-hygiene): cross-reference avoid-ai-writing for deeper AI-tell removal
+
+---
+
 ## [v2.57.0] — 2026-08-24
 
 ### Added
