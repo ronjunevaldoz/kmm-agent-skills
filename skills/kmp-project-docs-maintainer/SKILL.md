@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-08-23'
+  last-updated: '2026-08-26'
   references:
     - references/docs-hygiene.md
   keywords:
@@ -136,6 +136,15 @@ end to end. Every edit should make the doc easier to act on, not just more compl
   decision record explains the choice and its consequences in prose; if a decision
   needs a diagram or snippet to justify itself, that content belongs in the Reference
   doc the ADR should link to, not duplicated inside the ADR itself.
+
+**For deeper AI-tell removal than the hedge-phrase check above catches** — verified
+real, actively maintained, not reimplemented here: [`conorbronsdon/avoid-ai-writing`](https://github.com/conorbronsdon/avoid-ai-writing),
+a 62-category, 112-word tiered detector (em dashes, hollow intensifiers, "it's not
+X — it's Y" reveals, promotional inflation) with honest false-positive caveats built
+in. Install directly (`npx skills add conorbronsdon/avoid-ai-writing`) for a prose pass
+on `docs/`/README content — this skill's own `_detect_hedging_language` stays scoped to
+the smaller, KDoc/code-comment-specific phrase list it already owns, not a duplicate of
+the wider tool's catalog.
 
 ### Default Docs Topology
 
@@ -459,6 +468,7 @@ Keep the response focused on the project's docs surface and the source files it 
 
 | Date | Change |
 |---|---|
+| 2026-08-26 | Cross-referenced `conorbronsdon/avoid-ai-writing` in the Writing Style section — user asked whether the tool was useful to us. Verified real via `gh api` before recommending it: 3264 stars, actively maintained, a 62-category/112-word tiered AI-tell detector with a real test suite and honest cited false-positive caveats (Stanford *Patterns* 2023, BFI Working Paper 2025). Cited rather than reimplemented — its scope is far deeper than this skill's own `_detect_hedging_language`, which stays scoped to its existing narrow KDoc/code-comment phrase list rather than duplicating a 112-word catalog. |
 | 2026-08-23 | Added an 8th Writing Style rule: when to use Mermaid vs a code snippet vs neither, per doc kind — user asked directly which doc kinds should use which. Mermaid only for module graphs/sequence flows a table or list genuinely can't show (points at `kmp-audit`'s existing `generate_structure_diagram.py --mermaid` for the module-graph case rather than re-deriving one by hand); code snippets wherever a real API/interface is being described (Reference, Task, Module README); ADRs need neither — link out to the Reference doc instead of duplicating a diagram/snippet inside the decision record. |
 | 2026-08-23 | Added Reference Doc Starter Templates (root `README.md`, `docs/architecture.md`, `docs/reference/<topic>.md`) — user asked to see a template for every doc kind; Task, ADR, and Module README already had one, these three primary Reference docs didn't. Lives in `references/docs-hygiene.md`, moved there after adding it directly to `SKILL.md` pushed it to 548 lines. |
 | 2026-08-23 | Added the Decision lane (ADR) and Per-Module README.md. User asked us to research why a real consumer project's `docs/` had grown to 141 files / 29,650 lines — `kmp-audit --docs-hygiene-only` found 118 real violations there, including a 1,578-line `decision-log.md` and a 714-line findings file, both trying to be Architecture Decision Records built as one growing log instead of one-file-per-decision. Verified the real, widely-adopted ADR pattern (Michael Nygard, 2011; ThoughtWorks Radar ADOPT) before writing: one decision per file, ~1 page, immutable once `Accepted`, superseded by a new numbered file rather than edited. Added `docs/decisions/NNNN-slug.md` with a starter template, plus two mechanical checks in `kmp-audit` (filename shape, `**Status:**` line presence). Separately, user asked whether per-module `README.md` was a different concern — confirmed yes (code-colocated, not under `docs/`, zero prior coverage anywhere) and added a Per-Module README.md section with its own starter template, explicitly out of `docs/`'s line-cap enforcement since it lives outside that tree. |
