@@ -464,6 +464,23 @@ When asked to update project docs, respond in this order:
 
 Keep the response focused on the project's docs surface and the source files it mirrors.
 
+## KDoc vs Ground-Truth Docs Boundary (Zero Redundancy Rule)
+
+Never duplicate architectural explanations across source code and markdown documentation:
+
+| Boundary | Purpose | Content | Cross-Referencing Rule |
+|---|---|---|---|
+| **KDocs (`.kt` source)** | API contracts at the call-site | `@param`, `@return`, `@throws`, thread-safety, preconditions | Reference `[docs/architecture/<name>.md]` for high-level models. |
+| **Ground Truth (`docs/architecture/`)** | System topology & lifecycles | Architectural diagrams, memory layout, invariants | Reference `[ClassName.kt]` by symbol; do not copy parameter dumps. |
+| **Decisions (`docs/decisions/` ADRs)** | Immutable records of "WHY" | Context, alternatives evaluated, rationale | Reference the ADR number in commit messages and PRs. |
+
+**Anti-Patterns to Eliminate:**
+- **Echo comments**: `/** Sets name */ fun setName(name: String)` → Delete them.
+- **Architectural lore in KDocs**: Multi-paragraph essays inside Kotlin files → Move to `docs/architecture/` or `docs/decisions/`.
+- **API dumps in Markdown**: Listing every function and parameter manually in markdown → Let Dokka 2.x and KDocs generate API reference.
+
+---
+
 ## Changelog
 
 | Date | Change |
