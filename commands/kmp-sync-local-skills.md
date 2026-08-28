@@ -11,13 +11,13 @@ Use this when the repo has been released and you want your local assistants to s
 ## Usage
 
 ```bash
-bash /Users/ronvaldoz/Documents/kmp-agent-skills/scripts/sync-local-assistant-skills.sh
+bash $(cd "$(dirname "$0")/.." && pwd)/scripts/sync-local-assistant-skills.sh
 ```
 
 Dry run:
 
 ```bash
-bash /Users/ronvaldoz/Documents/kmp-agent-skills/scripts/sync-local-assistant-skills.sh --dry-run
+bash $(cd "$(dirname "$0")/.." && pwd)/scripts/sync-local-assistant-skills.sh --dry-run
 ```
 
 ## Behavior
