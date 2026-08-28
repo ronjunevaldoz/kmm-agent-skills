@@ -121,7 +121,7 @@ def plan_refactor(
 
     # 2. Update imports and references across all .kt files in the project
     for kt_file in project_root.rglob("*.kt"):
-        if "build" in kt_file.parts or ".gradle" in kt_file.parts:
+        if any(ignored in kt_file.parts for ignored in (".git", ".gradle", "build", ".idea", ".vscode", "node_modules")):
             continue
         if kt_file.resolve() == source_file:
             continue

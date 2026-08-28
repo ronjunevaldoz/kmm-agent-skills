@@ -53,7 +53,7 @@ def plan_rename(
     symbol_pattern = re.compile(rf"\b{re.escape(old_symbol)}\b")
 
     for kt_file in project_root.rglob("*.kt"):
-        if "build" in kt_file.parts or ".gradle" in kt_file.parts:
+        if any(ignored in kt_file.parts for ignored in (".git", ".gradle", "build", ".idea", ".vscode", "node_modules")):
             continue
 
         try:
