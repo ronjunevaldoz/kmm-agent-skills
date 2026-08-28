@@ -492,6 +492,18 @@ Never duplicate architectural explanations across source code and markdown docum
 
 ---
 
+## Developer-Friendly Vibe-to-Plan Template (Real-World Analogies)
+
+When drafting task plans from conversational instructions, use the **Vibe Plan Template** located in `references/vibe-plan-template.md`.
+
+Every task plan must provide:
+1. **A Real-World Mental Model (Analogy)**: Explain the problem/solution like a real-world scenario (e.g. *The Chef & Waiter* analogy for Domain vs Presenter) so anyone grasps the data flow immediately.
+2. **Before vs After Code Snippets**: Show what callers did before vs the clean, idiomatic API after.
+3. **4-Stage Architectural Progression**: `:model` → `:domain` → `:presenter` → `:ui`.
+4. **Concrete Verification Commands**: Explicit Gradle / Roborazzi test commands.
+
+---
+
 ## Changelog
 
 | Date | Change |
