@@ -35,6 +35,8 @@ def extract_doc_info(file_path: Path, repo_root: Path) -> dict:
         category = "Architecture"
     elif "decisions" in parts:
         category = "Decisions (ADR)"
+    elif "audits" in parts:
+        category = "Audits"
     elif "tasks" in parts:
         category = "Tasks (Archive)" if "archive" in parts else "Active Task"
     elif "reference" in parts:
@@ -112,7 +114,7 @@ def heal_docs(repo_root: Path, dry_run: bool = False) -> int:
     ]
     
     # Sort order for categories
-    priority = ["Strategy & Roadmap", "Architecture", "Decisions (ADR)", "Active Task", "Reference", "Tasks (Archive)", "General"]
+    priority = ["Strategy & Roadmap", "Architecture", "Decisions (ADR)", "Audits", "Active Task", "Reference", "Tasks (Archive)", "General"]
     for cat in priority:
         if cat in categories:
             for item in sorted(categories[cat], key=lambda x: x["path"]):
