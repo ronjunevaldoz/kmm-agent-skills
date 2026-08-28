@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
-"""heal_project.py — Comprehensive Project Health, Hooks, and Topology Doctor
+# SPDX-FileCopyrightText: 2023-2026 Ron June Valdoz
+#
+# SPDX-License-Identifier: Apache-2.0
+"""heal_project.py — Comprehensive Project Health, Hooks, Tech Debt, and Topology Doctor
 
 Automates:
   1. Documentation Healing: Rebuilds docs/README.md sitemap and archives completed tasks.
-  2. Git Hooks Healing: Verifies and installs .git/hooks/pre-commit.
-  3. Scripts & Tools Hygiene: Ensures executable permissions (chmod +x) on scripts/ and tools/.
-  4. Provenance Lockfile Healing: Updates .agents/skills.lock with upstream SemVer.
-  5. Topology Verification: Checks standard project structure (docs, scripts, tools, .agents).
+  2. Tech Debt & Scattered Comments Healing: Scans and classifies actionable vs orphan TODOs.
+  3. Git Hooks Healing: Verifies and installs .git/hooks/pre-commit.
+  4. Scripts & Tools Hygiene: Ensures executable permissions (chmod +x) on scripts/ and tools/.
+  5. Provenance Lockfile Healing: Updates .agents/skills.lock with upstream SemVer.
+  6. Topology Verification: Checks standard project structure (docs, scripts, tools, .agents).
 """
 
 import argparse
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -22,6 +27,7 @@ except ImportError:
     # If run standalone
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from heal_docs import heal_docs
+
 
 def fix_executable_permissions(repo_root: Path) -> int:
     print("\n🔧 Checking Script & Tool Permissions...")
@@ -42,17 +48,58 @@ def fix_executable_permissions(repo_root: Path) -> int:
         print(f"  ✅ Fixed permissions for {fixed} script(s).")
     return fixed
 
+
+def heal_tech_debt(repo_root: Path) -> int:
+    print("\n🧹 Scanning Tech Debt & Scattered Comments...")
+    actionable_todos = 0
+    orphan_todos = 0
+    orphan_samples = []
+
+    todo_pattern = re.compile(r"//\s*(TODO|FIXME)(?:\(([^)]+)\)|:?\s*(#[0-9]+))?", re.IGNORECASE)
+
+    for kt_file in repo_root.rglob("*.kt"):
+        if "build" in kt_file.parts or ".gradle" in kt_file.parts:
+            continue
+        try:
+            lines = kt_file.read_text(encoding="utf-8", errors="ignore").splitlines()
+            for idx, line in enumerate(lines, 1):
+                match = todo_pattern.search(line)
+                if match:
+                    tag = match.group(1).upper()
+                    has_ticket = bool(match.group(2) or match.group(3))
+                    if has_ticket:
+                        actionable_todos += 1
+                    else:
+                        orphan_todos += 1
+                        if len(orphan_samples) < 3:
+                            orphan_samples.append(f"{kt_file.relative_to(repo_root)}:{idx} — {line.strip()}")
+        except Exception:
+            pass
+
+    print(f"  • Actionable Tracked TODOs (#issue/ticket) : {actionable_todos}")
+    print(f"  • Orphan Untracked TODOs                  : {orphan_todos}")
+
+    if orphan_todos > 0:
+        print("  ⚠️ Sample untracked comments (consider linking to ticket or parking in docs/audits/):")
+        for sample in orphan_samples:
+            print(f"      - {sample}")
+    else:
+        print("  ✅ Zero untracked orphan TODO comments found.")
+
+    return orphan_todos
+
+
 def heal_git_hooks(repo_root: Path, dry_run: bool = False) -> bool:
     print("\n🪝 Checking Git Hooks...")
     git_dir = repo_root / ".git"
     if not git_dir.exists():
         print("  ℹ️ Not a git repository root, skipping hook healing.")
         return True
-        
+
     hooks_dir = git_dir / "hooks"
     hooks_dir.mkdir(parents=True, exist_ok=True)
     pre_commit = hooks_dir / "pre-commit"
-    
+
     # Check if repo has its own hooks/pre-commit source
     source_hook = repo_root / "hooks" / "pre-commit"
     if source_hook.exists():
@@ -69,6 +116,7 @@ def heal_git_hooks(repo_root: Path, dry_run: bool = False) -> bool:
         print("  ℹ️ No custom hooks/pre-commit found in project root.")
     return True
 
+
 def heal_lockfile(repo_root: Path, dry_run: bool = False) -> bool:
     print("\n🔒 Checking .agents/skills.lock...")
     lock_generator = Path(__file__).resolve().parent / "generate_skills_lock.py"
@@ -76,7 +124,11 @@ def heal_lockfile(repo_root: Path, dry_run: bool = False) -> bool:
         if dry_run:
             print("  [dry-run] would regenerate .agents/skills.lock")
         else:
-            res = subprocess.run([sys.executable, str(lock_generator), "--project", str(repo_root)], capture_output=True, text=True)
+            res = subprocess.run(
+                [sys.executable, str(lock_generator), "--project", str(repo_root)],
+                capture_output=True,
+                text=True,
+            )
             if res.returncode == 0:
                 print(f"  {res.stdout.strip()}")
             else:
@@ -84,6 +136,7 @@ def heal_lockfile(repo_root: Path, dry_run: bool = False) -> bool:
     else:
         print("  ℹ️ No .agents/skills/ directory found to lock.")
     return True
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Comprehensive KMP Project Doctor & Self-Healer")
@@ -98,17 +151,21 @@ def main() -> int:
     # 1. Heal Docs
     heal_docs(project_root, args.dry_run)
 
-    # 2. Permissions
+    # 2. Heal Tech Debt & Comments
+    heal_tech_debt(project_root)
+
+    # 3. Permissions
     fix_executable_permissions(project_root)
 
-    # 3. Hooks
+    # 4. Hooks
     heal_git_hooks(project_root, args.dry_run)
 
-    # 4. Lockfile
+    # 5. Lockfile
     heal_lockfile(project_root, args.dry_run)
 
     print(f"\n🎉 Project Doctor Complete for {project_root.name}!\n")
     return 0
+
 
 if __name__ == "__main__":
     raise SystemExit(main())
