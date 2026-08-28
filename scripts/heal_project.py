@@ -58,7 +58,7 @@ def heal_tech_debt(repo_root: Path) -> int:
     todo_pattern = re.compile(r"//\s*(TODO|FIXME)(?:\(([^)]+)\)|:?\s*(#[0-9]+))?", re.IGNORECASE)
 
     for kt_file in repo_root.rglob("*.kt"):
-        if "build" in kt_file.parts or ".gradle" in kt_file.parts:
+        if any(p in kt_file.parts for p in (".git", ".gradle", "build", ".claude", ".idea", ".vscode", "node_modules")):
             continue
         try:
             lines = kt_file.read_text(encoding="utf-8", errors="ignore").splitlines()
