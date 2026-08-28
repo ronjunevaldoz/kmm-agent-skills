@@ -481,6 +481,17 @@ Never duplicate architectural explanations across source code and markdown docum
 
 ---
 
+## Code Examples & Linking Policy
+
+| Element | When to Use | When to Avoid |
+|---|---|---|
+| **Code Examples** | Quickstarts, DSL builders, Before/After comparisons (5–15 lines max) | Full class dumps, boilerplate getters/setters, untested pseudo-code |
+| **Internal File Links** (`[Class](path)`) | Always when mentioning a concrete class, interface, or file | Generic terms or redundant link spam |
+| **Issue / PR Links** (`#123`) | ADRs (`docs/decisions/`), Task Plans (`docs/tasks/`), and `CHANGELOG.md` | Ground-truth architecture docs (`docs/architecture/` must be self-contained) |
+| **External Spec Links** | Reference docs (`docs/reference/`) documenting external protocol/spec conformity | Internal task notes |
+
+---
+
 ## Changelog
 
 | Date | Change |
