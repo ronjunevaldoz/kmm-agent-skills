@@ -225,6 +225,16 @@ decision the user makes, or `kmp-audit` flags).
 
 ---
 
+## Git History Surgery (Fixing Buried Bad Commits)
+
+When an unintended file, secret, or mistake is introduced in a past commit that has been stacked by newer commits:
+1. **Autosquash Fixup**: Fix at `HEAD`, run `git commit --fixup <sha>`, then `git rebase -i --autosquash <sha>~1`.
+2. **Interactive Edit**: Run `git rebase -i HEAD~N`, mark the commit as `edit`, amend with `git commit --amend`, and run `git rebase --continue`.
+
+See `references/git-history-surgery.md` for full step-by-step commands and force-push safety.
+
+---
+
 ## Changelog
 
 | Date | Change |
