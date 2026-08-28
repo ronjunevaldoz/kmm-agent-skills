@@ -372,6 +372,35 @@ matching heading above, not all of them.
 
 ---
 
+
+---
+
+## Design System & Parity Tooling Workflow
+
+Use the bundled scripts in `scripts/` to maximize implementation velocity, visual parity, and code correctness:
+
+```bash
+# 1. Audit Component Parity & Live Showcase Pages
+python3 skills/kmp-shadcn-compose/scripts/shadcn_parity.py --project <project_root>
+
+# 2. 1-Command Full-Stack Component Scaffolding (Component + Page + Test + Catalog)
+python3 skills/kmp-shadcn-compose/scripts/scaffold_shadcn_component.py --name Sheet --category overlays
+
+# 3. Audit WCAG 2.1 Contrast Ratios across Theme Palettes
+python3 skills/kmp-shadcn-compose/scripts/theme_contrast_audit.py
+
+# 4. Lint Compose Stability, Recomposition Leaks, and Semantic Token Usage
+python3 skills/kmp-shadcn-compose/scripts/audit_compose_perf.py --project <project_root>
+
+# 5. Full Render Quality (SDF AA, Shadows, Distance Fields, Dismissal) Audit
+python3 skills/kmp-shadcn-compose/scripts/audit_ui_render_quality.py --project <project_root>
+
+# 6. Headless Visual Pixel Baseline Diffing
+python3 skills/kmp-shadcn-compose/scripts/ui_visual_diff.py --ref <ref.png> --actual <act.png>
+```
+
+---
+
 ## Related Skills
 
 - `kmp-compose-design-system` — the default, owned-scaffold alternative this skill exists to be compared against; see its Ownership Model note for the full risk tradeoff
