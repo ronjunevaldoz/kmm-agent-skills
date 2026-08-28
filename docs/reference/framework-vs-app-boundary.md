@@ -1,6 +1,6 @@
-# Framework vs Game Pack Boundary Guide
+# Framework vs App Boundary Guide
 
-This guide establishes the architectural boundaries for AI agent skills across **Core Engine Frameworks**, **Starter Kit Extensions**, and **Game/Application Packs**.
+This guide establishes the architectural boundaries for AI agent skills across **Core Engine / SDK Frameworks**, **Modular Extension Kits**, and **Consumer Apps / Games**.
 
 ---
 
@@ -8,22 +8,22 @@ This guide establishes the architectural boundaries for AI agent skills across *
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│ 1. CORE ENGINE FRAMEWORK (e.g. Awake Engine)           │
+│ 1. CORE ENGINE / SDK FRAMEWORK (e.g. Engine Core, SDK) │
 │    • Low-level primitives: ECS, Vulkan/WebGPU, Math    │
-│    • ONLY commit engine-specific skills in .agents/    │
+│    • ONLY commit engine/framework skills in .agents/   │
 └──────────────────────────┬─────────────────────────────┘
                            │
                            ▼ Extended By
 ┌────────────────────────────────────────────────────────┐
-│ 2. MODULAR STARTER KITS (e.g. awake-lab/starter-kits)  │
-│    • Subsystem Extensions: 4-Pillar Taxonomy           │
-│    • Viewpoint, World, Network, Genre extensions       │
+│ 2. MODULAR STARTER KITS (e.g. Subsystems, Templates)   │
+│    • Subsystem Extensions: Viewpoint, World, Genre     │
+│    • Turnkey Starter Kits with kit.json manifests      │
 └──────────────────────────┬─────────────────────────────┘
                            │
                            ▼ Consumed By
 ┌────────────────────────────────────────────────────────┐
-│ 3. CONSUMER GAME / APP (e.g. flyffawaken, Mobile App)  │
-│    • Game-specific converters (.o3d, .lnd)             │
+│ 3. CONSUMER APP / GAME (e.g. Mobile App, Game Pack)    │
+│    • End-user screens, domain converters, UI layouts   │
 │    • Proprietary business logic & assets               │
 └────────────────────────────────────────────────────────┘
 ```
