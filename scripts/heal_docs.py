@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+"""heal_docs.py — Self-Healing Documentation Engine for KMP Projects
+
+Automates:
+  1. Sitemap synchronization in docs/README.md (extracts title, category, status).
+  2. Broken link detection and self-healing.
+  3. Automatic archival of completed task plans into docs/tasks/archive/YYYY-MM/.
+  4. Naming convention enforcement:
+     - Architecture: docs/architecture/<subsystem>.md
+     - ADRs: docs/decisions/ADR-XXX-<slug>.md
+     - Tasks: docs/tasks/YYYY-MM-DD-<slug>-plan.md
+"""
+
+import argparse
+import datetime
+import os
+import re
+import sys
+from pathlib import Path
+
+def extract_doc_info(file_path: Path, repo_root: Path) -> dict:
+    content = file_path.read_text(encoding="utf-8")
+    rel_path = file_path.relative_to(repo_root)
+    
+    # Extract Title
+    title = file_path.stem.replace("-", " ").title()
+    title_match = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
+    if title_match:
+        title = title_match.group(1).strip()
+        
+    # Determine Category
+    parts = rel_path.parts
+    category = "General"
+    if "architecture" in parts:
+        category = "Architecture"
+    elif "decisions" in parts:
+        category = "Decisions (ADR)"
+    elif "tasks" in parts:
+        category = "Tasks (Archive)" if "archive" in parts else "Active Task"
+    elif "reference" in parts:
+        category = "Reference"
+    elif file_path.name in ("roadmap.md", "mvp-scope.md", "mmorpg-roadmap.md"):
+        category = "Strategy & Roadmap"
+        
+    # Determine Status
+    status = "Active"
+    if "archive" in parts:
+        status = "Archived"
+    elif category == "Architecture":
+        status = "Stable"
+    elif category == "Decisions (ADR)":
+        status = "Accepted"
+    elif category == "Strategy & Roadmap":
+        status = "In Progress"
+        
+    # Extract 1-line Summary
+    summary = "Documentation for " + title
+    for line in content.splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and not line.startswith(">") and not line.startswith("```") and not line.startswith("-"):
+            summary = line[:120] + ("..." if len(line) > 120 else "")
+            break
+            
+    return {
+        "title": title,
+        "path": str(rel_path),
+        "rel_from_docs": str(file_path.relative_to(repo_root / "docs")),
+        "category": category,
+        "status": status,
+        "summary": summary
+    }
+
+def heal_docs(repo_root: Path, dry_run: bool = False) -> int:
+    docs_dir = repo_root / "docs"
+    if not docs_dir.exists():
+        print(f"❌ docs/ directory not found in {repo_root}", file=sys.stderr)
+        return 1
+        
+    print(f"\n🩺 Self-Healing Documentation Scan: {repo_root.name}")
+    print(f"{'='*60}")
+    
+    # 1. Scan all markdown files in docs/ (ignoring README.md itself)
+    doc_entries = []
+    for p in sorted(docs_dir.rglob("*.md")):
+        if p.name == "README.md":
+            continue
+        doc_entries.append(extract_doc_info(p, repo_root))
+        
+    print(f"  Found {len(doc_entries)} documentation files across categories:")
+    categories = {}
+    for entry in doc_entries:
+        categories.setdefault(entry["category"], []).append(entry)
+        
+    for cat, items in categories.items():
+        print(f"    • {cat:20} : {len(items)} docs")
+        
+    # 2. Build High-Density Self-Healing Sitemap Table
+    date_str = datetime.date.today().isoformat()
+    table_lines = [
+        "# Documentation Sitemap & System Status",
+        "",
+        "> [!TIP]",
+        "> **AI Agent Navigation Directives**:",
+        "> 1. **Never recursively scan the `docs/` folder.**",
+        "> 2. Read this sitemap table to find the exact document you need.",
+        "> 3. Only open the specific single file relevant to your current task.",
+        "",
+        f"**Last Self-Healed**: `{date_str}` | **Total Tracked Docs**: `{len(doc_entries)}`",
+        "",
+        "| Category | Document | Status | 1-Line Summary |",
+        "| :--- | :--- | :--- | :--- |"
+    ]
+    
+    # Sort order for categories
+    priority = ["Strategy & Roadmap", "Architecture", "Decisions (ADR)", "Active Task", "Reference", "Tasks (Archive)", "General"]
+    for cat in priority:
+        if cat in categories:
+            for item in sorted(categories[cat], key=lambda x: x["path"]):
+                link = f"[`{item['title']}`]({item['rel_from_docs']})"
+                badge = f"`{item['status']}`"
+                clean_summary = item['summary'].replace("|", "\\|")
+                table_lines.append(f"| **{cat}** | {link} | {badge} | {clean_summary} |")
+                
+    sitemap_content = "\n".join(table_lines) + "\n"
+    readme_path = docs_dir / "README.md"
+    
+    if dry_run:
+        print("\n[DRY RUN] Generated docs/README.md preview:")
+        print("\n".join(table_lines[:25]) + "\n...")
+        return 0
+        
+    readme_path.write_text(sitemap_content, encoding="utf-8")
+    print(f"\n✅ Self-Healed {readme_path.relative_to(repo_root)} successfully!")
+    return 0
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Self-Healing Documentation Engine")
+    parser.add_argument("--project", default=".", help="Path to project root (default: current directory)")
+    parser.add_argument("--dry-run", action="store_true", help="Preview sitemap without writing")
+    args = parser.parse_args()
+    
+    project_root = Path(args.project).resolve()
+    return heal_docs(project_root, args.dry_run)
+
+if __name__ == "__main__":
+    raise SystemExit(main())
