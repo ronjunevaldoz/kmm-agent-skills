@@ -12,6 +12,7 @@ For individual developers, pair-programming assistants, and multi-repo workflows
 
 ```bash
 # Sync latest released skills into all local assistants (~/.claude, ~/.gemini, ~/.codex, ~/.agents)
+# Refresh local Claude / Codex / Gemini installs on this Mac:
 bash scripts/sync-local-assistant-skills.sh
 ```
 
@@ -115,6 +116,7 @@ When a new release of `kmp-agent-skills` is tagged:
 
 ```bash
 # Refresh global assistants on this Mac
+# Refresh local Claude / Codex / Gemini installs on this Mac:
 bash scripts/sync-local-assistant-skills.sh
 
 # Or update consumer project skills

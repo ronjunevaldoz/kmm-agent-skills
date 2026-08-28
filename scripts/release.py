@@ -373,15 +373,15 @@ def detect_bump_type(since_tag: str) -> str:
     return "patch"
 
 
-def get_next_rc_number(base_version: str) -> int:
-    """Return the next RC number for the given base version (1-based)."""
-    result = run(["git", "tag", "--list", f"v{base_version}-rc.*"], check=False)
+def get_next_prerelease_number(base_version: str, channel: str) -> int:
+    """Return the next pre-release sequence number for the given base version and channel (1-based)."""
+    result = run(["git", "tag", "--list", f"v{base_version}-{channel}.*"], check=False)
     if result.returncode != 0 or not result.stdout.strip():
         return 1
     nums = [
         int(m.group(1))
         for tag in result.stdout.strip().splitlines()
-        if (m := re.search(r"-rc\.(\d+)$", tag.strip()))
+        if (m := re.search(rf"-{re.escape(channel)}\.(\d+)$", tag.strip()))
     ]
     return max(nums) + 1 if nums else 1
 
@@ -556,14 +556,17 @@ def main() -> int:
             "feat!/ BREAKING CHANGE → major, feat → minor, fix/chore/docs → patch."
         ),
     )
+    parser.add_argument("--channel", choices=["stable", "rc", "beta", "alpha", "dev", "snapshot"], default="stable",
+                        help="Target release channel: stable, rc, beta, alpha, dev, snapshot (default: stable)")
     parser.add_argument("--rc", action="store_true",
-                        help="Create a release candidate tag (vX.Y.Z-rc.N) instead of a stable tag")
+                        help="Alias for --channel rc")
     parser.add_argument("--dry-run", action="store_true",
                         help="Validate and preview without writing anything")
     args = parser.parse_args()
 
-    tier = "RC" if args.rc else "STABLE"
-    print(f"\n{'[DRY RUN] ' if args.dry_run else ''}kmp-agent-skills release — bump: {args.bump}, tier: {tier}\n")
+    channel = "rc" if args.rc else args.channel
+    tier = channel.upper()
+    print(f"\n{'[DRY RUN] ' if args.dry_run else ''}kmp-agent-skills release — bump: {args.bump}, channel: {channel}\n")
 
     if not args.dry_run:
         check_clean_tree()
@@ -583,11 +586,14 @@ def main() -> int:
     new_base_version = bump_version(current_version, bump)
 
     # Build the full tag string
-    if args.rc:
-        rc_num = get_next_rc_number(new_base_version)
-        full_version = f"{new_base_version}-rc.{rc_num}"
+    if channel == "snapshot":
+        full_version = f"{new_base_version}-SNAPSHOT"
+    elif channel in ("rc", "beta", "alpha", "dev"):
+        seq_num = get_next_prerelease_number(new_base_version, channel)
+        full_version = f"{new_base_version}-{channel}.{seq_num}"
     else:
         full_version = new_base_version
+    is_prerelease = channel != "stable"
 
     tag = f"v{full_version}"
     info(f"Version: {current_version} → {new_base_version}  |  Tag: {tag}")
@@ -598,7 +604,7 @@ def main() -> int:
         prev_tag = get_previous_tag()
         info(f"Previous tag: {prev_tag or '(none)'}")
         update_changelog(full_version, prev_tag, dry_run=True)
-        git_commit_and_tag(new_base_version, tag, len(skills), "", dry_run=True, prerelease=args.rc)
+        git_commit_and_tag(new_base_version, tag, len(skills), "", dry_run=True, prerelease=is_prerelease)
         info("Dry run complete — nothing written")
         return 0
 
@@ -612,7 +618,7 @@ def main() -> int:
     update_plan_md(skill_count)
     changelog_section = update_changelog(full_version, prev_tag, dry_run=False)
     update_skills_report()
-    git_commit_and_tag(new_base_version, tag, skill_count, changelog_section, dry_run=False, prerelease=args.rc)
+    git_commit_and_tag(new_base_version, tag, skill_count, changelog_section, dry_run=False, prerelease=is_prerelease)
 
     print(f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
