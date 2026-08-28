@@ -260,6 +260,7 @@ All commands are `kmp-` prefixed so they don't collide with your own `.claude/co
 | `/kmp-check-updates` | Check for a newer version of kmp-agent-skills |
 | `/kmp-report-skill-issue` | File a structured skill bug report |
 | `/kmp-refine-skill <name>` | Refine a project-owned skill against agentskills.io's real qualitative best practices (description phrasing, gotchas, scoping) |
+| `/kmp-heal-docs [path]` | Self-heal project documentation sitemap (`docs/README.md`), verify link hygiene, and archive stale tasks |
 
 ### Repo-internal commands
 
@@ -278,12 +279,23 @@ All commands are `kmp-` prefixed so they don't collide with your own `.claude/co
 
 ## Installation
 
+### 🚀 Recommended: Global Machine-Wide Install (Zero Git Bloat)
+Install once to make all 74 skills available across all your KMP projects (Claude Code, Gemini CLI, Codex, Cursor):
+
 ```bash
-npx skills add ronjunevaldoz/kmp-agent-skills
+# Sync latest released skills globally (~/.claude, ~/.gemini, ~/.codex, ~/.agents)
+bash scripts/sync-local-assistant-skills.sh
 ```
 
-See [INSTALL.md](INSTALL.md) for setup instructions for Claude Code, OpenAI Codex CLI,
-GitHub Copilot, Cursor, Windsurf, Gemini CLI, Aider, and Continue.
+### 📦 Project-Level Installation & Provenance Lockfile
+For team repositories, cherry-pick only the relevant architectural skills and track upstream versioning with `.agents/skills.lock`:
+
+```bash
+# Generate provenance lockfile
+python3 scripts/generate_skills_lock.py --project path/to/your-project
+```
+
+See [INSTALL.md](INSTALL.md) for full setup instructions and [Framework vs App Boundary Guide](docs/reference/framework-vs-app-boundary.md).
 
 ---
 
