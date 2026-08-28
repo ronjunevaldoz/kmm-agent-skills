@@ -1,0 +1,18 @@
+---
+name: kmp-doctor
+description: Comprehensive project health doctor — heals docs sitemaps, git hooks, script permissions, and .agents/skills.lock.
+---
+
+# /kmp-doctor $ARGUMENTS
+
+Run the project health doctor to audit and self-heal the repository:
+
+```bash
+python3 scripts/heal_project.py || python3 .agents/skills/scripts/heal_project.py
+```
+
+## What it Heals:
+1. **Documentation**: Generates high-density `docs/README.md` sitemap table and archives completed tasks.
+2. **Git Hooks**: Installs and syncs `.git/hooks/pre-commit` from `hooks/`.
+3. **Executable Permissions**: Ensures `chmod +x` across all `scripts/`, `tools/`, and `hooks/`.
+4. **Skills Lockfile**: Regenerates `.agents/skills.lock` with upstream version provenance.
