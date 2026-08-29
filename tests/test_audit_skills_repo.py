@@ -755,5 +755,58 @@ class OrphanedReferenceDocTests(unittest.TestCase):
             self.assertEqual(findings, [])
 
 
+class ChangelogUnreleasedBacklogTests(unittest.TestCase):
+    """git-cliff only flushes [Unreleased] into a dated section on an actual
+    `--tag` release run — a project that never releases silently accumulates
+    entries there forever. This check catches that case without depending on git.
+    """
+
+    def test_flags_backlog_over_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            entries = "\n".join(f"- feat: thing {i}" for i in range(1, 26))
+            (root / "CHANGELOG.md").write_text(
+                f"# Changelog\n\n## [Unreleased]\n\n{entries}\n\n## [v1.0.0] - 2026-01-01\n- initial\n",
+                encoding="utf-8",
+            )
+
+            findings: list[str] = []
+            audit_repo_scripts._check_changelog_unreleased_backlog(root, findings)
+            self.assertTrue(any("[Unreleased]" in f and "25 entries" in f for f in findings))
+
+    def test_does_not_flag_backlog_under_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "CHANGELOG.md").write_text(
+                "# Changelog\n\n## [Unreleased]\n\n- feat: one thing\n\n## [v1.0.0] - 2026-01-01\n- initial\n",
+                encoding="utf-8",
+            )
+
+            findings: list[str] = []
+            audit_repo_scripts._check_changelog_unreleased_backlog(root, findings)
+            self.assertEqual(findings, [])
+
+    def test_does_not_flag_when_no_unreleased_section(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "CHANGELOG.md").write_text(
+                "# Changelog\n\n## [v1.0.0] - 2026-01-01\n- initial\n",
+                encoding="utf-8",
+            )
+
+            findings: list[str] = []
+            audit_repo_scripts._check_changelog_unreleased_backlog(root, findings)
+            self.assertEqual(findings, [])
+
+    def test_does_not_flag_when_no_changelog(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# Test project\n", encoding="utf-8")
+
+            findings: list[str] = []
+            audit_repo_scripts._check_changelog_unreleased_backlog(root, findings)
+            self.assertEqual(findings, [])
+
+
 if __name__ == "__main__":
     unittest.main()

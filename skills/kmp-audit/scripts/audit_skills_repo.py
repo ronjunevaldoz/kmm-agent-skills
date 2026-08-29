@@ -209,6 +209,41 @@ def _check_root_doc_hygiene(root: Path, findings: list[str]) -> None:
             )
 
 
+# CHANGELOG.md itself is exempt from ROOT_DOC_MAX_LINES above (append-only, growth is
+# the point), but a git-cliff-style `## [Unreleased]` section only ever gets flushed by
+# an actual `git-cliff --tag` release run — nothing flags a project that just never cuts
+# one, so it silently accumulates forever. This catches that case without depending on
+# git (a filename/heading-only scan, consistent with every other check in this file).
+CHANGELOG_UNRELEASED_BACKLOG_LIMIT = 20
+
+
+def _check_changelog_unreleased_backlog(root: Path, findings: list[str]) -> None:
+    changelog = root / "CHANGELOG.md"
+    if not changelog.exists():
+        return
+
+    lines = changelog.read_text(encoding="utf-8", errors="ignore").splitlines()
+    in_unreleased = False
+    entry_count = 0
+    for line in lines:
+        stripped = line.strip()
+        if re.match(r"^##\s*\[unreleased\]", stripped, re.IGNORECASE):
+            in_unreleased = True
+            continue
+        if in_unreleased and stripped.startswith("## "):
+            break
+        if in_unreleased and stripped.startswith("- "):
+            entry_count += 1
+
+    if entry_count > CHANGELOG_UNRELEASED_BACKLOG_LIMIT:
+        findings.append(
+            f"docs-hygiene: CHANGELOG.md's [Unreleased] section has {entry_count} entries "
+            f"(limit {CHANGELOG_UNRELEASED_BACKLOG_LIMIT}) — cut a release "
+            f"(`git-cliff --tag vX.Y.Z --output CHANGELOG.md`, see kmp-release) so it "
+            f"flushes into a dated version section instead of growing indefinitely"
+        )
+
+
 DOCS_MAX_LINES = 150
 LESSON_STALE_DAYS = 30
 LESSON_BACKLOG_LIMIT = 20
@@ -518,6 +553,7 @@ def audit_skills_repo(root: Path) -> list[str]:
     _check_stale_task_docs_at_root(root, findings)
     _check_docs_hygiene(root, findings)
     _check_root_doc_hygiene(root, findings)
+    _check_changelog_unreleased_backlog(root, findings)
     _check_commonmain_jvm_apis(root, findings)
 
     readme = root / "README.md"
@@ -553,6 +589,7 @@ def main() -> int:
         findings: list[str] = []
         _check_docs_hygiene(root, findings)
         _check_root_doc_hygiene(root, findings)
+        _check_changelog_unreleased_backlog(root, findings)
         _check_orphaned_reference_docs(root, findings)
     elif args.jvm_api_only:
         findings = []

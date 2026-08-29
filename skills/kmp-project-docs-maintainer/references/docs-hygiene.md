@@ -341,6 +341,7 @@ active file, or a reader can't trust it as a substitute for opening each one.
 |---|---|---|
 | Any `docs/` file (outside `archive/`) | 150 lines | Split or archive completed sections |
 | Root-level named doc (`README.md`, `KNOWN_ISSUES.md`, etc. — see `_ROOT_DOCS_WITH_SIZE_LIMIT` in `audit_skills_repo.py`; `CHANGELOG.md` is exempt, it's auto-generated and append-only) | 500 lines | Split least-central sections into `docs/reference/*.md`, leave a pointer — same pattern as an oversized `SKILL.md` |
+| `CHANGELOG.md`'s `## [Unreleased]` section entry count | 20 entries | Cut a release (`git-cliff --tag vX.Y.Z --output CHANGELOG.md`, see `kmp-release`) so it flushes into a dated version section instead of growing forever |
 | Unprocessed lessons in `docs/lessons/` | 20 files | Harvest via `kmp-skill-harvester` |
 | Lesson file age without harvest | 30 days | Harvest or archive |
 | Task file with a `-done` filename suffix still in active `docs/tasks/<parent>/` | 0 | Move to `docs/tasks/<parent>/archive/` immediately |
