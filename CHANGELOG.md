@@ -2,6 +2,49 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.58.1] — 2026-08-29
+
+### Added
+
+- feat(skills): wire UI parity and render quality tooling workflow into kmp-shadcn-compose
+- feat(audit): add comprehensive 100% UI render quality and behavioral fidelity auditor
+- feat(ui): complete UI tooling arsenal (contrast auditor, compose perf linter, visual diff, full-stack scaffolder)
+- feat(shadcn): add automated shadcn_parity auditor tool and refine worktree filtering in doctor
+- feat(refactor): add automated refactor_optimize_imports script with dry-run support
+- feat(refactor): add automated bulk refactor tool for batch mappings with dry-run support
+- feat(refactor): add robust build/gradle/git ignore filtering and word boundary precision to refactoring scripts
+- feat(refactor): add automated refactor_rename_package tool with dry-run support
+- feat(refactor): add automated semantic refactor_rename script with dry-run support
+- feat(refactor): add semantic refactor_move tool and tech debt comment healing hooks
+- feat(hooks): add canonical pre-commit hook with binary leak guard, auto-sitemap heal, and lesson reminder
+- feat(docs): add developer-friendly vibe-to-plan template with real-world analogies
+- feat(docs): add Audits category to heal_docs sitemap engine
+- feat(lockfile): add check_skills_lock.py for upstream version freshness inspection
+- feat(doctor): introduce heal_project.py and /kmp-doctor command for docs, hooks, permissions, and lockfile
+- feat(docs): add subtle attribution footer to self-healed sitemaps
+- feat(commands): make /kmp-update-skills default to global machine-wide sync
+- feat(docs): introduce self-healing docs engine and kmp-heal-docs command
+- feat(lockfile): add generate_skills_lock.py and framework-vs-app boundary guide
+- feat(release): support multi-channel releases (alpha, beta, rc, dev, snapshot) with automated changelog
+
+### Fixed
+
+- fix(kmp-doctor): make heal/lock scripts actually reach consumer projects
+
+### Docs
+
+- docs(kmp-project-docs-maintainer): trim SKILL.md under the 500-line gate
+- docs(kmp-refactor): add References section for references/git-history-surgery.md
+- docs(skills): codify git history surgery for fixing buried bad commits in stacked history
+- docs(skills): codify 3-tier README templates (root, docs sitemap, module) in kmp-project-docs-maintainer
+- docs(skills): codify code examples and linking policy in kmp-project-docs-maintainer
+- docs(skills): codify KDoc vs ground-truth docs boundary in kmp-project-docs-maintainer
+- docs: update README with self-healing docs, global sync, and register kmp-heal-docs command
+- docs: generalize framework-vs-app boundary guide to neutral domain taxonomy
+- docs(install): promote global installation, warn against repo bloat, and standardize on .agents/skills
+
+---
+
 ## [v2.58.0] — 2026-08-26
 
 ### Added

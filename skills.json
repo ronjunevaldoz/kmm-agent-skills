@@ -1,5 +1,5 @@
 {
-  "version": "2.58.0",
+  "version": "2.58.1",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -3010,7 +3010,12 @@
         "thinner docs",
         "scaffold docs"
       ],
-      "scripts": []
+      "scripts": [
+        "check_skills_lock.py",
+        "generate_skills_lock.py",
+        "heal_docs.py",
+        "heal_project.py"
+      ]
     },
     {
       "name": "kmp-push-notifications",
@@ -3486,7 +3491,13 @@
         "verified against the library's own repo)"
       ],
       "scripts": [
-        "fetch_component_signature.py"
+        "audit_compose_perf.py",
+        "audit_ui_render_quality.py",
+        "fetch_component_signature.py",
+        "scaffold_shadcn_component.py",
+        "shadcn_parity.py",
+        "theme_contrast_audit.py",
+        "ui_visual_diff.py"
       ]
     },
     {
