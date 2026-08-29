@@ -235,6 +235,14 @@ See `references/git-history-surgery.md` for full step-by-step commands and force
 
 ---
 
+## References
+
+Full step-by-step content lives in `references/git-history-surgery.md` — commands and
+force-push safety for the Git History Surgery procedure above. Load it when actually
+performing a history rewrite, not for a plain rename/move.
+
+---
+
 ## Changelog
 
 | Date | Change |
