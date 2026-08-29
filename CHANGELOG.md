@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.59.0] — 2026-08-30
+
+### Added
+
+- feat(kmp-audit): flag a CHANGELOG.md [Unreleased] section that never gets released
+
+---
+
 ## [v2.58.1] — 2026-08-29
 
 ### Added

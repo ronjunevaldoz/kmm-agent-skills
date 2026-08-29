@@ -1,5 +1,5 @@
 {
-  "version": "2.58.1",
+  "version": "2.59.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -131,7 +131,7 @@
       "path": "skills/kmp-audit",
       "description": "KMP project audit skill for reviewing an existing Kotlin Multiplatform codebase. Use this skill to inspect architecture, module boundaries, state handling, repository and network layering, Compose patterns, expect/actual usage, shared resources, design system usage, test coverage, platform readiness, and the skills repo itself. Produces findings, risk levels, and a fix sequence instead of implementation code. Pair with kmp-expert to route any follow-up work to the right domain skills.",
       "license": "Apache-2.0",
-      "last_updated": "2026-08-24",
+      "last_updated": "2026-08-30",
       "keywords": [
         "investigation narration comment",
         "state the finding not the investigation",
@@ -140,6 +140,8 @@
         "robotic comment phrase",
         "orphaned reference doc",
         "no inbound links doc",
+        "changelog unreleased backlog",
+        "stale unreleased section",
         "formal comment phrasing",
         "stepwise what-comments",
         "comment-only stub body",
