@@ -8,7 +8,7 @@ description: Comprehensive project health doctor — heals docs sitemaps, git ho
 Run the project health doctor to audit and self-heal the repository:
 
 ```bash
-python3 scripts/heal_project.py || python3 .agents/skills/scripts/heal_project.py
+python3 .agents/skills/kmp-project-docs-maintainer/scripts/heal_project.py || python3 skills/kmp-project-docs-maintainer/scripts/heal_project.py
 ```
 
 ## What it Heals:

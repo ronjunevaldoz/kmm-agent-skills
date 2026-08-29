@@ -65,7 +65,7 @@ def check_project_skills(project_root: Path) -> int:
             print("\n📋 Latest Release Improvements & Fixes:")
             for line in release_notes.splitlines()[:15]:
                 print(f"    {line}")
-        print(f"\n💡 Run `/kmp-update-skills` or `python3 scripts/heal_project.py` to upgrade.")
+        print("\n💡 Run `/kmp-update-skills` or `/kmp-doctor` to upgrade.")
         return 1
 
 def main() -> int:

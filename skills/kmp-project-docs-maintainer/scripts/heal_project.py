@@ -29,7 +29,7 @@ except ImportError:
     from heal_docs import heal_docs
 
 
-def fix_executable_permissions(repo_root: Path) -> int:
+def fix_executable_permissions(repo_root: Path, dry_run: bool = False) -> int:
     print("\n🔧 Checking Script & Tool Permissions...")
     fixed = 0
     for subdir in ["scripts", "tools", "hooks", ".agents/skills/scripts"]:
@@ -39,11 +39,16 @@ def fix_executable_permissions(repo_root: Path) -> int:
                 if p.is_file() and p.suffix in (".py", ".sh"):
                     current_mode = p.stat().st_mode
                     if not (current_mode & 0o111):
-                        p.chmod(current_mode | 0o755)
-                        print(f"  chmod +x: {p.relative_to(repo_root)}")
+                        if dry_run:
+                            print(f"  [dry-run] would chmod +x: {p.relative_to(repo_root)}")
+                        else:
+                            p.chmod(current_mode | 0o755)
+                            print(f"  chmod +x: {p.relative_to(repo_root)}")
                         fixed += 1
     if fixed == 0:
         print("  ✅ All scripts and tools have proper executable permissions.")
+    elif dry_run:
+        print(f"  ℹ️ Would fix permissions for {fixed} script(s).")
     else:
         print(f"  ✅ Fixed permissions for {fixed} script(s).")
     return fixed
@@ -155,7 +160,7 @@ def main() -> int:
     heal_tech_debt(project_root)
 
     # 3. Permissions
-    fix_executable_permissions(project_root)
+    fix_executable_permissions(project_root, args.dry_run)
 
     # 4. Hooks
     heal_git_hooks(project_root, args.dry_run)

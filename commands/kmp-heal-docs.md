@@ -8,7 +8,7 @@ description: Self-heal project documentation sitemap (docs/README.md), verify li
 Run the self-healing documentation engine across the project:
 
 ```bash
-python3 .agents/skills/kmp-project-docs-maintainer/scripts/heal_docs.py || python3 scripts/heal_docs.py
+python3 .agents/skills/kmp-project-docs-maintainer/scripts/heal_docs.py || python3 skills/kmp-project-docs-maintainer/scripts/heal_docs.py
 ```
 
 This command:

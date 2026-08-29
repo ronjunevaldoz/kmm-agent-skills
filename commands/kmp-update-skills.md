@@ -20,7 +20,7 @@ If `$ARGUMENTS` specifies a project path (e.g. `/kmp-update-skills --project .`)
 
 ```bash
 bash scripts/update-consumer-skills.sh --agent-dir .agents/skills
-python3 scripts/generate_skills_lock.py --project .
+python3 .agents/skills/kmp-project-docs-maintainer/scripts/generate_skills_lock.py --project . || python3 skills/kmp-project-docs-maintainer/scripts/generate_skills_lock.py --project .
 ```
 
 ---

@@ -292,7 +292,7 @@ For team repositories, cherry-pick only the relevant architectural skills and tr
 
 ```bash
 # Generate provenance lockfile
-python3 scripts/generate_skills_lock.py --project path/to/your-project
+python3 skills/kmp-project-docs-maintainer/scripts/generate_skills_lock.py --project path/to/your-project
 ```
 
 See [INSTALL.md](INSTALL.md) for full setup instructions and [Framework vs App Boundary Guide](docs/reference/framework-vs-app-boundary.md).
