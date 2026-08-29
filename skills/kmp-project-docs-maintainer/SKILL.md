@@ -90,61 +90,40 @@ If the downstream project is an app or a library, include a simple architecture 
 in the README or `docs/architecture.md` that shows the major modules, layers, or
 runtime flow.
 
-Use the diagram to answer "what is the shape of this project?" at a glance:
-- app projects should show user-facing entry points, feature modules, and shared layers
-- library projects should show public API surface, internal implementation modules, and
-  the main integration points
-- keep the diagram short enough that it stays useful in the README, then expand details
-  in `docs/architecture.md` or reference pages when needed
-
-Update the diagram whenever a module, boundary, or release flow changes.
+Use the diagram to answer "what is the shape of this project?" at a glance: apps show
+entry points/feature modules/shared layers; libraries show public API surface, internal
+modules, and integration points. Keep it short enough for the README, expand details in
+`docs/architecture.md` when needed. Update it whenever a module or release flow changes.
 
 ### Writing Style — Clear, Concise, Organized, Developer-Friendly
 
 Docs are for someone about to run a command or make a decision, not someone reading
 end to end. Every edit should make the doc easier to act on, not just more complete.
 
-- **Lead with the answer, not the setup.** State the command, decision, or fact in the
-  first sentence; explain why after, only if it's non-obvious. A reader scanning for
-  "what do I run" shouldn't read three paragraphs of context first.
-- **One idea per section, each short enough to scan.** If a section needs its own
-  table of contents, it's really several sections — split it.
+- **Lead with the answer, not the setup.** State the command, decision, or fact first;
+  explain why after, only if non-obvious.
+- **One idea per section, each short enough to scan.** Needs its own table of contents?
+  It's really several sections — split it.
 - **Concrete over abstract.** "Run `./gradlew check` before pushing" beats "ensure
-  quality gates pass." A real command, path, or example always beats a description
-  of one.
-- **Cut hedging and filler on sight.** "In order to", "it should be noted that",
-  "generally speaking" add length without adding information — delete them.
-- **Organize by what the reader is trying to do, not by build/implementation order.**
-  A README's structure should follow "what does a new developer need, in the order
-  they need it" — not the order features were built.
-- **Prefer a table over a paragraph when comparing options** — same convention this
-  skill already uses throughout (Fix Maturity Lanes, Project Doc Change Checklist). A
-  developer scanning for their own case finds it faster in a row than buried in prose.
-- **Every code example must be real and runnable, not illustrative pseudocode** —
-  copy-pasting it should work, or it isn't worth including. Ties into the existing
-  "code snippets that no longer compile" anti-pattern below — that's about staleness,
-  this is about never shipping a fake example in the first place.
-- **Mermaid only where prose or a table genuinely can't show the shape** — a module
-  dependency graph, a sequence/flow diagram (auth flow, data flow). Don't default to
-  a diagram for something a short list or table already says as clearly; a diagram
-  nobody needed is the same "more content, not more clarity" failure as an unneeded
-  paragraph. `kmp-audit`'s `generate_structure_diagram.py --mermaid` generates the
-  module-graph case directly — don't hand-draw one that tool already produces.
-  **Code snippets belong wherever an actual API/interface is being described** —
-  Reference deep-dives, Task plans (the real approach, not pseudocode — same rule as
-  above), Module READMEs (the public API example). **ADRs mostly need neither** — a
-  decision record explains the choice and its consequences in prose; if a decision
-  needs a diagram or snippet to justify itself, that content belongs in the Reference
-  doc the ADR should link to, not duplicated inside the ADR itself.
+  quality gates pass."
+- **Cut hedging and filler on sight** — "in order to", "it should be noted that".
+- **Organize by what the reader is trying to do, not by build order.** Follow "what a
+  new developer needs, in the order they need it."
+- **Prefer a table over a paragraph when comparing options** (see Fix Maturity Lanes,
+  Project Doc Change Checklist below) — scanning a row beats prose.
+- **Every code example must be real and runnable, not pseudocode** — copy-pasting it
+  should work, or it isn't worth including.
+- **Mermaid only where prose/a table can't show the shape** — module dependency
+  graphs, sequence/flow diagrams. `kmp-audit`'s `generate_structure_diagram.py --mermaid`
+  already generates the module-graph case — don't hand-draw one. **Code snippets** go
+  wherever a real API/interface is described (Reference, Task, Module README). **ADRs
+  need neither** — link out to the Reference doc instead.
 
-**For deeper AI-tell removal than the hedge-phrase check above catches** — verified
-real, actively maintained, not reimplemented here: [`conorbronsdon/avoid-ai-writing`](https://github.com/conorbronsdon/avoid-ai-writing),
-a 62-category, 112-word tiered detector (em dashes, hollow intensifiers, "it's not
-X — it's Y" reveals, promotional inflation) with honest false-positive caveats built
-in. Install directly (`npx skills add conorbronsdon/avoid-ai-writing`) for a prose pass
-on `docs/`/README content — this skill's own `_detect_hedging_language` stays scoped to
-the smaller, KDoc/code-comment-specific phrase list it already owns, not a duplicate of
-the wider tool's catalog.
+**For deeper AI-tell removal**, verified real and actively maintained:
+[`conorbronsdon/avoid-ai-writing`](https://github.com/conorbronsdon/avoid-ai-writing) —
+a 62-category tiered detector (em dashes, hollow intensifiers, promotional inflation).
+`npx skills add conorbronsdon/avoid-ai-writing` for a `docs/`/README prose pass; this
+skill's own `_detect_hedging_language` stays scoped to its narrower phrase list.
 
 ### Default Docs Topology
 
@@ -464,31 +443,11 @@ When asked to update project docs, respond in this order:
 
 Keep the response focused on the project's docs surface and the source files it mirrors.
 
-## KDoc vs Ground-Truth Docs Boundary (Zero Redundancy Rule)
+## KDoc vs Ground-Truth Docs Boundary, Code Examples & Linking Policy
 
-Never duplicate architectural explanations across source code and markdown documentation:
-
-| Boundary | Purpose | Content | Cross-Referencing Rule |
-|---|---|---|---|
-| **KDocs (`.kt` source)** | API contracts at the call-site | `@param`, `@return`, `@throws`, thread-safety, preconditions | Reference `[docs/architecture/<name>.md]` for high-level models. |
-| **Ground Truth (`docs/architecture/`)** | System topology & lifecycles | Architectural diagrams, memory layout, invariants | Reference `[ClassName.kt]` by symbol; do not copy parameter dumps. |
-| **Decisions (`docs/decisions/` ADRs)** | Immutable records of "WHY" | Context, alternatives evaluated, rationale | Reference the ADR number in commit messages and PRs. |
-
-**Anti-Patterns to Eliminate:**
-- **Echo comments**: `/** Sets name */ fun setName(name: String)` → Delete them.
-- **Architectural lore in KDocs**: Multi-paragraph essays inside Kotlin files → Move to `docs/architecture/` or `docs/decisions/`.
-- **API dumps in Markdown**: Listing every function and parameter manually in markdown → Let Dokka 2.x and KDocs generate API reference.
-
----
-
-## Code Examples & Linking Policy
-
-| Element | When to Use | When to Avoid |
-|---|---|---|
-| **Code Examples** | Quickstarts, DSL builders, Before/After comparisons (5–15 lines max) | Full class dumps, boilerplate getters/setters, untested pseudo-code |
-| **Internal File Links** (`[Class](path)`) | Always when mentioning a concrete class, interface, or file | Generic terms or redundant link spam |
-| **Issue / PR Links** (`#123`) | ADRs (`docs/decisions/`), Task Plans (`docs/tasks/`), and `CHANGELOG.md` | Ground-truth architecture docs (`docs/architecture/` must be self-contained) |
-| **External Spec Links** | Reference docs (`docs/reference/`) documenting external protocol/spec conformity | Internal task notes |
+Never duplicate architectural explanations across source code and markdown documentation.
+Full tables (KDoc/Ground-Truth/Decisions boundary + anti-patterns; Code Examples/Internal
+Links/Issue Links/External Spec Links policy) live in `references/docs-hygiene.md`.
 
 ---
 
@@ -497,10 +456,10 @@ Never duplicate architectural explanations across source code and markdown docum
 When drafting task plans from conversational instructions, use the **Vibe Plan Template** located in `references/vibe-plan-template.md`.
 
 Every task plan must provide:
-1. **A Real-World Mental Model (Analogy)**: Explain the problem/solution like a real-world scenario (e.g. *The Chef & Waiter* analogy for Domain vs Presenter) so anyone grasps the data flow immediately.
-2. **Before vs After Code Snippets**: Show what callers did before vs the clean, idiomatic API after.
-3. **4-Stage Architectural Progression**: `:model` → `:domain` → `:presenter` → `:ui`.
-4. **Concrete Verification Commands**: Explicit Gradle / Roborazzi test commands.
+1. **Real-World Analogy**: a scenario (e.g. *The Chef & Waiter* for Domain vs Presenter) readers grasp instantly.
+2. **Before vs After Snippets**: what callers did before vs the clean, idiomatic API after.
+3. **4-Stage Progression**: `:model` → `:domain` → `:presenter` → `:ui`.
+4. **Verification Commands**: explicit Gradle / Roborazzi test commands.
 
 ---
 
@@ -517,6 +476,7 @@ Consumer projects follow a clean 3-tier README hierarchy documented in `referenc
 
 | Date | Change |
 |---|---|
+| 2026-08-29 | Trimmed `SKILL.md` from 540 to 500 lines to unblock `scripts/release.py`'s audit gate (agentskills.io recommends under 500 for progressive disclosure) — real gap: this file had grown past the limit without anyone re-running `scan_skill_issues.py` between edits. Moved the KDoc vs Ground-Truth Docs Boundary and Code Examples & Linking Policy tables into `references/docs-hygiene.md` (content unchanged, just relocated); tightened the Writing Style bullets, Architecture Diagram Rule paragraph, and AI-tell-removal note to say the same thing in fewer words; shortened the Vibe-to-Plan Template's 4 numbered steps, one of which was flagged separately for running 28 words (limit 20). |
 | 2026-08-26 | Cross-referenced `conorbronsdon/avoid-ai-writing` in the Writing Style section — user asked whether the tool was useful to us. Verified real via `gh api` before recommending it: 3264 stars, actively maintained, a 62-category/112-word tiered AI-tell detector with a real test suite and honest cited false-positive caveats (Stanford *Patterns* 2023, BFI Working Paper 2025). Cited rather than reimplemented — its scope is far deeper than this skill's own `_detect_hedging_language`, which stays scoped to its existing narrow KDoc/code-comment phrase list rather than duplicating a 112-word catalog. |
 | 2026-08-23 | Added an 8th Writing Style rule: when to use Mermaid vs a code snippet vs neither, per doc kind — user asked directly which doc kinds should use which. Mermaid only for module graphs/sequence flows a table or list genuinely can't show (points at `kmp-audit`'s existing `generate_structure_diagram.py --mermaid` for the module-graph case rather than re-deriving one by hand); code snippets wherever a real API/interface is being described (Reference, Task, Module README); ADRs need neither — link out to the Reference doc instead of duplicating a diagram/snippet inside the decision record. |
 | 2026-08-23 | Added Reference Doc Starter Templates (root `README.md`, `docs/architecture.md`, `docs/reference/<topic>.md`) — user asked to see a template for every doc kind; Task, ADR, and Module README already had one, these three primary Reference docs didn't. Lives in `references/docs-hygiene.md`, moved there after adding it directly to `SKILL.md` pushed it to 548 lines. |
