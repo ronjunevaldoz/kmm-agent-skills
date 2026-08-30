@@ -41,6 +41,31 @@ def test_bulk_symbol_refactoring(tmp_path: Path):
     assert "LegacyTexture" not in updated_content
 
 
+def test_bulk_symbol_refactoring_does_not_corrupt_string_literals(tmp_path: Path):
+    src_dir = tmp_path / "src" / "commonMain" / "kotlin"
+    src_dir.mkdir(parents=True)
+    file1 = src_dir / "User.kt"
+    file1.write_text(
+        "package com.app\n\n"
+        '@SerialName("LegacyShader")\n'
+        "class LegacyShader {\n"
+        '    fun log() = println("LegacyShader not found")\n'
+        "}\n"
+    )
+
+    plan = plan_bulk_refactor(
+        project_root=tmp_path,
+        mappings={"LegacyShader": "AslShader"},
+        is_package=False,
+    )
+    execute_bulk_refactor(plan, dry_run=False)
+
+    updated_content = file1.read_text()
+    assert "class AslShader" in updated_content
+    assert '@SerialName("LegacyShader")' in updated_content
+    assert 'println("LegacyShader not found")' in updated_content
+
+
 def test_bulk_package_refactoring(tmp_path: Path):
     src_dir = tmp_path / "src" / "commonMain" / "kotlin"
     src_dir.mkdir(parents=True)

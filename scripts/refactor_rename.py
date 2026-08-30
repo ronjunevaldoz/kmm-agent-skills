@@ -14,6 +14,11 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
+try:
+    from refactor_common import substitute_outside_string_literals
+except ImportError:  # imported as scripts.refactor_rename by the test suite
+    from scripts.refactor_common import substitute_outside_string_literals
+
 
 class RenamePlan(NamedTuple):
     old_name: str
@@ -62,8 +67,9 @@ def plan_rename(
             continue
 
         if symbol_pattern.search(content):
-            new_content = symbol_pattern.sub(new_symbol, content)
-            affected_files[kt_file] = new_content
+            new_content = substitute_outside_string_literals(symbol_pattern, new_symbol, content)
+            if new_content != content:
+                affected_files[kt_file] = new_content
 
     return RenamePlan(
         old_name=old_symbol,

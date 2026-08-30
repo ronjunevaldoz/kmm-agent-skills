@@ -69,3 +69,32 @@ def test_refactor_rename_class_across_modules(tmp_path: Path):
     assert "class Camera(val matrix: Mat4)" in consumer_content
     assert "val identity = Mat4()" in consumer_content
     assert "TransformMatrix" not in consumer_content
+
+
+def test_refactor_rename_does_not_corrupt_string_literals(tmp_path: Path):
+    # A @SerialName wire-format string, a log message, and a char literal must all
+    # survive untouched — only real code identifiers get renamed.
+    src_dir = tmp_path / "src" / "commonMain" / "kotlin" / "com" / "app"
+    src_dir.mkdir(parents=True)
+    def_file = src_dir / "User.kt"
+    def_file.write_text(
+        "package com.app\n\n"
+        "@Serializable\n"
+        'data class User(@SerialName("User") val name: String) {\n'
+        '    fun log() = println("User not found")\n'
+        "}\n"
+    )
+
+    plan = plan_rename(
+        project_root=tmp_path,
+        old_symbol="User",
+        new_symbol="Account",
+        target_file=def_file,
+    )
+    execute_rename(plan, dry_run=False)
+
+    new_file = src_dir / "Account.kt"
+    content = new_file.read_text()
+    assert "data class Account(" in content
+    assert '@SerialName("User")' in content
+    assert 'println("User not found")' in content

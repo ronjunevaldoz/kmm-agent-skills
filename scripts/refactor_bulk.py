@@ -15,6 +15,11 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
+try:
+    from refactor_common import substitute_outside_string_literals
+except ImportError:  # imported as scripts.refactor_bulk by the test suite
+    from scripts.refactor_common import substitute_outside_string_literals
+
 
 class BulkRefactorPlan(NamedTuple):
     symbol_mappings: dict[str, str]  # OldSymbol -> NewSymbol
@@ -59,7 +64,7 @@ def plan_bulk_refactor(
         orig_content = content
 
         for pattern, replacement, old_val, new_val in patterns:
-            content = pattern.sub(replacement, content)
+            content = substitute_outside_string_literals(pattern, replacement, content)
             # Update KDocs
             if is_package:
                 content = content.replace(f"[{old_val}.", f"[{new_val}.")

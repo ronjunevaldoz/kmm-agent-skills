@@ -75,6 +75,23 @@ If the target is a mix (e.g. renaming a skill that also has example Kotlin snipp
 inside its `SKILL.md`), do the textual sweep for the skill's own identifiers and treat
 embedded Kotlin snippets as prose — don't run a Kotlin-aware rename on markdown content.
 
+### Kotlin Symbol Scripts (Use IDE First — These Are a Fallback)
+
+`scripts/refactor_rename.py`, `refactor_move.py`, `refactor_rename_package.py`,
+`refactor_bulk.py`, and `refactor_optimize_imports.py` exist in this repo for CI/headless
+contexts where an IDE isn't available. They are regex-based, **not** AST-aware — the row
+above still applies: prefer IntelliJ/Android Studio's real Rename refactor whenever one is
+available.
+
+`refactor_common.substitute_outside_string_literals` protects string and char literals
+(so a `@SerialName("Old")` wire-format string or a log message survives a rename), but
+does **not** protect: comments/KDoc prose (a `[Symbol]` KDoc cross-reference is
+intentionally still renamed — that's existing, tested behavior, not a gap), string
+template expressions (`"${OldSymbol.thing()}"` — masked along with its enclosing string,
+so a template reference needs a manual follow-up), or a shadowed local variable with the
+same name as the renamed symbol. Always run the Testing steps below after using one of
+these scripts, same as after any textual sweep.
+
 ---
 
 ## Textual Rename Procedure
@@ -180,10 +197,10 @@ independent checks before calling it complete:
 ## Common Anti-Patterns
 
 - **Regex-renaming Kotlin source** — running a repo-wide sed across `.kt` files to
-  rename a class. It will silently corrupt a `@SerialName("OldName")` that was meant to
-  stay `"OldName"` for wire-format compatibility, a string template that happens to
-  contain the old name as user-facing text, or a shadowed local variable with the same
-  name. Use the IDE's Rename refactor for actual Kotlin symbols.
+  rename a class. Even this skill's own `scripts/refactor_rename.py` only protects
+  string/char literals (see Kotlin Symbol Scripts above), not shadowed locals or
+  string-template expressions. Use the IDE's Rename refactor for actual Kotlin symbols
+  whenever one is available.
 - **Skipping the residue check** — trusting the sweep script's own "0 changes on second
   run" without independently grepping for the old identifier. The sweep script can only
   find what its own patterns cover; a manual grep with a broader net catches what the
@@ -247,4 +264,5 @@ performing a history rewrite, not for a plain rename/move.
 
 | Date | Change |
 |---|---|
+| 2026-08-30 | Cross-referenced `scripts/refactor_rename.py`/`refactor_move.py`/`refactor_rename_package.py`/`refactor_bulk.py`/`refactor_optimize_imports.py` — these landed in a prior release but were never mentioned in this skill, so they contradicted its own "use the IDE, not regex" guidance with zero disclosure. Found they were self-labeled "semantic"/"AST-aware" while being raw `\bSymbol\b` regex substitutions with no string-literal awareness, matching the exact `@SerialName("Old")` corruption case the Anti-Patterns section already warned about. Hardened `refactor_rename.py` and `refactor_bulk.py`'s symbol mode via a new `refactor_common.substitute_outside_string_literals` helper that skips matches inside string/char literals; documented the remaining gaps (comments, string-template expressions, shadowed locals) rather than claiming full safety. 5 new tests. |
 | 2026-08-02 | Initial skill — codifies the textual-rename procedure used to rename this collection itself (kmm-agent-skills → kmp-agent-skills, kotlin-multiplatform-* → kmp-*, kmp-compose-* regrouping), the classification table for textual sweep vs IDE refactor, the module-move checklist, and the safe-delete dangling-reference check. |
