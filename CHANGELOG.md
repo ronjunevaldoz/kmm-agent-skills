@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.59.1] — 2026-08-31
+
+### Fixed
+
+- fix(kmp-refactor): protect string literals in refactor_rename/refactor_bulk
+
+---
+
 ## [v2.59.0] — 2026-08-30
 
 ### Added
