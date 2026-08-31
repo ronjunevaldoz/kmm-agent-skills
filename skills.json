@@ -1,5 +1,5 @@
 {
-  "version": "2.59.1",
+  "version": "2.60.0",
   "skills": [
     {
       "name": "kmp-analytics",
@@ -1178,7 +1178,7 @@
       "path": "skills/kmp-compose-web-performance",
       "description": "Live browser performance analysis for a Compose Multiplatform Web (wasmJs) target, using the official Chrome DevTools MCP server (github.com/ChromeDevTools/chrome-devtools-mcp) \u2014 performance traces, Lighthouse audits, network waterfall, and Wasm bundle-size awareness specific to Skiko's canvas-based rendering. Does NOT cover micro-benchmarking Kotlin functions (see kmp-benchmark) \u2014 this is live, real-browser profiling of the running app, not isolated function timing.",
       "license": "Apache-2.0",
-      "last_updated": "2026-08-03",
+      "last_updated": "2026-08-31",
       "keywords": [
         "web performance",
         "chrome devtools",
@@ -1190,7 +1190,10 @@
         "skiko performance",
         "compose web performance",
         "first paint",
-        "wasmJs performance"
+        "wasmJs performance",
+        "js glue minification",
+        "wasmJsBrowserProductionWebpack",
+        "webpack minification"
       ],
       "triggers": [
         "web performance",
@@ -2901,7 +2904,7 @@
       "path": "skills/kmp-proguard-r8",
       "description": "ProGuard and R8 obfuscation for KMP Android builds \u2014 keep rules for KMP artifacts, Koin, Ktor, SQLDelight, kotlinx.serialization, and Compose. Covers: when to enable minification, writing keep rules without breaking KMP shared code, validating the release APK, and the most common shrinking crashes in KMP projects.",
       "license": "Apache-2.0",
-      "last_updated": "2026-08-24",
+      "last_updated": "2026-08-31",
       "keywords": [
         "ProGuard",
         "R8",

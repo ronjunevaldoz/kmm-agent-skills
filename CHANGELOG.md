@@ -2,6 +2,14 @@
 
 All notable changes to kmp-agent-skills are documented here.
 
+## [v2.60.0] — 2026-08-31
+
+### Added
+
+- feat(kmp-compose-web-performance): add wasmJs JS glue-code minification guidance
+
+---
+
 ## [v2.59.1] — 2026-08-31
 
 ### Fixed

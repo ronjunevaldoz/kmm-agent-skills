@@ -73,12 +73,12 @@ Generated 2026-08-31 by `scripts/generate_skills_report.py` — run it after any
 | [`kmp-kotlin-rpc`](../../skills/kmp-kotlin-rpc/) | 285 | 2026-07-31 | ✅ |
 | [`kmp-imagevector-generator`](../../skills/kmp-imagevector-generator/) | 277 | 2026-07-08 | ✅ |
 | [`kmp-compose-preview-driven-development`](../../skills/kmp-compose-preview-driven-development/) | 276 | 2026-07-08 | ✅ |
-| [`kmp-proguard-r8`](../../skills/kmp-proguard-r8/) | 271 | 2026-08-24 | ✅ |
+| [`kmp-proguard-r8`](../../skills/kmp-proguard-r8/) | 273 | 2026-08-31 | ✅ |
 | [`kmp-refactor`](../../skills/kmp-refactor/) | 268 | 2026-08-02 | ✅ |
 | [`kmp-compose-graphics-modifiers`](../../skills/kmp-compose-graphics-modifiers/) | 266 | 2026-06-13 | ✅ |
+| [`kmp-compose-web-performance`](../../skills/kmp-compose-web-performance/) | 249 | 2026-08-31 | ✅ |
 | [`kmp-ktor-auth-service`](../../skills/kmp-ktor-auth-service/) | 242 | 2026-06-13 | ✅ |
 | [`kmp-android-cli`](../../skills/kmp-android-cli/) | 210 | 2026-07-19 | ✅ |
-| [`kmp-compose-web-performance`](../../skills/kmp-compose-web-performance/) | 210 | 2026-08-03 | ✅ |
 | [`kmp-token-saver`](../../skills/kmp-token-saver/) | 186 | 2026-07-13 | ✅ |
 
 **Status legend:** ✅ no issues · 🟡 known, tracked debt (doesn't block a release — see KI-008) · 🔴 blocking (would fail `scan_skill_issues.py`, a new regression, not tracked debt)
