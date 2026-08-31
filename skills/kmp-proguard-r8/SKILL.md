@@ -8,7 +8,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-08-24'
+  last-updated: '2026-08-31'
   keywords:
     - ProGuard
     - R8
@@ -248,6 +248,7 @@ Run instrumented tests against the `release` build type:
 - `kmp-dependency-injection` — Koin rules are required for all projects using Koin
 - `kmp-release` — R8 config is part of the release checklist
 - `kmp-security` — the iOS/Kotlin-Native counterpart (release-binary symbol stripping) plus certificate pinning, root/jailbreak detection, and encrypted storage; this skill stays Android-obfuscation-only
+- `kmp-compose-web-performance` — the Web/Wasm counterpart (JS glue-code minification via `wasmJsBrowserProductionWebpack`); this skill is Android-only, it does not cover the `wasmJs` target
 
 ---
 
@@ -267,5 +268,6 @@ Keep rules as targeted as possible — never suggest blanket keep rules.
 
 | Date | Change |
 |---|---|
+| 2026-08-31 | Cross-referenced `kmp-compose-web-performance` — user asked whether this collection covered obfuscation/minification for KMP as a whole, and it only covered Android; the `wasmJs` target's JS glue-code minification (`wasmJsBrowserProductionWebpack`) had no home anywhere. Added the guidance there instead of here, since this skill is Android-only by design. |
 | 2026-08-24 | Cross-referenced the new `kmp-security` skill — iOS/Kotlin-Native release-binary stripping, certificate pinning, root/jailbreak detection, and encrypted storage now have a real home; this skill stays scoped to Android R8/ProGuard obfuscation only. |
 | 2026-06-29 | Initial release. |

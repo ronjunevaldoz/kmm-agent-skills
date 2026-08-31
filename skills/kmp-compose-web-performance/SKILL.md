@@ -10,7 +10,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: kmp-agent-skills
-  last-updated: '2026-08-03'
+  last-updated: '2026-08-31'
   keywords:
     - web performance
     - chrome devtools
@@ -23,6 +23,9 @@ metadata:
     - compose web performance
     - first paint
     - wasmJs performance
+    - js glue minification
+    - wasmJsBrowserProductionWebpack
+    - webpack minification
 ---
 
 ## When to Use This Skill
@@ -143,6 +146,39 @@ not-yet-public staging URL).
 
 ---
 
+## Build-Time: JS Glue-Code Minification
+
+The `.wasm` binary isn't the only build output — Kotlin/Wasm also generates a JS
+loader/glue file that bootstraps and calls into it. Verified against
+[kotlinlang.org's Kotlin/JS production build docs](https://kotlinlang.org/docs/js-project-setup.html)
+(the `wasmJs` browser target shares the same webpack-based Kotlin Gradle plugin
+pipeline as the `js` target, just task-name-prefixed `wasmJs` instead of `js`):
+
+- **`./gradlew wasmJsBrowserProductionWebpack`** runs webpack in production mode against
+  the glue code — dead-code elimination and minification, same as the `js` target's
+  `jsBrowserProductionWebpack`.
+- **`./gradlew wasmJsBrowserDistribution`** (the task already referenced above for
+  profiling) depends on the production webpack build and assembles the full deployable
+  output at `build/dist/wasmJs/productionExecutable` — this is the minified, deployable
+  artifact; `wasmJsBrowserDevelopmentRun`'s output is not.
+- **Verify it actually happened** — don't assume: open the built `.js` file in
+  `build/dist/wasmJs/productionExecutable` and confirm it's a single dense minified
+  line, not readable multi-line source. A glue file that's still readable after a
+  "production" build means the distribution task silently ran in dev mode, or a custom
+  webpack config disabled minification.
+- **Customizing or disabling minification** goes through the same mechanism as any
+  Kotlin/JS webpack target: a `commonWebpackConfig { }` block in `build.gradle.kts`, or
+  a `webpack.config.d/*.js` file for raw webpack config overrides (e.g.
+  `config.optimization.minimize = false` to intentionally disable it, which you'd only
+  ever want for debugging a production-only bug, never for a real deploy).
+
+This is a build-config check, not a live-profiling one — for the Android counterpart
+(class/function/property renaming via R8), see `kmp-proguard-r8`; a KMP app targeting
+both Android and Web should verify both, not just the platform that happened to get
+checked first.
+
+---
+
 ## Testing a Performance Claim
 
 A performance claim ("this is slow," "this got faster") is only as good as the
@@ -186,6 +222,8 @@ measurement behind it. Before reporting a result:
   could be added as a CI step once a baseline is established
 - `kmp-network-layer` — the Ktor Web engine (JS/CIO); a network-layer misconfiguration
   can show up in this skill's network waterfall as redundant/slow requests
+- `kmp-proguard-r8` — the Android counterpart (R8 class/function/property renaming);
+  covers Android release builds only, not `wasmJs`'s JS glue-code minification
 
 ---
 
@@ -207,4 +245,5 @@ elsewhere; this skill's tooling (Chrome DevTools) doesn't apply to those targets
 
 | Date | Change |
 |---|---|
+| 2026-08-31 | Added "Build-Time: JS Glue-Code Minification" — user asked whether this collection covers wasmJs JS-glue minification the way `kmp-proguard-r8` covers Android R8 renaming, and it didn't. Verified real against kotlinlang.org's Kotlin/JS production build docs (the `wasmJs` browser target shares the same webpack pipeline as `js`, just task-prefixed differently): `wasmJsBrowserProductionWebpack` applies dead-code elimination + minification, `wasmJsBrowserDistribution` depends on it and assembles the deployable output, customization goes through `commonWebpackConfig`/`webpack.config.d`. Cross-referenced `kmp-proguard-r8` in both directions so a KMP app targeting both Android and Web has a path to verify both platforms' minification, not just whichever got checked first. |
 | 2026-08-03 | Initial skill — wires the official `chrome-devtools-mcp` (verified against its own repo, not a third-party reimplementation found via a skill-listing site) for live Compose Web/Wasm performance profiling. Covers setup, the trace/Lighthouse/network-waterfall workflow, and Wasm/Skiko-specific considerations (canvas rendering vs DOM, the real but still-evolving bundle-size concern) — deliberately with no fabricated size targets, since CMP Web is Beta as of CMP 1.9.0 (Sept 2025) with no single consolidated official optimization doc yet. |
